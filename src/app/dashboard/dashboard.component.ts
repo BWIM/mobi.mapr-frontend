@@ -1,32 +1,49 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
-import { ChartModule } from 'primeng/chart';
 import { ButtonModule } from 'primeng/button';
 import { PanelModule } from 'primeng/panel';
 import { MapComponent } from '../map/map.component';
+import { DisplayGrid, GridsterConfig, GridsterItem, GridsterModule, GridType } from 'angular-gridster2';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CardModule, ChartModule, ButtonModule, PanelModule, MapComponent],
+  imports: [CommonModule, CardModule, ButtonModule, PanelModule, MapComponent, GridsterModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
-export class DashboardComponent {
-  data = {
-    labels: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni'],
-    datasets: [
-      {
-        label: 'Beispieldaten 2024',
-        data: [65, 59, 80, 81, 56, 55],
-        fill: false,
-        borderColor: '#42A5F5'
-      }
-    ]
-  };
+export class DashboardComponent implements OnInit {
+  options: GridsterConfig;
+  dashboard: Array<GridsterItem>;
 
-  options = {
-    responsive: true,
-    maintainAspectRatio: false
-  };
+  constructor() {
+    this.options = {
+      gridType: GridType.Fit,
+      displayGrid: DisplayGrid.OnDragAndResize,
+      pushItems: true,
+      swap: true,
+      draggable: {
+        delayStart: 0,
+        enabled: true,
+        ignoreContentClass: 'gridster-item-content',
+        dragHandleClass: 'drag-handler',
+        ignoreContent: true,
+        dropOverItems: false
+      },
+      resizable: {
+        enabled: true
+      }
+    };
+
+    this.dashboard = [
+      { cols: 2, rows: 6, y: 0, x: 0, type: 'overview' },
+      { cols: 8, rows: 6, y: 0, x: 2, type: 'map' },
+      { cols: 2, rows: 6, y: 0, x: 10, type: 'details' }
+    ];
+  }
+
+  ngOnInit() {
+    // Zukünftige Initialisierungslogik kann hier hinzugefügt werden
+  }
 }

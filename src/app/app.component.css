@@ -1,12 +1,14 @@
 .app-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    overflow: hidden;
+    height: 100%;
 }
 
 .content {
     flex: 1;
-    overflow: auto;
+    overflow: hidden;
+    min-height: 0; /* Wichtig für Firefox */
 }
 
 :host ::ng-deep .p-menubar {
@@ -16,3 +18,4 @@
 :host ::ng-deep .p-sidebar {
     height: 100vh;
 }
+

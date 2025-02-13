@@ -1,2 +1,98 @@
 /* You can add global styles to this file, and also import other style files */
 @import 'ol/ol.css';
+
+/* Default theme (light theme) */
+:root {
+    --primary-color: #ffcc00;
+    --secondary-color: #c2a540;
+    --accent-color: #902660;
+    --background-color: #dbe7eb;
+    --second-background-color: #fff;
+    --text-color: #433143;
+    --secondary-text-color: #000;
+    --highlight-color: #88b1be;
+    --title-color: #1a1a1a;
+    --surface-color: var(--second-background-color);
+    --error-color: #F44336;
+    --warning-color: #FFC107;
+    --success-color: #4CAF50;
+    --border-radius: 4px;
+    --shadow-1: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12);
+    --shadow-2: 0 3px 3px -2px rgba(0,0,0,.2), 0 3px 4px 0 rgba(0,0,0,.14), 0 1px 8px 0 rgba(0,0,0,.12);
+    font-family: Arial, sans-serif;
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+    --primary-color: #c2a540;
+    --secondary-color: #ffcc00;
+    --accent-color: #88b1be;
+    --background-color: #2a2a2a;
+    --second-background-color: #1a1a1a;
+    --text-color: #dbe7eb;
+    --secondary-text-color: #fff;
+    --highlight-color: #916260;
+    --title-color: #ffffff;
+    --surface-color: var(--second-background-color);
+    --shadow-1: 0 2px 1px -1px rgba(255,255,255,.2), 0 1px 1px 0 rgba(255,255,255,.14), 0 1px 3px 0 rgba(255,255,255,.12);
+    --shadow-2: 0 3px 3px -2px rgba(255,255,255,.2), 0 3px 4px 0 rgba(255,255,255,.14), 0 1px 8px 0 rgba(255,255,255,.12);
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-family, Arial, sans-serif);
+    color: var(--text-color);
+    background-color: var(--background-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    height: 100vh;
+}
+
+.p-component {
+    font-family: var(--font-family, Arial, sans-serif);
+    color: var(--text-color);
+}
+
+/* Card-Styling */
+.p-card {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-1);
+    transition: box-shadow 0.3s ease-in-out, background-color 0.3s ease;
+    background-color: var(--surface-color);
+}
+
+.p-card:hover {
+    box-shadow: var(--shadow-2);
+}
+
+/* Button-Styling */
+.p-button {
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+}
+
+.p-button:hover {
+    background-color: var(--secondary-color);
+}
+
+/* Menubar-Styling */
+.p-menubar {
+    background: var(--surface-color);
+    box-shadow: var(--shadow-1);
+    color: var(--text-color);
+}
+
+.p-menubar .p-menuitem-link {
+    color: var(--text-color);
+}
+
+.p-menubar .p-menuitem-link:hover {
+    background-color: var(--highlight-color);
+}
+
+/* Responsive Anpassungen */
+@media screen and (max-width: 768px) {
+    :root {
+        --border-radius: 2px;
+    }
+}

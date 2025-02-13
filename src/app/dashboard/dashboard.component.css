@@ -1,6 +1,7 @@
 .dashboard-container {
-    padding: 1rem;
     height: 100%;
+    width: 100%;
+    overflow: hidden;
 }
 
 :host {
@@ -8,31 +9,54 @@
     height: 100%;
 }
 
-:host ::ng-deep .p-card {
-    height: auto;
-    margin-bottom: 0;
+:host ::ng-deep gridster {
+    background: transparent;
+    height: 100% !important;
 }
 
-:host ::ng-deep .p-panel {
-    height: auto;
-}
-
-:host ::ng-deep .p-chart {
-    min-height: 200px;
-}
-
-.h-full {
-    height: 100%;
-}
-
-.map-container {
+.grid-item-content {
     width: 100%;
-    height: calc(100vh - 200px);
-    min-height: 400px;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+:host ::ng-deep .p-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+:host ::ng-deep .p-card .p-card-content {
+    flex: 1;
+    overflow: auto;
+}
+
+.map-wrapper {
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2),
+                0 1px 1px 0 rgba(0, 0, 0, 0.14),
+                0 1px 3px 0 rgba(0, 0, 0, 0.12);
 }
 
 /* OpenLayers Karte benötigt eine definierte Größe */
 #map {
     width: 100%;
     height: 100%;
+}
+
+.info-section {
+    padding: 0.5rem 0;
+}
+
+/* Responsive Anpassungen */
+@media screen and (max-width: 768px) {
+    .map-container {
+        height: 50vh;
+        margin: 1rem 0;
+    }
 }
