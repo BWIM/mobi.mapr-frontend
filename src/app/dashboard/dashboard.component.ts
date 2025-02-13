@@ -38,9 +38,9 @@ export class DashboardComponent implements OnInit {
     };
 
     this.dashboard = [
-      { cols: 2, rows: 6, y: 0, x: 0, type: 'overview' },
-      { cols: 8, rows: 6, y: 0, x: 2, type: 'map' },
-      { cols: 2, rows: 6, y: 0, x: 10, type: 'details' }
+      { cols: 9, rows: 2, y: 0, x: 0, type: 'overview' },
+      { cols: 9, rows: 4, y: 0, x: 0, type: 'map' },
+      { cols: 3, rows: 6, y: 0, x: 9, type: 'details' }
     ];
   }
 

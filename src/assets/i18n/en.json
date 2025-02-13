@@ -2,7 +2,7 @@
     "PROJECTS": {
         "TITLE": "Projects",
         "LIST": {
-            "TITLE": "Project List",
+            "TITLE": "Projects",
             "NO_PROJECTS": "No projects available"
         },
         "DETAILS": {
@@ -10,14 +10,39 @@
             "DESCRIPTION": "Description",
             "CREATED": "Created at",
             "UPDATED": "Updated at"
-        }
+        },
+        "FIELDS": {
+            "NAME": "Name",
+            "DESCRIPTION": "Description",
+            "TYPE": "Type",
+            "CREATED": "Created at",
+            "STATUS": "Status"
+        },
+        "ACTIONS": {
+            "CREATE": "New Project"
+        },
+        "STATUS": {
+            "FINISHED": "Completed",
+            "IN_PROGRESS": "In Progress"
+        },
+        "UNGROUPED": "Ungrouped Projects"
     },
     "COMMON": {
         "ACTIONS": {
             "SAVE": "Save",
             "CANCEL": "Cancel",
             "EDIT": "Edit",
-            "DELETE": "Delete"
+            "DELETE": "Delete",
+            "LABEL": "Actions"
+        },
+        "MESSAGES": {
+            "ERROR": {
+                "LOAD": "Error loading data",
+                "DELETE": "Error deleting"
+            },
+            "SUCCESS": {
+                "DELETE": "Successfully deleted"
+            }
         }
     }
 } 

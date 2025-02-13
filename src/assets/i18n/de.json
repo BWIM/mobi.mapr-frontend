@@ -2,22 +2,47 @@
     "PROJECTS": {
         "TITLE": "Projekte",
         "LIST": {
-            "TITLE": "Projektliste",
-            "NO_PROJECTS": "Keine Projekte verfügbar"
+            "TITLE": "Projekte",
+            "NO_PROJECTS": "Keine Projekte vorhanden"
         },
         "DETAILS": {
             "NAME": "Name",
             "DESCRIPTION": "Beschreibung",
             "CREATED": "Erstellt am",
             "UPDATED": "Aktualisiert am"
-        }
+        },
+        "FIELDS": {
+            "NAME": "Name",
+            "DESCRIPTION": "Beschreibung",
+            "TYPE": "Typ",
+            "CREATED": "Erstellt am",
+            "STATUS": "Status"
+        },
+        "ACTIONS": {
+            "CREATE": "Neues Projekt"
+        },
+        "STATUS": {
+            "FINISHED": "Fertig",
+            "IN_PROGRESS": "In Bearbeitung"
+        },
+        "UNGROUPED": "Nicht gruppierte Projekte"
     },
     "COMMON": {
         "ACTIONS": {
             "SAVE": "Speichern",
             "CANCEL": "Abbrechen",
             "EDIT": "Bearbeiten",
-            "DELETE": "Löschen"
+            "DELETE": "Löschen",
+            "LABEL": "Aktionen"
+        },
+        "MESSAGES": {
+            "ERROR": {
+                "LOAD": "Fehler beim Laden",
+                "DELETE": "Fehler beim Löschen"
+            },
+            "SUCCESS": {
+                "DELETE": "Erfolgreich gelöscht"
+            }
         }
     }
 } 

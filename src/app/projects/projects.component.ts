@@ -1,24 +1,116 @@
-import { Component } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
-import { Project } from './project.interface';
+import { Component, OnInit } from '@angular/core';
 import { ProjectsService } from './projects.service';
-import { CommonModule } from '@angular/common';
+import { Project, ProjectGroup } from './project.interface';
+import { MessageService } from 'primeng/api';
+import { finalize } from 'rxjs/operators';
+import { SharedModule } from '../shared/shared.module';
+import { TranslateService } from '@ngx-translate/core';
+
+interface GroupedProjects {
+  group: ProjectGroup;
+  projects: Project[];
+}
 
 @Component({
-    selector: 'app-projects',
-    templateUrl: './projects.component.html',
-    styleUrls: ['./projects.component.css'],
-    standalone: true,
-    imports: [CommonModule, TranslateModule]
+  selector: 'app-projects',
+  templateUrl: './projects.component.html',
+  styleUrls: ['./projects.component.css'],
+  providers: [MessageService],
+  standalone: true,
+  imports: [SharedModule]
 })
-export class ProjectsComponent {
-    projects: Project[] = [];
+export class ProjectsComponent implements OnInit {
+  loading = false;
+  projectGroups: ProjectGroup[] = [];
+  groupedProjects: GroupedProjects[] = [];
+  ungroupedProjects: Project[] = [];
 
-    constructor(
-        private projectsService: ProjectsService
-    ) {}
+  constructor(
+    private projectsService: ProjectsService,
+    private messageService: MessageService,
+    private translate: TranslateService
+  ) {}
 
-    ngOnInit() {
-        // Hier später die Projekte laden
-    }
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  private loadData(): void {
+    this.loading = true;
+    
+    this.projectsService.getProjectGroups()
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response) => {
+          this.projectGroups = response.results;
+          this.loadProjects();
+        },
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
+            detail: this.translate.instant('PROJECTS.LIST.NO_PROJECTS')
+          });
+        }
+      });
+  }
+
+  private loadProjects(): void {
+    this.loading = true;
+    
+    this.projectsService.getProjects()
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (response) => {
+          const projects = response.results;
+          
+          // Projekte nach Gruppen sortieren
+          this.groupedProjects = this.projectGroups.map(group => ({
+            group,
+            projects: projects.filter(p => p.projectgroup?.id === group.id)
+          })).filter(g => g.projects.length > 0);
+
+          // Nicht gruppierte Projekte sammeln
+          this.ungroupedProjects = projects.filter(p => !p.projectgroup);
+        },
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
+            detail: this.translate.instant('PROJECTS.LIST.NO_PROJECTS')
+          });
+        }
+      });
+  }
+
+  deleteProject(project: Project): void {
+    this.projectsService.deleteProject(project.id)
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: this.translate.instant('COMMON.MESSAGES.SUCCESS.DELETE'),
+            detail: this.translate.instant('PROJECTS.LIST.NO_PROJECTS')
+          });
+          this.loadData();
+        },
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: this.translate.instant('COMMON.MESSAGES.ERROR.DELETE'),
+            detail: this.translate.instant('PROJECTS.LIST.NO_PROJECTS')
+          });
+        }
+      });
+  }
+
+  getProgress(project: Project): number {
+    if (project.areas === 0) return 0;
+    return Math.round((project.calculated / project.areas) * 100);
+  }
+
+  showResults(project: Project): void {
+    // TODO: Implementierung für die Ergebnisanzeige
+    console.log('Show results for project:', project.id);
+  }
 }

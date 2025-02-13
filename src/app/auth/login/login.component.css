@@ -13,7 +13,7 @@
   margin: auto;
 }
 
-:host ::ng-deep .login-card .p-card {
+:host ::ng-deep .login-card {
   background: var(--surface-card);
   border-radius: var(--border-radius);
 }
