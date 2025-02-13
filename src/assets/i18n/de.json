@@ -1,0 +1,23 @@
+{
+    "PROJECTS": {
+        "TITLE": "Projekte",
+        "LIST": {
+            "TITLE": "Projektliste",
+            "NO_PROJECTS": "Keine Projekte verfügbar"
+        },
+        "DETAILS": {
+            "NAME": "Name",
+            "DESCRIPTION": "Beschreibung",
+            "CREATED": "Erstellt am",
+            "UPDATED": "Aktualisiert am"
+        }
+    },
+    "COMMON": {
+        "ACTIONS": {
+            "SAVE": "Speichern",
+            "CANCEL": "Abbrechen",
+            "EDIT": "Bearbeiten",
+            "DELETE": "Löschen"
+        }
+    }
+} 

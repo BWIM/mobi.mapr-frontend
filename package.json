@@ -18,6 +18,8 @@
     "@angular/platform-browser": "^19.1.0",
     "@angular/platform-browser-dynamic": "^19.1.0",
     "@angular/router": "^19.1.0",
+    "@ngx-translate/core": "^16.0.4",
+    "@ngx-translate/http-loader": "^16.0.1",
     "@primeng/themes": "^19.0.6",
     "angular-gridster2": "^19.0.0",
     "ol": "^10.4.0",
