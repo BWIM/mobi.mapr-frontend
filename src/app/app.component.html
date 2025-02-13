@@ -1,15 +1,6 @@
-
 <div class="app-container">
     <p-menubar [model]="items"></p-menubar>
-    
-    <p-sidebar [(visible)]="sidebarVisible" [baseZIndex]="10000">
-        <h3>Sidebar</h3>
-        <p>Hier können Sie Ihre Navigationslinks einfügen.</p>
-    </p-sidebar>
-
     <div class="content">
         <router-outlet></router-outlet>
     </div>
 </div>
-
-<router-outlet />

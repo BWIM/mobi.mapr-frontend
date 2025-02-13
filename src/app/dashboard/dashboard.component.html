@@ -1,0 +1,36 @@
+<div class="dashboard-container">
+    <div class="grid h-full">
+        <!-- Linke Spalte -->
+        <div class="col-12 md:col-2 flex flex-column gap-3">
+            <p-card header="Übersicht">
+                <div class="flex align-items-center justify-content-center">
+                    <h3>Navigation</h3>
+                </div>
+            </p-card>
+            <p-card header="Statistik">
+                <div class="flex align-items-center justify-content-center">
+                    <h3>Aktuelle Zahlen</h3>
+                </div>
+            </p-card>
+        </div>
+
+        <!-- Mittlere Spalte mit Karte -->
+        <div class="col-12 md:col-8">
+            <div class="h-full">
+                <app-map></app-map>
+            </div>
+        </div>
+
+        <!-- Rechte Spalte -->
+        <div class="col-12 md:col-2 flex flex-column gap-3">
+            <p-card header="Details">
+                <div class="flex align-items-center justify-content-center">
+                    <h3>Zusatzinfos</h3>
+                </div>
+            </p-card>
+            <p-panel header="Verlauf">
+                <p-chart type="line" [data]="data" [options]="options"></p-chart>
+            </p-panel>
+        </div>
+    </div>
+</div>
