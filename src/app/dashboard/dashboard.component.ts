@@ -4,12 +4,13 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { PanelModule } from 'primeng/panel';
 import { MapComponent } from '../map/map.component';
+import { ProjectsComponent } from '../projects/projects.component';
 import { DisplayGrid, GridsterConfig, GridsterItem, GridsterModule, GridType } from 'angular-gridster2';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, CardModule, ButtonModule, PanelModule, MapComponent, GridsterModule],
+  imports: [CommonModule, CardModule, ButtonModule, PanelModule, MapComponent, GridsterModule, ProjectsComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })

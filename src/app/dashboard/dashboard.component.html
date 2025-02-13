@@ -1,15 +1,10 @@
 <div class="dashboard-container">
     <gridster [options]="options">
         <gridster-item [item]="item" *ngFor="let item of dashboard">
-            <!-- Übersicht -->
+            <!-- Projekte -->
             <div *ngIf="item['type'] === 'overview'" class="grid-item-content">
-                <p-card header="Übersicht">
-                    <div class="flex flex-column gap-3">
-                        <h3>Allgemeine Informationen</h3>
-                        <div class="info-section">
-                            <p>Hier können wichtige Kennzahlen und Übersichtsinformationen angezeigt werden.</p>
-                        </div>
-                    </div>
+                <p-card header="Projekte">
+                    <app-projects></app-projects>
                 </p-card>
             </div>
 
