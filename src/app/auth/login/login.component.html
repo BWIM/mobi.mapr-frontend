@@ -1,0 +1,51 @@
+<div class="login-container">
+  <p-card styleClass="login-card">
+    <ng-template pTemplate="header">
+      <h2>Anmeldung</h2>
+    </ng-template>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <span class="p-float-label">
+          <input 
+            id="username" 
+            type="text" 
+            pInputText 
+            formControlName="username"
+            [ngClass]="{'ng-invalid ng-dirty': loginForm.get('username')?.invalid && loginForm.get('username')?.touched}">
+          <label for="username">Benutzername</label>
+        </span>
+        <small class="p-error" *ngIf="getFieldError('username')">
+          {{ getFieldError('username') }}
+        </small>
+      </div>
+
+      <div class="form-group">
+        <span class="p-float-label">
+          <p-password 
+            id="password" 
+            formControlName="password"
+            [feedback]="false"
+            [toggleMask]="true"
+            [ngClass]="{'ng-invalid ng-dirty': loginForm.get('password')?.invalid && loginForm.get('password')?.touched}">
+          </p-password>
+          <label for="password">Passwort</label>
+        </span>
+        <small class="p-error" *ngIf="getFieldError('password')">
+          {{ getFieldError('password') }}
+        </small>
+      </div>
+
+      <p-message severity="error" *ngIf="error" [text]="error"></p-message>
+
+      <div class="button-container">
+        <p-button 
+          type="submit" 
+          label="Anmelden"
+          [disabled]="loginForm.invalid"
+          styleClass="p-button-primary p-button-raised">
+        </p-button>
+      </div>
+    </form>
+  </p-card>
+</div>
