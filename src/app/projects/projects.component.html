@@ -13,7 +13,6 @@
                     [routerLink]="['/projects/new']">
                 </p-button>
             </div>
-
             <!-- Gruppierte Projekte -->
             <div class="space-y-4 px-3 min-w-0">
                 <div class="mb-4 min-w-0 overflow-hidden" *ngFor="let group of groupedProjects">
@@ -29,7 +28,7 @@
                                     <th pFrozenColumn>{{ 'PROJECTS.FIELDS.NAME' | translate }} </th>
                                     <!-- <th>{{ 'PROJECTS.FIELDS.TYPE' | translate }}</th>
                                     <th>{{ 'PROJECTS.FIELDS.STATUS' | translate }}</th> -->
-                                    <th class="w-32">{{ 'COMMON.ACTIONS.LABEL' | translate }}</th>
+                                    <th></th>
                                 </tr>
                             </ng-template>
                             <ng-template pTemplate="body" let-project>
@@ -55,17 +54,18 @@
                                     </td> -->
                                     <td>
                                         <div class="flex gap-2 justify-end">
+                                            <p-splitButton 
+                                                [model]="items"
+                                                (onClick)="showResults(project.id, 'hexagons')"
+                                                icon="pi pi-map"
+                                                (onDropdownClick)="selectedProject = project"
+                                                [disabled]="!project.finished">
+                                            </p-splitButton>
                                             <p-button 
                                                 icon="pi pi-pencil" 
                                                 styleClass="p-button-rounded p-button-text"
                                                 [routerLink]="['/projects', project.id]"
                                                 [disabled]="project.default">
-                                            </p-button>
-                                            <p-button 
-                                                icon="pi pi-map" 
-                                                styleClass="p-button-rounded p-button-text p-button-success"
-                                                (onClick)="showResults(project)"
-                                                [disabled]="!project.finished">
                                             </p-button>
                                             <p-button 
                                                 icon="pi pi-trash" 
@@ -130,17 +130,18 @@
                                     </td> -->
                                     <td>
                                         <div class="flex gap-2 justify-end">
+                                            <p-splitButton 
+                                                [model]="items"
+                                                (onClick)="showResults(project.id, 'hexagons')"
+                                                icon="pi pi-map"
+                                                (onDropdownClick)="selectedProject = project"
+                                                [disabled]="!project.finished">
+                                            </p-splitButton>
                                             <p-button 
                                                 icon="pi pi-pencil" 
                                                 styleClass="p-button-rounded p-button-text"
                                                 [routerLink]="['/projects', project.id]"
                                                 [disabled]="project.default">
-                                            </p-button>
-                                            <p-button 
-                                                icon="pi pi-map" 
-                                                styleClass="p-button-rounded p-button-text p-button-success"
-                                                (onClick)="showResults(project)"
-                                                [disabled]="!project.finished">
                                             </p-button>
                                             <p-button 
                                                 icon="pi pi-trash" 

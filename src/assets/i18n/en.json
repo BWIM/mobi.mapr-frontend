@@ -56,5 +56,13 @@
         "LVLD": "The mobility time is between 72% and 100% of the local average time.",
         "LVLE": "The mobility time is between 101% and 140% of the local average time.",
         "LVLF": "The mobility time is at least 141% of the local average time."
+    },
+    "MAP": {
+        "ACTIONS": {
+            "HEXAGON": "Hexagon",
+            "GEMEINDE": "Gemeinde",
+            "LANDKREIS": "Landkreis",
+            "LAND": "Land"
+        }
     }
 } 

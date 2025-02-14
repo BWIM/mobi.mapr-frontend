@@ -56,5 +56,13 @@
         "LVLD": "Die Mobilitätszeit beträgt zw. 72% und 100% der lokalen durchschnittlichen Zeit.",
         "LVLE": "Die Mobilitätszeit beträgt zw. 101% und 140% der lokalen durchschnittlichen Zeit.",
         "LVLF": "Die Mobilitätszeit beträgt mind. 141% der lokalen durchschnittlichen Zeit."
+    },
+    "MAP": {
+        "ACTIONS": {
+            "HEXAGON": "Hexagon",
+            "GEMEINDE": "Gemeinde",
+            "LANDKREIS": "Landkreis",
+            "LAND": "Land"
+        }
     }
 } 

@@ -18,6 +18,9 @@ import { TooltipModule } from 'primeng/tooltip';
 import { DrawerModule } from 'primeng/drawer';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
 import { DialogModule } from 'primeng/dialog';
+import { SpeedDialModule } from 'primeng/speeddial';
+import { SplitButtonModule } from 'primeng/splitbutton';
+
 @NgModule({
   imports: [
     CommonModule,
@@ -36,7 +39,9 @@ import { DialogModule } from 'primeng/dialog';
     TooltipModule,
     DrawerModule,
     ScrollPanelModule,
-    DialogModule
+    DialogModule,
+    SpeedDialModule,
+    SplitButtonModule
   ],
   exports: [
     CommonModule,
@@ -55,7 +60,9 @@ import { DialogModule } from 'primeng/dialog';
     TooltipModule,
     DrawerModule,
     ScrollPanelModule,
-    DialogModule
+    DialogModule,
+    SpeedDialModule,
+    SplitButtonModule
   ],
   providers: [MessageService]
 })

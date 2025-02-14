@@ -6,6 +6,8 @@ import { finalize } from 'rxjs/operators';
 import { SharedModule } from '../shared/shared.module';
 import { TranslateService } from '@ngx-translate/core';
 import { MapService } from '../map/map.service';
+import { MenuItem } from 'primeng/api';
+import { Router } from '@angular/router';
 
 interface GroupedProjects {
   group: ProjectGroup;
@@ -26,13 +28,70 @@ export class ProjectsComponent implements OnInit {
   projectGroups: ProjectGroup[] = [];
   groupedProjects: GroupedProjects[] = [];
   ungroupedProjects: Project[] = [];
+  items: MenuItem[] = [];
+  selectedProject?: Project;
 
   constructor(
     private projectsService: ProjectsService,
     private messageService: MessageService,
     private translate: TranslateService,
-    private mapService: MapService
-  ) {}
+    private mapService: MapService,
+    private router: Router
+  ) {
+    this.initializeMapActions();
+    
+    // Übersetzungen neu laden, wenn sich die Sprache ändert
+    this.translate.onLangChange.subscribe(() => {
+      this.initializeMapActions();
+    });
+  }
+
+  private initializeMapActions(): void {
+    this.items = [
+      {
+        icon: 'pi pi-th-large',
+        label: this.translate.instant('MAP.ACTIONS.HEXAGON'),
+        tooltipOptions: {
+          tooltipLabel: this.translate.instant('MAP.ACTIONS.HEXAGON')
+        },
+        command: () => {
+          this.showResults(this.selectedProject, 'hexagons');
+        },
+      },
+      {
+        icon: 'pi pi-home',
+        label: this.translate.instant('MAP.ACTIONS.GEMEINDE'),
+        tooltipOptions: {
+          tooltipLabel: this.translate.instant('MAP.ACTIONS.GEMEINDE')
+        },
+        command: () => {
+          this.showResults(this.selectedProject, 'municipalities');
+        },
+      },
+      {
+        icon: 'pi pi-map',
+        label: this.translate.instant('MAP.ACTIONS.LANDKREIS'),
+        tooltipOptions: {
+          tooltipLabel: this.translate.instant('MAP.ACTIONS.LANDKREIS')
+        },
+        command: () => {
+          this.showResults(this.selectedProject, 'landkreise');
+        },
+        disabled: this.selectedProject?.type === 'Hexagon' || this.selectedProject?.type === "Gemeinde"
+      },
+      {
+        icon: 'pi pi-globe',
+        label: this.translate.instant('MAP.ACTIONS.LAND'),
+        tooltipOptions: {
+          tooltipLabel: this.translate.instant('MAP.ACTIONS.LAND')
+        },
+        command: () => {
+          this.showResults(this.selectedProject, 'laender');
+        },
+        disabled: this.selectedProject?.type !== "Land"
+      }
+    ];
+  }
 
   ngOnInit(): void {
     this.loadData();
@@ -112,10 +171,11 @@ export class ProjectsComponent implements OnInit {
     return Math.round((project.calculated / project.areas) * 100);
   }
 
-  showResults(project: Project): void {
+  showResults(project: Project | undefined, maptype: string): void {
+    if (!project) return;
     this.loading = true;
     
-    this.projectsService.getProjectResults(project.id)
+    this.projectsService.getProjectResults(project.id, maptype)
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: (results) => {
