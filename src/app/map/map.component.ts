@@ -14,6 +14,7 @@ import { MapService } from './map.service';
 import { Subscription } from 'rxjs';
 import { LegendComponent } from '../legend/legend.component';
 import { CommonModule } from '@angular/common';
+import { defaults as defaultControls, Zoom } from 'ol/control';
 
 @Component({
   selector: 'app-map',
@@ -53,7 +54,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private initMap(): void {
     this.initializeLayers();
-
     this.map = new Map({
       target: 'map',
       layers: [this.baseLayer, this.vectorLayer],
@@ -161,7 +161,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const extent = vectorSource.getExtent();
     this.map.getView().fit(extent, {
       duration: 1000,
-      padding: [50, 50, 50, 50]
+      padding: [200,200,200,200]
     });
   }
 

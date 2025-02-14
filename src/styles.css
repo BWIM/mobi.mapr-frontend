@@ -1,4 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
+@import 'tailwindcss';
+
 @import 'ol/ol.css';
 
 /* Default theme (light theme) */
@@ -20,6 +22,19 @@
     --shadow-1: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12);
     --shadow-2: 0 3px 3px -2px rgba(0,0,0,.2), 0 3px 4px 0 rgba(0,0,0,.14), 0 1px 8px 0 rgba(0,0,0,.12);
     font-family: Arial, sans-serif;
+
+    /* PrimeNG specific variables */
+    --primary-color: #ffcc00;
+    --secondary-color: #c2a540;
+    
+    /* PrimeNG Button variables */
+    --primary-button-bg: var(--primary-color);
+    --primary-button-text: var(--text-color);
+    --primary-button-border: var(--primary-color);
+    --primary-button-hover-bg: var(--secondary-color);
+    --primary-button-hover-text: var(--text-color);
+    --primary-button-hover-border: var(--secondary-color);
+    --primary-button-focus-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--primary-color);
 }
 
 /* Dark theme */
@@ -36,6 +51,14 @@
     --surface-color: var(--second-background-color);
     --shadow-1: 0 2px 1px -1px rgba(255,255,255,.2), 0 1px 1px 0 rgba(255,255,255,.14), 0 1px 3px 0 rgba(255,255,255,.12);
     --shadow-2: 0 3px 3px -2px rgba(255,255,255,.2), 0 3px 4px 0 rgba(255,255,255,.14), 0 1px 8px 0 rgba(255,255,255,.12);
+
+    /* PrimeNG Button variables */
+    --primary-button-bg: var(--primary-color);
+    --primary-button-text: var(--text-color);
+    --primary-button-border: var(--primary-color);
+    --primary-button-hover-bg: var(--secondary-color);
+    --primary-button-hover-text: var(--text-color);
+    --primary-button-hover-border: var(--secondary-color);
 }
 
 body {
@@ -66,13 +89,19 @@ body {
 
 /* Button-Styling */
 .p-button {
-    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
-    background-color: var(--primary-color);
-    color: var(--text-color);
+    background: var(--primary-button-bg) !important;
+    border-color: var(--primary-button-border) !important;
+    color: var(--primary-button-text) !important;
 }
 
 .p-button:hover {
-    background-color: var(--secondary-color);
+    background: var(--primary-button-hover-bg) !important;
+    border-color: var(--primary-button-hover-border) !important;
+    color: var(--primary-button-hover-text) !important;
+}
+
+.p-button:focus {
+    box-shadow: var(--primary-button-focus-shadow) !important;
 }
 
 /* Menubar-Styling */

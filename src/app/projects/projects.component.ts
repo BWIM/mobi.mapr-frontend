@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { ProjectsService } from './projects.service';
 import { Project, ProjectGroup } from './project.interface';
 import { MessageService } from 'primeng/api';
@@ -21,6 +21,7 @@ interface GroupedProjects {
   imports: [SharedModule]
 })
 export class ProjectsComponent implements OnInit {
+  @Output() projectAction = new EventEmitter<void>();
   loading = false;
   projectGroups: ProjectGroup[] = [];
   groupedProjects: GroupedProjects[] = [];
@@ -120,6 +121,7 @@ export class ProjectsComponent implements OnInit {
         next: (results) => {
           this.mapService.resetMap();
           this.mapService.updateFeatures(results.geojson.features);
+          this.projectAction.emit();
         },
         error: () => {
           this.messageService.add({

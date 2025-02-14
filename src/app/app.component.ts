@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MenubarModule } from 'primeng/menubar';
 import { ButtonModule } from 'primeng/button';
-import { MenuItem } from 'primeng/api';
 import { TranslateService } from '@ngx-translate/core';
 import { SharedModule } from './shared/shared.module';
 
@@ -15,13 +14,6 @@ import { SharedModule } from './shared/shared.module';
 })
 export class AppComponent {
   title = 'mobi.mapr';
-  items: MenuItem[] = [
-    {
-      label: 'Dashboard',
-      icon: 'pi pi-home',
-      routerLink: ['/']
-    }
-  ];
 
   constructor(private translate: TranslateService) {
     translate.setDefaultLang('de');

@@ -1,153 +1,175 @@
-<div class="projects-container">
+<div class="h-full flex flex-col  overflow-hidden">
     <p-toast></p-toast>
-
     <p-progressSpinner *ngIf="loading"></p-progressSpinner>
 
-    <div class="project-groups" *ngIf="!loading">
-        <!-- Action Bar -->
-        <div class="action-bar">
-            <p-button 
-                icon="pi pi-plus" 
-                label="{{ 'PROJECTS.ACTIONS.CREATE' | translate }}"
-                styleClass="p-button-success"
-                [routerLink]="['/projects/new']">
-            </p-button>
-        </div>
+    <div class="h-100 overflow-hidden min-w-0" *ngIf="!loading">
+        <p-scrollPanel [style]="{width: '100%', height: '100%'}">
+            <!-- Action Bar -->
+            <div class="sticky top-0 z-10 mb-4 bg-surface-ground p-3 min-w-0">
+                <p-button 
+                    icon="pi pi-plus" 
+                    label="{{ 'PROJECTS.ACTIONS.CREATE' | translate }}"
+                    styleClass="p-button-success"
+                    [routerLink]="['/projects/new']">
+                </p-button>
+            </div>
 
-        <!-- Gruppierte Projekte -->
-        <div class="group-section" *ngFor="let group of groupedProjects">
-            <p-panel [header]="group.group.name" [toggleable]="true">
-                <p-table [value]="group.projects" [tableStyle]="{ 'min-width': '40rem', 'max-width': '60rem' }" styleClass="p-datatable-sm">
-                    <ng-template pTemplate="header">
-                        <tr>
-                            <th>{{ 'PROJECTS.FIELDS.NAME' | translate }}</th>
-                            <th>{{ 'PROJECTS.FIELDS.TYPE' | translate }}</th>
-                            <th>{{ 'PROJECTS.FIELDS.STATUS' | translate }}</th>
-                            <th style="width: 8rem">{{ 'COMMON.ACTIONS.LABEL' | translate }}</th>
-                        </tr>
-                    </ng-template>
-                    <ng-template pTemplate="body" let-project>
-                        <tr>
-                            <td>
-                                <div class="project-name">
-                                    <i class="pi" [ngClass]="{'pi-user': !project.default, 'pi-users': project.default}" 
-                                       [pTooltip]="project.default ? ('PROJECTS.TYPE.DEFAULT' | translate) : ('PROJECTS.TYPE.PERSONAL' | translate)"
-                                       style="margin-right: 0.5rem">
-                                    </i>
-                                    {{ project.display_name }}
-                                    <small *ngIf="project.description">{{ project.description }}</small>
-                                </div>
-                            </td>
-                            <td>{{ project.type }}</td>
-                            <td>
-                                <div class="status-column">
-                                    <p-tag 
-                                        [severity]="project.finished ? 'success' : 'warn'"
-                                        [value]="project.finished ? ('PROJECTS.STATUS.FINISHED' | translate) : ('PROJECTS.STATUS.IN_PROGRESS' | translate)">
-                                    </p-tag>
-                                    <p-progressBar *ngIf="!project.finished" 
-                                        [value]="getProgress(project)" 
-                                        [showValue]="true">
-                                    </p-progressBar>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <p-button 
-                                        icon="pi pi-pencil" 
-                                        styleClass="p-button-rounded p-button-text"
-                                        [routerLink]="['/projects', project.id]"
-                                        [disabled]="project.default">
-                                    </p-button>
-                                    <p-button 
-                                        icon="pi pi-map" 
-                                        styleClass="p-button-rounded p-button-text p-button-success"
-                                        (onClick)="showResults(project)"
-                                        [disabled]="!project.finished">
-                                    </p-button>
-                                    <p-button 
-                                        icon="pi pi-trash" 
-                                        styleClass="p-button-rounded p-button-text p-button-danger"
-                                        (onClick)="deleteProject(project)"
-                                        [disabled]="project.default">
-                                    </p-button>
-                                </div>
-                            </td>
-                        </tr>
-                    </ng-template>
-                </p-table>
-            </p-panel>
-        </div>
+            <!-- Gruppierte Projekte -->
+            <div class="space-y-4 px-3 min-w-0">
+                <div class="mb-4 min-w-0 overflow-hidden" *ngFor="let group of groupedProjects">
+                    <p-panel [header]="group.group.name" [toggleable]="true" styleClass="overflow-hidden">
+                        <p-table 
+                            [value]="group.projects" 
+                            [tableStyle]="{ width: '100%' }" 
+                            styleClass="p-datatable-sm"
+                            [scrollable]="true"
+                            [scrollHeight]="'auto'">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th pFrozenColumn>{{ 'PROJECTS.FIELDS.NAME' | translate }} </th>
+                                    <!-- <th>{{ 'PROJECTS.FIELDS.TYPE' | translate }}</th>
+                                    <th>{{ 'PROJECTS.FIELDS.STATUS' | translate }}</th> -->
+                                    <th class="w-32">{{ 'COMMON.ACTIONS.LABEL' | translate }}</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-project>
+                                <tr>
+                                    <td>
+                                        <div class="flex flex-col">
+                                            <div class="flex items-center">
+                                                <i class="pi mr-2" [ngClass]="{'pi-user': !project.default, 'pi-users': project.default}" 
+                                                   [pTooltip]="project.default ? ('PROJECTS.TYPE.DEFAULT' | translate) : ('PROJECTS.TYPE.PERSONAL' | translate)">
+                                                </i>
+                                                {{ project.display_name }}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <!-- <td>{{ project.type }}</td>
+                                    <td>
+                                        <div class="flex flex-col space-y-2">
+                                            <p-tag 
+                                                [severity]="project.finished ? 'success' : 'warn'"
+                                                [value]="project.finished ? ('PROJECTS.STATUS.FINISHED' | translate) : ('PROJECTS.STATUS.IN_PROGRESS' | translate)">
+                                            </p-tag>
+                                        </div>
+                                    </td> -->
+                                    <td>
+                                        <div class="flex gap-2 justify-end">
+                                            <p-button 
+                                                icon="pi pi-pencil" 
+                                                styleClass="p-button-rounded p-button-text"
+                                                [routerLink]="['/projects', project.id]"
+                                                [disabled]="project.default">
+                                            </p-button>
+                                            <p-button 
+                                                icon="pi pi-map" 
+                                                styleClass="p-button-rounded p-button-text p-button-success"
+                                                (onClick)="showResults(project)"
+                                                [disabled]="!project.finished">
+                                            </p-button>
+                                            <p-button 
+                                                icon="pi pi-trash" 
+                                                styleClass="p-button-rounded p-button-text p-button-danger"
+                                                (onClick)="deleteProject(project)"
+                                                [disabled]="project.default">
+                                            </p-button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr *ngIf="!project.finished">
+                                    <td colspan="3">
+                                        <p-progressBar
+                                            [value]="getProgress(project)" 
+                                            [showValue]="true">
+                                        </p-progressBar>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </p-panel>
+                </div>
 
-        <!-- Nicht gruppierte Projekte -->
-        <div class="ungrouped-section" *ngIf="ungroupedProjects.length > 0">
-            <p-panel header="{{ 'PROJECTS.UNGROUPED' | translate }}" [toggleable]="true">
-                <p-table [value]="ungroupedProjects" [tableStyle]="{ 'min-width': '40rem', 'max-width': '60rem' }" styleClass="p-datatable-sm">
-                    <ng-template pTemplate="header">
-                        <tr>
-                            <th>{{ 'PROJECTS.FIELDS.NAME' | translate }}</th>
-                            <th>{{ 'PROJECTS.FIELDS.TYPE' | translate }}</th>
-                            <th>{{ 'PROJECTS.FIELDS.STATUS' | translate }}</th>
-                            <th style="width: 8rem">{{ 'COMMON.ACTIONS.LABEL' | translate }}</th>
-                        </tr>
-                    </ng-template>
-                    <ng-template pTemplate="body" let-project>
-                        <tr>
-                            <td>
-                                <div class="project-name">
-                                    <i class="pi" [ngClass]="{'pi-user': !project.default, 'pi-users': project.default}" 
-                                       [pTooltip]="project.default ? ('PROJECTS.TYPE.DEFAULT' | translate) : ('PROJECTS.TYPE.PERSONAL' | translate)"
-                                       style="margin-right: 0.5rem">
-                                    </i>
-                                    {{ project.display_name }}
-                                    <small *ngIf="project.description">{{ project.description }}</small>
-                                </div>
-                            </td>
-                            <td>{{ project.type }}</td>
-                            <td>
-                                <div class="status-column">
-                                    <p-tag 
-                                        [severity]="project.finished ? 'success' : 'warn'"
-                                        [value]="project.finished ? ('PROJECTS.STATUS.FINISHED' | translate) : ('PROJECTS.STATUS.IN_PROGRESS' | translate)">
-                                    </p-tag>
-                                    <p-progressBar *ngIf="!project.finished" 
-                                        [value]="getProgress(project)" 
-                                        [showValue]="true">
-                                    </p-progressBar>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <p-button 
-                                        icon="pi pi-pencil" 
-                                        styleClass="p-button-rounded p-button-text"
-                                        [routerLink]="['/projects', project.id]"
-                                        [disabled]="project.default">
-                                    </p-button>
-                                    <p-button 
-                                        icon="pi pi-map" 
-                                        styleClass="p-button-rounded p-button-text p-button-success"
-                                        (onClick)="showResults(project)"
-                                        [disabled]="!project.finished">
-                                    </p-button>
-                                    <p-button 
-                                        icon="pi pi-trash" 
-                                        styleClass="p-button-rounded p-button-text p-button-danger"
-                                        (onClick)="deleteProject(project)"
-                                        [disabled]="project.default">
-                                    </p-button>
-                                </div>
-                            </td>
-                        </tr>
-                    </ng-template>
-                </p-table>
-            </p-panel>
-        </div>
+                <!-- Nicht gruppierte Projekte -->
+                <div class="mb-4 min-w-0 overflow-hidden" *ngIf="ungroupedProjects.length > 0">
+                    <p-panel header="{{ 'PROJECTS.UNGROUPED' | translate }}" [toggleable]="true" styleClass="overflow-hidden">
+                        <p-table 
+                            [value]="ungroupedProjects" 
+                            [tableStyle]="{ width: '100%' }" 
+                            styleClass="p-datatable-sm"
+                            [scrollable]="true"
+                            [scrollHeight]="'auto'">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th>{{ 'PROJECTS.FIELDS.NAME' | translate }}</th>
+                                    <!-- <th>{{ 'PROJECTS.FIELDS.TYPE' | translate }}</th>
+                                    <th>{{ 'PROJECTS.FIELDS.STATUS' | translate }}</th> -->
+                                    <th class="w-32">{{ 'COMMON.ACTIONS.LABEL' | translate }}</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-project>
+                                <tr>
+                                    <td>
+                                        <div class="flex flex-col">
+                                            <div class="flex items-center">
+                                                <i class="pi mr-2" [ngClass]="{'pi-user': !project.default, 'pi-users': project.default}" 
+                                                   [pTooltip]="project.default ? ('PROJECTS.TYPE.DEFAULT' | translate) : ('PROJECTS.TYPE.PERSONAL' | translate)">
+                                                </i>
+                                                {{ project.display_name }}
+                                            </div>
+                                            <small *ngIf="project.description" class="text-gray-500 mt-1">{{ project.description }}</small>
+                                        </div>
+                                    </td>
+                                    <!-- <td>{{ project.type }}</td>
+                                    <td>
+                                        <div class="flex flex-col space-y-2">
+                                            <p-tag 
+                                                [severity]="project.finished ? 'success' : 'warn'"
+                                                [value]="project.finished ? ('PROJECTS.STATUS.FINISHED' | translate) : ('PROJECTS.STATUS.IN_PROGRESS' | translate)">
+                                            </p-tag>
+                                        </div>
+                                    </td> -->
+                                    <td>
+                                        <div class="flex gap-2 justify-end">
+                                            <p-button 
+                                                icon="pi pi-pencil" 
+                                                styleClass="p-button-rounded p-button-text"
+                                                [routerLink]="['/projects', project.id]"
+                                                [disabled]="project.default">
+                                            </p-button>
+                                            <p-button 
+                                                icon="pi pi-map" 
+                                                styleClass="p-button-rounded p-button-text p-button-success"
+                                                (onClick)="showResults(project)"
+                                                [disabled]="!project.finished">
+                                            </p-button>
+                                            <p-button 
+                                                icon="pi pi-trash" 
+                                                styleClass="p-button-rounded p-button-text p-button-danger"
+                                                (onClick)="deleteProject(project)"
+                                                [disabled]="project.default">
+                                            </p-button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr *ngIf="!project.finished">
+                                    <td colspan="3">
+                                        <p-progressBar
+                                            [value]="getProgress(project)" 
+                                            [showValue]="true">
+                                        </p-progressBar>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </p-panel>
+                </div>
 
-        <!-- Keine Projekte -->
-        <p-message *ngIf="!loading && groupedProjects.length === 0 && ungroupedProjects.length === 0"
-            severity="info"
-            text="{{ 'PROJECTS.LIST.NO_PROJECTS' | translate }}">
-        </p-message>
+                <!-- Keine Projekte -->
+                <p-message *ngIf="!loading && groupedProjects.length === 0 && ungroupedProjects.length === 0"
+                    severity="info"
+                    text="{{ 'PROJECTS.LIST.NO_PROJECTS' | translate }}">
+                </p-message>
+            </div>
+        </p-scrollPanel>
     </div>
 </div>

@@ -1,50 +1,43 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { CardModule } from 'primeng/card';
-import { ButtonModule } from 'primeng/button';
-import { PanelModule } from 'primeng/panel';
-import { MapComponent } from '../map/map.component';
+import { SharedModule } from '../shared/shared.module';
 import { ProjectsComponent } from '../projects/projects.component';
-import { DisplayGrid, GridsterConfig, GridsterItem, GridsterModule, GridType } from 'angular-gridster2';
+import { MapComponent } from '../map/map.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, CardModule, ButtonModule, PanelModule, MapComponent, GridsterModule, ProjectsComponent],
+  imports: [
+    SharedModule,
+    ProjectsComponent,
+    MapComponent
+  ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit {
-  options: GridsterConfig;
-  dashboard: Array<GridsterItem>;
-
-  constructor() {
-    this.options = {
-      gridType: GridType.Fit,
-      displayGrid: DisplayGrid.OnDragAndResize,
-      pushItems: true,
-      swap: true,
-      draggable: {
-        delayStart: 0,
-        enabled: true,
-        ignoreContentClass: 'gridster-item-content',
-        dragHandleClass: 'drag-handler',
-        ignoreContent: true,
-        dropOverItems: false
-      },
-      resizable: {
-        enabled: true
-      }
-    };
-
-    this.dashboard = [
-      { cols: 9, rows: 2, y: 0, x: 0, type: 'overview' },
-      { cols: 9, rows: 4, y: 0, x: 0, type: 'map' },
-      { cols: 3, rows: 6, y: 0, x: 9, type: 'details' }
-    ];
+  sidebarVisible: boolean = true;
+  detailsVisible: boolean = false;
+  projectsVisible: boolean = false;
+  showGlowEffect: boolean = true;
+  
+  get mainPanelSize(): number {
+    if (this.sidebarVisible && this.detailsVisible) return 60;
+    if (!this.sidebarVisible && !this.detailsVisible) return 100;
+    return 80;
   }
 
+  constructor() {}
+
   ngOnInit() {
-    // Zukünftige Initialisierungslogik kann hier hinzugefügt werden
+    // Entferne den Timer - der Effekt bleibt aktiv
+  }
+
+  showProjects() {
+    this.projectsVisible = !this.projectsVisible;
+    this.showGlowEffect = false;  // Deaktiviere den Glüheffekt beim ersten Klick
+  }
+
+  showDetails() {
+    this.detailsVisible = !this.detailsVisible;
   }
 }
