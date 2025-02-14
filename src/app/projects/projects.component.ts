@@ -5,6 +5,7 @@ import { MessageService } from 'primeng/api';
 import { finalize } from 'rxjs/operators';
 import { SharedModule } from '../shared/shared.module';
 import { TranslateService } from '@ngx-translate/core';
+import { MapService } from '../map/map.service';
 
 interface GroupedProjects {
   group: ProjectGroup;
@@ -28,7 +29,8 @@ export class ProjectsComponent implements OnInit {
   constructor(
     private projectsService: ProjectsService,
     private messageService: MessageService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private mapService: MapService
   ) {}
 
   ngOnInit(): void {
@@ -110,7 +112,22 @@ export class ProjectsComponent implements OnInit {
   }
 
   showResults(project: Project): void {
-    // TODO: Implementierung für die Ergebnisanzeige
-    console.log('Show results for project:', project.id);
+    this.loading = true;
+    
+    this.projectsService.getProjectResults(project.id)
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (results) => {
+          this.mapService.resetMap();
+          this.mapService.updateFeatures(results.geojson.features);
+        },
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
+            detail: this.translate.instant('PROJECTS.RESULTS.LOAD_ERROR')
+          });
+        }
+      });
   }
 }

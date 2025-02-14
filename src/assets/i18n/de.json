@@ -25,7 +25,11 @@
             "FINISHED": "Fertig",
             "IN_PROGRESS": "In Bearbeitung"
         },
-        "UNGROUPED": "Nicht gruppierte Projekte"
+        "UNGROUPED": "Nicht gruppierte Projekte",
+        "TYPE": {
+            "DEFAULT": "Standard",
+            "PERSONAL": "Persönlich"
+        }
     },
     "COMMON": {
         "ACTIONS": {
@@ -44,5 +48,13 @@
                 "DELETE": "Erfolgreich gelöscht"
             }
         }
+    },
+    "LEGEND": {
+        "LVLA": "Die Mobilitätszeit beträgt max. 35% der lokalen durchschnittlichen Zeit.",
+        "LVLB": "Die Mobilitätszeit beträgt zw. 36% und 50% der lokalen durchschnittlichen Zeit.",
+        "LVLC": "Die Mobilitätszeit beträgt zw. 51% und 71% der lokalen durchschnittlichen Zeit.",
+        "LVLD": "Die Mobilitätszeit beträgt zw. 72% und 100% der lokalen durchschnittlichen Zeit.",
+        "LVLE": "Die Mobilitätszeit beträgt zw. 101% und 140% der lokalen durchschnittlichen Zeit.",
+        "LVLF": "Die Mobilitätszeit beträgt mind. 141% der lokalen durchschnittlichen Zeit."
     }
 } 

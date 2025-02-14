@@ -7,7 +7,7 @@ export interface ProjectGroup {
 }
 
 export interface Project {
-    id: string;
+    id: number;
     display_name?: string;
     description?: string;
     calculated: number;

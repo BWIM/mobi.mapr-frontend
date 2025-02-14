@@ -1,0 +1,9 @@
+<div class="container">
+  <!-- Legend -->
+  <div class="legend">
+    <div *ngFor="let level of scoreLevels" class="legend-item" [class]="level.name.toLowerCase()">
+      <span>{{ level.name }}</span>
+      <div class="description">{{ level.description }}</div>
+    </div>
+  </div>
+</div>

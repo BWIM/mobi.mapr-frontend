@@ -14,6 +14,8 @@ import { TagModule } from 'primeng/tag';
 import { MessageModule } from 'primeng/message';
 import { MessageService } from 'primeng/api';
 import { ProgressBarModule } from 'primeng/progressbar';
+import { TooltipModule } from 'primeng/tooltip';
+
 @NgModule({
   imports: [
     CommonModule,
@@ -28,7 +30,8 @@ import { ProgressBarModule } from 'primeng/progressbar';
     TableModule,
     TagModule,
     ProgressBarModule,
-    MessageModule
+    MessageModule,
+    TooltipModule
   ],
   exports: [
     CommonModule,
@@ -43,7 +46,8 @@ import { ProgressBarModule } from 'primeng/progressbar';
     TableModule,
     TagModule,
     ProgressBarModule,
-    MessageModule
+    MessageModule,
+    TooltipModule
   ],
   providers: [MessageService]
 })

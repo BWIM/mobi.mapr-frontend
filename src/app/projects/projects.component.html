@@ -30,6 +30,10 @@
                         <tr>
                             <td>
                                 <div class="project-name">
+                                    <i class="pi" [ngClass]="{'pi-user': !project.default, 'pi-users': project.default}" 
+                                       [pTooltip]="project.default ? ('PROJECTS.TYPE.DEFAULT' | translate) : ('PROJECTS.TYPE.PERSONAL' | translate)"
+                                       style="margin-right: 0.5rem">
+                                    </i>
                                     {{ project.display_name }}
                                     <small *ngIf="project.description">{{ project.description }}</small>
                                 </div>
@@ -52,17 +56,20 @@
                                     <p-button 
                                         icon="pi pi-pencil" 
                                         styleClass="p-button-rounded p-button-text"
-                                        [routerLink]="['/projects', project.id]">
+                                        [routerLink]="['/projects', project.id]"
+                                        [disabled]="project.default">
                                     </p-button>
-                                    <p-button *ngIf="project.finished"
-                                        icon="pi pi-chart-line" 
+                                    <p-button 
+                                        icon="pi pi-map" 
                                         styleClass="p-button-rounded p-button-text p-button-success"
-                                        (onClick)="showResults(project)">
+                                        (onClick)="showResults(project)"
+                                        [disabled]="!project.finished">
                                     </p-button>
-                                    <p-button *ngIf="!project.default"
+                                    <p-button 
                                         icon="pi pi-trash" 
                                         styleClass="p-button-rounded p-button-text p-button-danger"
-                                        (onClick)="deleteProject(project)">
+                                        (onClick)="deleteProject(project)"
+                                        [disabled]="project.default">
                                     </p-button>
                                 </div>
                             </td>
@@ -88,6 +95,10 @@
                         <tr>
                             <td>
                                 <div class="project-name">
+                                    <i class="pi" [ngClass]="{'pi-user': !project.default, 'pi-users': project.default}" 
+                                       [pTooltip]="project.default ? ('PROJECTS.TYPE.DEFAULT' | translate) : ('PROJECTS.TYPE.PERSONAL' | translate)"
+                                       style="margin-right: 0.5rem">
+                                    </i>
                                     {{ project.display_name }}
                                     <small *ngIf="project.description">{{ project.description }}</small>
                                 </div>
@@ -110,17 +121,20 @@
                                     <p-button 
                                         icon="pi pi-pencil" 
                                         styleClass="p-button-rounded p-button-text"
-                                        [routerLink]="['/projects', project.id]">
+                                        [routerLink]="['/projects', project.id]"
+                                        [disabled]="project.default">
                                     </p-button>
-                                    <p-button *ngIf="project.finished"
-                                        icon="pi pi-chart-line" 
+                                    <p-button 
+                                        icon="pi pi-map" 
                                         styleClass="p-button-rounded p-button-text p-button-success"
-                                        (onClick)="showResults(project)">
+                                        (onClick)="showResults(project)"
+                                        [disabled]="!project.finished">
                                     </p-button>
-                                    <p-button *ngIf="!project.default"
+                                    <p-button 
                                         icon="pi pi-trash" 
                                         styleClass="p-button-rounded p-button-text p-button-danger"
-                                        (onClick)="deleteProject(project)">
+                                        (onClick)="deleteProject(project)"
+                                        [disabled]="project.default">
                                     </p-button>
                                 </div>
                             </td>

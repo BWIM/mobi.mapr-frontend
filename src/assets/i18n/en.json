@@ -25,7 +25,11 @@
             "FINISHED": "Completed",
             "IN_PROGRESS": "In Progress"
         },
-        "UNGROUPED": "Ungrouped Projects"
+        "UNGROUPED": "Ungrouped Projects",
+        "TYPE": {
+            "DEFAULT": "Standard",
+            "PERSONAL": "Personal"
+        }
     },
     "COMMON": {
         "ACTIONS": {
@@ -44,5 +48,13 @@
                 "DELETE": "Successfully deleted"
             }
         }
+    },
+    "LEGEND": {
+        "LVLA": "The mobility time is max. 35% of the local average time.",
+        "LVLB": "The mobility time is between 36% and 50% of the local average time.",
+        "LVLC": "The mobility time is between 51% and 71% of the local average time.",
+        "LVLD": "The mobility time is between 72% and 100% of the local average time.",
+        "LVLE": "The mobility time is between 101% and 140% of the local average time.",
+        "LVLF": "The mobility time is at least 141% of the local average time."
     }
 } 

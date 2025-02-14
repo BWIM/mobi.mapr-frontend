@@ -35,11 +35,11 @@ export class ProjectsService {
     return this.http.post<Project>(`${this.apiUrl}/projects/`, project);
   }
 
-  updateProject(id: string, project: ProjectCreateUpdate): Observable<Project> {
+  updateProject(id: number, project: ProjectCreateUpdate): Observable<Project> {
     return this.http.patch<Project>(`${this.apiUrl}/projects/${id}/`, project);
   }
 
-  deleteProject(id: string): Observable<void> {
+  deleteProject(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/projects/${id}/`);
   }
 
@@ -66,5 +66,9 @@ export class ProjectsService {
 
   deleteProjectGroup(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/projectgroups/${id}/`);
+  }
+
+  getProjectResults(projectId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/projects/${projectId}/map/?resolution=municipalities`);
   }
 }
