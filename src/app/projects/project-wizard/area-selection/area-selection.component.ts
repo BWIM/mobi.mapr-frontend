@@ -86,6 +86,7 @@ export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy 
     this.map.on('click', (event) => {
       const feature = this.map?.forEachFeatureAtPixel(event.pixel, (feature) => feature);
       if (feature) {
+        console.log(feature);
         const featureId = feature.getId() as string;
         if (this.selectedFeatures.has(featureId)) {
           this.selectedFeatures.delete(featureId);
@@ -100,7 +101,7 @@ export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy 
   private loadLands() {
     this.landsService.getLands().subscribe({
       next: (lands: Land[]) => {
-        this.lands = lands;
+        this.lands = lands.sort((a, b) => a.name.localeCompare(b.name));
       },
       error: (error) => {
         console.error('Fehler beim Laden der Länder:', error);
@@ -132,26 +133,60 @@ export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy 
     });
   }
 
+  getLandSelectionState(land: Land): any {
+    const source = this.vectorLayer?.getSource();
+    const features = source?.getFeatures() || [];
+    const landFeatures = features.filter((f: any) => f.get('land') === land.id);
+    
+    if (landFeatures.length === 0) return true;
+    
+    const selectedCount = landFeatures.filter((f: any) => 
+      this.selectedFeatures.has(f.getId() as string)
+    ).length;
+    
+    if (selectedCount === 0) return false;
+    if (selectedCount === landFeatures.length) return true;
+    return true; // Zwischenzustand
+  }
+
   selectLand(land: Land) {
     const source = this.vectorLayer?.getSource();
     const features = source?.getFeatures() || [];
-    
     const landFeatures = features.filter((f: any) => f.get('land') === land.id);
-    const allSelected = landFeatures.every((f: any) => 
-      this.selectedFeatures.has(f.getId() as string)
-    );
-
-    if (allSelected) {
+    
+    const currentState = this.getLandSelectionState(land);
+    
+    // Zyklus: false -> true -> null (teilweise) -> false
+    if (currentState === false || currentState === null) {
       landFeatures.forEach((f: any) => {
-        this.selectedFeatures.delete(f.getId() as string);
+        this.selectedFeatures.add(f.getId() as string);
       });
     } else {
       landFeatures.forEach((f: any) => {
-        this.selectedFeatures.add(f.getId() as string);
+        this.selectedFeatures.delete(f.getId() as string);
       });
     }
     
     this.vectorLayer?.changed();
-    console.log('Ausgewählte Features:', Array.from(this.selectedFeatures));
+  }
+
+  isLandSelected(land: Land): boolean {
+    const source = this.vectorLayer?.getSource();
+    const features = source?.getFeatures() || [];
+    const landFeatures = features.filter((f: any) => f.get('land') === land.id);
+    
+    return landFeatures.length > 0 && landFeatures.every((f: any) => 
+      this.selectedFeatures.has(f.getId() as string)
+    );
+  }
+
+  isLandIndeterminate(land: Land): boolean {
+    const source = this.vectorLayer?.getSource();
+    const features = source?.getFeatures() || [];
+    const landFeatures = features.filter((f: any) => f.get('land') === land.id);
+
+    return landFeatures.length > 0 && landFeatures.some((f: any) => 
+      this.selectedFeatures.has(f.getId() as string)
+    ) && !this.isLandSelected(land);
   }
 } 

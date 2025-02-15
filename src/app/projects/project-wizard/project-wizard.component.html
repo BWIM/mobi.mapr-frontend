@@ -157,9 +157,11 @@
             </div>
 
             <!-- Schritt 4: Gebiet auswählen -->
-            <div *ngIf="activeIndex === 3" formGroupName="area" class="animate-fadeIn h-full w-full">
+            <div *ngIf="activeIndex === 3" formGroupName="area" class="h-[calc(100%-4rem)]">
                 <h2 class="text-2xl mb-4">Gebiet auswählen</h2>
-                <app-area-selection formControlName="selectedArea"></app-area-selection>
+                <div class="h-[calc(100%-2rem)]">
+                    <app-area-selection formControlName="selectedArea"></app-area-selection>
+                </div>
             </div>
 
 
