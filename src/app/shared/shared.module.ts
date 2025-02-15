@@ -21,6 +21,7 @@ import { DialogModule } from 'primeng/dialog';
 import { SpeedDialModule } from 'primeng/speeddial';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { StepsModule } from 'primeng/steps';
+import { CheckboxModule } from 'primeng/checkbox';
 
 @NgModule({
   imports: [
@@ -43,7 +44,9 @@ import { StepsModule } from 'primeng/steps';
     DialogModule,
     SpeedDialModule,
     SplitButtonModule,
-    StepsModule
+    StepsModule,
+    CheckboxModule,
+  
   ],
   exports: [
     CommonModule,
@@ -65,7 +68,8 @@ import { StepsModule } from 'primeng/steps';
     DialogModule,
     SpeedDialModule,
     SplitButtonModule,
-    StepsModule
+    StepsModule,
+    CheckboxModule
   ],
   providers: [MessageService]
 })
