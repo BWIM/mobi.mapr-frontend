@@ -1,28 +1,14 @@
-<div [formGroup]="areaForm" class="flex flex-col gap-4">
-    <div class="flex-grow">
-        <!-- Hier kann später eine Kartenkomponente eingefügt werden -->
-        <div class="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-            <span class="text-gray-500">Kartenkomponente wird hier integriert</span>
+<div class="h-full w-full">
+    <div class="flex h-full w-full">
+        <div id="create-map" class="h-full w-2/3 rounded-lg">
+    </div>      
+    <div class="w-1/4 overflow-y-auto">
+        <div class="flex flex-col gap-2">
+            <div *ngFor="let land of lands" 
+                class="p-3 bg-white rounded-lg shadow cursor-pointer hover:bg-gray-50"
+                (click)="selectLand(land)">
+                {{land.name}}
+            </div>
         </div>
     </div>
-
-    <div class="flex-none">
-        <p-panel header="Verfügbare Gebiete">
-            <div class="flex flex-wrap gap-3">
-                <div *ngFor="let area of areas" class="flex align-items-center">
-                    <p-checkbox
-                        [binary]="false"
-                        [value]="area"
-                        [ariaLabel]="area.display_name || area.name"
-                        formControlName="selectedAreas"
-                        [inputId]="'area_' + area.id">
-                    </p-checkbox>
-                </div>
-            </div>
-        </p-panel>
-    </div>
-
-    <small class="text-red-500" *ngIf="areaForm.get('selectedAreas')?.errors?.['required'] && areaForm.get('selectedAreas')?.touched">
-        Bitte wählen Sie mindestens ein Gebiet aus.
-    </small>
 </div> 

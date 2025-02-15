@@ -1,58 +1,130 @@
-import { Component, OnInit, forwardRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SharedModule } from '../../../shared/shared.module';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AreasService } from '../../../services/areas.service';
-import { Area } from '../../../services/interfaces/area.interface';
+import { LandsService } from '../../../services/lands.service';
+import { Land } from '../../../services/interfaces/land.interface';
+import Map from 'ol/Map';
+import View from 'ol/View';
+import TileLayer from 'ol/layer/Tile';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+import XYZ from 'ol/source/XYZ';
+import GeoJSON from 'ol/format/GeoJSON';
+import { Fill, Stroke, Style } from 'ol/style';
+import { fromLonLat } from 'ol/proj';
 
 @Component({
   selector: 'app-area-selection',
   templateUrl: './area-selection.component.html',
   styleUrls: ['./area-selection.component.css'],
   standalone: true,
-  imports: [CommonModule, SharedModule],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => AreaSelectionComponent),
-      multi: true
-    }
-  ]
+  imports: [CommonModule, SharedModule]
 })
-export class AreaSelectionComponent implements OnInit, ControlValueAccessor {
-  areas: Area[] = [];
-  selectedAreaIds: number[] = [];
-  areaForm: FormGroup;
-  isDisabled = false;
-
-  // ControlValueAccessor Callbacks
-  private onChange: (value: number[]) => void = () => {};
-  private onTouched: () => void = () => {};
+export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy {
+  private map?: Map;
+  private vectorLayer?: VectorLayer<any>;
+  private geoJsonFormat = new GeoJSON();
+  private selectedFeatures: Set<string> = new Set();
+  
+  lands: Land[] = [];
 
   constructor(
     private areasService: AreasService,
-    private fb: FormBuilder
-  ) {
-    this.areaForm = this.fb.group({
-      selectedAreas: [[], Validators.required]
+    private landsService: LandsService
+  ) {}
+
+  ngOnInit() {
+    this.loadLands();
+    this.loadAreas();
+  }
+
+  ngAfterViewInit() {
+    this.initializeMap();
+  }
+
+  ngOnDestroy() {
+    if (this.map) {
+      this.map.dispose();
+    }
+  }
+
+  private initializeMap() {
+    const baseLayer = new TileLayer({
+      source: new XYZ({
+        url: 'https://{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+        attributions: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+      })
     });
 
-    // Wenn sich die Auswahl ändert, informiere den Parent
-    this.areaForm.get('selectedAreas')?.valueChanges.subscribe(areas => {
-      this.selectedAreaIds = areas.map((area: Area) => area.id);
-      this.onChange(this.selectedAreaIds);
-      this.onTouched();
+    this.vectorLayer = new VectorLayer({
+      source: new VectorSource(),
+      style: (feature) => {
+        const isSelected = this.selectedFeatures.has(feature.getId() as string);
+        return new Style({
+          zIndex: isSelected ? 1000 : 1,
+          fill: new Fill({
+            color: isSelected ? 'rgba(49, 159, 211, 0.5)' : 'rgba(255, 255, 255, 0.5)'
+          }),
+          stroke: new Stroke({
+            color: '#319FD3',
+            width: isSelected ? 2 : 1
+          })
+        });
+      }
+    });
+
+    this.map = new Map({
+      target: 'create-map',
+      layers: [baseLayer, this.vectorLayer],
+      view: new View({
+        center: fromLonLat([10.4515, 51.1657]),
+        zoom: 6
+      })
+    });
+
+    this.map.on('click', (event) => {
+      const feature = this.map?.forEachFeatureAtPixel(event.pixel, (feature) => feature);
+      if (feature) {
+        const featureId = feature.getId() as string;
+        if (this.selectedFeatures.has(featureId)) {
+          this.selectedFeatures.delete(featureId);
+        } else {
+          this.selectedFeatures.add(featureId);
+        }
+        this.vectorLayer?.changed();
+      }
     });
   }
 
-  ngOnInit() {
-    this.loadAreas();
+  private loadLands() {
+    this.landsService.getLands().subscribe({
+      next: (lands: Land[]) => {
+        this.lands = lands;
+      },
+      error: (error) => {
+        console.error('Fehler beim Laden der Länder:', error);
+      }
+    });
   }
 
   private loadAreas() {
     this.areasService.getAreas().subscribe({
-      next: (areas) => {
-        this.areas = areas;
+      next: (geojson: any) => {
+        const features = this.geoJsonFormat.readFeatures(geojson, {
+          featureProjection: 'EPSG:3857',
+          dataProjection: 'EPSG:4326'
+        });
+        
+        features.forEach(feature => {
+          if (!feature.getId()) {
+            feature.setId(feature.get('id'));
+          }
+        });
+
+        const source = this.vectorLayer?.getSource();
+        source?.clear();
+        source?.addFeatures(features);
       },
       error: (error) => {
         console.error('Fehler beim Laden der Gebiete:', error);
@@ -60,29 +132,26 @@ export class AreaSelectionComponent implements OnInit, ControlValueAccessor {
     });
   }
 
-  // ControlValueAccessor Interface Implementierung
-  writeValue(value: number[]): void {
-    if (value) {
-      this.selectedAreaIds = value;
-      const selectedAreas = this.areas.filter(area => value.includes(area.id));
-      this.areaForm.get('selectedAreas')?.setValue(selectedAreas, { emitEvent: false });
-    }
-  }
+  selectLand(land: Land) {
+    const source = this.vectorLayer?.getSource();
+    const features = source?.getFeatures() || [];
+    
+    const landFeatures = features.filter((f: any) => f.get('land') === land.id);
+    const allSelected = landFeatures.every((f: any) => 
+      this.selectedFeatures.has(f.getId() as string)
+    );
 
-  registerOnChange(fn: any): void {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: any): void {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.isDisabled = isDisabled;
-    if (isDisabled) {
-      this.areaForm.disable();
+    if (allSelected) {
+      landFeatures.forEach((f: any) => {
+        this.selectedFeatures.delete(f.getId() as string);
+      });
     } else {
-      this.areaForm.enable();
+      landFeatures.forEach((f: any) => {
+        this.selectedFeatures.add(f.getId() as string);
+      });
     }
+    
+    this.vectorLayer?.changed();
+    console.log('Ausgewählte Features:', Array.from(this.selectedFeatures));
   }
 } 

@@ -16,11 +16,10 @@ import { ProjectWizardComponent } from '../projects/project-wizard/project-wizar
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit {
-  sidebarVisible: boolean = false;
   detailsVisible: boolean = false;
   showGlowEffect: boolean = true;
-  isPinned: boolean = false;
-  sidebarExpanded: boolean = false;
+  isPinned: boolean = true;
+  sidebarExpanded: boolean = true;
 
   constructor() {}
 
