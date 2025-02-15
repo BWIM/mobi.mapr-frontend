@@ -20,6 +20,7 @@ import { ScrollPanelModule } from 'primeng/scrollpanel';
 import { DialogModule } from 'primeng/dialog';
 import { SpeedDialModule } from 'primeng/speeddial';
 import { SplitButtonModule } from 'primeng/splitbutton';
+import { StepsModule } from 'primeng/steps';
 
 @NgModule({
   imports: [
@@ -41,7 +42,8 @@ import { SplitButtonModule } from 'primeng/splitbutton';
     ScrollPanelModule,
     DialogModule,
     SpeedDialModule,
-    SplitButtonModule
+    SplitButtonModule,
+    StepsModule
   ],
   exports: [
     CommonModule,
@@ -62,7 +64,8 @@ import { SplitButtonModule } from 'primeng/splitbutton';
     ScrollPanelModule,
     DialogModule,
     SpeedDialModule,
-    SplitButtonModule
+    SplitButtonModule,
+    StepsModule
   ],
   providers: [MessageService]
 })

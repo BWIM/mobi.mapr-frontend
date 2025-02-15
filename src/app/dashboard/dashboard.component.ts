@@ -2,14 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { SharedModule } from '../shared/shared.module';
 import { ProjectsComponent } from '../projects/projects.component';
 import { MapComponent } from '../map/map.component';
-
+import { ProjectWizardComponent } from '../projects/project-wizard/project-wizard.component';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     SharedModule,
     ProjectsComponent,
-    MapComponent
+    MapComponent,
+    ProjectWizardComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'

@@ -1,0 +1,54 @@
+:host ::ng-deep .project-wizard-dialog {
+    max-width: 1200px;
+}
+
+:host ::ng-deep .project-wizard-dialog .p-dialog-content {
+    padding: 0;
+    overflow: hidden;
+}
+
+:host ::ng-deep .p-steps .p-steps-item .p-menuitem-link {
+    background: transparent;
+}
+
+:host ::ng-deep .p-steps .p-steps-item.p-highlight .p-steps-number {
+    background: var(--primary-color);
+    color: var(--primary-color-text);
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Anpassungen */
+@media screen and (max-width: 768px) {
+    :host ::ng-deep .project-wizard-dialog {
+        width: 95vw !important;
+        height: 95vh !important;
+    }
+
+    :host ::ng-deep .p-steps {
+        height: auto;
+    }
+
+    :host ::ng-deep .p-steps .p-steps-item .p-menuitem-link {
+        flex-direction: column;
+        padding: 0.5rem;
+    }
+
+    :host ::ng-deep .p-steps .p-steps-item .p-steps-number {
+        margin: 0;
+        margin-bottom: 0.5rem;
+    }
+} 

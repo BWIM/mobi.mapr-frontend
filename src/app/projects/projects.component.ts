@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, ViewChild } from '@angular/core';
 import { ProjectsService } from './projects.service';
 import { Project, ProjectGroup } from './project.interface';
 import { MessageService } from 'primeng/api';
@@ -8,6 +8,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { MapService } from '../map/map.service';
 import { MenuItem } from 'primeng/api';
 import { Router } from '@angular/router';
+import { ProjectWizardService } from './project-wizard/project-wizard.service';
 
 interface GroupedProjects {
   group: ProjectGroup;
@@ -24,6 +25,7 @@ interface GroupedProjects {
 })
 export class ProjectsComponent implements OnInit {
   @Output() projectAction = new EventEmitter<void>();
+  
   loading = false;
   projectGroups: ProjectGroup[] = [];
   groupedProjects: GroupedProjects[] = [];
@@ -36,7 +38,8 @@ export class ProjectsComponent implements OnInit {
     private messageService: MessageService,
     private translate: TranslateService,
     private mapService: MapService,
-    private router: Router
+    private router: Router,
+    private wizardService: ProjectWizardService
   ) {
     this.initializeMapActions();
     
@@ -191,5 +194,9 @@ export class ProjectsComponent implements OnInit {
           });
         }
       });
+  }
+
+  showProjectWizard(): void {
+    this.wizardService.show();
   }
 }
