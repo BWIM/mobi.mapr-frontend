@@ -111,11 +111,30 @@
 }
 
 /* Sidebar Styling */
-:host ::ng-deep .p-sidebar {
+:host ::ng-deep .projects-sidebar {
     background-color: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border: none;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+:host ::ng-deep .projects-sidebar .p-sidebar-content {
+    padding: 0;
+}
+
+/* Pin Button Styling */
+.rotate-45 {
+    transform: rotate(45deg);
+}
+
+/* Trigger Area Hover Effect */
+.sidebar-trigger {
+    transition: background-color 0.3s ease;
+}
+
+.sidebar-trigger:hover {
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
 /* Responsive Anpassungen */
@@ -148,4 +167,41 @@
 
 :host ::ng-deep .p-dialog-content {
     overflow: hidden !important;
+}
+
+/* Sidebar Tab Styling */
+.sidebar-tab {
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.sidebar-tab:hover {
+    background-color: rgba(255, 255, 255, 1);
+}
+
+.rotate-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    padding: 0.5rem 0;
+    white-space: nowrap;
+}
+
+.pi-angle-right {
+    transition: transform 0.3s ease;
+}
+
+.rotate-180 {
+    transform: rotate(180deg);
+}
+
+/* Dialog Positioning */
+:host ::ng-deep .projects-sidebar.p-dialog {
+    margin-left: 0 !important;
+    transform: translateX(0) !important;
+}
+
+:host ::ng-deep .projects-sidebar .p-dialog-content {
+    padding: 0;
+    height: calc(100vh - 4rem);
 }
