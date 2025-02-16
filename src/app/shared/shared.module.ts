@@ -23,6 +23,8 @@ import { SplitButtonModule } from 'primeng/splitbutton';
 import { StepsModule } from 'primeng/steps';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ChipModule } from 'primeng/chip';
+import { DropdownModule } from 'primeng/dropdown';
+
 @NgModule({
   imports: [
     CommonModule,
@@ -46,7 +48,8 @@ import { ChipModule } from 'primeng/chip';
     SplitButtonModule,
     StepsModule,
     CheckboxModule,
-    ChipModule
+    ChipModule,
+    DropdownModule
   
   ],
   exports: [
@@ -71,7 +74,8 @@ import { ChipModule } from 'primeng/chip';
     SplitButtonModule,
     StepsModule,
     CheckboxModule,
-    ChipModule
+    ChipModule,
+    DropdownModule
   ],
   providers: [MessageService]
 })

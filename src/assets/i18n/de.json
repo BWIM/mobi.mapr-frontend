@@ -16,7 +16,9 @@
             "DESCRIPTION": "Beschreibung",
             "TYPE": "Typ",
             "CREATED": "Erstellt am",
-            "STATUS": "Status"
+            "STATUS": "Status",
+            "GROUP": "Gruppe",
+            "SELECT_GROUP": "Gruppe auswählen"
         },
         "ACTIONS": {
             "CREATE": "Neues Projekt"
@@ -29,6 +31,10 @@
         "TYPE": {
             "DEFAULT": "Standard",
             "PERSONAL": "Persönlich"
+        },
+        "MESSAGES": {
+            "UPDATE_SUCCESS": "Projekt erfolgreich aktualisiert",
+            "UPDATE_ERROR": "Fehler beim Aktualisieren des Projekts"
         }
     },
     "COMMON": {
@@ -79,5 +85,8 @@
         "ERRORS": {
             "NAME_REQUIRED": "Bitte geben Sie einen Projektnamen ein."
         }
+    },
+    "EDIT": {
+        "TITLE": "Projekt bearbeiten"
     }
 } 

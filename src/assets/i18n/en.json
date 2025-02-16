@@ -16,7 +16,9 @@
             "DESCRIPTION": "Description",
             "TYPE": "Type",
             "CREATED": "Created at",
-            "STATUS": "Status"
+            "STATUS": "Status",
+            "GROUP": "Group",
+            "SELECT_GROUP": "Select Group"
         },
         "ACTIONS": {
             "CREATE": "New Project"
@@ -29,6 +31,10 @@
         "TYPE": {
             "DEFAULT": "Standard",
             "PERSONAL": "Personal"
+        },
+        "MESSAGES": {
+            "UPDATE_SUCCESS": "Project successfully updated",
+            "UPDATE_ERROR": "Error updating project"
         }
     },
     "COMMON": {

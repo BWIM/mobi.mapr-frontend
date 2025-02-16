@@ -51,6 +51,8 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   items: MenuItem[] = [];
   selectedProject?: Project;
   private websocketConnections: Map<number, WebSocketSubject<WebsocketResult>> = new Map();
+  editDialogVisible = false;
+  projectToEdit: Project | null = null;
 
   constructor(
     private projectsService: ProjectsService,
@@ -292,6 +294,49 @@ export class ProjectsComponent implements OnInit, OnDestroy {
       connection.complete();
     });
     this.websocketConnections.clear();
+  }
+
+  openEditDialog(project: Project): void {
+    this.projectToEdit = { ...project };
+    this.editDialogVisible = true;
+  }
+
+  closeEditDialog(): void {
+    this.editDialogVisible = false;
+    this.projectToEdit = null;
+  }
+
+  saveProject(): void {
+    if (!this.projectToEdit) return;
+
+    this.loadingService.startLoading();
+    
+    this.projectsService.updateProject(this.projectToEdit.id, {
+      display_name: this.projectToEdit.display_name,
+      description: this.projectToEdit.description,
+      projectgroup_id: this.projectToEdit.projectgroup?.id ? parseInt(this.projectToEdit.projectgroup?.id) : null
+    }).pipe(
+      finalize(() => {
+        this.loadingService.stopLoading();
+        this.closeEditDialog();
+      })
+    ).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: this.translate.instant('COMMON.MESSAGES.SUCCESS.UPDATE'),
+          detail: this.translate.instant('PROJECTS.MESSAGES.UPDATE_SUCCESS')
+        });
+        this.loadData();
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: this.translate.instant('COMMON.MESSAGES.ERROR.UPDATE'),
+          detail: this.translate.instant('PROJECTS.MESSAGES.UPDATE_ERROR')
+        });
+      }
+    });
   }
 
 }

@@ -65,7 +65,7 @@
                                             <p-button 
                                                 icon="pi pi-pencil" 
                                                 styleClass="p-button-rounded p-button-text"
-                                                [routerLink]="['/projects', project.id]"
+                                                (onClick)="openEditDialog(project)"
                                                 [disabled]="project.default">
                                             </p-button>
                                             <p-button 
@@ -143,7 +143,7 @@
                                             <p-button 
                                                 icon="pi pi-pencil" 
                                                 styleClass="p-button-rounded p-button-text"
-                                                [routerLink]="['/projects', project.id]"
+                                                (onClick)="openEditDialog(project)"
                                                 [disabled]="project.default">
                                             </p-button>
                                             <p-button 
@@ -176,5 +176,54 @@
             </div>
         </p-scrollPanel>
     </div>
+
+    <!-- Edit Project Dialog -->
+    <p-dialog 
+        [(visible)]="editDialogVisible" 
+        [header]="'PROJECTS.EDIT.TITLE' | translate"
+        [modal]="true"
+        [style]="{width: '450px'}"
+        [appendTo]="'body'"
+        [draggable]="false"
+        [resizable]="false">
+        <div class="flex flex-col gap-4" *ngIf="projectToEdit">
+            <div class="field">
+                <label for="projectName" class="block mb-2">{{ 'PROJECTS.FIELDS.NAME' | translate }}</label>
+                <input id="projectName" type="text" pInputText [(ngModel)]="projectToEdit.display_name" class="w-full border p-2 border rounded-md">
+            </div>
+            
+            <div class="field">
+                <label for="projectDescription" class="block mb-2">{{ 'PROJECTS.FIELDS.DESCRIPTION' | translate }}</label>
+                <textarea id="projectDescription" pInputTextarea [(ngModel)]="projectToEdit.description" class="w-full p-2 border rounded-md" rows="3"></textarea>
+            </div>
+
+            <div class="field">
+                <label for="projectGroup" class="block mb-2">{{ 'PROJECTS.FIELDS.GROUP' | translate }}</label>
+                <p-dropdown 
+                    id="projectGroup"
+                    [options]="projectGroups"
+                    [(ngModel)]="projectToEdit.projectgroup"
+                    optionLabel="name"
+                    [showClear]="true"
+                    [appendTo]="'body'"
+                    placeholder="{{ 'PROJECTS.FIELDS.SELECT_GROUP' | translate }}"
+                    class="w-full">
+                </p-dropdown>
+            </div>
+        </div>
+        <ng-template pTemplate="footer">
+            <p-button 
+                icon="pi pi-times" 
+                (onClick)="closeEditDialog()" 
+                label="{{ 'COMMON.ACTIONS.CANCEL' | translate }}"
+                styleClass="p-button-text">
+            </p-button>
+            <p-button 
+                icon="pi pi-check" 
+                (onClick)="saveProject()" 
+                label="{{ 'COMMON.ACTIONS.SAVE' | translate }}">
+            </p-button>
+        </ng-template>
+    </p-dialog>
 </div>
 
