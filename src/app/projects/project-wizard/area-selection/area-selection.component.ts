@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SharedModule } from '../../../shared/shared.module';
 import { AreasService } from '../../../services/areas.service';
@@ -22,6 +22,8 @@ import { fromLonLat } from 'ol/proj';
   imports: [CommonModule, SharedModule]
 })
 export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy {
+  @Output() selectedAreasChange = new EventEmitter<string[]>();
+
   private map?: Map;
   private vectorLayer?: VectorLayer<any>;
   private geoJsonFormat = new GeoJSON();
@@ -86,7 +88,6 @@ export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy 
     this.map.on('click', (event) => {
       const feature = this.map?.forEachFeatureAtPixel(event.pixel, (feature) => feature);
       if (feature) {
-        console.log(feature);
         const featureId = feature.getId() as string;
         if (this.selectedFeatures.has(featureId)) {
           this.selectedFeatures.delete(featureId);
@@ -94,6 +95,7 @@ export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy 
           this.selectedFeatures.add(featureId);
         }
         this.vectorLayer?.changed();
+        this.updateSelectedAreas();
       }
     });
   }
@@ -133,20 +135,23 @@ export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy 
     });
   }
 
-  getLandSelectionState(land: Land): any {
+  getLandSelectionState(land: Land): boolean {
     const source = this.vectorLayer?.getSource();
     const features = source?.getFeatures() || [];
     const landFeatures = features.filter((f: any) => f.get('land') === land.id);
     
-    if (landFeatures.length === 0) return true;
+    if (landFeatures.length === 0) return false;
     
     const selectedCount = landFeatures.filter((f: any) => 
       this.selectedFeatures.has(f.getId() as string)
     ).length;
     
-    if (selectedCount === 0) return false;
-    if (selectedCount === landFeatures.length) return true;
-    return true; // Zwischenzustand
+    return selectedCount === landFeatures.length;
+  }
+
+  private updateSelectedAreas() {
+    const selectedIds = Array.from(this.selectedFeatures);
+    this.selectedAreasChange.emit(selectedIds);
   }
 
   selectLand(land: Land) {
@@ -154,20 +159,16 @@ export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy 
     const features = source?.getFeatures() || [];
     const landFeatures = features.filter((f: any) => f.get('land') === land.id);
     
-    const currentState = this.getLandSelectionState(land);
-    
-    // Zyklus: false -> true -> null (teilweise) -> false
-    if (currentState === false || currentState === null) {
-      landFeatures.forEach((f: any) => {
+    landFeatures.forEach((f: any) => {
+      if (land.checked) {
         this.selectedFeatures.add(f.getId() as string);
-      });
-    } else {
-      landFeatures.forEach((f: any) => {
+      } else {
         this.selectedFeatures.delete(f.getId() as string);
-      });
-    }
+      }
+    });
     
     this.vectorLayer?.changed();
+    this.updateSelectedAreas();
   }
 
   isLandSelected(land: Land): boolean {

@@ -64,5 +64,20 @@
             "LANDKREIS": "Landkreis",
             "LAND": "Land"
         }
+    },
+    "PROJECT_WIZARD": {
+        "CREATE_NEW_PROJECT": "Neues Projekt erstellen",
+        "SELECT_ACTIVITIES": "Wählen Sie die relevanten Aktivitäten aus",
+        "CREATE_PROJECT": "Projekt erstellen",
+        "PROJECT_NAME": "Projektname",
+        "DESCRIPTION": "Beschreibung",
+        "PROJECT_SETTINGS": "Projekteinstellungen",
+        "MAKE_PUBLIC": "Projekt öffentlich machen",
+        "ALLOW_SHARING": "Teilen des Projekts erlauben",
+        "SEND_EMAIL": "E-Mail nach Fertigstellung senden",
+        "LOAD_AREAS_ON_MAP": "Berechnete Gemeinden direkt auf Karte laden",
+        "ERRORS": {
+            "NAME_REQUIRED": "Bitte geben Sie einen Projektnamen ein."
+        }
     }
 } 

@@ -64,5 +64,20 @@
             "LANDKREIS": "Landkreis",
             "LAND": "Land"
         }
+    },
+    "PROJECT_WIZARD": {
+        "CREATE_NEW_PROJECT": "Create New Project",
+        "SELECT_ACTIVITIES": "Select relevant activities",
+        "CREATE_PROJECT": "Create Project",
+        "PROJECT_NAME": "Project Name",
+        "DESCRIPTION": "Description",
+        "PROJECT_SETTINGS": "Project Settings",
+        "MAKE_PUBLIC": "Make Project Public",
+        "ALLOW_SHARING": "Allow Sharing",
+        "SEND_EMAIL": "Send Email after Completion",
+        "LOAD_AREAS_ON_MAP": "Load calculated municipalities directly on map",
+        "ERRORS": {
+            "NAME_REQUIRED": "Please enter a project name."
+        }
     }
 } 

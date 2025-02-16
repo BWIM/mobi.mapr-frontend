@@ -10,11 +10,10 @@
                         <p-checkbox
                             [value]="land"
                             [id]="'land-' + land.name"
-
+                            [binary]="true"
                             [indeterminate]="isLandIndeterminate(land)"
-                            
-                            (onChange)="selectLand(land)"
-                            [ngModel]="getLandSelectionState(land)">
+                            [(ngModel)]="land.checked"
+                            (onChange)="selectLand(land)">
                         </p-checkbox>
                         <label [for]="'land-' + land.name" class="ml-2 cursor-pointer">
                             {{land.name}}

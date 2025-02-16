@@ -8,7 +8,7 @@
     [closeOnEscape]="false"
     [closable]="false"
     styleClass="project-wizard-dialog"
-    header="Neues Projekt erstellen">
+    [header]="'PROJECT_WIZARD.CREATE_NEW_PROJECT' | translate">
     
     <div class="flex flex-col h-full">
         <!-- Stepper -->
@@ -20,7 +20,7 @@
         <div class="flex-grow overflow-auto p-4" [formGroup]="projectForm">
             <!-- Schritt 1: Aktivitätsauswahl -->
             <div *ngIf="activeIndex === 0" formGroupName="activities">
-                <h3>Wählen Sie die relevanten Aktivitäten aus</h3>
+                <h3>{{ 'PROJECT_WIZARD.SELECT_ACTIVITIES' | translate }}</h3>
                 <div class="grid w-full">
                     <div *ngFor="let group of groupedActivities" class="col-12 md:col-6 lg:col-4">
                         <p-panel [header]="group.tripPurpose">
@@ -158,97 +158,59 @@
 
             <!-- Schritt 4: Gebiet auswählen -->
             <div *ngIf="activeIndex === 3" formGroupName="area" class="h-[calc(100%-4rem)]">
-                <h2 class="text-2xl mb-4">Gebiet auswählen</h2>
+                <h2 class="text-2xl mb-4">{{ 'PROJECT_WIZARD.CREATE_PROJECT' | translate }}</h2>
                 <div class="h-[calc(100%-2rem)]">
-                    <app-area-selection formControlName="selectedArea"></app-area-selection>
+                    <app-area-selection (selectedAreasChange)="onAreaSelectionChange($event)"></app-area-selection>
                 </div>
             </div>
 
 
             <!-- Schritt 5: Zusammenfassung -->
             <div *ngIf="activeIndex === 4" formGroupName="summary" class="animate-fadeIn">
-                <h2 class="text-2xl mb-4">Projekt erstellen</h2>
+                <h2 class="text-2xl mb-4">{{ 'PROJECT_WIZARD.CREATE_PROJECT' | translate }}</h2>
                 
                 <!-- Projektinformationen -->
                 <div class="grid grid-cols-1 gap-4 mb-8">
                     <div class="field">
-                        <label for="name" class="block mb-2">Projektname *</label>
-                        <input id="name" type="text" pInputText formControlName="name" class="w-full">
+                        <label for="name" class="block mb-2">{{ 'PROJECT_WIZARD.PROJECT_NAME' | translate }} *</label>
+                        <input id="name" type="text" pInputText formControlName="name" class="w-full border rounded-md p-2" placeholder="Name" maxlength="128">
                         <small class="text-red-500" *ngIf="projectForm.get('summary.name')?.errors?.['required'] && projectForm.get('summary.name')?.touched">
-                            Bitte geben Sie einen Projektnamen ein.
+                            {{ 'PROJECT_WIZARD.ERRORS.NAME_REQUIRED' | translate }}
                         </small>
                     </div>
                     <div class="field">
-                        <label for="description" class="block mb-2">Beschreibung</label>
-                        <textarea id="description" pInputTextarea formControlName="description" class="w-full" rows="4"></textarea>
+                        <label for="description" class="block mb-2">{{ 'PROJECT_WIZARD.DESCRIPTION' | translate }}</label>
+                        <textarea id="description" pInputTextarea formControlName="description" class="w-full border rounded-md p-2" rows="4" maxlength="256"></textarea>
                     </div>
                 </div>
 
                 <!-- Projekteinstellungen -->
                 <div class="bg-gray-50 p-4 rounded-lg mb-8">
-                    <h3 class="font-bold mb-4">Projekteinstellungen</h3>
+                    <h3 class="font-bold mb-4">{{ 'PROJECT_WIZARD.PROJECT_SETTINGS' | translate }}</h3>
                     <div class="flex flex-col gap-3">
                         <div class="field-checkbox">
                             <p-checkbox
-                                [inputId]="'isPublic'"
-                                [name]="'isPublic'"
+                                [inputId]="'sendEmail'"
+                                [name]="'sendEmail'"
                                 [binary]="true"
-                                [ariaLabel]="'Projekt öffentlich machen'"
-                                formControlName="isPublic">
+                                [ariaLabel]="'PROJECT_WIZARD.SEND_EMAIL' | translate"
+                                formControlName="sendEmail">
                             </p-checkbox>
-                            <label [for]="'isPublic'" class="ml-2">Projekt öffentlich machen</label>
+                            <label [for]="'sendEmail'" class="ml-2">{{ 'PROJECT_WIZARD.SEND_EMAIL' | translate }}</label>
                         </div>
                         <div class="field-checkbox">
                             <p-checkbox
-                                [inputId]="'allowSharing'"
-                                [name]="'allowSharing'"
+                                [inputId]="'loadAreasOnMap'"
+                                [name]="'loadAreasOnMap'"
                                 [binary]="true"
-                                [ariaLabel]="'Teilen des Projekts erlauben'"
-                                formControlName="allowSharing">
+                                [ariaLabel]="'PROJECT_WIZARD.LOAD_AREAS_ON_MAP' | translate"
+                                formControlName="loadAreasOnMap">
                             </p-checkbox>
-                            <label [for]="'allowSharing'" class="ml-2">Teilen des Projekts erlauben</label>
+                            <label [for]="'loadAreasOnMap'" class="ml-2">{{ 'PROJECT_WIZARD.LOAD_AREAS_ON_MAP' | translate }}</label>
                         </div>
                     </div>
                 </div>
 
-                <!-- Zusammenfassung der Auswahl -->
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <h3 class="font-bold mb-4">Ausgewählte Elemente</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <h4 class="font-semibold mb-2">Aktivitäten</h4>
-                            <ul class="list-disc list-inside">
-                                <li *ngFor="let activity of projectForm.get('activities.selectedActivities')?.value">
-                                    {{activity.display_name || activity.name}}
-                                </li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold mb-2">Personas</h4>
-                            <ul class="list-disc list-inside">
-                                <li *ngFor="let persona of projectForm.get('personas.selectedPersonas')?.value">
-                                    {{persona.display_name || persona.name}}
-                                </li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold mb-2">Modi</h4>
-                            <ul class="list-disc list-inside">
-                                <li *ngFor="let mode of projectForm.get('modes.selectedModes')?.value">
-                                    {{mode.display_name || mode.name}}
-                                </li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="font-semibold mb-2">Ausgewählte Gebiete</h4>
-                            <ul class="list-disc list-inside">
-                                <li *ngFor="let area of projectForm.get('area.selectedArea')?.value">
-                                    {{area.display_name || area.name}}
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 

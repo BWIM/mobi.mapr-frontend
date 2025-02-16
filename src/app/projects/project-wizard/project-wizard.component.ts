@@ -13,6 +13,8 @@ import { GroupedActivities } from '../../services/interfaces/activity.interface'
 import { Persona } from '../../services/interfaces/persona.interface';
 import { Mode } from '../../services/interfaces/mode.interface';
 import { AreaSelectionComponent } from './area-selection/area-selection.component';
+import { TranslateService } from '@ngx-translate/core';
+
 
 @Component({
   selector: 'app-project-wizard',
@@ -30,6 +32,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   personas: Persona[] = [];
   modes: Mode[] = [];
   private subscription: Subscription;
+  selectedAreaIds: string[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -38,7 +41,8 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     private personasService: PersonasService,
     private modesService: ModesService,
     private router: Router,
-    private wizardService: ProjectWizardService
+    private wizardService: ProjectWizardService,
+    private translate: TranslateService
   ) {
     this.subscription = this.wizardService.visible$.subscribe(
       visible => this.visible = visible
@@ -66,7 +70,9 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         name: ['', Validators.required],
         description: [''],
         isPublic: [false],
-        allowSharing: [false]
+        allowSharing: [false],
+        sendEmail: [true],
+        loadAreasOnMap: [true]
       })
     });
   }
@@ -176,7 +182,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
       case 2:
         return this.projectForm.get('modes.selectedModes')?.value?.length > 0;
       case 3:
-        return this.projectForm.get('area.selectedArea')?.value?.length > 0;
+        return this.selectedAreaIds.length > 0;
       case 4:
         return this.projectForm.get('summary.name')?.value?.length > 0;
       default:
@@ -224,6 +230,11 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     this.projectForm.get('modes.selectedModes')?.setValue([]);
   }
 
+  onAreaSelectionChange(areaIds: string[]) {
+    this.selectedAreaIds = areaIds;
+    this.projectForm.get('area.selectedArea')?.setValue(areaIds);
+  }
+
   onSubmit() {
     if (this.projectForm.valid) {
       const projectData = {
@@ -231,21 +242,26 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         description: this.projectForm.get('summary.description')?.value,
         is_public: this.projectForm.get('summary.isPublic')?.value,
         allow_sharing: this.projectForm.get('summary.allowSharing')?.value,
+        send_email: this.projectForm.get('summary.sendEmail')?.value,
+        load_areas_on_map: this.projectForm.get('summary.loadAreasOnMap')?.value,
         activities: this.projectForm.get('activities.selectedActivities')?.value.map((a: any) => a.id),
         personas: this.projectForm.get('personas.selectedPersonas')?.value.map((p: any) => p.id),
         modes: this.projectForm.get('modes.selectedModes')?.value.map((m: any) => m.id),
-        areas: this.projectForm.get('area.selectedArea')?.value
+        areas: this.selectedAreaIds
       };
 
-      this.projectsService.createProject(projectData).subscribe({
-        next: (response) => {
-          this.hide();
-          this.router.navigate(['/projects']);
-        },
-        error: (error) => {
-          console.error('Fehler beim Erstellen des Projekts:', error);
-        }
-      });
+      console.log(projectData);
+
+    //   this.projectsService.createProject(projectData).subscribe({
+    //     next: (response) => {
+    //       this.hide();
+    //       this.router.navigate(['/projects']);
+    //     },
+    //     error: (error) => {
+    //       console.error('Fehler beim Erstellen des Projekts:', error);
+    //     }
+    //   });
+      this.hide();
     }
   }
 } 
