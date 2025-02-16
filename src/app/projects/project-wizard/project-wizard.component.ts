@@ -14,6 +14,7 @@ import { Persona } from '../../services/interfaces/persona.interface';
 import { Mode } from '../../services/interfaces/mode.interface';
 import { AreaSelectionComponent } from './area-selection/area-selection.component';
 import { TranslateService } from '@ngx-translate/core';
+import { ProjectsReloadService } from '../projects-reload.service';
 
 
 @Component({
@@ -42,7 +43,8 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     private modesService: ModesService,
     private router: Router,
     private wizardService: ProjectWizardService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private reloadService: ProjectsReloadService
   ) {
     this.subscription = this.wizardService.visible$.subscribe(
       visible => this.visible = visible
@@ -240,28 +242,25 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
       const projectData = {
         name: this.projectForm.get('summary.name')?.value,
         description: this.projectForm.get('summary.description')?.value,
-        is_public: this.projectForm.get('summary.isPublic')?.value,
-        allow_sharing: this.projectForm.get('summary.allowSharing')?.value,
-        send_email: this.projectForm.get('summary.sendEmail')?.value,
-        load_areas_on_map: this.projectForm.get('summary.loadAreasOnMap')?.value,
-        activities: this.projectForm.get('activities.selectedActivities')?.value.map((a: any) => a.id),
-        personas: this.projectForm.get('personas.selectedPersonas')?.value.map((p: any) => p.id),
-        modes: this.projectForm.get('modes.selectedModes')?.value.map((m: any) => m.id),
-        areas: this.selectedAreaIds
+        mail: this.projectForm.get('summary.sendEmail')?.value,
+        infos: this.projectForm.get('summary.loadAreasOnMap')?.value,
+        activities: this.projectForm.get('activities.selectedActivities')?.value.map((a: any) => a.id).join(','),
+        personas: this.projectForm.get('personas.selectedPersonas')?.value.map((p: any) => p.id).join(','),
+        modes: this.projectForm.get('modes.selectedModes')?.value.map((m: any) => m.id).join(','),
+        landkreise: this.selectedAreaIds.join(',')
       };
 
       console.log(projectData);
 
-    //   this.projectsService.createProject(projectData).subscribe({
-    //     next: (response) => {
-    //       this.hide();
-    //       this.router.navigate(['/projects']);
-    //     },
-    //     error: (error) => {
-    //       console.error('Fehler beim Erstellen des Projekts:', error);
-    //     }
-    //   });
-      this.hide();
+      this.projectsService.createProject(projectData).subscribe({
+        next: (response) => {
+          this.hide();
+          this.reloadService.triggerReload();
+        },
+        error: (error) => {
+          console.error('Fehler beim Erstellen des Projekts:', error);
+        }
+      });
     }
   }
 } 

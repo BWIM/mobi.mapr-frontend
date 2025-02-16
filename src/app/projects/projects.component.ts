@@ -12,10 +12,16 @@ import { ProjectWizardService } from './project-wizard/project-wizard.service';
 import { environment } from '../../environments/environment';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebsocketService } from '../services/websocket.service';
+import { ProjectsReloadService } from './projects-reload.service';
 
 interface GroupedProjects {
   group: ProjectGroup;
   projects: Project[];
+}
+
+interface WebsocketResult {
+  type: string;
+  result: ProjectProgress;
 }
 
 interface ProjectProgress {
@@ -44,7 +50,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   ungroupedProjects: Project[] = [];
   items: MenuItem[] = [];
   selectedProject?: Project;
-  private websocketConnections: Map<number, WebSocketSubject<ProjectProgress>> = new Map();
+  private websocketConnections: Map<number, WebSocketSubject<WebsocketResult>> = new Map();
 
   constructor(
     private projectsService: ProjectsService,
@@ -53,13 +59,19 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     private mapService: MapService,
     private router: Router,
     private wizardService: ProjectWizardService,
-    private websocketService: WebsocketService
+    private websocketService: WebsocketService,
+    private reloadService: ProjectsReloadService
   ) {
     this.initializeMapActions();
     
     // Übersetzungen neu laden, wenn sich die Sprache ändert
     this.translate.onLangChange.subscribe(() => {
       this.initializeMapActions();
+    });
+
+    // Auf Reload-Events reagieren
+    this.reloadService.reload$.subscribe(() => {
+      this.loadData();
     });
   }
 
@@ -114,7 +126,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     this.loadData();
   }
 
-  private loadData(): void {
+  loadData(): void {
     this.loading = true;
     
     this.projectsService.getProjectGroups()
@@ -218,34 +230,35 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   }
 
   private setupWebsocketForProject(project: Project): void {
-    if (this.getProgress(project) >= 100) return;
+    if (project.finished) return;
     
     if (this.websocketConnections.has(project.id)) return;
     
-    const wsSubject = this.websocketService.connect<ProjectProgress>(
+    const wsSubject = this.websocketService.connect<WebsocketResult>(
       `${environment.wsURL}/projects/?project=${project.id}`
     );
 
     this.websocketConnections.set(project.id, wsSubject);
 
     wsSubject.subscribe({
-      next: (progress: ProjectProgress) => {
-        if (progress.feature) {
-          this.mapService.updateFeatures([progress.feature]);
+      next: (result: WebsocketResult) => {
+        console.log(result);
+        if (result.result.feature) {
+          this.mapService.updateFeatures([result.result.feature]);
         }
         
-        const projectToUpdate = this.findProjectById(progress.project);
+        const projectToUpdate = this.findProjectById(result.result.project);
         if (projectToUpdate) {
-          projectToUpdate.calculated = progress.calculated;
-          projectToUpdate.areas = progress.total;
+          projectToUpdate.calculated = result.result.calculated;
+          projectToUpdate.areas = result.result.total;
         }
 
-        if (progress.finished) {
-          this.closeWebsocketConnection(progress.project);
+        if (result.result.finished) {
+          this.closeWebsocketConnection(result.result.project);
         }
       },
       error: (error) => {
-        console.error(`WebSocket error for project ${project.id}:`, error);
+        console.error(`WebSocket Fehler für Projekt ${project.id}:`, error);
         this.closeWebsocketConnection(project.id);
       }
     });
@@ -279,4 +292,5 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     });
     this.websocketConnections.clear();
   }
+
 }

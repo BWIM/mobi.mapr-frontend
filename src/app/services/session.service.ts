@@ -35,6 +35,6 @@ export class SessionService {
   }
 
   getRequestParameters(): string {
-    return `session=${this.getSessionId()}&lang=${this.getCurrentLanguage()}`;
+    return `sessionID=${this.getSessionId()}&lang=${this.getCurrentLanguage()}`;
   }
 } 
