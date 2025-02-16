@@ -3,6 +3,9 @@ import { SharedModule } from '../shared/shared.module';
 import { ProjectsComponent } from '../projects/projects.component';
 import { MapComponent } from '../map/map.component';
 import { ProjectWizardComponent } from '../projects/project-wizard/project-wizard.component';
+import { DetailsSidebarComponent } from '../details-sidebar/details-sidebar.component';
+import { LoadingSpinnerComponent } from '../shared/loading-spinner/loading-spinner.component';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -10,7 +13,9 @@ import { ProjectWizardComponent } from '../projects/project-wizard/project-wizar
     SharedModule,
     ProjectsComponent,
     MapComponent,
-    ProjectWizardComponent
+    ProjectWizardComponent,
+    DetailsSidebarComponent,
+    LoadingSpinnerComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
@@ -18,8 +23,10 @@ import { ProjectWizardComponent } from '../projects/project-wizard/project-wizar
 export class DashboardComponent implements OnInit {
   detailsVisible: boolean = false;
   showGlowEffect: boolean = true;
-  isPinned: boolean = true;
-  sidebarExpanded: boolean = true;
+  isLeftPinned: boolean = false;
+  leftSidebarExpanded: boolean = false;
+  isRightPinned: boolean = false;
+  rightSidebarExpanded: boolean = false;
 
   constructor() {}
 
@@ -27,28 +34,48 @@ export class DashboardComponent implements OnInit {
     // Entferne den Timer - der Effekt bleibt aktiv
   }
 
-  showSidebar() {
-    this.sidebarExpanded = true;
+  showLeftSidebar() {
+    this.leftSidebarExpanded = true;
   }
 
-  togglePin() {
-    this.isPinned = !this.isPinned;
+  showRightSidebar() {
+    this.rightSidebarExpanded = true;
+  }
+
+  toggleLeftPin() {
+    this.isLeftPinned = !this.isLeftPinned;
     this.showGlowEffect = false;
   }
 
-  showDetails() {
-    this.detailsVisible = !this.detailsVisible;
+
+  toggleRightPin() {
+    this.isRightPinned = !this.isRightPinned;
+    this.showGlowEffect = false;
   }
 
-  mouseLeave() {
-    if (!this.isPinned) {
-      this.sidebarExpanded = false;
+
+  pinRightSidebar() {
+    this.rightSidebarExpanded = true;
+    this.showGlowEffect = false;
+    this.isRightPinned = true;
+  }
+
+  pinLeftSidebar() {
+    this.leftSidebarExpanded = true;
+    this.showGlowEffect = false;
+    this.isLeftPinned = true;
+  }
+
+  mouseRightLeave() {
+    if (!this.isRightPinned) {
+      this.rightSidebarExpanded = false;
     }
   }
 
-  pinSidebar() {
-    this.sidebarExpanded = true;
-    this.showGlowEffect = false;
-    this.isPinned = true;
+  mouseLeftLeave() {
+    if (!this.isLeftPinned) {
+      this.leftSidebarExpanded = false;
+    }
   }
+
 }

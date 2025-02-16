@@ -13,6 +13,7 @@ import { environment } from '../../environments/environment';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebsocketService } from '../services/websocket.service';
 import { ProjectsReloadService } from './projects-reload.service';
+import { LoadingService } from '../services/loading.service';
 
 interface GroupedProjects {
   group: ProjectGroup;
@@ -44,7 +45,6 @@ interface ProjectProgress {
 export class ProjectsComponent implements OnInit, OnDestroy {
   @Output() projectAction = new EventEmitter<void>();
   
-  loading = false;
   projectGroups: ProjectGroup[] = [];
   groupedProjects: GroupedProjects[] = [];
   ungroupedProjects: Project[] = [];
@@ -60,7 +60,8 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     private router: Router,
     private wizardService: ProjectWizardService,
     private websocketService: WebsocketService,
-    private reloadService: ProjectsReloadService
+    private reloadService: ProjectsReloadService,
+    private loadingService: LoadingService
   ) {
     this.initializeMapActions();
     
@@ -127,10 +128,10 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   }
 
   loadData(): void {
-    this.loading = true;
+    this.loadingService.startLoading();
     
     this.projectsService.getProjectGroups()
-      .pipe(finalize(() => this.loading = false))
+      .pipe(finalize(() => this.loadingService.stopLoading()))
       .subscribe({
         next: (response) => {
           this.projectGroups = response.results;
@@ -147,10 +148,10 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   }
 
   private loadProjects(): void {
-    this.loading = true;
+    this.loadingService.startLoading();
     
     this.projectsService.getProjects()
-      .pipe(finalize(() => this.loading = false))
+      .pipe(finalize(() => this.loadingService.stopLoading()))
       .subscribe({
         next: (response) => {
           const projects = response.results;
@@ -205,10 +206,10 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
   showResults(project: Project | undefined, maptype: string): void {
     if (!project) return;
-    this.loading = true;
+    this.loadingService.startLoading();
     
     this.projectsService.getProjectResults(project.id, maptype)
-      .pipe(finalize(() => this.loading = false))
+      .pipe(finalize(() => this.loadingService.stopLoading()))
       .subscribe({
         next: (results) => {
           this.mapService.resetMap();
