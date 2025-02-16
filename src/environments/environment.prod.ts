@@ -1,4 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://mapr.mobi/api'
+  apiUrl: 'https://mapr.mobi/api',
+  wsURL: 'wss://mapr.mobi/ws'
 }; 

@@ -41,7 +41,6 @@ export class DashboardComponent implements OnInit {
   }
 
   mouseLeave() {
-    console.log('mouseLeave');
     if (!this.isPinned) {
       this.sidebarExpanded = false;
     }

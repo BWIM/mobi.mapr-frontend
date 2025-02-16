@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, ViewChild } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, ViewChild, OnDestroy } from '@angular/core';
 import { ProjectsService } from './projects.service';
 import { Project, ProjectGroup } from './project.interface';
 import { MessageService } from 'primeng/api';
@@ -9,10 +9,22 @@ import { MapService } from '../map/map.service';
 import { MenuItem } from 'primeng/api';
 import { Router } from '@angular/router';
 import { ProjectWizardService } from './project-wizard/project-wizard.service';
+import { environment } from '../../environments/environment';
+import { WebSocketSubject } from 'rxjs/webSocket';
+import { WebsocketService } from '../services/websocket.service';
 
 interface GroupedProjects {
   group: ProjectGroup;
   projects: Project[];
+}
+
+interface ProjectProgress {
+  project: number;
+  progress: number;
+  calculated: number;
+  finished: boolean;
+  total: number;
+  feature: any;
 }
 
 @Component({
@@ -23,7 +35,7 @@ interface GroupedProjects {
   standalone: true,
   imports: [SharedModule]
 })
-export class ProjectsComponent implements OnInit {
+export class ProjectsComponent implements OnInit, OnDestroy {
   @Output() projectAction = new EventEmitter<void>();
   
   loading = false;
@@ -32,6 +44,7 @@ export class ProjectsComponent implements OnInit {
   ungroupedProjects: Project[] = [];
   items: MenuItem[] = [];
   selectedProject?: Project;
+  private websocketConnections: Map<number, WebSocketSubject<ProjectProgress>> = new Map();
 
   constructor(
     private projectsService: ProjectsService,
@@ -39,7 +52,8 @@ export class ProjectsComponent implements OnInit {
     private translate: TranslateService,
     private mapService: MapService,
     private router: Router,
-    private wizardService: ProjectWizardService
+    private wizardService: ProjectWizardService,
+    private websocketService: WebsocketService
   ) {
     this.initializeMapActions();
     
@@ -137,6 +151,9 @@ export class ProjectsComponent implements OnInit {
 
           // Nicht gruppierte Projekte sammeln
           this.ungroupedProjects = projects.filter(p => !p.projectgroup);
+
+          // Websockets für unvollständige Projekte einrichten
+          this.setupWebsocketsForAllProjects();
         },
         error: () => {
           this.messageService.add({
@@ -198,5 +215,68 @@ export class ProjectsComponent implements OnInit {
 
   showProjectWizard(): void {
     this.wizardService.show();
+  }
+
+  private setupWebsocketForProject(project: Project): void {
+    if (this.getProgress(project) >= 100) return;
+    
+    if (this.websocketConnections.has(project.id)) return;
+    
+    const wsSubject = this.websocketService.connect<ProjectProgress>(
+      `${environment.wsURL}/projects/?project=${project.id}`
+    );
+
+    this.websocketConnections.set(project.id, wsSubject);
+
+    wsSubject.subscribe({
+      next: (progress: ProjectProgress) => {
+        if (progress.feature) {
+          this.mapService.updateFeatures([progress.feature]);
+        }
+        
+        const projectToUpdate = this.findProjectById(progress.project);
+        if (projectToUpdate) {
+          projectToUpdate.calculated = progress.calculated;
+          projectToUpdate.areas = progress.total;
+        }
+
+        if (progress.finished) {
+          this.closeWebsocketConnection(progress.project);
+        }
+      },
+      error: (error) => {
+        console.error(`WebSocket error for project ${project.id}:`, error);
+        this.closeWebsocketConnection(project.id);
+      }
+    });
+  }
+
+  private findProjectById(projectId: number): Project | undefined {
+    for (const group of this.groupedProjects) {
+      const project = group.projects.find(p => p.id === projectId);
+      if (project) return project;
+    }
+    return this.ungroupedProjects.find(p => p.id === projectId);
+  }
+
+  private closeWebsocketConnection(projectId: number): void {
+    const connection = this.websocketConnections.get(projectId);
+    if (connection) {
+      connection.complete();
+      this.websocketConnections.delete(projectId);
+    }
+  }
+
+  private setupWebsocketsForAllProjects(): void {
+    [...this.groupedProjects.flatMap(g => g.projects), ...this.ungroupedProjects]
+      .forEach(project => this.setupWebsocketForProject(project));
+  }
+
+  ngOnDestroy(): void {
+    // Alle Websocket-Verbindungen schließen
+    this.websocketConnections.forEach((connection) => {
+      connection.complete();
+    });
+    this.websocketConnections.clear();
   }
 }
