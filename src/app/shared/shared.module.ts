@@ -24,6 +24,8 @@ import { StepsModule } from 'primeng/steps';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ChipModule } from 'primeng/chip';
 import { DropdownModule } from 'primeng/dropdown';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { TabsModule } from 'primeng/tabs';
 
 @NgModule({
   imports: [
@@ -49,8 +51,9 @@ import { DropdownModule } from 'primeng/dropdown';
     StepsModule,
     CheckboxModule,
     ChipModule,
-    DropdownModule
-  
+    DropdownModule,
+    ConfirmDialogModule,
+    TabsModule
   ],
   exports: [
     CommonModule,
@@ -75,7 +78,9 @@ import { DropdownModule } from 'primeng/dropdown';
     StepsModule,
     CheckboxModule,
     ChipModule,
-    DropdownModule
+    DropdownModule,
+    ConfirmDialogModule,
+    TabsModule
   ],
   providers: [MessageService]
 })
