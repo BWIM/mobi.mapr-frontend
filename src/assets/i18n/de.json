@@ -88,5 +88,13 @@
     },
     "EDIT": {
         "TITLE": "Projekt bearbeiten"
+    },
+    "DETAILS": {
+        "FIELDS": {
+            "OVERVIEW": "Übersicht",
+            "PERSONAS": "Personas",
+            "ACTIVITIES": "Aktivitäten",
+            "MODES": "Modi"
+        }
     }
 } 
