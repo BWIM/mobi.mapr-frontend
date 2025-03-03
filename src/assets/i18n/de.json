@@ -43,7 +43,8 @@
             "CANCEL": "Abbrechen",
             "EDIT": "Bearbeiten",
             "DELETE": "Löschen",
-            "LABEL": "Aktionen"
+            "LABEL": "Aktionen",
+            "CLOSE": "Schließen"
         },
         "MESSAGES": {
             "ERROR": {
@@ -100,5 +101,28 @@
             "ACTIVITIES": "Aktivitäten",
             "MODES": "Modi"
         }
+    },
+    "SIDEBAR": {
+        "TITLE": "Details",
+        "DESCRIPTION": "Beschreibung",
+        "STATUS": "Status",
+        "NO_SELECTION": "Keine Auswahl",
+        "CLICK_HINT": "Klicken Sie auf eine Karte, um Details anzuzeigen"
+    },
+    "ANALYZE": {
+        "PERSONA": {
+            "TITLE": "Persona",
+            "NO_DATA": "Keine Daten vorhanden"
+        },
+        "ACTIVITIES": {
+            "TITLE": "Aktivitäten",
+            "NO_DATA": "Keine Daten vorhanden"
+        },
+        "MODES": {
+            "TITLE": "Modi",
+            "NO_DATA": "Keine Daten vorhanden"
+        },
+        "START": "Start",
+        "END": "Ende"
     }
 } 

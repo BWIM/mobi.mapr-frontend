@@ -5,11 +5,12 @@ import { ButtonModule } from 'primeng/button';
 import { TranslateService } from '@ngx-translate/core';
 import { SharedModule } from './shared/shared.module';
 import { ProjectWizardComponent } from './projects/project-wizard/project-wizard.component';
+import { AnalyzeComponent } from './analyze/analyze.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, MenubarModule, ButtonModule, SharedModule, ProjectWizardComponent],
+  imports: [RouterOutlet, MenubarModule, ButtonModule, SharedModule, ProjectWizardComponent, AnalyzeComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

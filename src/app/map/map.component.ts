@@ -14,7 +14,8 @@ import { MapService } from './map.service';
 import { Subscription } from 'rxjs';
 import { LegendComponent } from '../legend/legend.component';
 import { CommonModule } from '@angular/common';
-import { defaults as defaultControls, Zoom } from 'ol/control';
+import { FeatureSelectionService } from '../shared/services/feature-selection.service';
+import { AnalyzeService } from '../analyze/analyze.service';
 
 @Component({
   selector: 'app-map',
@@ -30,7 +31,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private lastClickedFeature: Feature | null = null;
   private subscriptions: Subscription[] = [];
 
-  constructor(private mapService: MapService) {}
+  constructor(
+    private mapService: MapService,
+    private featureSelectionService: FeatureSelectionService,
+    private analyzeService: AnalyzeService
+  ) {}
 
   ngAfterViewInit() {
     this.initMap();
@@ -89,6 +94,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private setupMapInteractions(): void {
     // Click-Handler für Features
     this.map.on('click', (event) => {
+      let clickedFeature: Feature | null = null;
+      
       this.map.forEachFeatureAtPixel(event.pixel, (feature) => {
         if (feature instanceof Feature) {
           if (this.lastClickedFeature) {
@@ -96,8 +103,15 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           }
           this.highlightFeature(feature as Feature<Geometry>);
           this.lastClickedFeature = feature;
+          clickedFeature = feature;
+          
+          // Öffne Analyse-Dialog wenn ein Feature geklickt wurde
+          this.analyzeService.setSelectedFeature(feature.getId()?.toString() || '');
         }
       });
+
+      // Wenn kein Feature geklickt wurde, setzen wir null
+      this.featureSelectionService.setSelectedFeature(clickedFeature);
     });
 
     // Hover-Effekt für Features

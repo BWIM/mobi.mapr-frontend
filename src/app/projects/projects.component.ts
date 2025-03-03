@@ -14,6 +14,7 @@ import { WebSocketSubject } from 'rxjs/webSocket';
 import { WebsocketService } from '../services/websocket.service';
 import { ProjectsReloadService } from './projects-reload.service';
 import { LoadingService } from '../services/loading.service';
+import { AnalyzeService } from '../analyze/analyze.service';
 
 interface GroupedProjects {
   group: ProjectGroup;
@@ -59,6 +60,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private translate: TranslateService,
     private mapService: MapService,
+    private analyzeService: AnalyzeService,
     private router: Router,
     private wizardService: ProjectWizardService,
     private websocketService: WebsocketService,
@@ -209,6 +211,8 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   showResults(project: Project | undefined, maptype: string): void {
     if (!project) return;
     this.loadingService.startLoading();
+    this.analyzeService.setCurrentProject(project.id.toString());
+    this.analyzeService.setMapType(maptype);
     
     this.projectsService.getProjectResults(project.id, maptype)
       .pipe(finalize(() => this.loadingService.stopLoading()))
@@ -254,6 +258,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         if (projectToUpdate) {
           projectToUpdate.calculated = result.result.calculated;
           projectToUpdate.areas = result.result.total;
+          projectToUpdate.finished = result.result.finished;
         }
 
         if (result.result.finished) {

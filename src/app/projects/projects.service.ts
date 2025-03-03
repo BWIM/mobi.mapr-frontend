@@ -75,4 +75,13 @@ export class ProjectsService {
   getProjectResults(projectId: number, maptype: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/projects/${projectId}/map/?resolution=${maptype}`);
   }
+
+  getProjectDetails(project: string, maptype: string, featureId: string): Observable<any> {
+    const params = new HttpParams()
+      .set('project', project)
+      .set('maptype', maptype)
+      .set('featureId', featureId);
+    
+    return this.http.get(`${this.apiUrl}/projects/details/`, { params });
+  }
 }

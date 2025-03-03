@@ -22,6 +22,7 @@
     "@ngx-translate/http-loader": "^16.0.1",
     "@primeng/themes": "^19.0.6",
     "@tailwindcss/postcss": "^4.0.6",
+    "chart.js": "^4.4.8",
     "ol": "^10.4.0",
     "postcss": "^8.5.2",
     "primeicons": "^7.0.0",

@@ -78,6 +78,9 @@ export class AuthService {
   }
 
   private startRefreshTokenTimer(): void {
+    // Zuerst den alten Timer stoppen, falls einer existiert
+    this.stopRefreshTokenTimer();
+    
     // Token alle 4 Minuten erneuern (bei 5 Minuten Gültigkeit)
     this.refreshTokenTimeout = setInterval(() => {
       this.refreshToken().subscribe();

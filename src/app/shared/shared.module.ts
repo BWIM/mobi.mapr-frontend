@@ -27,6 +27,8 @@ import { DropdownModule } from 'primeng/dropdown';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TabsModule } from 'primeng/tabs';
 import { ToggleButtonModule } from 'primeng/togglebutton';
+import { ChartModule } from 'primeng/chart';
+
 @NgModule({
   imports: [
     CommonModule,
@@ -54,7 +56,8 @@ import { ToggleButtonModule } from 'primeng/togglebutton';
     DropdownModule,
     ConfirmDialogModule,
     TabsModule,
-    ToggleButtonModule
+    ToggleButtonModule,
+    ChartModule
   ],
   exports: [
     CommonModule,
@@ -82,7 +85,8 @@ import { ToggleButtonModule } from 'primeng/togglebutton';
     DropdownModule,
     ConfirmDialogModule,
     TabsModule,
-    ToggleButtonModule
+    ToggleButtonModule,
+    ChartModule
   ],
   providers: [MessageService]
 })

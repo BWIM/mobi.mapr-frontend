@@ -13,7 +13,7 @@ import { LoadingSpinnerComponent } from '../shared/loading-spinner/loading-spinn
     ProjectsComponent,
     MapComponent,
     DetailsSidebarComponent,
-    LoadingSpinnerComponent
+    LoadingSpinnerComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'

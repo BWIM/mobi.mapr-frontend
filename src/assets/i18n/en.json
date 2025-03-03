@@ -43,7 +43,8 @@
             "CANCEL": "Cancel",
             "EDIT": "Edit",
             "DELETE": "Delete",
-            "LABEL": "Actions"
+            "LABEL": "Actions",
+            "CLOSE": "Close"
         },
         "MESSAGES": {
             "ERROR": {
@@ -89,5 +90,18 @@
             "MID": "Activities",
             "NON_MID": "Standard Activities"
         }
+    },
+    "SIDEBAR": {
+        "TITLE": "Details",
+        "DESCRIPTION": "Description",
+        "STATUS": "Status",
+        "NO_SELECTION": "No selection",
+        "CLICK_HINT": "Click on a map to display details"
+    },
+    "ANALYZE": {
+        "PERSONA": {
+            "TITLE": "Persona",
+            "NO_DATA": "No data available"
+        }
     }
-} 
+}   
