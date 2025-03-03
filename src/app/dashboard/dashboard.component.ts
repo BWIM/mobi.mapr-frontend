@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { SharedModule } from '../shared/shared.module';
 import { ProjectsComponent } from '../projects/projects.component';
 import { MapComponent } from '../map/map.component';
-import { ProjectWizardComponent } from '../projects/project-wizard/project-wizard.component';
 import { DetailsSidebarComponent } from '../details-sidebar/details-sidebar.component';
 import { LoadingSpinnerComponent } from '../shared/loading-spinner/loading-spinner.component';
 
@@ -13,7 +12,6 @@ import { LoadingSpinnerComponent } from '../shared/loading-spinner/loading-spinn
     SharedModule,
     ProjectsComponent,
     MapComponent,
-    ProjectWizardComponent,
     DetailsSidebarComponent,
     LoadingSpinnerComponent
   ],
