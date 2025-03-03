@@ -26,7 +26,7 @@ import { ChipModule } from 'primeng/chip';
 import { DropdownModule } from 'primeng/dropdown';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TabsModule } from 'primeng/tabs';
-
+import { ToggleButtonModule } from 'primeng/togglebutton';
 @NgModule({
   imports: [
     CommonModule,
@@ -53,7 +53,8 @@ import { TabsModule } from 'primeng/tabs';
     ChipModule,
     DropdownModule,
     ConfirmDialogModule,
-    TabsModule
+    TabsModule,
+    ToggleButtonModule
   ],
   exports: [
     CommonModule,
@@ -80,7 +81,8 @@ import { TabsModule } from 'primeng/tabs';
     ChipModule,
     DropdownModule,
     ConfirmDialogModule,
-    TabsModule
+    TabsModule,
+    ToggleButtonModule
   ],
   providers: [MessageService]
 })

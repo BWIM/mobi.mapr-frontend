@@ -23,15 +23,14 @@ import { LoadingSpinnerComponent } from '../shared/loading-spinner/loading-spinn
 export class DashboardComponent implements OnInit {
   detailsVisible: boolean = false;
   showGlowEffect: boolean = true;
-  isLeftPinned: boolean = false;
-  leftSidebarExpanded: boolean = false;
+  isLeftPinned: boolean = true;
+  leftSidebarExpanded: boolean = true;
   isRightPinned: boolean = false;
   rightSidebarExpanded: boolean = false;
 
   constructor() {}
 
   ngOnInit() {
-    // Entferne den Timer - der Effekt bleibt aktiv
   }
 
   showLeftSidebar() {

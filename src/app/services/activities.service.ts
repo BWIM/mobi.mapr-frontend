@@ -16,6 +16,7 @@ interface PaginatedResponse<T> {
 })
 export class ActivitiesService {
   private apiUrl = environment.apiUrl;
+  private allActivities: Activity[] = [];
 
   constructor(private http: HttpClient) { }
 
@@ -27,29 +28,41 @@ export class ActivitiesService {
     return this.http.get<PaginatedResponse<Activity>>(`${this.apiUrl}/categories/`, { params });
   }
 
-  getGroupedActivities(): Observable<GroupedActivities[]> {
-    return this.getActivities().pipe(
-      map(response => {
-        // Filtere zunächst nach mid=true und gruppiere dann nach Wegezweck
-        const grouped = response.results
-          .filter(activity => activity.mid === true)
-          .reduce((groups: { [key: string]: Activity[] }, activity) => {
-            const wegezweckId = activity.wegezweck || 'undefined';
-            if (!groups[wegezweckId]) {
-              groups[wegezweckId] = [];
-            }
-            groups[wegezweckId].push(activity);
-            return groups;
-          }, {});
+  getGroupedActivities(showMid: boolean = false): Observable<GroupedActivities[]> {
+    // Wenn wir noch keine Aktivitäten haben, laden wir sie
+    if (this.allActivities.length === 0) {
+      return this.getActivities().pipe(
+        map(response => {
+          this.allActivities = response.results;
+          return this.groupAndFilterActivities(showMid);
+        })
+      );
+    }
 
-        // Konvertiere in das gewünschte Format und sortiere
-        return Object.entries(grouped)
-          .map(([_, activities]) => ({
-            tripPurpose: activities[0].wegezweck!,
-            activities: activities.sort((a, b) => a.name.localeCompare(b.name))
-          }))
-          .sort((a, b) => a.tripPurpose.localeCompare(b.tripPurpose));
-      })
-    );
+    // Wenn wir bereits Aktivitäten haben, verwenden wir diese
+    return new Observable(observer => {
+      observer.next(this.groupAndFilterActivities(showMid));
+      observer.complete();
+    });
+  }
+
+  private groupAndFilterActivities(showMid: boolean): GroupedActivities[] {
+    const grouped = this.allActivities
+      .filter(activity => activity.mid === showMid)
+      .reduce((groups: { [key: string]: Activity[] }, activity) => {
+        const wegezweckId = activity.wegezweck || 'undefined';
+        if (!groups[wegezweckId]) {
+          groups[wegezweckId] = [];
+        }
+        groups[wegezweckId].push(activity);
+        return groups;
+      }, {});
+
+    return Object.entries(grouped)
+      .map(([_, activities]) => ({
+        tripPurpose: activities[0].wegezweck!,
+        activities: activities.sort((a, b) => a.name.localeCompare(b.name))
+      }))
+      .sort((a, b) => a.tripPurpose.localeCompare(b.tripPurpose));
   }
 } 

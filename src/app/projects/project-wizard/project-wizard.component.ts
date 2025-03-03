@@ -15,6 +15,7 @@ import { Mode } from '../../services/interfaces/mode.interface';
 import { AreaSelectionComponent } from './area-selection/area-selection.component';
 import { TranslateService } from '@ngx-translate/core';
 import { ProjectsReloadService } from '../projects-reload.service';
+import { Activity } from '../../services/interfaces/activity.interface';
 
 
 @Component({
@@ -34,6 +35,11 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   modes: Mode[] = [];
   private subscription: Subscription;
   selectedAreaIds: string[] = [];
+  showMidActivities: boolean = true;
+  private allGroupedActivities: { mid: GroupedActivities[], nonMid: GroupedActivities[] } = {
+    mid: [],
+    nonMid: []
+  };
 
   constructor(
     private fb: FormBuilder,
@@ -93,17 +99,41 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   }
 
   private loadActivities() {
-    this.activitiesService.getGroupedActivities().subscribe({
-      next: (groupedActivities) => {
-        this.groupedActivities = groupedActivities;
-        // Alle Aktivitäten automatisch auswählen
-        const allActivities = this.groupedActivities.flatMap(group => group.activities);
-        this.projectForm.get('activities.selectedActivities')?.setValue(allActivities);
+    this.activitiesService.getActivities().subscribe({
+      next: (response) => {
+        // Gruppiere alle Aktivitäten nach mid/non-mid
+        const midActivities = response.results.filter(activity => activity.mid === true);
+        const nonMidActivities = response.results.filter(activity => activity.mid === false);
+
+        // Gruppiere nach Wegezweck
+        this.allGroupedActivities.mid = this.groupActivitiesByPurpose(midActivities);
+        this.allGroupedActivities.nonMid = this.groupActivitiesByPurpose(nonMidActivities);
+        
+        // Setze initial die MID-Aktivitäten
+        this.updateDisplayedActivities(true);
       },
       error: (error) => {
         console.error('Fehler beim Laden der Aktivitäten:', error);
       }
     });
+  }
+
+  private groupActivitiesByPurpose(activities: Activity[]): GroupedActivities[] {
+    const grouped = activities.reduce((groups: { [key: string]: Activity[] }, activity) => {
+      const wegezweckId = activity.wegezweck || 'undefined';
+      if (!groups[wegezweckId]) {
+        groups[wegezweckId] = [];
+      }
+      groups[wegezweckId].push(activity);
+      return groups;
+    }, {});
+
+    return Object.entries(grouped)
+      .map(([_, activities]) => ({
+        tripPurpose: activities[0].wegezweck!,
+        activities: activities.sort((a, b) => a.name.localeCompare(b.name))
+      }))
+      .sort((a, b) => a.tripPurpose.localeCompare(b.tripPurpose));
   }
 
   private loadPersonas() {
@@ -262,5 +292,17 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         }
       });
     }
+  }
+
+  toggleMidActivities() {
+    console.log('toggleMidActivities', this.showMidActivities);
+    this.showMidActivities = !this.showMidActivities;
+    this.updateDisplayedActivities(this.showMidActivities);
+  }
+
+  private updateDisplayedActivities(showMid: boolean) {
+    this.groupedActivities = showMid ? this.allGroupedActivities.mid : this.allGroupedActivities.nonMid;
+    const allActivities = this.groupedActivities.flatMap(group => group.activities);
+    this.projectForm.get('activities.selectedActivities')?.setValue(allActivities);
   }
 } 

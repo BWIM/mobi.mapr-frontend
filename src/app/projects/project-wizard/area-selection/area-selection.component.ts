@@ -13,6 +13,7 @@ import XYZ from 'ol/source/XYZ';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Fill, Stroke, Style } from 'ol/style';
 import { fromLonLat } from 'ol/proj';
+import Overlay from 'ol/Overlay';
 
 @Component({
   selector: 'app-area-selection',
@@ -28,6 +29,8 @@ export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy 
   private vectorLayer?: VectorLayer<any>;
   private geoJsonFormat = new GeoJSON();
   private selectedFeatures: Set<string> = new Set();
+  private overlay?: Overlay;
+  private tooltipElement?: HTMLElement;
   
   lands: Land[] = [];
 
@@ -42,13 +45,34 @@ export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   ngAfterViewInit() {
+    this.initializeTooltip();
     this.initializeMap();
   }
 
   ngOnDestroy() {
     if (this.map) {
+      if (this.overlay) {
+        this.map.removeOverlay(this.overlay);
+      }
       this.map.dispose();
     }
+  }
+
+  private initializeTooltip() {
+    this.tooltipElement = document.createElement('div');
+    this.tooltipElement.className = 'tooltip';
+    this.tooltipElement.style.backgroundColor = 'white';
+    this.tooltipElement.style.padding = '5px';
+    this.tooltipElement.style.border = '1px solid #ccc';
+    this.tooltipElement.style.borderRadius = '4px';
+    this.tooltipElement.style.position = 'relative';
+    this.tooltipElement.style.zIndex = '1000';
+
+    this.overlay = new Overlay({
+      element: this.tooltipElement,
+      offset: [10, 0],
+      positioning: 'bottom-left',
+    });
   }
 
   private initializeMap() {
@@ -85,6 +109,10 @@ export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy 
       })
     });
 
+    if (this.overlay) {
+      this.map.addOverlay(this.overlay);
+    }
+
     this.map.on('click', (event) => {
       const feature = this.map?.forEachFeatureAtPixel(event.pixel, (feature) => feature);
       if (feature) {
@@ -96,6 +124,28 @@ export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy 
         }
         this.vectorLayer?.changed();
         this.updateSelectedAreas();
+      }
+    });
+
+    this.map.on('pointermove', (event) => {
+      if (event.dragging || !this.tooltipElement || !this.overlay) {
+        this.tooltipElement!.style.display = 'none';
+        return;
+      }
+
+      const feature = this.map?.forEachFeatureAtPixel(event.pixel, (feature) => feature);
+      
+      if (feature) {
+        const name = feature.get('name');
+        if (name) {
+          this.tooltipElement.style.display = '';
+          this.tooltipElement.innerHTML = name;
+          this.overlay.setPosition(event.coordinate);
+        } else {
+          this.tooltipElement.style.display = 'none';
+        }
+      } else {
+        this.tooltipElement.style.display = 'none';
       }
     });
   }

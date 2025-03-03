@@ -84,6 +84,10 @@
         "LOAD_AREAS_ON_MAP": "Load calculated municipalities directly on map",
         "ERRORS": {
             "NAME_REQUIRED": "Please enter a project name."
+        },
+        "ACTIVITIES": {
+            "MID": "Activities",
+            "NON_MID": "Standard Activities"
         }
     }
 } 

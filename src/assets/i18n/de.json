@@ -84,6 +84,10 @@
         "LOAD_AREAS_ON_MAP": "Berechnete Gemeinden direkt auf Karte laden",
         "ERRORS": {
             "NAME_REQUIRED": "Bitte geben Sie einen Projektnamen ein."
+        },
+        "ACTIVITIES": {
+            "MID": "Aktivitäten",
+            "NON_MID": "Standard Aktivitäten"
         }
     },
     "EDIT": {
