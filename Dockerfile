@@ -20,7 +20,7 @@ RUN npm run build --prod --configuration=production
 FROM nginx:alpine
 
 # Copy the build output to the Nginx html directory
-COPY --from=build /app/dist/mobi.mapr-frontend-2.0 /usr/share/nginx/html
+COPY --from=build /app/dist/mobi.mapr /usr/share/nginx/html
 
 # Copy the custom Nginx configuration file
 COPY nginx.conf /etc/nginx/nginx.conf
