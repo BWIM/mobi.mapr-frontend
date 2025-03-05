@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Build the Angular application
-RUN npm run build --prod --configuration=production --max-old-space-size=4096 --budget-warning=2500000 --budget-error=3000000
+RUN npm run build --prod --configuration=production
 
 # Stage 2: Serve the application with Nginx
 FROM nginx:alpine
