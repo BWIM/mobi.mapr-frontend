@@ -35,6 +35,10 @@
         "MESSAGES": {
             "UPDATE_SUCCESS": "Projekt erfolgreich aktualisiert",
             "UPDATE_ERROR": "Fehler beim Aktualisieren des Projekts"
+        },
+        "DELETE": {
+            "TITLE": "Projekt löschen",
+            "CONFIRMATION": "Sind Sie sicher, dass Sie das Projekt löschen möchten?"
         }
     },
     "COMMON": {
@@ -44,7 +48,8 @@
             "EDIT": "Bearbeiten",
             "DELETE": "Löschen",
             "LABEL": "Aktionen",
-            "CLOSE": "Schließen"
+            "CLOSE": "Schließen",
+            "CONFIRM": "Bestätigen"
         },
         "MESSAGES": {
             "ERROR": {

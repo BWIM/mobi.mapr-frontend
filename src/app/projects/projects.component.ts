@@ -1,7 +1,7 @@
 import { Component, OnInit, Output, EventEmitter, ViewChild, OnDestroy } from '@angular/core';
 import { ProjectsService } from './projects.service';
 import { Project, ProjectGroup } from './project.interface';
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
 import { finalize } from 'rxjs/operators';
 import { SharedModule } from '../shared/shared.module';
 import { TranslateService } from '@ngx-translate/core';
@@ -39,7 +39,7 @@ interface ProjectProgress {
   selector: 'app-projects',
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.css'],
-  providers: [MessageService],
+  providers: [MessageService, ConfirmationService],
   standalone: true,
   imports: [SharedModule]
 })
@@ -65,7 +65,8 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     private wizardService: ProjectWizardService,
     private websocketService: WebsocketService,
     private reloadService: ProjectsReloadService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private confirmationService: ConfirmationService
   ) {
     this.initializeMapActions();
     
@@ -180,6 +181,14 @@ export class ProjectsComponent implements OnInit, OnDestroy {
           });
         }
       });
+  }
+
+  confirmDelete(project: Project): void {
+    this.confirmationService.confirm({
+      accept: () => {
+        this.deleteProject(project);
+      }
+    });
   }
 
   deleteProject(project: Project): void {

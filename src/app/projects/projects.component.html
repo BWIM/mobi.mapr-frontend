@@ -61,7 +61,7 @@
                                             <p-button 
                                                 icon="pi pi-trash" 
                                                 styleClass="p-button-rounded p-button-text p-button-danger"
-                                                (onClick)="deleteProject(project)"
+                                                (onClick)="confirmDelete(project)"
                                                 [disabled]="project.default">
                                             </p-button>
                                         </div>
@@ -129,7 +129,7 @@
                                             <p-button 
                                                 icon="pi pi-trash" 
                                                 styleClass="p-button-rounded p-button-text p-button-danger"
-                                                (onClick)="deleteProject(project)"
+                                                (onClick)="confirmDelete(project)"
                                                 [disabled]="project.default">
                                             </p-button>
                                         </div>
@@ -204,6 +204,16 @@
                 label="{{ 'COMMON.ACTIONS.SAVE' | translate }}">
             </p-button>
         </ng-template>
-        <!-- <p-confirmDialog></p-confirmDialog> -->
     </p-dialog>
+
+    <p-confirmDialog 
+        [style]="{width: '450px'}" 
+        [appendTo]="'body'"
+        [header]="'PROJECTS.DELETE.TITLE' | translate"
+        [message]="'PROJECTS.DELETE.CONFIRMATION' | translate"
+        [icon]="'pi pi-exclamation-triangle'"
+        acceptButtonStyleClass="p-button-danger"
+        [acceptLabel]="'COMMON.ACTIONS.DELETE' | translate"
+        [rejectLabel]="'COMMON.ACTIONS.CANCEL' | translate">
+    </p-confirmDialog>
 </div>

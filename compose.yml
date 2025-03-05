@@ -1,4 +1,3 @@
-version: '3'
 services:
   mobi.mapr-frontend:
     image: bwim/mobi.mapr-frontend:latest # use staging-latest for images not built from main

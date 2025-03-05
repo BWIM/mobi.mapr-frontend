@@ -35,6 +35,10 @@
         "MESSAGES": {
             "UPDATE_SUCCESS": "Project successfully updated",
             "UPDATE_ERROR": "Error updating project"
+        },
+        "DELETE": {
+            "TITLE": "Delete Project",
+            "CONFIRMATION": "Are you sure you want to delete this project?"
         }
     },
     "COMMON": {
@@ -44,7 +48,8 @@
             "EDIT": "Edit",
             "DELETE": "Delete",
             "LABEL": "Actions",
-            "CLOSE": "Close"
+            "CLOSE": "Close",
+            "CONFIRM": "Confirm"
         },
         "MESSAGES": {
             "ERROR": {
