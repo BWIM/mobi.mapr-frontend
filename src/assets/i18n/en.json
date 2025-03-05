@@ -101,7 +101,12 @@
         "DESCRIPTION": "Description",
         "STATUS": "Status",
         "NO_SELECTION": "No selection",
-        "CLICK_HINT": "Click on a map to display details"
+        "CLICK_HINT": "Click on a map to display details",
+        "PROJECT_INFO": "Project Info",
+        "ACTIVITIES": "Activities",
+        "MODES": "Modes",
+        "PERSONAS": "Personas",
+        "NO_PROJECT_SELECTED": "No project selected"
     },
     "ANALYZE": {
         "PERSONA": {

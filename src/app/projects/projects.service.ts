@@ -1,20 +1,25 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { 
   Project, 
   ProjectGroup, 
   PaginatedResponse, 
   ProjectCreateUpdate,
-  ProjectGroupCreateUpdate 
+  ProjectGroupCreateUpdate, 
+  ProjectInfo
 } from './project.interface';
+
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProjectsService {
   private apiUrl = environment.apiUrl;
+  private currentProjectInfo = new BehaviorSubject<ProjectInfo | null>(null);
+  public currentProjectInfo$ = this.currentProjectInfo.asObservable();
 
   constructor(private http: HttpClient) { }
 
@@ -83,5 +88,13 @@ export class ProjectsService {
       .set('featureId', featureId);
     
     return this.http.get(`${this.apiUrl}/projects/details/`, { params });
+  }
+
+  getProjectInfo(projectId: number): Observable<ProjectInfo> {
+    return this.http.get<ProjectInfo>(`${this.apiUrl}/projects/${projectId}/info`);
+  }
+
+  updateCurrentProjectInfo(info: ProjectInfo | null): void {
+    this.currentProjectInfo.next(info);
   }
 }

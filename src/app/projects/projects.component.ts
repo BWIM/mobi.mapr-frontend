@@ -223,6 +223,16 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     this.analyzeService.setCurrentProject(project.id.toString());
     this.analyzeService.setMapType(maptype);
     
+    // Lade Projektinformationen
+    this.projectsService.getProjectInfo(project.id).subscribe({
+      next: (info) => {
+        this.projectsService.updateCurrentProjectInfo(info);
+      },
+      error: (error) => {
+        console.error('Fehler beim Laden der Projektinformationen:', error);
+      }
+    });
+
     this.projectsService.getProjectResults(project.id, maptype)
       .pipe(finalize(() => this.loadingService.stopLoading()))
       .subscribe({

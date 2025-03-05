@@ -112,7 +112,12 @@
         "DESCRIPTION": "Beschreibung",
         "STATUS": "Status",
         "NO_SELECTION": "Keine Auswahl",
-        "CLICK_HINT": "Klicken Sie auf eine Karte, um Details anzuzeigen"
+        "CLICK_HINT": "Klicken Sie auf eine Karte, um Details anzuzeigen",
+        "PROJECT_INFO": "Projekt Info",
+        "ACTIVITIES": "Aktivitäten",
+        "MODES": "Modi",
+        "PERSONAS": "Personas",
+        "NO_PROJECT_SELECTED": "Kein Projekt ausgewählt"
     },
     "ANALYZE": {
         "PERSONA": {

@@ -1,36 +1,38 @@
-<div class="details-sidebar">
-  <p-panel [toggleable]="true" [collapsed]="false">
-    <ng-template pTemplate="header">
-      <div class="panel-header">
-        {{ 'SIDEBAR.TITLE' | translate }}
-      </div>
-    </ng-template>
-    
-    <ng-container *ngIf="selectedFeature; else noSelection">
-      <div class="feature-details">
-        <h3>{{ getFeatureProperties()?.name || 'Unbenanntes Projekt' }}</h3>
-        
-        <div class="details-content" *ngIf="getFeatureProperties() as props">
-          <div class="detail-item" *ngIf="props.description">
-            <label>{{ 'SIDEBAR.DESCRIPTION' | translate }}</label>
-            <p>{{ props.description }}</p>
-          </div>
-          
-          <div class="detail-item" *ngIf="props.status">
-            <label>{{ 'SIDEBAR.STATUS' | translate }}</label>
-            <p>{{ props.status }}</p>
-          </div>
-          
-          <!-- Weitere Eigenschaften hier hinzufügen -->
+<div class="h-full">
+    <p-scrollPanel [style]="{width: '100%', height: 'calc(100vh - 12rem)'}">
+      <div *ngIf="projectInfo" class="p-4">
+        <div class="mb-6">
+          <h3 class="text-xl font-semibold text-primary mb-2">{{ projectInfo.display_name }}</h3>
+          <p class="text-gray-600">{{ projectInfo.description }}</p>
         </div>
+
+        <p-fieldset legend="Activities">
+          <ul class="list-disc pl-4 space-y-1">
+            <li *ngFor="let activity of projectInfo.activities" class="text-gray-700">
+              {{ activity }}
+            </li>
+          </ul>
+        </p-fieldset>
+
+        <p-fieldset legend="Modes">
+          <ul class="list-disc pl-4 space-y-1">
+            <li *ngFor="let mode of projectInfo.modes" class="text-gray-700">
+              {{ mode }}
+            </li>
+          </ul>
+        </p-fieldset>
+
+        <p-fieldset legend="Personas">
+          <ul class="list-disc pl-4 space-y-1">
+            <li *ngFor="let persona of projectInfo.personas" class="text-gray-700">
+              {{ persona }}
+            </li>
+          </ul>
+        </p-fieldset>
       </div>
-    </ng-container>
-    
-    <ng-template #noSelection>
-      <div class="no-selection-info">
-        <p>{{ 'SIDEBAR.NO_SELECTION' | translate }}</p>
-        <p class="helper-text">{{ 'SIDEBAR.CLICK_HINT' | translate }}</p>
+      
+      <div *ngIf="!projectInfo" class="p-4 text-center text-gray-500">
+        {{ 'SIDEBAR.NO_PROJECT_SELECTED' | translate }}
       </div>
-    </ng-template>
-  </p-panel>
+    </p-scrollPanel>
 </div>

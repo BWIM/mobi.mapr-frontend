@@ -4,10 +4,9 @@ import { ButtonModule } from 'primeng/button';
 import { PanelModule } from 'primeng/panel';
 import { DialogModule } from 'primeng/dialog';
 import { TranslateService } from '@ngx-translate/core';
-import { FeatureSelectionService } from '../shared/services/feature-selection.service';
-import { Feature } from 'ol';
 import { Subscription } from 'rxjs';
-
+import { ProjectsService } from '../projects/projects.service';
+import { ProjectInfo } from '../projects/project.interface';
 @Component({
   selector: 'app-details-sidebar',
   standalone: true,
@@ -21,19 +20,16 @@ import { Subscription } from 'rxjs';
   styleUrl: './details-sidebar.component.css'
 })
 export class DetailsSidebarComponent implements OnInit, OnDestroy {
-  selectedFeature: Feature | null = null;
-  featureProperties: any = null;
+  projectInfo: ProjectInfo | null = null;
   private subscription: Subscription;
 
   constructor(
     private translate: TranslateService,
-    private featureSelectionService: FeatureSelectionService
+    private projectsService: ProjectsService
   ) {
-    this.subscription = this.featureSelectionService.selectedFeature$.subscribe(
-      feature => {
-        this.selectedFeature = feature;
-        console.log(this.selectedFeature);
-        this.updateFeatureProperties();
+    this.subscription = this.projectsService.currentProjectInfo$.subscribe(
+      info => {
+        this.projectInfo = info;
       }
     );
   }
@@ -44,13 +40,5 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-  }
-
-  private updateFeatureProperties(): void {
-    this.featureProperties = this.selectedFeature ? this.selectedFeature.getProperties() : null;
-  }
-
-  getFeatureProperties(): any {
-    return this.featureProperties;
   }
 } 

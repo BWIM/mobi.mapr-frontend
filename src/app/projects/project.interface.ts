@@ -41,3 +41,12 @@ export interface ProjectGroupCreateUpdate {
     description?: string;
     default?: boolean;
 } 
+
+export interface ProjectInfo {
+    id: number;
+    display_name: string;
+    description: string;
+    activities: string[];
+    modes: string[];
+    personas: string[];
+  }

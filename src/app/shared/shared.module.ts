@@ -28,7 +28,8 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TabsModule } from 'primeng/tabs';
 import { ToggleButtonModule } from 'primeng/togglebutton';
 import { ChartModule } from 'primeng/chart';
-
+import { CardModule } from 'primeng/card';
+import { FieldsetModule } from 'primeng/fieldset';
 @NgModule({
   imports: [
     CommonModule,
@@ -57,7 +58,9 @@ import { ChartModule } from 'primeng/chart';
     ConfirmDialogModule,
     TabsModule,
     ToggleButtonModule,
-    ChartModule
+    ChartModule,
+    CardModule,
+    FieldsetModule
   ],
   exports: [
     CommonModule,
@@ -86,7 +89,9 @@ import { ChartModule } from 'primeng/chart';
     ConfirmDialogModule,
     TabsModule,
     ToggleButtonModule,
-    ChartModule
+    ChartModule,
+    CardModule,
+    FieldsetModule
   ],
   providers: [MessageService]
 })
