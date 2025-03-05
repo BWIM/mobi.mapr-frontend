@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { SharedModule } from '../shared/shared.module';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../projects/projects.service';
@@ -25,7 +25,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
   personaChartData: any;
   activitiesChartData: any;
   modesChartData: any;
-  chartOptions: any;
+  radarChartOptions: any;
+  barChartOptions: any;
+  pieChartOptions: any;
 
   hasPersonaData(): boolean {
     return Object.keys(this.projectDetails?.persona_scores || {}).length > 0;
@@ -41,7 +43,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
 
   constructor(
     private analyzeService: AnalyzeService,
-    private projectsService: ProjectsService
+    private projectsService: ProjectsService,
+    private cdr: ChangeDetectorRef
   ) {
     this.subscription = this.analyzeService.visible$.subscribe(
       visible => {
@@ -51,19 +54,14 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
           if (state.feature) {
             this.feature = state.feature;
             this.properties = this.feature.getProperties() as Properties;
-            console.log(this.properties);
           }
           if (state.projectId && state.mapType && state.feature) {
             this.loading = true;
-
             this.projectsService.getProjectDetails(state.projectId, state.mapType, state.feature.getId()!.toString())
               .subscribe({
                 next: (details) => {
                   this.projectDetails = details;
-                  setTimeout(() => {
-                    this.initializeChartData();
-                    this.loading = false;
-                  }, 10);
+                  this.initializeChartData();
                 },
                 error: (error) => {
                   console.error('Error loading project details:', error);
@@ -77,8 +75,26 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
       }
     );
 
-    // Grundlegende Chart-Optionen
-    this.chartOptions = {
+    // Grundlegende Chart-Optionen für verschiedene Diagrammtypen
+    this.radarChartOptions = {      plugins: {
+      legend: {
+        position: 'bottom'
+      }
+    },
+    responsive: true,
+    maintainAspectRatio: false
+    };
+
+    this.barChartOptions = {      plugins: {
+      legend: {
+        position: 'bottom'
+      }
+    },
+    responsive: true,
+    maintainAspectRatio: false
+    };
+
+    this.pieChartOptions = {
       plugins: {
         legend: {
           position: 'bottom'
@@ -93,6 +109,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     this.initializeModesChart();
     this.initializeActivitiesChart();
     this.initializePersonaChart();
+    this.loading = false;
+    this.cdr.detectChanges();
   }
 
   private initializeModesChart(): void {

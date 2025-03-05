@@ -95,7 +95,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         },
       },
       {
-        icon: 'pi pi-home',
+        icon: 'pi pi-map',
         label: this.translate.instant('MAP.ACTIONS.GEMEINDE'),
         tooltipOptions: {
           tooltipLabel: this.translate.instant('MAP.ACTIONS.GEMEINDE')
@@ -105,7 +105,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         },
       },
       {
-        icon: 'pi pi-map',
+        icon: 'pi pi-home',
         label: this.translate.instant('MAP.ACTIONS.LANDKREIS'),
         tooltipOptions: {
           tooltipLabel: this.translate.instant('MAP.ACTIONS.LANDKREIS')

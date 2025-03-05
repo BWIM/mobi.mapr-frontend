@@ -23,6 +23,44 @@
     --shadow-2: 0 3px 3px -2px rgba(0,0,0,.2), 0 3px 4px 0 rgba(0,0,0,.14), 0 1px 8px 0 rgba(0,0,0,.12);
     font-family: Arial, sans-serif;
 
+    /* PrimeNG Theme Überschreibungen */
+    --surface-0: var(--second-background-color);
+    --surface-50: var(--background-color);
+    --surface-100: var(--background-color);
+    --surface-200: var(--background-color);
+    --surface-300: var(--background-color);
+    --surface-400: var(--background-color);
+    --surface-500: var(--background-color);
+    --surface-600: var(--background-color);
+    --surface-700: var(--background-color);
+    --surface-800: var(--background-color);
+    --surface-900: var(--background-color);
+    
+    /* Text Colors */
+    --text-color: var(--text-color);
+    --text-color-secondary: var(--secondary-text-color);
+    
+    /* Primary Colors */
+    --primary-50: var(--primary-color);
+    --primary-100: var(--primary-color);
+    --primary-200: var(--primary-color);
+    --primary-300: var(--primary-color);
+    --primary-400: var(--primary-color);
+    --primary-500: var(--primary-color);
+    --primary-600: var(--primary-color);
+    --primary-700: var(--primary-color);
+    --primary-800: var(--primary-color);
+    --primary-900: var(--primary-color);
+    
+    /* Highlight Colors */
+    --highlight-bg: var(--highlight-color);
+    --highlight-text-color: var(--text-color);
+    
+    /* Error, Warning, Success Colors */
+    --red-500: var(--error-color);
+    --yellow-500: var(--warning-color);
+    --green-500: var(--success-color);
+
     /* PrimeNG specific variables */
     --primary-color: #ffcc00;
     --secondary-color: #c2a540;

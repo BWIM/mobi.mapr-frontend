@@ -50,6 +50,7 @@
                                                 [model]="items"
                                                 icon="pi pi-map"
                                                 appendTo="body"
+                                                (onClick)="showResults(project, 'municipalities')"
                                                 dropdownIcon="pi pi-chevron-down"
                                                 (onDropdownClick)="selectedProject = project"
                                                 [disabled]="!project.finished">
@@ -90,24 +91,24 @@
                             [tableStyle]="{ width: '100%' }" 
                             styleClass="p-datatable-sm"
                             [scrollable]="true"
-                            [scrollHeight]="'auto'">
+                            [scrollHeight]="'auto'"
+                            [(selection)]="selectedTableProject"
+                            selectionMode="single">
                             <ng-template pTemplate="header">
                                 <tr>
-                                    <th>{{ 'PROJECTS.FIELDS.NAME' | translate }}</th>
-                                    <!-- <th>{{ 'PROJECTS.FIELDS.TYPE' | translate }}</th>
-                                    <th>{{ 'PROJECTS.FIELDS.STATUS' | translate }}</th> -->
-                                    <th class="w-32">{{ 'COMMON.ACTIONS.LABEL' | translate }}</th>
+                                    <th pFrozenColumn style="min-width: 250px; max-width: 400px;">{{ 'PROJECTS.FIELDS.NAME' | translate }}</th>
+                                    <th style="width: 150px;"></th>
                                 </tr>
                             </ng-template>
                             <ng-template pTemplate="body" let-project>
-                                <tr>
-                                    <td>
+                                <tr [pSelectableRow]="project" [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
+                                    <td style="min-width: 250px; max-width: 400px;">
                                         <div class="flex flex-col">
                                             <div class="flex items-center">
                                                 <i class="pi mr-2" [ngClass]="{'pi-user': !project.default, 'pi-users': project.default}" 
-                                                [pTooltip]="project.default ? ('PROJECTS.TYPE.DEFAULT' | translate) : ('PROJECTS.TYPE.PERSONAL' | translate)">
+                                                    [pTooltip]="project.default ? ('PROJECTS.TYPE.DEFAULT' | translate) : ('PROJECTS.TYPE.PERSONAL' | translate)">
                                                 </i>
-                                                {{ project.display_name }}
+                                                <span class="text-overflow-ellipsis overflow-hidden whitespace-nowrap">{{ project.display_name }}</span>
                                             </div>
                                             <small *ngIf="project.description" class="text-gray-500 mt-1">{{ project.description }}</small>
                                         </div>
@@ -116,6 +117,7 @@
                                         <div class="flex gap-2 justify-end">
                                             <p-splitButton 
                                                 [model]="items"
+                                                (onClick)="showResults(project, 'municipalities')"
                                                 icon="pi pi-map"
                                                 appendTo="body"
                                                 dropdownIcon="pi pi-chevron-down"
@@ -138,7 +140,7 @@
                                     </td>
                                 </tr>
                                 <tr *ngIf="!project.finished">
-                                    <td colspan="3">
+                                    <td colspan="2">
                                         <p-progressBar
                                             [value]="getProgress(project)" 
                                             [showValue]="true">
