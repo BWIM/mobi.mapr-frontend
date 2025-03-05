@@ -133,6 +133,10 @@
             "NO_DATA": "Keine Daten vorhanden"
         },
         "START": "Start",
-        "END": "Ende"
+        "END": "Ende",
+        "TITLE": "Details",
+        "PROPERTIES": {
+            "POPULATION": "Bevölkerung"
+        }
     }
 } 

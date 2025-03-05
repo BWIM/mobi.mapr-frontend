@@ -51,6 +51,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   ungroupedProjects: Project[] = [];
   items: MenuItem[] = [];
   selectedProject?: Project;
+  selectedTableProject?: Project;
   private websocketConnections: Map<number, WebSocketSubject<WebsocketResult>> = new Map();
   editDialogVisible = false;
   projectToEdit: Project | null = null;
@@ -219,6 +220,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
   showResults(project: Project | undefined, maptype: string): void {
     if (!project) return;
+    this.selectedTableProject = project;
     this.loadingService.startLoading();
     this.analyzeService.setCurrentProject(project.id.toString());
     this.analyzeService.setMapType(maptype);

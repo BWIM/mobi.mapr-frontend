@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import Feature from "ol/Feature";
 import { BehaviorSubject } from "rxjs";
 
 @Injectable({
@@ -10,7 +11,7 @@ import { BehaviorSubject } from "rxjs";
   
     private currentProjectId: string | null = null;
     private currentMapType: string | null = null;
-    private selectedFeatureId: string | null = null;
+    private selectedFeature: Feature | null = null;
   
     show() {
       this.visibleSubject.next(true);
@@ -23,13 +24,14 @@ import { BehaviorSubject } from "rxjs";
     setCurrentProject(projectId: string) {
       this.currentProjectId = projectId;
     }
+
   
     setMapType(mapType: string) {
       this.currentMapType = mapType;
     }
   
-    setSelectedFeature(featureId: string) {
-      this.selectedFeatureId = featureId;
+    setSelectedFeature(feature: Feature) {
+      this.selectedFeature = feature;
       this.show(); // Automatisch das Analyse-Panel öffnen, wenn ein Feature ausgewählt wurde
     }
   
@@ -37,7 +39,7 @@ import { BehaviorSubject } from "rxjs";
       return {
         projectId: this.currentProjectId,
         mapType: this.currentMapType,
-        featureId: this.selectedFeatureId
+        feature: this.selectedFeature
       };
     }
   }

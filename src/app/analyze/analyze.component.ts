@@ -3,6 +3,8 @@ import { SharedModule } from '../shared/shared.module';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../projects/projects.service';
 import { AnalyzeService } from './analyze.service';
+import Feature from 'ol/Feature';
+import { Properties } from './analyze.interface';
 
 @Component({
   selector: 'app-analyze',
@@ -13,9 +15,12 @@ import { AnalyzeService } from './analyze.service';
 })
 export class AnalyzeComponent implements OnInit, OnDestroy {
   visible: boolean = false;
+  loading: boolean = false;
   private subscription: Subscription;
   projectDetails: any;
-  
+  feature: Feature | undefined;
+  properties: Properties | undefined;
+
   // Diagrammdaten
   personaChartData: any;
   activitiesChartData: any;
@@ -43,15 +48,26 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
         this.visible = visible;
         if (visible) {
           const state = this.analyzeService.getCurrentState();
-          if (state.projectId && state.mapType && state.featureId) {
-            this.projectsService.getProjectDetails(state.projectId, state.mapType, state.featureId)
+          if (state.feature) {
+            this.feature = state.feature;
+            this.properties = this.feature.getProperties() as Properties;
+            console.log(this.properties);
+          }
+          if (state.projectId && state.mapType && state.feature) {
+            this.loading = true;
+
+            this.projectsService.getProjectDetails(state.projectId, state.mapType, state.feature.getId()!.toString())
               .subscribe({
                 next: (details) => {
                   this.projectDetails = details;
-                  this.initializeChartData();
+                  setTimeout(() => {
+                    this.initializeChartData();
+                    this.loading = false;
+                  }, 10);
                 },
                 error: (error) => {
                   console.error('Error loading project details:', error);
+                  this.loading = false;
                 }
               });
           } else {
@@ -105,11 +121,14 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     const data = Object.values(categoryScores).map((category: any) => category.score);
 
     this.activitiesChartData = {
+      type: 'bar',
       labels: labels,
       datasets: [{
         label: 'Aktivitätswerte',
         data: data,
-        backgroundColor: '#36A2EB'
+        backgroundColor: '#ffcc00',
+        borderColor: '#ffcc00',
+        borderWidth: 1
       }]
     };
   }
@@ -124,12 +143,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
       datasets: [{
         label: 'Persona-Werte',
         data: data,
-        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-        borderColor: 'rgb(54, 162, 235)',
-        pointBackgroundColor: 'rgb(54, 162, 235)',
+        backgroundColor: 'rgba(255, 204, 0, 0.2)',
+        borderColor: 'rgb(255, 204, 0)',
+        pointBackgroundColor: 'rgb(255, 204, 0)',
         pointBorderColor: '#fff',
         pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: 'rgb(54, 162, 235)'
+        pointHoverBorderColor: 'rgb(255, 204, 0)'
       }]
     };
   }

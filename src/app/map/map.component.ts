@@ -84,8 +84,20 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.vectorLayer = new WebGLVectorLayer({
       source: new VectorSource(),
       style: {
-        'stroke-color': [0, 0, 0, 0.1],
-        'stroke-width': ['get', 'border_width'],
+        'stroke-color': [
+          'interpolate',
+          ['linear'],
+          ['get', 'selected'],
+          0, [0, 0, 0, 0.1],
+          1, [67, 49, 67, 1]
+        ],
+        'stroke-width': [
+          'interpolate',
+          ['linear'],
+          ['get', 'selected'],
+          0, ['get', 'border_width'],
+          1, 2
+        ],
         'fill-color': ['get', 'rgbColor']
       }
     });
@@ -106,7 +118,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           clickedFeature = feature;
           
           // Öffne Analyse-Dialog wenn ein Feature geklickt wurde
-          this.analyzeService.setSelectedFeature(feature.getId()?.toString() || '');
+          this.analyzeService.setSelectedFeature(feature);
         }
       });
 
@@ -180,23 +192,16 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private highlightFeature(feature: Feature<Geometry>): void {
-    const properties = feature.getProperties();
-    const color = properties['color'] || '#ffffff';
-    const opacity = properties['opacity'] || 1;
-
-    feature.setStyle(new Style({
-      stroke: new Stroke({
-        color: '#4a90e2',
-        width: 2
-      }),
-      fill: new Fill({
-        color: `rgba(${this.hexToRgb(color)}, ${opacity})`
-      })
-    }));
+    if (this.lastClickedFeature) {
+      this.lastClickedFeature.set('selected', false);
+    }
+    feature.set('selected', true);
+    this.vectorLayer.changed();
   }
 
   private resetFeatureStyle(feature: Feature<Geometry>): void {
-    feature.setStyle(undefined); // Zurück zum Standard-WebGL-Style
+    feature.set('selected', false);
+    this.vectorLayer.changed();
   }
 
   // Karte zurücksetzen

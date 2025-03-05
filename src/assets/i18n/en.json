@@ -112,6 +112,15 @@
         "PERSONA": {
             "TITLE": "Persona",
             "NO_DATA": "No data available"
+        },
+        "TITLE": "Details",
+        "START": "Start",
+        "END": "Ende",
+        "ACTIVITIES": "Activities",
+        "MODES": "Modes",
+        "PERSONAS": "Personas",
+        "PROPERTIES": {
+            "POPULATION": "Population"
         }
     }
 }   

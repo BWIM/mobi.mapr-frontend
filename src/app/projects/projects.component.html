@@ -21,7 +21,9 @@
                             [tableStyle]="{ width: '100%' }" 
                             styleClass="p-datatable-sm"
                             [scrollable]="true"
-                            [scrollHeight]="'auto'">
+                            [scrollHeight]="'auto'"
+                            [(selection)]="selectedTableProject"
+                            selectionMode="single">
                             <ng-template pTemplate="header">
                                 <tr>
                                     <th pFrozenColumn style="min-width: 250px; max-width: 400px;">{{ 'PROJECTS.FIELDS.NAME' | translate }} </th>
@@ -31,7 +33,7 @@
                                 </tr>
                             </ng-template>
                             <ng-template pTemplate="body" let-project>
-                                <tr>
+                                <tr [pSelectableRow]="project" [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
                                     <td style="min-width: 250px; max-width: 400px;">
                                         <div class="flex flex-col">
                                             <div class="flex items-center">
