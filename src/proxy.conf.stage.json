@@ -1,0 +1,20 @@
+{
+  "/api": {
+    "target": "http://mobi.mapr-stage:8000",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/api": ""
+    }
+  },
+  "/admin": {
+    "target": "http://mobi.mapr-stage:8000",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/admin": ""
+    }
+  }
+} 
