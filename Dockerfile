@@ -17,7 +17,11 @@ COPY . .
 ARG CONFIGURATION=stage
 
 # Build the Angular application with the specified configuration
-RUN ng build --configuration=${CONFIGURATION}
+RUN if [ "$CONFIGURATION" = "production" ]; then \
+        npm run build --prod; \
+    else \
+        npm run build -- --configuration=stage; \
+    fi
 
 # Stage 2: Serve the application with Nginx
 FROM nginx:alpine
