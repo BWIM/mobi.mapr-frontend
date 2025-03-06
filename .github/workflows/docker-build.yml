@@ -28,4 +28,4 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/mobi.mapr-frontend-smol:${{ github.ref_name == 'main' && 'latest' || 'stage-latest' }}
+            ${{ secrets.DOCKER_USERNAME }}/mobi.mapr-frontend:${{ github.ref_name == 'main' && 'latest' || 'stage-latest' }}
