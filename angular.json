@@ -61,6 +61,19 @@
               ]
             },
             "stage": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1MB",
+                  "maximumError": "3MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -82,8 +95,8 @@
             "production": {
               "buildTarget": "mobi.mapr:build:production"
             },
-            "staging": {
-              "buildTarget": "mobi.mapr:build:staging"
+            "stage": {
+              "buildTarget": "mobi.mapr:build:stage"
             },
             "development": {
               "buildTarget": "mobi.mapr:build:development"
