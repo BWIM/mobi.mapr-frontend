@@ -93,16 +93,13 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "mobi.mapr:build:production",
-              "proxyConfig": "src/proxy.conf.prod.json"
+              "buildTarget": "mobi.mapr:build:production"
             },
             "stage": {
-              "buildTarget": "mobi.mapr:build:stage",
-              "proxyConfig": "src/proxy.conf.stage.json"
+              "buildTarget": "mobi.mapr:build:stage"
             },
             "development": {
-              "buildTarget": "mobi.mapr:build:development",
-              "proxyConfig": "src/proxy.conf.dev.json"
+              "buildTarget": "mobi.mapr:build:development"
             }
           },
           "defaultConfiguration": "development"
