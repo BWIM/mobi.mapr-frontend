@@ -6,11 +6,12 @@ import { TranslateService } from '@ngx-translate/core';
 import { SharedModule } from './shared/shared.module';
 import { ProjectWizardComponent } from './projects/project-wizard/project-wizard.component';
 import { AnalyzeComponent } from './analyze/analyze.component';
+import { CreditsComponent } from './credits/credits.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, MenubarModule, ButtonModule, SharedModule, ProjectWizardComponent, AnalyzeComponent],
+  imports: [RouterOutlet, MenubarModule, ButtonModule, SharedModule, ProjectWizardComponent, AnalyzeComponent, CreditsComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
