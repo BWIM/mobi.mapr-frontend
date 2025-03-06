@@ -1,0 +1,252 @@
+<p-dialog 
+    [(visible)]="visible"
+    [modal]="true"
+    [style]="{width: '80vw', height: '80vh'}"
+    [draggable]="false"
+    [resizable]="false"
+    [dismissableMask]="true"
+    [closeOnEscape]="false"
+    [closable]="false"
+    styleClass="project-wizard-dialog"
+    [header]="'PROJECT_WIZARD.CREATE_NEW_PROJECT' | translate">
+    
+    <div class="flex flex-col h-full">
+        <!-- Stepper -->
+        <div class="mb-8">
+            <p-steps [model]="steps" [activeIndex]="activeIndex" [readonly]="true"></p-steps>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-grow overflow-auto p-4" [formGroup]="projectForm">
+            <p-scrollPanel [style]="{width: '100%', height: '100%'}">
+                <!-- Schritt 1: Aktivitätsauswahl -->
+                <div *ngIf="activeIndex === 0" formGroupName="activities">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3>{{ 'PROJECT_WIZARD.SELECT_ACTIVITIES' | translate }}</h3>
+                        <p-toggleButton
+                            [ngModel]="showMidActivities"
+                            [ngModelOptions]="{standalone: true}"
+                            onLabel="{{ 'PROJECT_WIZARD.ACTIVITIES.MID' | translate }}"
+                            offLabel="{{ 'PROJECT_WIZARD.ACTIVITIES.NON_MID' | translate }}"
+                            (onChange)="toggleMidActivities()"
+                            styleClass="p-button-sm">
+                        </p-toggleButton>
+                    </div>
+                    <div class="grid w-full">
+                        <div *ngFor="let group of groupedActivities" class="col-12 md:col-6 lg:col-4">
+                            <p-panel [header]="group.tripPurpose">
+                                <ng-template pTemplate="header">
+                                    <div class="right-10">
+                                        <div class="flex gap-2 ">
+                                            <button pButton 
+                                                icon="pi pi-check-square"
+                                                title="Alle auswählen"
+                                                class="p-button-sm p-button-rounded"
+                                                (click)="selectAllActivities(group.activities)">
+                                            </button>
+                                            <button pButton 
+                                                icon="pi pi-minus"
+                                                title="Alle abwählen"
+                                                class="p-button-sm p-button-rounded"
+                                                (click)="deselectAllActivities(group.activities)">
+                                            </button>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                                <div class="flex flex-column gap-2" *ngFor="let activity of group.activities">
+                                    <p-checkbox 
+                                        [value]="activity"
+                                        [name]="'activities'"
+                                        [inputId]="'activity_' + activity.id"
+                                        [ariaLabel]="activity.display_name || activity.name"
+                                        formControlName="selectedActivities">
+                                        {{activity.display_name || activity.name}}
+                                    </p-checkbox>
+                                    <label [for]="'activity_' + activity.id">{{activity.display_name || activity.name}}</label>
+                                </div>
+                            </p-panel>
+                        </div>
+                    </div>
+                    <small class="text-red-500" *ngIf="projectForm.get('activities.selectedActivities')?.errors?.['required'] && projectForm.get('activities.selectedActivities')?.touched">
+                        Bitte wählen Sie mindestens eine Aktivität aus.
+                    </small>
+                </div>
+
+                <!-- Schritt 2: Personas -->
+                <div *ngIf="activeIndex === 1" formGroupName="personas">
+                    <h3>Wählen Sie die relevanten Personas aus</h3>
+                    <div class="grid">
+                        <div class="col-12">
+                            <p-panel header="Verfügbare Personas">
+                                <ng-template pTemplate="header">
+                                    <div class="right-10">
+                                        <div class="flex gap-2">
+                                            <button pButton 
+                                                icon="pi pi-check-square"
+                                                title="Alle auswählen"
+                                                class="p-button-sm p-button-rounded"
+                                                (click)="selectAllPersonas()">
+                                            </button>
+                                            <button pButton 
+                                                icon="pi pi-minus"
+                                                title="Alle abwählen"
+                                                class="p-button-sm p-button-rounded"
+                                                (click)="deselectAllPersonas()">
+                                            </button>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                                <div class="flex flex-wrap gap-3" *ngFor="let persona of personas" >
+                                    <div class="flex align-items-center gap-2">
+                                        <p-checkbox
+                                            [value]="persona"
+                                            [name]="'personas'"
+                                            [inputId]="'persona_' + persona.id"
+                                            [ariaLabel]="persona.display_name || persona.name"
+                                            formControlName="selectedPersonas">
+                                            {{persona.display_name || persona.name}}
+                                        </p-checkbox>
+                                        <label [for]="'persona_' + persona.id"> {{persona.display_name || persona.name}}</label>
+                                        <!-- <p-tooltip *ngIf="persona.description" [target]="'persona_' + persona.id">
+                                            {{persona.description}}
+                                        </p-tooltip> -->
+                                    </div>
+                                </div>
+                            </p-panel>
+                        </div>
+                    </div>
+                    <small class="text-red-500" *ngIf="projectForm.get('personas.selectedPersonas')?.errors?.['required'] && projectForm.get('personas.selectedPersonas')?.touched">
+                        Bitte wählen Sie mindestens eine Persona aus.
+                    </small>
+                </div>
+
+                <!-- Schritt 3: Modi -->
+                <div *ngIf="activeIndex === 2" formGroupName="modes">
+                    <h3>Wählen Sie die relevanten Modi aus</h3>
+                    <div class="grid">
+                        <div class="col-12">
+                            <p-panel header="Verfügbare Modi">
+                                <ng-template pTemplate="header">
+                                    <div class="right-10">
+                                        <div class="flex gap-2">
+                                            <button pButton 
+                                                icon="pi pi-check-square"
+                                                title="Alle auswählen"
+                                                class="p-button-sm p-button-rounded"
+                                                (click)="selectAllModes()">
+                                            </button>
+                                            <button pButton 
+                                                icon="pi pi-minus"
+                                                title="Alle abwählen"
+                                                class="p-button-sm p-button-rounded"
+                                                (click)="deselectAllModes()">
+                                            </button>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                                <p-scrollPanel [style]="{width: '100%', height: '200px'}">
+                                    <div class="flex flex-wrap gap-3" *ngFor="let mode of modes">
+                                        <div class="flex align-items-center gap-2">
+                                            <p-checkbox
+                                                [value]="mode"
+                                                [name]="'modes'"
+                                                [inputId]="'mode_' + mode.id"
+                                                [ariaLabel]="mode.display_name || mode.name"
+                                                formControlName="selectedModes">
+                                                {{mode.display_name || mode.name}}
+                                            </p-checkbox>
+                                            <label [for]="'mode_' + mode.id">{{mode.display_name || mode.name}}</label>
+                                        </div>
+                                    </div>
+                                </p-scrollPanel>
+                            </p-panel>
+                        </div>
+                    </div>
+                    <small class="text-red-500" *ngIf="projectForm.get('modes.selectedModes')?.errors?.['required'] && projectForm.get('modes.selectedModes')?.touched">
+                        Bitte wählen Sie mindestens einen Modus aus.
+                    </small>
+                </div>
+
+                <!-- Schritt 4: Gebiet auswählen -->
+                <div *ngIf="activeIndex === 3" formGroupName="area" class="h-[calc(100%-4rem)]">
+                    <h2 class="text-2xl mb-4">{{ 'PROJECT_WIZARD.CREATE_PROJECT' | translate }}</h2>
+                    <div class="h-[calc(100%-2rem)]">
+                        <app-area-selection (selectedAreasChange)="onAreaSelectionChange($event)"></app-area-selection>
+                    </div>
+                </div>
+
+                <!-- Schritt 5: Zusammenfassung -->
+                <div *ngIf="activeIndex === 4" formGroupName="summary" class="animate-fadeIn">
+                    <h2 class="text-2xl mb-4">{{ 'PROJECT_WIZARD.CREATE_PROJECT' | translate }}</h2>
+                    
+                    <!-- Projektinformationen -->
+                    <div class="grid grid-cols-1 gap-4 mb-8">
+                        <div class="field">
+                            <label for="name" class="block mb-2">{{ 'PROJECT_WIZARD.PROJECT_NAME' | translate }} *</label>
+                            <input id="name" type="text" pInputText formControlName="name" class="w-full border rounded-md p-2" placeholder="Name" maxlength="128">
+                            <small class="text-red-500" *ngIf="projectForm.get('summary.name')?.errors?.['required'] && projectForm.get('summary.name')?.touched">
+                                {{ 'PROJECT_WIZARD.ERRORS.NAME_REQUIRED' | translate }}
+                            </small>
+                        </div>
+                        <div class="field">
+                            <label for="description" class="block mb-2">{{ 'PROJECT_WIZARD.DESCRIPTION' | translate }}</label>
+                            <textarea id="description" pInputTextarea formControlName="description" class="w-full border rounded-md p-2" rows="4" maxlength="256"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Projekteinstellungen -->
+                    <div class="bg-gray-50 p-4 rounded-lg mb-8">
+                        <h3 class="font-bold mb-4">{{ 'PROJECT_WIZARD.PROJECT_SETTINGS' | translate }}</h3>
+                        <div class="flex flex-col gap-3">
+                            <div class="field-checkbox">
+                                <p-checkbox
+                                    [inputId]="'sendEmail'"
+                                    [name]="'sendEmail'"
+                                    [binary]="true"
+                                    [ariaLabel]="'PROJECT_WIZARD.SEND_EMAIL' | translate"
+                                    formControlName="sendEmail">
+                                </p-checkbox>
+                                <label [for]="'sendEmail'" class="ml-2">{{ 'PROJECT_WIZARD.SEND_EMAIL' | translate }}</label>
+                            </div>
+                            <div class="field-checkbox">
+                                <p-checkbox
+                                    [inputId]="'loadAreasOnMap'"
+                                    [name]="'loadAreasOnMap'"
+                                    [binary]="true"
+                                    [ariaLabel]="'PROJECT_WIZARD.LOAD_AREAS_ON_MAP' | translate"
+                                    formControlName="loadAreasOnMap">
+                                </p-checkbox>
+                                <label [for]="'loadAreasOnMap'" class="ml-2">{{ 'PROJECT_WIZARD.LOAD_AREAS_ON_MAP' | translate }}</label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </p-scrollPanel>
+        </div>
+
+        <!-- Footer mit Navigation -->
+        <div class="flex justify-between items-center mt-4 p-4 border-t">
+            <button pButton 
+                    label="Abbrechen" 
+                    class="p-button-secondary" 
+                    (click)="hide()">
+            </button>
+            
+            <div class="flex gap-2">
+                <button pButton 
+                        label="Zurück" 
+                        class="p-button-outlined"
+                        [disabled]="activeIndex === 0"
+                        (click)="prevStep()">
+                </button>
+                
+                <button pButton 
+                        [label]="activeIndex === steps.length - 1 ? 'Fertigstellen' : 'Weiter'"
+                        [disabled]="!isCurrentStepValid()"
+                        (click)="activeIndex === steps.length - 1 ? onSubmit() : nextStep()">
+                </button>
+            </div>
+        </div>
+    </div>
+</p-dialog> 

@@ -1,0 +1,56 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+  <p-card styleClass="w-full max-w-md">
+    <ng-template pTemplate="header">
+      <h2 class="text-2xl font-semibold text-center text-gray-800 dark:text-white py-4">
+        Anmeldung
+      </h2>
+    </ng-template>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <div class="space-y-2">
+        <span class="p-float-label w-full">
+          <input 
+            id="username" 
+            type="text" 
+            pInputText 
+            formControlName="username"
+            class="w-full"
+            [ngClass]="{'ng-invalid ng-dirty': isFieldInvalid('username')}">
+          <label for="username">Benutzername</label>
+        </span>
+        <small class="text-red-500 text-sm" *ngIf="getFieldError('username')">
+          {{ getFieldError('username') }}
+        </small>
+      </div>
+
+      <div class="space-y-2">
+        <span class="p-float-label w-full">
+          <p-password 
+            id="password" 
+            formControlName="password"
+            [feedback]="false"
+            [toggleMask]="true"
+            styleClass="w-full"
+            [ngClass]="{'ng-invalid ng-dirty': isFieldInvalid('password')}">
+          </p-password>
+          <label for="password">Passwort</label>
+        </span>
+        <small class="text-red-500 text-sm" *ngIf="getFieldError('password')">
+          {{ getFieldError('password') }}
+        </small>
+      </div>
+
+      <p-message severity="error" *ngIf="error" [text]="error" styleClass="w-full"></p-message>
+
+      <div class="pt-2">
+        <p-button 
+          type="submit" 
+          label="Anmelden"
+          [disabled]="loginForm.invalid || isLoading"
+          [loading]="isLoading"
+          styleClass="w-full">
+        </p-button>
+      </div>
+    </form>
+  </p-card>
+</div>

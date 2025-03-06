@@ -1,0 +1,56 @@
+<div class="h-full">
+    <p-scrollPanel [style]="{width: '100%', height: 'calc(100vh - 12rem)'}">
+      <div *ngIf="projectInfo" class="p-4">
+        <div class="mb-6">
+          <h3 class="text-xl font-semibold text-primary mb-2">{{ projectInfo.display_name }}</h3>
+          <p class="text-gray-600">{{ projectInfo.description }}</p>
+        </div>
+
+        <p-fieldset legend="Activities">
+          <ul class="list-disc pl-4 space-y-1">
+            <li *ngFor="let activity of projectInfo.activities" class="text-gray-700">
+              {{ activity }}
+            </li>
+          </ul>
+        </p-fieldset>
+
+        <p-fieldset legend="Modes">
+          <ul class="list-disc pl-4 space-y-1">
+            <li *ngFor="let mode of projectInfo.modes" class="text-gray-700">
+              {{ mode }}
+            </li>
+          </ul>
+        </p-fieldset>
+
+        <p-fieldset legend="Personas">
+          <ul class="list-disc pl-4 space-y-1">
+            <li *ngFor="let persona of projectInfo.personas" class="text-gray-700">
+              {{ persona }}
+            </li>
+          </ul>
+        </p-fieldset>
+
+        <div class="mt-6 flex justify-center">
+          <p-button 
+            (onClick)="exportToPDFLandscape()"
+            icon="pi pi-file-pdf"
+            [label]="'SIDEBAR.EXPORT_PDF_LANDSCAPE' | translate"
+            styleClass="p-button-primary">
+          </p-button>
+        </div>
+
+        <div class="mt-6 flex justify-center">
+          <p-button 
+            (onClick)="exportToPDFPortrait()"
+            icon="pi pi-file-pdf"
+            [label]="'SIDEBAR.EXPORT_PDF_PORTRAIT' | translate"
+            styleClass="p-button-primary">
+          </p-button>
+        </div>
+      </div>
+      
+      <div *ngIf="!projectInfo" class="p-4 text-center text-gray-500">
+        {{ 'SIDEBAR.NO_PROJECT_SELECTED' | translate }}
+      </div>
+    </p-scrollPanel>
+</div>

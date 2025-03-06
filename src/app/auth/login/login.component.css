@@ -1,0 +1,68 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--surface-ground);
+  padding: 2rem;
+}
+
+:host ::ng-deep .login-card {
+  width: 100%;
+  max-width: 400px;
+  margin: auto;
+}
+
+:host ::ng-deep .login-card {
+  background: var(--surface-card);
+  border-radius: var(--border-radius);
+}
+
+h2 {
+  margin: 0;
+  padding: 1.5rem;
+  color: var(--text-color);
+  text-align: center;
+  font-weight: 600;
+}
+
+.form-group {
+  margin-bottom: 2rem;
+}
+
+:host ::ng-deep .p-float-label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+:host ::ng-deep .p-float-label input,
+:host ::ng-deep .p-float-label .p-password {
+  width: 100%;
+}
+
+:host ::ng-deep .p-password input {
+  width: 100%;
+}
+
+.p-error {
+  color: var(--red-500);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.button-container {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+:host ::ng-deep .button-container .p-button {
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    padding: 1rem;
+  }
+}

@@ -1,0 +1,221 @@
+<div class="h-full flex flex-col  overflow-hidden">
+    <p-toast></p-toast>
+
+    <div class="h-full overflow-hidden min-w-0">
+        <p-scrollPanel [style]="{width: '100%', height: '100%'}">
+            <!-- Action Bar -->
+            <div class="sticky top-0 z-10 mb-4 bg-surface-ground p-3 min-w-0">
+                <p-button 
+                    icon="pi pi-plus" 
+                    label="{{ 'PROJECTS.ACTIONS.CREATE' | translate }}"
+                    styleClass="p-button-success"
+                    (onClick)="showProjectWizard()">
+                </p-button>
+            </div>
+            <!-- Gruppierte Projekte -->
+            <div class="space-y-4 px-3 min-w-0">
+                <div class="mb-4 min-w-0 overflow-hidden" *ngFor="let group of groupedProjects">
+                    <p-panel [header]="group.group.name" [toggleable]="true" styleClass="overflow-hidden">
+                        <p-table 
+                            [value]="group.projects" 
+                            [tableStyle]="{ width: '100%' }" 
+                            styleClass="p-datatable-sm"
+                            [scrollable]="true"
+                            [scrollHeight]="'auto'"
+                            [scrollDirection]="'vertical'"
+                            [(selection)]="selectedTableProject"
+                            selectionMode="single">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th style="width: 70%">{{ 'PROJECTS.FIELDS.NAME' | translate }} </th>
+                                    <th style="width: 30%"></th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-project>
+                                <tr [pSelectableRow]="project" [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
+                                    <td>
+                                        <div class="flex flex-col">
+                                            <div class="flex items-center">
+                                                <i class="pi mr-2" [ngClass]="{'pi-user': !project.default, 'pi-users': project.default}" 
+                                                    [pTooltip]="project.default ? ('PROJECTS.TYPE.DEFAULT' | translate) : ('PROJECTS.TYPE.PERSONAL' | translate)">
+                                                </i>
+                                                <span class="text-overflow-ellipsis overflow-hidden whitespace-nowrap">{{ project.display_name }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="flex gap-2 justify-end relative">
+                                            <p-splitButton 
+                                                [model]="items"
+                                                icon="pi pi-map"
+                                                appendTo="body"
+                                                (onClick)="showResults(project, 'municipalities')"
+                                                dropdownIcon="pi pi-chevron-down"
+                                                (onDropdownClick)="selectedProject = project"
+                                                [disabled]="!project.finished">
+                                            </p-splitButton>
+                                            <p-button 
+                                                icon="pi pi-ellipsis-v"
+                                                (click)="menu.toggle($event)"
+                                                [disabled]="project.default"
+                                                styleClass="p-button-text p-button-rounded">
+                                            </p-button>
+                                            <p-menu #menu 
+                                                [model]="getSpeedDialItems(project)" 
+                                                [popup]="true"
+                                                appendTo="body">
+                                            </p-menu>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr *ngIf="!project.finished">
+                                    <td colspan="2">
+                                        <p-progressBar
+                                            [value]="getProgress(project)" 
+                                            [showValue]="true">
+                                        </p-progressBar>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </p-panel>
+                </div>
+
+                <!-- Nicht gruppierte Projekte -->
+                <div class="mb-4 min-w-0 overflow-hidden" *ngIf="ungroupedProjects.length > 0">
+                    <p-panel header="{{ 'PROJECTS.UNGROUPED' | translate }}" [toggleable]="true" styleClass="overflow-hidden">
+                        <p-table 
+                            [value]="ungroupedProjects" 
+                            [tableStyle]="{ width: '100%' }" 
+                            styleClass="p-datatable-sm"
+                            [scrollable]="true"
+                            [scrollHeight]="'auto'"
+                            [scrollDirection]="'vertical'"
+                            [(selection)]="selectedTableProject"
+                            selectionMode="single">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th style="width: 70%">{{ 'PROJECTS.FIELDS.NAME' | translate }}</th>
+                                    <th style="width: 30%"></th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-project>
+                                <tr [pSelectableRow]="project" [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
+                                    <td>
+                                        <div class="flex flex-col">
+                                            <div class="flex items-center">
+                                                <i class="pi mr-2" [ngClass]="{'pi-user': !project.default, 'pi-users': project.default}" 
+                                                    [pTooltip]="project.default ? ('PROJECTS.TYPE.DEFAULT' | translate) : ('PROJECTS.TYPE.PERSONAL' | translate)">
+                                                </i>
+                                                <span class="text-overflow-ellipsis overflow-hidden whitespace-nowrap">{{ project.display_name }}</span>
+                                            </div>
+                                            <small *ngIf="project.description" class="text-gray-500 mt-1">{{ project.description }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="flex gap-2 justify-end relative">
+                                            <p-splitButton 
+                                                [model]="items"
+                                                (onClick)="showResults(project, 'municipalities')"
+                                                icon="pi pi-map"
+                                                appendTo="body"
+                                                dropdownIcon="pi pi-chevron-down"
+                                                (onDropdownClick)="selectedProject = project"
+                                                [disabled]="!project.finished">
+                                            </p-splitButton>
+                                            <p-button 
+                                                icon="pi pi-ellipsis-v"
+                                                (click)="menu.toggle($event)"
+                                                [disabled]="project.default"
+                                                styleClass="p-button-text p-button-rounded">
+                                            </p-button>
+                                            <p-menu #menu 
+                                                [model]="getSpeedDialItems(project)" 
+                                                [popup]="true"
+                                                appendTo="body">
+                                            </p-menu>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr *ngIf="!project.finished">
+                                    <td colspan="2">
+                                        <p-progressBar
+                                            [value]="getProgress(project)" 
+                                            [showValue]="true">
+                                        </p-progressBar>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </p-panel>
+                </div>
+
+                <!-- Keine Projekte -->
+                <p-message *ngIf="groupedProjects.length === 0 && ungroupedProjects.length === 0"
+                    severity="info"
+                    text="{{ 'PROJECTS.LIST.NO_PROJECTS' | translate }}">
+                </p-message>
+            </div>
+        </p-scrollPanel>
+    </div>
+
+    <!-- Edit Project Dialog -->
+    <p-dialog 
+        [(visible)]="editDialogVisible" 
+        [header]="'PROJECTS.EDIT.TITLE' | translate"
+        [modal]="true"
+        [style]="{width: '450px'}"
+        [appendTo]="'body'"
+        [draggable]="false"
+        [resizable]="false">
+        <div class="flex flex-col gap-4" *ngIf="projectToEdit">
+            <div class="field">
+                <label for="projectName" class="block mb-2">{{ 'PROJECTS.FIELDS.NAME' | translate }}</label>
+                <input id="projectName" type="text" pInputText [(ngModel)]="projectToEdit.display_name" class="w-full border p-2 border rounded-md">
+            </div>
+            
+            <div class="field">
+                <label for="projectDescription" class="block mb-2">{{ 'PROJECTS.FIELDS.DESCRIPTION' | translate }}</label>
+                <textarea id="projectDescription" pInputTextarea [(ngModel)]="projectToEdit.description" class="w-full p-2 border rounded-md" rows="3"></textarea>
+            </div>
+
+            <div class="field">
+                <label for="projectGroup" class="block mb-2">{{ 'PROJECTS.FIELDS.GROUP' | translate }}</label>
+                <p-dropdown 
+                    id="projectGroup"
+                    [options]="projectGroups"
+                    [(ngModel)]="projectToEdit.projectgroup"
+                    optionLabel="name"
+                    [showClear]="true"
+                    [appendTo]="'body'"
+                    placeholder="{{ 'PROJECTS.FIELDS.SELECT_GROUP' | translate }}"
+                    class="w-full">
+                </p-dropdown>
+            </div>
+        </div>
+        <ng-template pTemplate="footer">
+            <p-button 
+                icon="pi pi-times" 
+                (onClick)="closeEditDialog()" 
+                label="{{ 'COMMON.ACTIONS.CANCEL' | translate }}"
+                styleClass="p-button-text">
+            </p-button>
+            <p-button 
+                icon="pi pi-check" 
+                (onClick)="saveProject()" 
+                label="{{ 'COMMON.ACTIONS.SAVE' | translate }}">
+            </p-button>
+        </ng-template>
+    </p-dialog>
+
+    <p-confirmDialog 
+        [style]="{width: '450px'}" 
+        [appendTo]="'body'"
+        [header]="'PROJECTS.DELETE.TITLE' | translate"
+        [message]="'PROJECTS.DELETE.CONFIRMATION' | translate"
+        [icon]="'pi pi-exclamation-triangle'"
+        acceptButtonStyleClass="p-button-danger"
+        [acceptLabel]="'COMMON.ACTIONS.DELETE' | translate"
+        [rejectLabel]="'COMMON.ACTIONS.CANCEL' | translate">
+    </p-confirmDialog>
+</div>

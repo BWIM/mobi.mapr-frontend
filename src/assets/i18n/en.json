@@ -1,0 +1,130 @@
+{
+    "PROJECTS": {
+        "TITLE": "Projects",
+        "LIST": {
+            "TITLE": "Projects",
+            "NO_PROJECTS": "No projects available"
+        },
+        "DETAILS": {
+            "NAME": "Name",
+            "DESCRIPTION": "Description",
+            "CREATED": "Created at",
+            "UPDATED": "Updated at"
+        },
+        "FIELDS": {
+            "NAME": "Name",
+            "DESCRIPTION": "Description",
+            "TYPE": "Type",
+            "CREATED": "Created at",
+            "STATUS": "Status",
+            "GROUP": "Group",
+            "SELECT_GROUP": "Select Group"
+        },
+        "ACTIONS": {
+            "CREATE": "New Project"
+        },
+        "STATUS": {
+            "FINISHED": "Completed",
+            "IN_PROGRESS": "In Progress"
+        },
+        "UNGROUPED": "Ungrouped Projects",
+        "TYPE": {
+            "DEFAULT": "Standard",
+            "PERSONAL": "Personal"
+        },
+        "MESSAGES": {
+            "UPDATE_SUCCESS": "Project successfully updated",
+            "UPDATE_ERROR": "Error updating project"
+        },
+        "DELETE": {
+            "TITLE": "Delete Project",
+            "CONFIRMATION": "Are you sure you want to delete this project?"
+        }
+    },
+    "COMMON": {
+        "ACTIONS": {
+            "SAVE": "Save",
+            "CANCEL": "Cancel",
+            "EDIT": "Edit",
+            "DELETE": "Delete",
+            "LABEL": "Actions",
+            "CLOSE": "Close",
+            "CONFIRM": "Confirm",
+            "SHARE": "Share",
+            "DOWNLOAD": "Download"
+        },
+        "MESSAGES": {
+            "ERROR": {
+                "LOAD": "Error loading data",
+                "DELETE": "Error deleting"
+            },
+            "SUCCESS": {
+                "DELETE": "Successfully deleted"
+            }
+        }
+    },
+    "LEGEND": {
+        "LVLA": "The mobility time is max. 35% of the local average time.",
+        "LVLB": "The mobility time is between 36% and 50% of the local average time.",
+        "LVLC": "The mobility time is between 51% and 71% of the local average time.",
+        "LVLD": "The mobility time is between 72% and 100% of the local average time.",
+        "LVLE": "The mobility time is between 101% and 140% of the local average time.",
+        "LVLF": "The mobility time is at least 141% of the local average time."
+    },
+    "MAP": {
+        "ACTIONS": {
+            "HEXAGON": "Hexagon",
+            "GEMEINDE": "Gemeinde",
+            "LANDKREIS": "Landkreis",
+            "LAND": "Land"
+        }
+    },
+    "PROJECT_WIZARD": {
+        "CREATE_NEW_PROJECT": "Create New Project",
+        "SELECT_ACTIVITIES": "Select relevant activities",
+        "CREATE_PROJECT": "Create Project",
+        "PROJECT_NAME": "Project Name",
+        "DESCRIPTION": "Description",
+        "PROJECT_SETTINGS": "Project Settings",
+        "MAKE_PUBLIC": "Make Project Public",
+        "ALLOW_SHARING": "Allow Sharing",
+        "SEND_EMAIL": "Send Email after Completion",
+        "LOAD_AREAS_ON_MAP": "Load calculated municipalities directly on map",
+        "ERRORS": {
+            "NAME_REQUIRED": "Please enter a project name."
+        },
+        "ACTIVITIES": {
+            "MID": "Activities",
+            "NON_MID": "Standard Activities"
+        }
+    },
+    "SIDEBAR": {
+        "TITLE": "Details",
+        "DESCRIPTION": "Description",
+        "STATUS": "Status",
+        "NO_SELECTION": "No selection",
+        "CLICK_HINT": "Click on a map to display details",
+        "PROJECT_INFO": "Project Info",
+        "ACTIVITIES": "Activities",
+        "MODES": "Modes",
+        "PERSONAS": "Personas",
+        "NO_PROJECT_SELECTED": "No project selected",
+        "EXPORT_PDF_LANDSCAPE": "Export PDF Landscape",
+        "EXPORT_PDF_PORTRAIT": "Export PDF Portrait"
+    },
+    "ANALYZE": {
+        "PERSONA": {
+            "TITLE": "Persona",
+            "NO_DATA": "No data available"
+        },
+        "TITLE": "Details",
+        "START": "Start",
+        "END": "Ende",
+        "ACTIVITIES": "Activities",
+        "MODES": "Modes",
+        "PERSONAS": "Personas",
+        "PROPERTIES": {
+            "POPULATION": "Population"
+        }
+    }
+}   
