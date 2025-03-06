@@ -13,14 +13,21 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Build the Angular application
-RUN npm run build --prod --configuration=production
+# Build-Argument für die Konfiguration
+ARG CONFIGURATION=stage
+
+# Build the Angular application with the specified configuration
+RUN if [ "$CONFIGURATION" = "production" ]; then \
+        npm run build --prod; \
+    else \
+        npm run build -- --configuration=stage; \
+    fi
 
 # Stage 2: Serve the application with Nginx
 FROM nginx:alpine
 
-# Copy the build output to the Nginx html directory
-COPY --from=build /app/dist/mobi.mapr /usr/share/nginx/html
+# Korrigierter Pfad entsprechend der Angular-Konfiguration
+COPY --from=build /app/dist/mobi.mapr/browser /usr/share/nginx/html
 
 # Copy the custom Nginx configuration file
 COPY nginx.conf /etc/nginx/nginx.conf

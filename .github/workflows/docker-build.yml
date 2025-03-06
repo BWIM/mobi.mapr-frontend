@@ -29,3 +29,5 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/mobi.mapr-frontend:${{ github.ref_name == 'main' && 'latest' || 'stage-latest' }}
+          build-args: |
+            CONFIGURATION=${{ github.ref_name == 'main' && 'production' || 'stage' }}

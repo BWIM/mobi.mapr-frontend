@@ -7,6 +7,7 @@ import { SharedModule } from './shared/shared.module';
 import { ProjectWizardComponent } from './projects/project-wizard/project-wizard.component';
 import { AnalyzeComponent } from './analyze/analyze.component';
 import { CreditsComponent } from './credits/credits.component';
+import { AuthService } from './auth/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -17,9 +18,11 @@ import { CreditsComponent } from './credits/credits.component';
 })
 export class AppComponent {
   title = 'mobi.mapr-frontend-2.0';
+  isLoggedIn: boolean = false;
 
-  constructor(private translate: TranslateService) {
+  constructor(private translate: TranslateService, private authService: AuthService) {
     translate.setDefaultLang('de');
     translate.use('de');
+    this.isLoggedIn = this.authService.isLoggedIn();
   }
 }
