@@ -17,7 +17,7 @@ COPY . .
 ARG CONFIGURATION=stage
 
 # Build the Angular application with the specified configuration
-RUN npm run build --configuration=${CONFIGURATION}
+RUN ng build --configuration=${CONFIGURATION}
 
 # Stage 2: Serve the application with Nginx
 FROM nginx:alpine
