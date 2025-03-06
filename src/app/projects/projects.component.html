@@ -22,19 +22,18 @@
                             styleClass="p-datatable-sm"
                             [scrollable]="true"
                             [scrollHeight]="'auto'"
+                            [scrollDirection]="'vertical'"
                             [(selection)]="selectedTableProject"
                             selectionMode="single">
                             <ng-template pTemplate="header">
                                 <tr>
-                                    <th pFrozenColumn style="min-width: 250px; max-width: 400px;">{{ 'PROJECTS.FIELDS.NAME' | translate }} </th>
-                                    <!-- <th>{{ 'PROJECTS.FIELDS.TYPE' | translate }}</th>
-                                    <th>{{ 'PROJECTS.FIELDS.STATUS' | translate }}</th> -->
-                                    <th style="width: 150px;"></th>
+                                    <th style="width: 70%">{{ 'PROJECTS.FIELDS.NAME' | translate }} </th>
+                                    <th style="width: 30%"></th>
                                 </tr>
                             </ng-template>
                             <ng-template pTemplate="body" let-project>
                                 <tr [pSelectableRow]="project" [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
-                                    <td style="min-width: 250px; max-width: 400px;">
+                                    <td>
                                         <div class="flex flex-col">
                                             <div class="flex items-center">
                                                 <i class="pi mr-2" [ngClass]="{'pi-user': !project.default, 'pi-users': project.default}" 
@@ -45,7 +44,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="flex gap-2 justify-end">
+                                        <div class="flex gap-2 justify-end relative">
                                             <p-splitButton 
                                                 [model]="items"
                                                 icon="pi pi-map"
@@ -56,22 +55,21 @@
                                                 [disabled]="!project.finished">
                                             </p-splitButton>
                                             <p-button 
-                                                icon="pi pi-pencil" 
-                                                styleClass="p-button-rounded p-button-text"
-                                                (onClick)="openEditDialog(project)"
-                                                [disabled]="project.default">
+                                                icon="pi pi-ellipsis-v"
+                                                (click)="menu.toggle($event)"
+                                                [disabled]="project.default"
+                                                styleClass="p-button-text p-button-rounded">
                                             </p-button>
-                                            <p-button 
-                                                icon="pi pi-trash" 
-                                                styleClass="p-button-rounded p-button-text p-button-danger"
-                                                (onClick)="confirmDelete(project)"
-                                                [disabled]="project.default">
-                                            </p-button>
+                                            <p-menu #menu 
+                                                [model]="getSpeedDialItems(project)" 
+                                                [popup]="true"
+                                                appendTo="body">
+                                            </p-menu>
                                         </div>
                                     </td>
                                 </tr>
                                 <tr *ngIf="!project.finished">
-                                    <td colspan="3">
+                                    <td colspan="2">
                                         <p-progressBar
                                             [value]="getProgress(project)" 
                                             [showValue]="true">
@@ -92,17 +90,18 @@
                             styleClass="p-datatable-sm"
                             [scrollable]="true"
                             [scrollHeight]="'auto'"
+                            [scrollDirection]="'vertical'"
                             [(selection)]="selectedTableProject"
                             selectionMode="single">
                             <ng-template pTemplate="header">
                                 <tr>
-                                    <th pFrozenColumn style="min-width: 250px; max-width: 400px;">{{ 'PROJECTS.FIELDS.NAME' | translate }}</th>
-                                    <th style="width: 150px;"></th>
+                                    <th style="width: 70%">{{ 'PROJECTS.FIELDS.NAME' | translate }}</th>
+                                    <th style="width: 30%"></th>
                                 </tr>
                             </ng-template>
                             <ng-template pTemplate="body" let-project>
                                 <tr [pSelectableRow]="project" [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
-                                    <td style="min-width: 250px; max-width: 400px;">
+                                    <td>
                                         <div class="flex flex-col">
                                             <div class="flex items-center">
                                                 <i class="pi mr-2" [ngClass]="{'pi-user': !project.default, 'pi-users': project.default}" 
@@ -114,7 +113,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="flex gap-2 justify-end">
+                                        <div class="flex gap-2 justify-end relative">
                                             <p-splitButton 
                                                 [model]="items"
                                                 (onClick)="showResults(project, 'municipalities')"
@@ -125,17 +124,16 @@
                                                 [disabled]="!project.finished">
                                             </p-splitButton>
                                             <p-button 
-                                                icon="pi pi-pencil" 
-                                                styleClass="p-button-rounded p-button-text"
-                                                (onClick)="openEditDialog(project)"
-                                                [disabled]="project.default">
+                                                icon="pi pi-ellipsis-v"
+                                                (click)="menu.toggle($event)"
+                                                [disabled]="project.default"
+                                                styleClass="p-button-text p-button-rounded">
                                             </p-button>
-                                            <p-button 
-                                                icon="pi pi-trash" 
-                                                styleClass="p-button-rounded p-button-text p-button-danger"
-                                                (onClick)="confirmDelete(project)"
-                                                [disabled]="project.default">
-                                            </p-button>
+                                            <p-menu #menu 
+                                                [model]="getSpeedDialItems(project)" 
+                                                [popup]="true"
+                                                appendTo="body">
+                                            </p-menu>
                                         </div>
                                     </td>
                                 </tr>

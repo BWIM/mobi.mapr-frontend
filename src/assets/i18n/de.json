@@ -49,7 +49,9 @@
             "DELETE": "Löschen",
             "LABEL": "Aktionen",
             "CLOSE": "Schließen",
-            "CONFIRM": "Bestätigen"
+            "CONFIRM": "Bestätigen",
+            "SHARE": "Teilen",
+            "DOWNLOAD": "Download"
         },
         "MESSAGES": {
             "ERROR": {

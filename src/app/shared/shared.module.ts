@@ -30,6 +30,7 @@ import { ToggleButtonModule } from 'primeng/togglebutton';
 import { ChartModule } from 'primeng/chart';
 import { CardModule } from 'primeng/card';
 import { FieldsetModule } from 'primeng/fieldset';
+import { MenuModule } from 'primeng/menu';
 @NgModule({
   imports: [
     CommonModule,
@@ -60,7 +61,8 @@ import { FieldsetModule } from 'primeng/fieldset';
     ToggleButtonModule,
     ChartModule,
     CardModule,
-    FieldsetModule
+    FieldsetModule,
+    MenuModule
   ],
   exports: [
     CommonModule,
@@ -91,7 +93,8 @@ import { FieldsetModule } from 'primeng/fieldset';
     ToggleButtonModule,
     ChartModule,
     CardModule,
-    FieldsetModule
+    FieldsetModule,
+    MenuModule
   ],
   providers: [MessageService]
 })

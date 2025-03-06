@@ -365,4 +365,52 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     });
   }
 
+  getSpeedDialItems(project: Project): MenuItem[] {
+    return [
+      {
+        icon: 'pi pi-pencil',
+        label: this.translate.instant('COMMON.ACTIONS.EDIT'),
+        command: () => this.openEditDialog(project),
+        tooltipOptions: {
+          tooltipLabel: this.translate.instant('COMMON.ACTIONS.EDIT')
+        }
+      },
+      {
+        icon: 'pi pi-trash',
+        label: this.translate.instant('COMMON.ACTIONS.DELETE'),
+        command: () => this.confirmDelete(project),
+        tooltipOptions: {
+          tooltipLabel: this.translate.instant('COMMON.ACTIONS.DELETE')
+        }
+      },
+      // Share Map
+      {
+        icon: 'pi pi-cloud-upload',
+        label: this.translate.instant('COMMON.ACTIONS.SHARE'),
+        command: () => this.shareMap(project),
+        tooltipOptions: {
+          tooltipLabel: this.translate.instant('COMMON.ACTIONS.SHARE')
+        },
+        disabled: true
+      },
+      // Download Map
+      {
+        icon: 'pi pi-download',
+        label: this.translate.instant('COMMON.ACTIONS.DOWNLOAD'),
+        command: () => this.downloadMap(project),
+        tooltipOptions: {
+          tooltipLabel: this.translate.instant('COMMON.ACTIONS.DOWNLOAD')
+        },
+        disabled: true
+      }
+    ];
+  }
+
+  shareMap(project: Project): void {
+    console.log(project);
+  }
+
+  downloadMap(project: Project): void {
+    console.log(project);
+  }
 }

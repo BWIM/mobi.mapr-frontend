@@ -49,7 +49,9 @@
             "DELETE": "Delete",
             "LABEL": "Actions",
             "CLOSE": "Close",
-            "CONFIRM": "Confirm"
+            "CONFIRM": "Confirm",
+            "SHARE": "Share",
+            "DOWNLOAD": "Download"
         },
         "MESSAGES": {
             "ERROR": {
