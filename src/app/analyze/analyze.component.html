@@ -73,7 +73,7 @@
                             <div class="p-4">
                                 <h3 class="text-xl mb-4">{{ 'ANALYZE.MODES.TITLE' | translate }}</h3>
                                 <div *ngIf="hasModeData()">
-                                    <p-chart type="pie" [data]="modesChartData" [options]="pieChartOptions"></p-chart>
+                                    <p-chart type="bar" [data]="modesChartData" [options]="barChartOptions"></p-chart>
                                 </div>
                                 <div *ngIf="!hasModeData()" class="text-center p-4">
                                     <p>{{ 'ANALYZE.MODES.NO_DATA' | translate }}</p>

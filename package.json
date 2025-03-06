@@ -23,6 +23,7 @@
     "@primeng/themes": "^19.0.6",
     "@tailwindcss/postcss": "^4.0.6",
     "chart.js": "^4.4.8",
+    "jspdf": "^3.0.0",
     "ol": "^10.4.0",
     "postcss": "^8.5.2",
     "primeicons": "^7.0.0",

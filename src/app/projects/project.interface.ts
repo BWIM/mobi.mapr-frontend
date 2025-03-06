@@ -50,3 +50,12 @@ export interface ProjectInfo {
     modes: string[];
     personas: string[];
   }
+
+  export interface ExportProject {
+    project_name: string;
+    project_description: string;
+    creation_date: string;
+    persona_abbreviations: string[];
+    profile_modes: string[];
+    activity_abbreviations: string[];
+  }

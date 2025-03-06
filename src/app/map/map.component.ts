@@ -44,6 +44,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
+    
+    // Referenzen im MapService zurücksetzen
+    this.mapService.setMap(null);
+    this.mapService.setMainLayer(null);
   }
 
   private setupSubscriptions(): void {
@@ -67,6 +71,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         zoom: 9
       })
     });
+
+    // Registriere Map und Layer im MapService
+    this.mapService.setMap(this.map);
+    this.mapService.setMainLayer(this.vectorLayer);
 
     this.setupMapInteractions();
   }

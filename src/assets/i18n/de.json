@@ -119,7 +119,9 @@
         "ACTIVITIES": "Aktivitäten",
         "MODES": "Modi",
         "PERSONAS": "Personas",
-        "NO_PROJECT_SELECTED": "Kein Projekt ausgewählt"
+        "NO_PROJECT_SELECTED": "Kein Projekt ausgewählt",
+        "EXPORT_PDF_LANDSCAPE": "PDF exportieren (Querformat)",
+        "EXPORT_PDF_PORTRAIT": "PDF exportieren (Hochformat)"
     },
     "ANALYZE": {
         "PERSONA": {

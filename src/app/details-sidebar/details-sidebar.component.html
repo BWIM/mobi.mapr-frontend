@@ -29,6 +29,24 @@
             </li>
           </ul>
         </p-fieldset>
+
+        <div class="mt-6 flex justify-center">
+          <p-button 
+            (onClick)="exportToPDFLandscape()"
+            icon="pi pi-file-pdf"
+            [label]="'SIDEBAR.EXPORT_PDF_LANDSCAPE' | translate"
+            styleClass="p-button-primary">
+          </p-button>
+        </div>
+
+        <div class="mt-6 flex justify-center">
+          <p-button 
+            (onClick)="exportToPDFPortrait()"
+            icon="pi pi-file-pdf"
+            [label]="'SIDEBAR.EXPORT_PDF_PORTRAIT' | translate"
+            styleClass="p-button-primary">
+          </p-button>
+        </div>
       </div>
       
       <div *ngIf="!projectInfo" class="p-4 text-center text-gray-500">

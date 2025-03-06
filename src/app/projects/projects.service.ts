@@ -8,7 +8,8 @@ import {
   PaginatedResponse, 
   ProjectCreateUpdate,
   ProjectGroupCreateUpdate, 
-  ProjectInfo
+  ProjectInfo,
+  ExportProject
 } from './project.interface';
 
 
@@ -96,5 +97,10 @@ export class ProjectsService {
 
   updateCurrentProjectInfo(info: ProjectInfo | null): void {
     this.currentProjectInfo.next(info);
+  }
+
+  getExportInfo(): Observable<ExportProject> {
+    const projectId = sessionStorage.getItem('project');
+    return this.http.get<any>(this.apiUrl + `/${projectId}/export-info`);
   }
 }

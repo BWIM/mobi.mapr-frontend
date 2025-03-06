@@ -108,7 +108,9 @@
         "ACTIVITIES": "Activities",
         "MODES": "Modes",
         "PERSONAS": "Personas",
-        "NO_PROJECT_SELECTED": "No project selected"
+        "NO_PROJECT_SELECTED": "No project selected",
+        "EXPORT_PDF_LANDSCAPE": "Export PDF Landscape",
+        "EXPORT_PDF_PORTRAIT": "Export PDF Portrait"
     },
     "ANALYZE": {
         "PERSONA": {

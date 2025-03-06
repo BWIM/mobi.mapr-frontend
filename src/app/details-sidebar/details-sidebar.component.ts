@@ -7,6 +7,9 @@ import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../projects/projects.service';
 import { ProjectInfo } from '../projects/project.interface';
+import { MapService } from '../map/map.service';
+import { PdfGenerationService } from '../map/pdf-generation.service';
+
 @Component({
   selector: 'app-details-sidebar',
   standalone: true,
@@ -25,7 +28,9 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
 
   constructor(
     private translate: TranslateService,
-    private projectsService: ProjectsService
+    private projectsService: ProjectsService,
+    private mapService: MapService,
+    private pdfService: PdfGenerationService
   ) {
     this.subscription = this.projectsService.currentProjectInfo$.subscribe(
       info => {
@@ -34,6 +39,15 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     );
   }
 
+  exportToPDFLandscape(): void {
+      this.pdfService.exportToPDFLandscape();
+    }
+
+  exportToPDFPortrait(): void {
+    this.pdfService.exportToPDFPortrait();
+  }
+
+  
   ngOnInit() {}
 
   ngOnDestroy() {
