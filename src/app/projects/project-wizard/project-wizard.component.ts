@@ -28,7 +28,7 @@ import { Activity } from '../../services/interfaces/activity.interface';
 export class ProjectWizardComponent implements OnInit, OnDestroy {
   steps: MenuItem[] = [];
   activeIndex: number = 0;
-  projectForm: FormGroup;
+  projectForm!: FormGroup;
   visible: boolean = false;
   groupedActivities: GroupedActivities[] = [];
   personas: Persona[] = [];
@@ -53,9 +53,31 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     private reloadService: ProjectsReloadService
   ) {
     this.subscription = this.wizardService.visible$.subscribe(
-      visible => this.visible = visible
+      visible => {
+        this.visible = visible;
+        if (visible) {
+          this.resetWizard();
+        }
+      }
     );
 
+    this.initializeForm();
+  }
+
+  ngOnInit() {
+    this.initializeSteps();
+    this.loadActivities();
+    this.loadPersonas();
+    this.loadModes();
+  }
+
+  ngOnDestroy() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  private initializeForm() {
     this.projectForm = this.fb.group({
       // Schritt 1: Aktivitäten
       activities: this.fb.group({
@@ -85,16 +107,38 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit() {
-    this.initializeSteps();
-    this.loadActivities();
-    this.loadPersonas();
-    this.loadModes();
-  }
+  private resetWizard() {
+    // Formular zurücksetzen
+    this.projectForm.reset();
+    
+    // Aktivitäten-Auswahl zurücksetzen
+    this.showMidActivities = true;
+    if (this.allGroupedActivities.mid.length > 0) {
+      this.updateDisplayedActivities(true);
+    }
+    
+    // Ausgewählte Gebiete zurücksetzen
+    this.selectedAreaIds = [];
+    
+    // Wizard zum ersten Schritt zurücksetzen
+    this.activeIndex = 0;
+    
+    // Standard-Werte für die Zusammenfassung setzen
+    this.projectForm.patchValue({
+      summary: {
+        isPublic: false,
+        allowSharing: false,
+        sendEmail: true,
+        loadAreasOnMap: true
+      }
+    });
 
-  ngOnDestroy() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
+    // Wenn Personas und Modi bereits geladen sind, diese automatisch auswählen
+    if (this.personas.length > 0) {
+      this.projectForm.get('personas.selectedPersonas')?.setValue(this.personas);
+    }
+    if (this.modes.length > 0) {
+      this.projectForm.get('modes.selectedModes')?.setValue(this.modes);
     }
   }
 

@@ -34,7 +34,8 @@
         },
         "MESSAGES": {
             "UPDATE_SUCCESS": "Projekt erfolgreich aktualisiert",
-            "UPDATE_ERROR": "Fehler beim Aktualisieren des Projekts"
+            "UPDATE_ERROR": "Fehler beim Aktualisieren des Projekts",
+            "CONFIRM_DELETE": "Sind Sie sicher, dass Sie das Projekt löschen möchten?"
         },
         "DELETE": {
             "TITLE": "Projekt löschen",
@@ -60,7 +61,8 @@
             },
             "SUCCESS": {
                 "DELETE": "Erfolgreich gelöscht"
-            }
+            },
+            "CONFIRM_DELETE": "Sind Sie sicher, dass Sie das Projekt löschen möchten?"
         }
     },
     "LEGEND": {

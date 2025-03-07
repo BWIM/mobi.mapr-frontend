@@ -186,6 +186,9 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
   confirmDelete(project: Project): void {
     this.confirmationService.confirm({
+      message: this.translate.instant('PROJECTS.MESSAGES.CONFIRM_DELETE'),
+      header: this.translate.instant('COMMON.MESSAGES.CONFIRM_DELETE'),
+      icon: 'pi pi-exclamation-triangle',
       accept: () => {
         this.deleteProject(project);
       }
@@ -382,27 +385,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         tooltipOptions: {
           tooltipLabel: this.translate.instant('COMMON.ACTIONS.DELETE')
         }
-      },
-      // // Share Map
-      // {
-      //   icon: 'pi pi-cloud-upload',
-      //   label: this.translate.instant('COMMON.ACTIONS.SHARE'),
-      //   command: () => this.shareMap(project),
-      //   tooltipOptions: {
-      //     tooltipLabel: this.translate.instant('COMMON.ACTIONS.SHARE')
-      //   },
-      //   disabled: true
-      // },
-      // // Download Map
-      // {
-      //   icon: 'pi pi-download',
-      //   label: this.translate.instant('COMMON.ACTIONS.DOWNLOAD'),
-      //   command: () => this.downloadMap(project),
-      //   tooltipOptions: {
-      //     tooltipLabel: this.translate.instant('COMMON.ACTIONS.DOWNLOAD')
-      //   },
-      //   disabled: true
-      // }
+      }
     ];
   }
 
