@@ -79,7 +79,8 @@ export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy 
     const baseLayer = new TileLayer({
       source: new XYZ({
         url: 'https://{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-        attributions: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+        attributions: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        crossOrigin: 'anonymous'
       })
     });
 

@@ -144,5 +144,9 @@
         "PROPERTIES": {
             "POPULATION": "Bevölkerung"
         }
+    },
+    "EXPORT": {
+        "IS_EXPORTING": "Export wird durchgeführt...",
+        "GENERATING_PDF": "PDF wird generiert..."
     }
 } 

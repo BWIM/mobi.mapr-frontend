@@ -100,7 +100,10 @@ export class ProjectsService {
   }
 
   getExportInfo(): Observable<ExportProject> {
-    const projectId = sessionStorage.getItem('project');
-    return this.http.get<any>(this.apiUrl + `/${projectId}/export-info`);
+    const currentProject = this.currentProjectInfo.getValue();
+    if (!currentProject) {
+      throw new Error('Kein Projekt ausgewählt');
+    }
+    return this.http.get<ExportProject>(`${this.apiUrl}/projects/${currentProject.id}/export-info`);
   }
 }

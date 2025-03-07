@@ -128,5 +128,9 @@
         "PROPERTIES": {
             "POPULATION": "Population"
         }
+    },
+    "EXPORT": {
+        "IS_EXPORTING": "Export is in progress...",
+        "GENERATING_PDF": "Generating PDF..."
     }
 }   
