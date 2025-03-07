@@ -34,7 +34,8 @@
         },
         "MESSAGES": {
             "UPDATE_SUCCESS": "Project successfully updated",
-            "UPDATE_ERROR": "Error updating project"
+            "UPDATE_ERROR": "Error updating project",
+            "CONFIRM_DELETE": "Are you sure you want to delete this project?"
         },
         "DELETE": {
             "TITLE": "Delete Project",
@@ -60,7 +61,8 @@
             },
             "SUCCESS": {
                 "DELETE": "Successfully deleted"
-            }
+            },
+            "CONFIRM_DELETE": "Are you sure you want to delete this project?"
         }
     },
     "LEGEND": {
@@ -126,5 +128,9 @@
         "PROPERTIES": {
             "POPULATION": "Population"
         }
+    },
+    "EXPORT": {
+        "IS_EXPORTING": "Export is in progress...",
+        "GENERATING_PDF": "Generating PDF..."
     }
 }   

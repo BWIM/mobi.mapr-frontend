@@ -17,18 +17,14 @@
                 <div class="mb-4 min-w-0 overflow-hidden" *ngFor="let group of groupedProjects">
                     <p-panel [header]="group.group.name" [toggleable]="true" styleClass="overflow-hidden">
                         <p-table 
-                            [value]="group.projects" 
-                            [tableStyle]="{ width: '100%' }" 
+                            [value]="group.projects"
                             styleClass="p-datatable-sm"
-                            [scrollable]="true"
-                            [scrollHeight]="'auto'"
-                            [scrollDirection]="'vertical'"
                             [(selection)]="selectedTableProject"
                             selectionMode="single">
                             <ng-template pTemplate="header">
                                 <tr>
-                                    <th style="width: 70%">{{ 'PROJECTS.FIELDS.NAME' | translate }} </th>
-                                    <th style="width: 30%"></th>
+                                    <th>{{ 'PROJECTS.FIELDS.NAME' | translate }} </th>
+                                    <th></th>
                                 </tr>
                             </ng-template>
                             <ng-template pTemplate="body" let-project>
@@ -39,7 +35,7 @@
                                                 <i class="pi mr-2" [ngClass]="{'pi-user': !project.default, 'pi-users': project.default}" 
                                                     [pTooltip]="project.default ? ('PROJECTS.TYPE.DEFAULT' | translate) : ('PROJECTS.TYPE.PERSONAL' | translate)">
                                                 </i>
-                                                <span class="text-overflow-ellipsis overflow-hidden whitespace-nowrap">{{ project.display_name }}</span>
+                                                <span class="text-overflow-ellipsis overflow-hidden break-words">{{ project.display_name }}</span>
                                             </div>
                                         </div>
                                     </td>
@@ -69,7 +65,7 @@
                                     </td>
                                 </tr>
                                 <tr *ngIf="!project.finished">
-                                    <td colspan="2">
+                                    <td colspan="1">
                                         <p-progressBar
                                             [value]="getProgress(project)" 
                                             [showValue]="true">
@@ -85,18 +81,14 @@
                 <div class="mb-4 min-w-0 overflow-hidden" *ngIf="ungroupedProjects.length > 0">
                     <p-panel header="{{ 'PROJECTS.UNGROUPED' | translate }}" [toggleable]="true" styleClass="overflow-hidden">
                         <p-table 
-                            [value]="ungroupedProjects" 
-                            [tableStyle]="{ width: '100%' }" 
+                            [value]="ungroupedProjects"
                             styleClass="p-datatable-sm"
-                            [scrollable]="true"
-                            [scrollHeight]="'auto'"
-                            [scrollDirection]="'vertical'"
                             [(selection)]="selectedTableProject"
                             selectionMode="single">
                             <ng-template pTemplate="header">
                                 <tr>
-                                    <th style="width: 70%">{{ 'PROJECTS.FIELDS.NAME' | translate }}</th>
-                                    <th style="width: 30%"></th>
+                                    <th>{{ 'PROJECTS.FIELDS.NAME' | translate }}</th>
+                                    <th></th>
                                 </tr>
                             </ng-template>
                             <ng-template pTemplate="body" let-project>
@@ -107,9 +99,8 @@
                                                 <i class="pi mr-2" [ngClass]="{'pi-user': !project.default, 'pi-users': project.default}" 
                                                     [pTooltip]="project.default ? ('PROJECTS.TYPE.DEFAULT' | translate) : ('PROJECTS.TYPE.PERSONAL' | translate)">
                                                 </i>
-                                                <span class="text-overflow-ellipsis overflow-hidden whitespace-nowrap">{{ project.display_name }}</span>
+                                                <span class="text-overflow-ellipsis overflow-hidden break-words">{{ project.display_name }}</span>
                                             </div>
-                                            <small *ngIf="project.description" class="text-gray-500 mt-1">{{ project.description }}</small>
                                         </div>
                                     </td>
                                     <td>
@@ -138,7 +129,7 @@
                                     </td>
                                 </tr>
                                 <tr *ngIf="!project.finished">
-                                    <td colspan="2">
+                                    <td colspan="1">
                                         <p-progressBar
                                             [value]="getProgress(project)" 
                                             [showValue]="true">

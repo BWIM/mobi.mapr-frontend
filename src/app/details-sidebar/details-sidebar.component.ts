@@ -9,6 +9,7 @@ import { ProjectsService } from '../projects/projects.service';
 import { ProjectInfo } from '../projects/project.interface';
 import { MapService } from '../map/map.service';
 import { PdfGenerationService } from '../map/pdf-generation.service';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @Component({
   selector: 'app-details-sidebar',
@@ -18,6 +19,7 @@ import { PdfGenerationService } from '../map/pdf-generation.service';
     ButtonModule,
     PanelModule,
     DialogModule,
+    ProgressSpinnerModule
   ],
   templateUrl: './details-sidebar.component.html',
   styleUrl: './details-sidebar.component.css'
@@ -25,6 +27,7 @@ import { PdfGenerationService } from '../map/pdf-generation.service';
 export class DetailsSidebarComponent implements OnInit, OnDestroy {
   projectInfo: ProjectInfo | null = null;
   private subscription: Subscription;
+  isExporting: boolean = false;
 
   constructor(
     private translate: TranslateService,
@@ -39,15 +42,24 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     );
   }
 
-  exportToPDFLandscape(): void {
-      this.pdfService.exportToPDFLandscape();
+  async exportToPDFLandscape(): Promise<void> {
+    try {
+      this.isExporting = true;
+      await this.pdfService.exportToPDFLandscape();
+    } finally {
+      this.isExporting = false;
     }
-
-  exportToPDFPortrait(): void {
-    this.pdfService.exportToPDFPortrait();
   }
 
-  
+  async exportToPDFPortrait(): Promise<void> {
+    try {
+      this.isExporting = true;
+      await this.pdfService.exportToPDFPortrait();
+    } finally {
+      this.isExporting = false;
+    }
+  }
+
   ngOnInit() {}
 
   ngOnDestroy() {

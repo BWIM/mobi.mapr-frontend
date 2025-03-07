@@ -85,6 +85,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       source: new XYZ({
         url: 'https://{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
         attributions: undefined,
+        crossOrigin: 'anonymous'  // CORS aktivieren
       })
     });
 
