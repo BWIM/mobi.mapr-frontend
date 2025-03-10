@@ -147,7 +147,12 @@
         "PERSONAS": "Personas",
         "NO_PROJECT_SELECTED": "Kein Projekt ausgewählt",
         "EXPORT_PDF_LANDSCAPE": "PDF exportieren (Querformat)",
-        "EXPORT_PDF_PORTRAIT": "PDF exportieren (Hochformat)"
+        "EXPORT_PDF_PORTRAIT": "PDF exportieren (Hochformat)",
+        "SHARE_LINK": "Teilen Link",
+        "SHARE_LINK_DESCRIPTION": "Teilen Sie diesen Link, damit andere das Projekt anschauen können, ohne dass sie ein Konto haben.",
+        "SHARE": "Teilen",
+        "COPY_LINK": "Link kopieren",
+        "COPY_LINK_SUCCESS": "Link erfolgreich kopiert"
     },
     "ANALYZE": {
         "PERSONA": {

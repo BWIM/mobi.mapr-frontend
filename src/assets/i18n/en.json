@@ -135,7 +135,12 @@
         "PERSONAS": "Personas",
         "NO_PROJECT_SELECTED": "No project selected",
         "EXPORT_PDF_LANDSCAPE": "Export PDF Landscape",
-        "EXPORT_PDF_PORTRAIT": "Export PDF Portrait"
+        "EXPORT_PDF_PORTRAIT": "Export PDF Portrait",
+        "SHARE_LINK": "Share Link",
+        "SHARE_LINK_DESCRIPTION": "Share this link so that others can view the project without having an account.",
+        "SHARE": "Share",
+        "COPY_LINK": "Copy Link",
+        "COPY_LINK_SUCCESS": "Link successfully copied"
     },
     "ANALYZE": {
         "PERSONA": {

@@ -123,12 +123,29 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     });
 
     const labels = modeScores.map((rankData: any) => `Rang ${rankData.rank}`);
+
+    // Farbpalette für bis zu 4 Modi
+    const colorPalette = {
+      'car': '#FF6384',      // Rot für Auto
+      'bicycle': '#36A2EB',     // Blau für Fahrrad
+      'pedestrian': '#4BC0C0',     // Türkis für Fußgänger
+      'pt': '#FFCD56'        // Gelb für ÖPNV
+    };
+
+    // Berechne die Gesamtsumme für jeden Rang
+    const rankTotals = modeScores.map((rankData: any) => {
+      return Object.values(rankData.modes || {}).reduce((sum: number, mode: any) => sum + (mode.count || 0), 0);
+    });
+
     const datasets = Array.from(uniqueModes).map(mode => {
-      const color = mode === 'car' ? '#FF6384' : '#36A2EB';
       return {
         label: modeScores[0]?.modes[mode]?.display_name || mode,
-        data: modeScores.map((rankData: any) => rankData.modes[mode]?.count || 0),
-        backgroundColor: color,
+        data: modeScores.map((rankData: any, index: number) => {
+          const count = rankData.modes[mode]?.count || 0;
+          const total = rankTotals[index];
+          return total > 0 ? (count / total * 100) : 0;
+        }),
+        backgroundColor: colorPalette[mode as keyof typeof colorPalette] || '#808080',
         stack: 'Stack 0'
       };
     });
@@ -145,7 +162,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
       plugins: {
         tooltip: {
           mode: 'index',
-          intersect: false
+          intersect: false,
+          callbacks: {
+            label: function(context: any) {
+              return `${context.dataset.label}: ${context.raw.toFixed(1)}%`;
+            }
+          }
         },
         legend: {
           labels: {
@@ -167,11 +189,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
         y: {
           stacked: true,
           ticks: {
-            color: '#495057'
+            color: '#495057',
+            callback: function(value: number) {
+              return value + '%';
+            }
           },
           grid: {
             color: '#ebedef'
-          }
+          },
+          max: 100
         }
       }
     };
