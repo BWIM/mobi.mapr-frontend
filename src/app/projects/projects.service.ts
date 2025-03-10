@@ -9,7 +9,8 @@ import {
   ProjectCreateUpdate,
   ProjectGroupCreateUpdate, 
   ProjectInfo,
-  ExportProject
+  ExportProject,
+  ProjectsFinishedStatus
 } from './project.interface';
 
 
@@ -105,5 +106,9 @@ export class ProjectsService {
       throw new Error('Kein Projekt ausgewählt');
     }
     return this.http.get<ExportProject>(`${this.apiUrl}/projects/${currentProject.id}/export-info`);
+  }
+
+  checkAllFinished(): Observable<ProjectsFinishedStatus> {
+    return this.http.get<ProjectsFinishedStatus>(`${this.apiUrl}/projects/check-all-finished/`);
   }
 }
