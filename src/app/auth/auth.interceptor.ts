@@ -8,6 +8,10 @@ import { SessionService } from '../services/session.service';
 
 let isRefreshing = false;
 
+function isPublicRoute(router: Router): boolean {
+  return router.routerState.snapshot.root.firstChild?.data?.['public'] === true;
+}
+
 function addSessionParameters(url: string, sessionService: SessionService): string {
   const separator = url.includes('?') ? '&' : '?';
   return `${url}${separator}${sessionService.getRequestParameters()}`;
@@ -21,8 +25,9 @@ export const AuthInterceptor: HttpInterceptorFn = (
   const router = inject(Router);
   const sessionService = inject(SessionService);
 
-  if (req.url.includes('/token/')) {
-    return next(req);
+  if (req.url.includes('/token/') || isPublicRoute(router)) {
+    const url = addSessionParameters(req.url, sessionService);
+    return next(req.clone({ url }));
   }
 
   const headers = authService.getAuthorizationHeaders();

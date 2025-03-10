@@ -160,5 +160,16 @@
     "EXPORT": {
         "IS_EXPORTING": "Export is in progress...",
         "GENERATING_PDF": "Generating PDF..."
+    },
+    "SHARE": {
+        "NO_PROJECT_SELECTED": "No project selected",
+        "CREATED_BY": "Created by",
+        "EXPIRES": "Expires at",
+        "DESCRIPTION": "Description",
+        "ACTIVITIES": "Activities",
+        "PERSONAS": "Personas",
+        "NO_ACTIVITIES": "No activities",
+        "NO_PERSONAS": "No personas",
+        "NO_DESCRIPTION": "No description"
     }
 }   

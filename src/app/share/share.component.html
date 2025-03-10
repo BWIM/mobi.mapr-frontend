@@ -1,1 +1,50 @@
-<p>share works!</p>
+<div class="relative w-full h-screen overflow-hidden">
+    <!-- Hauptbereich mit Karte -->
+    <div class="w-full h-full">
+        <app-map></app-map>
+
+        <!-- Header mit Logo -->
+        <div class="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
+            <img src="assets/images/logo.png" alt="Logo" class="h-30">
+        </div>
+    </div>
+
+    <!-- Details Tab -->
+    <div class="sidebar-tab absolute right-0 top-1/2 -translate-y-1/2 bg-white/95 rounded-l-lg shadow-md z-20 cursor-pointer"
+        (click)="pinRightSidebar()"
+        (mouseenter)="showRightSidebar()">
+        <div class="flex flex-col items-center p-2 gap-2">
+            <i class="pi pi-angle-left text-gray-600" [class.rotate-180]="rightSidebarExpanded"></i>
+            <span class="rotate-text text-gray-600 font-medium">Details</span>
+        </div>
+    </div>
+
+    <!-- Details Dialog -->
+    <p-dialog 
+        [(visible)]="rightSidebarExpanded"
+        position="right"
+        [closable]="true"
+        [draggable]="false"
+        class="h-full"
+        [resizable]="true"
+        styleClass="details-sidebar"
+        [style]="{width: '400px'}"
+        (onHide)="isRightPinned = false"
+        (mouseleave)="mouseRightLeave()">
+        <div class="absolute top-5 left-5">
+            <button pButton
+                    icon="pi pi-thumbtack"
+                    [class.rotate-45]="!isRightPinned"
+                    class="p-button-rounded p-button-text transition-transform"
+                    (click)="toggleRightPin()">
+            </button>
+        </div>
+        <div class="p-3 h-full">
+            <div class="info-section h-full">
+                <app-share-sidebar [sharedProject]="sharedProject"></app-share-sidebar>
+            </div>
+        </div>
+    </p-dialog>
+</div>
+
+<app-loading-spinner></app-loading-spinner>

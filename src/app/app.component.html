@@ -1,8 +1,8 @@
 <div class="app-container">
     <div class="content">
         <router-outlet></router-outlet>
-        <app-project-wizard></app-project-wizard>
-        <app-analyze></app-analyze>
+        <app-project-wizard *ngIf="isLoggedIn"></app-project-wizard>
+        <app-analyze *ngIf="isLoggedIn"></app-analyze>
         <app-credits *ngIf="isLoggedIn"></app-credits>
     </div>
 </div>

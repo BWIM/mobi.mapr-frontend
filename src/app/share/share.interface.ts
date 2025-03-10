@@ -3,7 +3,7 @@ export interface ShareProject {
     project_name: string;
     project_description: string;
     expires: string;
-    activities: string[];
+    categories: string[];
     personas: string[];
     profiles: string[];
   }

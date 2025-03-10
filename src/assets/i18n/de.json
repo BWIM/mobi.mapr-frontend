@@ -177,5 +177,16 @@
     "EXPORT": {
         "IS_EXPORTING": "Export wird durchgeführt...",
         "GENERATING_PDF": "PDF wird generiert..."
+    },
+    "SHARE": {
+        "NO_PROJECT_SELECTED": "Kein Projekt ausgewählt",
+        "CREATED_BY": "Erstellt von",
+        "EXPIRES": "Läuft ab am",
+        "DESCRIPTION": "Beschreibung",
+        "ACTIVITIES": "Aktivitäten",
+        "PERSONAS": "Personas",
+        "NO_ACTIVITIES": "Keine Aktivitäten vorhanden",
+        "NO_PERSONAS": "Keine Personas vorhanden",
+        "NO_DESCRIPTION": "Keine Beschreibung vorhanden"
     }
 } 
