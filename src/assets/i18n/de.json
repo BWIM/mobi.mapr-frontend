@@ -35,7 +35,10 @@
         "MESSAGES": {
             "UPDATE_SUCCESS": "Projekt erfolgreich aktualisiert",
             "UPDATE_ERROR": "Fehler beim Aktualisieren des Projekts",
-            "CONFIRM_DELETE": "Sind Sie sicher, dass Sie das Projekt löschen möchten?"
+            "CONFIRM_DELETE": "Sind Sie sicher, dass Sie das Projekt löschen möchten?",
+            "UNFINISHED_PROJECTS": "Es gibt noch nicht fertige Projekte",
+            "UNFINISHED_PROJECTS_DETAIL": "Die folgenden Projekte müssen noch fertiggestellt werden: {projects}",
+            "CHECK_PROJECTS_ERROR": "Fehler beim Prüfen der Projekte"
         },
         "DELETE": {
             "TITLE": "Projekt löschen",

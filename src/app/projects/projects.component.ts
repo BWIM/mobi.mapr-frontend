@@ -257,7 +257,35 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   }
 
   showProjectWizard(): void {
-    this.wizardService.show();
+    this.loadingService.startLoading();
+    this.projectsService.checkAllFinished().pipe(
+      finalize(() => this.loadingService.stopLoading())
+    ).subscribe({
+      next: (status) => {
+        if (!status.all_finished) {
+          const unfinishedProjectNames = status.unfinished_projects
+            .map(p => p.display_name)
+            .join(', ');
+          
+          this.messageService.add({
+            severity: 'warn',
+            summary: this.translate.instant('PROJECTS.MESSAGES.UNFINISHED_PROJECTS'),
+            detail: this.translate.instant('PROJECTS.MESSAGES.UNFINISHED_PROJECTS_DETAIL', { projects: unfinishedProjectNames }),
+            life: 5000
+          });
+        } else {
+          this.wizardService.show();
+        }
+      },
+      error: (error) => {
+        console.error('Fehler beim Prüfen der Projekte:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
+          detail: this.translate.instant('PROJECTS.MESSAGES.CHECK_PROJECTS_ERROR')
+        });
+      }
+    });
   }
 
   private setupWebsocketForProject(project: Project): void {

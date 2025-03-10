@@ -59,3 +59,14 @@ export interface ProjectInfo {
     profile_modes: string[];
     activity_abbreviations: string[];
   }
+
+export interface UnfinishedProject {
+  id: number;
+  display_name: string;
+  progress: number;
+}
+
+export interface ProjectsFinishedStatus {
+  all_finished: boolean;
+  unfinished_projects: UnfinishedProject[];
+}
