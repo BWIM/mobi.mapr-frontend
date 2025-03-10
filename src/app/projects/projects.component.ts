@@ -55,6 +55,23 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   private websocketConnections: Map<number, WebSocketSubject<WebsocketResult>> = new Map();
   editDialogVisible = false;
   projectToEdit: Project | null = null;
+  
+  // Neue Properties für Projektgruppen
+  projectGroupDialogVisible = false;
+  projectGroupToEdit: ProjectGroup | null = null;
+  newProjectGroup: ProjectGroup = { name: '', id: '', user: '', default: false };
+
+  get groupName(): string {
+    return this.projectGroupToEdit ? this.projectGroupToEdit.name : this.newProjectGroup.name;
+  }
+
+  set groupName(value: string) {
+    if (this.projectGroupToEdit) {
+      this.projectGroupToEdit.name = value;
+    } else {
+      this.newProjectGroup.name = value;
+    }
+  }
 
   constructor(
     private projectsService: ProjectsService,
@@ -423,5 +440,75 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
   downloadMap(project: Project): void {
     console.log(project);
+  }
+
+  showProjectGroupDialog(): void {
+    this.newProjectGroup = { name: '', id: '', user: '', default: false };
+    this.projectGroupDialogVisible = true;
+  }
+
+  editProjectGroup(group: ProjectGroup): void {
+    this.projectGroupToEdit = { ...group };
+    this.projectGroupDialogVisible = true;
+  }
+
+  saveProjectGroup(): void {
+    if (this.projectGroupToEdit) {
+      // Update existierende Gruppe
+      this.loadingService.startLoading();
+      this.projectsService.updateProjectGroup(this.projectGroupToEdit.id, this.projectGroupToEdit)
+        .pipe(finalize(() => {
+          this.loadingService.stopLoading();
+          this.closeProjectGroupDialog();
+        }))
+        .subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: this.translate.instant('COMMON.MESSAGES.SUCCESS.UPDATE'),
+              detail: this.translate.instant('PROJECT_GROUPS.MESSAGES.UPDATE_SUCCESS')
+            });
+            this.loadData();
+          },
+          error: () => {
+            this.messageService.add({
+              severity: 'error',
+              summary: this.translate.instant('COMMON.MESSAGES.ERROR.UPDATE'),
+              detail: this.translate.instant('PROJECT_GROUPS.MESSAGES.UPDATE_ERROR')
+            });
+          }
+        });
+    } else {
+      // Neue Gruppe erstellen
+      this.loadingService.startLoading();
+      this.projectsService.createProjectGroup(this.newProjectGroup)
+        .pipe(finalize(() => {
+          this.loadingService.stopLoading();
+          this.closeProjectGroupDialog();
+        }))
+        .subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: this.translate.instant('COMMON.MESSAGES.SUCCESS.CREATE'),
+              detail: this.translate.instant('PROJECT_GROUPS.MESSAGES.CREATE_SUCCESS')
+            });
+            this.loadData();
+          },
+          error: () => {
+            this.messageService.add({
+              severity: 'error',
+              summary: this.translate.instant('COMMON.MESSAGES.ERROR.CREATE'),
+              detail: this.translate.instant('PROJECT_GROUPS.MESSAGES.CREATE_ERROR')
+            });
+          }
+        });
+    }
+  }
+
+  closeProjectGroupDialog(): void {
+    this.projectGroupDialogVisible = false;
+    this.projectGroupToEdit = null;
+    this.newProjectGroup = { name: '', id: '', user: '', default: false };
   }
 }

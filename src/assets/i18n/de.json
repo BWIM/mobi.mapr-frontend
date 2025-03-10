@@ -21,11 +21,15 @@
             "SELECT_GROUP": "Gruppe auswählen"
         },
         "ACTIONS": {
-            "CREATE": "Neues Projekt"
+            "CREATE": "Neues Projekt",
+            "CREATE_GROUP": "Neue Gruppe"
         },
         "STATUS": {
             "FINISHED": "Fertig",
             "IN_PROGRESS": "In Bearbeitung"
+        },
+        "EDIT": {
+            "TITLE": "Projekt bearbeiten"
         },
         "UNGROUPED": "Nicht gruppierte Projekte",
         "TYPE": {
@@ -43,6 +47,22 @@
         "DELETE": {
             "TITLE": "Projekt löschen",
             "CONFIRMATION": "Sind Sie sicher, dass Sie das Projekt löschen möchten?"
+        }
+    },
+    "PROJECT_GROUPS": {
+        "CREATE": {
+            "TITLE": "Neue Projektgruppe"
+        },
+        "EDIT": {
+            "TITLE": "Projektgruppe bearbeiten"
+        },
+        "FIELDS": {
+            "NAME": "Name"
+        },
+        "MESSAGES": {
+            "UPDATE_SUCCESS": "Projektgruppe erfolgreich aktualisiert",
+            "UPDATE_ERROR": "Fehler beim Aktualisieren der Projektgruppe",
+            "CONFIRM_DELETE": "Sind Sie sicher, dass Sie die Projektgruppe löschen möchten?"
         }
     },
     "COMMON": {
@@ -65,7 +85,8 @@
             "SUCCESS": {
                 "DELETE": "Erfolgreich gelöscht"
             },
-            "CONFIRM_DELETE": "Sind Sie sicher, dass Sie das Projekt löschen möchten?"
+            "CONFIRM_DELETE": "Sind Sie sicher, dass Sie das Projekt löschen möchten?",
+            "CONFIRM_DELETE_GROUP": "Sind Sie sicher, dass Sie die Projektgruppe löschen möchten?"
         }
     },
     "LEGEND": {

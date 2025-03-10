@@ -71,8 +71,8 @@ export class ProjectsService {
     return this.http.post<ProjectGroup>(`${this.apiUrl}/projectgroups/`, projectGroup);
   }
 
-  updateProjectGroup(id: string, projectGroup: ProjectGroupCreateUpdate): Observable<ProjectGroup> {
-    return this.http.patch<ProjectGroup>(`${this.apiUrl}/projectgroups/${id}/`, projectGroup);
+  updateProjectGroup(groupId: string, projectGroup: ProjectGroup): Observable<ProjectGroup> {
+    return this.http.patch<ProjectGroup>(`${this.apiUrl}/projectgroups/${groupId}/`, projectGroup);
   }
 
   deleteProjectGroup(id: string): Observable<void> {
