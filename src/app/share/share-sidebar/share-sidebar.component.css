@@ -1,0 +1,8 @@
+:host {
+    display: block;
+    height: 100%;
+}
+
+:host ::ng-deep .p-scrollpanel {
+    height: 100%;
+}

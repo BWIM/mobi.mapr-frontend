@@ -147,7 +147,12 @@
         "PERSONAS": "Personas",
         "NO_PROJECT_SELECTED": "Kein Projekt ausgewählt",
         "EXPORT_PDF_LANDSCAPE": "PDF exportieren (Querformat)",
-        "EXPORT_PDF_PORTRAIT": "PDF exportieren (Hochformat)"
+        "EXPORT_PDF_PORTRAIT": "PDF exportieren (Hochformat)",
+        "SHARE_LINK": "Teilen Link",
+        "SHARE_LINK_DESCRIPTION": "Teilen Sie diesen Link, damit andere das Projekt anschauen können, ohne dass sie ein Konto haben.",
+        "SHARE": "Teilen",
+        "COPY_LINK": "Link kopieren",
+        "COPY_LINK_SUCCESS": "Link erfolgreich kopiert"
     },
     "ANALYZE": {
         "PERSONA": {
@@ -172,5 +177,16 @@
     "EXPORT": {
         "IS_EXPORTING": "Export wird durchgeführt...",
         "GENERATING_PDF": "PDF wird generiert..."
+    },
+    "SHARE": {
+        "NO_PROJECT_SELECTED": "Kein Projekt ausgewählt",
+        "CREATED_BY": "Erstellt von",
+        "EXPIRES": "Läuft ab am",
+        "DESCRIPTION": "Beschreibung",
+        "ACTIVITIES": "Aktivitäten",
+        "PERSONAS": "Personas",
+        "NO_ACTIVITIES": "Keine Aktivitäten vorhanden",
+        "NO_PERSONAS": "Keine Personas vorhanden",
+        "NO_DESCRIPTION": "Keine Beschreibung vorhanden"
     }
 } 

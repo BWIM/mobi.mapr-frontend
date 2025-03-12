@@ -135,7 +135,12 @@
         "PERSONAS": "Personas",
         "NO_PROJECT_SELECTED": "No project selected",
         "EXPORT_PDF_LANDSCAPE": "Export PDF Landscape",
-        "EXPORT_PDF_PORTRAIT": "Export PDF Portrait"
+        "EXPORT_PDF_PORTRAIT": "Export PDF Portrait",
+        "SHARE_LINK": "Share Link",
+        "SHARE_LINK_DESCRIPTION": "Share this link so that others can view the project without having an account.",
+        "SHARE": "Share",
+        "COPY_LINK": "Copy Link",
+        "COPY_LINK_SUCCESS": "Link successfully copied"
     },
     "ANALYZE": {
         "PERSONA": {
@@ -155,5 +160,16 @@
     "EXPORT": {
         "IS_EXPORTING": "Export is in progress...",
         "GENERATING_PDF": "Generating PDF..."
+    },
+    "SHARE": {
+        "NO_PROJECT_SELECTED": "No project selected",
+        "CREATED_BY": "Created by",
+        "EXPIRES": "Expires at",
+        "DESCRIPTION": "Description",
+        "ACTIVITIES": "Activities",
+        "PERSONAS": "Personas",
+        "NO_ACTIVITIES": "No activities",
+        "NO_PERSONAS": "No personas",
+        "NO_DESCRIPTION": "No description"
     }
 }   
