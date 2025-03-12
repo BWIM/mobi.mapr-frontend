@@ -223,6 +223,21 @@
                             <label for="description" class="block mb-2">{{ 'PROJECT_WIZARD.DESCRIPTION' | translate }}</label>
                             <textarea id="description" pInputTextarea formControlName="description" class="w-full border rounded-md p-2" rows="4" maxlength="256"></textarea>
                         </div>
+
+                        <!-- Projektgruppe -->
+                        <div class="field">
+                            <label for="projectGroup" class="block mb-2">{{ 'PROJECTS.FIELDS.GROUP' | translate }}</label>
+                            <p-dropdown 
+                                id="projectGroup"
+                                [options]="projectGroups"
+                                formControlName="projectGroup"
+                                optionLabel="name"
+                                [showClear]="true"
+                                [appendTo]="'body'"
+                                placeholder="{{ 'PROJECTS.FIELDS.SELECT_GROUP' | translate }}"
+                                class="w-full">
+                            </p-dropdown>
+                        </div>
                     </div>
 
                     <!-- Projekteinstellungen -->

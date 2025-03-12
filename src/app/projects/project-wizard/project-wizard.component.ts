@@ -16,6 +16,7 @@ import { AreaSelectionComponent } from './area-selection/area-selection.componen
 import { TranslateService } from '@ngx-translate/core';
 import { ProjectsReloadService } from '../projects-reload.service';
 import { Activity } from '../../services/interfaces/activity.interface';
+import { ProjectGroup } from '../project.interface';
 
 
 @Component({
@@ -33,6 +34,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   groupedActivities: GroupedActivities[] = [];
   personas: Persona[] = [];
   modes: Mode[] = [];
+  projectGroups: ProjectGroup[] = [];
   private subscription: Subscription;
   selectedAreaIds: string[] = [];
   showMidActivities: boolean = true;
@@ -57,6 +59,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         this.visible = visible;
         if (visible) {
           this.resetWizard();
+          this.loadProjectGroups();
         }
       }
     );
@@ -103,7 +106,8 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         isPublic: [false],
         allowSharing: [false],
         sendEmail: [true],
-        loadAreasOnMap: [true]
+        loadAreasOnMap: [true],
+        projectGroup: [null]
       })
     });
   }
@@ -350,7 +354,8 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         activities: allSelectedActivities.map((a: any) => a.id).join(','),
         personas: this.projectForm.get('personas.selectedPersonas')?.value.map((p: any) => p.id).join(','),
         modes: this.projectForm.get('modes.selectedModes')?.value.map((m: any) => m.id).join(','),
-        landkreise: this.selectedAreaIds.join(',')
+        landkreise: this.selectedAreaIds.join(','),
+        projectgroup: this.projectForm.get('summary.projectGroup')?.value?.id || null
       };
 
       console.log(projectData);
@@ -381,5 +386,16 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     } else {
       this.projectForm.get('activities.selectedNonMidActivity')?.setValue('');
     }
+  }
+
+  private loadProjectGroups() {
+    this.projectsService.getProjectGroups().subscribe({
+      next: (response) => {
+        this.projectGroups = response.results;
+      },
+      error: (error) => {
+        console.error('Fehler beim Laden der Projektgruppen:', error);
+      }
+    });
   }
 } 
