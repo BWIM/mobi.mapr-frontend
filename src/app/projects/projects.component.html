@@ -29,14 +29,14 @@
                                 </tr>
                             </ng-template>
                             <ng-template pTemplate="body" let-project>
-                                <tr [pSelectableRow]="project" [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
+                                <tr>
                                     <td>
                                         <div class="flex flex-col">
                                             <div class="flex items-center">
                                                 <i class="pi mr-2" [ngClass]="{'pi-user': !project.default, 'pi-users': project.default}" 
                                                     [pTooltip]="project.default ? ('PROJECTS.TYPE.DEFAULT' | translate) : ('PROJECTS.TYPE.PERSONAL' | translate)">
                                                 </i>
-                                                <span class="text-overflow-ellipsis overflow-hidden break-words">{{ project.display_name }}</span>
+                                                <span class="text-overflow-ellipsis overflow-hidden break-words" [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">{{ project.display_name }}</span>
                                             </div>
                                         </div>
                                     </td>
@@ -93,7 +93,7 @@
                                 </tr>
                             </ng-template>
                             <ng-template pTemplate="body" let-project>
-                                <tr [pSelectableRow]="project" [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
+                                <tr [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
                                     <td>
                                         <div class="flex flex-col">
                                             <div class="flex items-center">
@@ -108,9 +108,9 @@
                                         <div class="flex gap-2 justify-end relative">
                                             <p-splitButton 
                                                 [model]="items"
-                                                (onClick)="showResults(project, 'municipalities')"
                                                 icon="pi pi-map"
                                                 appendTo="body"
+                                                (onClick)="showResults(project, 'municipalities')"
                                                 dropdownIcon="pi pi-chevron-down"
                                                 (onDropdownClick)="selectedProject = project"
                                                 [disabled]="!project.finished">

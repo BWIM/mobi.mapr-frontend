@@ -1,10 +1,6 @@
 /* Tailwind wird nun für das Styling verwendet. Alle Styles wurden in die Template-Datei als Tailwind-Klassen verschoben. */
 
-.selected-row{
+.selected-row  {
     font-weight: bold !important;
+    color: var(--primary-color) !important;
 }
-
-.selected-row:hover {
-    background-color: var(--surface-80) !important;
-}
-
