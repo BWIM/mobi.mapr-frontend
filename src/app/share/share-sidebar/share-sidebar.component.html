@@ -1,0 +1,62 @@
+<div class="h-full">
+    <p-scrollPanel [style]="{width: '100%', height: '100%'}">
+        <div>
+            <div *ngIf="!sharedProject" class="flex items-center justify-center">
+                <p class="text-gray-500">{{ 'SHARE.NO_PROJECT_SELECTED' | translate }}</p>
+            </div>
+
+            <div *ngIf="sharedProject" class="flex flex-col gap-4">
+                <!-- Projekt Header -->
+                <div class="bg-white rounded-lg shadow p-4">
+                    <h2 class="text-xl font-bold mb-2">{{ sharedProject.project_name }}</h2>
+                    <p class="text-gray-600 text-sm mb-2">{{ 'SHARE.CREATED_BY' | translate }}: {{ sharedProject.user_name }}</p>
+                    <p class="text-gray-500 text-sm">{{ 'SHARE.EXPIRES' | translate }}: {{ sharedProject.expires }}</p>
+                </div>
+
+                <!-- Projekt Beschreibung -->
+                <p-panel [header]="'SHARE.DESCRIPTION' | translate" [toggleable]="true">
+                    <p class="text-gray-700">{{ sharedProject.project_description || 'SHARE.NO_DESCRIPTION' | translate }}</p>
+                </p-panel>
+
+                <!-- Aktivitäten -->
+                <p-panel [header]="'SHARE.ACTIVITIES' | translate" [toggleable]="true">
+                    <div class="flex flex-wrap gap-2">
+                        <span *ngFor="let activity of sharedProject.categories" 
+                            class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                            {{ activity }}
+                        </span>
+                        <p *ngIf="!sharedProject.categories?.length" class="text-gray-500">
+                            {{ 'SHARE.NO_ACTIVITIES' | translate }}
+                        </p>
+                    </div>
+                </p-panel>
+
+                <!-- Personas -->
+                <p-panel [header]="'SHARE.PERSONAS' | translate" [toggleable]="true">
+                    <div class="flex flex-wrap gap-2">
+                        <span *ngFor="let persona of sharedProject.personas" 
+                            class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                            {{ persona }}
+                        </span>
+                        <p *ngIf="!sharedProject.personas?.length" class="text-gray-500">
+                            {{ 'SHARE.NO_PERSONAS' | translate }}
+                        </p>
+                    </div>
+                </p-panel>
+
+                <!-- Profile -->
+                <p-panel [header]="'SHARE.PROFILES' | translate" [toggleable]="true">
+                    <div class="flex flex-wrap gap-2">
+                        <span *ngFor="let profile of sharedProject.profiles" 
+                            class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+                            {{ profile }}
+                        </span>
+                        <p *ngIf="!sharedProject.profiles?.length" class="text-gray-500">
+                            {{ 'SHARE.NO_PROFILES' | translate }}
+                        </p>
+                    </div>
+                </p-panel>
+            </div>
+        </div>
+    </p-scrollPanel>
+</div>

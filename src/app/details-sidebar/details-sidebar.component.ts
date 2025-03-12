@@ -10,6 +10,7 @@ import { ProjectInfo } from '../projects/project.interface';
 import { MapService } from '../map/map.service';
 import { PdfGenerationService } from '../map/pdf-generation.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ShareService } from '../share/share.service';
 
 @Component({
   selector: 'app-details-sidebar',
@@ -28,12 +29,15 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
   projectInfo: ProjectInfo | null = null;
   private subscription: Subscription;
   isExporting: boolean = false;
+  shareUrl: string | null = null;
+  isGeneratingShare: boolean = false;
 
   constructor(
     private translate: TranslateService,
     private projectsService: ProjectsService,
     private mapService: MapService,
-    private pdfService: PdfGenerationService
+    private pdfService: PdfGenerationService,
+    private shareService: ShareService
   ) {
     this.subscription = this.projectsService.currentProjectInfo$.subscribe(
       info => {
@@ -58,6 +62,34 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     } finally {
       this.isExporting = false;
     }
+  }
+
+  async generateShareLink(): Promise<void> {
+    if (this.projectInfo?.id) {
+      this.isGeneratingShare = true;
+      this.shareService.createShare(this.projectInfo.id, 'high').subscribe({
+        next: (response) => {
+          const baseUrl = window.location.origin;
+          this.shareUrl = `${baseUrl}/share/${response}`;
+          this.isGeneratingShare = false;
+        },
+        error: (error) => {
+          console.error('Error generating share link:', error);
+          this.isGeneratingShare = false;
+        }
+      });
+    }
+  }
+
+  copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text).then(
+      () => {
+        this.translate.instant('SIDEBAR.COPY_LINK_SUCCESS');
+      },
+      (err) => {
+        console.error('Could not copy text: ', err);
+      }
+    );
   }
 
   ngOnInit() {}

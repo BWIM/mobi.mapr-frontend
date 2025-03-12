@@ -49,6 +49,35 @@
             [disabled]="isExporting">
           </p-button>
         </div>
+
+        <div class="mt-6 flex justify-center">
+          <p-button 
+            (onClick)="generateShareLink()"
+            icon="pi pi-share-alt"
+            [label]="'SIDEBAR.SHARE' | translate"
+            styleClass="p-button-secondary"
+            [disabled]="isGeneratingShare">
+            <p-progressSpinner *ngIf="isGeneratingShare" 
+              [style]="{width: '20px', height: '20px'}" 
+              styleClass="ml-2"></p-progressSpinner>
+          </p-button>
+        </div>
+
+        <div *ngIf="shareUrl" class="mt-4 p-4 bg-gray-100 rounded">
+          <div class="flex justify-between items-center mb-2">
+            <p class="text-sm text-gray-600">{{ 'SIDEBAR.SHARE_LINK' | translate }}:</p>
+            <button class="text-blue-600 hover:text-blue-800 text-sm"
+                    (click)="copyToClipboard(shareUrl)">
+              <i class="pi pi-copy mr-1"></i>
+              {{ 'SIDEBAR.COPY_LINK' | translate }}
+            </button>
+          </div>
+          <div class="break-all">
+            <a [href]="shareUrl" target="_blank" class="text-blue-600 hover:text-blue-800">
+              {{shareUrl}}
+            </a>
+          </div>
+        </div>
       </div>
       
       <div *ngIf="!projectInfo" class="p-4 text-center text-gray-500">
