@@ -31,6 +31,8 @@ import { ChartModule } from 'primeng/chart';
 import { CardModule } from 'primeng/card';
 import { FieldsetModule } from 'primeng/fieldset';
 import { MenuModule } from 'primeng/menu';
+import { RadioButtonModule } from 'primeng/radiobutton';
+
 @NgModule({
   imports: [
     CommonModule,
@@ -62,7 +64,8 @@ import { MenuModule } from 'primeng/menu';
     ChartModule,
     CardModule,
     FieldsetModule,
-    MenuModule
+    MenuModule,
+    RadioButtonModule
   ],
   exports: [
     CommonModule,
@@ -94,7 +97,8 @@ import { MenuModule } from 'primeng/menu';
     ChartModule,
     CardModule,
     FieldsetModule,
-    MenuModule
+    MenuModule,
+    RadioButtonModule
   ],
   providers: [MessageService]
 })
