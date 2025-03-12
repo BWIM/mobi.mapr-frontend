@@ -16,6 +16,7 @@ import { AreaSelectionComponent } from './area-selection/area-selection.componen
 import { TranslateService } from '@ngx-translate/core';
 import { ProjectsReloadService } from '../projects-reload.service';
 import { Activity } from '../../services/interfaces/activity.interface';
+import { ProjectGroup } from '../project.interface';
 
 
 @Component({
@@ -33,6 +34,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   groupedActivities: GroupedActivities[] = [];
   personas: Persona[] = [];
   modes: Mode[] = [];
+  projectGroups: ProjectGroup[] = [];
   private subscription: Subscription;
   selectedAreaIds: string[] = [];
   showMidActivities: boolean = true;
@@ -57,6 +59,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         this.visible = visible;
         if (visible) {
           this.resetWizard();
+          this.loadProjectGroups();
         }
       }
     );
@@ -81,7 +84,8 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     this.projectForm = this.fb.group({
       // Schritt 1: Aktivitäten
       activities: this.fb.group({
-        selectedActivities: [[], Validators.required]
+        selectedMidActivities: [[], Validators.required],
+        selectedNonMidActivity: ['', Validators.required]
       }),
       // Schritt 2: Personas
       personas: this.fb.group({
@@ -102,7 +106,8 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         isPublic: [false],
         allowSharing: [false],
         sendEmail: [true],
-        loadAreasOnMap: [true]
+        loadAreasOnMap: [true],
+        projectGroup: [null]
       })
     });
   }
@@ -175,7 +180,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     return Object.entries(grouped)
       .map(([_, activities]) => ({
         tripPurpose: activities[0].wegezweck!,
-        activities: activities.sort((a, b) => a.name.localeCompare(b.name))
+        activities: activities.sort((a, b) => a.display_name.localeCompare(b.display_name))
       }))
       .sort((a, b) => a.tripPurpose.localeCompare(b.tripPurpose));
   }
@@ -245,14 +250,40 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
 
   nextStep() {
     if (this.activeIndex < this.steps.length - 1) {
-      this.activeIndex++;
+      // Wenn wir im Aktivitäten-Schritt sind und eine Nicht-MID-Aktivität ausgewählt wurde
+      if (this.activeIndex === 0 && !this.showMidActivities && this.projectForm.get('activities.selectedNonMidActivity')?.value) {
+        // Überspringe Personas (Index 1) und gehe direkt zu Modi (Index 2)
+        this.activeIndex = 2;
+        // Setze alle Personas als ausgewählt
+        this.selectAllPersonas();
+      } else {
+        this.activeIndex++;
+      }
+    }
+  }
+
+  prevStep() {
+    if (this.activeIndex > 0) {
+      // Wenn wir bei Modi sind und eine Nicht-MID-Aktivität ausgewählt ist
+      if (this.activeIndex === 2 && !this.showMidActivities && this.projectForm.get('activities.selectedNonMidActivity')?.value) {
+        // Springe direkt zurück zu Aktivitäten
+        this.activeIndex = 0;
+      } else {
+        this.activeIndex--;
+      }
     }
   }
 
   isCurrentStepValid(): boolean {
     switch (this.activeIndex) {
       case 0:
-        return this.projectForm.get('activities.selectedActivities')?.value?.length > 0;
+        if (this.showMidActivities) {
+          const midActivities = this.projectForm.get('activities.selectedMidActivities')?.value || [];
+          return midActivities.length > 0;
+        } else {
+          const nonMidActivity = this.projectForm.get('activities.selectedNonMidActivity')?.value;
+          return !!nonMidActivity;
+        }
       case 1:
         return this.projectForm.get('personas.selectedPersonas')?.value?.length > 0;
       case 2:
@@ -266,28 +297,22 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     }
   }
 
-  prevStep() {
-    if (this.activeIndex > 0) {
-      this.activeIndex--;
-    }
-  }
-
   hide() {
     this.wizardService.hide();
   }
 
   selectAllActivities(activities: any[]) {
-    const currentSelection = this.projectForm.get('activities.selectedActivities')?.value || [];
+    const currentSelection = this.projectForm.get('activities.selectedMidActivities')?.value || [];
     const newSelection = [...new Set([...currentSelection, ...activities])];
-    this.projectForm.get('activities.selectedActivities')?.setValue(newSelection);
+    this.projectForm.get('activities.selectedMidActivities')?.setValue(newSelection);
   }
 
   deselectAllActivities(activities: any[]) {
-    const currentSelection = this.projectForm.get('activities.selectedActivities')?.value || [];
+    const currentSelection = this.projectForm.get('activities.selectedMidActivities')?.value || [];
     const newSelection = currentSelection.filter((item: any) => 
       !activities.some(activity => activity.id === item.id)
     );
-    this.projectForm.get('activities.selectedActivities')?.setValue(newSelection);
+    this.projectForm.get('activities.selectedMidActivities')?.setValue(newSelection);
   }
 
   selectAllPersonas() {
@@ -313,15 +338,24 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
 
   onSubmit() {
     if (this.projectForm.valid) {
+      const selectedMidActivities = this.projectForm.get('activities.selectedMidActivities')?.value || [];
+      const selectedNonMidActivity = this.projectForm.get('activities.selectedNonMidActivity')?.value;
+      
+      const allSelectedActivities = [...selectedMidActivities];
+      if (selectedNonMidActivity) {
+        allSelectedActivities.push(selectedNonMidActivity);
+      }
+
       const projectData = {
         name: this.projectForm.get('summary.name')?.value,
         description: this.projectForm.get('summary.description')?.value,
         mail: this.projectForm.get('summary.sendEmail')?.value,
         infos: this.projectForm.get('summary.loadAreasOnMap')?.value,
-        activities: this.projectForm.get('activities.selectedActivities')?.value.map((a: any) => a.id).join(','),
+        activities: allSelectedActivities.map((a: any) => a.id).join(','),
         personas: this.projectForm.get('personas.selectedPersonas')?.value.map((p: any) => p.id).join(','),
         modes: this.projectForm.get('modes.selectedModes')?.value.map((m: any) => m.id).join(','),
-        landkreise: this.selectedAreaIds.join(',')
+        landkreise: this.selectedAreaIds.join(','),
+        projectgroup: this.projectForm.get('summary.projectGroup')?.value?.id || null
       };
 
       console.log(projectData);
@@ -346,7 +380,22 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
 
   private updateDisplayedActivities(showMid: boolean) {
     this.groupedActivities = showMid ? this.allGroupedActivities.mid : this.allGroupedActivities.nonMid;
-    const allActivities = this.groupedActivities.flatMap(group => group.activities);
-    this.projectForm.get('activities.selectedActivities')?.setValue(allActivities);
+    if (showMid) {
+      const allMidActivities = this.groupedActivities.flatMap(group => group.activities);
+      this.projectForm.get('activities.selectedMidActivities')?.setValue(allMidActivities);
+    } else {
+      this.projectForm.get('activities.selectedNonMidActivity')?.setValue('');
+    }
+  }
+
+  private loadProjectGroups() {
+    this.projectsService.getProjectGroups().subscribe({
+      next: (response) => {
+        this.projectGroups = response.results;
+      },
+      error: (error) => {
+        console.error('Fehler beim Laden der Projektgruppen:', error);
+      }
+    });
   }
 } 

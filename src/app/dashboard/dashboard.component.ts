@@ -39,40 +39,4 @@ export class DashboardComponent implements OnInit {
     this.rightSidebarExpanded = true;
   }
 
-  toggleLeftPin() {
-    this.isLeftPinned = !this.isLeftPinned;
-    this.showGlowEffect = false;
-  }
-
-
-  toggleRightPin() {
-    this.isRightPinned = !this.isRightPinned;
-    this.showGlowEffect = false;
-  }
-
-
-  pinRightSidebar() {
-    this.rightSidebarExpanded = true;
-    this.showGlowEffect = false;
-    this.isRightPinned = true;
-  }
-
-  pinLeftSidebar() {
-    this.leftSidebarExpanded = true;
-    this.showGlowEffect = false;
-    this.isLeftPinned = true;
-  }
-
-  mouseRightLeave() {
-    if (!this.isRightPinned) {
-      this.rightSidebarExpanded = false;
-    }
-  }
-
-  mouseLeftLeave() {
-    if (!this.isLeftPinned) {
-      this.leftSidebarExpanded = false;
-    }
-  }
-
 }

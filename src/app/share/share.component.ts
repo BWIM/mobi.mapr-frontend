@@ -50,16 +50,4 @@ export class ShareComponent {
   toggleRightPin() {
     this.isRightPinned = !this.isRightPinned;
   }
-
-  pinRightSidebar() {
-    this.rightSidebarExpanded = true;
-    this.isRightPinned = true;
-  }
-
-  mouseRightLeave() {
-    if (!this.isRightPinned) {
-      this.rightSidebarExpanded = false;
-    }
-  }
-
 }

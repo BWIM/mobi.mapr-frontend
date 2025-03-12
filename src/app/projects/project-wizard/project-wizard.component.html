@@ -33,42 +33,73 @@
                         </p-toggleButton>
                     </div>
                     <div class="grid w-full">
-                        <div *ngFor="let group of groupedActivities" class="col-12 md:col-6 lg:col-4">
-                            <p-panel [header]="group.tripPurpose">
-                                <ng-template pTemplate="header">
-                                    <div class="right-10">
-                                        <div class="flex gap-2 ">
-                                            <button pButton 
-                                                icon="pi pi-check-square"
-                                                title="Alle auswählen"
-                                                class="p-button-sm p-button-rounded"
-                                                (click)="selectAllActivities(group.activities)">
-                                            </button>
-                                            <button pButton 
-                                                icon="pi pi-minus"
-                                                title="Alle abwählen"
-                                                class="p-button-sm p-button-rounded"
-                                                (click)="deselectAllActivities(group.activities)">
-                                            </button>
+                        <!-- MID Aktivitäten -->
+                        <div *ngIf="showMidActivities">
+                            <div *ngFor="let group of groupedActivities" class="col-12 md:col-6 lg:col-4">
+                                <p-panel [header]="group.tripPurpose">
+                                    <ng-template pTemplate="header">
+                                        <div class="right-10">
+                                            <div class="flex gap-2">
+                                                <button pButton 
+                                                    icon="pi pi-check-square"
+                                                    title="Alle auswählen"
+                                                    class="p-button-sm p-button-rounded"
+                                                    (click)="selectAllActivities(group.activities)">
+                                                </button>
+                                                <button pButton 
+                                                    icon="pi pi-minus"
+                                                    title="Alle abwählen"
+                                                    class="p-button-sm p-button-rounded"
+                                                    (click)="deselectAllActivities(group.activities)">
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </ng-template>
+                                    <div class="flex flex-column gap-2" *ngFor="let activity of group.activities">
+                                        <div class="flex align-items-center gap-2">
+                                            <p-checkbox 
+                                                [value]="activity"
+                                                [name]="'midActivities'"
+                                                [inputId]="'activity_' + activity.id"
+                                                [ariaLabel]="activity.display_name || activity.name"
+                                                formControlName="selectedMidActivities">
+                                            </p-checkbox>
+                                            <label [for]="'activity_' + activity.id">{{activity.display_name || activity.name}}</label>
                                         </div>
                                     </div>
-                                </ng-template>
-                                <div class="flex flex-column gap-2" *ngFor="let activity of group.activities">
-                                    <p-checkbox 
-                                        [value]="activity"
-                                        [name]="'activities'"
-                                        [inputId]="'activity_' + activity.id"
-                                        [ariaLabel]="activity.display_name || activity.name"
-                                        formControlName="selectedActivities">
-                                        {{activity.display_name || activity.name}}
-                                    </p-checkbox>
-                                    <label [for]="'activity_' + activity.id">{{activity.display_name || activity.name}}</label>
+                                </p-panel>
+                            </div>
+                        </div>
+                        
+                        <!-- Nicht-MID Aktivitäten -->
+                        <div *ngIf="!showMidActivities" class="col-12">
+                            <p-panel header="Nicht-MID Aktivitäten">
+                                <div class="grid">
+                                    <div *ngFor="let group of groupedActivities" class="col-12 md:col-6 lg:col-4 mb-4">
+                                        <div class="font-bold mb-2">{{group.tripPurpose}}</div>
+                                        <div class="ml-2">
+                                            <div *ngFor="let activity of group.activities" class="flex align-items-center gap-2 mb-2">
+                                                <p-radioButton 
+                                                    [value]="activity"
+                                                    name="selectedNonMidActivity"
+                                                    [inputId]="'activity_' + activity.id"
+                                                    formControlName="selectedNonMidActivity">
+                                                </p-radioButton>
+                                                <label [for]="'activity_' + activity.id" class="cursor-pointer">
+                                                    {{activity.display_name || activity.name}}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </p-panel>
                         </div>
                     </div>
-                    <small class="text-red-500" *ngIf="projectForm.get('activities.selectedActivities')?.errors?.['required'] && projectForm.get('activities.selectedActivities')?.touched">
-                        Bitte wählen Sie mindestens eine Aktivität aus.
+                    <small class="text-red-500" *ngIf="showMidActivities && projectForm.get('activities.selectedMidActivities')?.errors?.['required'] && projectForm.get('activities.selectedMidActivities')?.touched">
+                        Bitte wählen Sie mindestens eine MID-Aktivität aus.
+                    </small>
+                    <small class="text-red-500" *ngIf="!showMidActivities && projectForm.get('activities.selectedNonMidActivity')?.errors?.['required'] && projectForm.get('activities.selectedNonMidActivity')?.touched">
+                        Bitte wählen Sie eine Nicht-MID-Aktivität aus.
                     </small>
                 </div>
 
@@ -191,6 +222,21 @@
                         <div class="field">
                             <label for="description" class="block mb-2">{{ 'PROJECT_WIZARD.DESCRIPTION' | translate }}</label>
                             <textarea id="description" pInputTextarea formControlName="description" class="w-full border rounded-md p-2" rows="4" maxlength="256"></textarea>
+                        </div>
+
+                        <!-- Projektgruppe -->
+                        <div class="field">
+                            <label for="projectGroup" class="block mb-2">{{ 'PROJECTS.FIELDS.GROUP' | translate }}</label>
+                            <p-dropdown 
+                                id="projectGroup"
+                                [options]="projectGroups"
+                                formControlName="projectGroup"
+                                optionLabel="name"
+                                [showClear]="true"
+                                [appendTo]="'body'"
+                                placeholder="{{ 'PROJECTS.FIELDS.SELECT_GROUP' | translate }}"
+                                class="w-full">
+                            </p-dropdown>
                         </div>
                     </div>
 

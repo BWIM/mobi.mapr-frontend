@@ -3,7 +3,12 @@ import {TranslateService} from '@ngx-translate/core';
 import {Subscription} from 'rxjs';
 import { SharedModule } from '../shared/shared.module';
 
-type ScoreLevel = {name: string; description: string; min: number; max: number};
+type ScoreLevel = {
+  name: string; 
+  description: string; 
+  min: number; 
+  max: number;
+};
 
 @Component({
   selector: 'app-legend',
@@ -15,6 +20,8 @@ type ScoreLevel = {name: string; description: string; min: number; max: number};
 export class LegendComponent implements OnInit, OnDestroy {
 
   private langChangeSubscription!: Subscription;
+  isPinned: boolean = false;
+  isExpanded: boolean = false;
 
   constructor(private translate: TranslateService) {}
 
@@ -23,6 +30,14 @@ export class LegendComponent implements OnInit, OnDestroy {
   defaultValues = [83, 72, 57, 42, 27].reverse();
 
   scoreLevels: ScoreLevel[] = [];
+
+  togglePin() {
+    this.isPinned = !this.isPinned;
+  }
+
+  toggleExpand() {
+    this.isExpanded = !this.isExpanded;
+  }
 
   ngOnInit() {
     this.initializeScoreLevels();
