@@ -16,11 +16,12 @@ import { LegendComponent } from '../legend/legend.component';
 import { CommonModule } from '@angular/common';
 import { FeatureSelectionService } from '../shared/services/feature-selection.service';
 import { AnalyzeService } from '../analyze/analyze.service';
+import { SharedModule } from '../shared/shared.module';
 
 @Component({
   selector: 'app-map',
   standalone: true,
-  imports: [CommonModule, LegendComponent],
+  imports: [CommonModule, LegendComponent, SharedModule],
   templateUrl: './map.component.html',
   styleUrl: './map.component.css'
 })
