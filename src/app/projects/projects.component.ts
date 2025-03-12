@@ -61,6 +61,8 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   projectGroupToEdit: ProjectGroup | null = null;
   newProjectGroup: ProjectGroup = { name: '', id: '', user: '', default: false };
 
+  private menuItemsCache: Map<number, MenuItem[]> = new Map();
+
   get groupName(): string {
     return this.projectGroupToEdit ? this.projectGroupToEdit.name : this.newProjectGroup.name;
   }
@@ -104,9 +106,6 @@ export class ProjectsComponent implements OnInit, OnDestroy {
       {
         icon: 'pi pi-th-large',
         label: this.translate.instant('MAP.ACTIONS.HEXAGON'),
-        tooltipOptions: {
-          tooltipLabel: this.translate.instant('MAP.ACTIONS.HEXAGON')
-        },
         command: () => {
           this.showResults(this.selectedProject, 'hexagons');
         },
@@ -114,9 +113,6 @@ export class ProjectsComponent implements OnInit, OnDestroy {
       {
         icon: 'pi pi-map',
         label: this.translate.instant('MAP.ACTIONS.GEMEINDE'),
-        tooltipOptions: {
-          tooltipLabel: this.translate.instant('MAP.ACTIONS.GEMEINDE')
-        },
         command: () => {
           this.showResults(this.selectedProject, 'municipalities');
         },
@@ -124,9 +120,6 @@ export class ProjectsComponent implements OnInit, OnDestroy {
       {
         icon: 'pi pi-home',
         label: this.translate.instant('MAP.ACTIONS.LANDKREIS'),
-        tooltipOptions: {
-          tooltipLabel: this.translate.instant('MAP.ACTIONS.LANDKREIS')
-        },
         command: () => {
           this.showResults(this.selectedProject, 'landkreise');
         },
@@ -135,9 +128,6 @@ export class ProjectsComponent implements OnInit, OnDestroy {
       {
         icon: 'pi pi-globe',
         label: this.translate.instant('MAP.ACTIONS.LAND'),
-        tooltipOptions: {
-          tooltipLabel: this.translate.instant('MAP.ACTIONS.LAND')
-        },
         command: () => {
           this.showResults(this.selectedProject, 'laender');
         },
@@ -152,6 +142,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
   loadData(): void {
     this.loadingService.startLoading();
+    this.menuItemsCache.clear();
     
     this.projectsService.getProjectGroups()
       .pipe(finalize(() => this.loadingService.stopLoading()))
@@ -414,24 +405,28 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   }
 
   getSpeedDialItems(project: Project): MenuItem[] {
-    return [
-      {
-        icon: 'pi pi-pencil',
-        label: this.translate.instant('COMMON.ACTIONS.EDIT'),
-        command: () => this.openEditDialog(project),
-        tooltipOptions: {
-          tooltipLabel: this.translate.instant('COMMON.ACTIONS.EDIT')
+    if (!this.menuItemsCache.has(project.id)) {
+      const items = [
+        {
+          icon: 'pi pi-pencil',
+          label: this.translate.instant('COMMON.ACTIONS.EDIT'),
+          command: () => this.openEditDialog(project),
+          tooltipOptions: {
+            tooltipLabel: this.translate.instant('COMMON.ACTIONS.EDIT')
+          }
+        },
+        {
+          icon: 'pi pi-trash',
+          label: this.translate.instant('COMMON.ACTIONS.DELETE'),
+          command: () => this.confirmDelete(project),
+          tooltipOptions: {
+            tooltipLabel: this.translate.instant('COMMON.ACTIONS.DELETE')
+          }
         }
-      },
-      {
-        icon: 'pi pi-trash',
-        label: this.translate.instant('COMMON.ACTIONS.DELETE'),
-        command: () => this.confirmDelete(project),
-        tooltipOptions: {
-          tooltipLabel: this.translate.instant('COMMON.ACTIONS.DELETE')
-        }
-      }
-    ];
+      ];
+      this.menuItemsCache.set(project.id, items);
+    }
+    return this.menuItemsCache.get(project.id)!;
   }
 
   shareMap(project: Project): void {
