@@ -220,4 +220,22 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.lastClickedFeature = null;
     }
   }
+
+  zoomIn() {
+    const view = this.map.getView();
+    const zoom = view.getZoom();
+    view.animate({
+      zoom: zoom ? zoom + 1 : 1,
+      duration: 250
+    });
+  }
+
+  zoomOut() {
+    const view = this.map.getView();
+    const zoom = view.getZoom();
+    view.animate({
+      zoom: zoom ? zoom - 1 : 1,
+      duration: 250
+    });
+  }
 }
