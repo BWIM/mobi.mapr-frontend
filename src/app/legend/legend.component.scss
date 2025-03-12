@@ -25,9 +25,45 @@ $sixthColor: #9656a2;
       padding: 10px;
       box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
       transition: all 0.3s ease;
+      cursor: pointer;
+      padding-right: 15px;
+      position: relative;
 
-      &:hover .legend-item .description {
-        display: block; // Show all descriptions when hovering over the legend
+      &::after {
+        content: "›";
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-color);
+        font-size: 20px;
+        opacity: 0;
+        transition: all 0.3s ease;
+      }
+
+      &:hover {
+        clip-path: polygon(0 0, 90% 0, 100% 50%, 90% 100%, 0 100%);
+        padding-right: 35px;
+        transform: translateX(5px);
+
+        &::after {
+          opacity: 0.7;
+          transform: translateY(-50%) translateX(3px);
+        }
+      }
+
+      &.expanded {
+        clip-path: none;
+        transform: none;
+        padding-right: 15px;
+        
+        &::after {
+          opacity: 0;
+        }
+      }
+
+      &.expanded .legend-item .description {
+        display: block;
       }
 
       .legend-item {
