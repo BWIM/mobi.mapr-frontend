@@ -55,9 +55,9 @@ app-legend {
 }
 
 button.ol-zoom-in {
-    display: none;
+    display: none !important;
 }
 
 button.ol-zoom-out {
-    display: none;
+    display: none !important;
 }

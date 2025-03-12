@@ -163,3 +163,19 @@ body {
         --border-radius: 2px;
     }
 }
+
+button.ol-zoom-in {
+    display: none !important;
+}
+
+button.ol-zoom-out {
+    display: none !important;
+}
+
+.ol-zoom-in {
+    display: none !important;
+}
+
+.ol-zoom-out {
+    display: none !important;
+}
