@@ -1,4 +1,4 @@
-<p-speedDial [model]="items" direction="up" buttonClassName="p-button-info" [showIcon]="'pi pi-info'" [hideIcon]="'pi pi-times'"></p-speedDial>
+<p-speedDial [model]="items" direction="up" buttonClassName="p-button-info" [showIcon]="'pi pi-info'" [hideIcon]="'pi pi-times'" [pTooltip]="'CREDITS.INFO_BUTTON_TOOLTIP' | translate"></p-speedDial>
 
 <p-dialog [(visible)]="showCreditsDialog" [modal]="true" styleClass="credits-dialog" header="mobi.mapr">
     <div class="grid">
@@ -9,7 +9,7 @@
                     <div class="text-center mb-4">
                         <h2 class="text-4xl font-bold mb-3">BWIM Mobile</h2>
                         <p class="text-xl line-height-3">Dies ist ein Projekt des Baden-Württemberg Instituts für nachhaltige Mobilität</p>
-                        <p-button label="bw-im.de besuchen" styleClass="p-button-link" (onClick)="openLink('https://bw-im.de')"></p-button>
+                        <p-button label="bw-im.de besuchen" styleClass="p-button-link" [pTooltip]="'CREDITS.VISIT_WEBSITE' | translate" (onClick)="openLink('https://bw-im.de')"></p-button>
                     </div>
                 </div>
             </p-card>
@@ -17,14 +17,14 @@
 
         <!-- Visualisierung -->
         <div class="col-12 md:col-6 lg:col-3">
-            <p-card header="Visualisierung">
+            <p-card header="Visualisierung" [pTooltip]="'CREDITS.VISUALIZATION_SECTION_TOOLTIP' | translate">
                 <div class="flex flex-column gap-3">
                     <div class="component-item" *ngFor="let item of visualComponents">
                         <div class="flex align-items-center gap-2">
-                            <i [class]="item.icon + ' text-xl'"></i>
+                            <i [class]="item.icon + ' text-xl'" [pTooltip]="item.name"></i>
                             <div>
                                 <h3 class="m-0 text-lg">{{item.name}}</h3>
-                                <p-button *ngIf="item.url" [label]="item.name + ' Website'" styleClass="p-button-link p-0" (onClick)="openLink(item.url)"></p-button>
+                                <p-button *ngIf="item.url" [label]="item.name + ' Website'" styleClass="p-button-link p-0" [pTooltip]="'CREDITS.VISIT_COMPONENT_WEBSITE' | translate: { name: item.name }" (onClick)="openLink(item.url)"></p-button>
                             </div>
                         </div>
                     </div>
@@ -34,14 +34,14 @@
 
         <!-- Daten -->
         <div class="col-12 md:col-6 lg:col-3">
-            <p-card header="Daten">
+            <p-card header="Daten" [pTooltip]="'CREDITS.DATA_SECTION_TOOLTIP' | translate">
                 <div class="flex flex-column gap-3">
                     <div class="component-item" *ngFor="let item of dataComponents">
                         <div class="flex align-items-center gap-2">
-                            <i [class]="item.icon + ' text-xl'"></i>
+                            <i [class]="item.icon + ' text-xl'" [pTooltip]="item.name"></i>
                             <div>
                                 <h3 class="m-0 text-lg">{{item.name}}</h3>
-                                <p-button *ngIf="item.url" [label]="item.name + ' Website'" styleClass="p-button-link p-0" (onClick)="openLink(item.url)"></p-button>
+                                <p-button *ngIf="item.url" [label]="item.name + ' Website'" styleClass="p-button-link p-0" [pTooltip]="'CREDITS.VISIT_COMPONENT_WEBSITE' | translate: { name: item.name }" (onClick)="openLink(item.url)"></p-button>
                             </div>
                         </div>
                     </div>
@@ -51,14 +51,14 @@
 
         <!-- Backend -->
         <div class="col-12 md:col-6 lg:col-3">
-            <p-card header="Backend">
+            <p-card header="Backend" [pTooltip]="'CREDITS.BACKEND_SECTION_TOOLTIP' | translate">
                 <div class="flex flex-column gap-3">
                     <div class="component-item" *ngFor="let item of backendComponents">
                         <div class="flex align-items-center gap-2">
-                            <i [class]="item.icon + ' text-xl'"></i>
+                            <i [class]="item.icon + ' text-xl'" [pTooltip]="item.name"></i>
                             <div>
                                 <h3 class="m-0 text-lg">{{item.name}}</h3>
-                                <p-button *ngIf="item.url" [label]="item.name + ' Website'" styleClass="p-button-link p-0" (onClick)="openLink(item.url)"></p-button>
+                                <p-button *ngIf="item.url" [label]="item.name + ' Website'" styleClass="p-button-link p-0" [pTooltip]="'CREDITS.VISIT_COMPONENT_WEBSITE' | translate: { name: item.name }" (onClick)="openLink(item.url)"></p-button>
                             </div>
                         </div>
                     </div>
@@ -68,14 +68,14 @@
 
         <!-- Routing -->
         <div class="col-12 md:col-6 lg:col-3">
-            <p-card header="Routing">
+            <p-card header="Routing" [pTooltip]="'CREDITS.ROUTING_SECTION_TOOLTIP' | translate">
                 <div class="flex flex-column gap-3">
                     <div class="component-item" *ngFor="let item of routingComponents">
                         <div class="flex align-items-center gap-2">
-                            <i [class]="item.icon + ' text-xl'"></i>
+                            <i [class]="item.icon + ' text-xl'" [pTooltip]="item.name"></i>
                             <div>
                                 <h3 class="m-0 text-lg">{{item.name}}</h3>
-                                <p-button *ngIf="item.url" [label]="item.name + ' Website'" styleClass="p-button-link p-0" (onClick)="openLink(item.url)"></p-button>
+                                <p-button *ngIf="item.url" [label]="item.name + ' Website'" styleClass="p-button-link p-0" [pTooltip]="'CREDITS.VISIT_COMPONENT_WEBSITE' | translate: { name: item.name }" (onClick)="openLink(item.url)"></p-button>
                             </div>
                         </div>
                     </div>
@@ -99,13 +99,13 @@
     <div class="grid">
         <div class="col-12">
             <p-accordion>
-                <p-accordionTab header="Erste Schritte">
+                <p-accordionTab header="Erste Schritte" [pTooltip]="'HELP.GETTING_STARTED_TOOLTIP' | translate">
                     <p>Hier finden Sie eine kurze Einführung in die wichtigsten Funktionen der Anwendung.</p>
                 </p-accordionTab>
-                <p-accordionTab header="Häufig gestellte Fragen">
+                <p-accordionTab header="Häufig gestellte Fragen" [pTooltip]="'HELP.FAQ_TOOLTIP' | translate">
                     <p>Antworten auf die am häufigsten gestellten Fragen.</p>
                 </p-accordionTab>
-                <p-accordionTab header="Kontakt & Support">
+                <p-accordionTab header="Kontakt & Support" [pTooltip]="'HELP.CONTACT_TOOLTIP' | translate">
                     <p>Bei weiteren Fragen erreichen Sie uns unter:</p>
                     <p><i class="pi pi-envelope"></i> bw-im.de/kontakt</p>
                 </p-accordionTab>

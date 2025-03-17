@@ -1,8 +1,8 @@
 <div class="map-container">
     <div id="map"></div>
     <div class="custom-zoom-controls">
-        <button class="zoom-button zoom-in" (click)="zoomIn()">+</button>
-        <button class="zoom-button zoom-out" (click)="zoomOut()">−</button>
+        <button pButton icon="pi pi-plus" (click)="zoomIn()" [pTooltip]="'MAP.CONTROLS.ZOOM_IN' | translate"></button>
+        <button pButton icon="pi pi-minus" (click)="zoomOut()" [pTooltip]="'MAP.CONTROLS.ZOOM_OUT' | translate"></button>
     </div>
     <app-legend></app-legend>
 </div>

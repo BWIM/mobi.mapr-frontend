@@ -10,6 +10,7 @@ import { CardModule } from 'primeng/card';
 import { MessagesModule } from 'primeng/messages';
 import { MessageModule } from 'primeng/message';
 import { finalize } from 'rxjs/operators';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-login',
@@ -24,7 +25,8 @@ import { finalize } from 'rxjs/operators';
     PasswordModule,
     CardModule,
     MessagesModule,
-    MessageModule
+    MessageModule,
+    TranslateModule
   ]
 })
 export class LoginComponent {
@@ -35,9 +37,12 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private translate: TranslateService
   ) {
     this.initForm();
+    this.translate.setDefaultLang('de');
+    this.translate.use('de');
   }
 
   private initForm(): void {

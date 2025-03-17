@@ -35,6 +35,7 @@
             (onClick)="exportToPDFLandscape()"
             icon="pi pi-file-pdf"
             [label]="'SIDEBAR.EXPORT_PDF_LANDSCAPE' | translate"
+            [pTooltip]="'SIDEBAR.EXPORT_PDF_LANDSCAPE_TOOLTIP' | translate"
             styleClass="p-button-primary"
             [disabled]="isExporting">
           </p-button>
@@ -45,6 +46,7 @@
             (onClick)="exportToPDFPortrait()"
             icon="pi pi-file-pdf"
             [label]="'SIDEBAR.EXPORT_PDF_PORTRAIT' | translate"
+            [pTooltip]="'SIDEBAR.EXPORT_PDF_PORTRAIT_TOOLTIP' | translate"
             styleClass="p-button-primary"
             [disabled]="isExporting">
           </p-button>
@@ -55,6 +57,7 @@
             (onClick)="generateShareLink()"
             icon="pi pi-share-alt"
             [label]="'SIDEBAR.SHARE' | translate"
+            [pTooltip]="'SIDEBAR.SHARE_TOOLTIP' | translate"
             styleClass="p-button-secondary"
             [disabled]="isGeneratingShare">
             <p-progressSpinner *ngIf="isGeneratingShare" 

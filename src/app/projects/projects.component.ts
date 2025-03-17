@@ -231,7 +231,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
   showResults(project: Project | undefined, maptype: string): void {
     if (!project) return;
-    this.selectedTableProject = project;
+    
     this.loadingService.startLoading();
     this.analyzeService.setCurrentProject(project.id.toString());
     this.analyzeService.setMapType(maptype);
@@ -252,6 +252,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         next: (results) => {
           this.mapService.resetMap();
           this.mapService.updateFeatures(results.geojson.features);
+          this.selectedTableProject = project;
           this.projectAction.emit();
         },
         error: () => {

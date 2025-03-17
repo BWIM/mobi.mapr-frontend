@@ -1,175 +1,236 @@
 {
-    "PROJECTS": {
-        "TITLE": "Projects",
-        "LIST": {
-            "TITLE": "Projects",
-            "NO_PROJECTS": "No projects available"
-        },
-        "DETAILS": {
-            "NAME": "Name",
-            "DESCRIPTION": "Description",
-            "CREATED": "Created at",
-            "UPDATED": "Updated at"
-        },
-        "FIELDS": {
-            "NAME": "Name",
-            "DESCRIPTION": "Description",
-            "TYPE": "Type",
-            "CREATED": "Created at",
-            "STATUS": "Status",
-            "GROUP": "Group",
-            "SELECT_GROUP": "Select Group"
-        },
-        "ACTIONS": {
-            "CREATE": "New Project",
-            "CREATE_GROUP": "New Group"
-        },
-        "STATUS": {
-            "FINISHED": "Completed",
-            "IN_PROGRESS": "In Progress"
-        },
-        "EDIT": {
-            "TITLE": "Edit Project"
-        },
-        "UNGROUPED": "Ungrouped Projects",
-        "TYPE": {
-            "DEFAULT": "Standard",
-            "PERSONAL": "Personal"
-        },
-        "MESSAGES": {
-            "UPDATE_SUCCESS": "Project successfully updated",
-            "UPDATE_ERROR": "Error updating project",
-            "CONFIRM_DELETE": "Are you sure you want to delete this project?",
-            "UNFINISHED_PROJECTS": "There are still unfinished projects",
-            "UNFINISHED_PROJECTS_DETAIL": "The following projects must still be completed: {projects}",
-            "CHECK_PROJECTS_ERROR": "Error checking projects"
-        },
-        "DELETE": {
-            "TITLE": "Delete Project",
-            "CONFIRMATION": "Are you sure you want to delete this project?"
-        }
+  "PROJECTS": {
+    "TITLE": "Projects",
+    "LIST": {
+      "TITLE": "Projects",
+      "NO_PROJECTS": "No projects available"
     },
-    "PROJECT_GROUPS": {
-        "CREATE": {
-            "TITLE": "New Group"
-        },
-        "EDIT": {
-            "TITLE": "Edit Group"
-        },
-        "FIELDS": {
-            "NAME": "Name"
-        },
-        "MESSAGES": {
-            "UPDATE_SUCCESS": "Project group successfully updated",
-            "UPDATE_ERROR": "Error updating project group",
-            "CONFIRM_DELETE": "Are you sure you want to delete this project group?"
-        }
+    "DETAILS": {
+      "NAME": "Name",
+      "DESCRIPTION": "Description",
+      "CREATED": "Created at",
+      "UPDATED": "Updated at"
     },
-    "COMMON": {
-        "ACTIONS": {
-            "SAVE": "Save",
-            "CANCEL": "Cancel",
-            "EDIT": "Edit",
-            "DELETE": "Delete",
-            "LABEL": "Actions",
-            "CLOSE": "Close",
-            "CONFIRM": "Confirm",
-            "SHARE": "Share",
-            "DOWNLOAD": "Download"
-        },
-        "MESSAGES": {
-            "ERROR": {
-                "LOAD": "Error loading data",
-                "DELETE": "Error deleting"
-            },
-            "SUCCESS": {
-                "DELETE": "Successfully deleted"
-            },
-            "CONFIRM_DELETE": "Are you sure you want to delete this project?"
-        }
+    "FIELDS": {
+      "NAME": "Name",
+      "DESCRIPTION": "Description",
+      "TYPE": "Type",
+      "CREATED": "Created at",
+      "STATUS": "Status",
+      "GROUP": "Group",
+      "SELECT_GROUP": "Select Group"
     },
-    "LEGEND": {
-        "LVLA": "The mobility time is max. 35% of the local average time.",
-        "LVLB": "The mobility time is between 36% and 50% of the local average time.",
-        "LVLC": "The mobility time is between 51% and 71% of the local average time.",
-        "LVLD": "The mobility time is between 72% and 100% of the local average time.",
-        "LVLE": "The mobility time is between 101% and 140% of the local average time.",
-        "LVLF": "The mobility time is at least 141% of the local average time."
+    "ACTIONS": {
+      "CREATE": "New Project",
+      "CREATE_GROUP": "New Group",
+      "CANCEL_TOOLTIP": "Cancel",
+      "SAVE_TOOLTIP": "Save",
+      "MORE_OPTIONS": "More Options",
+      "EDIT_GROUP": "Edit group",
+      "SHOW_RESULTS": "Show results",
+      "CREATE_GROUP_TOOLTIP": "Create group",
+      "CREATE_TOOLTIP": "Create"
     },
-    "MAP": {
-        "ACTIONS": {
-            "HEXAGON": "Hexagon",
-            "GEMEINDE": "Gemeinde",
-            "LANDKREIS": "Landkreis",
-            "LAND": "Land"
-        }
+    "STATUS": {
+      "FINISHED": "Completed",
+      "IN_PROGRESS": "In Progress"
     },
-    "PROJECT_WIZARD": {
-        "CREATE_NEW_PROJECT": "Create New Project",
-        "SELECT_ACTIVITIES": "Select relevant activities",
-        "CREATE_PROJECT": "Create Project",
-        "PROJECT_NAME": "Project Name",
-        "DESCRIPTION": "Description",
-        "PROJECT_SETTINGS": "Project Settings",
-        "MAKE_PUBLIC": "Make Project Public",
-        "ALLOW_SHARING": "Allow Sharing",
-        "SEND_EMAIL": "Send Email after Completion",
-        "LOAD_AREAS_ON_MAP": "Load calculated municipalities directly on map",
-        "ERRORS": {
-            "NAME_REQUIRED": "Please enter a project name."
-        },
-        "ACTIVITIES": {
-            "MID": "Activities",
-            "NON_MID": "Standard Activities"
-        }
+    "EDIT": {
+      "TITLE": "Edit Project"
     },
-    "SIDEBAR": {
-        "TITLE": "Details",
-        "DESCRIPTION": "Description",
-        "STATUS": "Status",
-        "NO_SELECTION": "No selection",
-        "CLICK_HINT": "Click on a map to display details",
-        "PROJECT_INFO": "Project Info",
-        "ACTIVITIES": "Activities",
-        "MODES": "Modes",
-        "PERSONAS": "Personas",
-        "NO_PROJECT_SELECTED": "No project selected",
-        "EXPORT_PDF_LANDSCAPE": "Export PDF Landscape",
-        "EXPORT_PDF_PORTRAIT": "Export PDF Portrait",
-        "SHARE_LINK": "Share Link",
-        "SHARE_LINK_DESCRIPTION": "Share this link so that others can view the project without having an account.",
-        "SHARE": "Share",
-        "COPY_LINK": "Copy Link",
-        "COPY_LINK_SUCCESS": "Link successfully copied"
+    "UNGROUPED": "Ungrouped Projects",
+    "TYPE": {
+      "DEFAULT": "Standard",
+      "PERSONAL": "Personal"
     },
-    "ANALYZE": {
-        "PERSONA": {
-            "TITLE": "Persona",
-            "NO_DATA": "No data available"
-        },
-        "TITLE": "Details",
-        "START": "Start",
-        "END": "Ende",
-        "ACTIVITIES": "Activities",
-        "MODES": "Modes",
-        "PERSONAS": "Personas",
-        "PROPERTIES": {
-            "POPULATION": "Population"
-        }
+    "MESSAGES": {
+      "UPDATE_SUCCESS": "Project successfully updated",
+      "UPDATE_ERROR": "Error updating project",
+      "CONFIRM_DELETE": "Are you sure you want to delete this project?",
+      "UNFINISHED_PROJECTS": "There are still unfinished projects",
+      "UNFINISHED_PROJECTS_DETAIL": "The following projects must still be completed: {projects}",
+      "CHECK_PROJECTS_ERROR": "Error checking projects",
+      "FORM_INVALID": "Form is invalid",
+      "CREATE_ERROR": "Error creating",
+      "CREATE_SUCCESS": "Success creating"
     },
-    "EXPORT": {
-        "IS_EXPORTING": "Export is in progress...",
-        "GENERATING_PDF": "Generating PDF..."
+    "DELETE": {
+      "TITLE": "Delete Project",
+      "CONFIRMATION": "Are you sure you want to delete this project?"
     },
-    "SHARE": {
-        "NO_PROJECT_SELECTED": "No project selected",
-        "CREATED_BY": "Created by",
-        "EXPIRES": "Expires at",
-        "DESCRIPTION": "Description",
-        "ACTIVITIES": "Activities",
-        "PERSONAS": "Personas",
-        "NO_ACTIVITIES": "No activities",
-        "NO_PERSONAS": "No personas",
-        "NO_DESCRIPTION": "No description"
+    "PROGRESS_TOOLTIP": "Progress",
+    "WIZARD": {
+      "SELECT_ALL_ACTIVITIES": "Select all",
+      "SELECT_ALL_PERSONAS": "Select all persona",
+      "DESELECT_ALL_PERSONAS": "deselect all persona",
+      "SELECT_ALL_MODES": "select all modes",
+      "DESELECT_ALL_MODES": "deselect all modes",
+      "DESELECT_ALL_ACTIVITIES": "deselect all"
     }
-}   
+  },
+  "PROJECT_GROUPS": {
+    "CREATE": {
+      "TITLE": "New Group"
+    },
+    "EDIT": {
+      "TITLE": "Edit Group"
+    },
+    "FIELDS": {
+      "NAME": "Name"
+    },
+    "MESSAGES": {
+      "UPDATE_SUCCESS": "Project group successfully updated",
+      "UPDATE_ERROR": "Error updating project group",
+      "CONFIRM_DELETE": "Are you sure you want to delete this project group?"
+    }
+  },
+  "COMMON": {
+    "ACTIONS": {
+      "SAVE": "Save",
+      "CANCEL": "Cancel",
+      "EDIT": "Edit",
+      "DELETE": "Delete",
+      "LABEL": "Actions",
+      "CLOSE": "Close",
+      "CONFIRM": "Confirm",
+      "SHARE": "Share",
+      "DOWNLOAD": "Download",
+      "CANCEL_TOOLTIP": "Cancel",
+      "SAVE_TOOLTIP": "Save"
+    },
+    "MESSAGES": {
+      "ERROR": {
+        "LOAD": "Error loading data",
+        "DELETE": "Error deleting",
+        "CREATE": "Create"
+      },
+      "SUCCESS": {
+        "DELETE": "Successfully deleted",
+        "CREATE": "Success creating"
+      },
+      "CONFIRM_DELETE": "Are you sure you want to delete this project?",
+      "CONFIRM_DELETE_GROUP": "Are you sure you want to delete this project group?"
+    }
+  },
+  "LEGEND": {
+    "LVLA": "The mobility time is max. 35% of the local average time.",
+    "LVLB": "The mobility time is between 36% and 50% of the local average time.",
+    "LVLC": "The mobility time is between 51% and 71% of the local average time.",
+    "LVLD": "The mobility time is between 72% and 100% of the local average time.",
+    "LVLE": "The mobility time is between 101% and 140% of the local average time.",
+    "LVLF": "The mobility time is at least 141% of the local average time."
+  },
+  "MAP": {
+    "ACTIONS": {
+      "HEXAGON": "Hexagon",
+      "GEMEINDE": "Gemeinde",
+      "LANDKREIS": "Landkreis",
+      "LAND": "Land"
+    },
+    "CONTROLS": {
+      "ZOOM_IN": "zoom in",
+      "ZOOM_OUT": "zoom out"
+    }
+  },
+  "PROJECT_WIZARD": {
+    "CREATE_NEW_PROJECT": "Create New Project",
+    "SELECT_ACTIVITIES": "Select relevant activities",
+    "CREATE_PROJECT": "Create Project",
+    "PROJECT_NAME": "Project Name",
+    "DESCRIPTION": "Description",
+    "PROJECT_SETTINGS": "Project Settings",
+    "MAKE_PUBLIC": "Make Project Public",
+    "ALLOW_SHARING": "Allow Sharing",
+    "SEND_EMAIL": "Send Email after Completion",
+    "LOAD_AREAS_ON_MAP": "Load calculated municipalities directly on map",
+    "ERRORS": {
+      "NAME_REQUIRED": "Please enter a project name."
+    },
+    "ACTIVITIES": {
+      "MID": "Activities",
+      "NON_MID": "Standard Activities",
+      "TOGGLE_TOOLTIP": "toggle"
+    },
+    "PROJECT_NAME_TOOLTIP": "project name",
+    "DESCRIPTION_TOOLTIP": "Project description",
+    "PROJECT_GROUP_TOOLTIP": "Choose project group",
+    "SEND_EMAIL_TOOLTIP": "Send an email after finished",
+    "LOAD_AREAS_ON_MAP_TOOLTIP": "Load areas directly",
+    "CANCEL_TOOLTIP": "cancel creating project",
+    "BACK_TOOLTIP": "Go back one step",
+    "FINISH_TOOLTIP": "finish",
+    "NEXT_TOOLTIP": "next",
+    "STEPS_TOOLTIP": "steps"
+  },
+  "SIDEBAR": {
+    "TITLE": "Details",
+    "DESCRIPTION": "Description",
+    "STATUS": "Status",
+    "NO_SELECTION": "No selection",
+    "CLICK_HINT": "Click on a map to display details",
+    "PROJECT_INFO": "Project Info",
+    "ACTIVITIES": "Activities",
+    "MODES": "Modes",
+    "PERSONAS": "Personas",
+    "NO_PROJECT_SELECTED": "No project selected",
+    "EXPORT_PDF_LANDSCAPE": "Export PDF Landscape",
+    "EXPORT_PDF_PORTRAIT": "Export PDF Portrait",
+    "SHARE_LINK": "Share Link",
+    "SHARE_LINK_DESCRIPTION": "Share this link so that others can view the project without having an account.",
+    "SHARE": "Share",
+    "COPY_LINK": "Copy Link",
+    "COPY_LINK_SUCCESS": "Link successfully copied",
+    "SHARE_TOOLTIP": "Share",
+    "EXPORT_PDF_LANDSCAPE_TOOLTIP": "Export in Landscape",
+    "EXPORT_PDF_PORTRAIT_TOOLTIP": "Export in portrait"
+  },
+  "ANALYZE": {
+    "PERSONA": {
+      "TITLE": "Persona",
+      "NO_DATA": "No data available"
+    },
+    "ACTIVITIES": {
+      "TITLE": "Activities",
+      "NO_DATA": "No data available"
+    },
+    "MODES": {
+      "TITLE": "Modes",
+      "NO_DATA": "No data available"
+    },
+    "TITLE": "Details",
+    "START": "Start",
+    "END": "End",
+    "PROPERTIES": {
+      "POPULATION": "Population"
+    }
+  },
+  "EXPORT": {
+    "IS_EXPORTING": "Export is in progress...",
+    "GENERATING_PDF": "Generating PDF..."
+  },
+  "SHARE": {
+    "NO_PROJECT_SELECTED": "No project selected",
+    "CREATED_BY": "Created by",
+    "EXPIRES": "Expires at",
+    "DESCRIPTION": "Description",
+    "ACTIVITIES": "Activities",
+    "PERSONAS": "Personas",
+    "NO_ACTIVITIES": "No activities",
+    "NO_PERSONAS": "No personas",
+    "NO_DESCRIPTION": "No description"
+  },
+  "DETAILS": {
+    "FIELDS": {
+      "OVERVIEW": "Overview",
+      "ACTIVITIES": "Activities"
+    }
+  },
+  "EDIT": {
+    "TITLE": "Edit project"
+  },
+  "AUTH": {
+    "LOGIN": {
+      "LOGIN": "login"
+    }
+  }
+}

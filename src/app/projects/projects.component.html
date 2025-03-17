@@ -13,7 +13,8 @@
                                 <button pButton 
                                     class="p-button-text p-button-rounded ml-2" 
                                     icon="pi pi-pencil"
-                                    (click)="editProjectGroup(group.group)">
+                                    (click)="editProjectGroup(group.group)"
+                                    pTooltip="{{'PROJECTS.ACTIONS.EDIT_GROUP' | translate}}">
                                 </button>
                             </div>
                         </ng-template>
@@ -29,14 +30,18 @@
                                 </tr>
                             </ng-template>
                             <ng-template pTemplate="body" let-project>
-                                <tr [pSelectableRow]="project" [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
+                                <tr>
                                     <td>
                                         <div class="flex flex-col">
                                             <div class="flex items-center">
                                                 <i class="pi mr-2" [ngClass]="{'pi-user': !project.default, 'pi-users': project.default}" 
                                                     [pTooltip]="project.default ? ('PROJECTS.TYPE.DEFAULT' | translate) : ('PROJECTS.TYPE.PERSONAL' | translate)">
                                                 </i>
-                                                <span class="text-overflow-ellipsis overflow-hidden break-words">{{ project.display_name }}</span>
+                                                <span class="text-overflow-ellipsis overflow-hidden break-words" 
+                                                      [ngClass]="{'selected-row': selectedTableProject?.id === project.id}"
+                                                      [pTooltip]="project.description || project.display_name">
+                                                    {{ project.display_name }}
+                                                </span>
                                             </div>
                                         </div>
                                     </td>
@@ -49,12 +54,14 @@
                                                 (onClick)="showResults(project, 'municipalities')"
                                                 dropdownIcon="pi pi-chevron-down"
                                                 (onDropdownClick)="selectedProject = project"
-                                                [disabled]="!project.finished">
+                                                [disabled]="!project.finished"
+                                                [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate">
                                             </p-splitButton>
                                             <p-button 
                                                 icon="pi pi-ellipsis-v"
                                                 (click)="menu.toggle($event)"
                                                 [disabled]="project.default"
+                                                [pTooltip]="'PROJECTS.ACTIONS.MORE_OPTIONS' | translate"
                                                 styleClass="p-button-text p-button-rounded">
                                             </p-button>
                                             <p-menu #menu 
@@ -69,7 +76,8 @@
                                     <td colspan="1">
                                         <p-progressBar
                                             [value]="getProgress(project)" 
-                                            [showValue]="true">
+                                            [showValue]="true"
+                                            [pTooltip]="'PROJECTS.PROGRESS_TOOLTIP' | translate: { progress: getProgress(project) }">
                                         </p-progressBar>
                                     </td>
                                 </tr>
@@ -93,14 +101,18 @@
                                 </tr>
                             </ng-template>
                             <ng-template pTemplate="body" let-project>
-                                <tr [pSelectableRow]="project" [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
+                                <tr [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
                                     <td>
                                         <div class="flex flex-col">
                                             <div class="flex items-center">
                                                 <i class="pi mr-2" [ngClass]="{'pi-user': !project.default, 'pi-users': project.default}" 
                                                     [pTooltip]="project.default ? ('PROJECTS.TYPE.DEFAULT' | translate) : ('PROJECTS.TYPE.PERSONAL' | translate)">
                                                 </i>
-                                                <span class="text-overflow-ellipsis overflow-hidden break-words">{{ project.display_name }}</span>
+                                                <span class="text-overflow-ellipsis overflow-hidden break-words" 
+                                                      [ngClass]="{'selected-row': selectedTableProject?.id === project.id}"
+                                                      [pTooltip]="project.description || project.display_name">
+                                                    {{ project.display_name }}
+                                                </span>
                                             </div>
                                         </div>
                                     </td>
@@ -108,17 +120,19 @@
                                         <div class="flex gap-2 justify-end relative">
                                             <p-splitButton 
                                                 [model]="items"
-                                                (onClick)="showResults(project, 'municipalities')"
                                                 icon="pi pi-map"
                                                 appendTo="body"
+                                                (onClick)="showResults(project, 'municipalities')"
                                                 dropdownIcon="pi pi-chevron-down"
                                                 (onDropdownClick)="selectedProject = project"
-                                                [disabled]="!project.finished">
+                                                [disabled]="!project.finished"
+                                                [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate">
                                             </p-splitButton>
                                             <p-button 
                                                 icon="pi pi-ellipsis-v"
                                                 (click)="menu.toggle($event)"
                                                 [disabled]="project.default"
+                                                [pTooltip]="'PROJECTS.ACTIONS.MORE_OPTIONS' | translate"
                                                 styleClass="p-button-text p-button-rounded">
                                             </p-button>
                                             <p-menu #menu 
@@ -133,7 +147,8 @@
                                     <td colspan="1">
                                         <p-progressBar
                                             [value]="getProgress(project)" 
-                                            [showValue]="true">
+                                            [showValue]="true"
+                                            [pTooltip]="'PROJECTS.PROGRESS_TOOLTIP' | translate: { progress: getProgress(project) }">
                                         </p-progressBar>
                                     </td>
                                 </tr>
@@ -156,12 +171,14 @@
         <p-button 
             icon="pi pi-users" 
             label="{{ 'PROJECTS.ACTIONS.CREATE_GROUP' | translate }}"
+            [pTooltip]="'PROJECTS.ACTIONS.CREATE_GROUP_TOOLTIP' | translate"
             styleClass="p-button-secondary w-full"
             (onClick)="showProjectGroupDialog()">
         </p-button>
         <p-button 
             icon="pi pi-plus" 
             label="{{ 'PROJECTS.ACTIONS.CREATE' | translate }}"
+            [pTooltip]="'PROJECTS.ACTIONS.CREATE_TOOLTIP' | translate"
             styleClass="p-button-info w-full"
             (onClick)="showProjectWizard()">
         </p-button>
@@ -206,12 +223,14 @@
                 icon="pi pi-times" 
                 (onClick)="closeEditDialog()" 
                 label="{{ 'COMMON.ACTIONS.CANCEL' | translate }}"
+                [pTooltip]="'COMMON.ACTIONS.CANCEL_TOOLTIP' | translate"
                 styleClass="p-button-text">
             </p-button>
             <p-button 
                 icon="pi pi-check" 
                 (onClick)="saveProject()" 
-                label="{{ 'COMMON.ACTIONS.SAVE' | translate }}">
+                label="{{ 'COMMON.ACTIONS.SAVE' | translate }}"
+                [pTooltip]="'COMMON.ACTIONS.SAVE_TOOLTIP' | translate">
             </p-button>
         </ng-template>
     </p-dialog>

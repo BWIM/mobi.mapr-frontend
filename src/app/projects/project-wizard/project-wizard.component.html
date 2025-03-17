@@ -13,7 +13,7 @@
     <div class="flex flex-col h-full">
         <!-- Stepper -->
         <div class="mb-8">
-            <p-steps [model]="steps" [activeIndex]="activeIndex" [readonly]="true"></p-steps>
+            <p-steps [model]="steps" [activeIndex]="activeIndex" [readonly]="true" [pTooltip]="'PROJECT_WIZARD.STEPS_TOOLTIP' | translate"></p-steps>
         </div>
 
         <!-- Content -->
@@ -28,6 +28,7 @@
                             [ngModelOptions]="{standalone: true}"
                             onLabel="{{ 'PROJECT_WIZARD.ACTIVITIES.MID' | translate }}"
                             offLabel="{{ 'PROJECT_WIZARD.ACTIVITIES.NON_MID' | translate }}"
+                            [pTooltip]="'PROJECT_WIZARD.ACTIVITIES.TOGGLE_TOOLTIP' | translate"
                             (onChange)="toggleMidActivities()"
                             styleClass="p-button-sm">
                         </p-toggleButton>
@@ -42,13 +43,13 @@
                                             <div class="flex gap-2">
                                                 <button pButton 
                                                     icon="pi pi-check-square"
-                                                    title="Alle auswählen"
+                                                    [pTooltip]="'PROJECTS.WIZARD.SELECT_ALL_ACTIVITIES' | translate"
                                                     class="p-button-sm p-button-rounded"
                                                     (click)="selectAllActivities(group.activities)">
                                                 </button>
                                                 <button pButton 
                                                     icon="pi pi-minus"
-                                                    title="Alle abwählen"
+                                                    [pTooltip]="'PROJECTS.WIZARD.DESELECT_ALL_ACTIVITIES' | translate"
                                                     class="p-button-sm p-button-rounded"
                                                     (click)="deselectAllActivities(group.activities)">
                                                 </button>
@@ -62,6 +63,7 @@
                                                 [name]="'midActivities'"
                                                 [inputId]="'activity_' + activity.id"
                                                 [ariaLabel]="activity.display_name || activity.name"
+                                                [pTooltip]="activity.description || (activity.display_name || activity.name)"
                                                 formControlName="selectedMidActivities">
                                             </p-checkbox>
                                             <label [for]="'activity_' + activity.id">{{activity.display_name || activity.name}}</label>
@@ -83,6 +85,7 @@
                                                     [value]="activity"
                                                     name="selectedNonMidActivity"
                                                     [inputId]="'activity_' + activity.id"
+                                                    [pTooltip]="activity.description || (activity.display_name || activity.name)"
                                                     formControlName="selectedNonMidActivity">
                                                 </p-radioButton>
                                                 <label [for]="'activity_' + activity.id" class="cursor-pointer">
@@ -114,13 +117,13 @@
                                         <div class="flex gap-2">
                                             <button pButton 
                                                 icon="pi pi-check-square"
-                                                title="Alle auswählen"
+                                                [pTooltip]="'PROJECTS.WIZARD.SELECT_ALL_PERSONAS' | translate"
                                                 class="p-button-sm p-button-rounded"
                                                 (click)="selectAllPersonas()">
                                             </button>
                                             <button pButton 
                                                 icon="pi pi-minus"
-                                                title="Alle abwählen"
+                                                [pTooltip]="'PROJECTS.WIZARD.DESELECT_ALL_PERSONAS' | translate"
                                                 class="p-button-sm p-button-rounded"
                                                 (click)="deselectAllPersonas()">
                                             </button>
@@ -162,13 +165,13 @@
                                         <div class="flex gap-2">
                                             <button pButton 
                                                 icon="pi pi-check-square"
-                                                title="Alle auswählen"
+                                                [pTooltip]="'PROJECTS.WIZARD.SELECT_ALL_MODES' | translate"
                                                 class="p-button-sm p-button-rounded"
                                                 (click)="selectAllModes()">
                                             </button>
                                             <button pButton 
                                                 icon="pi pi-minus"
-                                                title="Alle abwählen"
+                                                [pTooltip]="'PROJECTS.WIZARD.DESELECT_ALL_MODES' | translate"
                                                 class="p-button-sm p-button-rounded"
                                                 (click)="deselectAllModes()">
                                             </button>
@@ -214,14 +217,28 @@
                     <div class="grid grid-cols-1 gap-4 mb-8">
                         <div class="field">
                             <label for="name" class="block mb-2">{{ 'PROJECT_WIZARD.PROJECT_NAME' | translate }} *</label>
-                            <input id="name" type="text" pInputText formControlName="name" class="w-full border rounded-md p-2" placeholder="Name" maxlength="128">
+                            <input id="name" 
+                                   type="text" 
+                                   pInputText 
+                                   formControlName="name" 
+                                   class="w-full border rounded-md p-2" 
+                                   [pTooltip]="'PROJECT_WIZARD.PROJECT_NAME_TOOLTIP' | translate"
+                                   placeholder="Name" 
+                                   maxlength="128">
                             <small class="text-red-500" *ngIf="projectForm.get('summary.name')?.errors?.['required'] && projectForm.get('summary.name')?.touched">
                                 {{ 'PROJECT_WIZARD.ERRORS.NAME_REQUIRED' | translate }}
                             </small>
                         </div>
                         <div class="field">
                             <label for="description" class="block mb-2">{{ 'PROJECT_WIZARD.DESCRIPTION' | translate }}</label>
-                            <textarea id="description" pInputTextarea formControlName="description" class="w-full border rounded-md p-2" rows="4" maxlength="256"></textarea>
+                            <textarea id="description" 
+                                    pInputTextarea 
+                                    formControlName="description" 
+                                    class="w-full border rounded-md p-2" 
+                                    [pTooltip]="'PROJECT_WIZARD.DESCRIPTION_TOOLTIP' | translate"
+                                    rows="4" 
+                                    maxlength="256">
+                            </textarea>
                         </div>
 
                         <!-- Projektgruppe -->
@@ -234,6 +251,7 @@
                                 optionLabel="name"
                                 [showClear]="true"
                                 [appendTo]="'body'"
+                                [pTooltip]="'PROJECT_WIZARD.PROJECT_GROUP_TOOLTIP' | translate"
                                 placeholder="{{ 'PROJECTS.FIELDS.SELECT_GROUP' | translate }}"
                                 class="w-full">
                             </p-dropdown>
@@ -250,6 +268,7 @@
                                     [name]="'sendEmail'"
                                     [binary]="true"
                                     [ariaLabel]="'PROJECT_WIZARD.SEND_EMAIL' | translate"
+                                    [pTooltip]="'PROJECT_WIZARD.SEND_EMAIL_TOOLTIP' | translate"
                                     formControlName="sendEmail">
                                 </p-checkbox>
                                 <label [for]="'sendEmail'" class="ml-2">{{ 'PROJECT_WIZARD.SEND_EMAIL' | translate }}</label>
@@ -260,6 +279,7 @@
                                     [name]="'loadAreasOnMap'"
                                     [binary]="true"
                                     [ariaLabel]="'PROJECT_WIZARD.LOAD_AREAS_ON_MAP' | translate"
+                                    [pTooltip]="'PROJECT_WIZARD.LOAD_AREAS_ON_MAP_TOOLTIP' | translate"
                                     formControlName="loadAreasOnMap">
                                 </p-checkbox>
                                 <label [for]="'loadAreasOnMap'" class="ml-2">{{ 'PROJECT_WIZARD.LOAD_AREAS_ON_MAP' | translate }}</label>
@@ -276,6 +296,7 @@
             <button pButton 
                     label="Abbrechen" 
                     class="p-button-secondary" 
+                    [pTooltip]="'PROJECT_WIZARD.CANCEL_TOOLTIP' | translate"
                     (click)="hide()">
             </button>
             
@@ -283,12 +304,14 @@
                 <button pButton 
                         label="Zurück" 
                         class="p-button-outlined"
+                        [pTooltip]="'PROJECT_WIZARD.BACK_TOOLTIP' | translate"
                         [disabled]="activeIndex === 0"
                         (click)="prevStep()">
                 </button>
                 
                 <button pButton 
                         [label]="activeIndex === steps.length - 1 ? 'Fertigstellen' : 'Weiter'"
+                        [pTooltip]="activeIndex === steps.length - 1 ? ('PROJECT_WIZARD.FINISH_TOOLTIP' | translate) : ('PROJECT_WIZARD.NEXT_TOOLTIP' | translate)"
                         [disabled]="!isCurrentStepValid()"
                         (click)="activeIndex === steps.length - 1 ? onSubmit() : nextStep()">
                 </button>
