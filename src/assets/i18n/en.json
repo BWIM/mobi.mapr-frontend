@@ -49,7 +49,10 @@
       "CONFIRM_DELETE": "Are you sure you want to delete this project?",
       "UNFINISHED_PROJECTS": "There are still unfinished projects",
       "UNFINISHED_PROJECTS_DETAIL": "The following projects must still be completed: {projects}",
-      "CHECK_PROJECTS_ERROR": "Error checking projects"
+      "CHECK_PROJECTS_ERROR": "Error checking projects",
+      "FORM_INVALID": "Form is invalid",
+      "CREATE_ERROR": "Error creating",
+      "CREATE_SUCCESS": "Success creating"
     },
     "DELETE": {
       "TITLE": "Delete Project",
@@ -98,10 +101,12 @@
     "MESSAGES": {
       "ERROR": {
         "LOAD": "Error loading data",
-        "DELETE": "Error deleting"
+        "DELETE": "Error deleting",
+        "CREATE": "Create"
       },
       "SUCCESS": {
-        "DELETE": "Successfully deleted"
+        "DELETE": "Successfully deleted",
+        "CREATE": "Success creating"
       },
       "CONFIRM_DELETE": "Are you sure you want to delete this project?",
       "CONFIRM_DELETE_GROUP": "Are you sure you want to delete this project group?"

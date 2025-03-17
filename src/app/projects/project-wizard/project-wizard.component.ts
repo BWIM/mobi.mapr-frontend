@@ -17,6 +17,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { ProjectsReloadService } from '../projects-reload.service';
 import { Activity } from '../../services/interfaces/activity.interface';
 import { ProjectGroup } from '../project.interface';
+import { MessageService } from 'primeng/api';
 
 
 @Component({
@@ -24,7 +25,8 @@ import { ProjectGroup } from '../project.interface';
   templateUrl: './project-wizard.component.html',
   styleUrls: ['./project-wizard.component.css'],
   standalone: true,
-  imports: [SharedModule, AreaSelectionComponent]
+  imports: [SharedModule, AreaSelectionComponent],
+  providers: [MessageService]
 })
 export class ProjectWizardComponent implements OnInit, OnDestroy {
   steps: MenuItem[] = [];
@@ -52,7 +54,8 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     private router: Router,
     private wizardService: ProjectWizardService,
     private translate: TranslateService,
-    private reloadService: ProjectsReloadService
+    private reloadService: ProjectsReloadService,
+    private messageService: MessageService
   ) {
     this.subscription = this.wizardService.visible$.subscribe(
       visible => {
@@ -84,8 +87,8 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     this.projectForm = this.fb.group({
       // Schritt 1: Aktivitäten
       activities: this.fb.group({
-        selectedMidActivities: [[], Validators.required],
-        selectedNonMidActivity: ['', Validators.required]
+        selectedMidActivities: [[]],  // Kein required, wird manuell validiert
+        selectedNonMidActivity: ['']  // Kein required, wird manuell validiert
       }),
       // Schritt 2: Personas
       personas: this.fb.group({
@@ -97,7 +100,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
       }),
       // Schritt 4: Gebiet auswählen
       area: this.fb.group({
-        selectedArea: ['', Validators.required]
+        selectedArea: [[], Validators.required]
       }),
       // Schritt 5: Zusammenfassung
       summary: this.fb.group({
@@ -276,7 +279,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
 
   isCurrentStepValid(): boolean {
     switch (this.activeIndex) {
-      case 0:
+      case 0: // Aktivitäten
         if (this.showMidActivities) {
           const midActivities = this.projectForm.get('activities.selectedMidActivities')?.value || [];
           return midActivities.length > 0;
@@ -332,12 +335,26 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   }
 
   onAreaSelectionChange(areaIds: string[]) {
+    console.log('Ausgewählte Areas:', areaIds);
     this.selectedAreaIds = areaIds;
     this.projectForm.get('area.selectedArea')?.setValue(areaIds);
+    console.log('Formularwert nach Area-Änderung:', {
+      selectedAreaIds: this.selectedAreaIds,
+      formValue: this.projectForm.get('area.selectedArea')?.value
+    });
   }
 
   onSubmit() {
-    if (this.projectForm.valid) {
+    // Prüfe die Validität aller Schritte
+    const isValid = [0, 1, 2, 3, 4].every(step => {
+      const wasValid = this.isCurrentStepValid();
+      if (!wasValid) {
+        console.log(`Schritt ${step} ist ungültig`);
+      }
+      return wasValid;
+    });
+
+    if (isValid) {
       const selectedMidActivities = this.projectForm.get('activities.selectedMidActivities')?.value || [];
       const selectedNonMidActivity = this.projectForm.get('activities.selectedNonMidActivity')?.value;
       
@@ -358,16 +375,33 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         projectgroup: this.projectForm.get('summary.projectGroup')?.value?.id || null
       };
 
-      console.log(projectData);
+      console.log('Projektdaten:', projectData);
 
       this.projectsService.createProject(projectData).subscribe({
         next: (response) => {
+          this.messageService.add({
+            severity: 'success',
+            summary: this.translate.instant('COMMON.MESSAGES.SUCCESS.CREATE'),
+            detail: this.translate.instant('PROJECTS.MESSAGES.CREATE_SUCCESS')
+          });
           this.hide();
           this.reloadService.triggerReload();
         },
         error: (error) => {
           console.error('Fehler beim Erstellen des Projekts:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: this.translate.instant('COMMON.MESSAGES.ERROR.CREATE'),
+            detail: this.translate.instant('PROJECTS.MESSAGES.CREATE_ERROR')
+          });
         }
+      });
+    } else {
+      console.log('Formular ist ungültig');
+      this.messageService.add({
+        severity: 'error',
+        summary: this.translate.instant('COMMON.MESSAGES.ERROR.CREATE'),
+        detail: this.translate.instant('PROJECTS.MESSAGES.FORM_INVALID')
       });
     }
   }
