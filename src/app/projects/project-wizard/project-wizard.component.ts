@@ -18,6 +18,7 @@ import { ProjectsReloadService } from '../projects-reload.service';
 import { Activity } from '../../services/interfaces/activity.interface';
 import { ProjectGroup } from '../project.interface';
 import { MessageService } from 'primeng/api';
+import { MapService } from '../../map/map.service';
 
 
 @Component({
@@ -55,7 +56,8 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     private wizardService: ProjectWizardService,
     private translate: TranslateService,
     private reloadService: ProjectsReloadService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private mapService: MapService
   ) {
     this.subscription = this.wizardService.visible$.subscribe(
       visible => {
@@ -379,6 +381,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
 
       this.projectsService.createProject(projectData).subscribe({
         next: (response) => {
+          this.mapService.resetMap();
           this.messageService.add({
             severity: 'success',
             summary: this.translate.instant('COMMON.MESSAGES.SUCCESS.CREATE'),
