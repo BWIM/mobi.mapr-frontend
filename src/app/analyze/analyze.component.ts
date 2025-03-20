@@ -205,8 +205,25 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
 
   private initializeActivitiesChart(): void {
     const categoryScores = this.projectDetails?.category_scores || {};
-    const labels = Object.values(categoryScores).map((category: any) => category.display_name);
-    const data = Object.values(categoryScores).map((category: any) => category.score);
+    
+    // Sortiere die Kategorien nach ihren Scores (aufsteigend)
+    const sortedCategories = Object.entries(categoryScores)
+      .sort(([, a]: [string, any], [, b]: [string, any]) => a.score - b.score);
+    
+    const labels = sortedCategories.map(([, category]: [string, any]) => category.display_name);
+    const data = sortedCategories.map(([, category]: [string, any]) => category.score);
+
+    // Farbzuordnung basierend auf den Werten
+    const getColorForValue = (value: number): string => {
+      if (value >= 1.41) return '#9656a2';      // Lila (F)
+      if (value >= 1) return '#c21807';      // Rot (E)
+      if (value >= 0.72) return '#ed7014';      // Orange (D)
+      if (value >= 0.51) return '#eed202';      // Gelb (C)
+      if (value >= 0.35) return '#3cb043';      // Hellgrün (B)
+      return '#32612d';                         // Dunkelgrün (A)
+    };
+
+    const backgroundColor = data.map(value => getColorForValue(value));
 
     this.activitiesChartData = {
       type: 'bar',
@@ -214,30 +231,161 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
       datasets: [{
         label: 'Aktivitätswerte',
         data: data,
-        backgroundColor: '#ffcc00',
-        borderColor: '#ffcc00',
+        backgroundColor: backgroundColor,
+        borderColor: backgroundColor,
         borderWidth: 1
       }]
+    };
+
+    // Aktualisiere die Chart-Optionen
+    this.barChartOptions = {
+      indexAxis: 'x',
+      maintainAspectRatio: false,
+      aspectRatio: 1,
+      plugins: {
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            label: function(context: any) {
+              return `${context.dataset.label}: ${context.raw.toFixed(2)}`;
+            }
+          }
+        },
+        legend: {
+          labels: {
+            color: '#495057'
+          },
+          position: 'bottom'
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#495057'
+          },
+          grid: {
+            color: '#ebedef'
+          }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: '#495057'
+          },
+          grid: {
+            color: '#ebedef'
+          }
+        }
+      }
     };
   }
 
   private initializePersonaChart(): void {
     const personaScores = this.projectDetails?.persona_scores || {};
-    const labels = Object.values(personaScores).map((persona: any) => persona.display_name);
-    const data = Object.values(personaScores).map((persona: any) => persona.score);
+    // Filtere Personas ohne "n/a" und finde den höchsten Score
+    const filteredPersonaScores = Object.entries(personaScores)
+      .filter(([key]) => key !== 'n/a')
+      .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+    const highestScore = Math.max(...Object.values(filteredPersonaScores).map((persona: any) => persona.score));
+
+    const labels = Object.values(filteredPersonaScores).map((persona: any) => persona.display_name);
+    const data = Object.values(filteredPersonaScores).map((persona: any) => persona.score);
+
+    // Farbzuordnung basierend auf den Werten
+    const getColorForValue = (value: number): string => {
+      if (value >= 1.41) return '#9656a2';      // Lila (F)
+      if (value >= 1) return '#c21807';      // Rot (E)
+      if (value >= 0.72) return '#ed7014';      // Orange (D)
+      if (value >= 0.51) return '#eed202';      // Gelb (C)
+      if (value >= 0.35) return '#3cb043';      // Hellgrün (B)
+      return '#32612d';                         // Dunkelgrün (A)
+    };
+
+    const getBackgroundColorForValue = (value: number): string => {
+      if (value >= 1.41) return 'rgba(150, 86, 162, 0.2)';    // Lila (F)
+      if (value >= 1) return 'rgba(194, 24, 7, 0.2)';    // Rot (E)
+      if (value >= 0.72) return 'rgba(237, 112, 20, 0.2)';    // Orange (D)
+      if (value >= 0.51) return 'rgba(238, 210, 2, 0.2)';    // Gelb (C)
+      if (value >= 0.35) return 'rgba(60, 176, 67, 0.2)';    // Hellgrün (B)
+      return 'rgba(50, 97, 45, 0.2)';                       // Dunkelgrün (A)
+    };
+
+    const borderColors = data.map(value => getColorForValue(value));
+    const backgroundColors = data.map(value => getBackgroundColorForValue(value));
+
+    // Basis-Datensatz für die Hintergrundfarben
+    const baseDatasets = []
+    if (highestScore >= 1.41) {
+      baseDatasets.push({
+        label: 'F',
+        data: Array(labels.length).fill(2),
+        backgroundColor: 'rgba(150, 86, 162, 0.1)',
+        borderWidth: 0,
+        fill: true
+      })
+    }
+    if (highestScore >= 1) {
+      baseDatasets.push({
+        label: 'E',
+        data: Array(labels.length).fill(1.41),
+        backgroundColor: 'rgba(194, 24, 7, 0.1)',
+        borderWidth: 0,
+        fill: true
+      })
+    }
+    if (highestScore >= 0.72) {
+      baseDatasets.push({
+        label: 'D',
+        data: Array(labels.length).fill(0.72),
+        backgroundColor: 'rgba(237, 112, 20, 0.1)',
+        borderWidth: 0,
+        fill: true
+      })
+    }
+    if (highestScore >= 0.51) {
+      baseDatasets.push({
+        label: 'C',
+        data: Array(labels.length).fill(0.51),
+        backgroundColor: 'rgba(238, 210, 2, 0.1)',
+        borderWidth: 0,
+        fill: true
+      })
+    }
+    if (highestScore >= 0.35) {
+      baseDatasets.push({
+        label: 'B',
+        data: Array(labels.length).fill(0.35),
+        backgroundColor: 'rgba(60, 176, 67, 0.1)',
+        borderWidth: 0,
+        fill: true
+      })
+    }
+    baseDatasets.push({
+      label: 'A',
+      data: Array(labels.length).fill(0),
+      backgroundColor: 'rgba(50, 97, 45, 0.1)',
+      borderWidth: 0,
+      fill: true
+    })
 
     this.personaChartData = {
       labels: labels,
-      datasets: [{
-        label: 'Persona-Werte',
-        data: data,
-        backgroundColor: 'rgba(255, 204, 0, 0.2)',
-        borderColor: 'rgb(255, 204, 0)',
-        pointBackgroundColor: 'rgb(255, 204, 0)',
-        pointBorderColor: '#fff',
-        pointHoverBackgroundColor: '#fff',
-        pointHoverBorderColor: 'rgb(255, 204, 0)'
-      }]
+      datasets: [
+        ...baseDatasets,
+        {
+          label: 'Persona-Werte',
+          data: data,
+          backgroundColor: backgroundColors,
+          borderColor: borderColors,
+          borderWidth: 2,
+          pointBackgroundColor: borderColors,
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: borderColors,
+          fill: true
+        }
+      ]
     };
   }
 
