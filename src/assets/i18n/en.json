@@ -52,7 +52,10 @@
       "CHECK_PROJECTS_ERROR": "Error checking projects",
       "FORM_INVALID": "Form is invalid",
       "CREATE_ERROR": "Error creating",
-      "CREATE_SUCCESS": "Success creating"
+      "CREATE_SUCCESS": "Success creating",
+      "INVALID_DATA": "Invaldid data",
+      "PERMISSION_DENIED": "Permission deneied",
+      "SERVER_ERROR": "Server error"
     },
     "DELETE": {
       "TITLE": "Delete Project",
@@ -81,7 +84,9 @@
     "MESSAGES": {
       "UPDATE_SUCCESS": "Project group successfully updated",
       "UPDATE_ERROR": "Error updating project group",
-      "CONFIRM_DELETE": "Are you sure you want to delete this project group?"
+      "CONFIRM_DELETE": "Are you sure you want to delete this project group?",
+      "CREATE_SUCCESS": "Success creating a new project group",
+      "CREATE_ERROR": "Error when creating a new group"
     }
   },
   "COMMON": {
@@ -102,11 +107,13 @@
       "ERROR": {
         "LOAD": "Error loading data",
         "DELETE": "Error deleting",
-        "CREATE": "Create"
+        "CREATE": "Create",
+        "UPDATE": "Error when updating"
       },
       "SUCCESS": {
         "DELETE": "Successfully deleted",
-        "CREATE": "Success creating"
+        "CREATE": "Success creating",
+        "UPDATE": "Updated"
       },
       "CONFIRM_DELETE": "Are you sure you want to delete this project?",
       "CONFIRM_DELETE_GROUP": "Are you sure you want to delete this project group?"
@@ -160,7 +167,17 @@
     "BACK_TOOLTIP": "Go back one step",
     "FINISH_TOOLTIP": "finish",
     "NEXT_TOOLTIP": "next",
-    "STEPS_TOOLTIP": "steps"
+    "STEPS_TOOLTIP": "steps",
+    "ACCUMULATION_TYPE": {
+      "AREA": "By Area",
+      "LABEL": "Accumulation Type",
+      "POPULATION": "By Population"
+    },
+    "AVERAGE_TYPE": {
+      "MEAN": "Mean",
+      "MEDIAN": "Median",
+      "LABEL": "Average Type"
+    }
   },
   "SIDEBAR": {
     "TITLE": "Details",
@@ -232,5 +249,19 @@
     "LOGIN": {
       "LOGIN": "login"
     }
+  },
+  "CREDITS": {
+    "VISIT_WEBSITE": "Visit website",
+    "INFO_BUTTON_TOOLTIP": "Information and Help",
+    "VISUALIZATION_SECTION_TOOLTIP": "Components used for visualization",
+    "DATA_SECTION_TOOLTIP": "Data sources and processing components",
+    "BACKEND_SECTION_TOOLTIP": "Backend technologies used",
+    "ROUTING_SECTION_TOOLTIP": "Routing services used",
+    "VISIT_COMPONENT_WEBSITE": "Visit the {{name}} website"
+  },
+  "HELP": {
+    "GETTING_STARTED_TOOLTIP": "Getting started with the application",
+    "FAQ_TOOLTIP": "Frequently asked questions and answers",
+    "CONTACT_TOOLTIP": "Contact information for support"
   }
 }

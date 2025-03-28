@@ -39,8 +39,11 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   modes: Mode[] = [];
   projectGroups: ProjectGroup[] = [];
   private subscription: Subscription;
+  private langChangeSubscription: Subscription;
   selectedAreaIds: string[] = [];
   showMidActivities: boolean = true;
+  accumulationTypeOptions: any[] = [];
+  averageTypeOptions: any[] = [];
   private allGroupedActivities: { mid: GroupedActivities[], nonMid: GroupedActivities[] } = {
     mid: [],
     nonMid: []
@@ -70,6 +73,24 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     );
 
     this.initializeForm();
+    this.updateTranslations();
+    
+    // Übersetzungen bei Sprachwechsel aktualisieren
+    this.langChangeSubscription = this.translate.onLangChange.subscribe(() => {
+      this.updateTranslations();
+    });
+  }
+
+  private updateTranslations() {
+    this.accumulationTypeOptions = [
+      { label: this.translate.instant('PROJECT_WIZARD.ACCUMULATION_TYPE.AREA'), value: 'area' },
+      { label: this.translate.instant('PROJECT_WIZARD.ACCUMULATION_TYPE.POPULATION'), value: 'population' }
+    ];
+  
+    this.averageTypeOptions = [
+      { label: this.translate.instant('PROJECT_WIZARD.AVERAGE_TYPE.MEAN'), value: 'mean' },
+      { label: this.translate.instant('PROJECT_WIZARD.AVERAGE_TYPE.MEDIAN'), value: 'median' }
+    ];
   }
 
   ngOnInit() {
@@ -82,6 +103,9 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.subscription) {
       this.subscription.unsubscribe();
+    }
+    if (this.langChangeSubscription) {
+      this.langChangeSubscription.unsubscribe();
     }
   }
 
@@ -112,7 +136,9 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         allowSharing: [false],
         sendEmail: [true],
         loadAreasOnMap: [true],
-        projectGroup: [null]
+        projectGroup: [null],
+        accumulationType: ['population'], // 'area' oder 'population'
+        averageType: ['mean'] // 'mean' oder 'median'
       })
     });
   }
@@ -139,7 +165,9 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         isPublic: false,
         allowSharing: false,
         sendEmail: true,
-        loadAreasOnMap: true
+        loadAreasOnMap: true,
+        accumulationType: 'population',
+        averageType: 'mean'
       }
     });
 
@@ -374,28 +402,50 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         personas: this.projectForm.get('personas.selectedPersonas')?.value.map((p: any) => p.id).join(','),
         modes: this.projectForm.get('modes.selectedModes')?.value.map((m: any) => m.id).join(','),
         landkreise: this.selectedAreaIds.join(','),
-        projectgroup: this.projectForm.get('summary.projectGroup')?.value?.id || null
+        projectgroup: this.projectForm.get('summary.projectGroup')?.value?.id || null,
+        accumulation_type: this.projectForm.get('summary.accumulationType')?.value,
+        average_type: this.projectForm.get('summary.averageType')?.value
       };
 
       console.log('Projektdaten:', projectData);
 
       this.projectsService.createProject(projectData).subscribe({
         next: (response) => {
+          if (!response) {
+            this.messageService.add({
+              severity: 'error',
+              summary: this.translate.instant('COMMON.MESSAGES.ERROR.CREATE'),
+              detail: this.translate.instant('PROJECTS.MESSAGES.CREATE_ERROR')
+            });
+            return;
+          }
           this.mapService.resetMap();
           this.messageService.add({
             severity: 'success',
             summary: this.translate.instant('COMMON.MESSAGES.SUCCESS.CREATE'),
             detail: this.translate.instant('PROJECTS.MESSAGES.CREATE_SUCCESS')
           });
-          this.hide();
           this.reloadService.triggerReload();
+          this.hide();
         },
         error: (error) => {
           console.error('Fehler beim Erstellen des Projekts:', error);
+          let errorMessage = this.translate.instant('PROJECTS.MESSAGES.CREATE_ERROR');
+          
+          if (error.error && error.error.detail) {
+            errorMessage = error.error.detail;
+          } else if (error.status === 400) {
+            errorMessage = this.translate.instant('PROJECTS.MESSAGES.INVALID_DATA');
+          } else if (error.status === 403) {
+            errorMessage = this.translate.instant('PROJECTS.MESSAGES.PERMISSION_DENIED');
+          } else if (error.status === 500) {
+            errorMessage = this.translate.instant('PROJECTS.MESSAGES.SERVER_ERROR');
+          }
+
           this.messageService.add({
             severity: 'error',
             summary: this.translate.instant('COMMON.MESSAGES.ERROR.CREATE'),
-            detail: this.translate.instant('PROJECTS.MESSAGES.CREATE_ERROR')
+            detail: errorMessage
           });
         }
       });

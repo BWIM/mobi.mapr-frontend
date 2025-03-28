@@ -262,6 +262,28 @@
                     <div class="bg-gray-50 p-4 rounded-lg mb-8">
                         <h3 class="font-bold mb-4">{{ 'PROJECT_WIZARD.PROJECT_SETTINGS' | translate }}</h3>
                         <div class="flex flex-col gap-3">
+                            <!-- Akkumulierungstyp -->
+                            <div class="field">
+                                <label class="block mb-2">{{ 'PROJECT_WIZARD.ACCUMULATION_TYPE.LABEL' | translate }}</label>
+                                <p-selectButton 
+                                    [options]="accumulationTypeOptions"
+                                    formControlName="accumulationType"
+                                    optionLabel="label"
+                                    optionValue="value">
+                                </p-selectButton>
+                            </div>
+
+                            <!-- Mittelwerttyp -->
+                            <div class="field">
+                                <label class="block mb-2">{{ 'PROJECT_WIZARD.AVERAGE_TYPE.LABEL' | translate }}</label>
+                                <p-selectButton 
+                                    [options]="averageTypeOptions"
+                                    formControlName="averageType"
+                                    optionLabel="label"
+                                    optionValue="value">
+                                </p-selectButton>
+                            </div>
+
                             <div class="field-checkbox">
                                 <p-checkbox
                                     [inputId]="'sendEmail'"
