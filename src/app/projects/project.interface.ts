@@ -49,6 +49,8 @@ export interface ProjectInfo {
     activities: string[];
     modes: string[];
     personas: string[];
+    accumulation_type: string;
+    average_type: string;
   }
 
   export interface ExportProject {

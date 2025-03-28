@@ -52,7 +52,10 @@
       "CHECK_PROJECTS_ERROR": "Fehler beim Überprüfen der Projekte",
       "FORM_INVALID": "Formular ist ungültig",
       "CREATE_ERROR": "Fehler beim Erstellen",
-      "CREATE_SUCCESS": "Erfolgreich erstellt"
+      "CREATE_SUCCESS": "Erfolgreich erstellt",
+      "INVALID_DATA": "Ungülgtige Daten",
+      "PERMISSION_DENIED": "Keine Berechtigung",
+      "SERVER_ERROR": "Es gab einen Fehler im Backend"
     },
     "DELETE": {
       "TITLE": "Projekt löschen",
@@ -68,7 +71,7 @@
       "DESELECT_ALL_ACTIVITIES": "Alle abwählen"
     }
   },
-"PROJECT_GROUPS": {
+  "PROJECT_GROUPS": {
     "CREATE": {
       "TITLE": "Neue Gruppe"
     },
@@ -81,7 +84,9 @@
     "MESSAGES": {
       "UPDATE_SUCCESS": "Projektgruppe erfolgreich aktualisiert",
       "UPDATE_ERROR": "Fehler beim Aktualisieren der Projektgruppe",
-      "CONFIRM_DELETE": "Sind Sie sicher, dass Sie diese Projektgruppe löschen möchten?"
+      "CONFIRM_DELETE": "Sind Sie sicher, dass Sie diese Projektgruppe löschen möchten?",
+      "CREATE_SUCCESS": "Das Erstellen einer neuen Gruppe war erfolgreich",
+      "CREATE_ERROR": "Fehler beim erstellen einer neuen Gruppe"
     }
   },
   "COMMON": {
@@ -102,11 +107,13 @@
       "ERROR": {
         "LOAD": "Fehler beim Laden der Daten",
         "DELETE": "Fehler beim Löschen",
-        "CREATE": "Fehler beim Erstellen"
+        "CREATE": "Fehler beim Erstellen",
+        "UPDATE": "Fehler beim Aktualisieren"
       },
       "SUCCESS": {
         "DELETE": "Erfolgreich gelöscht",
-        "CREATE": "Erfolgreich erstellt"
+        "CREATE": "Erfolgreich erstellt",
+        "UPDATE": "Aktualisiert"
       },
       "CONFIRM_DELETE": "Sind Sie sicher, dass Sie dieses Projekt löschen möchten?",
       "CONFIRM_DELETE_GROUP": "Sind Sie sicher, dass Sie diese Projektgruppe löschen möchten?"
@@ -142,7 +149,7 @@
     "MAKE_PUBLIC": "Projekt öffentlich machen",
     "ALLOW_SHARING": "Freigabe erlauben",
     "SEND_EMAIL": "E-Mail nach Abschluss senden",
-    "LOAD_AREAS_ON_MAP": "Berechnete Gemeinden direkt auf der Karte laden",
+    "LOAD_AREAS_ON_MAP": "Berechnete Gemeinden direkt auf der Karte anzeigen",
     "ERRORS": {
       "NAME_REQUIRED": "Bitte einen Projektnamen eingeben."
     },
@@ -160,7 +167,17 @@
     "BACK_TOOLTIP": "Einen Schritt zurückgehen",
     "FINISH_TOOLTIP": "Fertigstellen",
     "NEXT_TOOLTIP": "Weiter",
-    "STEPS_TOOLTIP": "Schritte"
+    "STEPS_TOOLTIP": "Schritte",
+    "ACCUMULATION_TYPE": {
+      "AREA": "Nach Fläche",
+      "POPULATION": "Nach Bevölkerung",
+      "LABEL": "Akkumulierungstyp"
+    },
+    "AVERAGE_TYPE": {
+      "MEAN": "Durchschnitt",
+      "MEDIAN": "Median",
+      "LABEL": "Mittelwerttyp"
+    }
   },
   "SIDEBAR": {
     "TITLE": "Details",
@@ -232,5 +249,19 @@
     "LOGIN": {
       "LOGIN": "Anmelden"
     }
+  },
+  "CREDITS": {
+    "VISIT_WEBSITE": "Besuche unsere Website",
+    "INFO_BUTTON_TOOLTIP": "Informationen und Hilfe",
+    "VISUALIZATION_SECTION_TOOLTIP": "Verwendete Komponenten für die Visualisierung",
+    "DATA_SECTION_TOOLTIP": "Verwendete Datenquellen und -verarbeitung",
+    "BACKEND_SECTION_TOOLTIP": "Verwendete Backend-Technologien",
+    "ROUTING_SECTION_TOOLTIP": "Verwendete Routing-Dienste",
+    "VISIT_COMPONENT_WEBSITE": "Besuche die {{name}} Website"
+  },
+  "HELP": {
+    "GETTING_STARTED_TOOLTIP": "Erste Schritte mit der Anwendung",
+    "FAQ_TOOLTIP": "Häufig gestellte Fragen und Antworten",
+    "CONTACT_TOOLTIP": "Kontaktinformationen für Support"
   }
 }
