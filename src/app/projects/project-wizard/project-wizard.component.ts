@@ -381,21 +381,41 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
 
       this.projectsService.createProject(projectData).subscribe({
         next: (response) => {
+          if (!response) {
+            this.messageService.add({
+              severity: 'error',
+              summary: this.translate.instant('COMMON.MESSAGES.ERROR.CREATE'),
+              detail: this.translate.instant('PROJECTS.MESSAGES.CREATE_ERROR')
+            });
+            return;
+          }
           this.mapService.resetMap();
           this.messageService.add({
             severity: 'success',
             summary: this.translate.instant('COMMON.MESSAGES.SUCCESS.CREATE'),
             detail: this.translate.instant('PROJECTS.MESSAGES.CREATE_SUCCESS')
           });
-          this.hide();
           this.reloadService.triggerReload();
+          this.hide();
         },
         error: (error) => {
           console.error('Fehler beim Erstellen des Projekts:', error);
+          let errorMessage = this.translate.instant('PROJECTS.MESSAGES.CREATE_ERROR');
+          
+          if (error.error && error.error.detail) {
+            errorMessage = error.error.detail;
+          } else if (error.status === 400) {
+            errorMessage = this.translate.instant('PROJECTS.MESSAGES.INVALID_DATA');
+          } else if (error.status === 403) {
+            errorMessage = this.translate.instant('PROJECTS.MESSAGES.PERMISSION_DENIED');
+          } else if (error.status === 500) {
+            errorMessage = this.translate.instant('PROJECTS.MESSAGES.SERVER_ERROR');
+          }
+
           this.messageService.add({
             severity: 'error',
             summary: this.translate.instant('COMMON.MESSAGES.ERROR.CREATE'),
-            detail: this.translate.instant('PROJECTS.MESSAGES.CREATE_ERROR')
+            detail: errorMessage
           });
         }
       });

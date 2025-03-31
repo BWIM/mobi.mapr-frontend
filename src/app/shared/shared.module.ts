@@ -32,6 +32,7 @@ import { CardModule } from 'primeng/card';
 import { FieldsetModule } from 'primeng/fieldset';
 import { MenuModule } from 'primeng/menu';
 import { RadioButtonModule } from 'primeng/radiobutton';
+import { SelectButtonModule } from 'primeng/selectbutton';
 
 @NgModule({
   imports: [
@@ -65,7 +66,8 @@ import { RadioButtonModule } from 'primeng/radiobutton';
     CardModule,
     FieldsetModule,
     MenuModule,
-    RadioButtonModule
+    RadioButtonModule,
+    SelectButtonModule
   ],
   exports: [
     CommonModule,
@@ -98,7 +100,8 @@ import { RadioButtonModule } from 'primeng/radiobutton';
     CardModule,
     FieldsetModule,
     MenuModule,
-    RadioButtonModule
+    RadioButtonModule,
+    SelectButtonModule
   ],
   providers: [MessageService]
 })
