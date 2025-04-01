@@ -199,7 +199,13 @@
     "COPY_LINK_SUCCESS": "Link erfolgreich kopiert",
     "SHARE_TOOLTIP": "Teilen",
     "EXPORT_PDF_LANDSCAPE_TOOLTIP": "Im Querformat exportieren",
-    "EXPORT_PDF_PORTRAIT_TOOLTIP": "Im Hochformat exportieren"
+    "EXPORT_PDF_PORTRAIT_TOOLTIP": "Im Hochformat exportieren",
+    "AVERAGE_TYPE": "Mittelwerttyp",
+    "POPULATION_AREA": "Bevölkerung/Fläche",
+    "MEDIAN": "Median",
+    "AVERAGE": "Durchschnitt",
+    "AREA": "Fläche",
+    "POPULATION": "Bevölkerung"
   },
   "ANALYZE": {
     "PERSONA": {

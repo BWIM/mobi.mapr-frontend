@@ -31,6 +31,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private baseLayer!: TileLayer<XYZ>;
   private lastClickedFeature: Feature | null = null;
   private subscriptions: Subscription[] = [];
+  private currentPropertyKey: string = 'pop_mean_color'; // Standardwert
 
   constructor(
     private mapService: MapService,
@@ -58,6 +59,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       }),
       this.mapService.resetMap$.subscribe(() => {
         this.resetMap();
+      }),
+      this.mapService.visualizationSettings$.subscribe(settings => {
+        this.currentPropertyKey = settings.populationArea + "_" + settings.averageType + "_color";
+        this.updateFeatureColors();
       })
     );
   }
@@ -159,7 +164,23 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     return [rgb[0], rgb[1], rgb[2], opacity];
   }
 
-  // Feature zur Karte hinzufügen
+  private updateFeatureColors(): void {
+    const features = this.vectorLayer.getSource()?.getFeatures() || [];
+    features.forEach(feature => {
+      let color = feature.get(this.currentPropertyKey);
+      if (!color) {
+        color = feature.get('score_color');
+      }
+      const opacity = feature.get('opacity') || 0.5;
+      if (color) {
+        const rgbColor = this.hexToRgba(color, opacity);
+        feature.set('rgbColor', rgbColor);
+      }
+    });
+    
+    this.vectorLayer.changed();
+  }
+
   public addFeatures(features: any[]): void {
     if (!this.vectorLayer) return;
 
@@ -171,8 +192,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         featureProjection: this.map.getView().getProjection()
       }) as Feature<Geometry>;
 
-      const color = olFeature.get('color');
-      const opacity = olFeature.get('opacity') || 0;
+      let color = olFeature.get(this.currentPropertyKey);
+      if (!color) {
+        color = olFeature.get('score_color');
+      }
+      const opacity = olFeature.get('opacity') || 0.5;
       const border_width = olFeature.get('border_width') || 0.1;
 
       if (color) {
@@ -185,6 +209,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       }
 
       vectorSource.addFeature(olFeature);
+      vectorSource.changed();
     });
 
     this.zoomToFeatures();

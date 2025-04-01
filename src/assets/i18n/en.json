@@ -199,7 +199,13 @@
     "COPY_LINK_SUCCESS": "Link successfully copied",
     "SHARE_TOOLTIP": "Share",
     "EXPORT_PDF_LANDSCAPE_TOOLTIP": "Export in Landscape",
-    "EXPORT_PDF_PORTRAIT_TOOLTIP": "Export in portrait"
+    "EXPORT_PDF_PORTRAIT_TOOLTIP": "Export in portrait",
+    "AVERAGE_TYPE": "Average Type",
+    "POPULATION_AREA": "Population/Area",
+    "MEDIAN": "Median",
+    "AVERAGE": "Average",
+    "AREA": "Area",
+    "POPULATION": "Population"
   },
   "ANALYZE": {
     "PERSONA": {
