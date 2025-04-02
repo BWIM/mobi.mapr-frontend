@@ -3,7 +3,7 @@ import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
-import WebGLVectorLayer from 'ol/layer/WebGLVector';
+import VectorImageLayer from 'ol/layer/VectorImage';
 import VectorSource from 'ol/source/Vector';
 import { Feature } from 'ol';
 import { fromLonLat } from 'ol/proj';
@@ -27,7 +27,7 @@ import { SharedModule } from '../shared/shared.module';
 })
 export class MapComponent implements AfterViewInit, OnDestroy {
   private map!: Map;
-  private vectorLayer!: WebGLVectorLayer<VectorSource>;
+  private vectorLayer!: VectorImageLayer<VectorSource>;
   private baseLayer!: TileLayer<XYZ>;
   private lastClickedFeature: Feature | null = null;
   private subscriptions: Subscription[] = [];
@@ -74,7 +74,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       layers: [this.baseLayer, this.vectorLayer],
       view: new View({
         center: fromLonLat([8.5, 49.05]), // Zentrum von Ba-Wü
-        zoom: 9
+        zoom: 9,
+        constrainResolution: true,
+        smoothExtentConstraint: true,
+        smoothResolutionConstraint: true
       })
     });
 
@@ -95,25 +98,26 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       })
     });
 
-    // WebGL Vector Layer mit Standard-Styling
-    this.vectorLayer = new WebGLVectorLayer({
+    // Vector Layer mit optimiertem Styling
+    this.vectorLayer = new VectorImageLayer({
       source: new VectorSource(),
-      style: {
-        'stroke-color': [
-          'interpolate',
-          ['linear'],
-          ['get', 'selected'],
-          0, [0, 0, 0, 0.1],
-          1, [67, 49, 67, 1]
-        ],
-        'stroke-width': [
-          'interpolate',
-          ['linear'],
-          ['get', 'selected'],
-          0, ['get', 'border_width'],
-          1, 2
-        ],
-        'fill-color': ['get', 'rgbColor']
+      imageRatio: 2,
+      renderBuffer: 200,
+      declutter: true,
+      style: (feature) => {
+        const selected = feature.get('selected') || false;
+        const rgbColor = feature.get('rgbColor');
+        const borderWidth = feature.get('border_width') || 0.1;
+        
+        return new Style({
+          stroke: new Stroke({
+            color: selected ? [67, 49, 67, 1] : [0, 0, 0, 0.1],
+            width: selected ? 2 : borderWidth
+          }),
+          fill: new Fill({
+            color: rgbColor
+          })
+        });
       }
     });
   }
@@ -182,37 +186,43 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   public addFeatures(features: any[]): void {
-    if (!this.vectorLayer) return;
+    try {
+      console.log(features.length);
+      if (!this.vectorLayer) return;
 
-    const vectorSource = this.vectorLayer.getSource();
-    if (!vectorSource) return;
+      const vectorSource = this.vectorLayer.getSource();
+      if (!vectorSource) return;
 
-    features.forEach(feature => {
-      const olFeature = new GeoJSON().readFeature(feature, {
-        featureProjection: this.map.getView().getProjection()
-      }) as Feature<Geometry>;
+      features.forEach(feature => {
+        const olFeature = new GeoJSON().readFeature(feature, {
+          featureProjection: this.map.getView().getProjection()
+        }) as Feature<Geometry>;
 
-      let color = olFeature.get(this.currentPropertyKey);
-      if (!color) {
-        color = olFeature.get('score_color');
-      }
-      const opacity = olFeature.get('opacity') || 0.5;
-      const border_width = olFeature.get('border_width') || 0.1;
+        let color = olFeature.get(this.currentPropertyKey);
+        if (!color) {
+          color = olFeature.get('score_color');
+        }
+        const opacity = olFeature.get('opacity') || 0.5;
+        const border_width = olFeature.get('border_width') || 0.1;
 
-      if (color) {
-        const rgbColor = this.hexToRgba(color, opacity);
-        olFeature.setProperties({
-          rgbColor: rgbColor,
-          opacity: opacity,
-          border_width: border_width
-        });
-      }
+        if (color) {
+          const rgbColor = this.hexToRgba(color, opacity);
+          olFeature.setProperties({
+            rgbColor: rgbColor,
+            opacity: opacity,
+            border_width: border_width
+          });
+        }
+        vectorSource.addFeature(olFeature);
 
-      vectorSource.addFeature(olFeature);
+      });
       vectorSource.changed();
-    });
 
-    this.zoomToFeatures();
+      this.zoomToFeatures();
+    }
+    catch (error) {
+      console.error(error);
+    }
   }
 
   private zoomToFeatures(): void {

@@ -230,6 +230,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   }
 
   showResults(project: Project | undefined, maptype: string): void {
+    try {
     if (!project) return;
     
     this.loadingService.startLoading();
@@ -263,6 +264,10 @@ export class ProjectsComponent implements OnInit, OnDestroy {
           });
         }
       });
+    }
+    catch (error) {
+      console.error(error);
+    }
   }
 
   showProjectWizard(): void {

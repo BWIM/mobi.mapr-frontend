@@ -69,6 +69,9 @@
       "SELECT_ALL_MODES": "Alle Modi auswählen",
       "DESELECT_ALL_MODES": "Alle Modi abwählen",
       "DESELECT_ALL_ACTIVITIES": "Alle abwählen"
+    },
+    "RESULTS": {
+      "LOAD_ERROR": "Ergebnisse können nicht geladen werden"
     }
   },
   "PROJECT_GROUPS": {

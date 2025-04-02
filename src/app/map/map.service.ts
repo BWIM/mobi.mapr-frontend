@@ -3,13 +3,14 @@ import { Subject } from 'rxjs';
 import Map from 'ol/Map';
 import WebGLVectorLayer from 'ol/layer/WebGLVector';
 import VectorSource from 'ol/source/Vector';
+import VectorImageLayer from 'ol/layer/VectorImage';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MapService {
   private map: Map | null = null;
-  private mainLayer: WebGLVectorLayer<VectorSource> | null = null;
+  private mainLayer: VectorImageLayer<VectorSource> | null = null;
   private featuresSubject = new Subject<any>();
   features$ = this.featuresSubject.asObservable();
 
@@ -30,11 +31,11 @@ export class MapService {
     return this.map;
   }
 
-  setMainLayer(layer: WebGLVectorLayer<VectorSource> | null): void {
+  setMainLayer(layer: VectorImageLayer<VectorSource> | null): void {
     this.mainLayer = layer;
   }
 
-  getMainLayer(): WebGLVectorLayer<VectorSource> | null {
+  getMainLayer(): VectorImageLayer<VectorSource> | null {
     return this.mainLayer;
   }
 
