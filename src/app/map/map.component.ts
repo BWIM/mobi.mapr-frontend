@@ -187,7 +187,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   public addFeatures(features: any[]): void {
     try {
-      console.log(features.length);
       if (!this.vectorLayer) return;
 
       const vectorSource = this.vectorLayer.getSource();

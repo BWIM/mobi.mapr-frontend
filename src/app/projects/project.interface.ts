@@ -49,6 +49,7 @@ export interface ProjectInfo {
     activities: string[];
     modes: string[];
     personas: string[];
+    type: string;
   }
 
   export interface ExportProject {
