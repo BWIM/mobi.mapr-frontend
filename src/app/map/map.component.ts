@@ -3,7 +3,7 @@ import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
-import VectorImageLayer from 'ol/layer/VectorImage';
+import WebGLVectorLayer from 'ol/layer/WebGLVector';
 import VectorSource from 'ol/source/Vector';
 import { Feature } from 'ol';
 import { fromLonLat } from 'ol/proj';
@@ -27,7 +27,7 @@ import { SharedModule } from '../shared/shared.module';
 })
 export class MapComponent implements AfterViewInit, OnDestroy {
   private map!: Map;
-  private vectorLayer!: VectorImageLayer<VectorSource>;
+  private vectorLayer!: WebGLVectorLayer<VectorSource>;
   private baseLayer!: TileLayer<XYZ>;
   private lastClickedFeature: Feature | null = null;
   private subscriptions: Subscription[] = [];
@@ -98,30 +98,16 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       })
     });
 
-    // Vector Layer mit optimiertem Styling
-    this.vectorLayer = new VectorImageLayer({
+    // WebGL Vector Layer mit Standard-Styling
+    this.vectorLayer = new WebGLVectorLayer({
       source: new VectorSource(),
-      imageRatio: 2,
-      renderBuffer: 200,
-      declutter: true,
-      style: (feature) => {
-        const selected = feature.get('selected') || false;
-        const rgbColor = feature.get('rgbColor');
-        const borderWidth = feature.get('border_width') || 0.1;
-        
-        return new Style({
-          stroke: new Stroke({
-            color: selected ? [67, 49, 67, 1] : [0, 0, 0, 0.1],
-            width: selected ? 2 : borderWidth
-          }),
-          fill: new Fill({
-            color: rgbColor
-          })
-        });
+      style: {
+        'stroke-color': [0, 0, 0, 0.1],
+        'stroke-width': 0.1,
+        'fill-color': ['get', 'rgbColor']
       }
     });
   }
-
   private setupMapInteractions(): void {
     // Click-Handler für Features
     this.map.on('click', (event) => {
@@ -153,7 +139,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  // Hilfsfunktionen für Feature-Styling
   private hexToRgb(hex: string): number[] {
     hex = hex.replace('#', '');
     const bigint = parseInt(hex, 16);
@@ -201,9 +186,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         if (!color) {
           color = olFeature.get('score_color');
         }
-        const opacity = olFeature.get('opacity') || 0.5;
+        const opacity = olFeature.get('opacity') || 0.1;
         const border_width = olFeature.get('border_width') || 0.1;
-
+  
         if (color) {
           const rgbColor = this.hexToRgba(color, opacity);
           olFeature.setProperties({
@@ -212,11 +197,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
             border_width: border_width
           });
         }
+
         vectorSource.addFeature(olFeature);
-
       });
+      
       vectorSource.changed();
-
       this.zoomToFeatures();
     }
     catch (error) {
@@ -237,14 +222,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private highlightFeature(feature: Feature<Geometry>): void {
     if (this.lastClickedFeature) {
-      this.lastClickedFeature.set('selected', false);
+      this.lastClickedFeature.set('color', this.lastClickedFeature.get(this.currentPropertyKey));
     }
-    feature.set('selected', true);
+    feature.set('color', [67, 49, 67, 1]);
     this.vectorLayer.changed();
   }
 
   private resetFeatureStyle(feature: Feature<Geometry>): void {
-    feature.set('selected', false);
+    feature.set('color', feature.get(this.currentPropertyKey));
     this.vectorLayer.changed();
   }
 
