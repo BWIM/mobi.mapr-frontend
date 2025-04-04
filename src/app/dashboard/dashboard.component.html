@@ -30,7 +30,7 @@
         [style]="{width: '500px'}"
         (onHide)="isLeftPinned = false">
         <div class="p-3 h-full">
-            <app-projects></app-projects>
+            <app-projects (projectSelected)="leftSidebarExpanded = false"></app-projects>
         </div>
     </p-dialog>
 
@@ -56,7 +56,7 @@
         (onHide)="isRightPinned = false">
         <div class="p-3 h-full">
             <div class="info-section h-full">
-                <app-details-sidebar></app-details-sidebar>
+                <app-details-sidebar (projectLoaded)="showRightSidebar()"></app-details-sidebar>
             </div>
         </div>
     </p-dialog>

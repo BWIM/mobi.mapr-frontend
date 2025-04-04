@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { SharedModule } from '../shared/shared.module';
 import { ButtonModule } from 'primeng/button';
 import { PanelModule } from 'primeng/panel';
@@ -33,6 +33,7 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
   isGeneratingShare: boolean = false;
   selectedAverageType: string = 'mean';
   selectedPopulationArea: string = 'pop';
+  @Output() projectLoaded = new EventEmitter<void>();
 
   constructor(
     private translate: TranslateService,
@@ -44,6 +45,9 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     this.subscription = this.projectsService.currentProjectInfo$.subscribe(
       info => {
         this.projectInfo = info;
+        if (info) {
+          this.projectLoaded.emit();
+        }
       }
     );
   }

@@ -46,6 +46,7 @@ interface ProjectProgress {
 })
 export class ProjectsComponent implements OnInit, OnDestroy {
   @Output() projectAction = new EventEmitter<void>();
+  @Output() projectSelected = new EventEmitter<void>();
   @ViewChild('unusedGroupsOverlay') unusedGroupsOverlay!: any;
   
   projectGroups: ProjectGroup[] = [];
@@ -257,39 +258,40 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
   showResults(project: Project | undefined, maptype: string): void {
     try {
-    if (!project) return;
-    
-    this.loadingService.startLoading();
-    this.analyzeService.setCurrentProject(project.id.toString());
-    this.analyzeService.setMapType(maptype);
-    
-    // Lade Projektinformationen
-    this.projectsService.getProjectInfo(project.id).subscribe({
-      next: (info) => {
-        this.projectsService.updateCurrentProjectInfo(info);
-      },
-      error: (error) => {
-        console.error('Fehler beim Laden der Projektinformationen:', error);
-      }
-    });
-
-    this.projectsService.getProjectResults(project.id, maptype)
-      .pipe(finalize(() => this.loadingService.stopLoading()))
-      .subscribe({
-        next: (results) => {
-          this.mapService.resetMap();
-          this.mapService.updateFeatures(results.geojson.features);
-          this.selectedTableProject = project;
-          this.projectAction.emit();
+      if (!project) return;
+      
+      this.loadingService.startLoading();
+      this.analyzeService.setCurrentProject(project.id.toString());
+      this.analyzeService.setMapType(maptype);
+      
+      // Projektinformationen laden
+      this.projectsService.getProjectInfo(project.id).subscribe({
+        next: (info) => {
+          this.projectsService.updateCurrentProjectInfo(info);
+          this.projectSelected.emit(); // Emit wenn ein Projekt ausgewählt wurde
         },
-        error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
-            detail: this.translate.instant('PROJECTS.RESULTS.LOAD_ERROR')
-          });
+        error: (error) => {
+          console.error('Fehler beim Laden der Projektinformationen:', error);
         }
       });
+
+      this.projectsService.getProjectResults(project.id, maptype)
+        .pipe(finalize(() => this.loadingService.stopLoading()))
+        .subscribe({
+          next: (results) => {
+            this.mapService.resetMap();
+            this.mapService.updateFeatures(results.geojson.features);
+            this.selectedTableProject = project;
+            this.projectAction.emit();
+          },
+          error: () => {
+            this.messageService.add({
+              severity: 'error',
+              summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
+              detail: this.translate.instant('PROJECTS.RESULTS.LOAD_ERROR')
+            });
+          }
+        });
     }
     catch (error) {
       console.error(error);

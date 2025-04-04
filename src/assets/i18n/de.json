@@ -155,6 +155,12 @@
     "CONTROLS": {
       "ZOOM_IN": "Hineinzoomen",
       "ZOOM_OUT": "Herauszoomen"
+    },
+    "VISUALIZATION": {
+      "MEAN": "Durchschnitt",
+      "MEDIAN": "Median",
+      "POP": "Bevölkerung",
+      "AREA": "Fläche"
     }
   },
   "PROJECT_WIZARD": {
