@@ -15,6 +15,7 @@ import { WebsocketService } from '../services/websocket.service';
 import { ProjectsReloadService } from './projects-reload.service';
 import { LoadingService } from '../services/loading.service';
 import { AnalyzeService } from '../analyze/analyze.service';
+import { forkJoin } from 'rxjs';
 
 interface GroupedProjects {
   group: ProjectGroup;
@@ -45,6 +46,7 @@ interface ProjectProgress {
 })
 export class ProjectsComponent implements OnInit, OnDestroy {
   @Output() projectAction = new EventEmitter<void>();
+  @ViewChild('unusedGroupsOverlay') unusedGroupsOverlay!: any;
   
   projectGroups: ProjectGroup[] = [];
   groupedProjects: GroupedProjects[] = [];
@@ -60,6 +62,8 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   projectGroupDialogVisible = false;
   projectGroupToEdit: ProjectGroup | null = null;
   newProjectGroup: ProjectGroup = { name: '', id: '', user: '', default: false };
+  unusedGroups: ProjectGroup[] = [];
+  selectedUnusedGroups: ProjectGroup[] = [];
 
   private menuItemsCache: Map<number, MenuItem[]> = new Map();
 
@@ -149,6 +153,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.projectGroups = response.results;
+          this.updateUnusedGroups();
           this.loadProjects();
         },
         error: () => {
@@ -170,14 +175,35 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         next: (response) => {
           const projects = response.results;
           
-          // Projekte nach Gruppen sortieren
-          this.groupedProjects = this.projectGroups.map(group => ({
+          // Erstelle Default-Gruppe falls Default-Projekte existieren
+          const defaultProjects = projects.filter(p => p.default);
+          if (defaultProjects.length > 0) {
+            const defaultGroup: ProjectGroup = {
+              id: 'default',
+              name: this.translate.instant('PROJECTS.DEFAULT_GROUP'),
+              user: '',
+              default: true
+            };
+            
+            this.groupedProjects = [{
+              group: defaultGroup,
+              projects: defaultProjects
+            }];
+          } else {
+            this.groupedProjects = [];
+          }
+
+          // Füge die restlichen Projekte zu ihren Gruppen hinzu
+          const nonDefaultProjects = projects.filter(p => !p.default);
+          const groupedNonDefault = this.projectGroups.map(group => ({
             group,
-            projects: projects.filter(p => p.projectgroup?.id === group.id)
+            projects: nonDefaultProjects.filter(p => p.projectgroup?.id === group.id)
           })).filter(g => g.projects.length > 0);
 
-          // Nicht gruppierte Projekte sammeln
-          this.ungroupedProjects = projects.filter(p => !p.projectgroup);
+          this.groupedProjects = [...this.groupedProjects, ...groupedNonDefault];
+
+          // Nicht gruppierte Projekte (nur nicht-Default Projekte)
+          this.ungroupedProjects = nonDefaultProjects.filter(p => !p.projectgroup);
 
           // Websockets für unvollständige Projekte einrichten
           this.setupWebsocketsForAllProjects();
@@ -523,5 +549,112 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     this.projectGroupDialogVisible = false;
     this.projectGroupToEdit = null;
     this.newProjectGroup = { name: '', id: '', user: '', default: false };
+  }
+
+  confirmDeleteGroup(group: ProjectGroup): void {
+    this.confirmationService.confirm({
+      message: this.translate.instant('PROJECT_GROUPS.MESSAGES.CONFIRM_DELETE', { name: group.name }),
+      header: this.translate.instant('COMMON.MESSAGES.CONFIRM_DELETE'),
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.deleteProjectGroup(group);
+      }
+    });
+  }
+
+  deleteProjectGroup(group: ProjectGroup): void {
+    this.loadingService.startLoading();
+    
+    this.projectsService.deleteProjectGroup(group.id)
+      .pipe(finalize(() => this.loadingService.stopLoading()))
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: this.translate.instant('COMMON.MESSAGES.SUCCESS.DELETE'),
+            detail: this.translate.instant('PROJECT_GROUPS.MESSAGES.DELETE_SUCCESS')
+          });
+          this.closeProjectGroupDialog();
+          this.loadData();
+        },
+        error: (error) => {
+          console.error('Fehler beim Löschen der Projektgruppe:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: this.translate.instant('COMMON.MESSAGES.ERROR.DELETE'),
+            detail: this.translate.instant('PROJECT_GROUPS.MESSAGES.DELETE_ERROR')
+          });
+        }
+      });
+  }
+
+  private updateUnusedGroups(): void {
+    // Finde alle Gruppen, die keinem nicht-Default Projekt zugewiesen sind
+    const usedGroupIds = new Set(
+      this.groupedProjects
+        .filter(gp => !gp.group.default) // Ignoriere die Default-Gruppe
+        .map(gp => gp.group.id)
+    );
+    
+    this.unusedGroups = this.projectGroups.filter(
+      group => !usedGroupIds.has(group.id) && !group.default
+    );
+  }
+
+  showUnusedGroupsOverlay(event: any): void {
+    this.updateUnusedGroups();
+    this.unusedGroupsOverlay.toggle(event);
+  }
+
+  confirmDeleteUnusedGroups(): void {
+    if (!this.selectedUnusedGroups?.length) return;
+
+    const groupNames = this.selectedUnusedGroups.map(g => g.name).join(', ');
+    
+    this.confirmationService.confirm({
+      message: this.translate.instant('PROJECT_GROUPS.MESSAGES.CONFIRM_DELETE_MULTIPLE', { groups: groupNames }),
+      header: this.translate.instant('COMMON.MESSAGES.CONFIRM_DELETE'),
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.deleteUnusedGroups();
+      }
+    });
+  }
+
+  private deleteUnusedGroups(): void {
+    if (!this.selectedUnusedGroups?.length) return;
+
+    this.loadingService.startLoading();
+    
+    // Erstelle ein Array von Observables für jede Löschoperation
+    const deleteObservables = this.selectedUnusedGroups.map(group =>
+      this.projectsService.deleteProjectGroup(group.id)
+    );
+
+    // Führe alle Löschoperationen parallel aus
+    forkJoin(deleteObservables)
+      .pipe(finalize(() => {
+        this.loadingService.stopLoading();
+        this.unusedGroupsOverlay.hide();
+      }))
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: this.translate.instant('COMMON.MESSAGES.SUCCESS.DELETE'),
+            detail: this.translate.instant('PROJECT_GROUPS.MESSAGES.DELETE_MULTIPLE_SUCCESS')
+          });
+          this.selectedUnusedGroups = [];
+          this.loadData();
+        },
+        error: (error) => {
+          console.error('Fehler beim Löschen der Projektgruppen:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: this.translate.instant('COMMON.MESSAGES.ERROR.DELETE'),
+            detail: this.translate.instant('PROJECT_GROUPS.MESSAGES.DELETE_MULTIPLE_ERROR')
+          });
+        }
+      });
   }
 }

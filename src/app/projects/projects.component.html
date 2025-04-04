@@ -11,6 +11,7 @@
                             <div class="flex items-center">
                                 <span><b>{{group.group.name}}</b></span>
                                 <button pButton 
+                                    *ngIf="!group.group.default"
                                     class="p-button-text p-button-rounded ml-2" 
                                     icon="pi pi-pencil"
                                     (click)="editProjectGroup(group.group)"
@@ -34,9 +35,6 @@
                                     <td>
                                         <div class="flex flex-col">
                                             <div class="flex items-center">
-                                                <i class="pi mr-2" [ngClass]="{'pi-user': !project.default, 'pi-users': project.default}" 
-                                                    [pTooltip]="project.default ? ('PROJECTS.TYPE.DEFAULT' | translate) : ('PROJECTS.TYPE.PERSONAL' | translate)">
-                                                </i>
                                                 <span class="text-overflow-ellipsis overflow-hidden break-words" 
                                                       [ngClass]="{'selected-row': selectedTableProject?.id === project.id}"
                                                       [pTooltip]="project.description || project.display_name">
@@ -105,9 +103,6 @@
                                     <td>
                                         <div class="flex flex-col">
                                             <div class="flex items-center">
-                                                <i class="pi mr-2" [ngClass]="{'pi-user': !project.default, 'pi-users': project.default}" 
-                                                    [pTooltip]="project.default ? ('PROJECTS.TYPE.DEFAULT' | translate) : ('PROJECTS.TYPE.PERSONAL' | translate)">
-                                                </i>
                                                 <span class="text-overflow-ellipsis overflow-hidden break-words" 
                                                       [ngClass]="{'selected-row': selectedTableProject?.id === project.id}"
                                                       [pTooltip]="project.description || project.display_name">
@@ -162,9 +157,55 @@
                     severity="info"
                     text="{{ 'PROJECTS.LIST.NO_PROJECTS' | translate }}">
                 </p-message>
+
+                <!-- Button für nicht zugewiesene Gruppen -->
+                <div class="mt-4 p-2">
+                    <button pButton
+                        icon="pi pi-trash"
+                        [label]="'PROJECT_GROUPS.MANAGE_UNUSED' | translate"
+                        class="p-button-secondary p-button-sm"
+                        (click)="showUnusedGroupsOverlay($event)">
+                    </button>
+                </div>
             </div>
         </p-scrollPanel>
     </div>
+
+    <!-- Overlay für nicht zugewiesene Gruppen -->
+    <p-overlayPanel #unusedGroupsOverlay>
+        <ng-template pTemplate>
+            <div class="flex flex-column gap-3" style="min-width: 300px">
+                <h3>{{ 'PROJECT_GROUPS.UNUSED_GROUPS' | translate }}</h3>
+                
+                <p-message 
+                    *ngIf="unusedGroups.length === 0" 
+                    severity="info" 
+                    [text]="'PROJECT_GROUPS.NO_UNUSED_GROUPS' | translate">
+                </p-message>
+
+                <div *ngIf="unusedGroups.length > 0" class="flex flex-column gap-3">
+                    <p-listbox 
+                        [options]="unusedGroups"
+                        [(ngModel)]="selectedUnusedGroups"
+                        [multiple]="true"
+                        optionLabel="name"
+                        [style]="{'max-height': '200px'}"
+                        [listStyle]="{'max-height': '200px'}">
+                    </p-listbox>
+
+                    <div class="flex justify-content-between align-items-center">
+                        <p-button 
+                            icon="pi pi-trash" 
+                            [label]="'PROJECT_GROUPS.DELETE_SELECTED' | translate"
+                            styleClass="p-button-danger p-button-sm"
+                            [disabled]="!selectedUnusedGroups.length"
+                            (onClick)="confirmDeleteUnusedGroups()">
+                        </p-button>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+    </p-overlayPanel>
 
     <!-- Action Buttons am unteren Rand -->
     <div class="p-3 bg-surface-ground border-t grid grid-cols-2 gap-2">
@@ -263,6 +304,18 @@
                     pInputText 
                     [(ngModel)]="groupName" 
                     class="w-full border p-2 border rounded-md">
+            </div>
+
+            <!-- Lösch-Button für existierende Gruppen -->
+            <div class="field" *ngIf="projectGroupToEdit">
+                <p-message severity="warn" [text]="'PROJECT_GROUPS.DELETE_WARNING' | translate" styleClass="w-full mb-3"></p-message>
+                <button pButton 
+                    icon="pi pi-trash" 
+                    [label]="'PROJECT_GROUPS.DELETE' | translate"
+                    class="p-button-danger w-full"
+                    [pTooltip]="'PROJECT_GROUPS.DELETE_TOOLTIP' | translate"
+                    (click)="confirmDeleteGroup(projectGroupToEdit)">
+                </button>
             </div>
         </div>
         <ng-template pTemplate="footer">
