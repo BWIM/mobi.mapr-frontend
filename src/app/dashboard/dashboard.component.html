@@ -30,7 +30,7 @@
         [style]="{width: '500px'}"
         (onHide)="isLeftPinned = false">
         <div class="p-3 h-full">
-            <app-projects></app-projects>
+            <app-projects (projectSelected)="leftSidebarExpanded = false"></app-projects>
         </div>
     </p-dialog>
 

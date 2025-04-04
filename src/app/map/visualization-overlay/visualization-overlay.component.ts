@@ -40,16 +40,15 @@ import { ProjectsService } from '../../projects/projects.service';
 
     .setting-label {
       font-size: 14px;
-      color: #495057;
     }
 
     .divider {
-      color: #495057;
+      color: var(--secondary-color);
       margin: 0 4px;
     }
 
     i {
-      color: #2196F3;
+        color: var(--secondary-color);
     }
   `]
 })
