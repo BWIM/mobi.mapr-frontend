@@ -1,12 +1,13 @@
 import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { catchError, switchMap } from 'rxjs/operators';
-import { throwError } from 'rxjs';
+import { catchError, switchMap, take, filter } from 'rxjs/operators';
+import { throwError, Observable, BehaviorSubject } from 'rxjs';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
 import { SessionService } from '../services/session.service';
 
 let isRefreshing = false;
+let refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
 
 function isPublicRoute(router: Router): boolean {
   return router.routerState.snapshot.root.firstChild?.data?.['public'] === true;
@@ -40,26 +41,36 @@ export const AuthInterceptor: HttpInterceptorFn = (
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 && !isRefreshing) {
-        isRefreshing = true;
-        
-        return authService.refreshToken().pipe(
-          switchMap(() => {
-            isRefreshing = false;
-            const newHeaders = authService.getAuthorizationHeaders();
-            const newAuthReq = req.clone({ 
-              headers: newHeaders,
-              url
-            });
-            return next(newAuthReq);
-          }),
-          catchError((refreshError) => {
-            isRefreshing = false;
-            authService.logout();
-            router.navigate(['/login']);
-            return throwError(() => refreshError);
-          })
-        );
+      if (error.status === 401) {
+        if (!isRefreshing) {
+          isRefreshing = true;
+          refreshTokenSubject.next(null);
+
+          return authService.refreshToken().pipe(
+            switchMap((token) => {
+              isRefreshing = false;
+              refreshTokenSubject.next(token);
+              const newHeaders = authService.getAuthorizationHeaders();
+              return next(req.clone({ headers: newHeaders, url }));
+            }),
+            catchError((refreshError) => {
+              isRefreshing = false;
+              refreshTokenSubject.next(null);
+              authService.logout();
+              router.navigate(['/login']);
+              return throwError(() => refreshError);
+            })
+          );
+        } else {
+          return refreshTokenSubject.pipe(
+            filter(token => token !== null),
+            take(1),
+            switchMap(() => {
+              const newHeaders = authService.getAuthorizationHeaders();
+              return next(req.clone({ headers: newHeaders, url }));
+            })
+          );
+        }
       }
       return throwError(() => error);
     })

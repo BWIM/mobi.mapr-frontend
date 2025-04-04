@@ -31,6 +31,8 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
   isExporting: boolean = false;
   shareUrl: string | null = null;
   isGeneratingShare: boolean = false;
+  selectedAverageType: string = 'mean';
+  selectedPopulationArea: string = 'pop';
 
   constructor(
     private translate: TranslateService,
@@ -44,6 +46,22 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
         this.projectInfo = info;
       }
     );
+  }
+
+  onVisualizationChange(): void {
+    if (this.selectedAverageType === 'mean') {
+      if (this.selectedPopulationArea === 'pop') {
+        this.mapService.updateVisualizationSettings('mean', 'pop');
+      } else {
+        this.mapService.updateVisualizationSettings('mean', 'area');
+      }
+    } else if (this.selectedAverageType === 'median') {
+      if (this.selectedPopulationArea === 'pop') {
+        this.mapService.updateVisualizationSettings('median', 'pop');
+      } else {
+        this.mapService.updateVisualizationSettings('median', 'area');
+      }
+    }
   }
 
   async exportToPDFLandscape(): Promise<void> {

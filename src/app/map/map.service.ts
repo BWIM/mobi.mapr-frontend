@@ -16,6 +16,12 @@ export class MapService {
   private resetMapSubject = new Subject<void>();
   resetMap$ = this.resetMapSubject.asObservable();
 
+  private visualizationSettingsSubject = new Subject<{
+    averageType: 'mean' | 'median';
+    populationArea: 'pop' | 'area';
+  }>();
+  visualizationSettings$ = this.visualizationSettingsSubject.asObservable();
+
   setMap(map: Map | null): void  {
     this.map = map;
   }
@@ -38,5 +44,15 @@ export class MapService {
 
   resetMap(): void {
     this.resetMapSubject.next();
+  }
+
+  updateVisualizationSettings(
+    averageType: 'mean' | 'median',
+    populationArea: 'pop' | 'area'
+  ): void {
+    this.visualizationSettingsSubject.next({
+      averageType,
+      populationArea
+    });
   }
 }

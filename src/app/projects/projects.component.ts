@@ -230,6 +230,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   }
 
   showResults(project: Project | undefined, maptype: string): void {
+    try {
     if (!project) return;
     
     this.loadingService.startLoading();
@@ -263,6 +264,10 @@ export class ProjectsComponent implements OnInit, OnDestroy {
           });
         }
       });
+    }
+    catch (error) {
+      console.error(error);
+    }
   }
 
   showProjectWizard(): void {
@@ -323,7 +328,19 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         }
 
         if (result.result.finished) {
-          this.closeWebsocketConnection(result.result.project);
+          const finishedProjectId = result.result.project;
+          this.closeWebsocketConnection(finishedProjectId);
+          this.mapService.resetMap();
+          setTimeout(() => {
+            this.loadData();
+            // Nach dem Laden der Daten das Projekt anzeigen
+            setTimeout(() => {
+              const project = this.findProjectById(finishedProjectId);
+              if (project) {
+                this.showResults(project,'municipalities');
+              }
+            }, 500);
+          }, 500);
         }
       },
       error: (error) => {

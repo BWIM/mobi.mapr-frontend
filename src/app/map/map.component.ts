@@ -31,6 +31,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private baseLayer!: TileLayer<XYZ>;
   private lastClickedFeature: Feature | null = null;
   private subscriptions: Subscription[] = [];
+  private currentPropertyKey: string = 'pop_mean_color'; // Standardwert
 
   constructor(
     private mapService: MapService,
@@ -58,6 +59,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       }),
       this.mapService.resetMap$.subscribe(() => {
         this.resetMap();
+      }),
+      this.mapService.visualizationSettings$.subscribe(settings => {
+        this.currentPropertyKey = settings.populationArea + "_" + settings.averageType + "_color";
+        this.updateFeatureColors();
       })
     );
   }
@@ -69,7 +74,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       layers: [this.baseLayer, this.vectorLayer],
       view: new View({
         center: fromLonLat([8.5, 49.05]), // Zentrum von Ba-Wü
-        zoom: 9
+        zoom: 9,
+        constrainResolution: true,
+        smoothExtentConstraint: true,
+        smoothResolutionConstraint: true
       })
     });
 
@@ -94,25 +102,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.vectorLayer = new WebGLVectorLayer({
       source: new VectorSource(),
       style: {
-        'stroke-color': [
-          'interpolate',
-          ['linear'],
-          ['get', 'selected'],
-          0, [0, 0, 0, 0.1],
-          1, [67, 49, 67, 1]
-        ],
-        'stroke-width': [
-          'interpolate',
-          ['linear'],
-          ['get', 'selected'],
-          0, ['get', 'border_width'],
-          1, 2
-        ],
+        'stroke-color': [0, 0, 0, 0.1],
+        'stroke-width': 0.1,
         'fill-color': ['get', 'rgbColor']
       }
     });
   }
-
   private setupMapInteractions(): void {
     // Click-Handler für Features
     this.map.on('click', (event) => {
@@ -144,7 +139,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  // Hilfsfunktionen für Feature-Styling
   private hexToRgb(hex: string): number[] {
     hex = hex.replace('#', '');
     const bigint = parseInt(hex, 16);
@@ -159,35 +153,60 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     return [rgb[0], rgb[1], rgb[2], opacity];
   }
 
-  // Feature zur Karte hinzufügen
-  public addFeatures(features: any[]): void {
-    if (!this.vectorLayer) return;
-
-    const vectorSource = this.vectorLayer.getSource();
-    if (!vectorSource) return;
-
+  private updateFeatureColors(): void {
+    const features = this.vectorLayer.getSource()?.getFeatures() || [];
     features.forEach(feature => {
-      const olFeature = new GeoJSON().readFeature(feature, {
-        featureProjection: this.map.getView().getProjection()
-      }) as Feature<Geometry>;
-
-      const color = olFeature.get('color');
-      const opacity = olFeature.get('opacity') || 0;
-      const border_width = olFeature.get('border_width') || 0.1;
-
+      let color = feature.get(this.currentPropertyKey);
+      if (!color) {
+        color = feature.get('score_color');
+      }
+      const opacity = feature.get('opacity') || 0.5;
       if (color) {
         const rgbColor = this.hexToRgba(color, opacity);
-        olFeature.setProperties({
-          rgbColor: rgbColor,
-          opacity: opacity,
-          border_width: border_width
-        });
+        feature.set('rgbColor', rgbColor);
       }
-
-      vectorSource.addFeature(olFeature);
     });
+    
+    this.vectorLayer.changed();
+  }
 
-    this.zoomToFeatures();
+  public addFeatures(features: any[]): void {
+    try {
+      if (!this.vectorLayer) return;
+
+      const vectorSource = this.vectorLayer.getSource();
+      if (!vectorSource) return;
+
+      features.forEach(feature => {
+        const olFeature = new GeoJSON().readFeature(feature, {
+          featureProjection: this.map.getView().getProjection()
+        }) as Feature<Geometry>;
+
+        let color = olFeature.get(this.currentPropertyKey);
+        if (!color) {
+          color = olFeature.get('score_color');
+        }
+        const opacity = olFeature.get('opacity') || 0.1;
+        const border_width = olFeature.get('border_width') || 0.1;
+  
+        if (color) {
+          const rgbColor = this.hexToRgba(color, opacity);
+          olFeature.setProperties({
+            rgbColor: rgbColor,
+            opacity: opacity,
+            border_width: border_width
+          });
+        }
+
+        vectorSource.addFeature(olFeature);
+      });
+      
+      vectorSource.changed();
+      this.zoomToFeatures();
+    }
+    catch (error) {
+      console.error(error);
+    }
   }
 
   private zoomToFeatures(): void {
@@ -203,14 +222,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private highlightFeature(feature: Feature<Geometry>): void {
     if (this.lastClickedFeature) {
-      this.lastClickedFeature.set('selected', false);
+      this.lastClickedFeature.set('color', this.lastClickedFeature.get(this.currentPropertyKey));
     }
-    feature.set('selected', true);
+    feature.set('color', [67, 49, 67, 1]);
     this.vectorLayer.changed();
   }
 
   private resetFeatureStyle(feature: Feature<Geometry>): void {
-    feature.set('selected', false);
+    feature.set('color', feature.get(this.currentPropertyKey));
     this.vectorLayer.changed();
   }
 

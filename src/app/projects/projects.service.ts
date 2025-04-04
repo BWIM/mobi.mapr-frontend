@@ -39,6 +39,7 @@ export class ProjectsService {
   }
 
   createProject(project: ProjectCreateUpdate): Observable<Project> {
+    this.currentProjectInfo.next(null);
     return this.http.post<Project>(`${this.apiUrl}/projects/`, project);
   }
 
