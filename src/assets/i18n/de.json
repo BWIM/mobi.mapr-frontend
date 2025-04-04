@@ -55,7 +55,11 @@
       "CREATE_SUCCESS": "Erfolgreich erstellt",
       "INVALID_DATA": "Ungülgtige Daten",
       "PERMISSION_DENIED": "Keine Berechtigung",
-      "SERVER_ERROR": "Es gab einen Fehler im Backend"
+      "SERVER_ERROR": "Es gab einen Fehler im Backend",
+      "LOAD_GROUPS_ERROR": "Gruppen konnten nicht geladen werden",
+      "CONFIRM_DELETE_GROUP": "Wollen Sie die Gruppe wirklich löschen?",
+      "DELETE_GROUP_SUCCESS": "Gruppe erfolgreich gelöscht",
+      "DELETE_GROUP_ERROR": "Gruppe kann nicht gelöscht werden"
     },
     "DELETE": {
       "TITLE": "Projekt löschen",
@@ -72,7 +76,8 @@
     },
     "RESULTS": {
       "LOAD_ERROR": "Ergebnisse können nicht geladen werden"
-    }
+    },
+    "DEFAULT_GROUP": "Vorberechnete Karten"
   },
   "PROJECT_GROUPS": {
     "CREATE": {
@@ -89,8 +94,18 @@
       "UPDATE_ERROR": "Fehler beim Aktualisieren der Projektgruppe",
       "CONFIRM_DELETE": "Sind Sie sicher, dass Sie diese Projektgruppe löschen möchten?",
       "CREATE_SUCCESS": "Das Erstellen einer neuen Gruppe war erfolgreich",
-      "CREATE_ERROR": "Fehler beim erstellen einer neuen Gruppe"
-    }
+      "CREATE_ERROR": "Fehler beim erstellen einer neuen Gruppe",
+      "CONFIRM_DELETE_MULTIPLE": "Alle ausgewählten Gruppen löschen?",
+      "DELETE_SUCCESS": "Erlfogreich gelöscht",
+      "DELETE_ERROR": "Fehler beim löschen"
+    },
+    "DELETE_WARNING": "Die Projektgruppe wird gelöscht",
+    "DELETE": "Projektgruppe löschen",
+    "DELETE_TOOLTIP": "Gruppe löschen",
+    "MANAGE_UNUSED": "Ungenutze Projektgruppen verwalten",
+    "UNUSED_GROUPS": "Ungenutze Projektgruppen",
+    "NO_UNUSED_GROUPS": "Es gibt keine ungenutzten Gruppen",
+    "DELETE_SELECTED": "Ausgewählte Gruppen löschen"
   },
   "COMMON": {
     "ACTIONS": {

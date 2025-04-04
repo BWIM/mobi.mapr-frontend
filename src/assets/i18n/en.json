@@ -55,7 +55,11 @@
       "CREATE_SUCCESS": "Success creating",
       "INVALID_DATA": "Invaldid data",
       "PERMISSION_DENIED": "Permission deneied",
-      "SERVER_ERROR": "Server error"
+      "SERVER_ERROR": "Server error",
+      "LOAD_GROUPS_ERROR": "Cannot load groups",
+      "CONFIRM_DELETE_GROUP": "Do you really want to delete the group?",
+      "DELETE_GROUP_SUCCESS": "Group successfully deleted",
+      "DELETE_GROUP_ERROR": "Cannot delete group"
     },
     "DELETE": {
       "TITLE": "Delete Project",
@@ -72,7 +76,8 @@
     },
     "RESULTS": {
       "LOAD_ERROR": "Results cannot be loaded"
-    }
+    },
+    "DEFAULT_GROUP": "Precalculated maps"
   },
   "PROJECT_GROUPS": {
     "CREATE": {
@@ -89,8 +94,18 @@
       "UPDATE_ERROR": "Error updating project group",
       "CONFIRM_DELETE": "Are you sure you want to delete this project group?",
       "CREATE_SUCCESS": "Success creating a new project group",
-      "CREATE_ERROR": "Error when creating a new group"
-    }
+      "CREATE_ERROR": "Error when creating a new group",
+      "CONFIRM_DELETE_MULTIPLE": "Delete all selected groups?",
+      "DELETE_SUCCESS": "Successfully deleted",
+      "DELETE_ERROR": "Cannto delete group"
+    },
+    "DELETE_WARNING": "The project group will be deleted",
+    "DELETE": "Delete prject group",
+    "DELETE_TOOLTIP": "Delete group",
+    "MANAGE_UNUSED": "Manage unused groups",
+    "UNUSED_GROUPS": "Unused projectgroups",
+    "NO_UNUSED_GROUPS": "There are no unsed groups",
+    "DELETE_SELECTED": "Delete selected groups"
   },
   "COMMON": {
     "ACTIONS": {

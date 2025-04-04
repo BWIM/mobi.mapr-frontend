@@ -44,6 +44,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   showMidActivities: boolean = true;
   accumulationTypeOptions: any[] = [];
   averageTypeOptions: any[] = [];
+  selectedGroupToDelete: ProjectGroup | null = null;
   private allGroupedActivities: { mid: GroupedActivities[], nonMid: GroupedActivities[] } = {
     mid: [],
     nonMid: []
@@ -478,11 +479,52 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   private loadProjectGroups() {
     this.projectsService.getProjectGroups().subscribe({
       next: (response) => {
-        this.projectGroups = response.results;
+        this.projectGroups = response.results.sort((a, b) => a.name.localeCompare(b.name));
       },
       error: (error) => {
         console.error('Fehler beim Laden der Projektgruppen:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
+          detail: this.translate.instant('PROJECTS.MESSAGES.LOAD_GROUPS_ERROR')
+        });
       }
     });
+  }
+
+  deleteProjectGroup(group: ProjectGroup | null) {
+    if (!group) return;
+
+    // Bestätigungsdialog anzeigen
+    if (confirm(this.translate.instant('PROJECTS.MESSAGES.CONFIRM_DELETE_GROUP'))) {
+      this.projectsService.deleteProjectGroup(group.id).subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: this.translate.instant('COMMON.MESSAGES.SUCCESS.DELETE'),
+            detail: this.translate.instant('PROJECTS.MESSAGES.DELETE_GROUP_SUCCESS')
+          });
+          
+          // Aktualisiere die Liste der Projektgruppen
+          this.loadProjectGroups();
+          
+          // Setze die Auswahl zurück
+          this.selectedGroupToDelete = null;
+          
+          // Wenn die gelöschte Gruppe im Formular ausgewählt war, setze sie zurück
+          if (this.projectForm.get('summary.projectGroup')?.value?.id === group.id) {
+            this.projectForm.get('summary.projectGroup')?.setValue(null);
+          }
+        },
+        error: (error) => {
+          console.error('Fehler beim Löschen der Projektgruppe:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: this.translate.instant('COMMON.MESSAGES.ERROR.DELETE'),
+            detail: this.translate.instant('PROJECTS.MESSAGES.DELETE_GROUP_ERROR')
+          });
+        }
+      });
+    }
   }
 } 
