@@ -3,6 +3,8 @@
       <div *ngIf="projectInfo" class="p-4">
         <div class="mb-6">
           <h3 class="text-xl font-semibold text-primary mb-2">{{ projectInfo.display_name }}</h3>
+          <p class="text-lg">{{'PROJECT_WIZARD.ACCUMULATION_TYPE.LABEL' | translate}}: {{ projectInfo.accumulation_type === 'area' ? ('PROJECT_WIZARD.ACCUMULATION_TYPE.AREA' | translate) : ('PROJECT_WIZARD.ACCUMULATION_TYPE.POPULATION' | translate) }}</p>
+          <p class="text-lg">{{'PROJECT_WIZARD.AVERAGE_TYPE.LABEL' | translate}}: {{ projectInfo.average_type === 'mean' ? ('PROJECT_WIZARD.AVERAGE_TYPE.MEAN' | translate) : ('PROJECT_WIZARD.AVERAGE_TYPE.MEDIAN' | translate) }}</p>
           <p class="text-gray-600">{{ projectInfo.description }}</p>
         </div>
 
