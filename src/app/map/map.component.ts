@@ -17,11 +17,17 @@ import { CommonModule } from '@angular/common';
 import { FeatureSelectionService } from '../shared/services/feature-selection.service';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { SharedModule } from '../shared/shared.module';
+import { VisualizationOverlayComponent } from './visualization-overlay/visualization-overlay.component';
 
 @Component({
   selector: 'app-map',
   standalone: true,
-  imports: [CommonModule, LegendComponent, SharedModule],
+  imports: [
+    CommonModule,
+    LegendComponent,
+    SharedModule,
+    VisualizationOverlayComponent
+  ],
   templateUrl: './map.component.html',
   styleUrl: './map.component.css'
 })

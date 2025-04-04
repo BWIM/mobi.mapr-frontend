@@ -155,6 +155,12 @@
     "CONTROLS": {
       "ZOOM_IN": "zoom in",
       "ZOOM_OUT": "zoom out"
+    },
+    "VISUALIZATION": {
+      "MEAN": "Mean",
+      "MEDIAN": "Median",
+      "POP": "Population",
+      "AREA": "Area"
     }
   },
   "PROJECT_WIZARD": {
