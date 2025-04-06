@@ -24,6 +24,7 @@ import Overlay from 'ol/Overlay';
 })
 export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() selectedAreasChange = new EventEmitter<string[]>();
+  @Output() completelySelectedLandsChange = new EventEmitter<boolean>();
 
   private map?: Map;
   private vectorLayer?: VectorLayer<any>;
@@ -203,6 +204,13 @@ export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy 
   private updateSelectedAreas() {
     const selectedIds = Array.from(this.selectedFeatures);
     this.selectedAreasChange.emit(selectedIds);
+
+    // Überprüfe den Status der Bundesländer
+    const hasCompletelySelectedLands = this.lands.some(land => this.getLandSelectionState(land));
+    const hasPartiallySelectedLands = this.lands.some(land => this.isLandIndeterminate(land));
+    
+    // Emittiere true nur wenn mindestens ein Bundesland vollständig und keins teilweise ausgewählt ist
+    this.completelySelectedLandsChange.emit(hasCompletelySelectedLands && !hasPartiallySelectedLands);
   }
 
   selectLand(land: Land) {

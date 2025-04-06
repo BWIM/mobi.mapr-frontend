@@ -45,6 +45,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   accumulationTypeOptions: any[] = [];
   averageTypeOptions: any[] = [];
   selectedGroupToDelete: ProjectGroup | null = null;
+  hasCompletelySelectedLands: boolean = false;
   private allGroupedActivities: { mid: GroupedActivities[], nonMid: GroupedActivities[] } = {
     mid: [],
     nonMid: []
@@ -375,6 +376,10 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     });
   }
 
+  onCompletelySelectedLandsChange(hasCompletelySelectedLands: boolean) {
+    this.hasCompletelySelectedLands = hasCompletelySelectedLands;
+  }
+
   onSubmit() {
     // Prüfe die Validität aller Schritte
     const isValid = [0, 1, 2, 3, 4].every(step => {
@@ -405,7 +410,8 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         landkreise: this.selectedAreaIds.join(','),
         projectgroup: this.projectForm.get('summary.projectGroup')?.value?.id || null,
         accumulation_type: this.projectForm.get('summary.accumulationType')?.value,
-        average_type: this.projectForm.get('summary.averageType')?.value
+        average_type: this.projectForm.get('summary.averageType')?.value,
+        laender: this.hasCompletelySelectedLands
       };
 
       console.log('Projektdaten:', projectData);

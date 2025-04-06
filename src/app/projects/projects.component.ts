@@ -128,7 +128,6 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         command: () => {
           this.showResults(this.selectedProject, 'landkreise');
         },
-        disabled: this.selectedProject?.type === 'Hexagon' || this.selectedProject?.type === "Gemeinde"
       },
       {
         icon: 'pi pi-globe',
@@ -136,7 +135,6 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         command: () => {
           this.showResults(this.selectedProject, 'laender');
         },
-        disabled: this.selectedProject?.type !== "Land"
       }
     ];
   }

@@ -205,7 +205,10 @@
                 <div *ngIf="activeIndex === 3" formGroupName="area" class="h-[calc(100%-4rem)]">
                     <h2 class="text-2xl mb-4">{{ 'PROJECT_WIZARD.CREATE_PROJECT' | translate }}</h2>
                     <div class="h-[calc(100%-2rem)]">
-                        <app-area-selection (selectedAreasChange)="onAreaSelectionChange($event)"></app-area-selection>
+                        <app-area-selection 
+                            (selectedAreasChange)="onAreaSelectionChange($event)"
+                            (completelySelectedLandsChange)="onCompletelySelectedLandsChange($event)">
+                        </app-area-selection>
                     </div>
                 </div>
 
