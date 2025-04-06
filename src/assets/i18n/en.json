@@ -191,17 +191,7 @@
     "BACK_TOOLTIP": "Go back one step",
     "FINISH_TOOLTIP": "finish",
     "NEXT_TOOLTIP": "next",
-    "STEPS_TOOLTIP": "steps",
-    "ACCUMULATION_TYPE": {
-      "AREA": "By Area",
-      "LABEL": "Accumulation Type",
-      "POPULATION": "By Population"
-    },
-    "AVERAGE_TYPE": {
-      "MEAN": "Mean",
-      "MEDIAN": "Median",
-      "LABEL": "Average Type"
-    }
+    "STEPS_TOOLTIP": "steps"
   },
   "SIDEBAR": {
     "TITLE": "Details",
