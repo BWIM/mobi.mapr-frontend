@@ -115,6 +115,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
   private setupMapInteractions(): void {
+    const tooltip = document.getElementById('tooltip');
+    
     // Click-Handler für Features
     this.map.on('click', (event) => {
       let clickedFeature: Feature | null = null;
@@ -142,7 +144,33 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       const pixel = event.pixel;
       const hit = this.map.hasFeatureAtPixel(pixel);
       this.map.getTargetElement().style.cursor = hit ? 'pointer' : '';
-    });
+
+      if (tooltip) {
+        if (!hit) {
+          tooltip.style.display = 'none';
+          return;
+        }
+
+        let hoveredFeature: Feature | null = null;
+        this.map.forEachFeatureAtPixel(pixel, (feature) => {
+          if (feature instanceof Feature) {
+            hoveredFeature = feature;
+          }
+        });
+
+        if (hoveredFeature) {
+          const scoreKey = this.currentPropertyKey.replace('_color', '');
+          const name = (hoveredFeature as Feature).get('name') || 'Unbekannt';
+          const score = (hoveredFeature as Feature).get(scoreKey) || 'Keine Daten';
+          
+          tooltip.innerHTML = `<strong>${name}</strong><br>Score: ${typeof score === 'number' ? (score * 100).toFixed(0) + '%' : score}`;
+          tooltip.style.display = 'block';
+        }
+          tooltip.style.left = pixel[0] + 10 + 'px';
+          tooltip.style.top = pixel[1] + 10 + 'px';
+        }
+      }
+    )
   }
 
   private hexToRgb(hex: string): number[] {

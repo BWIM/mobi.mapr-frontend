@@ -61,3 +61,16 @@ button.ol-zoom-in {
 button.ol-zoom-out {
     display: none !important;
 }
+
+.tooltip {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    pointer-events: none;
+    display: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1000;
+    border: 1px solid #ddd;
+}
