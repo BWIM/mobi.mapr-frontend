@@ -21,6 +21,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
   feature: Feature | undefined;
   properties: Properties | undefined;
 
+  // Sortieroptionen für Aktivitätsdiagramm
+  sortOptions = [
+    { label: 'Score (aufsteigend)', value: 'score_asc' },
+    { label: 'Score (absteigend)', value: 'score_desc' },
+    { label: 'Relevanz (aufsteigend)', value: 'relevance_asc' },
+    { label: 'Relevanz (absteigend)', value: 'relevance_desc' }
+  ];
+  selectedSortOption: string = 'score_asc';
+
   // Diagrammdaten
   personaChartData: any;
   activitiesChartData: any;
@@ -258,15 +267,23 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     };
 }
 
-  private initializeActivitiesChart(): void {
+  initializeActivitiesChart(): void {
     const categoryScores = this.projectDetails?.category_scores || {};
     
-    // Sortiere die Kategorien nach ihren Scores (aufsteigend)
+    // Sortiere die Kategorien basierend auf der ausgewählten Option
+    const [criterion, direction] = this.selectedSortOption.split('_');
     const sortedCategories = Object.entries(categoryScores)
-      .sort(([, a]: [string, any], [, b]: [string, any]) => a.score - b.score);
+      .sort(([, a]: [string, any], [, b]: [string, any]) => {
+        const valueA = criterion === 'relevance' ? a.relevance : a.score;
+        const valueB = criterion === 'relevance' ? b.relevance : b.score;
+        return direction === 'asc' ? valueA - valueB : valueB - valueA;
+      });
     
     const labels = sortedCategories.map(([, category]: [string, any]) => category.display_name);
     const data = sortedCategories.map(([, category]: [string, any]) => category.score);
+    const relevanceData = sortedCategories.map(([, category]: [string, any]) => 
+      Math.round(category.relevance * 100) / 100
+    );
 
     // Farbzuordnung basierend auf den Werten
     const getColorForValue = (value: number): string => {
@@ -283,13 +300,24 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     this.activitiesChartData = {
       type: 'bar',
       labels: labels,
-      datasets: [{
-        label: 'Aktivitätswerte',
-        data: data,
-        backgroundColor: backgroundColor,
-        borderColor: backgroundColor,
-        borderWidth: 1
-      }]
+      datasets: [
+        {
+          label: 'Relevanz (%)',
+          data: relevanceData,
+          type: 'scatter',
+          yAxisID: 'y1',
+          order: 1
+        },
+        {
+          label: 'Aktivitätswerte',
+          data: data,
+          backgroundColor: backgroundColor,
+          borderColor: backgroundColor,
+          borderWidth: 1,
+          yAxisID: 'y',
+          order: 2
+        }
+      ]
     };
 
     // Aktualisiere die Chart-Optionen
@@ -303,6 +331,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
           intersect: false,
           callbacks: {
             label: function(context: any) {
+              if (context.dataset.label === 'Relevanz (%)') {
+                return `${context.dataset.label}: ${context.raw.toFixed(1)}%`;
+              }
               return `${context.dataset.label}: ${context.raw.toFixed(2)}`;
             }
           }
@@ -324,12 +355,38 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
           }
         },
         y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
           beginAtZero: true,
           ticks: {
             color: '#495057'
           },
           grid: {
             color: '#ebedef'
+          },
+          title: {
+            display: true,
+            text: 'Aktivitätswerte'
+          }
+        },
+        y1: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          beginAtZero: true,
+          grid: {
+            drawOnChartArea: false
+          },
+          ticks: {
+            color: '#2196F3',
+            callback: function(value: any) {
+              return value + '%';
+            }
+          },
+          title: {
+            display: true,
+            text: 'Relevanz (%)'
           }
         }
       }
