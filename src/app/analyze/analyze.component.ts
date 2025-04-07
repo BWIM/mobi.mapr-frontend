@@ -85,7 +85,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
               return [
                 {
                   text: 'A',
-                  fillStyle: '#32612d',
+                  fillStyle: 'rgba(50, 97, 45, 0.2)',
                   strokeStyle: '#32612d',
                   fontColor: '#000000',
                   lineWidth: 1,
@@ -96,7 +96,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
                 },
                 {
                   text: 'B',
-                  fillStyle: '#3cb043',
+                  fillStyle: 'rgba(60, 176, 67, 0.2)',
                   strokeStyle: '#3cb043',
                   fontColor: '#000000',
                   lineWidth: 1,
@@ -107,7 +107,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
                 },
                 {
                   text: 'C',
-                  fillStyle: '#eed202',
+                  fillStyle: 'rgba(238, 210, 2, 0.2)',
                   strokeStyle: '#eed202',
                   fontColor: '#000000',
                   lineWidth: 1,
@@ -118,7 +118,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
                 },
                 {
                   text: 'D',
-                  fillStyle: '#ed7014',
+                  fillStyle: 'rgba(237, 112, 20, 0.2)',
                   strokeStyle: '#ed7014',
                   fontColor: '#000000',
                   lineWidth: 1,
@@ -129,7 +129,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
                 },
                 {
                   text: 'E',
-                  fillStyle: '#c21807',
+                  fillStyle: 'rgba(194, 24, 7, 0.2)',
                   strokeStyle: '#c21807',
                   fontColor: '#000000',
                   lineWidth: 1,
@@ -140,7 +140,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
                 },
                 {
                   text: 'F',
-                  fillStyle: '#9656a2',
+                  fillStyle: 'rgba(150, 86, 162, 0.2)',
                   strokeStyle: '#9656a2',
                   fontColor: '#000000',
                   lineWidth: 1,
@@ -157,7 +157,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
         }
       },
       responsive: true,
-      maintainAspectRatio: false
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          beginAtZero: true,
+        }
+      }
     };
 
     this.barChartOptions = {      plugins: {
@@ -394,71 +399,71 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     if (highestScore >= 1.41) {
       baseDatasets.push({
         label: 'F',
-        data: Array(labels.length).fill(2),
-        backgroundColor: 'rgba(150, 86, 162, 0.1)',
+        data: Array(labels.length).fill(2.0),
+        backgroundColor: 'rgba(150, 86, 162, 0.2)',
         borderWidth: 0,
-        fill: true
+        fill: 'start'
       })
     }
-    if (highestScore >= 1) {
+    if (highestScore >= 1.0) {
       baseDatasets.push({
         label: 'E',
         data: Array(labels.length).fill(1.41),
-        backgroundColor: 'rgba(194, 24, 7, 0.1)',
+        backgroundColor: 'rgba(194, 24, 7, 0.2)',
         borderWidth: 0,
-        fill: true
+        fill: 'start'
       })
     }
     if (highestScore >= 0.72) {
       baseDatasets.push({
         label: 'D',
-        data: Array(labels.length).fill(0.72),
-        backgroundColor: 'rgba(237, 112, 20, 0.1)',
+        data: Array(labels.length).fill(1.0),
+        backgroundColor: 'rgba(237, 112, 20, 0.2)',
         borderWidth: 0,
-        fill: true
+        fill: 'start'
       })
     }
     if (highestScore >= 0.51) {
       baseDatasets.push({
         label: 'C',
-        data: Array(labels.length).fill(0.51),
-        backgroundColor: 'rgba(238, 210, 2, 0.1)',
+        data: Array(labels.length).fill(0.72),
+        backgroundColor: 'rgba(238, 210, 2, 0.2)',
         borderWidth: 0,
-        fill: true
+        fill: 'start'
       })
     }
     if (highestScore >= 0.35) {
       baseDatasets.push({
         label: 'B',
-        data: Array(labels.length).fill(0.35),
-        backgroundColor: 'rgba(60, 176, 67, 0.1)',
+        data: Array(labels.length).fill(0.51),
+        backgroundColor: 'rgba(60, 176, 67, 0.2)',
         borderWidth: 0,
-        fill: true
+        fill: 'start'
       })
     }
     baseDatasets.push({
       label: 'A',
-      data: Array(labels.length).fill(0),
-      backgroundColor: 'rgba(50, 97, 45, 0.1)',
+      data: Array(labels.length).fill(0.35),
+      backgroundColor: 'rgba(50, 97, 45, 0.2)',
       borderWidth: 0,
-      fill: true
+      fill: 'start'
     })
 
     this.personaChartData = {
       labels: labels,
       datasets: [
-        ...baseDatasets,
+        ...baseDatasets.reverse(),
         {
           label: 'Persona-Werte',
           data: data,
-          backgroundColor: backgroundColors,
+          backgroundColor: 'transparent',
           borderColor: borderColors,
           borderWidth: 2,
           pointBackgroundColor: borderColors,
           pointBorderColor: '#fff',
           pointHoverBackgroundColor: '#fff',
           pointHoverBorderColor: borderColors,
-          fill: true
+          fill: false
         }
       ]
     };
