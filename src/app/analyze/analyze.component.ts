@@ -197,91 +197,66 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     const modeScores = this.projectDetails?.mode_scores || [];
     const uniqueModes = new Set<string>();
     
-    // Sammle alle einzigartigen Verkehrsmittel
     modeScores.forEach((rankData: any) => {
-      Object.keys(rankData.modes || {}).forEach(mode => uniqueModes.add(mode));
+        Object.keys(rankData.modes || {}).forEach(mode => uniqueModes.add(mode));
     });
 
-    const labels = modeScores.map((rankData: any) => `Rang ${rankData.rank}`);
+    const labels = modeScores.map((rankData: any) => 
+        `${rankData.rank}. beste Erreichbarkeit`
+    );
 
-    // Farbpalette für bis zu 4 Modi
     const colorPalette = {
-      'car': '#FF6384',      // Rot für Auto
-      'bicycle': '#36A2EB',     // Blau für Fahrrad
-      'pedestrian': '#4BC0C0',     // Türkis für Fußgänger
-      'pt': '#FFCD56'        // Gelb für ÖPNV
+        'car': '#FF6384',      // Auto
+        'bicycle': '#36A2EB',   // Fahrrad
+        'pedestrian': '#4BC0C0', // Fußgänger
+        'pt': '#FFCD56'        // ÖPNV
     };
 
-    // Berechne die Gesamtsumme für jeden Rang
-    const rankTotals = modeScores.map((rankData: any) => {
-      return Object.values(rankData.modes || {}).reduce((sum: number, mode: any) => sum + (mode.count || 0), 0);
-    });
-
-    const datasets = Array.from(uniqueModes).map(mode => {
-      return {
+    const datasets = Array.from(uniqueModes).map(mode => ({
         label: modeScores[0]?.modes[mode]?.display_name || mode,
-        data: modeScores.map((rankData: any, index: number) => {
-          const count = rankData.modes[mode]?.count || 0;
-          const total = rankTotals[index];
-          return total > 0 ? (count / total * 100) : 0;
-        }),
+        data: modeScores.map((rankData: any) => rankData.modes[mode]?.count || 0),
         backgroundColor: colorPalette[mode as keyof typeof colorPalette] || '#808080',
-        stack: 'Stack 0'
-      };
-    });
+    }));
 
     this.modesChartData = {
-      labels: labels,
-      datasets: datasets
+        labels: labels,
+        datasets: datasets
     };
 
+    // Angepasste Optionen für gruppierte Säulen
     this.barChartOptions = {
-      indexAxis: 'x',
-      maintainAspectRatio: false,
-      aspectRatio: 1,
-      plugins: {
-        tooltip: {
-          mode: 'index',
-          intersect: false,
-          callbacks: {
-            label: function(context: any) {
-              return `${context.dataset.label}: ${context.raw.toFixed(1)}%`;
+        indexAxis: 'x',
+        maintainAspectRatio: false,
+        aspectRatio: 1,
+        plugins: {
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+            },
+            legend: {
+                position: 'bottom'
+            },
+            title: {
+                display: true,
+                text: 'Verkehrsmittelverteilung nach Erreichbarkeitsrang'
             }
-          }
         },
-        legend: {
-          labels: {
-            color: '#495057'
-          },
-          position: 'bottom'
-        }
-      },
-      scales: {
-        x: {
-          stacked: true,
-          ticks: {
-            color: '#495057'
-          },
-          grid: {
-            color: '#ebedef'
-          }
-        },
-        y: {
-          stacked: true,
-          ticks: {
-            color: '#495057',
-            callback: function(value: number) {
-              return value + '%';
+        scales: {
+            x: {
+                grid: {
+                    display: false
+                }
+            },
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Anzahl der Ziele'
+                }
             }
-          },
-          grid: {
-            color: '#ebedef'
-          },
-          max: 100
         }
-      }
     };
-  }
+}
 
   private initializeActivitiesChart(): void {
     const categoryScores = this.projectDetails?.category_scores || {};
