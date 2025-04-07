@@ -77,7 +77,8 @@
     "RESULTS": {
       "LOAD_ERROR": "Results cannot be loaded"
     },
-    "DEFAULT_GROUP": "Precalculated maps"
+    "DEFAULT_GROUP": "Precalculated maps",
+    "AUTO_CLOSE_SIDEBAR": "Pin sidebar"
   },
   "PROJECT_GROUPS": {
     "CREATE": {

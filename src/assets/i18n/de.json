@@ -77,7 +77,8 @@
     "RESULTS": {
       "LOAD_ERROR": "Ergebnisse können nicht geladen werden"
     },
-    "DEFAULT_GROUP": "Vorberechnete Karten"
+    "DEFAULT_GROUP": "Vorberechnete Karten",
+    "AUTO_CLOSE_SIDEBAR": "Sidebar pinnen"
   },
   "PROJECT_GROUPS": {
     "CREATE": {
