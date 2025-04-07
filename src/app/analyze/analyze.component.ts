@@ -3,6 +3,7 @@ import { SharedModule } from '../shared/shared.module';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../projects/projects.service';
 import { AnalyzeService } from './analyze.service';
+import { MapService } from '../map/map.service';
 import Feature from 'ol/Feature';
 import { Properties } from './analyze.interface';
 
@@ -16,10 +17,14 @@ import { Properties } from './analyze.interface';
 export class AnalyzeComponent implements OnInit, OnDestroy {
   visible: boolean = false;
   loading: boolean = false;
-  private subscription: Subscription;
+  private subscriptions: Subscription[] = [];
   projectDetails: any;
   feature: Feature | undefined;
   properties: Properties | undefined;
+  averageType: 'mean' | 'median' = 'mean';
+  populationArea: 'pop' | 'area' = 'pop';
+  currentScore: number = 0;
+  currentScoreColor: string = '';
 
   // Diagrammdaten
   personaChartData: any;
@@ -28,6 +33,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
   radarChartOptions: any;
   barChartOptions: any;
   pieChartOptions: any;
+
+  getScore(): {score: number, color: string} {
+    if (!this.properties) return {score: 0, color: ''};
+    const mapType = `${this.populationArea}_${this.averageType}`;
+    this.currentScore = this.properties[mapType] as number || 0;
+    const color =`${this.populationArea}_${this.averageType}_color`;
+    this.currentScoreColor = this.properties[color] as string || '';
+    return {score: this.currentScore, color: this.currentScoreColor};
+  }
 
   hasPersonaData(): boolean {
     return Object.keys(this.projectDetails?.persona_scores || {}).length > 0;
@@ -44,9 +58,11 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
   constructor(
     private analyzeService: AnalyzeService,
     private projectsService: ProjectsService,
+    private mapService: MapService,
     private cdr: ChangeDetectorRef
   ) {
-    this.subscription = this.analyzeService.visible$.subscribe(
+    this.subscriptions.push(
+      this.analyzeService.visible$.subscribe(
       visible => {
         this.visible = visible;
         if (visible) {
@@ -73,7 +89,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
           }
         }
       }
+      ),
+      this.mapService.visualizationSettings$.subscribe(settings => {
+        this.averageType = settings.averageType;
+        this.populationArea = settings.populationArea;
+        this.getScore();
+        this.cdr.detectChanges();
+      })
     );
+    this.getScore();
 
     // Grundlegende Chart-Optionen für verschiedene Diagrammtypen
     this.radarChartOptions = {
@@ -491,8 +515,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
+    if (this.subscriptions) {
+      this.subscriptions.forEach(subscription => subscription.unsubscribe());
     }
   }
 

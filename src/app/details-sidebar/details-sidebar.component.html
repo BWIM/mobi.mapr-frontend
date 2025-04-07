@@ -12,7 +12,7 @@
             <p-selectButton [options]="[
               { label: ('SIDEBAR.MEDIAN' | translate), value: 'median' },
               { label: ('SIDEBAR.AVERAGE' | translate), value: 'mean' }
-            ]" [(ngModel)]="selectedAverageType" optionLabel="label" optionValue="value" (onChange)="onVisualizationChange()">
+            ]" [(ngModel)]="selectedAverageType" optionLabel="label" optionValue="value" (onChange)="onVisualizationChange()" [allowEmpty]="false">
             </p-selectButton>
           </div>
 
@@ -21,7 +21,7 @@
             <p-selectButton [options]="[
               { label: ('SIDEBAR.POPULATION' | translate), value: 'pop' },
               { label: ('SIDEBAR.AREA' | translate), value: 'area' }
-            ]" [(ngModel)]="selectedPopulationArea" optionLabel="label" optionValue="value" (onChange)="onVisualizationChange()">
+            ]" [(ngModel)]="selectedPopulationArea" optionLabel="label" optionValue="value" (onChange)="onVisualizationChange()" [allowEmpty]="false">
             </p-selectButton>
           </div>
         </div>

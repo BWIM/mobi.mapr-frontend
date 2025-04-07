@@ -24,8 +24,8 @@
                             <div class="flex items-center space-x-2">
                                 <h2 class="text-xl font-semibold">{{properties.name}}</h2>
                                 <span class="px-3 py-1 rounded-full text-white text-sm font-medium"
-                                      [style.backgroundColor]="properties.color">
-                                    {{properties.mobiscore * 100 | number: '1.0-0'}}%
+                                      [style.backgroundColor]="getScore().color">
+                                    {{ getScore().score * 100 | number: '1.0-0'}}%
                                 </span>
                             </div>
                             <div class="tooltip-container relative">

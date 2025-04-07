@@ -7,4 +7,5 @@ export interface Properties {
     name: string;
     color: string;
     rgbColor: number[];
+    [key: string]: number | string | MultiPolygon | number[];
 }
