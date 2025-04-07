@@ -191,17 +191,7 @@
     "BACK_TOOLTIP": "Einen Schritt zurückgehen",
     "FINISH_TOOLTIP": "Fertigstellen",
     "NEXT_TOOLTIP": "Weiter",
-    "STEPS_TOOLTIP": "Schritte",
-    "ACCUMULATION_TYPE": {
-      "AREA": "Nach Fläche",
-      "POPULATION": "Nach Bevölkerung",
-      "LABEL": "Akkumulierungstyp"
-    },
-    "AVERAGE_TYPE": {
-      "MEAN": "Durchschnitt",
-      "MEDIAN": "Median",
-      "LABEL": "Mittelwerttyp"
-    }
+    "STEPS_TOOLTIP": "Schritte"
   },
   "SIDEBAR": {
     "TITLE": "Details",

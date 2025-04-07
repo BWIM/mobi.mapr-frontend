@@ -39,11 +39,8 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   modes: Mode[] = [];
   projectGroups: ProjectGroup[] = [];
   private subscription: Subscription;
-  private langChangeSubscription: Subscription;
   selectedAreaIds: string[] = [];
   showMidActivities: boolean = true;
-  accumulationTypeOptions: any[] = [];
-  averageTypeOptions: any[] = [];
   selectedGroupToDelete: ProjectGroup | null = null;
   hasCompletelySelectedLands: boolean = false;
   private allGroupedActivities: { mid: GroupedActivities[], nonMid: GroupedActivities[] } = {
@@ -75,25 +72,8 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     );
 
     this.initializeForm();
-    this.updateTranslations();
-    
-    // Übersetzungen bei Sprachwechsel aktualisieren
-    this.langChangeSubscription = this.translate.onLangChange.subscribe(() => {
-      this.updateTranslations();
-    });
   }
 
-  private updateTranslations() {
-    this.accumulationTypeOptions = [
-      { label: this.translate.instant('PROJECT_WIZARD.ACCUMULATION_TYPE.AREA'), value: 'area' },
-      { label: this.translate.instant('PROJECT_WIZARD.ACCUMULATION_TYPE.POPULATION'), value: 'population' }
-    ];
-  
-    this.averageTypeOptions = [
-      { label: this.translate.instant('PROJECT_WIZARD.AVERAGE_TYPE.MEAN'), value: 'mean' },
-      { label: this.translate.instant('PROJECT_WIZARD.AVERAGE_TYPE.MEDIAN'), value: 'median' }
-    ];
-  }
 
   ngOnInit() {
     this.initializeSteps();
@@ -105,9 +85,6 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.subscription) {
       this.subscription.unsubscribe();
-    }
-    if (this.langChangeSubscription) {
-      this.langChangeSubscription.unsubscribe();
     }
   }
 
@@ -139,8 +116,6 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         sendEmail: [true],
         loadAreasOnMap: [true],
         projectGroup: [null],
-        accumulationType: ['population'], // 'area' oder 'population'
-        averageType: ['mean'] // 'mean' oder 'median'
       })
     });
   }
@@ -168,8 +143,6 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         allowSharing: false,
         sendEmail: true,
         loadAreasOnMap: true,
-        accumulationType: 'population',
-        averageType: 'mean'
       }
     });
 
@@ -409,8 +382,6 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         modes: this.projectForm.get('modes.selectedModes')?.value.map((m: any) => m.id).join(','),
         landkreise: this.selectedAreaIds.join(','),
         projectgroup: this.projectForm.get('summary.projectGroup')?.value?.id || null,
-        accumulation_type: this.projectForm.get('summary.accumulationType')?.value,
-        average_type: this.projectForm.get('summary.averageType')?.value,
         laender: this.hasCompletelySelectedLands
       };
 
