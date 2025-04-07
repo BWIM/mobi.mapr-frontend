@@ -21,15 +21,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
   feature: Feature | undefined;
   properties: Properties | undefined;
 
-  // Sortieroptionen für Aktivitätsdiagramm
-  sortOptions = [
-    { label: 'Score (aufsteigend)', value: 'score_asc' },
-    { label: 'Score (absteigend)', value: 'score_desc' },
-    { label: 'Relevanz (aufsteigend)', value: 'relevance_asc' },
-    { label: 'Relevanz (absteigend)', value: 'relevance_desc' }
-  ];
-  selectedSortOption: string = 'score_asc';
-
   // Diagrammdaten
   personaChartData: any;
   activitiesChartData: any;
@@ -267,17 +258,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     };
 }
 
-  initializeActivitiesChart(): void {
+  private initializeActivitiesChart(): void {
     const categoryScores = this.projectDetails?.category_scores || {};
     
-    // Sortiere die Kategorien basierend auf der ausgewählten Option
-    const [criterion, direction] = this.selectedSortOption.split('_');
+    // Sortiere die Kategorien nach ihren Scores (aufsteigend)
     const sortedCategories = Object.entries(categoryScores)
-      .sort(([, a]: [string, any], [, b]: [string, any]) => {
-        const valueA = criterion === 'relevance' ? a.relevance : a.score;
-        const valueB = criterion === 'relevance' ? b.relevance : b.score;
-        return direction === 'asc' ? valueA - valueB : valueB - valueA;
-      });
+      .sort(([, a]: [string, any], [, b]: [string, any]) => a.score - b.score);
     
     const labels = sortedCategories.map(([, category]: [string, any]) => category.display_name);
     const data = sortedCategories.map(([, category]: [string, any]) => category.score);

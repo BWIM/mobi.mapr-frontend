@@ -59,25 +59,11 @@
                         <p-tabpanel [value]="'activities'">
                             <div class="p-4">
                                 <h3 class="text-xl mb-4">{{ 'ANALYZE.ACTIVITIES.TITLE' | translate }}</h3>
-                                
-
                                 <div *ngIf="hasActivityData()">
                                     <p-chart type="bar" [data]="activitiesChartData" [options]="barChartOptions"></p-chart>
                                 </div>
                                 <div *ngIf="!hasActivityData()" class="text-center p-4">
                                     <p>{{ 'ANALYZE.ACTIVITIES.NO_DATA' | translate }}</p>
-                                </div>
-
-                                <div class="sort-controls" style="margin-bottom: 1rem;">
-                                    <p-selectButton 
-                                        [options]="sortOptions" 
-                                        [(ngModel)]="selectedSortOption"
-                                        (ngModelChange)="initializeActivitiesChart()"
-                                        optionLabel="label"
-                                        optionValue="value"
-                                        styleClass="small-buttons"
-                                        [style]="{'font-size': '0.875rem'}"
-                                    ></p-selectButton>
                                 </div>
                             </div>
                         </p-tabpanel>
