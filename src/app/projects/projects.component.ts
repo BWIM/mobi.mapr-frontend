@@ -46,7 +46,7 @@ interface ProjectProgress {
 })
 export class ProjectsComponent implements OnInit, OnDestroy {
   @Output() projectAction = new EventEmitter<void>();
-  @Output() projectSelected = new EventEmitter<void>();
+  @Output() projectSelected = new EventEmitter<boolean>();
   @ViewChild('unusedGroupsOverlay') unusedGroupsOverlay!: any;
   
   projectGroups: ProjectGroup[] = [];
@@ -55,6 +55,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   items: MenuItem[] = [];
   selectedProject?: Project;
   selectedTableProject?: Project;
+  autoCloseSidebar: boolean = false;
   private websocketConnections: Map<number, WebSocketSubject<WebsocketResult>> = new Map();
   editDialogVisible = false;
   projectToEdit: Project | null = null;
@@ -266,7 +267,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
       this.projectsService.getProjectInfo(project.id).subscribe({
         next: (info) => {
           this.projectsService.updateCurrentProjectInfo(info);
-          this.projectSelected.emit(); // Emit wenn ein Projekt ausgewählt wurde
+          this.projectSelected.emit(this.autoCloseSidebar); // Emit den Auto-Close-Status
         },
         error: (error) => {
           console.error('Fehler beim Laden der Projektinformationen:', error);
