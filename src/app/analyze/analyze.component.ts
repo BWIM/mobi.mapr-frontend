@@ -76,13 +76,88 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     );
 
     // Grundlegende Chart-Optionen für verschiedene Diagrammtypen
-    this.radarChartOptions = {      plugins: {
-      legend: {
-        position: 'bottom'
-      }
-    },
-    responsive: true,
-    maintainAspectRatio: false
+    this.radarChartOptions = {
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            generateLabels: function(chart: any) {
+              return [
+                {
+                  text: 'A',
+                  fillStyle: '#32612d',
+                  strokeStyle: '#32612d',
+                  fontColor: '#000000',
+                  lineWidth: 1,
+                  hidden: false,
+                  boxWidth: 30,
+                  boxHeight: 20,
+                  borderRadius: 4
+                },
+                {
+                  text: 'B',
+                  fillStyle: '#3cb043',
+                  strokeStyle: '#3cb043',
+                  fontColor: '#000000',
+                  lineWidth: 1,
+                  hidden: false,
+                  boxWidth: 30,
+                  boxHeight: 20,
+                  borderRadius: 4
+                },
+                {
+                  text: 'C',
+                  fillStyle: '#eed202',
+                  strokeStyle: '#eed202',
+                  fontColor: '#000000',
+                  lineWidth: 1,
+                  hidden: false,
+                  boxWidth: 30,
+                  boxHeight: 20,
+                  borderRadius: 4
+                },
+                {
+                  text: 'D',
+                  fillStyle: '#ed7014',
+                  strokeStyle: '#ed7014',
+                  fontColor: '#000000',
+                  lineWidth: 1,
+                  hidden: false,
+                  boxWidth: 30,
+                  boxHeight: 20,
+                  borderRadius: 4
+                },
+                {
+                  text: 'E',
+                  fillStyle: '#c21807',
+                  strokeStyle: '#c21807',
+                  fontColor: '#000000',
+                  lineWidth: 1,
+                  hidden: false,
+                  boxWidth: 30,
+                  boxHeight: 20,
+                  borderRadius: 4
+                },
+                {
+                  text: 'F',
+                  fillStyle: '#9656a2',
+                  strokeStyle: '#9656a2',
+                  fontColor: '#000000',
+                  lineWidth: 1,
+                  hidden: false,
+                  boxWidth: 30,
+                  boxHeight: 20,
+                  borderRadius: 4
+                }
+              ];
+            },
+            usePointStyle: false,
+            padding: 15
+          }
+        }
+      },
+      responsive: true,
+      maintainAspectRatio: false
     };
 
     this.barChartOptions = {      plugins: {
