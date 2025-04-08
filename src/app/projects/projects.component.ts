@@ -115,6 +115,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         command: () => {
           this.showResults(this.selectedProject, 'hexagons');
         },
+        disabled: this.selectedProject?.build_hexagons
       },
       {
         icon: 'pi pi-map',
@@ -136,6 +137,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         command: () => {
           this.showResults(this.selectedProject, 'laender');
         },
+        disabled: this.selectedProject?.type !== "Land"
       }
     ];
   }

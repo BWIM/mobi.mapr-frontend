@@ -19,6 +19,7 @@ export interface Project {
     
     finished: boolean;
     projectgroup?: ProjectGroup;  // ProjectGroup ID
+    build_hexagons?: boolean;
 }
 
 export interface PaginatedResponse<T> {
