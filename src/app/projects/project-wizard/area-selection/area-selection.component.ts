@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SharedModule } from '../../../shared/shared.module';
 import { AreasService } from '../../../services/areas.service';
@@ -22,7 +22,8 @@ import Overlay from 'ol/Overlay';
   standalone: true,
   imports: [CommonModule, SharedModule]
 })
-export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy {
+export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges {
+  @Input() preloadedAreas: any = null;
   @Output() selectedAreasChange = new EventEmitter<string[]>();
   @Output() completelySelectedLandsChange = new EventEmitter<boolean>();
 
@@ -42,12 +43,22 @@ export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy 
 
   ngOnInit() {
     this.loadLands();
-    this.loadAreas();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['preloadedAreas'] && this.preloadedAreas && this.vectorLayer) {
+      this.loadAreasFromPreloaded();
+    }
   }
 
   ngAfterViewInit() {
     this.initializeTooltip();
     this.initializeMap();
+    if (this.preloadedAreas) {
+      this.loadAreasFromPreloaded();
+    } else {
+      this.loadAreas();
+    }
   }
 
   ngOnDestroy() {
@@ -185,6 +196,23 @@ export class AreaSelectionComponent implements OnInit, AfterViewInit, OnDestroy 
         console.error('Fehler beim Laden der Gebiete:', error);
       }
     });
+  }
+
+  private loadAreasFromPreloaded() {
+    const features = this.geoJsonFormat.readFeatures(this.preloadedAreas, {
+      featureProjection: 'EPSG:3857',
+      dataProjection: 'EPSG:4326'
+    });
+    
+    features.forEach(feature => {
+      if (!feature.getId()) {
+        feature.setId(feature.get('id'));
+      }
+    });
+
+    const source = this.vectorLayer?.getSource();
+    source?.clear();
+    source?.addFeatures(features);
   }
 
   getLandSelectionState(land: Land): boolean {

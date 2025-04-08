@@ -19,6 +19,7 @@ import { Activity } from '../../services/interfaces/activity.interface';
 import { ProjectGroup } from '../project.interface';
 import { MessageService } from 'primeng/api';
 import { MapService } from '../../map/map.service';
+import { AreasService } from '../../services/areas.service';
 
 
 @Component({
@@ -43,6 +44,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   showMidActivities: boolean = true;
   selectedGroupToDelete: ProjectGroup | null = null;
   hasCompletelySelectedLands: boolean = false;
+  areasGeoJson: any = null;
   private allGroupedActivities: { mid: GroupedActivities[], nonMid: GroupedActivities[] } = {
     mid: [],
     nonMid: []
@@ -59,7 +61,8 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     private translate: TranslateService,
     private reloadService: ProjectsReloadService,
     private messageService: MessageService,
-    private mapService: MapService
+    private mapService: MapService,
+    private areasService: AreasService
   ) {
     this.subscription = this.wizardService.visible$.subscribe(
       visible => {
@@ -67,6 +70,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         if (visible) {
           this.resetWizard();
           this.loadProjectGroups();
+          this.loadAreas();
         }
       }
     );
@@ -499,6 +503,24 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
             severity: 'error',
             summary: this.translate.instant('COMMON.MESSAGES.ERROR.DELETE'),
             detail: this.translate.instant('PROJECTS.MESSAGES.DELETE_GROUP_ERROR')
+          });
+        }
+      });
+    }
+  }
+
+  private loadAreas() {
+    if (!this.areasGeoJson) {
+      this.areasService.getAreas().subscribe({
+        next: (geojson: any) => {
+          this.areasGeoJson = geojson;
+        },
+        error: (error) => {
+          console.error('Fehler beim Laden der Gebiete:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
+            detail: this.translate.instant('PROJECTS.MESSAGES.LOAD_AREAS_ERROR')
           });
         }
       });
