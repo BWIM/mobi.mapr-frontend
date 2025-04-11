@@ -281,7 +281,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (results) => {
             this.mapService.resetMap();
-            this.mapService.updateFeatures(results.geojson.features);
+            this.mapService.updateFeatures(results);
             this.selectedTableProject = project;
             this.projectAction.emit();
           },
