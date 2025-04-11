@@ -16,6 +16,7 @@ import { CommonModule } from '@angular/common';
 import { SharedModule } from '../shared/shared.module';
 import { VisualizationOverlayComponent } from './visualization-overlay/visualization-overlay.component';
 import { MapBuildService } from './map-build.service';
+import { Extent } from 'ol/extent';
 
 @Component({
   selector: 'app-map',
@@ -74,7 +75,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         center: fromLonLat([8.5, 49.05]),
         zoom: 7,
         minZoom: 7,
-        maxZoom: 12,
+        maxZoom: 15,
         constrainResolution: true
       })
     });
@@ -82,8 +83,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.mapService.setMap(this.map);
     this.mapService.setMainLayer(this.vectorLayer);
 
-    // Update features when zoom changes
+    // Update features when zoom changes or view moves
     this.map.getView().on('change:resolution', async () => {
+      await this.updateMapFeatures();
+    });
+    
+    this.map.getView().on('change:center', async () => {
       await this.updateMapFeatures();
     });
   }
@@ -126,7 +131,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       level = 'county';
     }
 
-    const geojson = await this.mapBuildService.buildMap(this.landkreise, level);
+    // Get current viewport extent
+    const extent = this.map.getView().calculateExtent(this.map.getSize());
+
+    const geojson = await this.mapBuildService.buildMap(this.landkreise, level, extent);
 
     if (geojson && geojson.features) {
       vectorSource.clear();
