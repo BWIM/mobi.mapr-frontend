@@ -45,16 +45,12 @@
                                     </td>
                                     <td>
                                         <div class="flex gap-2 justify-end relative">
-                                            <p-splitButton 
-                                                [model]="items"
+                                            <p-button 
                                                 icon="pi pi-map"
-                                                appendTo="body"
-                                                (onClick)="showResults(project, 'municipalities')"
-                                                dropdownIcon="pi pi-chevron-down"
-                                                (onDropdownClick)="selectedProject = project"
+                                                (onClick)="showResults(project)"
                                                 [disabled]="!project.finished"
                                                 [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate">
-                                            </p-splitButton>
+                                            </p-button>
                                             <p-button 
                                                 icon="pi pi-ellipsis-v"
                                                 (click)="menu.toggle($event)"
@@ -113,16 +109,12 @@
                                     </td>
                                     <td>
                                         <div class="flex gap-2 justify-end relative">
-                                            <p-splitButton 
-                                                [model]="items"
+                                            <p-button 
                                                 icon="pi pi-map"
-                                                appendTo="body"
-                                                (onClick)="showResults(project, 'municipalities')"
-                                                dropdownIcon="pi pi-chevron-down"
-                                                (onDropdownClick)="selectedProject = project"
+                                                (onClick)="showResults(project)"
                                                 [disabled]="!project.finished"
                                                 [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate">
-                                            </p-splitButton>
+                                            </p-button>
                                             <p-button 
                                                 icon="pi pi-ellipsis-v"
                                                 (click)="menu.toggle($event)"

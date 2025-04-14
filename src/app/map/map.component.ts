@@ -148,7 +148,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       const features = geojson.features.map(feature => {
         const olFeature = new GeoJSON().readFeature(feature, {
           featureProjection: this.map.getView().getProjection()
-        });
+        }) as Feature<Geometry>;
+        
+        olFeature.set('rgbColor', feature.properties.rgbColor);
+        
         return olFeature;
       });
 

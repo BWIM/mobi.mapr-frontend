@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Extent } from 'ol/extent';
 import { intersects } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
-import { MapService } from './map.service';
+import { MapService, OpacityThresholds } from './map.service';
 
 @Injectable({
     providedIn: 'root'
@@ -13,6 +13,11 @@ export class MapBuildService {
     municipalitiesLoaded$ = this.municipalitiesLoaded.asObservable();
     private geoJSONFormat = new GeoJSON();
     private populationArea: 'pop' | 'area' = 'pop';
+    private opacityThresholds: OpacityThresholds = {
+        county: 200,
+        municipality: 500,
+        hexagon: 1000
+    };
 
     private cache: {
         counties: { [key: string]: any },
@@ -38,6 +43,13 @@ export class MapBuildService {
     constructor(private mapService: MapService) {
         this.mapService.visualizationSettings$.subscribe(settings => {
             this.populationArea = settings.populationArea;
+            this.opacityThresholds = settings.opacityThresholds;
+            
+            if (settings.updatedLevel) {
+                this.refreshFeatureColors(settings.updatedLevel);
+            } else {
+                this.refreshFeatureColors();
+            }
         });
     }
 
@@ -66,6 +78,18 @@ export class MapBuildService {
                     .flatMap(hexagonGroup => Object.values(hexagonGroup));
             }
         }
+
+        // Update opacity for all features before returning
+        features.forEach(feature => {
+            const featureLevel = feature.properties.level;
+            const populationDensity = featureLevel === 'hexagon' ? 
+                feature.properties.populationDensity : 
+                feature.properties.population_density || 0;
+            
+            const opacity = this.calculateOpacity(populationDensity, featureLevel);
+            const currentColor = feature.properties.rgbColor;
+            feature.properties.rgbColor = [...currentColor.slice(0, 3), opacity];
+        });
 
         return {
             type: "FeatureCollection",
@@ -147,7 +171,7 @@ export class MapBuildService {
                         maxZoom: 10,
                         score: averageScore,
                         population: totalPopulation,
-                        rgbColor: this.getColorForScore(averageScore)
+                        rgbColor: this.getColorForScore(averageScore, countyGeoJson.properties.population_density || 0, 'county')
                     };
                     this.cache.counties[landkreis] = countyGeoJson;
                 } catch (error) {
@@ -204,7 +228,7 @@ export class MapBuildService {
                             const averageScore = this.populationArea === 'pop'
                                 ? (totalPopulation > 0 ? totalScore / totalPopulation : 0)
                                 : (totalHexagons > 0 ? totalScore / totalHexagons : 0);
-                            
+
                             feature.properties = {
                                 ...feature.properties,
                                 level: 'municipality',
@@ -212,7 +236,8 @@ export class MapBuildService {
                                 maxZoom: 12,
                                 score: averageScore,
                                 population: totalPopulation,
-                                rgbColor: this.getColorForScore(averageScore)
+                                populationDensity: landkreise[landkreis]?.[municipalityId]?.['population_density'] || 0,
+                                rgbColor: this.getColorForScore(averageScore, feature.properties.population_density || 0, 'municipality')
                             };
                             
                             this.cache.municipalities[landkreis][municipalityId] = feature;
@@ -232,6 +257,9 @@ export class MapBuildService {
 
     private async loadHexagons(landkreise: { [key: string]: { [key: string]: { [key: string]: [number, number] } } }): Promise<void> {
         const unloadedCounties = Object.keys(landkreise).filter(id => !this.cache.hexagons[id]);
+        
+        // Hexagon area in km² (assuming all hexagons have the same size)
+        const HEXAGON_AREA = 1; // 1 km² per hexagon
         
         await Promise.all(unloadedCounties.map(async landkreis => {
             // Return existing promise if already loading
@@ -263,6 +291,8 @@ export class MapBuildService {
                                 }
                             }
                             
+                            const populationDensity = population / HEXAGON_AREA;
+                            
                             feature.properties = {
                                 ...feature.properties,
                                 level: 'hexagon',
@@ -270,7 +300,9 @@ export class MapBuildService {
                                 maxZoom: 15,
                                 score: score,
                                 population: population,
-                                rgbColor: this.getColorForScore(score)
+                                area: HEXAGON_AREA,
+                                populationDensity: populationDensity,
+                                rgbColor: this.getColorForScore(score, populationDensity, 'hexagon')
                             };
                             
                             this.cache.hexagons[landkreis][hexagonId] = feature;
@@ -288,24 +320,89 @@ export class MapBuildService {
         }));
     }
 
-    private getColorForScore(score: number): number[] {
-        // Define 6 color steps from green to red
+    private calculateOpacity(populationDensity: number, level: 'county' | 'municipality' | 'hexagon'): number {
+        const threshold = this.opacityThresholds[level];
+        return Math.min(0.9, Math.max(0.3, populationDensity / threshold));
+    }
+
+    private getColorForScore(score: number, populationDensity: number = 0, level: 'county' | 'municipality' | 'hexagon' = 'county'): number[] {
         const colorSteps = [
-            [50,97,45,0.7],    // Pure green (score <= 0.33)
-            [60,176,67,0.7],  // Light green (score <= 0.66)
-            [238,210,2,0.7],  // Yellow-green (score <= 1.0)
-            [237,112,20,0.7],  // Yellow-orange (score <= 1.33)
-            [194,24,7,0.7],  // Orange (score <= 1.66)
-            [150,86,162,0.7]     // Pure red (score <= 2.0)
+            [50,97,45],    // Pure green (score <= 0.33)
+            [60,176,67],   // Light green (score <= 0.66)
+            [238,210,2],   // Yellow-green (score <= 1.0)
+            [237,112,20],  // Yellow-orange (score <= 1.33)
+            [194,24,7],    // Orange (score <= 1.66)
+            [150,86,162]   // Pure red (score <= 2.0)
         ];
 
-        // Determine which step the score falls into
+        const opacity = this.calculateOpacity(populationDensity, level);
+
         if (score <= 0) return [128,128,128,0.5];
-        if (score <= 0.35) return colorSteps[0];
-        if (score <= 0.5) return colorSteps[1];
-        if (score <= 0.71) return colorSteps[2];
-        if (score <= 1) return colorSteps[3];
-        if (score <= 1.41) return colorSteps[4];
-        return colorSteps[5];
+        if (score <= 0.35) return [...colorSteps[0], opacity];
+        if (score <= 0.5) return [...colorSteps[1], opacity];
+        if (score <= 0.71) return [...colorSteps[2], opacity];
+        if (score <= 1) return [...colorSteps[3], opacity];
+        if (score <= 1.41) return [...colorSteps[4], opacity];
+        return [...colorSteps[5], opacity];
+    }
+
+    private refreshFeatureColors(level?: 'county' | 'municipality' | 'hexagon'): void {
+        const vectorLayer = this.mapService.getMainLayer();
+        if (!vectorLayer || !vectorLayer.getSource()) return;
+
+        const source = vectorLayer.getSource();
+        if (!source) return;
+        const features = source.getFeatures();
+
+        // If level is specified, only update features of that level
+        features.forEach(feature => {
+            const properties = feature.getProperties();
+            const featureLevel = properties['level'];
+            
+            // Skip if level is specified and doesn't match
+            if (level && featureLevel !== level) return;
+
+            const populationDensity = featureLevel === 'hexagon' ? 
+                properties['populationDensity'] : 
+                properties['population_density'] || 0;
+            
+            const opacity = this.calculateOpacity(populationDensity, featureLevel);
+            const currentColor = properties['rgbColor'];
+            
+            // Update both the cache and the feature in one go
+            const newColor = [...currentColor.slice(0, 3), opacity];
+            feature.set('rgbColor', newColor);
+
+            // Update the cache
+            const featureId = properties['id'] || properties['ars'];
+            if (featureId) {
+                switch (featureLevel) {
+                    case 'county':
+                        if (this.cache.counties[featureId]) {
+                            this.cache.counties[featureId].properties.rgbColor = newColor;
+                        }
+                        break;
+                    case 'municipality':
+                        // Find and update in municipality cache
+                        Object.values(this.cache.municipalities).forEach(municipalityGroup => {
+                            if (municipalityGroup[featureId]) {
+                                municipalityGroup[featureId].properties.rgbColor = newColor;
+                            }
+                        });
+                        break;
+                    case 'hexagon':
+                        // Find and update in hexagon cache
+                        Object.values(this.cache.hexagons).forEach(hexagonGroup => {
+                            if (hexagonGroup[featureId]) {
+                                hexagonGroup[featureId].properties.rgbColor = newColor;
+                            }
+                        });
+                        break;
+                }
+            }
+        });
+
+        // Force a single redraw after all updates
+        source?.changed();
     }
 }

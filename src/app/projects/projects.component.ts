@@ -113,7 +113,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         icon: 'pi pi-th-large',
         label: this.translate.instant('MAP.ACTIONS.HEXAGON'),
         command: () => {
-          this.showResults(this.selectedProject, 'hexagons');
+          this.showResults(this.selectedProject);
         },
         disabled: this.selectedProject?.build_hexagons
       },
@@ -121,21 +121,21 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         icon: 'pi pi-map',
         label: this.translate.instant('MAP.ACTIONS.GEMEINDE'),
         command: () => {
-          this.showResults(this.selectedProject, 'municipalities');
+          this.showResults(this.selectedProject);
         },
       },
       {
         icon: 'pi pi-home',
         label: this.translate.instant('MAP.ACTIONS.LANDKREIS'),
         command: () => {
-          this.showResults(this.selectedProject, 'landkreise');
+          this.showResults(this.selectedProject);
         },
       },
       {
         icon: 'pi pi-globe',
         label: this.translate.instant('MAP.ACTIONS.LAND'),
         command: () => {
-          this.showResults(this.selectedProject, 'laender');
+          this.showResults(this.selectedProject);
         },
         disabled: this.selectedProject?.type !== "Land"
       }
@@ -257,13 +257,13 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     return Math.round((project.calculated / project.areas) * 100);
   }
 
-  showResults(project: Project | undefined, maptype: string): void {
+  showResults(project: Project | undefined): void {
     try {
       if (!project) return;
       
       this.loadingService.startLoading();
       this.analyzeService.setCurrentProject(project.id.toString());
-      this.analyzeService.setMapType(maptype);
+      this.analyzeService.setMapType('municipalities');
       
       // Projektinformationen laden
       this.projectsService.getProjectInfo(project.id).subscribe({
@@ -276,7 +276,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         }
       });
 
-      this.projectsService.getProjectResults(project.id, maptype)
+      this.projectsService.getProjectResults(project.id)
         .pipe(finalize(() => this.loadingService.stopLoading()))
         .subscribe({
           next: (results) => {
@@ -366,7 +366,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
             setTimeout(() => {
               const project = this.findProjectById(finishedProjectId);
               if (project) {
-                this.showResults(project,'municipalities');
+                this.showResults(project);
               }
             }, 500);
           }, 500);

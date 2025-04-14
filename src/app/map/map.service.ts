@@ -1,8 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Subject, debounceTime } from 'rxjs';
 import Map from 'ol/Map';
 import WebGLVectorLayer from 'ol/layer/WebGLVector';
 import VectorSource from 'ol/source/Vector';
+
+export interface OpacityThresholds {
+  county: number;
+  municipality: number;
+  hexagon: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -19,8 +25,46 @@ export class MapService {
   private visualizationSettingsSubject = new Subject<{
     averageType: 'mean' | 'median';
     populationArea: 'pop' | 'area';
+    opacityThresholds: OpacityThresholds;
+    updatedLevel?: keyof OpacityThresholds;
   }>();
+  
+  // Create a separate subject for opacity updates with debounce
+  private opacityUpdateSubject = new Subject<{
+    thresholds: Partial<OpacityThresholds>;
+    level: keyof OpacityThresholds;
+  }>();
+
   visualizationSettings$ = this.visualizationSettingsSubject.asObservable();
+  
+  constructor() {
+    // Subscribe to debounced opacity updates
+    this.opacityUpdateSubject.pipe(
+      debounceTime(100) // Wait 100ms after the last update before emitting
+    ).subscribe(({ thresholds, level }) => {
+      const currentSettings = {
+        averageType: 'mean' as const,
+        populationArea: 'pop' as const,
+        opacityThresholds: this.defaultOpacityThresholds
+      };
+      
+      this.visualizationSettingsSubject.next({
+        ...currentSettings,
+        opacityThresholds: {
+          ...currentSettings.opacityThresholds,
+          ...thresholds
+        },
+        updatedLevel: level
+      });
+    });
+  }
+
+  // Default opacity thresholds (people per square km)
+  private defaultOpacityThresholds: OpacityThresholds = {
+    county: 200,
+    municipality: 500,
+    hexagon: 1000
+  };
 
   setMap(map: Map | null): void  {
     this.map = map;
@@ -48,11 +92,21 @@ export class MapService {
 
   updateVisualizationSettings(
     averageType: 'mean' | 'median',
-    populationArea: 'pop' | 'area'
+    populationArea: 'pop' | 'area',
+    opacityThresholds?: Partial<OpacityThresholds>
   ): void {
     this.visualizationSettingsSubject.next({
       averageType,
-      populationArea
+      populationArea,
+      opacityThresholds: {
+        ...this.defaultOpacityThresholds,
+        ...opacityThresholds
+      }
     });
+  }
+
+  updateOpacityThresholds(thresholds: Partial<OpacityThresholds>, level: keyof OpacityThresholds): void {
+    // Use the debounced subject instead of direct update
+    this.opacityUpdateSubject.next({ thresholds, level });
   }
 }

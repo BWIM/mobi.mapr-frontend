@@ -36,6 +36,8 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { ListboxModule } from 'primeng/listbox';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { SliderModule } from 'primeng/slider';
+
 @NgModule({
   imports: [
     CommonModule,
@@ -72,7 +74,8 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
     SelectButtonModule,
     ListboxModule,
     OverlayPanelModule,
-    ToggleSwitchModule
+    ToggleSwitchModule,
+    SliderModule
   ],
   exports: [
     CommonModule,
@@ -109,7 +112,8 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
     SelectButtonModule,
     ListboxModule,
     OverlayPanelModule,
-    ToggleSwitchModule
+    ToggleSwitchModule,
+    SliderModule
   ],
   providers: [MessageService]
 })

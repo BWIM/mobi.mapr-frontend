@@ -220,7 +220,11 @@
     "MEDIAN": "Median",
     "AVERAGE": "Durchschnitt",
     "AREA": "Fläche",
-    "POPULATION": "Bevölkerung"
+    "POPULATION": "Bevölkerung",
+    "OPACITY_THRESHOLDS": "Farb-Dichte",
+    "COUNTY_THRESHOLD": "Landkreise",
+    "MUNICIPALITY_THRESHOLD": "Kommunen Einstellungen",
+    "HEXAGON_THRESHOLD": "Hexagon"
   },
   "ANALYZE": {
     "PERSONA": {

@@ -11,6 +11,7 @@ import { MapService } from '../map/map.service';
 import { PdfGenerationService } from '../map/pdf-generation.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ShareService } from '../share/share.service';
+import { OpacityThresholds } from '../map/map.service';
 
 @Component({
   selector: 'app-details-sidebar',
@@ -31,8 +32,13 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
   isExporting: boolean = false;
   shareUrl: string | null = null;
   isGeneratingShare: boolean = false;
-  selectedAverageType: string = 'mean';
-  selectedPopulationArea: string = 'pop';
+  selectedAverageType: 'mean' | 'median' = 'mean';
+  selectedPopulationArea: 'pop' | 'area' = 'pop';
+  opacityThresholds: OpacityThresholds = {
+    county: 500,
+    municipality: 500,
+    hexagon: 1000
+  };
   @Output() projectLoaded = new EventEmitter<void>();
 
   constructor(
@@ -42,30 +48,44 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     private pdfService: PdfGenerationService,
     private shareService: ShareService
   ) {
-    this.subscription = this.projectsService.currentProjectInfo$.subscribe(
-      info => {
-        this.projectInfo = info;
-        if (info) {
-          this.projectLoaded.emit();
+    this.subscription = new Subscription();
+    
+    this.subscription.add(
+      this.projectsService.currentProjectInfo$.subscribe(
+        info => {
+          this.projectInfo = info;
+          if (info) {
+            this.projectLoaded.emit();
+          }
         }
-      }
+      )
+    );
+
+    this.subscription.add(
+      this.mapService.visualizationSettings$.subscribe(settings => {
+        this.selectedAverageType = settings.averageType;
+        this.selectedPopulationArea = settings.populationArea;
+        this.opacityThresholds = settings.opacityThresholds;
+      })
     );
   }
 
   onVisualizationChange(): void {
-    if (this.selectedAverageType === 'mean') {
-      if (this.selectedPopulationArea === 'pop') {
-        this.mapService.updateVisualizationSettings('mean', 'pop');
-      } else {
-        this.mapService.updateVisualizationSettings('mean', 'area');
-      }
-    } else if (this.selectedAverageType === 'median') {
-      if (this.selectedPopulationArea === 'pop') {
-        this.mapService.updateVisualizationSettings('median', 'pop');
-      } else {
-        this.mapService.updateVisualizationSettings('median', 'area');
-      }
-    }
+    this.mapService.updateVisualizationSettings(
+        this.selectedAverageType,
+        this.selectedPopulationArea,
+        this.opacityThresholds
+    );
+  }
+
+  onOpacityThresholdChange(level: keyof OpacityThresholds, value: number | undefined): void {
+    if (value === undefined) return;
+    
+    const thresholds = {
+        [level]: value
+    };
+    
+    this.mapService.updateOpacityThresholds(thresholds, level);
   }
 
   async exportToPDFLandscape(): Promise<void> {

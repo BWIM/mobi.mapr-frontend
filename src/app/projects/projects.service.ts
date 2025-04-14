@@ -80,8 +80,8 @@ export class ProjectsService {
     return this.http.delete<void>(`${this.apiUrl}/projectgroups/${id}/`);
   }
 
-  getProjectResults(projectId: number, maptype: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/projects/${projectId}/map/?resolution=${maptype}`);
+  getProjectResults(projectId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/projects/${projectId}/map/`);
   }
 
   getProjectDetails(project: string, maptype: string, featureId: string): Observable<any> {

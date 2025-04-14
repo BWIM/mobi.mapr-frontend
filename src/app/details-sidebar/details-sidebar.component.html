@@ -25,6 +25,55 @@
             </p-selectButton>
           </div>
         </div>
+
+        <div class="mb-6">
+          <p-fieldset legend="{{ 'SIDEBAR.OPACITY_THRESHOLDS' | translate }}">
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  {{ 'SIDEBAR.COUNTY_THRESHOLD' | translate }} ({{ opacityThresholds.county }} people/km²)
+                </label>
+                <p-slider 
+                  [(ngModel)]="opacityThresholds.county"
+                  [min]="50"
+                  [max]="1000"
+                  [step]="50"
+                  (ngModelChange)="onOpacityThresholdChange('county', $event)">
+                </p-slider>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  {{ 'SIDEBAR.MUNICIPALITY_THRESHOLD' | translate }} ({{ opacityThresholds.municipality }} people/km²)
+                </label>
+                <p-slider 
+                  [(ngModel)]="opacityThresholds.municipality"
+                  [min]="100"
+                  [max]="2000"
+                  [step]="100"
+                  (ngModelChange)="onOpacityThresholdChange('municipality', $event)">
+                </p-slider>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  {{ 'SIDEBAR.HEXAGON_THRESHOLD' | translate }}
+                </label>
+                <p-slider 
+                  [(ngModel)]="opacityThresholds.hexagon"
+                  [min]="200"
+                  [max]="5000"
+                  [step]="200"
+                  (ngModelChange)="onOpacityThresholdChange('hexagon', $event)">
+                </p-slider>
+              </div>
+            </div>
+          </p-fieldset>
+        </div>
+
+        <!-- Separator -->
+        <div class="my-6 border-t border-gray-200"></div>
+
         <p-fieldset legend="Activities">
           <ul class="list-disc pl-4 space-y-1">
             <li *ngFor="let activity of projectInfo.activities" class="text-gray-700">
