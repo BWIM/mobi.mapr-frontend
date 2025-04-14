@@ -26,6 +26,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
   populationArea: 'pop' | 'area' = 'pop';
   currentScore: number = 0;
   currentScoreColor: string = '';
+  weightingType: 'population' | 'area' = 'population';
+  isAreaWeighting: boolean = false;
 
   // Diagrammdaten
   personaChartData: any;
@@ -292,14 +294,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0) return;
 
     // Calculate weighted averages for each category
-    const categoryScores = new Map<number, { totalWeightedScore: number, totalPopulation: number }>();
+    const categoryScores = new Map<number, { totalWeightedScore: number, totalWeight: number }>();
     
-    // Sum up weighted scores and populations for each category
+    // Sum up weighted scores and weights for each category
     this.projectDetails.hexagons.forEach(hexagon => {
+      const weight = this.weightingType === 'population' ? hexagon.population : 1;
       hexagon.category_scores.forEach(categoryScore => {
-        const current = categoryScores.get(categoryScore.category) || { totalWeightedScore: 0, totalPopulation: 0 };
-        current.totalWeightedScore += categoryScore.score * hexagon.population;
-        current.totalPopulation += hexagon.population;
+        const current = categoryScores.get(categoryScore.category) || { totalWeightedScore: 0, totalWeight: 0 };
+        current.totalWeightedScore += categoryScore.score * weight;
+        current.totalWeight += weight;
         categoryScores.set(categoryScore.category, current);
       });
     });
@@ -307,7 +310,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     // Calculate final weighted averages
     const weightedCategoryScores = Array.from(categoryScores.entries()).map(([category, data]) => ({
       category,
-      score: data.totalWeightedScore / data.totalPopulation
+      score: data.totalWeightedScore / data.totalWeight
     }));
 
     // Sort categories by their weighted scores (ascending)
@@ -401,14 +404,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0) return;
 
     // Calculate weighted averages for each persona
-    const personaScores = new Map<number, { totalWeightedScore: number, totalPopulation: number }>();
+    const personaScores = new Map<number, { totalWeightedScore: number, totalWeight: number }>();
     
-    // Sum up weighted scores and populations for each persona
+    // Sum up weighted scores and weights for each persona
     this.projectDetails.hexagons.forEach(hexagon => {
+      const weight = this.weightingType === 'population' ? hexagon.population : 1;
       hexagon.persona_scores.forEach(personaScore => {
-        const current = personaScores.get(personaScore.persona) || { totalWeightedScore: 0, totalPopulation: 0 };
-        current.totalWeightedScore += personaScore.score * hexagon.population;
-        current.totalPopulation += hexagon.population;
+        const current = personaScores.get(personaScore.persona) || { totalWeightedScore: 0, totalWeight: 0 };
+        current.totalWeightedScore += personaScore.score * weight;
+        current.totalWeight += weight;
         personaScores.set(personaScore.persona, current);
       });
     });
@@ -416,7 +420,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     // Calculate final weighted averages
     const weightedPersonaScores = Array.from(personaScores.entries()).map(([persona, data]) => ({
       persona,
-      score: data.totalWeightedScore / data.totalPopulation
+      score: data.totalWeightedScore / data.totalWeight
     }));
 
     // Sort personas by their weighted scores (ascending)
@@ -538,5 +542,11 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
 
   hide() {
     this.analyzeService.hide();
+  }
+
+  onWeightingChange(event: any): void {
+    this.isAreaWeighting = event.checked;
+    this.weightingType = this.isAreaWeighting ? 'area' : 'population';
+    this.initializeChartData();
   }
 }

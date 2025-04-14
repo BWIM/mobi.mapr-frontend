@@ -244,6 +244,10 @@
     "END": "Ende",
     "PROPERTIES": {
       "POPULATION": "Bevölkerung"
+    },
+    "WEIGHTING": {
+      "POPULATION": "Gewichten nach Bevölkerung",
+      "AREA": "Gewichten nach Fläche"
     }
   },
   "EXPORT": {
