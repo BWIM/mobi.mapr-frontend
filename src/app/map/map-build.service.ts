@@ -42,10 +42,14 @@ export class MapBuildService {
 
     constructor(private mapService: MapService) {
         this.mapService.visualizationSettings$.subscribe(settings => {
+            const populationAreaChanged = this.populationArea !== settings.populationArea;
             this.populationArea = settings.populationArea;
             this.opacityThresholds = settings.opacityThresholds;
             
-            if (settings.updatedLevel) {
+            if (populationAreaChanged) {
+                // Reset cache to force recalculation with new populationArea
+                this.resetCache();
+            } else if (settings.updatedLevel) {
                 this.refreshFeatureColors(settings.updatedLevel);
             } else {
                 this.refreshFeatureColors();

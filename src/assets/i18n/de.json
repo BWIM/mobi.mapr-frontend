@@ -223,7 +223,7 @@
     "POPULATION": "Bevölkerung",
     "OPACITY_THRESHOLDS": "Farb-Dichte",
     "COUNTY_THRESHOLD": "Landkreise",
-    "MUNICIPALITY_THRESHOLD": "Kommunen Einstellungen",
+    "MUNICIPALITY_THRESHOLD": "Kommunen",
     "HEXAGON_THRESHOLD": "Hexagon"
   },
   "ANALYZE": {

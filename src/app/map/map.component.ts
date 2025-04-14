@@ -67,6 +67,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       }),
       this.mapService.resetMap$.subscribe(() => {
         this.resetMap();
+      }),
+      this.mapService.visualizationSettings$.subscribe(async () => {
+        if (this.landkreise) {
+          await this.updateMapFeatures();
+        }
       })
     );
   }
