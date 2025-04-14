@@ -56,8 +56,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private setupSubscriptions(): void {
     this.subscriptions.push(
       this.mapService.features$.subscribe(async features => {
+        this.mapBuildService.resetCache();
         this.landkreise = features;
-        await this.updateMapFeatures();
+        await this.updateMapFeatures().then(() => {
+          this.zoomToFeatures();
+        });
       }),
       this.mapService.resetMap$.subscribe(() => {
         this.resetMap();
@@ -123,9 +126,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     if (!vectorSource) return;
 
     let level: 'county' | 'municipality' | 'hexagon';
-    if (zoom >= 12) {
+    if (zoom >= 11) {
       level = 'hexagon';
-    } else if (zoom >= 10) {
+    } else if (zoom >= 9) {
       level = 'municipality';
     } else {
       level = 'county';
@@ -154,6 +157,17 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     if (this.vectorLayer && this.vectorLayer.getSource()) {
       this.vectorLayer.getSource()?.clear();
     }
+  }
+
+  private zoomToFeatures(): void {
+    const vectorSource = this.vectorLayer.getSource();
+    if (!vectorSource || vectorSource.getFeatures().length === 0) return;
+
+    const extent = vectorSource.getExtent();
+    this.map.getView().fit(extent, {
+      duration: 1000,
+      padding: [200,200,200,200]
+    });
   }
 
   zoomIn() {
