@@ -17,6 +17,7 @@ import { SharedModule } from '../shared/shared.module';
 import { VisualizationOverlayComponent } from './visualization-overlay/visualization-overlay.component';
 import { MapBuildService } from './map-build.service';
 import { Extent } from 'ol/extent';
+import { Pixel } from 'ol/pixel';
 
 @Component({
   selector: 'app-map',
@@ -36,6 +37,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private baseLayer!: TileLayer<XYZ>;
   private subscriptions: Subscription[] = [];
   private landkreise: { [key: string]: any } | null = null;
+  private tooltip!: HTMLElement;
 
   constructor(
     private mapService: MapService,
@@ -45,6 +47,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     this.initMap();
     this.setupSubscriptions();
+    this.setupTooltip();
   }
 
   ngOnDestroy() {
@@ -185,6 +188,42 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     view.animate({
       zoom: zoom ? zoom - 1 : 1,
       duration: 250
+    });
+  }
+
+  private setupTooltip(): void {
+    this.tooltip = document.getElementById('tooltip') as HTMLElement;
+    
+    this.map.on('pointermove', (evt) => {
+      const pixel = this.map.getEventPixel(evt.originalEvent);
+      const hit = this.map.hasFeatureAtPixel(pixel);
+      
+      if (hit) {
+        const feature = this.map.forEachFeatureAtPixel(pixel, (feature) => feature);
+        if (feature) {
+          const properties = feature.getProperties();
+          const name = properties['name'] || 'N/A';
+          const score = properties['score'] !== undefined ? (properties['score'] * 100).toFixed(1) : 'N/A';
+          
+          this.tooltip.innerHTML = `${name}<br>Score: ${score}%`;
+          this.tooltip.style.display = 'block';
+          this.tooltip.style.left = `${pixel[0] + 10}px`;
+          this.tooltip.style.top = `${pixel[1] + 10}px`;
+        }
+      } else {
+        this.tooltip.style.display = 'none';
+      }
+      
+      // Change cursor style
+      const mapElement = document.getElementById('map');
+      if (mapElement) {
+        mapElement.style.cursor = hit ? 'pointer' : '';
+      }
+    });
+    
+    // Hide tooltip when moving the map
+    this.map.on('movestart', () => {
+      this.tooltip.style.display = 'none';
     });
   }
 }

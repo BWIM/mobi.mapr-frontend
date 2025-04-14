@@ -300,7 +300,7 @@ export class MapBuildService {
         ];
 
         // Determine which step the score falls into
-        if (score <= 0) return [0,0,0,0.7];
+        if (score <= 0) return [128,128,128,0.5];
         if (score <= 0.35) return colorSteps[0];
         if (score <= 0.5) return colorSteps[1];
         if (score <= 0.71) return colorSteps[2];
