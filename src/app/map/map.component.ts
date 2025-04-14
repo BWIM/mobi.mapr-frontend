@@ -16,6 +16,9 @@ import { CommonModule } from '@angular/common';
 import { SharedModule } from '../shared/shared.module';
 import { VisualizationOverlayComponent } from './visualization-overlay/visualization-overlay.component';
 import { MapBuildService } from './map-build.service';
+import { ProjectsService } from '../projects/projects.service';
+import { AnalyzeService } from '../analyze/analyze.service';
+import { FeatureSelectionService } from '../shared/services/feature-selection.service';
 
 @Component({
   selector: 'app-map',
@@ -33,13 +36,18 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private map!: Map;
   private vectorLayer!: WebGLVectorLayer<VectorSource>;
   private baseLayer!: TileLayer<XYZ>;
+  private lastClickedFeature: Feature | null = null;
   private subscriptions: Subscription[] = [];
   private landkreise: { [key: string]: any } | null = null;
   private tooltip!: HTMLElement;
+  private level: 'county' | 'municipality' | 'hexagon' = 'county';
 
   constructor(
     private mapService: MapService,
-    private mapBuildService: MapBuildService
+    private mapBuildService: MapBuildService,
+    private projectsService: ProjectsService,
+    private analyzeService: AnalyzeService,
+    private featureSelectionService: FeatureSelectionService
   ) {}
 
   ngAfterViewInit() {
@@ -140,19 +148,18 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const vectorSource = this.vectorLayer.getSource();
     if (!vectorSource) return;
 
-    let level: 'county' | 'municipality' | 'hexagon';
     if (zoom >= 11) {
-      level = 'hexagon';
+      this.level = 'hexagon';
     } else if (zoom >= 9) {
-      level = 'municipality';
+      this.level = 'municipality';
     } else {
-      level = 'county';
+      this.level = 'county';
     }
 
     // Get current viewport extent
     const extent = this.map.getView().calculateExtent(this.map.getSize());
 
-    const geojson = await this.mapBuildService.buildMap(this.landkreise, level, extent);
+    const geojson = await this.mapBuildService.buildMap(this.landkreise, this.level, extent);
 
     if (geojson && geojson.features) {
       vectorSource.clear();
@@ -209,6 +216,27 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private setupTooltip(): void {
     this.tooltip = document.getElementById('tooltip') as HTMLElement;
     
+    // Add click handler
+    this.map.on('click', (event) => {
+      let clickedFeature: Feature | null = null;
+      
+      this.map.forEachFeatureAtPixel(event.pixel, (feature) => {
+        if (feature instanceof Feature) {
+          this.lastClickedFeature = feature;
+          clickedFeature = feature;
+
+          this.analyzeService.setMapType(this.level);
+          
+          // Öffne Analyse-Dialog wenn ein Feature geklickt wurde
+          this.analyzeService.setSelectedFeature(feature);
+        }
+      });
+
+      // Wenn kein Feature geklickt wurde, setzen wir null
+      this.featureSelectionService.setSelectedFeature(clickedFeature);
+    });
+
+    // Existing pointer move handler
     this.map.on('pointermove', (evt) => {
       const pixel = this.map.getEventPixel(evt.originalEvent);
       const hit = this.map.hasFeatureAtPixel(pixel);
@@ -241,4 +269,5 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.tooltip.style.display = 'none';
     });
   }
+
 }

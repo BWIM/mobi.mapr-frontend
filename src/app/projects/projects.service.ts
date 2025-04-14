@@ -10,7 +10,8 @@ import {
   ProjectGroupCreateUpdate, 
   ProjectInfo,
   ExportProject,
-  ProjectsFinishedStatus
+  ProjectsFinishedStatus,
+  ProjectDetails
 } from './project.interface';
 
 
@@ -84,13 +85,13 @@ export class ProjectsService {
     return this.http.get(`${this.apiUrl}/projects/${projectId}/map/`);
   }
 
-  getProjectDetails(project: string, maptype: string, featureId: string): Observable<any> {
+  getProjectDetails(project: string, maptype: string, featureId: string): Observable<ProjectDetails> {
     const params = new HttpParams()
       .set('project', project)
       .set('maptype', maptype)
       .set('featureId', featureId);
     
-    return this.http.get(`${this.apiUrl}/projects/details/`, { params });
+    return this.http.get<ProjectDetails>(`${this.apiUrl}/projects/details/`, { params });
   }
 
   getProjectInfo(projectId: number): Observable<ProjectInfo> {

@@ -263,7 +263,6 @@ export class ProjectsComponent implements OnInit, OnDestroy {
       
       this.loadingService.startLoading();
       this.analyzeService.setCurrentProject(project.id.toString());
-      this.analyzeService.setMapType('municipalities');
       
       // Projektinformationen laden
       this.projectsService.getProjectInfo(project.id).subscribe({

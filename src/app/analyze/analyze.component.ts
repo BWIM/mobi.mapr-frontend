@@ -6,6 +6,7 @@ import { AnalyzeService } from './analyze.service';
 import { MapService } from '../map/map.service';
 import Feature from 'ol/Feature';
 import { Properties } from './analyze.interface';
+import { ProjectDetails } from '../projects/project.interface';
 
 @Component({
   selector: 'app-analyze',
@@ -18,7 +19,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
   visible: boolean = false;
   loading: boolean = false;
   private subscriptions: Subscription[] = [];
-  projectDetails: any;
+  projectDetails: ProjectDetails | undefined;
   feature: Feature | undefined;
   properties: Properties | undefined;
   averageType: 'mean' | 'median' = 'mean';
@@ -44,15 +45,20 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
   }
 
   hasPersonaData(): boolean {
-    return Object.keys(this.projectDetails?.persona_scores || {}).length > 0;
+    if (!this.projectDetails) return false;
+    if (!this.projectDetails.hexagons || this.projectDetails.hexagons.length === 0) return false;
+    return Object.keys(this.projectDetails?.hexagons[0].persona_scores || {}).length > 0;
   }
 
   hasActivityData(): boolean {
-    return Object.keys(this.projectDetails?.category_scores || {}).length > 0;
+    if (!this.projectDetails) return false;
+    if (!this.projectDetails.hexagons || this.projectDetails.hexagons.length === 0) return false;
+    return Object.keys(this.projectDetails?.hexagons[0].category_scores || {}).length > 0;
   }
 
   hasModeData(): boolean {
-    return Object.keys(this.projectDetails?.mode_scores || {}).length > 0;
+    return false;
+    // return Object.keys(this.projectDetails?.mode_scores || {}).length > 0;
   }
 
   constructor(
@@ -73,7 +79,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
           }
           if (state.projectId && state.mapType && state.feature) {
             this.loading = true;
-            this.projectsService.getProjectDetails(state.projectId, state.mapType, state.feature.getId()!.toString())
+            this.projectsService.getProjectDetails(state.projectId, state.mapType, state.feature.getProperties()['id'])
               .subscribe({
                 next: (details) => {
                   this.projectDetails = details;
@@ -218,82 +224,99 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
   }
 
   private initializeModesChart(): void {
-    const modeScores = this.projectDetails?.mode_scores || [];
-    const uniqueModes = new Set<string>();
+    // const modeScores = this.projectDetails?.modes || [];
+    // const uniqueModes = new Set<string>();
     
-    modeScores.forEach((rankData: any) => {
-        Object.keys(rankData.modes || {}).forEach(mode => uniqueModes.add(mode));
-    });
+    // modeScores.forEach((rankData: any) => {
+    //     Object.keys(rankData.modes || {}).forEach(mode => uniqueModes.add(mode));
+    // });
 
-    const labels = modeScores.map((rankData: any) => 
-        `${rankData.rank}. beste Erreichbarkeit`
-    );
+    // const labels = modeScores.map((rankData: any) => 
+    //     `${rankData.rank}. beste Erreichbarkeit`
+    // );
 
-    const colorPalette = {
-        'car': '#FF6384',      // Auto
-        'bicycle': '#36A2EB',   // Fahrrad
-        'pedestrian': '#4BC0C0', // Fußgänger
-        'pt': '#FFCD56'        // ÖPNV
-    };
+    // const colorPalette = {
+    //     'car': '#FF6384',      // Auto
+    //     'bicycle': '#36A2EB',   // Fahrrad
+    //     'pedestrian': '#4BC0C0', // Fußgänger
+    //     'pt': '#FFCD56'        // ÖPNV
+    // };
 
-    const datasets = Array.from(uniqueModes).map(mode => ({
-        label: modeScores[0]?.modes[mode]?.display_name || mode,
-        data: modeScores.map((rankData: any) => rankData.modes[mode]?.count || 0),
-        backgroundColor: colorPalette[mode as keyof typeof colorPalette] || '#808080',
-    }));
+    // const datasets = Array.from(uniqueModes).map(mode => ({
+    //     label: modeScores[0]?.modes[mode]?.display_name || mode,
+    //     data: modeScores.map((rankData: any) => rankData.modes[mode]?.count || 0),
+    //     backgroundColor: colorPalette[mode as keyof typeof colorPalette] || '#808080',
+    // }));
 
-    this.modesChartData = {
-        labels: labels,
-        datasets: datasets
-    };
+    // this.modesChartData = {
+    //     labels: labels,
+    //     datasets: datasets
+    // };
 
-    // Angepasste Optionen für gruppierte Säulen
-    this.barChartOptions = {
-        indexAxis: 'x',
-        maintainAspectRatio: false,
-        aspectRatio: 1,
-        plugins: {
-            tooltip: {
-                mode: 'index',
-                intersect: false,
-            },
-            legend: {
-                position: 'bottom'
-            },
-            title: {
-                display: true,
-                text: 'Verkehrsmittelverteilung nach Erreichbarkeitsrang'
-            }
-        },
-        scales: {
-            x: {
-                grid: {
-                    display: false
-                }
-            },
-            y: {
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Anzahl der Ziele'
-                }
-            }
-        }
-    };
+    // // Angepasste Optionen für gruppierte Säulen
+    // this.barChartOptions = {
+    //     indexAxis: 'x',
+    //     maintainAspectRatio: false,
+    //     aspectRatio: 1,
+    //     plugins: {
+    //         tooltip: {
+    //             mode: 'index',
+    //             intersect: false,
+    //         },
+    //         legend: {
+    //             position: 'bottom'
+    //         },
+    //         title: {
+    //             display: true,
+    //             text: 'Verkehrsmittelverteilung nach Erreichbarkeitsrang'
+    //         }
+    //     },
+    //     scales: {
+    //         x: {
+    //             grid: {
+    //                 display: false
+    //             }
+    //         },
+    //         y: {
+    //             beginAtZero: true,
+    //             title: {
+    //                 display: true,
+    //                 text: 'Anzahl der Ziele'
+    //             }
+    //         }
+    //     }
+    // };
 }
 
   private initializeActivitiesChart(): void {
-    const categoryScores = this.projectDetails?.category_scores || {};
+    if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0) return;
+
+    // Calculate weighted averages for each category
+    const categoryScores = new Map<number, { totalWeightedScore: number, totalPopulation: number }>();
     
-    // Sortiere die Kategorien nach ihren Scores (aufsteigend)
-    const sortedCategories = Object.entries(categoryScores)
-      .sort(([, a]: [string, any], [, b]: [string, any]) => a.score - b.score);
+    // Sum up weighted scores and populations for each category
+    this.projectDetails.hexagons.forEach(hexagon => {
+      hexagon.category_scores.forEach(categoryScore => {
+        const current = categoryScores.get(categoryScore.category) || { totalWeightedScore: 0, totalPopulation: 0 };
+        current.totalWeightedScore += categoryScore.score * hexagon.population;
+        current.totalPopulation += hexagon.population;
+        categoryScores.set(categoryScore.category, current);
+      });
+    });
+
+    // Calculate final weighted averages
+    const weightedCategoryScores = Array.from(categoryScores.entries()).map(([category, data]) => ({
+      category,
+      score: data.totalWeightedScore / data.totalPopulation
+    }));
+
+    // Sort categories by their weighted scores (ascending)
+    const sortedCategories = weightedCategoryScores.sort((a, b) => a.score - b.score);
     
-    const labels = sortedCategories.map(([, category]: [string, any]) => category.display_name);
-    const data = sortedCategories.map(([, category]: [string, any]) => category.score);
-    const relevanceData = sortedCategories.map(([, category]: [string, any]) => 
-      Math.round(category.relevance * 100) / 100
-    );
+    // Get category names from formatted_categories
+    const categoryMap = new Map(this.projectDetails.categories.map(cat => [cat.id, cat.name]));
+    const labels = sortedCategories.map(category => categoryMap.get(category.category) || `${category.category}`);
+    const data = sortedCategories.map(category => category.score);
 
     // Farbzuordnung basierend auf den Werten
     const getColorForValue = (value: number): string => {
@@ -311,13 +334,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
       type: 'bar',
       labels: labels,
       datasets: [
-        {
-          label: 'Relevanz (%)',
-          data: relevanceData,
-          type: 'scatter',
-          yAxisID: 'y1',
-          order: 1
-        },
         {
           label: 'Aktivitätswerte',
           data: data,
@@ -341,9 +357,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
           intersect: false,
           callbacks: {
             label: function(context: any) {
-              if (context.dataset.label === 'Relevanz (%)') {
-                return `${context.dataset.label}: ${context.raw.toFixed(1)}%`;
-              }
               return `${context.dataset.label}: ${context.raw.toFixed(2)}`;
             }
           }
@@ -379,40 +392,43 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
             display: true,
             text: 'Aktivitätswerte'
           }
-        },
-        y1: {
-          type: 'linear',
-          display: true,
-          position: 'right',
-          beginAtZero: true,
-          grid: {
-            drawOnChartArea: false
-          },
-          ticks: {
-            color: '#2196F3',
-            callback: function(value: any) {
-              return value + '%';
-            }
-          },
-          title: {
-            display: true,
-            text: 'Relevanz (%)'
-          }
         }
       }
     };
   }
 
   private initializePersonaChart(): void {
-    const personaScores = this.projectDetails?.persona_scores || {};
-    // Filtere Personas ohne "n/a" und finde den höchsten Score
-    const filteredPersonaScores = Object.entries(personaScores)
-      .filter(([key]) => key !== 'n/a')
-      .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
-    const highestScore = Math.max(...Object.values(filteredPersonaScores).map((persona: any) => persona.score));
+    if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0) return;
 
-    const labels = Object.values(filteredPersonaScores).map((persona: any) => persona.display_name);
-    const data = Object.values(filteredPersonaScores).map((persona: any) => persona.score);
+    // Calculate weighted averages for each persona
+    const personaScores = new Map<number, { totalWeightedScore: number, totalPopulation: number }>();
+    
+    // Sum up weighted scores and populations for each persona
+    this.projectDetails.hexagons.forEach(hexagon => {
+      hexagon.persona_scores.forEach(personaScore => {
+        const current = personaScores.get(personaScore.persona) || { totalWeightedScore: 0, totalPopulation: 0 };
+        current.totalWeightedScore += personaScore.score * hexagon.population;
+        current.totalPopulation += hexagon.population;
+        personaScores.set(personaScore.persona, current);
+      });
+    });
+
+    // Calculate final weighted averages
+    const weightedPersonaScores = Array.from(personaScores.entries()).map(([persona, data]) => ({
+      persona,
+      score: data.totalWeightedScore / data.totalPopulation
+    }));
+
+    // Sort personas by their weighted scores (ascending)
+    const sortedPersonas = weightedPersonaScores.sort((a, b) => a.score - b.score);
+    
+    // Get persona names from formatted_personas
+    const personaMap = new Map(this.projectDetails.personas.map(p => [p.id, p.name]));
+    const labels = sortedPersonas.map(persona => personaMap.get(persona.persona) || `${persona.persona}`);
+    const data = sortedPersonas.map(persona => persona.score);
+
+    // Find the highest score for background bands
+    const highestScore = Math.max(...data);
 
     // Farbzuordnung basierend auf den Werten
     const getColorForValue = (value: number): string => {
