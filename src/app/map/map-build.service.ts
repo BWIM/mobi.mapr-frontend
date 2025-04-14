@@ -13,8 +13,9 @@ export class MapBuildService {
     municipalitiesLoaded$ = this.municipalitiesLoaded.asObservable();
     private geoJSONFormat = new GeoJSON();
     private populationArea: 'pop' | 'area' = 'pop';
+    private averageType: 'mean' | 'median' = 'mean';
     private opacityThresholds: OpacityThresholds = {
-        county: 200,
+        county: 500,
         municipality: 500,
         hexagon: 1000
     };
@@ -43,10 +44,12 @@ export class MapBuildService {
     constructor(private mapService: MapService) {
         this.mapService.visualizationSettings$.subscribe(settings => {
             const populationAreaChanged = this.populationArea !== settings.populationArea;
+            const averageTypeChanged = this.averageType !== settings.averageType;
             this.populationArea = settings.populationArea;
+            this.averageType = settings.averageType;
             this.opacityThresholds = settings.opacityThresholds;
             
-            if (populationAreaChanged) {
+            if (populationAreaChanged || averageTypeChanged) {
                 // Reset cache to force recalculation with new populationArea
                 this.resetCache();
             } else if (settings.updatedLevel) {
@@ -326,7 +329,7 @@ export class MapBuildService {
 
     private calculateOpacity(populationDensity: number, level: 'county' | 'municipality' | 'hexagon'): number {
         const threshold = this.opacityThresholds[level];
-        return Math.min(0.9, Math.max(0.3, populationDensity / threshold));
+        return Math.min(0.9, Math.max(0.5, populationDensity / threshold));
     }
 
     private getColorForScore(score: number, populationDensity: number = 0, level: 'county' | 'municipality' | 'hexagon' = 'county'): number[] {

@@ -16,8 +16,6 @@ import { CommonModule } from '@angular/common';
 import { SharedModule } from '../shared/shared.module';
 import { VisualizationOverlayComponent } from './visualization-overlay/visualization-overlay.component';
 import { MapBuildService } from './map-build.service';
-import { Extent } from 'ol/extent';
-import { Pixel } from 'ol/pixel';
 
 @Component({
   selector: 'app-map',
@@ -61,6 +59,15 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.mapService.features$.subscribe(async features => {
         this.mapBuildService.resetCache();
         this.landkreise = features;
+        
+        // First zoom out to county level to prevent unnecessary hexagon calculations
+        const view = this.map.getView();
+        const currentZoom = view.getZoom();
+        if (currentZoom && currentZoom >= 9) {
+          view.setZoom(8); // Zoom out to county level
+        }
+        
+        // Then update features and zoom to them
         await this.updateMapFeatures().then(() => {
           this.zoomToFeatures();
         });
