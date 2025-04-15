@@ -122,7 +122,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private initializeLayers(): void {
     this.baseLayer = new TileLayer({
       source: new XYZ({
-        url: 'https://{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+        url: 'https://{a-d}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
         crossOrigin: 'anonymous'
       })
     });

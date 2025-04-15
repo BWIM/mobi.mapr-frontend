@@ -17,6 +17,7 @@ export class MapService {
   private map: Map | null = null;
   private mainLayer: WebGLVectorLayer<VectorSource> | null = null;
   private featuresSubject = new Subject<any>();
+  private currentFeatures: { [key: string]: any } = {};  // Store current features
   features$ = this.featuresSubject.asObservable();
 
   private resetMapSubject = new Subject<void>();
@@ -82,8 +83,22 @@ export class MapService {
     return this.mainLayer;
   }
 
-  updateFeatures(features: any[]): void {
-    this.featuresSubject.next(features);
+  updateFeatures(features: any): void {
+    this.featuresSubject.next(features);  // Emit all features
+  }
+
+  addSingleFeature(feature: { [key: string]: { [key: string]: any } }): void {
+    // Get the primary key (e.g., '082150000000')
+    const primaryKey = Object.keys(feature)[0];
+    
+    this.currentFeatures = {
+      ...this.currentFeatures,
+      [primaryKey]: {
+        ...(this.currentFeatures[primaryKey] || {}),
+        ...feature[primaryKey]
+      }
+    };
+    this.featuresSubject.next(this.currentFeatures);
   }
 
   resetMap(): void {
