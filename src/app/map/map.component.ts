@@ -78,6 +78,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         // Then update features and zoom to them
         await this.updateMapFeatures().then(() => {
           this.zoomToFeatures();
+          
         });
       }),
       this.mapService.resetMap$.subscribe(() => {

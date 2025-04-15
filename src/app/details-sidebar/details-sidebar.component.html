@@ -26,6 +26,18 @@
           </div>
         </div>
 
+
+        <div class="mt-6 flex">
+          <p-button 
+            (onClick)="toggleOpacity()"
+            icon="pi pi-eye-slash"
+            [label]="'SIDEBAR.REDUCE_OPACITY' | translate"
+            [pTooltip]="'SIDEBAR.REDUCE_OPACITY_TOOLTIP' | translate"
+            [styleClass]="isLowOpacity ? 'p-button-secondary mb-4 p-button-outlined' : 'p-button-secondary mb-4'">
+          </p-button>
+        </div>
+
+
         <!-- <div class="mb-6">
           <p-fieldset legend="{{ 'SIDEBAR.OPACITY_THRESHOLDS' | translate }}">
             <div class="space-y-4">
