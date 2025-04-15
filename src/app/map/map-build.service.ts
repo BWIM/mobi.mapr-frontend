@@ -344,7 +344,7 @@ export class MapBuildService {
 
         const opacity = this.calculateOpacity(populationDensity, level);
 
-        if (score <= 0) return [128,128,128,0.5];
+        if (score <= 0) return [128,128,128,0];
         if (score <= 0.35) return [...colorSteps[0], opacity];
         if (score <= 0.5) return [...colorSteps[1], opacity];
         if (score <= 0.71) return [...colorSteps[2], opacity];

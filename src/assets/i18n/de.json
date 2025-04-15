@@ -3,7 +3,7 @@
     "TITLE": "Projekte",
     "LIST": {
       "TITLE": "Projekte",
-      "NO_PROJECTS": "Keine Projekte verfügbar"
+      "NO_PROJECTS": "Bitte lade die Seite neu"
     },
     "DETAILS": {
       "NAME": "Name",
@@ -181,7 +181,8 @@
     "ACTIVITIES": {
       "MID": "Aktivitäten",
       "NON_MID": "Standardaktivitäten",
-      "TOGGLE_TOOLTIP": "umschalten"
+      "TOGGLE_TOOLTIP": "umschalten",
+      "NO_MID_ACTIVITIES": "Fehler bei den Aktivitäten. Lade die Seite neu."
     },
     "PROJECT_NAME_TOOLTIP": "Projektname",
     "DESCRIPTION_TOOLTIP": "Projektbeschreibung",

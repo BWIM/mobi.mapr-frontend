@@ -3,7 +3,7 @@
     "TITLE": "Projects",
     "LIST": {
       "TITLE": "Projects",
-      "NO_PROJECTS": "No projects available"
+      "NO_PROJECTS": "Please reload the page"
     },
     "DETAILS": {
       "NAME": "Name",
@@ -181,7 +181,8 @@
     "ACTIVITIES": {
       "MID": "Activities",
       "NON_MID": "Standard Activities",
-      "TOGGLE_TOOLTIP": "toggle"
+      "TOGGLE_TOOLTIP": "toggle",
+      "NO_MID_ACTIVITIES": "Error with the Activities. Please reload the page"
     },
     "PROJECT_NAME_TOOLTIP": "project name",
     "DESCRIPTION_TOOLTIP": "Project description",

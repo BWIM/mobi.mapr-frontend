@@ -49,13 +49,13 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
   hasPersonaData(): boolean {
     if (!this.projectDetails) return false;
     if (!this.projectDetails.hexagons || this.projectDetails.hexagons.length === 0) return false;
-    return Object.keys(this.projectDetails?.hexagons[0].persona_scores || {}).length > 0;
+    return true;
   }
 
   hasActivityData(): boolean {
     if (!this.projectDetails) return false;
     if (!this.projectDetails.hexagons || this.projectDetails.hexagons.length === 0) return false;
-    return Object.keys(this.projectDetails?.hexagons[0].category_scores || {}).length > 0;
+    return true;
   }
 
   hasModeData(): boolean {

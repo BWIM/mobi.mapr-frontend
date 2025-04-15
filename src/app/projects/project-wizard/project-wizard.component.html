@@ -71,6 +71,9 @@
                                     </div>
                                 </p-panel>
                             </div>
+                            <div *ngIf="groupedActivities.length === 0">
+                                <p>{{ 'PROJECT_WIZARD.ACTIVITIES.NO_MID_ACTIVITIES' | translate }}</p>
+                            </div>
                         </div>
                         
                         <!-- Nicht-MID Aktivitäten -->
