@@ -139,12 +139,12 @@
     }
   },
   "LEGEND": {
-    "LVLA": "Die Mobilitätszeit beträgt maximal 35 % der lokalen Durchschnittszeit.",
-    "LVLB": "Die Mobilitätszeit liegt zwischen 36 % und 50 % der lokalen Durchschnittszeit.",
-    "LVLC": "Die Mobilitätszeit liegt zwischen 51 % und 71 % der lokalen Durchschnittszeit.",
-    "LVLD": "Die Mobilitätszeit liegt zwischen 72 % und 100 % der lokalen Durchschnittszeit.",
-    "LVLE": "Die Mobilitätszeit liegt zwischen 101 % und 140 % der lokalen Durchschnittszeit.",
-    "LVLF": "Die Mobilitätszeit beträgt mindestens 141 % der lokalen Durchschnittszeit."
+    "LVLA": "Die Mobilitätsqualität beträgt maximal 35 % im lokalen Vergleich.",
+    "LVLB": "Die Mobilitätsqualität liegt zwischen 36 % und 50 % im lokalen Vergleich.",
+    "LVLC": "Die Mobilitätsqualität liegt zwischen 51 % und 71 % im lokalen Vergleich.",
+    "LVLD": "Die Mobilitätsqualität liegt zwischen 72 % und 100 % im lokalen Vergleich.",
+    "LVLE": "Die Mobilitätsqualität liegt zwischen 101 % und 140 % im lokalen Vergleich.",
+    "LVLF": "Die Mobilitätsqualität beträgt mindestens 141 % im lokalen Vergleich."
   },
   "MAP": {
     "ACTIONS": {
@@ -237,7 +237,10 @@
     },
     "ACTIVITIES": {
       "TITLE": "Aktivitäten",
-      "NO_DATA": "Keine Daten verfügbar"
+      "NO_DATA": "Keine Daten verfügbar",
+      "SWITCH_TO_DOUGHNUT": "Ansicht wechseln",
+      "HINT": "Bitte beachte, dass es bei der Gewichtung auf Landkreis-Ebene zu Ungenauigkeiten kommen kann.",
+      "EXPLANATION": "Die Aktivitäten gewichtet nach lokaler Relevanz"
     },
     "MODES": {
       "TITLE": "Modi",
