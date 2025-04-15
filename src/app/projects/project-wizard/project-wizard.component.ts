@@ -344,13 +344,8 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   }
 
   onAreaSelectionChange(areaIds: string[]) {
-    console.log('Ausgewählte Areas:', areaIds);
     this.selectedAreaIds = areaIds;
     this.projectForm.get('area.selectedArea')?.setValue(areaIds);
-    console.log('Formularwert nach Area-Änderung:', {
-      selectedAreaIds: this.selectedAreaIds,
-      formValue: this.projectForm.get('area.selectedArea')?.value
-    });
   }
 
   onCompletelySelectedLandsChange(hasCompletelySelectedLands: boolean) {
@@ -389,7 +384,6 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         laender: this.hasCompletelySelectedLands
       };
 
-      console.log('Projektdaten:', projectData);
 
       this.projectsService.createProject(projectData).subscribe({
         next: (response) => {
@@ -432,7 +426,6 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         }
       });
     } else {
-      console.log('Formular ist ungültig');
       this.messageService.add({
         severity: 'error',
         summary: this.translate.instant('COMMON.MESSAGES.ERROR.CREATE'),
@@ -442,7 +435,6 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   }
 
   toggleMidActivities() {
-    console.log('toggleMidActivities', this.showMidActivities);
     this.showMidActivities = !this.showMidActivities;
     this.updateDisplayedActivities(this.showMidActivities);
   }

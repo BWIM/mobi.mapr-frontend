@@ -32,7 +32,6 @@ import { BehaviorSubject } from "rxjs";
   
     setSelectedFeature(feature: Feature) {
       this.selectedFeature = feature;
-      console.log(this.selectedFeature);
       this.show(); // Automatisch das Analyse-Panel öffnen, wenn ein Feature ausgewählt wurde
     }
   

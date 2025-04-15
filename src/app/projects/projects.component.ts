@@ -280,7 +280,6 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (results) => {
             this.mapService.resetMap();
-            console.log(results)
             this.mapService.updateFeatures(results);
             this.selectedTableProject = project;
             this.projectAction.emit();
