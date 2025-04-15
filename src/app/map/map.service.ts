@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Subject, debounceTime } from 'rxjs';
+import { Subject, BehaviorSubject, debounceTime } from 'rxjs';
 import Map from 'ol/Map';
 import WebGLVectorLayer from 'ol/layer/WebGLVector';
 import VectorSource from 'ol/source/Vector';
@@ -15,6 +15,7 @@ export interface OpacityThresholds {
 })
 export class MapService {
   private map: Map | null = null;
+  private mapSubject = new BehaviorSubject<Map | null>(null);
   private mainLayer: WebGLVectorLayer<VectorSource> | null = null;
   private featuresSubject = new Subject<any>();
   private currentFeatures: { [key: string]: any } = {};  // Store current features
@@ -69,10 +70,15 @@ export class MapService {
 
   setMap(map: Map | null): void  {
     this.map = map;
+    this.mapSubject.next(map);
   }
 
   getMap(): Map | null {
     return this.map;
+  }
+
+  getMap$() {
+    return this.mapSubject.asObservable();
   }
 
   setMainLayer(layer: WebGLVectorLayer<VectorSource> | null): void {

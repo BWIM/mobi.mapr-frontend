@@ -225,7 +225,10 @@
     "OPACITY_THRESHOLDS": "Farb-Dichte",
     "COUNTY_THRESHOLD": "Landkreise",
     "MUNICIPALITY_THRESHOLD": "Kommunen",
-    "HEXAGON_THRESHOLD": "Hexagon"
+    "HEXAGON_THRESHOLD": "Hexagon",
+    "REDUCE_OPACITY": "Basis-Karte hervorheben",
+    "REDUCE_OPACITY_TOOLTIP": "Features weniger intensiv anzeigen",
+    "RESTORE_OPACITY": "Karte wiederherstellen"
   },
   "ANALYZE": {
     "PERSONA": {

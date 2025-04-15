@@ -225,7 +225,10 @@
     "OPACITY_THRESHOLDS": "Opacity",
     "COUNTY_THRESHOLD": "County threshold",
     "MUNICIPALITY_THRESHOLD": "Municipality threshold",
-    "HEXAGON_THRESHOLD": "Hexagon"
+    "HEXAGON_THRESHOLD": "Hexagon",
+    "REDUCE_OPACITY": "Reduce opacity",
+    "REDUCE_OPACITY_TOOLTIP": "Reduce opacity of features",
+    "RESTORE_OPACITY": "Restore opacity"
   },
   "ANALYZE": {
     "PERSONA": {

@@ -40,6 +40,8 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     hexagon: 1000
   };
   @Output() projectLoaded = new EventEmitter<void>();
+  private originalFeatureColors: Map<string, number[]> = new Map();
+  isLowOpacity: boolean = false;
 
   constructor(
     private translate: TranslateService,
@@ -66,6 +68,16 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
         this.selectedAverageType = settings.averageType;
         this.selectedPopulationArea = settings.populationArea;
         this.opacityThresholds = settings.opacityThresholds;
+      })
+    );
+
+    // Subscribe to feature changes and maintain opacity state
+    this.subscription.add(
+      this.mapService.features$.subscribe(() => {
+        if (this.isLowOpacity) {
+          // Small delay to ensure features are loaded
+          setTimeout(() => this.setLowOpacity(), 100);
+        }
       })
     );
   }
@@ -132,6 +144,73 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
         console.error('Could not copy text: ', err);
       }
     );
+  }
+
+  toggleOpacity(): void {
+    if (this.isLowOpacity) {
+      this.resetOpacity();
+    } else {
+      this.setLowOpacity();
+    }
+  }
+
+  private setLowOpacity(): void {
+    const vectorLayer = this.mapService.getMainLayer();
+    if (!vectorLayer || !vectorLayer.getSource()) return;
+
+    const source = vectorLayer.getSource();
+    if (!source) return;
+    const features = source.getFeatures();
+
+    // Clear any existing stored colors first
+    this.originalFeatureColors.clear();
+
+    features.forEach(feature => {
+      const rgbColor = feature.get('rgbColor');
+      if (Array.isArray(rgbColor)) {
+        // Use a combination of properties to create a unique ID
+        const featureId = this.getFeatureId(feature);
+        this.originalFeatureColors.set(featureId, [...rgbColor]);
+        
+        const newColor = [...rgbColor.slice(0, 3), rgbColor[3] * 0.2];
+        feature.set('rgbColor', newColor);
+      }
+    });
+
+    this.isLowOpacity = true;
+    source.changed();
+  }
+
+  private resetOpacity(): void {
+    const vectorLayer = this.mapService.getMainLayer();
+    if (!vectorLayer || !vectorLayer.getSource()) return;
+
+    const source = vectorLayer.getSource();
+    if (!source) return;
+    const features = source.getFeatures();
+
+    features.forEach(feature => {
+      const featureId = this.getFeatureId(feature);
+      const originalColor = this.originalFeatureColors.get(featureId);
+      if (originalColor) {
+        feature.set('rgbColor', originalColor);
+      }
+    });
+
+    this.originalFeatureColors.clear();
+    this.isLowOpacity = false;
+    source.changed();
+  }
+
+  private getFeatureId(feature: any): string {
+    // Try to get a unique identifier using various properties
+    const id = feature.getId();
+    const properties = feature.getProperties();
+    const ars = properties['ars'];
+    const hexId = properties['id'];
+    
+    // Return the first available identifier
+    return id?.toString() || ars?.toString() || hexId?.toString() || Math.random().toString();
   }
 
   ngOnInit() {}
