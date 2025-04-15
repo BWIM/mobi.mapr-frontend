@@ -328,8 +328,41 @@ export class MapBuildService {
     }
 
     private calculateOpacity(populationDensity: number, level: 'county' | 'municipality' | 'hexagon'): number {
-        const threshold = this.opacityThresholds[level];
-        return Math.min(0.9, Math.max(0.5, populationDensity / threshold));
+        // Constants for density scaling
+        const MIN_DENSITY = 1;  // Minimum density to avoid log(0)
+        let MAX_DENSITY = 1000000;
+        if (level === 'county') {
+            MAX_DENSITY = 1782202;  // Maximum expected density
+        } else if (level === 'municipality') {
+            MAX_DENSITY = 3062;  // Maximum expected density
+        } else {
+            MAX_DENSITY = 18338;  // Maximum expected density
+        }
+        const MIN_OPACITY = 0.3;
+        const MAX_OPACITY = 0.9;
+        const OPACITY_RANGE = MAX_OPACITY - MIN_OPACITY;
+
+        // Handle invalid or zero density
+        if (!populationDensity || populationDensity <= 0) {
+            return MIN_OPACITY;
+        }
+
+        try {
+            // Apply logarithmic scaling
+            const logMinDensity = Math.log(MIN_DENSITY);
+            const logMaxDensity = Math.log(MAX_DENSITY);
+            const logDensity = Math.log(Math.max(MIN_DENSITY, populationDensity));
+
+            // Normalize to [0,1]
+            const normalizedDensity = (logDensity - logMinDensity) / (logMaxDensity - logMinDensity);
+            const clampedDensity = Math.max(0, Math.min(1, normalizedDensity));
+
+            // Map to opacity range
+            return MIN_OPACITY + (OPACITY_RANGE * clampedDensity);
+        } catch (error) {
+            console.error('Error calculating opacity:', error);
+            return MIN_OPACITY;
+        }
     }
 
     private getColorForScore(score: number, populationDensity: number = 0, level: 'county' | 'municipality' | 'hexagon' = 'county'): number[] {
