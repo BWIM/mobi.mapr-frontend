@@ -34,9 +34,8 @@
                                 <tr>
                                     <td>
                                         <div class="flex flex-col">
-                                            <div class="flex items-center">
-                                                <span class="text-overflow-ellipsis overflow-hidden break-words" 
-                                                      [ngClass]="{'selected-row': selectedTableProject?.id === project.id}"
+                                            <div class="flex items-center" [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
+                                                <span class="text-overflow-ellipsis overflow-hidden break-words"
                                                       [pTooltip]="project.description || project.display_name">
                                                     {{ project.display_name }}
                                                 </span>
@@ -45,16 +44,12 @@
                                     </td>
                                     <td>
                                         <div class="flex gap-2 justify-end relative">
-                                            <p-splitButton 
-                                                [model]="items"
+                                            <p-button 
                                                 icon="pi pi-map"
-                                                appendTo="body"
-                                                (onClick)="showResults(project, 'municipalities')"
-                                                dropdownIcon="pi pi-chevron-down"
-                                                (onDropdownClick)="selectedProject = project"
+                                                (onClick)="showResults(project)"
                                                 [disabled]="!project.finished"
                                                 [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate">
-                                            </p-splitButton>
+                                            </p-button>
                                             <p-button 
                                                 icon="pi pi-ellipsis-v"
                                                 (click)="menu.toggle($event)"
@@ -99,12 +94,11 @@
                                 </tr>
                             </ng-template>
                             <ng-template pTemplate="body" let-project>
-                                <tr [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
+                                <tr>
                                     <td>
                                         <div class="flex flex-col">
-                                            <div class="flex items-center">
-                                                <span class="text-overflow-ellipsis overflow-hidden break-words" 
-                                                      [ngClass]="{'selected-row': selectedTableProject?.id === project.id}"
+                                            <div class="flex items-center" [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
+                                                <span class="text-overflow-ellipsis overflow-hidden break-words"
                                                       [pTooltip]="project.description || project.display_name">
                                                     {{ project.display_name }}
                                                 </span>
@@ -113,16 +107,12 @@
                                     </td>
                                     <td>
                                         <div class="flex gap-2 justify-end relative">
-                                            <p-splitButton 
-                                                [model]="items"
+                                            <p-button 
                                                 icon="pi pi-map"
-                                                appendTo="body"
-                                                (onClick)="showResults(project, 'municipalities')"
-                                                dropdownIcon="pi pi-chevron-down"
-                                                (onDropdownClick)="selectedProject = project"
+                                                (onClick)="showResults(project)"
                                                 [disabled]="!project.finished"
                                                 [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate">
-                                            </p-splitButton>
+                                            </p-button>
                                             <p-button 
                                                 icon="pi pi-ellipsis-v"
                                                 (click)="menu.toggle($event)"

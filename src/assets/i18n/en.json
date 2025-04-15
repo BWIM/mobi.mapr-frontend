@@ -220,7 +220,11 @@
     "MEDIAN": "Median",
     "AVERAGE": "Average",
     "AREA": "Area",
-    "POPULATION": "Population"
+    "POPULATION": "Population",
+    "OPACITY_THRESHOLDS": "Opacity",
+    "COUNTY_THRESHOLD": "County threshold",
+    "MUNICIPALITY_THRESHOLD": "Municipality threshold",
+    "HEXAGON_THRESHOLD": "Hexagon"
   },
   "ANALYZE": {
     "PERSONA": {
@@ -240,6 +244,10 @@
     "END": "End",
     "PROPERTIES": {
       "POPULATION": "Population"
+    },
+    "WEIGHTING": {
+      "POPULATION": "Weight by population",
+      "AREA": "Weight by area"
     }
   },
   "EXPORT": {

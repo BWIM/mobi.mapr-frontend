@@ -9,15 +9,16 @@ import { Feature } from 'ol';
 import { fromLonLat } from 'ol/proj';
 import GeoJSON from 'ol/format/GeoJSON';
 import { Geometry } from 'ol/geom';
-import { Style, Fill, Stroke } from 'ol/style';
 import { MapService } from './map.service';
 import { Subscription } from 'rxjs';
 import { LegendComponent } from '../legend/legend.component';
 import { CommonModule } from '@angular/common';
-import { FeatureSelectionService } from '../shared/services/feature-selection.service';
-import { AnalyzeService } from '../analyze/analyze.service';
 import { SharedModule } from '../shared/shared.module';
 import { VisualizationOverlayComponent } from './visualization-overlay/visualization-overlay.component';
+import { MapBuildService } from './map-build.service';
+import { ProjectsService } from '../projects/projects.service';
+import { AnalyzeService } from '../analyze/analyze.service';
+import { FeatureSelectionService } from '../shared/services/feature-selection.service';
 
 @Component({
   selector: 'app-map',
@@ -37,76 +38,99 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private baseLayer!: TileLayer<XYZ>;
   private lastClickedFeature: Feature | null = null;
   private subscriptions: Subscription[] = [];
-  private currentPropertyKey: string = 'pop_mean_color'; // Standardwert
+  private landkreise: { [key: string]: any } | null = null;
+  private tooltip!: HTMLElement;
+  private level: 'county' | 'municipality' | 'hexagon' = 'county';
 
   constructor(
     private mapService: MapService,
-    private featureSelectionService: FeatureSelectionService,
-    private analyzeService: AnalyzeService
+    private mapBuildService: MapBuildService,
+    private projectsService: ProjectsService,
+    private analyzeService: AnalyzeService,
+    private featureSelectionService: FeatureSelectionService
   ) {}
 
   ngAfterViewInit() {
     this.initMap();
     this.setupSubscriptions();
+    this.setupTooltip();
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
-    
-    // Referenzen im MapService zurücksetzen
     this.mapService.setMap(null);
     this.mapService.setMainLayer(null);
   }
 
   private setupSubscriptions(): void {
     this.subscriptions.push(
-      this.mapService.features$.subscribe(features => {
-        this.addFeatures(features);
+      this.mapService.features$.subscribe(async features => {
+        this.mapBuildService.resetCache();
+        this.landkreise = features;
+        
+        // First zoom out to county level to prevent unnecessary hexagon calculations
+        const view = this.map.getView();
+        const currentZoom = view.getZoom();
+        if (currentZoom && currentZoom >= 9) {
+          view.setZoom(8); // Zoom out to county level
+        }
+        
+        // Then update features and zoom to them
+        await this.updateMapFeatures().then(() => {
+          this.zoomToFeatures();
+        });
       }),
       this.mapService.resetMap$.subscribe(() => {
         this.resetMap();
       }),
-      this.mapService.visualizationSettings$.subscribe(settings => {
-        this.currentPropertyKey = settings.populationArea + "_" + settings.averageType + "_color";
-        this.updateFeatureColors();
+      this.mapService.visualizationSettings$.subscribe(async () => {
+        if (this.landkreise) {
+          await this.updateMapFeatures();
+        }
       })
     );
   }
 
   private initMap(): void {
     this.initializeLayers();
+    
     this.map = new Map({
       target: 'map',
       layers: [this.baseLayer, this.vectorLayer],
       view: new View({
-        center: fromLonLat([8.5, 49.05]), // Zentrum von Ba-Wü
-        zoom: 9,
-        constrainResolution: true,
-        smoothExtentConstraint: true,
-        smoothResolutionConstraint: true
+        center: fromLonLat([8.5, 49.05]),
+        zoom: 7,
+        minZoom: 7,
+        maxZoom: 15,
+        constrainResolution: true
       })
     });
 
-    // Registriere Map und Layer im MapService
     this.mapService.setMap(this.map);
     this.mapService.setMainLayer(this.vectorLayer);
 
-    this.setupMapInteractions();
+    // Update features when zoom changes or view moves
+    this.map.getView().on('change:resolution', async () => {
+      await this.updateMapFeatures();
+    });
+    
+    this.map.getView().on('change:center', async () => {
+      await this.updateMapFeatures();
+    });
   }
 
   private initializeLayers(): void {
-    // Base Layer initialisieren
     this.baseLayer = new TileLayer({
       source: new XYZ({
         url: 'https://{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-        attributions: undefined,
-        crossOrigin: 'anonymous'  // CORS aktivieren
+        crossOrigin: 'anonymous'
       })
     });
 
-    // WebGL Vector Layer mit Standard-Styling
     this.vectorLayer = new WebGLVectorLayer({
-      source: new VectorSource(),
+      source: new VectorSource({
+        format: new GeoJSON()
+      }),
       style: {
         'stroke-color': [0, 0, 0, 0.1],
         'stroke-width': 0.1,
@@ -114,132 +138,49 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       }
     });
   }
-  private setupMapInteractions(): void {
-    const tooltip = document.getElementById('tooltip');
+
+  private async updateMapFeatures(): Promise<void> {
+    if (!this.landkreise) return;
     
-    // Click-Handler für Features
-    this.map.on('click', (event) => {
-      let clickedFeature: Feature | null = null;
+    const zoom = this.map.getView().getZoom();
+    if (!zoom) return;
+
+    const vectorSource = this.vectorLayer.getSource();
+    if (!vectorSource) return;
+
+    if (zoom >= 11) {
+      this.level = 'hexagon';
+    } else if (zoom >= 9) {
+      this.level = 'municipality';
+    } else {
+      this.level = 'county';
+    }
+
+    // Get current viewport extent
+    const extent = this.map.getView().calculateExtent(this.map.getSize());
+
+    const geojson = await this.mapBuildService.buildMap(this.landkreise, this.level, extent);
+
+    if (geojson && geojson.features) {
+      vectorSource.clear();
       
-      this.map.forEachFeatureAtPixel(event.pixel, (feature) => {
-        if (feature instanceof Feature) {
-          if (this.lastClickedFeature) {
-            this.resetFeatureStyle(this.lastClickedFeature);
-          }
-          this.highlightFeature(feature as Feature<Geometry>);
-          this.lastClickedFeature = feature;
-          clickedFeature = feature;
-          
-          // Öffne Analyse-Dialog wenn ein Feature geklickt wurde
-          this.analyzeService.setSelectedFeature(feature);
-        }
-      });
-
-      // Wenn kein Feature geklickt wurde, setzen wir null
-      this.featureSelectionService.setSelectedFeature(clickedFeature);
-    });
-
-    // Hover-Effekt für Features
-    this.map.on('pointermove', (event) => {
-      const pixel = event.pixel;
-      const hit = this.map.hasFeatureAtPixel(pixel);
-      this.map.getTargetElement().style.cursor = hit ? 'pointer' : '';
-
-      if (tooltip) {
-        if (!hit) {
-          tooltip.style.display = 'none';
-          return;
-        }
-
-        let hoveredFeature: Feature | null = null;
-        this.map.forEachFeatureAtPixel(pixel, (feature) => {
-          if (feature instanceof Feature) {
-            hoveredFeature = feature;
-          }
-        });
-
-        if (hoveredFeature) {
-          const scoreKey = this.currentPropertyKey.replace('_color', '');
-          const name = (hoveredFeature as Feature).get('name') || 'Unbekannt';
-          const score = (hoveredFeature as Feature).get(scoreKey) || 'Keine Daten';
-          
-          tooltip.innerHTML = `<strong>${name}</strong><br>Score: ${typeof score === 'number' ? (score * 100).toFixed(0) + '%' : score}`;
-          tooltip.style.display = 'block';
-        }
-          tooltip.style.left = pixel[0] + 10 + 'px';
-          tooltip.style.top = pixel[1] + 10 + 'px';
-        }
-      }
-    )
-  }
-
-  private hexToRgb(hex: string): number[] {
-    hex = hex.replace('#', '');
-    const bigint = parseInt(hex, 16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
-    return [r, g, b];
-  }
-
-  private hexToRgba(hex: string, opacity: number): [number, number, number, number] {
-    const rgb = this.hexToRgb(hex);
-    return [rgb[0], rgb[1], rgb[2], opacity];
-  }
-
-  private updateFeatureColors(): void {
-    const features = this.vectorLayer.getSource()?.getFeatures() || [];
-    features.forEach(feature => {
-      let color = feature.get(this.currentPropertyKey);
-      if (!color) {
-        color = feature.get('score_color');
-      }
-      const opacity = feature.get('opacity') || 0.5;
-      if (color) {
-        const rgbColor = this.hexToRgba(color, opacity);
-        feature.set('rgbColor', rgbColor);
-      }
-    });
-    
-    this.vectorLayer.changed();
-  }
-
-  public addFeatures(features: any[]): void {
-    try {
-      if (!this.vectorLayer) return;
-
-      const vectorSource = this.vectorLayer.getSource();
-      if (!vectorSource) return;
-
-      features.forEach(feature => {
+      const features = geojson.features.map(feature => {
         const olFeature = new GeoJSON().readFeature(feature, {
           featureProjection: this.map.getView().getProjection()
         }) as Feature<Geometry>;
-
-        let color = olFeature.get(this.currentPropertyKey);
-        if (!color) {
-          color = olFeature.get('score_color');
-        }
-        const opacity = olFeature.get('opacity') || 0.1;
-        const border_width = olFeature.get('border_width') || 0.1;
-  
-        if (color) {
-          const rgbColor = this.hexToRgba(color, opacity);
-          olFeature.setProperties({
-            rgbColor: rgbColor,
-            opacity: opacity,
-            border_width: border_width
-          });
-        }
-
-        vectorSource.addFeature(olFeature);
+        
+        olFeature.set('rgbColor', feature.properties.rgbColor);
+        
+        return olFeature;
       });
-      
-      vectorSource.changed();
-      this.zoomToFeatures();
+
+      vectorSource.addFeatures(features as Feature<Geometry>[]);
     }
-    catch (error) {
-      console.error(error);
+  }
+
+  public resetMap(): void {
+    if (this.vectorLayer && this.vectorLayer.getSource()) {
+      this.vectorLayer.getSource()?.clear();
     }
   }
 
@@ -252,27 +193,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       duration: 1000,
       padding: [200,200,200,200]
     });
-  }
-
-  private highlightFeature(feature: Feature<Geometry>): void {
-    if (this.lastClickedFeature) {
-      this.lastClickedFeature.set('color', this.lastClickedFeature.get(this.currentPropertyKey));
-    }
-    feature.set('color', [67, 49, 67, 1]);
-    this.vectorLayer.changed();
-  }
-
-  private resetFeatureStyle(feature: Feature<Geometry>): void {
-    feature.set('color', feature.get(this.currentPropertyKey));
-    this.vectorLayer.changed();
-  }
-
-  // Karte zurücksetzen
-  public resetMap(): void {
-    if (this.vectorLayer && this.vectorLayer.getSource()) {
-      this.vectorLayer.getSource()?.clear();
-      this.lastClickedFeature = null;
-    }
   }
 
   zoomIn() {
@@ -292,4 +212,62 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       duration: 250
     });
   }
+
+  private setupTooltip(): void {
+    this.tooltip = document.getElementById('tooltip') as HTMLElement;
+    
+    // Add click handler
+    this.map.on('click', (event) => {
+      let clickedFeature: Feature | null = null;
+      
+      this.map.forEachFeatureAtPixel(event.pixel, (feature) => {
+        if (feature instanceof Feature) {
+          this.lastClickedFeature = feature;
+          clickedFeature = feature;
+
+          this.analyzeService.setMapType(this.level);
+          
+          // Öffne Analyse-Dialog wenn ein Feature geklickt wurde
+          this.analyzeService.setSelectedFeature(feature);
+        }
+      });
+
+      // Wenn kein Feature geklickt wurde, setzen wir null
+      this.featureSelectionService.setSelectedFeature(clickedFeature);
+    });
+
+    // Existing pointer move handler
+    this.map.on('pointermove', (evt) => {
+      const pixel = this.map.getEventPixel(evt.originalEvent);
+      const hit = this.map.hasFeatureAtPixel(pixel);
+      
+      if (hit) {
+        const feature = this.map.forEachFeatureAtPixel(pixel, (feature) => feature);
+        if (feature) {
+          const properties = feature.getProperties();
+          const name = properties['name'] || 'N/A';
+          const score = properties['score'] !== undefined ? (properties['score'] * 100).toFixed(1) : 'N/A';
+          
+          this.tooltip.innerHTML = `${name}<br>Score: ${score}%`;
+          this.tooltip.style.display = 'block';
+          this.tooltip.style.left = `${pixel[0] + 10}px`;
+          this.tooltip.style.top = `${pixel[1] + 10}px`;
+        }
+      } else {
+        this.tooltip.style.display = 'none';
+      }
+      
+      // Change cursor style
+      const mapElement = document.getElementById('map');
+      if (mapElement) {
+        mapElement.style.cursor = hit ? 'pointer' : '';
+      }
+    });
+    
+    // Hide tooltip when moving the map
+    this.map.on('movestart', () => {
+      this.tooltip.style.display = 'none';
+    });
+  }
+
 }

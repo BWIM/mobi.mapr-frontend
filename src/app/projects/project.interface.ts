@@ -72,3 +72,51 @@ export interface ProjectsFinishedStatus {
   all_finished: boolean;
   unfinished_projects: UnfinishedProject[];
 }
+
+export interface PersonaScore {
+  persona: number;
+  score: number;
+}
+
+export interface CategoryScore {
+  category: number;
+  score: number;
+}
+
+export interface ModeScore {
+  mode: number;
+  score: number;
+}
+
+export interface HexagonScore {
+  hexagon: number;
+  population: number;
+  persona_scores: PersonaScore[];
+  category_scores: CategoryScore[];
+  mode_scores: ModeScore[];
+}
+
+export interface FormattedPersona {
+  name: string;
+  id: number;
+}
+
+export interface FormattedCategory {
+  name: string;
+  id: number;
+}
+
+export interface ProjectDetails {
+  project: {
+    id: number;
+    name: string;
+    description: string;
+  },
+  metadata: {
+    "maptype": string;
+    "featureId": string;
+  },
+  personas: FormattedPersona[];
+  categories: FormattedCategory[];
+  hexagons: HexagonScore[];
+}

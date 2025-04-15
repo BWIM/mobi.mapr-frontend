@@ -220,7 +220,11 @@
     "MEDIAN": "Median",
     "AVERAGE": "Durchschnitt",
     "AREA": "Fläche",
-    "POPULATION": "Bevölkerung"
+    "POPULATION": "Bevölkerung",
+    "OPACITY_THRESHOLDS": "Farb-Dichte",
+    "COUNTY_THRESHOLD": "Landkreise",
+    "MUNICIPALITY_THRESHOLD": "Kommunen",
+    "HEXAGON_THRESHOLD": "Hexagon"
   },
   "ANALYZE": {
     "PERSONA": {
@@ -240,6 +244,10 @@
     "END": "Ende",
     "PROPERTIES": {
       "POPULATION": "Bevölkerung"
+    },
+    "WEIGHTING": {
+      "POPULATION": "Gewichten nach Bevölkerung",
+      "AREA": "Gewichten nach Fläche"
     }
   },
   "EXPORT": {

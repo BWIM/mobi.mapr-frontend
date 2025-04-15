@@ -36,6 +36,16 @@
                         </div>
                     </div>
 
+                    <!-- Weighting Toggle -->
+                    <div class="flex items-center justify-end mb-4 gap-2">
+                        <span class="text-sm">{{ 'ANALYZE.WEIGHTING.POPULATION' | translate }}</span>
+                        <p-inputSwitch 
+                            [(ngModel)]="isAreaWeighting"
+                            (onChange)="onWeightingChange($event)">
+                        </p-inputSwitch>
+                        <span class="text-sm">{{ 'ANALYZE.WEIGHTING.AREA' | translate }}</span>
+                    </div>
+
                     <p-tabs [value]="'activities'">
                         <p-tablist>
                             <p-tab value="activities">Aktivitäten</p-tab>
