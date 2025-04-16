@@ -104,6 +104,12 @@ export interface FormattedPersona {
 export interface FormattedCategory {
   name: string;
   id: number;
+  weight: number;
+}
+
+export interface FormattedMode {
+  name: string;
+  id: number;
 }
 
 export interface ProjectDetails {
@@ -118,5 +124,6 @@ export interface ProjectDetails {
   },
   personas: FormattedPersona[];
   categories: FormattedCategory[];
+  modes: FormattedMode[];
   hexagons: HexagonScore[];
 }

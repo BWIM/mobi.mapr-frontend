@@ -36,6 +36,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
   radarChartOptions: any;
   barChartOptions: any;
   pieChartOptions: any;
+  activitiesChartType: 'bar' | 'doughnut' = 'bar';
+  doughnutChartOptions: any;
 
   getScore(): {score: number, color: string} {
     if (!this.properties) return {score: 0, color: ''};
@@ -59,8 +61,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
   }
 
   hasModeData(): boolean {
-    return false;
-    // return Object.keys(this.projectDetails?.mode_scores || {}).length > 0;
+    if (!this.projectDetails) return false;
+    if (!this.projectDetails.hexagons || this.projectDetails.hexagons.length === 0) return false;
+    return true;
   }
 
   constructor(
@@ -215,6 +218,28 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
       responsive: true,
       maintainAspectRatio: false
     };
+
+    this.doughnutChartOptions = {
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context: any) {
+              const dataset = context.dataset;
+              const value = dataset.data[context.dataIndex];
+              const label = context.label;
+              const weight = dataset.weights[context.dataIndex];
+              return `${label}: ${value.toFixed(2)} (Weight: ${weight})`;
+            }
+          }
+        }
+      },
+      cutout: '60%',
+      responsive: true,
+      maintainAspectRatio: false
+    };
   }
 
   private initializeChartData(): void {
@@ -226,100 +251,35 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
   }
 
   private initializeModesChart(): void {
-    // const modeScores = this.projectDetails?.modes || [];
-    // const uniqueModes = new Set<string>();
-    
-    // modeScores.forEach((rankData: any) => {
-    //     Object.keys(rankData.modes || {}).forEach(mode => uniqueModes.add(mode));
-    // });
-
-    // const labels = modeScores.map((rankData: any) => 
-    //     `${rankData.rank}. beste Erreichbarkeit`
-    // );
-
-    // const colorPalette = {
-    //     'car': '#FF6384',      // Auto
-    //     'bicycle': '#36A2EB',   // Fahrrad
-    //     'pedestrian': '#4BC0C0', // Fußgänger
-    //     'pt': '#FFCD56'        // ÖPNV
-    // };
-
-    // const datasets = Array.from(uniqueModes).map(mode => ({
-    //     label: modeScores[0]?.modes[mode]?.display_name || mode,
-    //     data: modeScores.map((rankData: any) => rankData.modes[mode]?.count || 0),
-    //     backgroundColor: colorPalette[mode as keyof typeof colorPalette] || '#808080',
-    // }));
-
-    // this.modesChartData = {
-    //     labels: labels,
-    //     datasets: datasets
-    // };
-
-    // // Angepasste Optionen für gruppierte Säulen
-    // this.barChartOptions = {
-    //     indexAxis: 'x',
-    //     maintainAspectRatio: false,
-    //     aspectRatio: 1,
-    //     plugins: {
-    //         tooltip: {
-    //             mode: 'index',
-    //             intersect: false,
-    //         },
-    //         legend: {
-    //             position: 'bottom'
-    //         },
-    //         title: {
-    //             display: true,
-    //             text: 'Verkehrsmittelverteilung nach Erreichbarkeitsrang'
-    //         }
-    //     },
-    //     scales: {
-    //         x: {
-    //             grid: {
-    //                 display: false
-    //             }
-    //         },
-    //         y: {
-    //             beginAtZero: true,
-    //             title: {
-    //                 display: true,
-    //                 text: 'Anzahl der Ziele'
-    //             }
-    //         }
-    //     }
-    // };
-}
-
-  private initializeActivitiesChart(): void {
     if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0) return;
 
-    // Calculate weighted averages for each category
-    const categoryScores = new Map<number, { totalWeightedScore: number, totalWeight: number }>();
+    // Calculate weighted averages for each mode
+    const modeScores = new Map<number, { totalWeightedScore: number, totalWeight: number }>();
     
-    // Sum up weighted scores and weights for each category
+    // Sum up weighted scores and weights for each mode
     this.projectDetails.hexagons.forEach(hexagon => {
       const weight = this.weightingType === 'population' ? hexagon.population : 1;
-      hexagon.category_scores.forEach(categoryScore => {
-        const current = categoryScores.get(categoryScore.category) || { totalWeightedScore: 0, totalWeight: 0 };
-        current.totalWeightedScore += categoryScore.score * weight;
+      hexagon.mode_scores.forEach(modeScore => {
+        const current = modeScores.get(modeScore.mode) || { totalWeightedScore: 0, totalWeight: 0 };
+        current.totalWeightedScore += modeScore.score * weight;
         current.totalWeight += weight;
-        categoryScores.set(categoryScore.category, current);
+        modeScores.set(modeScore.mode, current);
       });
     });
 
     // Calculate final weighted averages
-    const weightedCategoryScores = Array.from(categoryScores.entries()).map(([category, data]) => ({
-      category,
+    const weightedModeScores = Array.from(modeScores.entries()).map(([mode, data]) => ({
+      mode,
       score: data.totalWeightedScore / data.totalWeight
     }));
 
-    // Sort categories by their weighted scores (ascending)
-    const sortedCategories = weightedCategoryScores.sort((a, b) => a.score - b.score);
+    // Sort modes by their weighted scores (ascending)
+    const sortedModes = weightedModeScores.sort((a, b) => a.score - b.score);
     
-    // Get category names from formatted_categories
-    const categoryMap = new Map(this.projectDetails.categories.map(cat => [cat.id, cat.name]));
-    const labels = sortedCategories.map(category => categoryMap.get(category.category) || `${category.category}`);
-    const data = sortedCategories.map(category => category.score);
+    // Get mode names from formatted_modes
+    const modeMap = new Map(this.projectDetails.modes.map(mode => [mode.id, mode.name]));
+    const labels = sortedModes.map(mode => modeMap.get(mode.mode) || `${mode.mode}`);
+    const data = sortedModes.map(mode => mode.score);
 
     // Farbzuordnung basierend auf den Werten
     const getColorForValue = (value: number): string => {
@@ -333,12 +293,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
 
     const backgroundColor = data.map(value => getColorForValue(value));
 
-    this.activitiesChartData = {
+    this.modesChartData = {
       type: 'bar',
       labels: labels,
       datasets: [
         {
-          label: 'Aktivitätswerte',
+          label: 'Verkehrsmittelwerte',
           data: data,
           backgroundColor: backgroundColor,
           borderColor: backgroundColor,
@@ -393,11 +353,174 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
           },
           title: {
             display: true,
-            text: 'Aktivitätswerte'
+            text: 'Verkehrsmittelwerte'
           }
         }
       }
     };
+  }
+
+  private initializeActivitiesChart(): void {
+    if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0) return;
+
+    // Calculate weighted averages for each category
+    const categoryScores = new Map<number, { totalWeightedScore: number, totalWeight: number }>();
+    
+    // Sum up weighted scores and weights for each category
+    this.projectDetails.hexagons.forEach(hexagon => {
+      const weight = this.weightingType === 'population' ? hexagon.population : 1;
+      hexagon.category_scores.forEach(categoryScore => {
+        const current = categoryScores.get(categoryScore.category) || { totalWeightedScore: 0, totalWeight: 0 };
+        current.totalWeightedScore += categoryScore.score * weight;
+        current.totalWeight += weight;
+        categoryScores.set(categoryScore.category, current);
+      });
+    });
+
+    // Calculate final weighted averages
+    const weightedCategoryScores = Array.from(categoryScores.entries()).map(([category, data]) => ({
+      category,
+      score: data.totalWeightedScore / data.totalWeight
+    }));
+
+    // Get category names and weights from formatted_categories
+    const categoryMap = new Map(this.projectDetails.categories.map(cat => [cat.id, { name: cat.name, weight: cat.weight }]));
+
+    // Create array with all necessary data
+    const categoryData = weightedCategoryScores.map(category => ({
+      name: categoryMap.get(category.category)?.name || `${category.category}`,
+      score: category.score,
+      weight: categoryMap.get(category.category)?.weight || 1
+    }));
+
+    // Sort based on chart type
+    let sortedData;
+    if (this.activitiesChartType === 'bar') {
+      // Sort by score for bar chart (ascending)
+      sortedData = [...categoryData].sort((a, b) => a.score - b.score);
+    } else {
+      // Sort by weight for doughnut chart (descending)
+      sortedData = [...categoryData].sort((a, b) => b.weight - a.weight);
+    }
+
+    // Extract sorted arrays
+    const labels = sortedData.map(item => item.name);
+    const data = sortedData.map(item => item.score);
+    const weights = sortedData.map(item => item.weight);
+
+    // Farbzuordnung basierend auf den Werten
+    const getColorForValue = (value: number): string => {
+      if (value >= 1.41) return '#9656a2';      // Lila (F)
+      if (value >= 1) return '#c21807';      // Rot (E)
+      if (value >= 0.72) return '#ed7014';      // Orange (D)
+      if (value >= 0.51) return '#eed202';      // Gelb (C)
+      if (value >= 0.35) return '#3cb043';      // Hellgrün (B)
+      return '#32612d';                         // Dunkelgrün (A)
+    };
+
+    const backgroundColor = data.map(value => getColorForValue(value));
+
+    if (this.activitiesChartType === 'bar') {
+      this.activitiesChartData = {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Aktivitätswerte',
+            data: data,
+            backgroundColor: backgroundColor,
+            borderColor: backgroundColor,
+            borderWidth: 1,
+            yAxisID: 'y',
+            order: 2
+          }
+        ]
+      };
+
+      // Aktualisiere die Chart-Optionen
+      this.barChartOptions = {
+        indexAxis: 'x',
+        aspectRatio: 1,
+        plugins: {
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+            callbacks: {
+              label: function(context: any) {
+                const weight = weights[context.dataIndex];
+                return `${context.dataset.label}: ${context.raw.toFixed(2)} (Weight: ${weight})`;
+              }
+            }
+          },
+          legend: {
+            labels: {
+              color: '#495057'
+            },
+            position: 'bottom'
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: '#495057'
+            },
+            grid: {
+              color: '#ebedef'
+            }
+          },
+          y: {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            beginAtZero: true,
+            ticks: {
+              color: '#495057'
+            },
+            grid: {
+              color: '#ebedef'
+            },
+            title: {
+              display: true,
+              text: 'Aktivitätswerte'
+            }
+          }
+        }
+      };
+    } else {
+      // Prepare doughnut data - use weights for segment sizes
+      this.activitiesChartData = {
+        labels: labels.map((label, i) => `${label} (${weights[i]}%)`), // Include weight in label
+        datasets: [{
+          data: weights, // Use weights for segment sizes
+          backgroundColor: backgroundColor,
+          borderColor: '#ffffff',
+          borderWidth: 2,
+          weights: weights, // Keep weights for tooltip
+          scores: data // Store scores for tooltip
+        }]
+      };
+
+      // Update doughnut options to show both weight and score in tooltip
+      this.doughnutChartOptions = {
+        plugins: {
+          legend: {
+            display: false // Disable legend
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context: any) {
+                const label = context.label.split(' (')[0]; // Remove weight from label
+                const score = context.dataset.scores[context.dataIndex];
+                const weight = context.dataset.weights[context.dataIndex];
+                return `${label}: ${score.toFixed(2)} (Weight: ${weight})`;
+              }
+            }
+          }
+        },
+        cutout: '60%',
+        responsive: true,
+        maintainAspectRatio: false
+      };
+    }
   }
 
   private initializePersonaChart(): void {
@@ -434,6 +557,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     // Find the highest score for background bands
     const highestScore = Math.max(...data);
 
+    // Calculate dynamic max value - round up to next 0.5 increment and add small padding
+    const maxValue = highestScore * 1.05;
+
     // Farbzuordnung basierend auf den Werten
     const getColorForValue = (value: number): string => {
       if (value >= 1.41) return '#9656a2';      // Lila (F)
@@ -456,60 +582,88 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     const borderColors = data.map(value => getColorForValue(value));
     const backgroundColors = data.map(value => getBackgroundColorForValue(value));
 
+    // Update radar options with dynamic max value
+    this.radarChartOptions = {
+      ...this.radarChartOptions,
+      scales: {
+        r: {
+          beginAtZero: true,
+          max: maxValue,
+          ticks: {
+            stepSize: maxValue > 2 ? 0.5 : 0.2,
+            font: {
+              size: 10
+            }
+          },
+          grid: {
+            color: '#ebedef'
+          },
+          angleLines: {
+            color: '#ebedef'
+          },
+          pointLabels: {
+            font: {
+              size: 12
+            }
+          }
+        }
+      }
+    };
+
     // Basis-Datensatz für die Hintergrundfarben
-    const baseDatasets = []
+    const baseDatasets = [];
     if (highestScore >= 1.41) {
       baseDatasets.push({
         label: 'F',
-        data: Array(labels.length).fill(2.0),
+        data: Array(labels.length).fill(Math.min(maxValue, 2)), // Use dynamic max value
         backgroundColor: 'rgba(150, 86, 162, 0.2)',
         borderWidth: 0,
         fill: 'start'
-      })
+      });
     }
     if (highestScore >= 1.0) {
       baseDatasets.push({
         label: 'E',
-        data: Array(labels.length).fill(1.41),
+        data: Array(labels.length).fill(Math.min(maxValue, 1.41)),
         backgroundColor: 'rgba(194, 24, 7, 0.2)',
         borderWidth: 0,
         fill: 'start'
-      })
+      });
     }
     if (highestScore >= 0.72) {
       baseDatasets.push({
         label: 'D',
-        data: Array(labels.length).fill(1.0),
+        data: Array(labels.length).fill(Math.min(maxValue, 1.0)),
         backgroundColor: 'rgba(237, 112, 20, 0.2)',
         borderWidth: 0,
         fill: 'start'
-      })
+      });
     }
     if (highestScore >= 0.51) {
       baseDatasets.push({
         label: 'C',
-        data: Array(labels.length).fill(0.72),
+        data: Array(labels.length).fill(Math.min(maxValue, 0.72)),
         backgroundColor: 'rgba(238, 210, 2, 0.2)',
         borderWidth: 0,
         fill: 'start'
-      })
+      });
     }
     if (highestScore >= 0.35) {
       baseDatasets.push({
         label: 'B',
-        data: Array(labels.length).fill(0.51),
+        data: Array(labels.length).fill(Math.min(maxValue, 0.51)),
         backgroundColor: 'rgba(60, 176, 67, 0.2)',
         borderWidth: 0,
         fill: 'start'
-      })
+      });
     }
     baseDatasets.push({
       label: 'A',
-      data: Array(labels.length).fill(0.35),
+      data: Array(labels.length).fill(Math.min(maxValue, 0.35)),
       backgroundColor: 'rgba(50, 97, 45, 0.2)',
       borderWidth: 0,
       fill: 'start'
-    })
+    });
 
     this.personaChartData = {
       labels: labels,
@@ -548,5 +702,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     this.isAreaWeighting = event.checked;
     this.weightingType = this.isAreaWeighting ? 'area' : 'population';
     this.initializeChartData();
+  }
+
+  toggleActivitiesChartType(): void {
+    this.activitiesChartType = this.activitiesChartType === 'bar' ? 'doughnut' : 'bar';
+    this.initializeActivitiesChart();
   }
 }

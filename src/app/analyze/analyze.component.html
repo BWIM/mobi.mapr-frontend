@@ -68,9 +68,24 @@
                         <!-- Aktivitäten Tab -->
                         <p-tabpanel [value]="'activities'">
                             <div class="p-4">
-                                <h3 class="text-xl mb-4">{{ 'ANALYZE.ACTIVITIES.TITLE' | translate }}</h3>
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-xl">{{ 'ANALYZE.ACTIVITIES.TITLE' | translate }}</h3>
+                                    <p-button 
+                                        [icon]="activitiesChartType === 'bar' ? 'pi pi-chart-pie' : 'pi pi-chart-bar'"
+                                        (onClick)="toggleActivitiesChartType()"
+                                        [pTooltip]="'ANALYZE.ACTIVITIES.SWITCH_TO_DOUGHNUT' | translate"
+                                        tooltipPosition="left"
+                                        styleClass="p-button-text">
+                                    </p-button>
+                                </div>
                                 <div *ngIf="hasActivityData()">
-                                    <p-chart type="bar" [data]="activitiesChartData" [options]="barChartOptions"></p-chart>
+                                    <p-chart 
+                                        [type]="activitiesChartType" 
+                                        [data]="activitiesChartData" 
+                                        [options]="activitiesChartType === 'bar' ? barChartOptions : doughnutChartOptions">
+                                    </p-chart>
+                                    <p *ngIf="activitiesChartType === 'doughnut'">{{ 'ANALYZE.ACTIVITIES.EXPLANATION' | translate }}</p>
+                                    <p class="text-sm text-gray-500">{{ 'ANALYZE.ACTIVITIES.HINT' | translate }}</p>
                                 </div>
                                 <div *ngIf="!hasActivityData()" class="text-center p-4">
                                     <p>{{ 'ANALYZE.ACTIVITIES.NO_DATA' | translate }}</p>

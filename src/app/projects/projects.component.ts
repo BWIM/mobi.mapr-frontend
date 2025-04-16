@@ -238,7 +238,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
           this.messageService.add({
             severity: 'success',
             summary: this.translate.instant('COMMON.MESSAGES.SUCCESS.DELETE'),
-            detail: this.translate.instant('PROJECTS.LIST.NO_PROJECTS')
+            detail: this.translate.instant('PROJECTS.LIST.DELETED')
           });
           this.loadData();
         },
