@@ -256,6 +256,9 @@
     "WEIGHTING": {
       "POPULATION": "Gewichten nach Bevölkerung",
       "AREA": "Gewichten nach Fläche"
+    },
+    "LOADING": {
+      "HINT": "Hinweis: Umso mehr Fläche, die angeklickte Verwaltungseinheit hat, desto länger dauert der Ladevorgang!"
     }
   },
   "EXPORT": {

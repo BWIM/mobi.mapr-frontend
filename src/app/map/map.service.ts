@@ -5,6 +5,7 @@ import WebGLVectorLayer from 'ol/layer/WebGLVector';
 import VectorSource from 'ol/source/Vector';
 
 export interface OpacityThresholds {
+  state: number;
   county: number;
   municipality: number;
   hexagon: number;
@@ -63,6 +64,7 @@ export class MapService {
 
   // Default opacity thresholds (people per square km)
   private defaultOpacityThresholds: OpacityThresholds = {
+    state: 200,
     county: 200,
     municipality: 500,
     hexagon: 1000

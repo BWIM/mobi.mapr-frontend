@@ -15,16 +15,19 @@ export class MapBuildService {
     private populationArea: 'pop' | 'area' = 'pop';
     private averageType: 'mean' | 'median' = 'mean';
     private opacityThresholds: OpacityThresholds = {
+        state: 500,
         county: 500,
         municipality: 500,
         hexagon: 1000
     };
 
     private cache: {
+        states: { [key: string]: any },
         counties: { [key: string]: any },
         municipalities: { [key: string]: { [key: string]: any } },
         hexagons: { [key: string]: { [key: string]: any } }
     } = {
+        states: {},
         counties: {},
         municipalities: {},
         hexagons: {}
@@ -32,10 +35,12 @@ export class MapBuildService {
 
     // Add loading promise caches to prevent duplicate API calls
     private loadingPromises: {
+        states: { [key: string]: Promise<void> },
         counties: { [key: string]: Promise<void> },
         municipalities: { [key: string]: Promise<void> },
         hexagons: { [key: string]: Promise<void> }
     } = {
+        states: {},
         counties: {},
         municipalities: {},
         hexagons: {}
@@ -60,11 +65,13 @@ export class MapBuildService {
         });
     }
 
-    async buildMap(landkreise: { [key: string]: any }, level: 'county' | 'municipality' | 'hexagon' = 'county', extent?: Extent) {
+    async buildMap(landkreise: { [key: string]: any }, level: 'county' | 'municipality' | 'hexagon' | 'state' = 'county', extent?: Extent) {
         await this.ensureDataLoaded(landkreise);
         
         let features;
-        if (level === 'county') {
+        if (level === 'state') {
+            features = Object.values(this.cache.states);
+        } else if (level === 'county') {
             features = Object.values(this.cache.counties);
         } else if (level === 'municipality') {
             features = Object.values(this.cache.municipalities)
@@ -106,11 +113,13 @@ export class MapBuildService {
 
     resetCache() {
         this.cache = {
+            states: {},
             counties: {},
             municipalities: {},
             hexagons: {}
         };
         this.loadingPromises = {
+            states: {},
             counties: {},
             municipalities: {},
             hexagons: {}
@@ -119,7 +128,10 @@ export class MapBuildService {
     }
 
     private async ensureDataLoaded(landkreise: { [key: string]: any }): Promise<void> {
-        // Load counties first
+        // Load states first
+        await this.loadStates(landkreise);
+        
+        // Load counties
         await this.loadCounties(landkreise);
         
         // Load municipalities and hexagons and wait for them to complete
@@ -130,6 +142,73 @@ export class MapBuildService {
             ]);
             this.municipalitiesLoaded.next(true);
         }
+    }
+
+    private async loadStates(landkreise: { [key: string]: { [key: string]: { [key: string]: [number, number] } } }): Promise<void> {
+        // Group counties by state (first 2 digits of the landkreis ID)
+        const stateIds = [...new Set(Object.keys(landkreise).map(id => id.substring(0, 2) + '0000000000'))];
+        const unloadedStates = stateIds.filter(id => !this.cache.states[id]);
+
+        await Promise.all(unloadedStates.map(async stateId => {
+            // Return existing promise if already loading
+            if (stateId in this.loadingPromises.states) {
+                return this.loadingPromises.states[stateId];
+            }
+
+            // Create new loading promise
+            this.loadingPromises.states[stateId] = (async () => {
+                try {
+                    const response = await fetch(`assets/boundaries/${stateId}/boundary.geojson`);
+                    const stateGeoJson = await response.json();
+
+                    // Calculate state-level statistics from all hexagons in all counties in the state
+                    let totalScore = 0;
+                    let totalPopulation = 0;
+                    let totalHexagons = 0;
+
+                    // Find all counties that belong to this state
+                    const stateCounties = Object.entries(landkreise)
+                        .filter(([countyId]) => countyId.startsWith(stateId.substring(0, 2)));
+
+                    stateCounties.forEach(([_, countyData]) => {
+                        Object.values(countyData).forEach(municipalityData => {
+                            Object.values(municipalityData).forEach(([score, population]) => {
+                                if (this.populationArea === 'pop') {
+                                    totalScore += score * population;
+                                    totalPopulation += population;
+                                } else {
+                                    totalScore += score;
+                                    totalHexagons++;
+                                }
+                            });
+                        });
+                    });
+
+                    const averageScore = this.populationArea === 'pop'
+                        ? (totalPopulation > 0 ? totalScore / totalPopulation : 0)
+                        : (totalHexagons > 0 ? totalScore / totalHexagons : 0);
+
+                    stateGeoJson.properties = {
+                        ...stateGeoJson.properties,
+                        level: 'state',
+                        minZoom: 6,
+                        maxZoom: 8,
+                        score: averageScore,
+                        population: totalPopulation,
+                        rgbColor: this.getColorForScore(averageScore, stateGeoJson.properties.population_density || 0, 'county')
+                    };
+
+                    this.cache.states[stateId] = stateGeoJson;
+                } catch (error) {
+                    console.warn(`Could not load state data for ${stateId}`, error);
+                } finally {
+                    // Clean up the loading promise
+                    delete this.loadingPromises.states[stateId];
+                }
+            })();
+
+            return this.loadingPromises.states[stateId];
+        }));
     }
 
     private async loadCounties(landkreise: { [key: string]: { [key: string]: { [key: string]: [number, number] } } }): Promise<void> {
@@ -327,11 +406,13 @@ export class MapBuildService {
         }));
     }
 
-    private calculateOpacity(populationDensity: number, level: 'county' | 'municipality' | 'hexagon'): number {
+    private calculateOpacity(populationDensity: number, level: 'state' | 'county' | 'municipality' | 'hexagon'): number {
         // Constants for density scaling
         const MIN_DENSITY = 1;  // Minimum density to avoid log(0)
         let MAX_DENSITY = 1000000;
-        if (level === 'county') {
+        if (level === 'state') {
+            MAX_DENSITY = 1782202;  // Maximum expected density for states
+        } else if (level === 'county') {
             MAX_DENSITY = 1782202;  // Maximum expected density
         } else if (level === 'municipality') {
             MAX_DENSITY = 3062;  // Maximum expected density
@@ -386,7 +467,7 @@ export class MapBuildService {
         return [...colorSteps[5], opacity];
     }
 
-    private refreshFeatureColors(level?: 'county' | 'municipality' | 'hexagon'): void {
+    private refreshFeatureColors(level?: 'state' | 'county' | 'municipality' | 'hexagon'): void {
         const vectorLayer = this.mapService.getMainLayer();
         if (!vectorLayer || !vectorLayer.getSource()) return;
 
@@ -397,7 +478,7 @@ export class MapBuildService {
         // If level is specified, only update features of that level
         features.forEach(feature => {
             const properties = feature.getProperties();
-            const featureLevel = properties['level'];
+            const featureLevel = properties['level'] as 'state' | 'county' | 'municipality' | 'hexagon';
             
             // Skip if level is specified and doesn't match
             if (level && featureLevel !== level) return;
@@ -417,6 +498,11 @@ export class MapBuildService {
             const featureId = properties['id'] || properties['ars'];
             if (featureId) {
                 switch (featureLevel) {
+                    case 'state':
+                        if (this.cache.states[featureId]) {
+                            this.cache.states[featureId].properties.rgbColor = newColor;
+                        }
+                        break;
                     case 'county':
                         if (this.cache.counties[featureId]) {
                             this.cache.counties[featureId].properties.rgbColor = newColor;
