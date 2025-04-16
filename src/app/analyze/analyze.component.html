@@ -11,7 +11,10 @@
     <div class="flex flex-col h-full">
         <!-- Loading Spinner -->
         <div *ngIf="loading" class="flex justify-center items-center p-4">
-            <p-progressSpinner></p-progressSpinner>
+            <div class="flex flex-col items-center">
+                <p class="text-center text-sm text-gray-500 mb-4">{{ 'ANALYZE.LOADING.HINT' | translate }}</p>
+                <p-progressSpinner></p-progressSpinner>
+            </div>
         </div>
         
         <!-- Content -->

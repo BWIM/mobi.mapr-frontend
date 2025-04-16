@@ -40,7 +40,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private landkreise: { [key: string]: any } | null = null;
   private tooltip!: HTMLElement;
-  private level: 'county' | 'municipality' | 'hexagon' = 'county';
+  private level: 'state' | 'county' | 'municipality' | 'hexagon' = 'county';
 
   constructor(
     private mapService: MapService,
@@ -153,8 +153,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.level = 'hexagon';
     } else if (zoom >= 9) {
       this.level = 'municipality';
-    } else {
+    } else if (zoom >= 8) {
       this.level = 'county';
+    } else {
+      this.level = 'state';
     }
 
     // Get current viewport extent

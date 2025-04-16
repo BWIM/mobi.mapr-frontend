@@ -35,6 +35,7 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
   selectedAverageType: 'mean' | 'median' = 'mean';
   selectedPopulationArea: 'pop' | 'area' = 'pop';
   opacityThresholds: OpacityThresholds = {
+    state: 500,
     county: 500,
     municipality: 500,
     hexagon: 1000

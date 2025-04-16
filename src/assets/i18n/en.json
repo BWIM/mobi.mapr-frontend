@@ -256,6 +256,9 @@
     "WEIGHTING": {
       "POPULATION": "Weight by population",
       "AREA": "Weight by area"
+    },
+    "LOADING": {
+      "HINT": "Hint: The larger the size of the clicked feature, the longer is the loading time for it!"
     }
   },
   "EXPORT": {
