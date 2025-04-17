@@ -29,11 +29,13 @@
 
         <div class="mt-6 flex">
           <p-button 
-            (onClick)="toggleOpacity()"
+            (mousedown)="setLowOpacity()"
+            (mouseup)="resetOpacity()"
+            (mouseleave)="resetOpacity()"
             icon="pi pi-eye-slash"
             [label]="'SIDEBAR.REDUCE_OPACITY' | translate"
             [pTooltip]="'SIDEBAR.REDUCE_OPACITY_TOOLTIP' | translate"
-            [styleClass]="isLowOpacity ? 'p-button-secondary mb-4 p-button-outlined' : 'p-button-secondary mb-4'">
+            [styleClass]="'p-button-secondary mb-4'">
           </p-button>
         </div>
 

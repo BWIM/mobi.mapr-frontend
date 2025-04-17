@@ -4,6 +4,7 @@ import { Extent } from 'ol/extent';
 import { intersects } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
 import { MapService, OpacityThresholds } from './map.service';
+// import * as pako from 'pako';
 
 @Injectable({
     providedIn: 'root'
@@ -55,8 +56,7 @@ export class MapBuildService {
             this.opacityThresholds = settings.opacityThresholds;
             
             if (populationAreaChanged || averageTypeChanged) {
-                // Reset cache to force recalculation with new populationArea
-                this.resetCache();
+                this.resetCache(false);
             } else if (settings.updatedLevel) {
                 this.refreshFeatureColors(settings.updatedLevel);
             } else {
@@ -111,19 +111,21 @@ export class MapBuildService {
         };
     }
 
-    resetCache() {
+    resetCache(data: boolean= true) {
         this.cache = {
             states: {},
             counties: {},
             municipalities: {},
             hexagons: {}
         };
-        this.loadingPromises = {
-            states: {},
-            counties: {},
-            municipalities: {},
-            hexagons: {}
-        };
+        if (data) {
+            this.loadingPromises = {
+                states: {},
+                counties: {},
+                municipalities: {},
+                hexagons: {}
+            };
+        }
         this.municipalitiesLoaded.next(false);
     }
 
@@ -144,6 +146,7 @@ export class MapBuildService {
         }
     }
 
+
     private async loadStates(landkreise: { [key: string]: { [key: string]: { [key: string]: [number, number] } } }): Promise<void> {
         // Group counties by state (first 2 digits of the landkreis ID)
         const stateIds = [...new Set(Object.keys(landkreise).map(id => id.substring(0, 2) + '0000000000'))];
@@ -158,7 +161,7 @@ export class MapBuildService {
             // Create new loading promise
             this.loadingPromises.states[stateId] = (async () => {
                 try {
-                    const response = await fetch(`assets/boundaries/${stateId}/boundary.geojson`);
+                    const response = await fetch(`assets/boundaries/${stateId}/boundary.geojson.gz`);
                     const stateGeoJson = await response.json();
 
                     // Calculate state-level statistics from all hexagons in all counties in the state
@@ -226,7 +229,7 @@ export class MapBuildService {
             // Create new loading promise
             this.loadingPromises.counties[landkreis] = (async () => {
                 try {
-                    const response = await fetch(`assets/boundaries/${land}/${kreis}/boundary.geojson`);
+                    const response = await fetch(`assets/boundaries/${land}/${kreis}/boundary.geojson.gz`);
                     const countyGeoJson = await response.json();
 
                     const hexagonData = Object.values(landkreise[landkreis])
@@ -287,7 +290,7 @@ export class MapBuildService {
             // Create new loading promise
             this.loadingPromises.municipalities[landkreis] = (async () => {
                 try {
-                    const response = await fetch(`assets/boundaries/${land}/${kreis}/gemeinden_shapes.geojson`);
+                    const response = await fetch(`assets/boundaries/${land}/${kreis}/gemeinden_shapes.geojson.gz`);
                     const municipalityGeoJson = await response.json();
                     
                     if (Array.isArray(municipalityGeoJson.features)) {
@@ -359,7 +362,7 @@ export class MapBuildService {
             // Create new loading promise
             this.loadingPromises.hexagons[landkreis] = (async () => {
                 try {
-                    const response = await fetch(`assets/boundaries/${land}/${kreis}/hexagons.geojson`);
+                    const response = await fetch(`assets/boundaries/${land}/${kreis}/hexagons.geojson.gz`);
                     const hexagonGeoJson = await response.json();
                     
                     if (Array.isArray(hexagonGeoJson.features)) {
@@ -446,7 +449,7 @@ export class MapBuildService {
         }
     }
 
-    private getColorForScore(score: number, populationDensity: number = 0, level: 'county' | 'municipality' | 'hexagon' = 'county'): number[] {
+    private getColorForScore(score: number, populationDensity: number = 0, level: 'state' | 'county' | 'municipality' | 'hexagon' = 'county'): number[] {
         const colorSteps = [
             [50,97,45],    // Pure green (score <= 0.33)
             [60,176,67],   // Light green (score <= 0.66)

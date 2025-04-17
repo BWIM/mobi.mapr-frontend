@@ -34,7 +34,6 @@ export class ShareComponent {
     this.shareService.getProject(this.projectKey).subscribe(project => {
       this.project = project;
       this.mapService.updateFeatures(project.geojson.features);
-      this.loadingService.stopLoading();
     });
     this.shareService.getProjectDetails(this.projectKey).subscribe(project => {
       this.sharedProject = project;

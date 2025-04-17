@@ -275,26 +275,26 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         }
       });
 
-      this.projectsService.getProjectResults(project.id)
-        .pipe(finalize(() => this.loadingService.stopLoading()))
-        .subscribe({
-          next: (results) => {
-            this.mapService.resetMap();
-            this.mapService.updateFeatures(results);
-            this.selectedTableProject = project;
-            this.projectAction.emit();
-          },
-          error: () => {
-            this.messageService.add({
-              severity: 'error',
-              summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
-              detail: this.translate.instant('PROJECTS.RESULTS.LOAD_ERROR')
-            });
-          }
-        });
+      this.projectsService.getProjectResults(project.id).subscribe({
+        next: (results) => {
+          this.mapService.resetMap();
+          this.mapService.updateFeatures(results);
+          this.selectedTableProject = project;
+          this.projectAction.emit();
+        },
+        error: () => {
+          this.loadingService.stopLoading(); // Stop loading on error
+          this.messageService.add({
+            severity: 'error',
+            summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
+            detail: this.translate.instant('PROJECTS.RESULTS.LOAD_ERROR')
+          });
+        }
+      });
     }
     catch (error) {
       console.error(error);
+      this.loadingService.stopLoading(); // Stop loading on error
     }
   }
 

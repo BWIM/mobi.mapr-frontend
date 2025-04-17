@@ -227,7 +227,7 @@
     "COUNTY_THRESHOLD": "Landkreise",
     "MUNICIPALITY_THRESHOLD": "Kommunen",
     "HEXAGON_THRESHOLD": "Hexagon",
-    "REDUCE_OPACITY": "Basis-Karte hervorheben",
+    "REDUCE_OPACITY": "Knopf halten, um Basis-Karte besser zu sehen.",
     "REDUCE_OPACITY_TOOLTIP": "Features weniger intensiv anzeigen",
     "RESTORE_OPACITY": "Karte wiederherstellen"
   },
