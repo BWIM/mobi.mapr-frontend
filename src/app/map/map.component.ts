@@ -67,6 +67,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private setupSubscriptions(): void {
     this.subscriptions.push(
       this.mapService.features$.subscribe(async features => {
+        this.loadingService.startLoading(); // Start loading when new features arrive
         this.mapBuildService.resetCache();
         this.landkreise = features;
         
@@ -80,7 +81,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         // Then update features and zoom to them
         await this.updateMapFeatures().then(() => {
           this.zoomToFeatures();
-          
+          this.loadingService.stopLoading(); // Stop loading after features are updated and zoomed
+        }).catch(() => {
+          this.loadingService.stopLoading(); // Ensure loading stops even if there's an error
         });
       }),
       this.mapService.resetMap$.subscribe(() => {
@@ -114,10 +117,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     // Update features when zoom changes or view moves
     this.map.getView().on('change:resolution', async () => {
+      this.loadingService.startLoading(); // Start loading when zoom changes
       await this.updateMapFeatures();
     });
     
     this.map.getView().on('change:center', async () => {
+      this.loadingService.startLoading(); // Start loading when map moves
       await this.updateMapFeatures();
     });
   }
@@ -143,13 +148,22 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private async updateMapFeatures(): Promise<void> {
-    if (!this.landkreise) return;
+    if (!this.landkreise) {
+      this.loadingService.stopLoading();
+      return;
+    }
     
     const zoom = this.map.getView().getZoom();
-    if (!zoom) return;
+    if (!zoom) {
+      this.loadingService.stopLoading();
+      return;
+    }
 
     const vectorSource = this.vectorLayer.getSource();
-    if (!vectorSource) return;
+    if (!vectorSource) {
+      this.loadingService.stopLoading();
+      return;
+    }
 
     if (zoom >= 11) {
       this.level = 'hexagon';
@@ -180,8 +194,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       });
 
       vectorSource.addFeatures(features as Feature<Geometry>[]);
-      this.loadingService.stopLoading(); // Stop loading after features are added
     }
+
+    this.loadingService.stopLoading();
   }
 
   public resetMap(): void {
