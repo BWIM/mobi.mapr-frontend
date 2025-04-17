@@ -55,8 +55,8 @@ export class MapBuildService {
             this.opacityThresholds = settings.opacityThresholds;
             
             if (populationAreaChanged || averageTypeChanged) {
-                // Reset cache to force recalculation with new populationArea
-                this.resetCache();
+                // Update colors instead of resetting cache
+                this.updateCacheColors();
             } else if (settings.updatedLevel) {
                 this.refreshFeatureColors(settings.updatedLevel);
             } else {
@@ -454,7 +454,7 @@ export class MapBuildService {
         }
     }
 
-    private getColorForScore(score: number, populationDensity: number = 0, level: 'county' | 'municipality' | 'hexagon' = 'county'): number[] {
+    private getColorForScore(score: number, populationDensity: number = 0, level: 'state' | 'county' | 'municipality' | 'hexagon' = 'county'): number[] {
         const colorSteps = [
             [50,97,45],    // Pure green (score <= 0.33)
             [60,176,67],   // Light green (score <= 0.66)
@@ -538,5 +538,103 @@ export class MapBuildService {
 
         // Force a single redraw after all updates
         source?.changed();
+    }
+
+    private updateCacheColors(): void {
+        // Update state colors
+        Object.entries(this.cache.states).forEach(([stateId, state]) => {
+            const stateCounties = Object.entries(this.cache.counties)
+                .filter(([countyId]) => countyId.startsWith(stateId.substring(0, 2)));
+
+            let totalScore = 0;
+            let totalPopulation = 0;
+            let totalHexagons = 0;
+
+            stateCounties.forEach(([_, county]) => {
+                if (this.populationArea === 'pop') {
+                    totalScore += county.properties.score * county.properties.population;
+                    totalPopulation += county.properties.population;
+                } else {
+                    totalScore += county.properties.score;
+                    totalHexagons++;
+                }
+            });
+
+            const averageScore = this.populationArea === 'pop'
+                ? (totalPopulation > 0 ? totalScore / totalPopulation : 0)
+                : (totalHexagons > 0 ? totalScore / totalHexagons : 0);
+
+            state.properties.score = averageScore;
+            state.properties.rgbColor = this.getColorForScore(averageScore, state.properties.population_density || 0, 'state');
+        });
+
+        // Update county colors
+        Object.entries(this.cache.counties).forEach(([landkreis, county]) => {
+            const hexagonData = Object.values(this.cache.hexagons[landkreis] || {});
+            let totalScore = 0;
+            let totalPopulation = 0;
+            let totalHexagons = 0;
+
+            hexagonData.forEach(hexagon => {
+                if (this.populationArea === 'pop') {
+                    totalScore += hexagon.properties.score * hexagon.properties.population;
+                    totalPopulation += hexagon.properties.population;
+                } else {
+                    totalScore += hexagon.properties.score;
+                    totalHexagons++;
+                }
+            });
+
+            const averageScore = this.populationArea === 'pop'
+                ? (totalPopulation > 0 ? totalScore / totalPopulation : 0)
+                : (totalHexagons > 0 ? totalScore / totalHexagons : 0);
+
+            county.properties.score = averageScore;
+            county.properties.rgbColor = this.getColorForScore(averageScore, county.properties.population_density || 0, 'county');
+        });
+
+        // Update municipality colors
+        Object.values(this.cache.municipalities).forEach(municipalityGroup => {
+            Object.values(municipalityGroup).forEach(municipality => {
+                const municipalityHexagons = Object.values(this.cache.hexagons)
+                    .flatMap(hexGroup => Object.values(hexGroup))
+                    .filter(hex => hex.properties.municipality_id === municipality.properties.ars);
+
+                let totalScore = 0;
+                let totalPopulation = 0;
+                let totalHexagons = 0;
+
+                municipalityHexagons.forEach(hexagon => {
+                    if (this.populationArea === 'pop') {
+                        totalScore += hexagon.properties.score * hexagon.properties.population;
+                        totalPopulation += hexagon.properties.population;
+                    } else {
+                        totalScore += hexagon.properties.score;
+                        totalHexagons++;
+                    }
+                });
+
+                const averageScore = this.populationArea === 'pop'
+                    ? (totalPopulation > 0 ? totalScore / totalPopulation : 0)
+                    : (totalHexagons > 0 ? totalScore / totalHexagons : 0);
+
+                municipality.properties.score = averageScore;
+                municipality.properties.rgbColor = this.getColorForScore(averageScore, municipality.properties.populationDensity || 0, 'municipality');
+            });
+        });
+
+        // Update hexagon colors (no averaging needed, just update colors)
+        Object.values(this.cache.hexagons).forEach(hexagonGroup => {
+            Object.values(hexagonGroup).forEach(hexagon => {
+                hexagon.properties.rgbColor = this.getColorForScore(
+                    hexagon.properties.score,
+                    hexagon.properties.populationDensity || 0,
+                    'hexagon'
+                );
+            });
+        });
+
+        // Refresh the map display
+        this.refreshFeatureColors();
     }
 }

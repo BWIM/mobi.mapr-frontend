@@ -185,6 +185,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     if (this.vectorLayer && this.vectorLayer.getSource()) {
       this.vectorLayer.getSource()?.clear();
     }
+    this.mapBuildService.resetCache();
   }
 
   private zoomToFeatures(): void {
