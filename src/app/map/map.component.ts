@@ -19,6 +19,7 @@ import { MapBuildService } from './map-build.service';
 import { ProjectsService } from '../projects/projects.service';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { FeatureSelectionService } from '../shared/services/feature-selection.service';
+import { LoadingService } from '../services/loading.service';
 
 @Component({
   selector: 'app-map',
@@ -47,7 +48,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     private mapBuildService: MapBuildService,
     private projectsService: ProjectsService,
     private analyzeService: AnalyzeService,
-    private featureSelectionService: FeatureSelectionService
+    private featureSelectionService: FeatureSelectionService,
+    private loadingService: LoadingService
   ) {}
 
   ngAfterViewInit() {
@@ -178,6 +180,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       });
 
       vectorSource.addFeatures(features as Feature<Geometry>[]);
+      this.loadingService.stopLoading(); // Stop loading after features are added
     }
   }
 
