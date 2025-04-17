@@ -144,6 +144,14 @@ export class MapBuildService {
         }
     }
 
+    private async decompressGzippedJson(response: Response): Promise<any> {
+        const blob = await response.blob();
+        const decompressedStream = blob.stream().pipeThrough(new DecompressionStream('gzip'));
+        const decompressedBlob = await new Response(decompressedStream).blob();
+        const text = await decompressedBlob.text();
+        return JSON.parse(text);
+    }
+
     private async loadStates(landkreise: { [key: string]: { [key: string]: { [key: string]: [number, number] } } }): Promise<void> {
         // Group counties by state (first 2 digits of the landkreis ID)
         const stateIds = [...new Set(Object.keys(landkreise).map(id => id.substring(0, 2) + '0000000000'))];
@@ -158,8 +166,8 @@ export class MapBuildService {
             // Create new loading promise
             this.loadingPromises.states[stateId] = (async () => {
                 try {
-                    const response = await fetch(`assets/boundaries/${stateId}/boundary.geojson`);
-                    const stateGeoJson = await response.json();
+                    const response = await fetch(`assets/boundaries/${stateId}/boundary.geojson.gz`);
+                    const stateGeoJson = await this.decompressGzippedJson(response);
 
                     // Calculate state-level statistics from all hexagons in all counties in the state
                     let totalScore = 0;
@@ -226,8 +234,8 @@ export class MapBuildService {
             // Create new loading promise
             this.loadingPromises.counties[landkreis] = (async () => {
                 try {
-                    const response = await fetch(`assets/boundaries/${land}/${kreis}/boundary.geojson`);
-                    const countyGeoJson = await response.json();
+                    const response = await fetch(`assets/boundaries/${land}/${kreis}/boundary.geojson.gz`);
+                    const countyGeoJson = await this.decompressGzippedJson(response);
 
                     const hexagonData = Object.values(landkreise[landkreis])
                         .flatMap(municipality => Object.values(municipality));
@@ -287,8 +295,8 @@ export class MapBuildService {
             // Create new loading promise
             this.loadingPromises.municipalities[landkreis] = (async () => {
                 try {
-                    const response = await fetch(`assets/boundaries/${land}/${kreis}/gemeinden_shapes.geojson`);
-                    const municipalityGeoJson = await response.json();
+                    const response = await fetch(`assets/boundaries/${land}/${kreis}/gemeinden_shapes.geojson.gz`);
+                    const municipalityGeoJson = await this.decompressGzippedJson(response);
                     
                     if (Array.isArray(municipalityGeoJson.features)) {
                         this.cache.municipalities[landkreis] = {};
@@ -359,8 +367,8 @@ export class MapBuildService {
             // Create new loading promise
             this.loadingPromises.hexagons[landkreis] = (async () => {
                 try {
-                    const response = await fetch(`assets/boundaries/${land}/${kreis}/hexagons.geojson`);
-                    const hexagonGeoJson = await response.json();
+                    const response = await fetch(`assets/boundaries/${land}/${kreis}/hexagons.geojson.gz`);
+                    const hexagonGeoJson = await this.decompressGzippedJson(response);
                     
                     if (Array.isArray(hexagonGeoJson.features)) {
                         this.cache.hexagons[landkreis] = {};
