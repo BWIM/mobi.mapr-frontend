@@ -65,49 +65,31 @@ export class MapBuildService {
         });
     }
 
-    async buildMap(landkreise: { [key: string]: any }, level: 'county' | 'municipality' | 'hexagon' | 'state' = 'county', extent?: Extent) {
-        await this.ensureDataLoaded(landkreise);
-        
-        let features;
+    async buildMap(landkreise: { [key: string]: any }, level: 'county' | 'municipality' | 'hexagon' | 'state' = 'state', extent?: Extent) {
+        // Only load states initially
         if (level === 'state') {
-            features = Object.values(this.cache.states);
-        } else if (level === 'county') {
-            features = Object.values(this.cache.counties);
-        } else if (level === 'municipality') {
-            features = Object.values(this.cache.municipalities)
-                .flatMap(municipalityGroup => Object.values(municipalityGroup));
-        } else {
-            // For hexagons, only return those in the viewport
-            if (extent) {
-                features = Object.values(this.cache.hexagons)
-                    .flatMap(hexagonGroup => Object.values(hexagonGroup))
-                    .filter(feature => {
-                        const geometry = this.geoJSONFormat.readGeometry(feature.geometry, {
-                            featureProjection: 'EPSG:3857'  // Web Mercator (the projection used by OpenLayers)
-                        });
-                        return intersects(extent, geometry.getExtent());
-                    });
-            } else {
-                features = Object.values(this.cache.hexagons)
-                    .flatMap(hexagonGroup => Object.values(hexagonGroup));
-            }
+            await this.loadStates(landkreise);
+            const features = Object.values(this.cache.states);
+            
+            // Update opacity for state features
+            features.forEach(feature => {
+                const populationDensity = feature.properties.population_density || 0;
+                const opacity = this.calculateOpacity(populationDensity, 'state');
+                const currentColor = feature.properties.rgbColor;
+                feature.properties.rgbColor = [...currentColor.slice(0, 3), opacity];
+            });
+
+            return {
+                type: "FeatureCollection",
+                features
+            };
         }
 
-        // Update opacity for all features before returning
-        features.forEach(feature => {
-            const featureLevel = feature.properties.level;
-            const populationDensity = featureLevel === 'hexagon' ? 
-                feature.properties.populationDensity : 
-                feature.properties.population_density || 0;
-            
-            const opacity = this.calculateOpacity(populationDensity, featureLevel);
-            const currentColor = feature.properties.rgbColor;
-            feature.properties.rgbColor = [...currentColor.slice(0, 3), opacity];
-        });
-
+        // For other levels, we'll implement this later
+        console.warn('Loading of other levels is not implemented yet');
         return {
             type: "FeatureCollection",
-            features
+            features: []
         };
     }
 
@@ -198,7 +180,7 @@ export class MapBuildService {
                         maxZoom: 8,
                         score: averageScore,
                         population: totalPopulation,
-                        rgbColor: this.getColorForScore(averageScore, stateGeoJson.properties.population_density || 0, 'county')
+                        rgbColor: this.getColorForScore(averageScore, stateGeoJson.properties.population_density || 0, 'state')
                     };
 
                     this.cache.states[stateId] = stateGeoJson;

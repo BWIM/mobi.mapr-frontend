@@ -158,6 +158,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
+    // Determine the appropriate level based on zoom
     if (zoom >= 11) {
       this.level = 'hexagon';
     } else if (zoom >= 9) {
@@ -171,25 +172,30 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     // Get current viewport extent
     const extent = this.map.getView().calculateExtent(this.map.getSize());
 
-    const geojson = await this.mapBuildService.buildMap(this.landkreise, this.level, extent);
+    try {
+      const geojson = await this.mapBuildService.buildMap(this.landkreise, this.level, extent);
 
-    if (geojson && geojson.features) {
-      vectorSource.clear();
-      
-      const features = geojson.features.map(feature => {
-        const olFeature = new GeoJSON().readFeature(feature, {
-          featureProjection: this.map.getView().getProjection()
-        }) as Feature<Geometry>;
+      if (geojson && geojson.features) {
+        vectorSource.clear();
         
-        olFeature.set('rgbColor', feature.properties.rgbColor);
-        
-        return olFeature;
-      });
+        const features = geojson.features.map(feature => {
+          const olFeature = new GeoJSON().readFeature(feature, {
+            featureProjection: this.map.getView().getProjection()
+          }) as Feature<Geometry>;
+          
+          olFeature.set('rgbColor', feature.properties.rgbColor);
+          olFeature.set('level', this.level);
+          
+          return olFeature;
+        });
 
-      vectorSource.addFeatures(features as Feature<Geometry>[]);
+        vectorSource.addFeatures(features as Feature<Geometry>[]);
+      }
+    } catch (error) {
+      console.error('Error updating map features:', error);
+    } finally {
+      this.loadingService.stopLoading();
     }
-
-    this.loadingService.stopLoading();
   }
 
   public resetMap(): void {
