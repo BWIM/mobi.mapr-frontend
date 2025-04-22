@@ -71,13 +71,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         this.mapBuildService.resetCache();
         this.landkreise = features;
         
-        // First zoom out to county level to prevent unnecessary hexagon calculations
-        const view = this.map.getView();
-        const currentZoom = view.getZoom();
-        if (currentZoom && currentZoom >= 9) {
-          view.setZoom(8); // Zoom out to county level
-        }
-        
         // Then update features and zoom to them
         await this.updateMapFeatures().then(() => {
           this.zoomToFeatures();
@@ -213,7 +206,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const extent = vectorSource.getExtent();
     this.map.getView().fit(extent, {
       duration: 1000,
-      padding: [200,200,200,200]
+      padding: [100,100,100,100]
     });
   }
 
