@@ -200,13 +200,14 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
       }
     };
 
-    this.barChartOptions = {      plugins: {
-      legend: {
-        position: 'bottom'
-      }
-    },
-    responsive: true,
-    maintainAspectRatio: false
+    this.barChartOptions = {
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
+      },
+      responsive: true,
+      maintainAspectRatio: false
     };
 
     this.pieChartOptions = {
@@ -248,6 +249,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     this.initializePersonaChart();
     this.loading = false;
     this.cdr.detectChanges();
+    // Trigger resize after charts are initialized and rendered
+    setTimeout(() => this.triggerChartResize(), 100);
   }
 
   private initializeModesChart(): void {
@@ -313,7 +316,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     this.barChartOptions = {
       indexAxis: 'x',
       maintainAspectRatio: false,
-      aspectRatio: 1,
+      responsive: true,
       plugins: {
         tooltip: {
           mode: 'index',
@@ -439,7 +442,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
       // Aktualisiere die Chart-Optionen
       this.barChartOptions = {
         indexAxis: 'x',
-        aspectRatio: 1,
+        responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           tooltip: {
             mode: 'index',
@@ -499,16 +503,16 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
         }]
       };
 
-      // Update doughnut options to show both weight and score in tooltip
+      // Update doughnut options
       this.doughnutChartOptions = {
         plugins: {
           legend: {
-            display: false // Disable legend
+            display: false
           },
           tooltip: {
             callbacks: {
               label: function(context: any) {
-                const label = context.label.split(' (')[0]; // Remove weight from label
+                const label = context.label.split(' (')[0];
                 const score = context.dataset.scores[context.dataIndex];
                 const weight = context.dataset.weights[context.dataIndex];
                 return `${label}: ${score.toFixed(2)} (Weight: ${weight})`;
@@ -585,6 +589,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     // Update radar options with dynamic max value
     this.radarChartOptions = {
       ...this.radarChartOptions,
+      responsive: true,
+      maintainAspectRatio: false,
       scales: {
         r: {
           beginAtZero: true,
@@ -702,10 +708,30 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     this.isAreaWeighting = event.checked;
     this.weightingType = this.isAreaWeighting ? 'area' : 'population';
     this.initializeChartData();
+    // No need for an additional trigger here as initializeChartData already has one
   }
 
   toggleActivitiesChartType(): void {
     this.activitiesChartType = this.activitiesChartType === 'bar' ? 'doughnut' : 'bar';
     this.initializeActivitiesChart();
+    // Trigger resize after chart type change with sufficient delay to ensure rendering completes
+    setTimeout(() => this.triggerChartResize(), 100);
+  }
+
+  /**
+   * Triggers a resize event on window to make charts adjust to their container size
+   */
+  triggerChartResize(): void {
+    // Initial resize
+    window.dispatchEvent(new Event('resize'));
+    
+    // Series of delayed resizes to ensure chart properly adjusts
+    const delays = [50, 150, 300];
+    delays.forEach(delay => {
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+        this.cdr.detectChanges();
+      }, delay);
+    });
   }
 }
