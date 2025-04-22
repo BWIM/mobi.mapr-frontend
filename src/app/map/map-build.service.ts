@@ -4,6 +4,7 @@ import { Extent } from 'ol/extent';
 import { intersects } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
 import { MapService, OpacityThresholds } from './map.service';
+import { Feature } from "ol";
 // import * as pako from 'pako';
 
 @Injectable({
@@ -65,7 +66,8 @@ export class MapBuildService {
         });
     }
 
-    async buildMap(landkreise: { [key: string]: any }, level: 'county' | 'municipality' | 'hexagon' | 'state' = 'state', extent?: Extent) {
+    async buildMap(landkreise: { [key: string]: any }, level: 'county' | 'municipality' | 'hexagon' | 'state' = 'state', currentFeatures?: Feature[]) {
+        
         // Only load states initially
         if (level === 'state') {
             await this.loadStates(landkreise);
@@ -83,10 +85,33 @@ export class MapBuildService {
                 type: "FeatureCollection",
                 features
             };
+        } else if (level === 'county') {
+            await this.loadCounties(landkreise, currentFeatures);
+            const features = Object.values(this.cache.counties);
+            return {
+                type: "FeatureCollection",
+                features
+            };
+        } else if (level === 'municipality') {
+            await this.loadMunicipalities(landkreise, currentFeatures);
+            // Flatten the nested structure to get all municipality features
+            const features = Object.values(this.cache.municipalities)
+                .flatMap(municipalityGroup => Object.values(municipalityGroup));
+            return {
+                type: "FeatureCollection",
+                features
+            };
+        } else if (level === 'hexagon') {
+            await this.loadHexagons(landkreise, currentFeatures);
+            // Flatten the nested structure to get all hexagon features
+            const features = Object.values(this.cache.hexagons)
+                .flatMap(hexagonGroup => Object.values(hexagonGroup));
+            return {
+                type: "FeatureCollection",
+                features
+            };
         }
 
-        // For other levels, we'll implement this later
-        console.warn('Loading of other levels is not implemented yet');
         return {
             type: "FeatureCollection",
             features: []
@@ -110,24 +135,6 @@ export class MapBuildService {
         }
         this.municipalitiesLoaded.next(false);
     }
-
-    private async ensureDataLoaded(landkreise: { [key: string]: any }): Promise<void> {
-        // Load states first
-        await this.loadStates(landkreise);
-        
-        // Load counties
-        await this.loadCounties(landkreise);
-        
-        // Load municipalities and hexagons and wait for them to complete
-        if (!this.municipalitiesLoaded.value) {
-            await Promise.all([
-                this.loadMunicipalities(landkreise),
-                this.loadHexagons(landkreise)
-            ]);
-            this.municipalitiesLoaded.next(true);
-        }
-    }
-
 
     private async loadStates(landkreise: { [key: string]: { [key: string]: { [key: string]: [number, number] } } }): Promise<void> {
         // Group counties by state (first 2 digits of the landkreis ID)
@@ -196,10 +203,21 @@ export class MapBuildService {
         }));
     }
 
-    private async loadCounties(landkreise: { [key: string]: { [key: string]: { [key: string]: [number, number] } } }): Promise<void> {
-        const unloadedCounties = Object.keys(landkreise).filter(id => !this.cache.counties[id]);
-        
-        await Promise.all(unloadedCounties.map(async landkreis => {
+    private async loadCounties(landkreise: { [key: string]: { [key: string]: { [key: string]: [number, number] } } }, currentFeatures?: Feature[]): Promise<void> {
+        // If currentFeatures is provided, only load those counties
+        let countiesToLoad: string[];
+        if (currentFeatures && currentFeatures.length > 0) {
+            const currentFeatureIds = currentFeatures.map(feature => feature.getProperties()['ars']);
+            // Convert landkreis IDs to match ARS format (first 5 digits + '000000')
+            countiesToLoad = Object.keys(landkreise).filter(id => {
+                const arsFormat = id.substring(0, 2) + '0000000000';
+                return currentFeatureIds.includes(arsFormat) && !this.cache.counties[id];
+            });
+        } else {
+            countiesToLoad = Object.keys(landkreise).filter(id => !this.cache.counties[id]);
+        }
+
+        await Promise.all(countiesToLoad.map(async landkreis => {
             // Return existing promise if already loading
             if (landkreis in this.loadingPromises.counties) {
                 return this.loadingPromises.counties[landkreis];
@@ -257,10 +275,25 @@ export class MapBuildService {
         }));
     }
 
-    private async loadMunicipalities(landkreise: { [key: string]: { [key: string]: { [key: string]: [number, number] } } }): Promise<void> {
-        const unloadedCounties = Object.keys(landkreise).filter(id => !this.cache.municipalities[id]);
+    private async loadMunicipalities(landkreise: { [key: string]: { [key: string]: { [key: string]: [number, number] } } }, currentFeatures?: Feature[]): Promise<void> {
+        console.log(currentFeatures)
+        console.log(currentFeatures?.length)
+        let municipalitiesToLoad: string[];
+        if (currentFeatures && currentFeatures.length > 0) {
+            const currentFeatureIds = currentFeatures.map(feature => feature.getProperties()['ars']);
+            // Convert landkreis IDs to match ARS format (first 5 digits + '000000')
+            municipalitiesToLoad = Object.keys(landkreise).filter(id => {
+                const arsFormat = id.substring(0, 5) + '0000000';
+                return currentFeatureIds.includes(arsFormat) && !this.cache.municipalities[id];
+            });
+        } else {
+            console.error("No municipalities")
+            return
+        }
+
+        console.log(municipalitiesToLoad)
         
-        await Promise.all(unloadedCounties.map(async landkreis => {
+        await Promise.all(municipalitiesToLoad.map(async landkreis => {
             // Return existing promise if already loading
             if (landkreis in this.loadingPromises.municipalities) {
                 return this.loadingPromises.municipalities[landkreis];
@@ -326,13 +359,23 @@ export class MapBuildService {
         }));
     }
 
-    private async loadHexagons(landkreise: { [key: string]: { [key: string]: { [key: string]: [number, number] } } }): Promise<void> {
-        const unloadedCounties = Object.keys(landkreise).filter(id => !this.cache.hexagons[id]);
-        
+    private async loadHexagons(landkreise: { [key: string]: { [key: string]: { [key: string]: [number, number] } } }, currentFeatures?: Feature[]): Promise<void> {
+        let countiesToLoad: string[];
+        if (currentFeatures && currentFeatures.length > 0) {
+            const currentFeatureIds = currentFeatures.map(feature => feature.getProperties()['ars']);
+            const uniqueFeatureIds = [...new Set(currentFeatureIds.map(id => id.substring(0, 5)))];
+            // Convert landkreis IDs to match ARS format (first 5 digits)
+            countiesToLoad = Object.keys(landkreise).filter(id => {
+                const arsFormat = id.substring(0, 5);
+                return uniqueFeatureIds.includes(arsFormat) && !this.cache.hexagons[id];
+            });
+        } else {
+            countiesToLoad = Object.keys(landkreise).filter(id => !this.cache.hexagons[id]);
+        }
         // Hexagon area in km² (assuming all hexagons have the same size)
         const HEXAGON_AREA = 1; // 1 km² per hexagon
         
-        await Promise.all(unloadedCounties.map(async landkreis => {
+        await Promise.all(countiesToLoad.map(async landkreis => {
             // Return existing promise if already loading
             if (landkreis in this.loadingPromises.hexagons) {
                 return this.loadingPromises.hexagons[landkreis];
@@ -344,7 +387,8 @@ export class MapBuildService {
             // Create new loading promise
             this.loadingPromises.hexagons[landkreis] = (async () => {
                 try {
-                    const response = await fetch(`assets/boundaries/${land}/${kreis}/hexagons.geojson.gz`);
+                    const url = `assets/boundaries/${land}/${kreis}/hexagons.geojson.gz`
+                    const response = await fetch(url);
                     const hexagonGeoJson = await response.json();
                     
                     if (Array.isArray(hexagonGeoJson.features)) {

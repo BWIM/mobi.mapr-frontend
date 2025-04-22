@@ -172,8 +172,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     // Get current viewport extent
     const extent = this.map.getView().calculateExtent(this.map.getSize());
 
+    const currentFeatures = this.vectorLayer.getSource()?.getFeaturesInExtent(extent)
+
+
     try {
-      const geojson = await this.mapBuildService.buildMap(this.landkreise, this.level, extent);
+      const geojson = await this.mapBuildService.buildMap(this.landkreise, this.level, currentFeatures);
 
       if (geojson && geojson.features) {
         vectorSource.clear();
