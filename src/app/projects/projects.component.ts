@@ -59,6 +59,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   private websocketConnections: Map<number, WebSocketSubject<WebsocketResult>> = new Map();
   editDialogVisible = false;
   projectToEdit: Project | null = null;
+  progress: number = 0;
   
   // Neue Properties für Projektgruppen
   projectGroupDialogVisible = false;
@@ -254,7 +255,8 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
   getProgress(project: Project): number {
     if (project.areas === 0) return 0;
-    return Math.round((project.calculated / project.areas) * 100);
+    this.progress = Math.round((project.calculated / project.areas) * 100);
+    return this.progress;
   }
 
   showResults(project: Project | undefined): void {
