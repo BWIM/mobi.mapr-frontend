@@ -40,6 +40,15 @@
                                                     {{ project.display_name }}
                                                 </span>
                                             </div>
+                                            <div *ngIf="!project.finished" class="w-full mt-1">
+                                                <p-progressBar
+                                                    [value]="getProgress(project)" 
+                                                    [showValue]="true"
+                                                    styleClass="h-1"
+                                                    [pTooltip]="progress + '%'"
+                                                    color="var(--primary-color)">
+                                                </p-progressBar>
+                                            </div>
                                         </div>
                                     </td>
                                     <td>
@@ -63,15 +72,6 @@
                                                 appendTo="body">
                                             </p-menu>
                                         </div>
-                                    </td>
-                                </tr>
-                                <tr *ngIf="!project.finished">
-                                    <td colspan="1">
-                                        <p-progressBar
-                                            [value]="getProgress(project)" 
-                                            [showValue]="true"
-                                            [pTooltip]="'PROJECTS.PROGRESS_TOOLTIP' | translate: { progress: getProgress(project) }">
-                                        </p-progressBar>
                                     </td>
                                 </tr>
                             </ng-template>
@@ -103,6 +103,15 @@
                                                     {{ project.display_name }}
                                                 </span>
                                             </div>
+                                            <div *ngIf="!project.finished" class="w-full mt-1">
+                                                <p-progressBar
+                                                    [value]="getProgress(project)" 
+                                                    [showValue]="true"
+                                                    styleClass="h-2"
+                                                    [pTooltip]="progress + '%'"
+                                                    color="var(--primary-color)">
+                                                </p-progressBar>
+                                            </div>
                                         </div>
                                     </td>
                                     <td>
@@ -126,15 +135,6 @@
                                                 appendTo="body">
                                             </p-menu>
                                         </div>
-                                    </td>
-                                </tr>
-                                <tr *ngIf="!project.finished">
-                                    <td colspan="1">
-                                        <p-progressBar
-                                            [value]="getProgress(project)" 
-                                            [showValue]="true"
-                                            [pTooltip]="'PROJECTS.PROGRESS_TOOLTIP' | translate: { progress: getProgress(project) }">
-                                        </p-progressBar>
                                     </td>
                                 </tr>
                             </ng-template>
