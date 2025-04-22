@@ -204,18 +204,25 @@ export class MapBuildService {
     }
 
     private async loadCounties(landkreise: { [key: string]: { [key: string]: { [key: string]: [number, number] } } }, currentFeatures?: Feature[]): Promise<void> {
+        // Theoretically, load only the counties that are visible, but we need all for the visibiliy trick
         // If currentFeatures is provided, only load those counties
-        let countiesToLoad: string[];
-        if (currentFeatures && currentFeatures.length > 0) {
-            const currentFeatureIds = currentFeatures.map(feature => feature.getProperties()['ars']);
-            // Convert landkreis IDs to match ARS format (first 5 digits + '000000')
-            countiesToLoad = Object.keys(landkreise).filter(id => {
-                const arsFormat = id.substring(0, 2) + '0000000000';
-                return currentFeatureIds.includes(arsFormat) && !this.cache.counties[id];
-            });
-        } else {
-            countiesToLoad = Object.keys(landkreise).filter(id => !this.cache.counties[id]);
-        }
+        // let countiesToLoad: string[];
+        // if (currentFeatures && currentFeatures.length > 0) {
+        //     const currentFeatureIds = currentFeatures.map(feature => feature.getProperties()['ars']);
+        //     // Convert landkreis IDs to match ARS format (first 5 digits + '000000')
+        //     if (currentFeatureIds.length > 0) {
+        //         countiesToLoad = Object.keys(landkreise).filter(id => {
+        //             const arsFormat = id.substring(0, 2) + '0000000000';
+        //             return currentFeatureIds.includes(arsFormat) && !this.cache.counties[id];
+        //         });
+        //     } else {
+        //         console.error("No counties")
+        //         return
+        //     }
+        // } else {
+        //     countiesToLoad = Object.keys(landkreise).filter(id => !this.cache.counties[id]);
+        // }
+        const countiesToLoad = Object.keys(landkreise).filter(id => !this.cache.counties[id]);
 
         await Promise.all(countiesToLoad.map(async landkreis => {
             // Return existing promise if already loading
@@ -276,22 +283,23 @@ export class MapBuildService {
     }
 
     private async loadMunicipalities(landkreise: { [key: string]: { [key: string]: { [key: string]: [number, number] } } }, currentFeatures?: Feature[]): Promise<void> {
-        console.log(currentFeatures)
-        console.log(currentFeatures?.length)
         let municipalitiesToLoad: string[];
         if (currentFeatures && currentFeatures.length > 0) {
             const currentFeatureIds = currentFeatures.map(feature => feature.getProperties()['ars']);
             // Convert landkreis IDs to match ARS format (first 5 digits + '000000')
-            municipalitiesToLoad = Object.keys(landkreise).filter(id => {
-                const arsFormat = id.substring(0, 5) + '0000000';
-                return currentFeatureIds.includes(arsFormat) && !this.cache.municipalities[id];
-            });
+            if (currentFeatureIds.length > 0) {
+                municipalitiesToLoad = Object.keys(landkreise).filter(id => {
+                    const arsFormat = id.substring(0, 5) + '0000000';
+                    return currentFeatureIds.includes(arsFormat) && !this.cache.municipalities[id];
+                });
+            } else {
+                console.error("No municipalities")
+                return
+            }
         } else {
             console.error("No municipalities")
             return
         }
-
-        console.log(municipalitiesToLoad)
         
         await Promise.all(municipalitiesToLoad.map(async landkreis => {
             // Return existing promise if already loading
@@ -360,17 +368,23 @@ export class MapBuildService {
     }
 
     private async loadHexagons(landkreise: { [key: string]: { [key: string]: { [key: string]: [number, number] } } }, currentFeatures?: Feature[]): Promise<void> {
-        let countiesToLoad: string[];
+        let countiesToLoad: string[] = [];
         if (currentFeatures && currentFeatures.length > 0) {
             const currentFeatureIds = currentFeatures.map(feature => feature.getProperties()['ars']);
-            const uniqueFeatureIds = [...new Set(currentFeatureIds.map(id => id.substring(0, 5)))];
-            // Convert landkreis IDs to match ARS format (first 5 digits)
-            countiesToLoad = Object.keys(landkreise).filter(id => {
-                const arsFormat = id.substring(0, 5);
-                return uniqueFeatureIds.includes(arsFormat) && !this.cache.hexagons[id];
-            });
+            if (currentFeatureIds.length > 0) {
+                const uniqueFeatureIds = [...new Set(currentFeatureIds.map(id => id.substring(0, 5)))];
+                // Convert landkreis IDs to match ARS format (first 5 digits)
+                countiesToLoad = Object.keys(landkreise).filter(id => {
+                    const arsFormat = id.substring(0, 5);
+                    return uniqueFeatureIds.includes(arsFormat) && !this.cache.hexagons[id];
+                });
+            }
         } else {
             countiesToLoad = Object.keys(landkreise).filter(id => !this.cache.hexagons[id]);
+        }
+        if (!countiesToLoad || countiesToLoad.length === 0) {
+            console.error("No hexagons")
+            return
         }
         // Hexagon area in km² (assuming all hexagons have the same size)
         const HEXAGON_AREA = 1; // 1 km² per hexagon
