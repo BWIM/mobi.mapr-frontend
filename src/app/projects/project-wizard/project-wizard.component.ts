@@ -12,7 +12,6 @@ import { Subscription } from 'rxjs';
 import { GroupedActivities } from '../../services/interfaces/activity.interface';
 import { Persona } from '../../services/interfaces/persona.interface';
 import { Mode } from '../../services/interfaces/mode.interface';
-import { AreaSelectionComponent } from './area-selection/area-selection.component';
 import { TranslateService } from '@ngx-translate/core';
 import { ProjectsReloadService } from '../projects-reload.service';
 import { Activity } from '../../services/interfaces/activity.interface';
@@ -20,6 +19,19 @@ import { ProjectGroup } from '../project.interface';
 import { MessageService } from 'primeng/api';
 import { MapService } from '../../map/map.service';
 import { AreasService } from '../../services/areas.service';
+import { LandsService } from '../../services/lands.service';
+import { Land } from '../../services/interfaces/land.interface';
+// OpenLayers imports
+import Map from 'ol/Map';
+import View from 'ol/View';
+import TileLayer from 'ol/layer/Tile';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+import XYZ from 'ol/source/XYZ';
+import GeoJSON from 'ol/format/GeoJSON';
+import { Fill, Stroke, Style } from 'ol/style';
+import { fromLonLat } from 'ol/proj';
+import Overlay from 'ol/Overlay';
 
 
 @Component({
@@ -27,7 +39,7 @@ import { AreasService } from '../../services/areas.service';
   templateUrl: './project-wizard.component.html',
   styleUrls: ['./project-wizard.component.css'],
   standalone: true,
-  imports: [SharedModule, AreaSelectionComponent],
+  imports: [SharedModule],
   providers: [MessageService]
 })
 export class ProjectWizardComponent implements OnInit, OnDestroy {
@@ -50,6 +62,15 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     nonMid: []
   };
 
+  // Area selection properties
+  lands: Land[] = [];
+  private map?: Map;
+  private vectorLayer?: VectorLayer<any>;
+  private geoJsonFormat = new GeoJSON();
+  private selectedFeatures: Set<string> = new Set();
+  private overlay?: Overlay;
+  private tooltipElement?: HTMLElement;
+
   constructor(
     private fb: FormBuilder,
     private projectsService: ProjectsService,
@@ -62,7 +83,8 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     private reloadService: ProjectsReloadService,
     private messageService: MessageService,
     private mapService: MapService,
-    private areasService: AreasService
+    private areasService: AreasService,
+    private landsService: LandsService
   ) {
     this.subscription = this.wizardService.visible$.subscribe(
       visible => {
@@ -71,6 +93,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
           this.resetWizard();
           this.loadProjectGroups();
           this.loadAreas();
+          this.loadLands();
         }
       }
     );
@@ -89,6 +112,14 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.subscription) {
       this.subscription.unsubscribe();
+    }
+    
+    // Clean up map resources
+    if (this.map) {
+      if (this.overlay) {
+        this.map.removeOverlay(this.overlay);
+      }
+      this.map.dispose();
     }
   }
 
@@ -271,6 +302,14 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
       } else {
         this.activeIndex++;
       }
+      
+      // If we're moving to step 4 (area selection), initialize the map
+      if (this.activeIndex === 3) {
+        setTimeout(() => {
+          this.initializeMap();
+          this.setupAreaSelection();
+        }, 0);
+      }
     }
   }
 
@@ -341,15 +380,6 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
 
   deselectAllModes() {
     this.projectForm.get('modes.selectedModes')?.setValue([]);
-  }
-
-  onAreaSelectionChange(areaIds: string[]) {
-    this.selectedAreaIds = areaIds;
-    this.projectForm.get('area.selectedArea')?.setValue(areaIds);
-  }
-
-  onCompletelySelectedLandsChange(hasCompletelySelectedLands: boolean) {
-    this.hasCompletelySelectedLands = hasCompletelySelectedLands;
   }
 
   onSubmit() {
@@ -506,6 +536,13 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
       this.areasService.getAreas().subscribe({
         next: (geojson: any) => {
           this.areasGeoJson = geojson;
+          // Initialize map when areas are loaded and we're on step 4
+          if (this.activeIndex === 3) {
+            setTimeout(() => {
+              this.initializeMap();
+              this.setupAreaSelection();
+            }, 0);
+          }
         },
         error: (error) => {
           console.error('Fehler beim Laden der Gebiete:', error);
@@ -516,6 +553,205 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
           });
         }
       });
+    } else if (this.activeIndex === 3) {
+      // If areas are already loaded and we're on step 4, initialize map
+      setTimeout(() => {
+        this.initializeMap();
+        this.setupAreaSelection();
+      }, 0);
     }
+  }
+  
+  private loadLands() {
+    this.landsService.getLands().subscribe({
+      next: (lands: Land[]) => {
+        this.lands = lands.sort((a, b) => a.name.localeCompare(b.name));
+      },
+      error: (error) => {
+        console.error('Fehler beim Laden der Länder:', error);
+      }
+    });
+  }
+  
+  // Area selection methods from area-selection component
+  private initializeTooltip() {
+    this.tooltipElement = document.createElement('div');
+    this.tooltipElement.className = 'tooltip';
+    this.tooltipElement.style.backgroundColor = 'white';
+    this.tooltipElement.style.padding = '5px';
+    this.tooltipElement.style.border = '1px solid #ccc';
+    this.tooltipElement.style.borderRadius = '4px';
+    this.tooltipElement.style.position = 'relative';
+    this.tooltipElement.style.zIndex = '1000';
+
+    this.overlay = new Overlay({
+      element: this.tooltipElement,
+      offset: [10, 0],
+      positioning: 'bottom-left',
+    });
+  }
+
+  private initializeMap() {
+    if (!document.getElementById('create-map')) {
+      console.error("Map container not found");
+      return;
+    }
+    
+    const baseLayer = new TileLayer({
+      source: new XYZ({
+        url: 'https://{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+        attributions: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        crossOrigin: 'anonymous'
+      })
+    });
+
+    this.vectorLayer = new VectorLayer({
+      source: new VectorSource(),
+      style: (feature) => {
+        const isSelected = this.selectedFeatures.has(feature.getId() as string);
+        return new Style({
+          zIndex: isSelected ? 1000 : 1,
+          fill: new Fill({
+            color: isSelected ? 'rgba(49, 159, 211, 0.5)' : 'rgba(255, 255, 255, 0.5)'
+          }),
+          stroke: new Stroke({
+            color: '#319FD3',
+            width: isSelected ? 2 : 1
+          })
+        });
+      }
+    });
+
+    this.initializeTooltip();
+
+    this.map = new Map({
+      target: 'create-map',
+      layers: [baseLayer, this.vectorLayer],
+      view: new View({
+        center: fromLonLat([10.4515, 51.1657]),
+        zoom: 6
+      })
+    });
+
+    if (this.overlay) {
+      this.map.addOverlay(this.overlay);
+    }
+
+    this.map.on('click', (event) => {
+      const feature = this.map?.forEachFeatureAtPixel(event.pixel, (feature) => feature);
+      if (feature) {
+        const featureId = feature.getId() as string;
+        if (this.selectedFeatures.has(featureId)) {
+          this.selectedFeatures.delete(featureId);
+        } else {
+          this.selectedFeatures.add(featureId);
+        }
+        this.vectorLayer?.changed();
+        this.updateSelectedAreas();
+      }
+    });
+
+    this.map.on('pointermove', (event) => {
+      if (event.dragging || !this.tooltipElement || !this.overlay) {
+        this.tooltipElement!.style.display = 'none';
+        return;
+      }
+
+      const feature = this.map?.forEachFeatureAtPixel(event.pixel, (feature) => feature);
+      
+      if (feature) {
+        const name = feature.get('name');
+        if (name) {
+          this.tooltipElement.style.display = '';
+          this.tooltipElement.innerHTML = name;
+          this.overlay.setPosition(event.coordinate);
+        } else {
+          this.tooltipElement.style.display = 'none';
+        }
+      } else {
+        this.tooltipElement.style.display = 'none';
+      }
+    });
+  }
+  
+  private setupAreaSelection() {
+    if (!this.areasGeoJson || !this.vectorLayer) return;
+    
+    const features = this.geoJsonFormat.readFeatures(this.areasGeoJson, {
+      featureProjection: 'EPSG:3857',
+      dataProjection: 'EPSG:4326'
+    });
+    
+    features.forEach(feature => {
+      if (!feature.getId()) {
+        feature.setId(feature.get('id'));
+      }
+    });
+
+    const source = this.vectorLayer.getSource();
+    source?.clear();
+    source?.addFeatures(features);
+  }
+  
+  private updateSelectedAreas() {
+    this.selectedAreaIds = Array.from(this.selectedFeatures);
+    this.projectForm.get('area.selectedArea')?.setValue(this.selectedAreaIds);
+
+    // Check for completely selected lands
+    const hasCompletelySelectedLands = this.lands.some(land => this.getLandSelectionState(land));
+    const hasPartiallySelectedLands = this.lands.some(land => this.isLandIndeterminate(land));
+    
+    this.hasCompletelySelectedLands = hasCompletelySelectedLands && !hasPartiallySelectedLands;
+  }
+  
+  getLandSelectionState(land: Land): boolean {
+    const source = this.vectorLayer?.getSource();
+    const features = source?.getFeatures() || [];
+    const landFeatures = features.filter((f: any) => f.get('land') === land.id);
+    
+    if (landFeatures.length === 0) return false;
+    
+    const selectedCount = landFeatures.filter((f: any) => 
+      this.selectedFeatures.has(f.getId() as string)
+    ).length;
+    
+    return selectedCount === landFeatures.length;
+  }
+  
+  isLandIndeterminate(land: Land): boolean {
+    const source = this.vectorLayer?.getSource();
+    const features = source?.getFeatures() || [];
+    const landFeatures = features.filter((f: any) => f.get('land') === land.id);
+
+    return landFeatures.length > 0 && landFeatures.some((f: any) => 
+      this.selectedFeatures.has(f.getId() as string)
+    ) && !this.isLandSelected(land);
+  }
+  
+  isLandSelected(land: Land): boolean {
+    const source = this.vectorLayer?.getSource();
+    const features = source?.getFeatures() || [];
+    const landFeatures = features.filter((f: any) => f.get('land') === land.id);
+    
+    return landFeatures.length > 0 && landFeatures.every((f: any) => 
+      this.selectedFeatures.has(f.getId() as string)
+    );
+  }
+  
+  selectLand(land: Land) {
+    const source = this.vectorLayer?.getSource();
+    const features = source?.getFeatures() || [];
+    const landFeatures = features.filter((f: any) => f.get('land') === land.id);
+    
+    landFeatures.forEach((f: any) => {
+      if (land.checked) {
+        this.selectedFeatures.add(f.getId() as string);
+      } else {
+        this.selectedFeatures.delete(f.getId() as string);
+      }
+    });
+    
+    this.vectorLayer?.changed();
+    this.updateSelectedAreas();
   }
 } 

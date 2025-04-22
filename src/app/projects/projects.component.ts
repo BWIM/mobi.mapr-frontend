@@ -255,7 +255,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
   getProgress(project: Project): number {
     if (project.areas === 0) return 0;
-    this.progress = Math.round((project.calculated / project.areas) * 100);
+    this.progress = Math.floor((project.calculated / project.areas) * 100);
     return this.progress;
   }
 
