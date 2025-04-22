@@ -69,9 +69,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.subscriptions.push(
       this.mapService.features$.subscribe(async features => {
         this.loadingService.startLoading(); // Start loading when new features arrive
-        this.mapBuildService.resetCache();
         
-        // Reset both layers
+        // Reset cache and clear layers, but don't reset view
+        this.mapBuildService.resetCache();
         if (this.vectorLayer && this.vectorLayer.getSource()) {
           this.vectorLayer.getSource()?.clear();
         }
@@ -79,18 +79,26 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           this.hiddenCountyLayer.getSource()?.clear();
         }
         
+        // Then set new features and update
         this.landkreise = features;
         
-        // Then update features and zoom to them
-        await this.updateMapFeatures().then(() => {
+        try {
+          // Update features
+          await this.updateMapFeatures();
+          
+          // Ensure we have a clean state before zooming
+          await new Promise(resolve => setTimeout(resolve, 250));
+          
+          // Now zoom to the features
           this.zoomToFeatures();
-          this.loadingService.stopLoading(); // Stop loading after features are updated and zoomed
-        }).catch(() => {
-          this.loadingService.stopLoading(); // Ensure loading stops even if there's an error
-        });
+          this.loadingService.stopLoading();
+        } catch (error) {
+          console.error('Error updating features:', error);
+          this.loadingService.stopLoading();
+        }
       }),
-      this.mapService.resetMap$.subscribe(() => {
-        this.resetMap();
+      this.mapService.resetMap$.subscribe(async () => {
+        await this.resetMap(true); // Pass true to indicate we want to reset view
       }),
       this.mapService.visualizationSettings$.subscribe(async () => {
         if (this.landkreise) {
@@ -147,8 +155,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       view: new View({
         center: fromLonLat([8.5, 49.05]),
         zoom: 7,
-        minZoom: 7,
-        maxZoom: 15,
+        minZoom: 5,
         constrainResolution: true
       })
     });
@@ -198,28 +205,49 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     try {
       const level = this.determineFeatureLevel(zoom);
+      
+      // Always ensure we have counties in the hidden layer if needed
+      if (level !== 'state' && hiddenSource.getFeatures().length === 0) {
+        console.log('Loading counties into hidden layer');
+        const countyGeojson = await this.mapBuildService.buildMap(this.landkreise, 'county');
+        if (countyGeojson?.features) {
+          await this.updateHiddenLayerFeatures(countyGeojson, 'county');
+        }
+      }
+
       // Only update if the zoom drastically changed
       if (level !== this.level) {
-        console.log('level changed', level);
+        console.log('level changed from', this.level, 'to', level);
         this.level = level;
         const extent = this.map.getView().calculateExtent(this.map.getSize());
         
-        // Get visible counties from hidden layer
-        const hiddenFeatures = hiddenSource.getFeaturesInExtent(extent);
+        let geojson;
+        if (level === 'state') {
+          // For state level, we don't need to filter by visible counties
+          geojson = await this.mapBuildService.buildMap(this.landkreise, level);
+        } else {
+          // For other levels, use visible counties from hidden layer
+          const hiddenFeatures = hiddenSource.getFeaturesInExtent(extent);
+          const hiddenIds = hiddenFeatures.map(feature => feature.get('ars') as string);
+          
+          if (hiddenIds.length === 0) {
+            console.warn('No visible counties found for level', level);
+            this.loadingService.stopLoading();
+            return;
+          }
 
-        const geojson = await this.mapBuildService.buildMap(
-          this.landkreise, 
-          level, 
-          hiddenFeatures.length > 0 ? hiddenFeatures : undefined
-        );
+          geojson = await this.mapBuildService.buildMap(
+            this.landkreise, 
+            level, 
+            hiddenFeatures.length > 0 ? hiddenFeatures : undefined
+          );
+        }
 
         if (geojson?.features) {
           await this.updateVectorLayerFeatures(geojson, level);
-        }
-
-        // If we're at county level, also update the hidden layer
-        if (level === 'county') {
-          if (geojson?.features) {
+          
+          // If we're at county level, update the hidden layer
+          if (level === 'county') {
             await this.updateHiddenLayerFeatures(geojson, level);
           }
         }
@@ -301,25 +329,56 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     hiddenSource.addFeatures(features as Feature<Geometry>[]);
   }
 
-  public resetMap(): void {
+  public async resetMap(resetView: boolean = false): Promise<void> {
+    // Reset cache first
+    this.mapBuildService.resetCache();
+    
+    // Clear both layers
     if (this.vectorLayer && this.vectorLayer.getSource()) {
       this.vectorLayer.getSource()?.clear();
     }
     if (this.hiddenCountyLayer && this.hiddenCountyLayer.getSource()) {
       this.hiddenCountyLayer.getSource()?.clear();
     }
-    this.mapBuildService.resetCache();
+
+    // Only reset the view if explicitly requested
+    if (resetView) {
+      const view = this.map.getView();
+      view.setCenter(fromLonLat([8.5, 49.05]));
+      view.setZoom(7);
+      view.setRotation(0);
+    }
+
+    // Reset level
+    this.level = 'county';
+
+    // Ensure changes are applied
+    await new Promise(resolve => setTimeout(resolve, 100));
   }
 
   private zoomToFeatures(): void {
+    console.log('zoomToFeatures');
     const vectorSource = this.vectorLayer.getSource();
-    if (!vectorSource || vectorSource.getFeatures().length === 0) return;
+    if (!vectorSource || vectorSource.getFeatures().length === 0) {
+      console.warn('No features to zoom to');
+      return;
+    }
 
     const extent = vectorSource.getExtent();
-    this.map.getView().fit(extent, {
-      duration: 1000,
-      padding: [100,100,100,100]
-    });
+    if (!extent || extent.some(val => !isFinite(val))) {
+      console.warn('Invalid extent', extent);
+      return;
+    }
+
+    try {
+      this.map.getView().fit(extent, {
+        duration: 1000,
+        padding: [50, 50, 50, 50],
+        maxZoom: 10
+      });
+    } catch (error) {
+      console.error('Error zooming to features:', error);
+    }
   }
 
   zoomIn() {
