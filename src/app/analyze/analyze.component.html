@@ -91,12 +91,7 @@
                                         </p-chart>
                                     </div>
                                     <div *ngIf="activitiesChartType === 'doughnut'" class="chart-container">
-                                        <p-chart 
-                                            [type]="activitiesChartType" 
-                                            [data]="activitiesChartData" 
-                                            [options]="doughnutChartOptions"
-                                            class="h-full w-full min-h-[400px]">
-                                        </p-chart>
+                                        <canvas #doughnutChart class="h-full w-full min-h-[400px]"></canvas>
                                     </div>
                                     <p *ngIf="activitiesChartType === 'doughnut'" class="mt-2">{{ 'ANALYZE.ACTIVITIES.EXPLANATION' | translate }}</p>
                                     <p class="text-sm text-gray-500 mt-2">{{ 'ANALYZE.ACTIVITIES.HINT' | translate }}</p>

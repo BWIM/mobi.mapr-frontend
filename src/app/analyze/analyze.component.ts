@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { SharedModule } from '../shared/shared.module';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../projects/projects.service';
@@ -7,6 +7,18 @@ import { MapService } from '../map/map.service';
 import Feature from 'ol/Feature';
 import { Properties } from './analyze.interface';
 import { ProjectDetails } from '../projects/project.interface';
+import { Chart, ChartConfiguration } from 'chart.js';
+import { TreemapController, TreemapElement } from 'chartjs-chart-treemap';
+
+interface TreemapData {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  name: string;
+  value: number;
+  score: number;
+}
 
 @Component({
   selector: 'app-analyze',
@@ -15,7 +27,9 @@ import { ProjectDetails } from '../projects/project.interface';
   templateUrl: './analyze.component.html',
   styleUrl: './analyze.component.css'
 })
-export class AnalyzeComponent implements OnInit, OnDestroy {
+export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild('doughnutChart') doughnutChartRef!: ElementRef<HTMLCanvasElement>;
+  private doughnutChart: Chart | undefined;
   visible: boolean = false;
   loading: boolean = false;
   private subscriptions: Subscription[] = [];
@@ -490,40 +504,92 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
         }
       };
     } else {
-      // Prepare doughnut data - use weights for segment sizes
-      this.activitiesChartData = {
-        labels: labels.map((label, i) => `${label} (${weights[i]}%)`), // Include weight in label
-        datasets: [{
-          data: weights, // Use weights for segment sizes
-          backgroundColor: backgroundColor,
-          borderColor: '#ffffff',
-          borderWidth: 2,
-          weights: weights, // Keep weights for tooltip
-          scores: data // Store scores for tooltip
-        }]
-      };
+      // Destroy existing chart if it exists
+      if (this.doughnutChart) {
+        this.doughnutChart.destroy();
+      }
 
-      // Update doughnut options
-      this.doughnutChartOptions = {
-        plugins: {
-          legend: {
-            display: false
-          },
-          tooltip: {
-            callbacks: {
-              label: function(context: any) {
-                const label = context.label.split(' (')[0];
-                const score = context.dataset.scores[context.dataIndex];
-                const weight = context.dataset.weights[context.dataIndex];
-                return `${label}: ${score.toFixed(2)} (Weight: ${weight})`;
+      // Wait for the canvas element to be available
+      setTimeout(() => {
+        if (this.doughnutChartRef) {
+          const ctx = this.doughnutChartRef.nativeElement.getContext('2d');
+          if (ctx) {
+            const chartData = {
+              type: 'treemap' as const,
+              data: {
+                datasets: [{
+                  type: 'treemap' as const,
+                  data: sortedData.map(item => ({
+                    x: 0,
+                    y: 0,
+                    width: 0,
+                    height: 0,
+                    name: item.name,
+                    value: item.weight,
+                    score: item.score
+                  })) as TreemapData[],
+                  key: 'value',
+                  labels: {
+                    display: true,
+                    align: 'center',
+                    position: 'middle',
+                    padding: 4,
+                    font: {
+                      size: 14,
+                      weight: 'bold',
+                      family: "'Open Sans', sans-serif"
+                    },
+                    formatter: (ctx: any) => {
+                      const item = ctx.raw._data;
+                      return item.name;
+                    },
+                    color: '#ffffff'
+                  },
+                  backgroundColor: (ctx: any) => {
+                    const score = ctx.raw?._data?.score || 0;
+                    if (score >= 1.41) return '#9656a2';      // Purple (F)
+                    if (score >= 1.0) return '#c21807';       // Red (E)
+                    if (score >= 0.72) return '#ed7014';      // Orange (D)
+                    if (score >= 0.51) return '#eed202';      // Yellow (C)
+                    if (score >= 0.35) return '#3cb043';      // Light green (B)
+                    return '#32612d';                         // Dark green (A)
+                  },
+                  spacing: 2,
+                  borderWidth: 1,
+                  borderColor: '#ffffff'
+                }]
+              },
+              options: {
+                maintainAspectRatio: false,
+                plugins: {
+                  title: {
+                    display: false
+                  },
+                  legend: {
+                    display: false
+                  },
+                  tooltip: {
+                    callbacks: {
+                      title: (items: any) => {
+                        return items[0].raw._data.name;
+                      },
+                      label: (item: any) => {
+                        const data = item.raw._data;
+                        return [
+                          `Score: ${data.score.toFixed(2)}`,
+                          `Weight: ${data.value}`
+                        ];
+                      }
+                    }
+                  }
+                }
               }
-            }
+            } as ChartConfiguration;
+
+            this.doughnutChart = new Chart(ctx, chartData);
           }
-        },
-        cutout: '60%',
-        responsive: true,
-        maintainAspectRatio: false
-      };
+        }
+      }, 0);
     }
   }
 
@@ -698,6 +764,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     if (this.subscriptions) {
       this.subscriptions.forEach(subscription => subscription.unsubscribe());
     }
+    if (this.doughnutChart) {
+      this.doughnutChart.destroy();
+    }
   }
 
   hide() {
@@ -733,5 +802,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       }, delay);
     });
+  }
+
+  ngAfterViewInit() {
+    Chart.register(TreemapController, TreemapElement);
   }
 }
