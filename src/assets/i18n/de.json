@@ -60,7 +60,8 @@
       "LOAD_GROUPS_ERROR": "Gruppen konnten nicht geladen werden",
       "CONFIRM_DELETE_GROUP": "Wollen Sie die Gruppe wirklich löschen?",
       "DELETE_GROUP_SUCCESS": "Gruppe erfolgreich gelöscht",
-      "DELETE_GROUP_ERROR": "Gruppe kann nicht gelöscht werden"
+      "DELETE_GROUP_ERROR": "Gruppe kann nicht gelöscht werden",
+      "LOAD_AREAS_ERROR": "Gebiete können nicht geladen werden"
     },
     "DELETE": {
       "TITLE": "Projekt löschen",

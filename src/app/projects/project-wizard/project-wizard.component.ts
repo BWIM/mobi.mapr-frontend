@@ -167,6 +167,12 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     
     // Ausgewählte Gebiete zurücksetzen
     this.selectedAreaIds = [];
+    this.selectedFeatures.clear();
+    
+    // Reset land check status
+    this.lands.forEach(land => {
+      land.checked = false;
+    });
     
     // Wizard zum ersten Schritt zurücksetzen
     this.activeIndex = 0;
@@ -187,6 +193,16 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     }
     if (this.modes.length > 0) {
       this.projectForm.get('modes.selectedModes')?.setValue(this.modes);
+    }
+    
+    // Reset the map if it exists
+    if (this.map) {
+      if (this.overlay) {
+        this.map.removeOverlay(this.overlay);
+      }
+      this.map.dispose();
+      this.map = undefined;
+      this.vectorLayer = undefined;
     }
   }
 
@@ -280,6 +296,11 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         label: 'Gebiet auswählen',
         command: (event: any) => {
           this.activeIndex = 3;
+          // Initialize map when directly selecting this step
+          setTimeout(() => {
+            this.initializeMap();
+            this.setupAreaSelection();
+          }, 0);
         }
       },
       {
@@ -321,6 +342,14 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         this.activeIndex = 0;
       } else {
         this.activeIndex--;
+      }
+      
+      // If we're moving back to the area selection step, initialize the map
+      if (this.activeIndex === 3) {
+        setTimeout(() => {
+          this.initializeMap();
+          this.setupAreaSelection();
+        }, 0);
       }
     }
   }
@@ -575,6 +604,11 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   
   // Area selection methods from area-selection component
   private initializeTooltip() {
+    // Remove existing tooltip if it exists
+    if (this.tooltipElement && this.tooltipElement.parentNode) {
+      this.tooltipElement.parentNode.removeChild(this.tooltipElement);
+    }
+    
     this.tooltipElement = document.createElement('div');
     this.tooltipElement.className = 'tooltip';
     this.tooltipElement.style.backgroundColor = 'white';
@@ -592,7 +626,18 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   }
 
   private initializeMap() {
-    if (!document.getElementById('create-map')) {
+    // Clean up existing map if it exists
+    if (this.map) {
+      if (this.overlay) {
+        this.map.removeOverlay(this.overlay);
+      }
+      this.map.dispose();
+      this.map = undefined;
+      this.vectorLayer = undefined;
+    }
+    
+    const mapElement = document.getElementById('create-map');
+    if (!mapElement) {
       console.error("Map container not found");
       return;
     }

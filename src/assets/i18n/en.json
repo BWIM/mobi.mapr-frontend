@@ -60,7 +60,8 @@
       "LOAD_GROUPS_ERROR": "Cannot load groups",
       "CONFIRM_DELETE_GROUP": "Do you really want to delete the group?",
       "DELETE_GROUP_SUCCESS": "Group successfully deleted",
-      "DELETE_GROUP_ERROR": "Cannot delete group"
+      "DELETE_GROUP_ERROR": "Cannot delete group",
+      "LOAD_AREAS_ERROR": "Cannot load areas"
     },
     "DELETE": {
       "TITLE": "Delete Project",
