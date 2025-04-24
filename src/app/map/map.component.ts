@@ -1,5 +1,5 @@
 import { Component, AfterViewInit, OnDestroy } from '@angular/core';
-import Map from 'ol/Map';
+import { default as OlMap } from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
@@ -34,7 +34,7 @@ import { LoadingService } from '../services/loading.service';
   styleUrl: './map.component.css'
 })
 export class MapComponent implements AfterViewInit, OnDestroy {
-  private map!: Map;
+  private map!: OlMap;
   private vectorLayer!: WebGLVectorLayer<VectorSource>;
   private baseLayer!: TileLayer<XYZ>;
   private hiddenCountyLayer!: WebGLVectorLayer<VectorSource>;
@@ -43,6 +43,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private landkreise: { [key: string]: any } | null = null;
   private tooltip!: HTMLElement;
   private level: 'state' | 'county' | 'municipality' | 'hexagon' = 'county';
+  private originalFeatureColors: Map<string, number[]> = new Map();
 
   constructor(
     private mapService: MapService,
@@ -149,7 +150,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private initializeMapInstance(): void {
-    this.map = new Map({
+    this.map = new OlMap({
       target: 'map',
       layers: [this.baseLayer, this.vectorLayer, this.hiddenCountyLayer],  // Add hiddenCountyLayer
       view: new View({
@@ -179,6 +180,15 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     this.map.getView().on('change:resolution', handleViewChange);
     this.map.getView().on('change:center', handleViewChange);
+
+    // Add map dragging opacity handlers
+    this.map.on('movestart', () => {
+      this.setLowOpacity();
+    });
+
+    this.map.on('moveend', () => {
+      this.resetOpacity();
+    });
   }
 
   private setupMapServices(): void {
@@ -456,6 +466,23 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.map.on('movestart', () => {
       this.tooltip.style.display = 'none';
     });
+  }
+
+  private setLowOpacity(): void {
+    console.log('setLowOpacity');
+    const vectorLayer = this.mapService.getMainLayer();
+    if (!vectorLayer) return;
+
+    // Update the layer's style directly
+    vectorLayer.setOpacity(0.5);
+  }
+
+  private resetOpacity(): void {
+    const vectorLayer = this.mapService.getMainLayer();
+    if (!vectorLayer) return;
+
+    // Reset to original style
+    vectorLayer.setOpacity(1);
   }
 
 }

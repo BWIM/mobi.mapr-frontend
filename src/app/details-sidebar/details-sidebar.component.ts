@@ -41,7 +41,6 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     hexagon: 1000
   };
   @Output() projectLoaded = new EventEmitter<void>();
-  private originalFeatureColors: Map<string, number[]> = new Map();
 
   constructor(
     private translate: TranslateService,
@@ -136,58 +135,6 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     );
   }
 
-  setLowOpacity(): void {
-    const vectorLayer = this.mapService.getMainLayer();
-    if (!vectorLayer || !vectorLayer.getSource()) return;
-
-    const source = vectorLayer.getSource();
-    if (!source) return;
-    const features = source.getFeatures();
-
-    // Clear any existing stored colors first
-    this.originalFeatureColors.clear();
-
-    features.forEach(feature => {
-      const rgbColor = feature.get('rgbColor');
-      if (Array.isArray(rgbColor)) {
-        const featureId = this.getFeatureId(feature);
-        this.originalFeatureColors.set(featureId, [...rgbColor]);
-        
-        const newColor = [...rgbColor.slice(0, 3), rgbColor[3] * 0.2];
-        feature.set('rgbColor', newColor);
-      }
-    });
-
-    source.changed();
-  }
-
-  resetOpacity(): void {
-    const vectorLayer = this.mapService.getMainLayer();
-    if (!vectorLayer || !vectorLayer.getSource()) return;
-
-    const source = vectorLayer.getSource();
-    if (!source) return;
-    const features = source.getFeatures();
-
-    features.forEach(feature => {
-      const featureId = this.getFeatureId(feature);
-      const originalColor = this.originalFeatureColors.get(featureId);
-      if (originalColor) {
-        feature.set('rgbColor', originalColor);
-      }
-    });
-
-    this.originalFeatureColors.clear();
-    source.changed();
-  }
-
-  private getFeatureId(feature: any): string {
-    const id = feature.getId();
-    const properties = feature.getProperties();
-    const ars = properties['ars'];
-    const hexId = properties['id'];
-    return id?.toString() || ars?.toString() || hexId?.toString() || Math.random().toString();
-  }
 
   ngOnInit() {}
 
