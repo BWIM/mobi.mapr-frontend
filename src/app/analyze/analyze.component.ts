@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, AfterViewInit } from '@angular/core';
 import { SharedModule } from '../shared/shared.module';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../projects/projects.service';
@@ -8,17 +8,6 @@ import Feature from 'ol/Feature';
 import { Properties } from './analyze.interface';
 import { ProjectDetails } from '../projects/project.interface';
 import { Chart, ChartConfiguration } from 'chart.js';
-import { TreemapController, TreemapElement } from 'chartjs-chart-treemap';
-
-interface TreemapData {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  name: string;
-  value: number;
-  score: number;
-}
 
 @Component({
   selector: 'app-analyze',
@@ -28,8 +17,6 @@ interface TreemapData {
   styleUrl: './analyze.component.css'
 })
 export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
-  @ViewChild('doughnutChart') doughnutChartRef!: ElementRef<HTMLCanvasElement>;
-  private doughnutChart: Chart | undefined;
   visible: boolean = false;
   loading: boolean = false;
   private subscriptions: Subscription[] = [];
@@ -504,92 +491,96 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       };
     } else {
-      // Destroy existing chart if it exists
-      if (this.doughnutChart) {
-        this.doughnutChart.destroy();
-      }
+      // Create a new dataset that shows activities multiplied by their weight
+      const weightedScores = sortedData.map(item => ({
+        name: item.name,
+        weightedValue: item.score * item.weight,
+        score: item.score,
+        weight: item.weight
+      }));
+      
+      // Sort by weighted value (descending)
+      const sortedWeightedScores = [...weightedScores].sort((a, b) => b.weightedValue - a.weightedValue);
+      
+      const weightedLabels = sortedWeightedScores.map(item => item.name);
+      const weightedData = sortedWeightedScores.map(item => item.weightedValue);
+      const originalScores = sortedWeightedScores.map(item => item.score);
+      const weights = sortedWeightedScores.map(item => item.weight);
+      
+      const weightedBackgroundColors = sortedWeightedScores.map(item => {
+        const score = item.score;
+        if (score >= 1.41) return '#9656a2';      // Purple (F)
+        if (score >= 1.0) return '#c21807';       // Red (E)
+        if (score >= 0.72) return '#ed7014';      // Orange (D)
+        if (score >= 0.51) return '#eed202';      // Yellow (C)
+        if (score >= 0.35) return '#3cb043';      // Light green (B)
+        return '#32612d';                         // Dark green (A)
+      });
 
-      // Wait for the canvas element to be available
-      setTimeout(() => {
-        if (this.doughnutChartRef) {
-          const ctx = this.doughnutChartRef.nativeElement.getContext('2d');
-          if (ctx) {
-            const chartData = {
-              type: 'treemap' as const,
-              data: {
-                datasets: [{
-                  type: 'treemap' as const,
-                  data: sortedData.map(item => ({
-                    x: 0,
-                    y: 0,
-                    width: 0,
-                    height: 0,
-                    name: item.name,
-                    value: item.weight,
-                    score: item.score
-                  })) as TreemapData[],
-                  key: 'value',
-                  labels: {
-                    display: true,
-                    align: 'center',
-                    position: 'middle',
-                    padding: 4,
-                    font: {
-                      size: 14,
-                      weight: 'bold',
-                      family: "'Open Sans', sans-serif"
-                    },
-                    formatter: (ctx: any) => {
-                      const item = ctx.raw._data;
-                      return item.name;
-                    },
-                    color: '#ffffff'
-                  },
-                  backgroundColor: (ctx: any) => {
-                    const score = ctx.raw?._data?.score || 0;
-                    if (score >= 1.41) return '#9656a2';      // Purple (F)
-                    if (score >= 1.0) return '#c21807';       // Red (E)
-                    if (score >= 0.72) return '#ed7014';      // Orange (D)
-                    if (score >= 0.51) return '#eed202';      // Yellow (C)
-                    if (score >= 0.35) return '#3cb043';      // Light green (B)
-                    return '#32612d';                         // Dark green (A)
-                  },
-                  spacing: 2,
-                  borderWidth: 1,
-                  borderColor: '#ffffff'
-                }]
-              },
-              options: {
-                maintainAspectRatio: false,
-                plugins: {
-                  title: {
-                    display: false
-                  },
-                  legend: {
-                    display: false
-                  },
-                  tooltip: {
-                    callbacks: {
-                      title: (items: any) => {
-                        return items[0].raw._data.name;
-                      },
-                      label: (item: any) => {
-                        const data = item.raw._data;
-                        return [
-                          `Score: ${data.score.toFixed(2)}`,
-                          `Weight: ${data.value}`
-                        ];
-                      }
-                    }
-                  }
-                }
+      this.activitiesChartData = {
+        labels: weightedLabels,
+        datasets: [
+          {
+            label: 'Gewichtete Aktivitätswerte',
+            data: weightedData,
+            backgroundColor: weightedBackgroundColors,
+            borderColor: weightedBackgroundColors,
+            borderWidth: 1
+          }
+        ]
+      };
+
+      // Update chart options for weighted bar chart
+      this.barChartOptions = {
+        indexAxis: 'x',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+            callbacks: {
+              label: function(context: any) {
+                const index = context.dataIndex;
+                return [
+                  `Gewichteter Wert: ${context.raw.toFixed(2)}`,
+                  `Score: ${originalScores[index].toFixed(2)}`,
+                  `Gewichtung: ${weights[index]}`
+                ];
               }
-            } as ChartConfiguration;
-
-            this.doughnutChart = new Chart(ctx, chartData);
+            }
+          },
+          legend: {
+            labels: {
+              color: '#495057'
+            },
+            position: 'bottom'
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: '#495057'
+            },
+            grid: {
+              color: '#ebedef'
+            }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: '#495057'
+            },
+            grid: {
+              color: '#ebedef'
+            },
+            title: {
+              display: true,
+              text: 'Gewichtete Aktivitätswerte (Score × Gewichtung)'
+            }
           }
         }
-      }, 0);
+      };
     }
   }
 
@@ -764,9 +755,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.subscriptions) {
       this.subscriptions.forEach(subscription => subscription.unsubscribe());
     }
-    if (this.doughnutChart) {
-      this.doughnutChart.destroy();
-    }
   }
 
   hide() {
@@ -805,6 +793,5 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    Chart.register(TreemapController, TreemapElement);
   }
 }
