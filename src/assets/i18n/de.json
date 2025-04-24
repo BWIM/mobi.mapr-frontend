@@ -141,12 +141,12 @@
     }
   },
   "LEGEND": {
-    "LVLA": "Die Mobilitätsqualität beträgt maximal 35 % im lokalen Vergleich.",
-    "LVLB": "Die Mobilitätsqualität liegt zwischen 36 % und 50 % im lokalen Vergleich.",
-    "LVLC": "Die Mobilitätsqualität liegt zwischen 51 % und 71 % im lokalen Vergleich.",
-    "LVLD": "Die Mobilitätsqualität liegt zwischen 72 % und 100 % im lokalen Vergleich.",
-    "LVLE": "Die Mobilitätsqualität liegt zwischen 101 % und 140 % im lokalen Vergleich.",
-    "LVLF": "Die Mobilitätsqualität beträgt mindestens 141 % im lokalen Vergleich."
+    "LVLA": "Die erforderliche Mobilitätszeit beträgt maximal 35 % im lokalen Vergleich.",
+    "LVLB": "Die erforderliche Mobilitätszeit liegt zwischen 36 % und 50 % im lokalen Vergleich.",
+    "LVLC": "Die erforderliche Mobilitätszeit liegt zwischen 51 % und 71 % im lokalen Vergleich.",
+    "LVLD": "Die erforderliche Mobilitätszeit liegt zwischen 72 % und 100 % im lokalen Vergleich.",
+    "LVLE": "Die erforderliche Mobilitätszeit liegt zwischen 101 % und 140 % im lokalen Vergleich.",
+    "LVLF": "Die erforderliche Mobilitätszeit beträgt mindestens 141 % im lokalen Vergleich."
   },
   "MAP": {
     "ACTIONS": {
