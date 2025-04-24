@@ -498,6 +498,7 @@ export class MapBuildService {
             [194,24,7],    // Orange (score <= 1.66)
             [150,86,162]   // Pure red (score <= 2.0)
         ];
+        score = Math.floor(score * 100) / 100;
 
         const opacity = this.calculateOpacity(populationDensity, level);
 
