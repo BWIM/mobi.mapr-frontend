@@ -74,9 +74,9 @@
                                 <div class="flex justify-between items-center mb-4">
                                     <h3 class="text-xl">{{ 'ANALYZE.ACTIVITIES.TITLE' | translate }}</h3>
                                     <p-button 
-                                        [icon]="activitiesChartType === 'bar' ? 'pi pi-chart-pie' : 'pi pi-chart-bar'"
+                                        [icon]="activitiesChartType === 'bar' ? 'pi pi-sort-amount-down' : 'pi pi-sort-amount-up'"
                                         (onClick)="toggleActivitiesChartType()"
-                                        [pTooltip]="'ANALYZE.ACTIVITIES.SWITCH_TO_DOUGHNUT' | translate"
+                                        [pTooltip]="activitiesChartType === 'bar' ? 'Wechseln zu gewichteten Werten' : 'Wechseln zu ungewichteten Werten'"
                                         tooltipPosition="left"
                                         styleClass="p-button-text">
                                     </p-button>
@@ -91,7 +91,12 @@
                                         </p-chart>
                                     </div>
                                     <div *ngIf="activitiesChartType === 'doughnut'" class="chart-container">
-                                        <canvas #doughnutChart class="h-full w-full min-h-[400px]"></canvas>
+                                        <p-chart 
+                                            type="bar" 
+                                            [data]="activitiesChartData" 
+                                            [options]="barChartOptions"
+                                            class="h-full w-full min-h-[400px]">
+                                        </p-chart>
                                     </div>
                                     <p *ngIf="activitiesChartType === 'doughnut'" class="mt-2">{{ 'ANALYZE.ACTIVITIES.EXPLANATION' | translate }}</p>
                                     <p class="text-sm text-gray-500 mt-2">{{ 'ANALYZE.ACTIVITIES.HINT' | translate }}</p>
