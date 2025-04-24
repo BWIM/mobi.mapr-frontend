@@ -156,7 +156,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         center: fromLonLat([8.5, 49.05]),
         zoom: 7,
         minZoom: 5,
-        constrainResolution: true
+        constrainResolution: true,
+        enableRotation: false,
+        constrainRotation: true
       })
     });
   }
