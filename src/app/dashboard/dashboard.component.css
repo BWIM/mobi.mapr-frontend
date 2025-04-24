@@ -170,10 +170,20 @@
 .sidebar-tab {
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
+    pointer-events: all;
 }
 
 .sidebar-tab:hover {
     background-color: rgba(255, 255, 255, 1);
+}
+
+.sidebar-tab * {
+    pointer-events: none;
+}
+
+/* Additional clickable tab styling */
+.clickable-tab {
+    user-select: none;
 }
 
 .rotate-text {
