@@ -125,3 +125,18 @@
         </p-button>
     </div>
 </p-dialog>
+
+<p-dialog 
+    [(visible)]="showShortcutsDialog" 
+    [modal]="true" 
+    header="Tastenkürzel" 
+    [style]="{width: '50vw'}"
+    [draggable]="false" 
+    [resizable]="false">
+    <div class="shortcuts-container">
+        <div class="shortcut-item" *ngFor="let shortcut of shortcuts">
+            <span class="shortcut-key">{{shortcut.key}}</span>
+            <span class="shortcut-description">{{shortcut.description}}</span>
+        </div>
+    </div>
+</p-dialog>

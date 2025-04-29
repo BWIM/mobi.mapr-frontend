@@ -5,3 +5,29 @@
     z-index: 10000;
 }
 
+.shortcuts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.shortcut-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.shortcut-key {
+    background-color: #f0f0f0;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-family: monospace;
+    font-weight: bold;
+    min-width: 2rem;
+    text-align: center;
+}
+
+.shortcut-description {
+    flex: 1;
+}
+

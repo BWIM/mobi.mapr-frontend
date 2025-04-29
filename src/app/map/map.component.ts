@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, HostListener } from '@angular/core';
 import { default as OlMap } from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
@@ -8,7 +8,7 @@ import VectorSource from 'ol/source/Vector';
 import { Feature } from 'ol';
 import { fromLonLat } from 'ol/proj';
 import GeoJSON from 'ol/format/GeoJSON';
-import { Geometry } from 'ol/geom';
+import { Geometry, Point } from 'ol/geom';
 import { MapService } from './map.service';
 import { Subscription } from 'rxjs';
 import { LegendComponent } from '../legend/legend.component';
@@ -20,6 +20,8 @@ import { ProjectsService } from '../projects/projects.service';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { FeatureSelectionService } from '../shared/services/feature-selection.service';
 import { LoadingService } from '../services/loading.service';
+import { Style, Text, Fill, Stroke } from 'ol/style';
+import VectorLayer from 'ol/layer/Vector';
 
 @Component({
   selector: 'app-map',
@@ -38,12 +40,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private vectorLayer!: WebGLVectorLayer<VectorSource>;
   private baseLayer!: TileLayer<XYZ>;
   private hiddenCountyLayer!: WebGLVectorLayer<VectorSource>;
-  private lastClickedFeature: Feature | null = null;
+  private labelLayer!: VectorLayer<VectorSource>;
   private subscriptions: Subscription[] = [];
   private landkreise: { [key: string]: any } | null = null;
   private tooltip!: HTMLElement;
   private level: 'state' | 'county' | 'municipality' | 'hexagon' = 'county';
-  private originalFeatureColors: Map<string, number[]> = new Map();
+  private isFrozen = false;
 
   constructor(
     private mapService: MapService,
@@ -69,32 +71,43 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private setupSubscriptions(): void {
     this.subscriptions.push(
       this.mapService.features$.subscribe(async features => {
-        this.loadingService.startLoading(); // Start loading when new features arrive
-        
-        // Reset cache and clear layers, but don't reset view
-        this.mapBuildService.resetCache();
-        if (this.vectorLayer && this.vectorLayer.getSource()) {
-          this.vectorLayer.getSource()?.clear();
-        }
-        if (this.hiddenCountyLayer && this.hiddenCountyLayer.getSource()) {
-          this.hiddenCountyLayer.getSource()?.clear();
-        }
-        
-        // Then set new features and update
-        this.landkreise = features;
-        
-        try {
-          // Update features
-          await this.updateMapFeatures();
+        try {          
+          // Reset cache and clear layers
+          this.mapBuildService.resetCache();
+          if (this.vectorLayer && this.vectorLayer.getSource()) {
+            this.vectorLayer.getSource()?.clear();
+          }
+          if (this.hiddenCountyLayer && this.hiddenCountyLayer.getSource()) {
+            this.hiddenCountyLayer.getSource()?.clear();
+          }
           
-          // Ensure we have a clean state before zooming
-          await new Promise(resolve => setTimeout(resolve, 250));
+          this.landkreise = features;
           
-          // Now zoom to the features
-          this.zoomToFeatures();
-          this.loadingService.stopLoading();
+          if (this.landkreise) {
+            // First load county level features
+            const countyGeojson = await this.mapBuildService.buildMap(this.landkreise, 'county');
+            if (countyGeojson?.features) {
+              // If we have few enough features, we can zoom directly to county level
+              if (countyGeojson.features.length <= 50) {
+                await this.updateVectorLayerFeatures(countyGeojson, 'county');
+                this.level = 'county';
+              } else {
+                // Otherwise, load state level for initial view
+                const stateGeojson = await this.mapBuildService.buildMap(this.landkreise, 'state');
+                if (stateGeojson?.features) {
+                  await this.updateVectorLayerFeatures(stateGeojson, 'state');
+                  this.level = 'state';
+                }
+              }
+              
+              // Ensure features are rendered before zooming
+              await new Promise(resolve => setTimeout(resolve, 250));
+              this.zoomToFeatures();
+            }
+          }
         } catch (error) {
           console.error('Error updating features:', error);
+        } finally {
           this.loadingService.stopLoading();
         }
       }),
@@ -147,12 +160,34 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         'fill-color': [0, 0, 0, 0]
       }
     });
+
+    // Add a new layer for labels when in frozen mode
+    this.labelLayer = new VectorLayer({
+      source: new VectorSource(),
+      style: (feature) => {
+        return new Style({
+          text: new Text({
+            text: feature.get('labelText'),
+            font: '10px Calibri,sans-serif',
+            fill: new Fill({
+              color: '#000'
+            }),
+            stroke: new Stroke({
+              color: '#fff',
+              width: 2
+            }),
+            offsetY: 0
+          })
+        });
+      },
+      visible: false
+    });
   }
 
   private initializeMapInstance(): void {
     this.map = new OlMap({
       target: 'map',
-      layers: [this.baseLayer, this.vectorLayer, this.hiddenCountyLayer],  // Add hiddenCountyLayer
+      layers: [this.baseLayer, this.vectorLayer, this.hiddenCountyLayer, this.labelLayer],  // Add labelLayer
       view: new View({
         center: fromLonLat([8.5, 49.05]),
         zoom: 7,
@@ -197,25 +232,24 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private async updateMapFeatures(): Promise<void> {
-    if (!this.landkreise) {
-      this.loadingService.stopLoading();
-      return;
-    }
-    
-    const zoom = this.map.getView().getZoom();
-    if (!zoom) {
-      this.loadingService.stopLoading();
-      return;
-    }
-
-    const vectorSource = this.vectorLayer.getSource();
-    const hiddenSource = this.hiddenCountyLayer.getSource();
-    if (!vectorSource || !hiddenSource) {
-      this.loadingService.stopLoading();
-      return;
-    }
-
     try {
+      if (!this.landkreise) {
+        return;
+      }
+      
+      const zoom = this.map.getView().getZoom();
+      if (!zoom) {
+        return;
+      }
+
+      const vectorSource = this.vectorLayer.getSource();
+      const hiddenSource = this.hiddenCountyLayer.getSource();
+      if (!vectorSource || !hiddenSource) {
+        return;
+      }
+
+      this.loadingService.startLoading();
+
       const level = this.determineFeatureLevel(zoom);
       
       // Always ensure we have counties in the hidden layer if needed
@@ -229,7 +263,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
       // Only update if the zoom drastically changed
       if (level !== this.level) {
-        console.log('level changed from', this.level, 'to', level);
         this.level = level;
         const extent = this.map.getView().calculateExtent(this.map.getSize());
         
@@ -288,7 +321,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     } catch (error) {
       console.error('Error updating map features:', error);
     } finally {
-      this.loadingService.stopLoading();
+      this.loadingService.stopLoadingAndReset();
     }
   }
 
@@ -369,27 +402,32 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private zoomToFeatures(): void {
-    console.log('zoomToFeatures');
     const vectorSource = this.vectorLayer.getSource();
     if (!vectorSource || vectorSource.getFeatures().length === 0) {
-      console.warn('No features to zoom to');
-      return;
+        console.warn('No features to zoom to');
+        return;
     }
 
-    const extent = vectorSource.getExtent();
+    let extent = vectorSource.getExtent();
     if (!extent || extent.some(val => !isFinite(val))) {
-      console.warn('Invalid extent', extent);
-      return;
+        console.warn('Invalid extent', extent);
+        return;
     }
 
     try {
-      this.map.getView().fit(extent, {
-        duration: 1000,
-        padding: [50, 50, 50, 50],
-        maxZoom: 10
-      });
+        // Adjust maxZoom based on the current level
+        const maxZoom = this.level === 'state' ? 8 : 10;
+        
+        this.map.getView().fit(extent, {
+            duration: 1000,
+            padding: [50, 50, 50, 50],
+            maxZoom: maxZoom
+        });
     } catch (error) {
-      console.error('Error zooming to features:', error);
+        console.error('Error zooming to features:', error);
+    } finally {
+      console.log('Zooming to features finished');
+      this.loadingService.stopLoading();
     }
   }
 
@@ -420,7 +458,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       
       this.map.forEachFeatureAtPixel(event.pixel, (feature) => {
         if (feature instanceof Feature) {
-          this.lastClickedFeature = feature;
           clickedFeature = feature;
 
           this.analyzeService.setMapType(this.level);
@@ -434,8 +471,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.featureSelectionService.setSelectedFeature(clickedFeature);
     });
 
-    // Existing pointer move handler
+    // Modify the pointermove handler
     this.map.on('pointermove', (evt) => {
+      // If frozen, don't update tooltip position
+      if (this.isFrozen) return;
+
       const pixel = this.map.getEventPixel(evt.originalEvent);
       const hit = this.map.hasFeatureAtPixel(pixel);
       
@@ -444,14 +484,21 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         if (feature) {
           const properties = feature.getProperties();
           const name = properties['name'] || 'N/A';
-          const score = properties['score'] !== undefined ? (properties['score'] * 100).toFixed(1) : 'N/A';
+          const score = properties['score'] !== undefined ? 
+            (properties['score'] * 100).toFixed(0) : 'N/A';
+
+          const score_name = this.getScoreName(properties['score']);
           
-          this.tooltip.innerHTML = `${name}<br>Score: ${score}%`;
+          if (this.isFrozen) {
+            this.tooltip.innerHTML = `${score_name} (${score}%)`;
+          } else {
+            this.tooltip.innerHTML = `${name}<br>${score_name} (${score}%)`;
+          }
           this.tooltip.style.display = 'block';
           this.tooltip.style.left = `${pixel[0] + 10}px`;
           this.tooltip.style.top = `${pixel[1] + 10}px`;
         }
-      } else {
+      } else if (!this.isFrozen) {
         this.tooltip.style.display = 'none';
       }
       
@@ -462,9 +509,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       }
     });
     
-    // Hide tooltip when moving the map
+    // Modify the movestart handler
     this.map.on('movestart', () => {
-      this.tooltip.style.display = 'none';
+      if (!this.isFrozen) {
+        this.tooltip.style.display = 'none';
+      }
     });
   }
 
@@ -485,4 +534,82 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     vectorLayer.setOpacity(1);
   }
 
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    // Only handle shortcuts if no input element is focused
+    if (document.activeElement?.tagName === 'INPUT' || 
+        document.activeElement?.tagName === 'TEXTAREA') {
+      return;
+    }
+
+    switch(event.key.toLowerCase()) {
+      case 'c':
+        this.zoomToFeatures();
+        break;
+      case 'f':
+        this.toggleFreeze();
+        break;
+    }
+  }
+
+  private toggleFreeze(): void {
+    this.isFrozen = !this.isFrozen;
+    
+    if (this.isFrozen) {
+      // Show labels for all visible features
+      const vectorSource = this.vectorLayer.getSource();
+      const labelSource = this.labelLayer.getSource();
+      
+      if (!vectorSource || !labelSource) return;
+      
+      // Clear any existing labels
+      labelSource.clear();
+      
+      // Create label features
+      const features = vectorSource.getFeatures();
+      features.forEach(feature => {
+        const properties = feature.getProperties();
+        const score = properties['score'] !== undefined ? 
+          (properties['score'] * 100).toFixed(0) : 'N/A';
+        const score_name = this.getScoreName(properties['score']);
+        
+        // Create a point feature at the center of the original feature
+        const geometry = feature.getGeometry();
+        if (geometry) {
+          const extent = geometry.getExtent();
+          const centerX = (extent[0] + extent[2]) / 2;
+          const centerY = (extent[1] + extent[3]) / 2;
+          
+          const labelFeature = new Feature({
+            geometry: new Point([centerX, centerY]),
+            labelText: `${score_name} (${score}%)`,
+            ars: properties['ars']
+          });
+          
+          labelSource.addFeature(labelFeature);
+        }
+      });
+      
+      // Show the label layer
+      this.labelLayer.setVisible(true);
+      
+      // Hide the regular tooltip
+      if (this.tooltip) {
+        this.tooltip.style.display = 'none';
+      }
+    } else {
+      // Hide the label layer
+      this.labelLayer.setVisible(false);
+    }
+  }
+
+  private getScoreName(score: number): string {
+    if (score <= 0) return "Error";
+    if (score <= 0.35) return "A";
+    if (score <= 0.5) return "B";
+    if (score <= 0.71) return "C";
+    if (score <= 1) return "D";
+    if (score <= 1.41) return "E";
+    return "F";
+  }
 }

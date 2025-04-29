@@ -10,6 +10,7 @@ export class LoadingService {
   private loadingCounter = 0;
 
   startLoading(): void {
+
     this.loadingCounter++;
     if (this.loadingCounter === 1) {
       this.loadingSubject.next(true);
@@ -21,5 +22,10 @@ export class LoadingService {
     if (this.loadingCounter === 0) {
       this.loadingSubject.next(false);
     }
+  }
+
+  stopLoadingAndReset(): void {
+    this.loadingCounter = 0;
+    this.loadingSubject.next(false);
   }
 } 

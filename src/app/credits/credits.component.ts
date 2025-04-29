@@ -14,6 +14,11 @@ interface InfoComponent {
   url?: string;
 }
 
+interface Shortcut {
+  key: string;
+  description: string;
+}
+
 @Component({
   selector: 'app-credits',
   standalone: true,
@@ -43,6 +48,13 @@ export class CreditsComponent implements OnInit {
     { code: 'de-sw', name: 'Schwäbisch', icon: 'pi pi-check' },
     { code: 'en', name: 'English', icon: 'pi pi-check' }
   ];
+
+  shortcuts: Shortcut[] = [
+    { key: 'C', description: 'Karte zentrieren' },
+    { key: 'F', description: 'Kartenoverlay einfrieren (für Screenshots)' }
+  ];
+
+  showShortcutsDialog = false;
 
   constructor(private translate: TranslateService) {}
 
@@ -111,6 +123,13 @@ export class CreditsComponent implements OnInit {
         this.toggleTheme();
       },
       tooltip: this.isDarkMode ? 'Light Mode' : 'Dark Mode'
+    },
+    {
+      icon: 'pi pi-key',
+      command: () => {
+        this.showShortcuts();
+      },
+      tooltip: 'Tastenkürzel'
     }
   ];
 
@@ -141,5 +160,9 @@ export class CreditsComponent implements OnInit {
     // Save language preference
     localStorage.setItem(this.LANGUAGE_KEY, lang);
     this.showLanguageDialog = false;
+  }
+
+  showShortcuts() {
+    this.showShortcutsDialog = true;
   }
 }
