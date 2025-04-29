@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { SharedModule } from '../shared/shared.module';
 import { MenuItem } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
@@ -6,6 +6,7 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { AccordionModule } from 'primeng/accordion';
 import { SpeedDialModule } from 'primeng/speeddial';
+import { TranslateService } from '@ngx-translate/core';
 
 interface InfoComponent {
   name: string;
@@ -27,10 +28,32 @@ interface InfoComponent {
   templateUrl: './credits.component.html',
   styleUrl: './credits.component.css'
 })
-export class CreditsComponent {
+export class CreditsComponent implements OnInit {
   showCreditsDialog = false;
   showHelpDialog = false;
+  showLanguageDialog = false;
   isDarkMode = false;
+  currentLang = 'de';
+
+  private readonly LANGUAGE_KEY = 'mobi.mapr.language';
+
+  languages = [
+    { code: 'de', name: 'Deutsch', icon: 'pi pi-check' },
+    { code: 'de-bw', name: 'Badisch', icon: 'pi pi-check' },
+    { code: 'de-sw', name: 'Schwäbisch', icon: 'pi pi-check' },
+    { code: 'en', name: 'English', icon: 'pi pi-check' }
+  ];
+
+  constructor(private translate: TranslateService) {}
+
+  ngOnInit() {
+    // Load saved language preference
+    const savedLang = localStorage.getItem(this.LANGUAGE_KEY);
+    if (savedLang) {
+      this.currentLang = savedLang;
+      this.translate.use(savedLang);
+    }
+  }
 
   visualComponents: InfoComponent[] = [
     { name: 'OpenStreetMap', icon: 'pi pi-map', url: 'https://www.openstreetmap.org' },
@@ -76,6 +99,13 @@ export class CreditsComponent {
       tooltip: 'Hilfe'
     },
     {
+      icon: 'pi pi-globe',
+      command: () => {
+        this.showLanguageDialog = true;
+      },
+      tooltip: 'Sprache ändern'
+    },
+    {
       icon: this.isDarkMode ? 'pi pi-sun' : 'pi pi-moon',
       command: () => {
         this.toggleTheme();
@@ -100,8 +130,16 @@ export class CreditsComponent {
     this.isDarkMode = !this.isDarkMode;
     document.documentElement.classList.toggle('dark');
     // Update the icon in the menu
-    const themeItem = this.items[2];
+    const themeItem = this.items[3];
     themeItem.icon = this.isDarkMode ? 'pi pi-sun' : 'pi pi-moon';
     themeItem.tooltip = this.isDarkMode ? 'Light Mode' : 'Dark Mode';
+  }
+
+  switchLanguage(lang: string) {
+    this.currentLang = lang;
+    this.translate.use(lang);
+    // Save language preference
+    localStorage.setItem(this.LANGUAGE_KEY, lang);
+    this.showLanguageDialog = false;
   }
 }
