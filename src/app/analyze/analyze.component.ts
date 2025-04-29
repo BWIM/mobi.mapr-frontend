@@ -390,12 +390,14 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Get category names and weights from formatted_categories
     const categoryMap = new Map(this.projectDetails.categories.map(cat => [cat.id, { name: cat.name, weight: cat.weight }]));
 
-    // Create array with all necessary data
-    const categoryData = weightedCategoryScores.map(category => ({
-      name: categoryMap.get(category.category)?.name || `${category.category}`,
-      score: category.score,
-      weight: categoryMap.get(category.category)?.weight || 1
-    }));
+    // Create array with all necessary data and filter for weights > 3%
+    const categoryData = weightedCategoryScores
+      .map(category => ({
+        name: categoryMap.get(category.category)?.name || `${category.category}`,
+        score: category.score,
+        weight: categoryMap.get(category.category)?.weight || 1
+      }))
+      .filter(item => item.weight > 3); // Filter for weights greater than 3%
 
     // Sort based on chart type
     let sortedData;
