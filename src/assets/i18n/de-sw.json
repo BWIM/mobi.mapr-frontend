@@ -1,0 +1,253 @@
+{
+  "PROJECTS": {
+    "TITLE": "Projekt",
+    "LIST": {
+      "TITLE": "Projekt",
+      "NO_PROJECTS": "Bitte lad d'Seit neu",
+      "DELETED": "Alli Informatione zum Projekt send glöscht worde"
+    },
+    "DETAILS": {
+      "NAME": "Namme",
+      "DESCRIPTION": "Beschriibig",
+      "CREATED": "Erstellt am",
+      "UPDATED": "Aktualisiert am"
+    },
+    "FIELDS": {
+      "NAME": "Namme",
+      "DESCRIPTION": "Beschriibig",
+      "TYPE": "Typ",
+      "CREATED": "Erstellt am",
+      "STATUS": "Status",
+      "GROUP": "Gruppe",
+      "SELECT_GROUP": "Gruppe uswähle"
+    },
+    "ACTIONS": {
+      "CREATE": "Neis Projekt",
+      "CREATE_GROUP": "Neui Gruppe",
+      "CANCEL_TOOLTIP": "Abbreche",
+      "SAVE_TOOLTIP": "Spichere",
+      "MORE_OPTIONS": "Mehr Optione",
+      "EDIT_GROUP": "Gruppe bearbeite",
+      "SHOW_RESULTS": "Ergebnis zeige",
+      "CREATE_GROUP_TOOLTIP": "Gruppe erstelle",
+      "CREATE_TOOLTIP": "Erstelle"
+    },
+    "STATUS": {
+      "FINISHED": "Fertig",
+      "IN_PROGRESS": "In Bearbeitig"
+    },
+    "EDIT": {
+      "TITLE": "Projekt bearbeite"
+    },
+    "UNGROUPED": "Nit gruppierti Projekt",
+    "TYPE": {
+      "DEFAULT": "Standard",
+      "PERSONAL": "Persönlich"
+    },
+    "MESSAGES": {
+      "UPDATE_SUCCESS": "Projekt isch aktualisiert worde",
+      "UPDATE_ERROR": "Fehler bim Aktualisiere vom Projekt",
+      "CONFIRM_DELETE": "Witt des Projekt würklich lösche?",
+      "UNFINISHED_PROJECTS": "S git no nit fertigi Projekt",
+      "UNFINISHED_PROJECTS_DETAIL": "Die Projekt müsse no fertig gmacht werre: {projects}",
+      "CHECK_PROJECTS_ERROR": "Fehler bim Überprüfe vo de Projekt",
+      "FORM_INVALID": "Formular isch nit gültig",
+      "CREATE_ERROR": "Fehler bim Erstelle",
+      "CREATE_SUCCESS": "Erfolgrich erstellt",
+      "INVALID_DATA": "Nit gültigi Date",
+      "PERMISSION_DENIED": "Kei Berechtigung",
+      "SERVER_ERROR": "S het e Fehler im Backend gä",
+      "LOAD_GROUPS_ERROR": "Gruppe hän nit glade werre könne",
+      "CONFIRM_DELETE_GROUP": "Witt die Gruppe würklich lösche?",
+      "DELETE_GROUP_SUCCESS": "Gruppe isch glöscht worde",
+      "DELETE_GROUP_ERROR": "Gruppe cha nit glöscht werre",
+      "LOAD_AREAS_ERROR": "Gebiet könne nit glade werre"
+    },
+    "DELETE": {
+      "TITLE": "Projekt lösche",
+      "CONFIRMATION": "Bisch sicher, dass des Projekt glöscht werre soll?"
+    },
+    "PROGRESS_TOOLTIP": "Fortschritt",
+    "WIZARD": {
+      "SELECT_ALL_ACTIVITIES": "Alli uswähle",
+      "SELECT_ALL_PERSONAS": "Alli Personas uswähle",
+      "DESELECT_ALL_PERSONAS": "Alli Personas abwähle",
+      "SELECT_ALL_MODES": "Alli Modi uswähle",
+      "DESELECT_ALL_MODES": "Alli Modi abwähle",
+      "DESELECT_ALL_ACTIVITIES": "Alli abwähle"
+    },
+    "RESULTS": {
+      "LOAD_ERROR": "Ergebnis könne nit glade werre"
+    },
+    "DEFAULT_GROUP": "Vorberechneti Karte",
+    "AUTO_CLOSE_SIDEBAR": "Sidebar pinne"
+  },
+  "PROJECT_GROUPS": {
+    "CREATE": {
+      "TITLE": "Neui Gruppe"
+    },
+    "EDIT": {
+      "TITLE": "Gruppe bearbeite"
+    },
+    "FIELDS": {
+      "NAME": "Namme"
+    },
+    "MESSAGES": {
+      "UPDATE_SUCCESS": "Projektgruppe isch aktualisiert worde",
+      "UPDATE_ERROR": "Fehler bim Aktualisiere vo de Projektgruppe",
+      "CONFIRM_DELETE": "Bisch sicher, dass die Projektgruppe glöscht werre soll?",
+      "CREATE_SUCCESS": "S Erstelle vo neuer Gruppe isch erfolgrich gsi",
+      "CREATE_ERROR": "Fehler bim Erstelle vo neuer Gruppe",
+      "CONFIRM_DELETE_MULTIPLE": "Alli usgwählte Gruppe lösche?",
+      "DELETE_SUCCESS": "Erfolgrich glöscht",
+      "DELETE_ERROR": "Fehler bim Lösche"
+    },
+    "DELETE_WARNING": "Die Projektgruppe wird glöscht",
+    "DELETE": "Projektgruppe lösche",
+    "DELETE_TOOLTIP": "Gruppe lösche",
+    "MANAGE_UNUSED": "Nit bruchti Projektgruppe verwalte",
+    "UNUSED_GROUPS": "Nit bruchti Projektgruppe",
+    "NO_UNUSED_GROUPS": "S git kei nit bruchti Gruppe",
+    "DELETE_SELECTED": "Usgwählte Gruppe lösche"
+  },
+  "COMMON": {
+    "ACTIONS": {
+      "SAVE": "Spichere",
+      "CANCEL": "Abbreche",
+      "EDIT": "Bearbeite",
+      "DELETE": "Lösche",
+      "LABEL": "Aktione",
+      "CLOSE": "Zuemache",
+      "CONFIRM": "Bestätige",
+      "SHARE": "Deile",
+      "DOWNLOAD": "Abelade",
+      "CANCEL_TOOLTIP": "Abbreche",
+      "SAVE_TOOLTIP": "Spichere"
+    },
+    "MESSAGES": {
+      "ERROR": {
+        "LOAD": "Fehler bim Lade vo de Date",
+        "DELETE": "Fehler bim Lösche",
+        "CREATE": "Fehler bim Erstelle",
+        "UPDATE": "Fehler bim Aktualisiere"
+      },
+      "SUCCESS": {
+        "DELETE": "Erfolgrich glöscht",
+        "CREATE": "Erfolgrich erstellt",
+        "UPDATE": "Aktualisiert"
+      },
+      "CONFIRM_DELETE": "Bisch sicher, dass des Projekt glöscht werre soll?",
+      "CONFIRM_DELETE_GROUP": "Bisch sicher, dass die Projektgruppe glöscht werre soll?"
+    }
+  },
+  "LEGEND": {
+    "LVLA": "D erforderlichi Mobilitätszit isch maximal 35 % im lokale Vergliich.",
+    "LVLB": "D erforderlichi Mobilitätszit ligt zwische 36 % und 50 % im lokale Vergliich.",
+    "LVLC": "D erforderlichi Mobilitätszit ligt zwische 51 % und 71 % im lokale Vergliich.",
+    "LVLD": "D erforderlichi Mobilitätszit ligt zwische 72 % und 100 % im lokale Vergliich.",
+    "LVLE": "D erforderlichi Mobilitätszit ligt zwische 101 % und 140 % im lokale Vergliich.",
+    "LVLF": "D erforderlichi Mobilitätszit isch mindestens 141 % im lokale Vergliich."
+  },
+  "MAP": {
+    "ACTIONS": {
+      "HEXAGON": "Hexagon",
+      "GEMEINDE": "Gmeind",
+      "LANDKREIS": "Landchreis",
+      "LAND": "Land"
+    },
+    "CONTROLS": {
+      "ZOOM_IN": "Inezoome",
+      "ZOOM_OUT": "Usezoome"
+    },
+    "VISUALIZATION": {
+      "MEAN": "Durchschnitt",
+      "MEDIAN": "Median",
+      "POP": "Bevölkerig",
+      "AREA": "Flächi"
+    }
+  },
+  "PROJECT_WIZARD": {
+    "CREATE_NEW_PROJECT": "Neis Projekt erstelle",
+    "SELECT_ACTIVITIES": "Relevanti Aktivitete uswähle",
+    "CREATE_PROJECT": "Projekt erstelle",
+    "PROJECT_NAME": "Projektnamme",
+    "DESCRIPTION": "Beschriibig",
+    "PROJECT_SETTINGS": "Projekteistellige",
+    "MAKE_PUBLIC": "Projekt öffentlich mache",
+    "ALLOW_SHARING": "Freigab erlaube",
+    "SEND_EMAIL": "E-Mail nach Abschluss schicke",
+    "LOAD_AREAS_ON_MAP": "Berechneti Gmeinde direkt uf de Karte zeige",
+    "ERRORS": {
+      "NAME_REQUIRED": "Bitte e Projektnamme iigä."
+    },
+    "ACTIVITIES": {
+      "MID": "Aktivitäte",
+      "NON_MID": "Standardaktivitäte",
+      "TOGGLE_TOOLTIP": "umschalte",
+      "NO_MID_ACTIVITIES": "Fehler bi de Aktivitete. Lad d'Seit neu."
+    },
+    "PROJECT_NAME_TOOLTIP": "Projektnamme",
+    "DESCRIPTION_TOOLTIP": "Projektbeschriibig",
+    "PROJECT_GROUP_TOOLTIP": "Projektgruppe uswähle",
+    "SEND_EMAIL_TOOLTIP": "E-Mail nach Abschluss schicke",
+    "LOAD_AREAS_ON_MAP_TOOLTIP": "Bereich direkt lade",
+    "CANCEL_TOOLTIP": "Erstellig vom Projekt abbreche",
+    "BACK_TOOLTIP": "E Schritt zrugggah",
+    "FINISH_TOOLTIP": "Fertigstelle",
+    "NEXT_TOOLTIP": "Wiiter",
+    "STEPS_TOOLTIP": "Schritt"
+  },
+  "SIDEBAR": {
+    "TITLE": "Details",
+    "DESCRIPTION": "Beschriibig",
+    "STATUS": "Status",
+    "NO_SELECTION": "Kei Uswahl",
+    "CLICK_HINT": "Klick uf e Karte zum Details azeige",
+    "PROJECT_INFO": "Projektinformatione",
+    "ACTIVITIES": "Aktivitäte",
+    "MODES": "Modi",
+    "PERSONAS": "Personas",
+    "NO_PROJECT_SELECTED": "Kei Projekt usgwählt",
+    "EXPORT_PDF_LANDSCAPE": "PDF im Querformat exportiere",
+    "EXPORT_PDF_PORTRAIT": "PDF im Hochformat exportiere",
+    "SHARE_LINK": "Link deile",
+    "SHARE_LINK_DESCRIPTION": "Deil de Link, damit anderi s Projekt ohni Konto azeige könne.",
+    "SHARE": "Deile",
+    "COPY_LINK": "Link kopiere",
+    "COPY_LINK_SUCCESS": "Link isch kopiert worde",
+    "SHARE_TOOLTIP": "Deile",
+    "EXPORT_PDF_LANDSCAPE_TOOLTIP": "Im Querformat exportiere",
+    "EXPORT_PDF_PORTRAIT_TOOLTIP": "Im Hochformat exportiere",
+    "AVERAGE_TYPE": "Mittelwerttyp",
+    "POPULATION_AREA": "Bevölkerig/Flächi",
+    "MEDIAN": "Median",
+    "AVERAGE": "Durchschnitt",
+    "AREA": "Flächi",
+    "POPULATION": "Bevölkerig",
+    "OPACITY_THRESHOLDS": "Farb-Dichti",
+    "COUNTY_THRESHOLD": "Landchreis",
+    "MUNICIPALITY_THRESHOLD": "Gmeinde",
+    "HEXAGON_THRESHOLD": "Hexagon",
+    "REDUCE_OPACITY": "Knopf halte zum Basis-Karte besser gseh.",
+    "REDUCE_OPACITY_TOOLTIP": "Features weniger intensiv azeige",
+    "RESTORE_OPACITY": "Karte widerherstelle",
+    "ZOOM_TO_FEATURES": "Karte zentriere",
+    "ZOOM_TO_FEATURES_TOOLTIP": "Zentriert d'Karte wider zum Initialzustand"
+  },
+  "ANALYZE": {
+    "PERSONA": {
+      "TITLE": "Persona",
+      "NO_DATA": "Kei Date verfüegbar"
+    },
+    "ACTIVITIES": {
+      "TITLE": "Aktivitäte",
+      "NO_DATA": "Kei Date verfüegbar",
+      "SWITCH_TO_DOUGHNUT": "Aasicht wechsle",
+      "HINT": "Bitte beachte, dass s bi de Gwichtig uf Landchreis-Ebene zu Ungenauigkeite chönn cho.",
+      "EXPLANATION": "D Aktivitäte gwichtet nach lokaler Relevanz"
+    },
+    "MODES": {
+      "TITLE": "Modi"
+    }
+  }
+} 

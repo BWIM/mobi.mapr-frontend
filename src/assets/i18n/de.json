@@ -300,7 +300,8 @@
     "DATA_SECTION_TOOLTIP": "Verwendete Datenquellen und -verarbeitung",
     "BACKEND_SECTION_TOOLTIP": "Verwendete Backend-Technologien",
     "ROUTING_SECTION_TOOLTIP": "Verwendete Routing-Dienste",
-    "VISIT_COMPONENT_WEBSITE": "Besuche die {{name}} Website"
+    "VISIT_COMPONENT_WEBSITE": "Besuche die {{name}} Website",
+    "LANGUAGE_BUTTON_TOOLTIP": "Sprache ändern"
   },
   "HELP": {
     "GETTING_STARTED_TOOLTIP": "Erste Schritte mit der Anwendung",
