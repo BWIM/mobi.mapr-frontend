@@ -135,6 +135,22 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     );
   }
 
+  zoomToFeatures(): void {
+    const map = this.mapService.getMap();
+    if (map) {
+      const vectorSource = this.mapService.getMainLayer()?.getSource();
+      if (vectorSource && vectorSource.getFeatures().length > 0) {
+        const extent = vectorSource.getExtent();
+        if (extent) {
+          map.getView().fit(extent, {
+            duration: 1000,
+            padding: [50, 50, 50, 50],
+            maxZoom: 10
+          });
+        }
+      }
+    }
+  }
 
   ngOnInit() {}
 
