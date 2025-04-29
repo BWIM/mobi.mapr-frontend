@@ -230,7 +230,9 @@
     "HEXAGON_THRESHOLD": "Hexagon",
     "REDUCE_OPACITY": "Reduce opacity",
     "REDUCE_OPACITY_TOOLTIP": "Reduce opacity of features",
-    "RESTORE_OPACITY": "Restore opacity"
+    "RESTORE_OPACITY": "Restore opacity",
+    "ZOOM_TO_FEATURES": "Recenter Map",
+    "ZOOM_TO_FEATURES_TOOLTIP": "Recenters the map to the original state"
   },
   "ANALYZE": {
     "PERSONA": {

@@ -230,7 +230,9 @@
     "HEXAGON_THRESHOLD": "Hexagon",
     "REDUCE_OPACITY": "Knopf halten, um Basis-Karte besser zu sehen.",
     "REDUCE_OPACITY_TOOLTIP": "Features weniger intensiv anzeigen",
-    "RESTORE_OPACITY": "Karte wiederherstellen"
+    "RESTORE_OPACITY": "Karte wiederherstellen",
+    "ZOOM_TO_FEATURES": "Karte zentrieren",
+    "ZOOM_TO_FEATURES_TOOLTIP": "Zentriert die Karte wieder zum Initialzustand"
   },
   "ANALYZE": {
     "PERSONA": {
