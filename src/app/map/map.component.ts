@@ -89,7 +89,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           }
           
           this.landkreise = features;
-          console.log('Landkreise:', this.landkreise);
           
           if (this.landkreise) {
             // First load county level features
@@ -265,7 +264,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       
       // Always ensure we have counties in the hidden layer if needed
       if (level !== 'state' && hiddenSource.getFeatures().length === 0) {
-        console.log('Loading counties into hidden layer');
         const countyGeojson = await this.mapBuildService.buildMap(this.landkreise, 'county');
         if (countyGeojson?.features) {
           await this.updateHiddenLayerFeatures(countyGeojson, 'county');
@@ -437,7 +435,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     } catch (error) {
         console.error('Error zooming to features:', error);
     } finally {
-      console.log('Zooming to features finished');
       this.loadingService.stopLoading();
     }
   }
@@ -529,7 +526,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private setLowOpacity(): void {
-    console.log('setLowOpacity');
     const vectorLayer = this.mapService.getMainLayer();
     if (!vectorLayer) return;
 

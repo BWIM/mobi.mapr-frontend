@@ -26,6 +26,10 @@ export class StatisticsService {
 
   set visible(value: boolean) {
     this._visible.next(value);
+    if (!value) {
+      // Clear municipalities cache when closing statistics view
+      this.mapBuildService.clearMunicipalitiesCache();
+    }
   }
 
   async loadAllMunicipalities(): Promise<void> {
@@ -36,7 +40,6 @@ export class StatisticsService {
         feature.setProperties({ ars: id.substring(0, 5) + '0000000' });
         return feature;
       });
-      console.log('Features:', features);
       await this.mapBuildService.buildMap(this.mapBuildService.getLandkreise(), 'municipality', features);
     }
   }
@@ -65,7 +68,6 @@ export class StatisticsService {
         }
         break;
     }
-    console.log('Features:', features);
 
     const scores = features
       .map(feature => ({

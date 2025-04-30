@@ -134,6 +134,12 @@ export class MapBuildService {
         this.municipalitiesLoaded.next(false);
     }
 
+    clearMunicipalitiesCache(): void {
+        this.cache.municipalities = {};
+        this.loadingPromises.municipalities = {};
+        this.municipalitiesLoaded.next(false);
+    }
+
     private async loadStates(landkreise: { [key: string]: { [key: string]: { [key: string]: [number, number] } } }): Promise<void> {
         // Group counties by state (first 2 digits of the landkreis ID)
         const stateIds = [...new Set(Object.keys(landkreise).map(id => id.substring(0, 2) + '0000000000'))];
