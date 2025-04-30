@@ -248,15 +248,69 @@
     },
     "MODES": {
       "TITLE": "Modi"
+    },
+    "TITLE": "Details",
+    "START": "Start",
+    "END": "End",
+    "PROPERTIES": {
+      "POPULATION": "Bevölkerig"
+    },
+    "WEIGHTING": {
+      "POPULATION": "Nach Bevölkerig gwichte",
+      "AREA": "Nach Flächi gwichte"
+    },
+    "LOADING": {
+      "HINT": "Hinweis: Je größer d'Flächi isch, wo de druff klickt hesch, desto länger brucht's zum Lade!"
     }
   },
   "STATISTICS": {
     "TITLE": "Schtatistige",
-    "SHOW_STATISTICS_TOOLTIP": "Zeig mir mo die Schtatistige für ebbes Projekt"
+    "SHOW_STATISTICS_TOOLTIP": "Zeig mir mo die Schtatistige für ebbes Projekt",
+    "STATES": "Bundesländer",
+    "COUNTIES": "Landkreise",
+    "MUNICIPALITIES": "Gemeinden",
+    "RANK": "Rang",
+    "NAME": "Name",
+    "SCORE": "Score",
+    "GRADE": "Note",
+    "CURRENT_SETTINGS": "Aktuelle Einstellungen",
+    "POPULATION_WEIGHTED": "Bevölkerung gewichtet",
+    "AREA_WEIGHTED": "Fläche gewichtet"
   },
   "CREDITS": {
     "SHORTCUTS": {
+      "SHOW_STATISTICS": "Statistiken anzeigen",
+      "EXPORT_PDF_PORTRAIT": "PDF im Hochformat exportieren",
+      "EXPORT_PDF_LANDSCAPE": "PDF im Querformat exportieren",
+      "CENTER_MAP": "Karte zentrieren",
+      "FREEZE_MAP": "Kartenoverlay einfrieren (für Screenshots)",
       "SHARE": "Teile"
     }
+  },
+  "EXPORT": {
+    "IS_EXPORTING": "Export lauft grad...",
+    "GENERATING_PDF": "PDF wird erstellt..."
+  },
+  "SHARE": {
+    "NO_PROJECT_SELECTED": "Kei Projäkt usgwählt",
+    "CREATED_BY": "Erstellt von",
+    "EXPIRES": "Lauft ab am",
+    "DESCRIPTION": "Beschriibig",
+    "ACTIVITIES": "Aktivitäte",
+    "PERSONAS": "Personas",
+    "NO_ACTIVITIES": "Kei Aktivitäte",
+    "NO_PERSONAS": "Kei Personas",
+    "NO_DESCRIPTION": "Kei Beschriibig"
+  },
+  "DETAILS": {
+    "FIELDS": {
+      "OVERVIEW": "Übersicht",
+      "ACTIVITIES": "Aktivitäte"
+    }
+  },
+  "HELP": {
+    "GETTING_STARTED_TOOLTIP": "Erste Schritt mit de Awendig",
+    "FAQ_TOOLTIP": "Häufig gstellti Froge un Antworte",
+    "CONTACT_TOOLTIP": "Kontaktinformatione für de Support"
   }
 }

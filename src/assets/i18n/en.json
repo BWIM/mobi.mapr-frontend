@@ -318,6 +318,16 @@
   },
   "STATISTICS": {
     "TITLE": "Statistics",
-    "SHOW_STATISTICS_TOOLTIP": "View detailed statistics for this project"
+    "SHOW_STATISTICS_TOOLTIP": "View detailed statistics for this project",
+    "STATES": "States",
+    "COUNTIES": "Counties",
+    "MUNICIPALITIES": "Municipalities",
+    "RANK": "Rank",
+    "NAME": "Name",
+    "SCORE": "Score",
+    "GRADE": "Grade",
+    "CURRENT_SETTINGS": "Current settings",
+    "POPULATION_WEIGHTED": "Population weighted",
+    "AREA_WEIGHTED": "Area weighted"
   }
 }

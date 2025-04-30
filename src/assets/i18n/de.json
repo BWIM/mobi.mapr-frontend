@@ -318,6 +318,16 @@
   },
   "STATISTICS": {
     "TITLE": "Statistiken",
-    "SHOW_STATISTICS_TOOLTIP": "Detaillierte Statistiken für dieses Projekt anzeigen"
+    "SHOW_STATISTICS_TOOLTIP": "Detaillierte Statistiken für dieses Projekt anzeigen",
+    "STATES": "Bundesländer",
+    "COUNTIES": "Landkreise",
+    "MUNICIPALITIES": "Gemeinden",
+    "RANK": "Rang",
+    "NAME": "Name",
+    "SCORE": "Score",
+    "GRADE": "Note",
+    "CURRENT_SETTINGS": "Aktuelle Einstellungen",
+    "POPULATION_WEIGHTED": "Bevölkerung gewichtet",
+    "AREA_WEIGHTED": "Fläche gewichtet"
   }
 }

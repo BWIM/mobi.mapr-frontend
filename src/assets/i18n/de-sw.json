@@ -1,10 +1,10 @@
 {
   "PROJECTS": {
-    "TITLE": "Projekt",
+    "TITLE": "Projäkkd",
     "LIST": {
-      "TITLE": "Projekt",
+      "TITLE": "Projäkkd",
       "NO_PROJECTS": "Bitte lad d'Seit neu",
-      "DELETED": "Alli Informatione zum Projekt send glöscht worde"
+      "DELETED": "Alli Informatione zum Projäkkd send glöscht worde"
     },
     "DETAILS": {
       "NAME": "Namme",
@@ -22,7 +22,7 @@
       "SELECT_GROUP": "Gruppe uswähle"
     },
     "ACTIONS": {
-      "CREATE": "Neis Projekt",
+      "CREATE": "Neis Projäkkd",
       "CREATE_GROUP": "Neui Gruppe",
       "CANCEL_TOOLTIP": "Abbreche",
       "SAVE_TOOLTIP": "Spichere",
@@ -37,20 +37,20 @@
       "IN_PROGRESS": "In Bearbeitig"
     },
     "EDIT": {
-      "TITLE": "Projekt bearbeite"
+      "TITLE": "Projäkkd bearbeite"
     },
-    "UNGROUPED": "Nit gruppierti Projekt",
+    "UNGROUPED": "Nit gruppierti Projäkkd",
     "TYPE": {
       "DEFAULT": "Standard",
       "PERSONAL": "Persönlich"
     },
     "MESSAGES": {
-      "UPDATE_SUCCESS": "Projekt isch aktualisiert worde",
-      "UPDATE_ERROR": "Fehler bim Aktualisiere vom Projekt",
-      "CONFIRM_DELETE": "Witt des Projekt würklich lösche?",
-      "UNFINISHED_PROJECTS": "S git no nit fertigi Projekt",
-      "UNFINISHED_PROJECTS_DETAIL": "Die Projekt müsse no fertig gmacht werre: {projects}",
-      "CHECK_PROJECTS_ERROR": "Fehler bim Überprüfe vo de Projekt",
+      "UPDATE_SUCCESS": "Projäkkd isch aktualisiert worde",
+      "UPDATE_ERROR": "Fehler bim Aktualisiere vom Projäkkd",
+      "CONFIRM_DELETE": "Witt des Projäkkd würklich lösche?",
+      "UNFINISHED_PROJECTS": "S git no nit fertigi Projäkkd",
+      "UNFINISHED_PROJECTS_DETAIL": "Die Projäkkd müsse no fertig gmacht werre: {projects}",
+      "CHECK_PROJECTS_ERROR": "Fehler bim Überprüfe vo de Projäkkd",
       "FORM_INVALID": "Formular isch nit gültig",
       "CREATE_ERROR": "Fehler bim Erstelle",
       "CREATE_SUCCESS": "Erfolgrich erstellt",
@@ -64,8 +64,8 @@
       "LOAD_AREAS_ERROR": "Gebiet könne nit glade werre"
     },
     "DELETE": {
-      "TITLE": "Projekt lösche",
-      "CONFIRMATION": "Bisch sicher, dass des Projekt glöscht werre soll?"
+      "TITLE": "Projäkkd lösche",
+      "CONFIRMATION": "Bisch sicher, dass des Projäkkd glöscht werre soll?"
     },
     "PROGRESS_TOOLTIP": "Fortschritt",
     "WIZARD": {
@@ -93,20 +93,20 @@
       "NAME": "Namme"
     },
     "MESSAGES": {
-      "UPDATE_SUCCESS": "Projektgruppe isch aktualisiert worde",
-      "UPDATE_ERROR": "Fehler bim Aktualisiere vo de Projektgruppe",
-      "CONFIRM_DELETE": "Bisch sicher, dass die Projektgruppe glöscht werre soll?",
+      "UPDATE_SUCCESS": "Projäkkdgruppe isch aktualisiert worde",
+      "UPDATE_ERROR": "Fehler bim Aktualisiere vo de Projäkkdgruppe",
+      "CONFIRM_DELETE": "Bisch sicher, dass die Projäkkdgruppe glöscht werre soll?",
       "CREATE_SUCCESS": "S Erstelle vo neuer Gruppe isch erfolgrich gsi",
       "CREATE_ERROR": "Fehler bim Erstelle vo neuer Gruppe",
       "CONFIRM_DELETE_MULTIPLE": "Alli usgwählte Gruppe lösche?",
       "DELETE_SUCCESS": "Erfolgrich glöscht",
       "DELETE_ERROR": "Fehler bim Lösche"
     },
-    "DELETE_WARNING": "Die Projektgruppe wird glöscht",
-    "DELETE": "Projektgruppe lösche",
+    "DELETE_WARNING": "Die Projäkkdgruppe wird glöscht",
+    "DELETE": "Projäkkdgruppe lösche",
     "DELETE_TOOLTIP": "Gruppe lösche",
-    "MANAGE_UNUSED": "Nit bruchti Projektgruppe verwalte",
-    "UNUSED_GROUPS": "Nit bruchti Projektgruppe",
+    "MANAGE_UNUSED": "Nit bruchti Projäkkdgruppe verwalte",
+    "UNUSED_GROUPS": "Nit bruchti Projäkkdgruppe",
     "NO_UNUSED_GROUPS": "S git kei nit bruchti Gruppe",
     "DELETE_SELECTED": "Usgwählte Gruppe lösche"
   },
@@ -136,8 +136,8 @@
         "CREATE": "Erfolgrich erstellt",
         "UPDATE": "Aktualisiert"
       },
-      "CONFIRM_DELETE": "Bisch sicher, dass des Projekt glöscht werre soll?",
-      "CONFIRM_DELETE_GROUP": "Bisch sicher, dass die Projektgruppe glöscht werre soll?"
+      "CONFIRM_DELETE": "Bisch sicher, dass des Projäkkd glöscht werre soll?",
+      "CONFIRM_DELETE_GROUP": "Bisch sicher, dass die Projäkkdgruppe glöscht werre soll?"
     }
   },
   "LEGEND": {
@@ -167,18 +167,18 @@
     }
   },
   "PROJECT_WIZARD": {
-    "CREATE_NEW_PROJECT": "Neis Projekt erstelle",
+    "CREATE_NEW_PROJECT": "Neis Projäkkd erstelle",
     "SELECT_ACTIVITIES": "Relevanti Aktivitete uswähle",
-    "CREATE_PROJECT": "Projekt erstelle",
-    "PROJECT_NAME": "Projektnamme",
+    "CREATE_PROJECT": "Projäkkd erstelle",
+    "PROJECT_NAME": "Projäkkdnamme",
     "DESCRIPTION": "Beschriibig",
-    "PROJECT_SETTINGS": "Projekteistellige",
-    "MAKE_PUBLIC": "Projekt öffentlich mache",
+    "PROJECT_SETTINGS": "Projäkkdeistellige",
+    "MAKE_PUBLIC": "Projäkkd öffentlich mache",
     "ALLOW_SHARING": "Freigab erlaube",
     "SEND_EMAIL": "E-Mail nach Abschluss schicke",
     "LOAD_AREAS_ON_MAP": "Berechneti Gmeinde direkt uf de Karte zeige",
     "ERRORS": {
-      "NAME_REQUIRED": "Bitte e Projektnamme iigä."
+      "NAME_REQUIRED": "Bitte e Projäkkdnamme iigä."
     },
     "ACTIVITIES": {
       "MID": "Aktivitäte",
@@ -186,12 +186,12 @@
       "TOGGLE_TOOLTIP": "umschalte",
       "NO_MID_ACTIVITIES": "Fehler bi de Aktivitete. Lad d'Seit neu."
     },
-    "PROJECT_NAME_TOOLTIP": "Projektnamme",
-    "DESCRIPTION_TOOLTIP": "Projektbeschriibig",
-    "PROJECT_GROUP_TOOLTIP": "Projektgruppe uswähle",
+    "PROJECT_NAME_TOOLTIP": "Projäkkdnamme",
+    "DESCRIPTION_TOOLTIP": "Projäkkdbeschriibig",
+    "PROJECT_GROUP_TOOLTIP": "Projäkkdgruppe uswähle",
     "SEND_EMAIL_TOOLTIP": "E-Mail nach Abschluss schicke",
     "LOAD_AREAS_ON_MAP_TOOLTIP": "Bereich direkt lade",
-    "CANCEL_TOOLTIP": "Erstellig vom Projekt abbreche",
+    "CANCEL_TOOLTIP": "Erstellig vom Projäkkd abbreche",
     "BACK_TOOLTIP": "E Schritt zrugggah",
     "FINISH_TOOLTIP": "Fertigstelle",
     "NEXT_TOOLTIP": "Wiiter",
@@ -203,15 +203,15 @@
     "STATUS": "Status",
     "NO_SELECTION": "Kei Uswahl",
     "CLICK_HINT": "Klick uf e Karte zum Details azeige",
-    "PROJECT_INFO": "Projektinformatione",
+    "PROJECT_INFO": "Projäkkdinformatione",
     "ACTIVITIES": "Aktivitäte",
     "MODES": "Modi",
     "PERSONAS": "Personas",
-    "NO_PROJECT_SELECTED": "Kei Projekt usgwählt",
+    "NO_PROJECT_SELECTED": "Kei Projäkkd usgwählt",
     "EXPORT_PDF_LANDSCAPE": "PDF im Querformat exportiere",
     "EXPORT_PDF_PORTRAIT": "PDF im Hochformat exportiere",
     "SHARE_LINK": "Link deile",
-    "SHARE_LINK_DESCRIPTION": "Deil de Link, damit anderi s Projekt ohni Konto azeige könne.",
+    "SHARE_LINK_DESCRIPTION": "Deil de Link, damit anderi s Projäkkd ohni Konto azeige könne.",
     "SHARE": "Deile",
     "COPY_LINK": "Link kopiere",
     "COPY_LINK_SUCCESS": "Link isch kopiert worde",
@@ -248,11 +248,34 @@
     },
     "MODES": {
       "TITLE": "Modi"
+    },
+    "TITLE": "Details",
+    "START": "Start",
+    "END": "End",
+    "PROPERTIES": {
+      "POPULATION": "Bevölkerung"
+    },
+    "WEIGHTING": {
+      "POPULATION": "Nach Bevölkerung gwichta",
+      "AREA": "Nach Fläche gwichta"
+    },
+    "LOADING": {
+      "HINT": "Hinweis: Je größer d'Fläche isch, wo du druff klickt hosch, desto länger brauchts zum Lada!"
     }
   },
   "STATISTICS": {
     "TITLE": "Schtadistige",
-    "SHOW_STATISTICS_TOOLTIP": "Zeig mir mo die Schtadistige für dis Projekt"
+    "SHOW_STATISTICS_TOOLTIP": "Zeig mir mo die Schtadistige für dis Projäkkd",
+    "STATES": "Bundesländer",
+    "COUNTIES": "Landkreise",
+    "MUNICIPALITIES": "Gemeinden",
+    "RANK": "Rang",
+    "NAME": "Name",
+    "SCORE": "Score",
+    "GRADE": "Note",
+    "CURRENT_SETTINGS": "Aktuelle Einstellungen",
+    "POPULATION_WEIGHTED": "Bevölkerung gewichtet",
+    "AREA_WEIGHTED": "Fläche gewichtet"
   },
   "CREDITS": {
     "SHORTCUTS": {
@@ -263,5 +286,31 @@
       "FREEZE_MAP": "Kartenoverlay einfrieren (für Screenshots)",
       "SHARE": "Teile"
     }
+  },
+  "EXPORT": {
+    "IS_EXPORTING": "Export lauft grad...",
+    "GENERATING_PDF": "PDF wird erstellt..."
+  },
+  "SHARE": {
+    "NO_PROJECT_SELECTED": "Koi Projäkkd ausgwählt",
+    "CREATED_BY": "Erstellt von",
+    "EXPIRES": "Lauft ab am",
+    "DESCRIPTION": "Beschreibung",
+    "ACTIVITIES": "Aktivitäta",
+    "PERSONAS": "Personas",
+    "NO_ACTIVITIES": "Koine Aktivitäta",
+    "NO_PERSONAS": "Koine Personas",
+    "NO_DESCRIPTION": "Koi Beschreibung"
+  },
+  "DETAILS": {
+    "FIELDS": {
+      "OVERVIEW": "Übersicht",
+      "ACTIVITIES": "Aktivitäta"
+    }
+  },
+  "HELP": {
+    "GETTING_STARTED_TOOLTIP": "Erschte Schritt mit dr Awendung",
+    "FAQ_TOOLTIP": "Häufig gstellte Froga ond Antworda",
+    "CONTACT_TOOLTIP": "Kontaktinformationen für da Support"
   }
 }

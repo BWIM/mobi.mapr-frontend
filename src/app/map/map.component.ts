@@ -89,6 +89,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           }
           
           this.landkreise = features;
+          console.log('Landkreise:', this.landkreise);
           
           if (this.landkreise) {
             // First load county level features

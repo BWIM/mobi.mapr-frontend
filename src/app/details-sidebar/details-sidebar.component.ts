@@ -155,7 +155,7 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
   }
 
   toggleStatistics(): void {
-    this.statisticsService.visible = !this.statisticsService.visible;
+    this.statisticsService.visible = true;
   }
 
   ngOnInit() {}

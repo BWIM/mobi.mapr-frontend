@@ -1,9 +1,7 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject } from 'rxjs';
-import { Extent } from 'ol/extent';
-import { intersects } from 'ol/extent';
 import GeoJSON from 'ol/format/GeoJSON';
-import { MapService, OpacityThresholds } from './map.service';
+import { MapService } from './map.service';
 import { Feature } from "ol";
 // import * as pako from 'pako';
 
@@ -13,16 +11,9 @@ import { Feature } from "ol";
 export class MapBuildService {
     private municipalitiesLoaded = new BehaviorSubject<boolean>(false);
     municipalitiesLoaded$ = this.municipalitiesLoaded.asObservable();
-    private geoJSONFormat = new GeoJSON();
     private populationArea: 'pop' | 'area' = 'pop';
     private averageType: 'mean' | 'median' = 'mean';
-    private opacityThresholds: OpacityThresholds = {
-        state: 500,
-        county: 500,
-        municipality: 500,
-        hexagon: 1000
-    };
-
+    private landkreise: { [key: string]: any } = {};
     private cache: {
         states: { [key: string]: any },
         counties: { [key: string]: any },
@@ -34,6 +25,14 @@ export class MapBuildService {
         municipalities: {},
         hexagons: {}
     };
+
+    getCache() {
+        return this.cache;
+    }
+
+    getLandkreise() {
+        return this.landkreise;
+    }
 
     // Add loading promise caches to prevent duplicate API calls
     private loadingPromises: {
@@ -54,7 +53,6 @@ export class MapBuildService {
             const averageTypeChanged = this.averageType !== settings.averageType;
             this.populationArea = settings.populationArea;
             this.averageType = settings.averageType;
-            this.opacityThresholds = settings.opacityThresholds;
             
             if (populationAreaChanged || averageTypeChanged) {
                 this.resetCache(false);
@@ -67,7 +65,7 @@ export class MapBuildService {
     }
 
     async buildMap(landkreise: { [key: string]: any }, level: 'county' | 'municipality' | 'hexagon' | 'state' = 'state', currentFeatures?: Feature[]) {
-        
+        this.landkreise = landkreise;
         // Only load states initially
         if (level === 'state') {
             await this.loadStates(landkreise);

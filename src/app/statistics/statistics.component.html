@@ -1,11 +1,122 @@
 <p-dialog 
     [(visible)]="visible"
     [modal]="true"
-    [style]="{width: '80vw', height: '80vh'}"
+    [style]="{width: '80vw', maxWidth: '1200px'}"
     [draggable]="false"
     [resizable]="false"
     [dismissableMask]="true"
-    styleClass="statistics-dialog"
-    [header]="'STATISTICS.TITLE' | translate">
+    [header]="'STATISTICS.TITLE' | translate"
+    class="statistics-dialog">
 
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- States -->
+        <div *ngIf="stateScores.length > 0" class="bg-white rounded-lg shadow-md overflow-hidden">
+            <h2 class="text-xl font-bold p-4 border-b-2 border-primary text-gray-800">{{ 'STATISTICS.STATES' | translate }}</h2>
+            <p-scrollPanel [style]="{ height: '400px' }">
+                <p-table [value]="stateScores" styleClass="text-sm">
+                    <ng-template pTemplate="header">
+                        <tr class="bg-gray-100">
+                            <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.RANK' | translate }}</th>
+                            <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.NAME' | translate }}</th>
+                            <th class="p-3 text-left font-semibold text-gray-700">
+                                {{ 'STATISTICS.SCORE' | translate }}
+                                
+                            </th>
+                            <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.GRADE' | translate }}</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-score let-i="rowIndex">
+                        <tr class="hover:bg-gray-50 border-b border-gray-100">
+                            <td class="p-3">{{i + 1}}</td>
+                            <td class="p-3">{{score.name}}</td>
+                            <td class="p-3">
+                                <span [style.color]="getScoreColor(score.score)">
+                                    {{score.score | number:'1.2-2'}}
+                                </span>
+                            </td>
+                            <td class="p-3 font-semibold" [style.color]="getScoreColor(score.score)">
+                                {{getScoreGrade(score.score)}}
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-scrollPanel>
+        </div>
+
+        <!-- Counties -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <h2 class="text-xl font-bold p-4 border-b-2 border-primary text-gray-800">{{ 'STATISTICS.COUNTIES' | translate }}</h2>
+            <p-scrollPanel [style]="{ height: '400px' }">
+                <p-table [value]="countyScores" styleClass="text-sm">
+                    <ng-template pTemplate="header">
+                        <tr class="bg-gray-100">
+                            <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.RANK' | translate }}</th>
+                            <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.NAME' | translate }}</th>
+                            <th class="p-3 text-left font-semibold text-gray-700">
+                                {{ 'STATISTICS.SCORE' | translate }}
+                                
+                            </th>
+                            <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.GRADE' | translate }}</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-score let-i="rowIndex">
+                        <tr class="hover:bg-gray-50 border-b border-gray-100">
+                            <td class="p-3">{{i + 1}}</td>
+                            <td class="p-3">{{score.name}}</td>
+                            <td class="p-3">
+                                <span [style.color]="getScoreColor(score.score)">
+                                    {{score.score | number:'1.2-2'}}
+                                </span>
+                            </td>
+                            <td class="p-3 font-semibold" [style.color]="getScoreColor(score.score)">
+                                {{getScoreGrade(score.score)}}
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-scrollPanel>
+        </div>
+
+        <!-- Municipalities -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <h2 class="text-xl font-bold p-4 border-b-2 border-primary text-gray-800">{{ 'STATISTICS.MUNICIPALITIES' | translate }}</h2>
+            <p-scrollPanel [style]="{ height: '400px' }">
+                <p-table [value]="municipalityScores" styleClass="text-sm">
+                    <ng-template pTemplate="header">
+                        <tr class="bg-gray-100">
+                            <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.RANK' | translate }}</th>
+                            <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.NAME' | translate }}</th>
+                            <th class="p-3 text-left font-semibold text-gray-700">
+                                {{ 'STATISTICS.SCORE' | translate }}
+                                
+                            </th>
+                            <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.GRADE' | translate }}</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-score let-i="rowIndex">
+                        <tr class="hover:bg-gray-50 border-b border-gray-100">
+                            <td class="p-3">{{i + 1}}</td>
+                            <td class="p-3">{{score.name}}</td>
+                            <td class="p-3">
+                                <span [style.color]="getScoreColor(score.score)">
+                                    {{score.score | number:'1.2-2'}}
+                                </span>
+                            </td>
+                            <td class="p-3 font-semibold" [style.color]="getScoreColor(score.score)">
+                                {{getScoreGrade(score.score)}}
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </p-scrollPanel>
+        </div>
+    </div>
+
+    <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+        <p class="text-sm text-gray-600">
+            {{ 'STATISTICS.CURRENT_SETTINGS' | translate }}: 
+            {{ averageType | uppercase | translate }} | 
+            {{ populationArea === 'pop' ? ('STATISTICS.POPULATION_WEIGHTED' | translate) : ('STATISTICS.AREA_WEIGHTED' | translate) }}
+        </p>
+    </div>
 </p-dialog>
