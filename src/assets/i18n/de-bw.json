@@ -249,5 +249,14 @@
     "MODES": {
       "TITLE": "Modi"
     }
+  },
+  "STATISTICS": {
+    "TITLE": "Schtatistige",
+    "SHOW_STATISTICS_TOOLTIP": "Zeig mir mo die Schtatistige für ebbes Projekt"
+  },
+  "CREDITS": {
+    "SHORTCUTS": {
+      "SHARE": "Teile"
+    }
   }
-} 
+}

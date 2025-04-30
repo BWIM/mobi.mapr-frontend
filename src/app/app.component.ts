@@ -8,11 +8,12 @@ import { ProjectWizardComponent } from './projects/project-wizard/project-wizard
 import { AnalyzeComponent } from './analyze/analyze.component';
 import { CreditsComponent } from './credits/credits.component';
 import { AuthService } from './auth/auth.service';
+import { StatisticsComponent } from './statistics/statistics.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, MenubarModule, ButtonModule, SharedModule, ProjectWizardComponent, AnalyzeComponent, CreditsComponent],
+  imports: [RouterOutlet, MenubarModule, ButtonModule, SharedModule, ProjectWizardComponent, AnalyzeComponent, CreditsComponent, StatisticsComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

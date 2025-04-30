@@ -249,5 +249,19 @@
     "MODES": {
       "TITLE": "Modi"
     }
+  },
+  "STATISTICS": {
+    "TITLE": "Schtadistige",
+    "SHOW_STATISTICS_TOOLTIP": "Zeig mir mo die Schtadistige für dis Projekt"
+  },
+  "CREDITS": {
+    "SHORTCUTS": {
+      "SHOW_STATISTICS": "Statistiken anzeigen",
+      "EXPORT_PDF_PORTRAIT": "PDF im Hochformat exportieren",
+      "EXPORT_PDF_LANDSCAPE": "PDF im Querformat exportieren",
+      "CENTER_MAP": "Karte zentrieren",
+      "FREEZE_MAP": "Kartenoverlay einfrieren (für Screenshots)",
+      "SHARE": "Teile"
+    }
   }
-} 
+}

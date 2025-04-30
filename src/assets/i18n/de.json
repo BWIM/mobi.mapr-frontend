@@ -301,11 +301,23 @@
     "BACKEND_SECTION_TOOLTIP": "Verwendete Backend-Technologien",
     "ROUTING_SECTION_TOOLTIP": "Verwendete Routing-Dienste",
     "VISIT_COMPONENT_WEBSITE": "Besuche die {{name}} Website",
-    "LANGUAGE_BUTTON_TOOLTIP": "Sprache ändern"
+    "LANGUAGE_BUTTON_TOOLTIP": "Sprache ändern",
+    "SHORTCUTS": {
+      "CENTER_MAP": "Karte zentrieren",
+      "FREEZE_MAP": "Kartenoverlay einfrieren (für Screenshots)",
+      "SHOW_STATISTICS": "Statistiken anzeigen",
+      "EXPORT_PDF_PORTRAIT": "PDF im Hochformat exportieren",
+      "EXPORT_PDF_LANDSCAPE": "PDF im Querformat exportieren",
+      "SHARE": "Teilen"
+    }
   },
   "HELP": {
     "GETTING_STARTED_TOOLTIP": "Erste Schritte mit der Anwendung",
     "FAQ_TOOLTIP": "Häufig gestellte Fragen und Antworten",
     "CONTACT_TOOLTIP": "Kontaktinformationen für Support"
+  },
+  "STATISTICS": {
+    "TITLE": "Statistiken",
+    "SHOW_STATISTICS_TOOLTIP": "Detaillierte Statistiken für dieses Projekt anzeigen"
   }
 }

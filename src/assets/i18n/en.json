@@ -301,11 +301,23 @@
     "BACKEND_SECTION_TOOLTIP": "Backend technologies used",
     "ROUTING_SECTION_TOOLTIP": "Routing services used",
     "VISIT_COMPONENT_WEBSITE": "Visit the {{name}} website",
-    "LANGUAGE_BUTTON_TOOLTIP": "Change language"
+    "LANGUAGE_BUTTON_TOOLTIP": "Change language",
+    "SHORTCUTS": {
+      "CENTER_MAP": "Recenter map",
+      "FREEZE_MAP": "Freeze map (for screenshots)",
+      "SHOW_STATISTICS": "Show statistics",
+      "EXPORT_PDF_PORTRAIT": "Export PDF Portrait",
+      "EXPORT_PDF_LANDSCAPE": "Export PDF Landscape",
+      "SHARE": "Share"
+    }
   },
   "HELP": {
     "GETTING_STARTED_TOOLTIP": "Getting started with the application",
     "FAQ_TOOLTIP": "Frequently asked questions and answers",
     "CONTACT_TOOLTIP": "Contact information for support"
+  },
+  "STATISTICS": {
+    "TITLE": "Statistics",
+    "SHOW_STATISTICS_TOOLTIP": "View detailed statistics for this project"
   }
 }

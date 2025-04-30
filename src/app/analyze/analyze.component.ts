@@ -7,7 +7,6 @@ import { MapService } from '../map/map.service';
 import Feature from 'ol/Feature';
 import { Properties } from './analyze.interface';
 import { ProjectDetails } from '../projects/project.interface';
-import { Chart, ChartConfiguration } from 'chart.js';
 
 @Component({
   selector: 'app-analyze',

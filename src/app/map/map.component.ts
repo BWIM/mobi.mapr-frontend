@@ -22,6 +22,9 @@ import { FeatureSelectionService } from '../shared/services/feature-selection.se
 import { LoadingService } from '../services/loading.service';
 import { Style, Text, Fill, Stroke } from 'ol/style';
 import VectorLayer from 'ol/layer/Vector';
+import { ShareService } from '../share/share.service';
+import { PdfGenerationService } from './pdf-generation.service';
+import { StatisticsService } from '../statistics/statistics.service';
 
 @Component({
   selector: 'app-map',
@@ -46,6 +49,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private tooltip!: HTMLElement;
   private level: 'state' | 'county' | 'municipality' | 'hexagon' = 'county';
   private isFrozen = false;
+  private projectInfo: any;
 
   constructor(
     private mapService: MapService,
@@ -53,7 +57,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     private projectsService: ProjectsService,
     private analyzeService: AnalyzeService,
     private featureSelectionService: FeatureSelectionService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private shareService: ShareService,
+    private pdfGenerationService: PdfGenerationService,
+    private statisticsService: StatisticsService
   ) {}
 
   ngAfterViewInit() {
@@ -118,6 +125,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         if (this.landkreise) {
           await this.updateMapFeatures();
         }
+      }),
+      this.projectsService.currentProjectInfo$.subscribe(info => {
+        this.projectInfo = info;
       })
     );
   }
@@ -548,6 +558,24 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         break;
       case 'f':
         this.toggleFreeze();
+        break;
+      case 's':
+        this.statisticsService.visible = true;
+        break;
+      case 'h':
+        if (this.projectInfo?.id) {
+          this.pdfGenerationService.exportToPDFPortrait();
+        }
+        break;
+      case 'q':
+        if (this.projectInfo?.id) {
+          this.pdfGenerationService.exportToPDFLandscape();
+        }
+        break;
+      case 't':
+        if (this.projectInfo?.id) {
+          this.shareService.createShare(this.projectInfo.id, 'high');
+        }
         break;
     }
   }

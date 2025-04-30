@@ -49,10 +49,7 @@ export class CreditsComponent implements OnInit {
     { code: 'en', name: 'English', icon: 'pi pi-check' }
   ];
 
-  shortcuts: Shortcut[] = [
-    { key: 'C', description: 'Karte zentrieren' },
-    { key: 'F', description: 'Kartenoverlay einfrieren (für Screenshots)' }
-  ];
+  shortcuts: Shortcut[] = [];
 
   showShortcutsDialog = false;
 
@@ -65,6 +62,16 @@ export class CreditsComponent implements OnInit {
       this.currentLang = savedLang;
       this.translate.use(savedLang);
     }
+
+    this.shortcuts = [
+      { key: 'C', description: this.translate.instant('CREDITS.SHORTCUTS.CENTER_MAP') },
+      { key: 'F', description: this.translate.instant('CREDITS.SHORTCUTS.FREEZE_MAP') },
+      { key: 'S', description: this.translate.instant('CREDITS.SHORTCUTS.SHOW_STATISTICS') },
+      { key: 'H', description: this.translate.instant('CREDITS.SHORTCUTS.EXPORT_PDF_PORTRAIT') },
+      { key: 'Q', description: this.translate.instant('CREDITS.SHORTCUTS.EXPORT_PDF_LANDSCAPE') },
+      { key: 'T', description: this.translate.instant('CREDITS.SHORTCUTS.SHARE') }
+  
+    ];
   }
 
   visualComponents: InfoComponent[] = [
