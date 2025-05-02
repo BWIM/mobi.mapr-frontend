@@ -25,6 +25,7 @@ import VectorLayer from 'ol/layer/Vector';
 import { ShareService } from '../share/share.service';
 import { PdfGenerationService } from './pdf-generation.service';
 import { StatisticsService } from '../statistics/statistics.service';
+import { KeyboardShortcutsService, ShortcutAction } from './keyboard-shortcuts.service';
 
 @Component({
   selector: 'app-map',
@@ -48,7 +49,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private landkreise: { [key: string]: any } | null = null;
   private tooltip!: HTMLElement;
   private level: 'state' | 'county' | 'municipality' | 'hexagon' = 'county';
-  private isFrozen = false;
   private projectInfo: any;
 
   constructor(
@@ -60,8 +60,23 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     private loadingService: LoadingService,
     private shareService: ShareService,
     private pdfGenerationService: PdfGenerationService,
-    private statisticsService: StatisticsService
-  ) {}
+    private statisticsService: StatisticsService,
+    private keyboardShortcutsService: KeyboardShortcutsService
+  ) {
+    // Subscribe to keyboard shortcuts
+    this.subscriptions.push(
+      this.keyboardShortcutsService.getShortcutStream().subscribe(action => {
+        switch(action) {
+          case ShortcutAction.ZOOM_TO_FEATURES:
+            this.zoomToFeatures();
+            break;
+          case ShortcutAction.TOGGLE_FREEZE:
+            this.toggleFreeze();
+            break;
+        }
+      })
+    );
+  }
 
   ngAfterViewInit() {
     this.initMap();
@@ -482,7 +497,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     // Modify the pointermove handler
     this.map.on('pointermove', (evt) => {
       // If frozen, don't update tooltip position
-      if (this.isFrozen) return;
+      if (this.keyboardShortcutsService.getIsFrozen()) return;
 
       const pixel = this.map.getEventPixel(evt.originalEvent);
       const hit = this.map.hasFeatureAtPixel(pixel);
@@ -497,7 +512,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
           const score_name = this.getScoreName(properties['score']);
           
-          if (this.isFrozen) {
+          if (this.keyboardShortcutsService.getIsFrozen()) {
             this.tooltip.innerHTML = `${score_name} (${score}%)`;
           } else {
             this.tooltip.innerHTML = `${name}<br>${score_name} (${score}%)`;
@@ -506,7 +521,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           this.tooltip.style.left = `${pixel[0] + 10}px`;
           this.tooltip.style.top = `${pixel[1] + 10}px`;
         }
-      } else if (!this.isFrozen) {
+      } else if (!this.keyboardShortcutsService.getIsFrozen()) {
         this.tooltip.style.display = 'none';
       }
       
@@ -519,7 +534,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     
     // Modify the movestart handler
     this.map.on('movestart', () => {
-      if (!this.isFrozen) {
+      if (!this.keyboardShortcutsService.getIsFrozen()) {
         this.tooltip.style.display = 'none';
       }
     });
@@ -541,46 +556,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     vectorLayer.setOpacity(1);
   }
 
-  @HostListener('window:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-    // Only handle shortcuts if no input element is focused
-    if (document.activeElement?.tagName === 'INPUT' || 
-        document.activeElement?.tagName === 'TEXTAREA') {
-      return;
-    }
-
-    switch(event.key.toLowerCase()) {
-      case 'c':
-        this.zoomToFeatures();
-        break;
-      case 'f':
-        this.toggleFreeze();
-        break;
-      case 's':
-        this.statisticsService.visible = true;
-        break;
-      case 'h':
-        if (this.projectInfo?.id) {
-          this.pdfGenerationService.exportToPDFPortrait();
-        }
-        break;
-      case 'q':
-        if (this.projectInfo?.id) {
-          this.pdfGenerationService.exportToPDFLandscape();
-        }
-        break;
-      case 't':
-        if (this.projectInfo?.id) {
-          this.shareService.createShare(this.projectInfo.id, 'high');
-        }
-        break;
-    }
-  }
-
   private toggleFreeze(): void {
-    this.isFrozen = !this.isFrozen;
+    const newFrozenState = !this.keyboardShortcutsService.getIsFrozen();
+    this.keyboardShortcutsService.setIsFrozen(newFrozenState);
     
-    if (this.isFrozen) {
+    if (newFrozenState) {
       // Show labels for all visible features
       const vectorSource = this.vectorLayer.getSource();
       const labelSource = this.labelLayer.getSource();
