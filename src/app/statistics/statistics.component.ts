@@ -6,6 +6,7 @@ import { MapService } from '../map/map.service';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { LoadingService } from '../services/loading.service';
 
 @Component({
   selector: 'app-statistics',
@@ -43,7 +44,8 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
   constructor(
     private statisticsService: StatisticsService,
-    private mapService: MapService
+    private mapService: MapService,
+    private loadingService: LoadingService
   ) {
     this.subscription = new Subscription();
     
@@ -77,6 +79,11 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+    // Only reset cache if statistics were visible
+    if (this.visible) {
+      console.log('resetting statistics cache');
+      this.statisticsService.resetCache();
+    }
   }
 
   async loadAllMunicipalities(): Promise<void> {
@@ -93,6 +100,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
   private async updateScores(): Promise<void> {
     try {
+      this.loadingService.startLoading();
       const [stateResult, countyResult, municipalityResult] = await Promise.all([
         this.statisticsService.getTopScores('state'),
         this.statisticsService.getTopScores('county'),
@@ -102,12 +110,15 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       this.stateScores = stateResult;
       this.countyScores = countyResult;
       this.municipalityScores = municipalityResult;
+      this.statisticsService.resetCache();
     } catch (error) {
       console.error('Error updating scores:', error);
       // Reset scores on error
       this.stateScores = [];
       this.countyScores = [];
       this.municipalityScores = [];
+    } finally {
+      this.loadingService.stopLoading();
     }
   }
 
@@ -131,3 +142,4 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     return this.scoreColors.worst;
   }
 }
+ // TODO: Click on name to zoom on map

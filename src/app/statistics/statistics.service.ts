@@ -82,4 +82,11 @@ export class StatisticsService {
 
     return scores;
   }
+
+  resetCache() {
+    // Only reset cache if statistics were visible
+    if (this.visible) {
+      this.mapBuildService.resetCache(true);
+    }
+  }
 }

@@ -116,14 +116,15 @@ export class MapBuildService {
         };
     }
 
-    resetCache(data: boolean= true) {
-        this.cache = {
-            states: {},
-            counties: {},
-            municipalities: {},
-            hexagons: {}
-        };
+    resetCache(data: boolean = true) {
+        // Only clear the cache if explicitly requested
         if (data) {
+            this.cache = {
+                states: {},
+                counties: {},
+                municipalities: {},
+                hexagons: {}
+            };
             this.loadingPromises = {
                 states: {},
                 counties: {},
