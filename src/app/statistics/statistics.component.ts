@@ -79,11 +79,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-    // Only reset cache if statistics were visible
-    if (this.visible) {
-      console.log('resetting statistics cache');
-      this.statisticsService.resetCache();
-    }
   }
 
   async loadAllMunicipalities(): Promise<void> {
@@ -110,7 +105,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       this.stateScores = stateResult;
       this.countyScores = countyResult;
       this.municipalityScores = municipalityResult;
-      this.statisticsService.resetCache();
     } catch (error) {
       console.error('Error updating scores:', error);
       // Reset scores on error
@@ -140,6 +134,38 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     if (score <= 1) return this.scoreColors.poor;
     if (score <= 1.41) return this.scoreColors.bad;
     return this.scoreColors.worst;
+  }
+
+  onFeatureClick(entry: ScoreEntry): void {
+    console.log('onFeatureClick', entry);
+    // Close the statistics overlay
+    this.statisticsService.visible = false;
+    
+    // Get the map instance
+    const map = this.mapService.getMap();
+    if (!map) return;
+
+    // Get the vector layer
+    const vectorLayer = this.mapService.getMainLayer();
+    if (!vectorLayer || !vectorLayer.getSource()) return;
+
+    // Find the feature by name and level
+    const features = vectorLayer.getSource()?.getFeatures();
+    const feature = features?.find(f => 
+      f.get('name') === entry.name && 
+      f.get('level') === entry.level
+    );
+
+    if (feature) {
+      // Zoom to the feature
+      const extent = feature.getGeometry()?.getExtent();
+      if (extent) {
+        map.getView().fit(extent, {
+          duration: 1000,
+          padding: [50, 50, 50, 50]
+        });
+      }
+    }
   }
 }
  // TODO: Click on name to zoom on map

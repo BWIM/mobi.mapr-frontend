@@ -26,14 +26,10 @@ export class StatisticsService {
 
   set visible(value: boolean) {
     this._visible.next(value);
-    if (!value) {
-      // Clear municipalities cache when closing statistics view
-      this.mapBuildService.clearMunicipalitiesCache();
-    }
   }
 
   async loadAllMunicipalities(): Promise<void> {
-    const counties = Object.keys(this.mapBuildService.getCache().counties);
+    const counties = Object.keys(this.mapBuildService.getStatisticsCache().counties);
     if (counties.length > 0) {
       const features: Feature<Geometry>[] = counties.map(id => {
         const feature = new Feature();
@@ -49,21 +45,21 @@ export class StatisticsService {
     
     switch(level) {
       case 'state':
-        features = Object.values(this.mapBuildService.getCache().states);
+        features = Object.values(this.mapBuildService.getStatisticsCache().states);
         break;
       case 'county':
-        features = Object.values(this.mapBuildService.getCache().counties);
+        features = Object.values(this.mapBuildService.getStatisticsCache().counties);
         break;
       case 'municipality':
         // Get all counties from the cache
-        const counties = Object.keys(this.mapBuildService.getCache().counties);
+        const counties = Object.keys(this.mapBuildService.getStatisticsCache().counties);
         if (counties.length > 0) {
           // Check if we have municipalities loaded for each county
-          const municipalitiesInCache = Object.keys(this.mapBuildService.getCache().municipalities);
+          const municipalitiesInCache = Object.keys(this.mapBuildService.getStatisticsCache().municipalities);
           if (municipalitiesInCache.length < counties.length) {
             await this.loadAllMunicipalities();
           }
-          features = Object.values(this.mapBuildService.getCache().municipalities)
+          features = Object.values(this.mapBuildService.getStatisticsCache().municipalities)
             .flatMap(municipalityGroup => Object.values(municipalityGroup));
         }
         break;
@@ -81,12 +77,5 @@ export class StatisticsService {
       .slice(0, 10);
 
     return scores;
-  }
-
-  resetCache() {
-    // Only reset cache if statistics were visible
-    if (this.visible) {
-      this.mapBuildService.resetCache(true);
-    }
   }
 }

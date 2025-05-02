@@ -26,12 +26,34 @@ export class MapBuildService {
         hexagons: {}
     };
 
+    private statisticsCache: {
+        states: { [key: string]: any },
+        counties: { [key: string]: any },
+        municipalities: { [key: string]: any }
+    } = {
+        states: {},
+        counties: {},
+        municipalities: {}
+    };
+
     getCache() {
         return this.cache;
     }
 
+    getStatisticsCache() {
+        return this.statisticsCache;
+    }
+
     getLandkreise() {
         return this.landkreise;
+    }
+
+    resetStatisticsCache() {
+        this.statisticsCache = {
+            states: {},
+            counties: {},
+            municipalities: {}
+        };
     }
 
     // Add loading promise caches to prevent duplicate API calls
@@ -56,6 +78,7 @@ export class MapBuildService {
             
             if (populationAreaChanged || averageTypeChanged) {
                 this.resetCache(false);
+                this.resetStatisticsCache();
             } else if (settings.updatedLevel) {
                 this.refreshFeatureColors(settings.updatedLevel);
             } else {
@@ -131,13 +154,12 @@ export class MapBuildService {
                 municipalities: {},
                 hexagons: {}
             };
+            this.statisticsCache = {
+                states: {},
+                counties: {},
+                municipalities: {}
+            };
         }
-        this.municipalitiesLoaded.next(false);
-    }
-
-    clearMunicipalitiesCache(): void {
-        this.cache.municipalities = {};
-        this.loadingPromises.municipalities = {};
         this.municipalitiesLoaded.next(false);
     }
 
@@ -196,6 +218,7 @@ export class MapBuildService {
                     };
 
                     this.cache.states[stateId] = stateGeoJson;
+                    this.statisticsCache.states[stateId] = stateGeoJson;
                 } catch (error) {
                     console.warn(`Could not load state data for ${stateId}`, error);
                 } finally {
@@ -275,6 +298,7 @@ export class MapBuildService {
                         rgbColor: this.getColorForScore(averageScore, countyGeoJson.properties.population_density || 0, 'county')
                     };
                     this.cache.counties[landkreis] = countyGeoJson;
+                    this.statisticsCache.counties[landkreis] = countyGeoJson;
                 } catch (error) {
                     console.warn(`Could not load county data for ${landkreis}`, error);
                 } finally {
@@ -323,6 +347,7 @@ export class MapBuildService {
                     
                     if (Array.isArray(municipalityGeoJson.features)) {
                         this.cache.municipalities[landkreis] = {};
+                        this.statisticsCache.municipalities[landkreis] = {};
                         municipalityGeoJson.features.forEach((feature: any) => {
                             const municipalityId = feature.properties.ars;
                             const municipalityData = landkreise[landkreis]?.[municipalityId] || {};
@@ -358,6 +383,7 @@ export class MapBuildService {
                             };
                             
                             this.cache.municipalities[landkreis][municipalityId] = feature;
+                            this.statisticsCache.municipalities[landkreis][municipalityId] = feature;
                         });
                     }
                 } catch (error) {
