@@ -12,6 +12,7 @@ import { PdfGenerationService } from '../map/pdf-generation.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ShareService } from '../share/share.service';
 import { OpacityThresholds } from '../map/map.service';
+import { StatisticsService } from '../statistics/statistics.service';
 
 @Component({
   selector: 'app-details-sidebar',
@@ -47,7 +48,8 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     private projectsService: ProjectsService,
     private mapService: MapService,
     private pdfService: PdfGenerationService,
-    private shareService: ShareService
+    private shareService: ShareService,
+    private statisticsService: StatisticsService
   ) {
     this.subscription = new Subscription();
     
@@ -150,6 +152,10 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
         }
       }
     }
+  }
+
+  toggleStatistics(): void {
+    this.statisticsService.visible = true;
   }
 
   ngOnInit() {}
