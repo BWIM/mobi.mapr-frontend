@@ -20,6 +20,7 @@ export class KeyboardShortcutsService {
   private isFrozen = false;
   private projectInfo: any;
   private shortcutSubject = new Subject<ShortcutAction>();
+  private frozenStateSubject = new Subject<boolean>();
 
   constructor(
     private statisticsService: StatisticsService,
@@ -33,10 +34,15 @@ export class KeyboardShortcutsService {
 
   setIsFrozen(frozen: boolean) {
     this.isFrozen = frozen;
+    this.frozenStateSubject.next(frozen);
   }
 
   getIsFrozen(): boolean {
     return this.isFrozen;
+  }
+
+  getFrozenStateStream() {
+    return this.frozenStateSubject.asObservable();
   }
 
   getShortcutStream() {
@@ -55,7 +61,7 @@ export class KeyboardShortcutsService {
         this.shortcutSubject.next(ShortcutAction.ZOOM_TO_FEATURES);
         break;
       case 'f':
-        this.isFrozen = !this.isFrozen;
+        this.setIsFrozen(!this.isFrozen);
         this.shortcutSubject.next(ShortcutAction.TOGGLE_FREEZE);
         break;
       case 's':

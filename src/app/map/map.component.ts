@@ -70,10 +70,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           case ShortcutAction.ZOOM_TO_FEATURES:
             this.zoomToFeatures();
             break;
-          case ShortcutAction.TOGGLE_FREEZE:
-            this.toggleFreeze();
-            break;
         }
+      })
+    );
+
+    // Subscribe to frozen state changes
+    this.subscriptions.push(
+      this.keyboardShortcutsService.getFrozenStateStream().subscribe(isFrozen => {
+        this.handleFrozenStateChange(isFrozen);
       })
     );
   }
@@ -556,11 +560,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     vectorLayer.setOpacity(1);
   }
 
-  private toggleFreeze(): void {
-    const newFrozenState = !this.keyboardShortcutsService.getIsFrozen();
-    this.keyboardShortcutsService.setIsFrozen(newFrozenState);
-    
-    if (newFrozenState) {
+  private handleFrozenStateChange(isFrozen: boolean): void {
+    if (isFrozen) {
       // Show labels for all visible features
       const vectorSource = this.vectorLayer.getSource();
       const labelSource = this.labelLayer.getSource();
