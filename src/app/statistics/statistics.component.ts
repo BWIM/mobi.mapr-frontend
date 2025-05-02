@@ -137,35 +137,87 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   }
 
   onFeatureClick(entry: ScoreEntry): void {
-    console.log('onFeatureClick', entry);
     // Close the statistics overlay
     this.statisticsService.visible = false;
-    
-    // Get the map instance
+
     const map = this.mapService.getMap();
     if (!map) return;
 
-    // Get the vector layer
     const vectorLayer = this.mapService.getMainLayer();
     if (!vectorLayer || !vectorLayer.getSource()) return;
 
-    // Find the feature by name and level
-    const features = vectorLayer.getSource()?.getFeatures();
-    const feature = features?.find(f => 
-      f.get('name') === entry.name && 
-      f.get('level') === entry.level
-    );
+    let targetZoom = 7.5;
+    if (entry.level === 'county') {
+      targetZoom = 9;
+    } else if (entry.level === 'municipality') {
+      targetZoom = 10;
+    }
 
-    if (feature) {
-      // Zoom to the feature
-      const extent = feature.getGeometry()?.getExtent();
-      if (extent) {
-        map.getView().fit(extent, {
-          duration: 1000,
-          padding: [50, 50, 50, 50]
+    // Helper to animate and return a promise
+    function animateView(view: any, options: any): Promise<void> {
+      return new Promise(resolve => {
+        view.animate({ ...options, duration: 600 }, resolve);
+      });
+    }
+
+    const view = map.getView();
+
+    // Step 1: Zoom out to a safe level if needed
+    let safeZoom = 6;
+    if (entry.level === 'county') {
+      safeZoom = 8;
+    } else if (entry.level === 'municipality') {
+      safeZoom = 10;
+    }
+    const currentZoom = view.getZoom();
+    let zoomOutPromise: Promise<void>;
+
+    if (currentZoom && currentZoom > safeZoom) {
+      zoomOutPromise = animateView(view, { zoom: safeZoom });
+    } else {
+      zoomOutPromise = Promise.resolve();
+    }
+
+    zoomOutPromise.then(() => {
+      // Step 2: Poll for the feature (case-insensitive, trimmed)
+      const maxTries = 10;
+      const delay = 200;
+
+      function findFeature(): any {
+        const features = vectorLayer?.getSource()?.getFeatures();
+        return features?.find(f => {
+          const featureName = (f.get('name') || '').trim().toLowerCase();
+          const entryName = (entry.name || '').trim().toLowerCase();
+          const featureLevel = (f.get('level') || '').trim().toLowerCase();
+          const entryLevel = (entry.level || '').trim().toLowerCase();
+          return featureName === entryName && featureLevel === entryLevel;
         });
       }
-    }
+
+      function pollForFeature(triesLeft: number) {
+        const feature = findFeature();
+        if (feature) {
+          const extent = feature.getGeometry()?.getExtent();
+          if (extent) {
+            view.animate(
+              { zoom: targetZoom, duration: 800 },
+              () => {
+                view.fit(extent, {
+                  duration: 1000,
+                  padding: [50, 50, 50, 50]
+                });
+              }
+            );
+          }
+        } else if (triesLeft > 0) {
+          setTimeout(() => pollForFeature(triesLeft - 1), delay);
+        } else {
+          console.warn('Feature not found after zooming out and polling:', entry);
+        }
+      }
+
+      pollForFeature(maxTries);
+    });
   }
 }
  // TODO: Click on name to zoom on map
