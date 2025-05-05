@@ -425,9 +425,12 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
       const selectedMidActivities = this.projectForm.get('activities.selectedMidActivities')?.value || [];
       const selectedNonMidActivity = this.projectForm.get('activities.selectedNonMidActivity')?.value;
       
-      const allSelectedActivities = [...selectedMidActivities];
+      let allSelectedActivities = [...selectedMidActivities];
+      let personas = this.projectForm.get('personas.selectedPersonas')?.value.map((p: any) => p.id).join(',');
       if (selectedNonMidActivity) {
-        allSelectedActivities.push(selectedNonMidActivity);
+        allSelectedActivities = [selectedNonMidActivity];
+        personas = "";
+
       }
 
       const projectData = {
@@ -436,14 +439,13 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         mail: this.projectForm.get('summary.sendEmail')?.value,
         infos: this.projectForm.get('summary.loadAreasOnMap')?.value,
         activities: allSelectedActivities.map((a: any) => a.id).join(','),
-        personas: this.projectForm.get('personas.selectedPersonas')?.value.map((p: any) => p.id).join(','),
+        personas: personas,
         modes: this.projectForm.get('modes.selectedModes')?.value.map((m: any) => m.id).join(','),
         landkreise: this.selectedAreaIds.join(','),
         projectgroup: this.projectForm.get('summary.projectGroup')?.value?.id || null,
         laender: this.hasCompletelySelectedLands
       };
-
-
+      
       this.projectsService.createProject(projectData).subscribe({
         next: (response) => {
           if (!response) {
@@ -504,6 +506,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
       const allMidActivities = this.groupedActivities.flatMap(group => group.activities);
       this.projectForm.get('activities.selectedMidActivities')?.setValue(allMidActivities);
     } else {
+      console.log('Non-MID activity selected');
       this.projectForm.get('activities.selectedNonMidActivity')?.setValue('');
     }
   }
