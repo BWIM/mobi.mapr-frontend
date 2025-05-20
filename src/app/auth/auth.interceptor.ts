@@ -1,6 +1,6 @@
 import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { catchError, switchMap, take, filter } from 'rxjs/operators';
+import { catchError, switchMap, take, filter, retry } from 'rxjs/operators';
 import { throwError, Observable, BehaviorSubject } from 'rxjs';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
@@ -92,6 +92,22 @@ export const AuthInterceptor: HttpInterceptorFn = (
         }
       }
       return throwError(() => error);
+    }),
+    retry({
+      count: 1,
+      delay: (error, retryCount) => {
+        if (error instanceof HttpErrorResponse && error.status === 401) {
+          return refreshTokenSubject.pipe(
+            filter(token => token !== null),
+            take(1),
+            switchMap(() => {
+              const newHeaders = authService.getAuthorizationHeaders();
+              return next(req.clone({ headers: newHeaders, url }));
+            })
+          );
+        }
+        return throwError(() => error);
+      }
     })
   );
 }; 
