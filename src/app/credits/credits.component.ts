@@ -7,6 +7,8 @@ import { ButtonModule } from 'primeng/button';
 import { AccordionModule } from 'primeng/accordion';
 import { SpeedDialModule } from 'primeng/speeddial';
 import { TranslateService } from '@ngx-translate/core';
+import { AuthService } from '../auth/auth.service';
+import { Router } from '@angular/router';
 
 interface InfoComponent {
   name: string;
@@ -53,7 +55,7 @@ export class CreditsComponent implements OnInit {
 
   showShortcutsDialog = false;
 
-  constructor(private translate: TranslateService) {}
+  constructor(private translate: TranslateService, private authService: AuthService, private router: Router) {}
 
   ngOnInit() {
     // Load saved language preference
@@ -103,6 +105,13 @@ export class CreditsComponent implements OnInit {
   ];
 
   items: MenuItem[] = [
+    {
+      icon: 'pi pi-sign-out',
+      command: () => {
+        this.logout();
+      },
+      tooltip: 'Logout'
+    },
     {
       icon: 'pi pi-info-circle',
       command: () => {
@@ -171,5 +180,10 @@ export class CreditsComponent implements OnInit {
 
   showShortcuts() {
     this.showShortcutsDialog = true;
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }
