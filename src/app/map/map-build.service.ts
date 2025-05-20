@@ -77,7 +77,7 @@ export class MapBuildService {
             this.averageType = settings.averageType;
             
             if (populationAreaChanged || averageTypeChanged) {
-                this.resetCache(false);
+                this.resetCache(true);
                 this.resetStatisticsCache();
             } else if (settings.updatedLevel) {
                 this.refreshFeatureColors(settings.updatedLevel);
@@ -414,7 +414,6 @@ export class MapBuildService {
             countiesToLoad = Object.keys(landkreise).filter(id => !this.cache.hexagons[id]);
         }
         if (!countiesToLoad || countiesToLoad.length === 0) {
-            console.error("No hexagons")
             return
         }
         // Hexagon area in km² (assuming all hexagons have the same size)

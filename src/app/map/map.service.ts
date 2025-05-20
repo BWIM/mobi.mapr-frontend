@@ -129,7 +129,6 @@ export class MapService {
   }
 
   updateOpacityThresholds(thresholds: Partial<OpacityThresholds>, level: keyof OpacityThresholds): void {
-    // Use the debounced subject instead of direct update
     this.opacityUpdateSubject.next({ thresholds, level });
   }
 }

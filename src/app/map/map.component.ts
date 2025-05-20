@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy } from '@angular/core';
 import { default as OlMap } from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
@@ -22,9 +22,6 @@ import { FeatureSelectionService } from '../shared/services/feature-selection.se
 import { LoadingService } from '../services/loading.service';
 import { Style, Text, Fill, Stroke } from 'ol/style';
 import VectorLayer from 'ol/layer/Vector';
-import { ShareService } from '../share/share.service';
-import { PdfGenerationService } from './pdf-generation.service';
-import { StatisticsService } from '../statistics/statistics.service';
 import { KeyboardShortcutsService, ShortcutAction } from './keyboard-shortcuts.service';
 
 @Component({
@@ -49,18 +46,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private landkreise: { [key: string]: any } | null = null;
   private tooltip!: HTMLElement;
   private level: 'state' | 'county' | 'municipality' | 'hexagon' = 'county';
-  private projectInfo: any;
 
   constructor(
     private mapService: MapService,
     private mapBuildService: MapBuildService,
-    private projectsService: ProjectsService,
     private analyzeService: AnalyzeService,
     private featureSelectionService: FeatureSelectionService,
     private loadingService: LoadingService,
-    private shareService: ShareService,
-    private pdfGenerationService: PdfGenerationService,
-    private statisticsService: StatisticsService,
     private keyboardShortcutsService: KeyboardShortcutsService
   ) {
     // Subscribe to keyboard shortcuts
@@ -145,9 +137,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           await this.updateMapFeatures();
         }
       }),
-      this.projectsService.currentProjectInfo$.subscribe(info => {
-        this.projectInfo = info;
-      })
     );
   }
 
