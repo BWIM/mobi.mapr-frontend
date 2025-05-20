@@ -69,22 +69,12 @@ export class KeyboardShortcutsService {
         this.shortcutSubject.next(ShortcutAction.SHOW_STATISTICS);
         break;
       case 'h':
-        if (this.projectInfo?.id) {
-          this.pdfGenerationService.exportToPDFPortrait();
-          this.shortcutSubject.next(ShortcutAction.EXPORT_PDF_PORTRAIT);
-        }
+        this.pdfGenerationService.exportToPDFPortrait();
+        this.shortcutSubject.next(ShortcutAction.EXPORT_PDF_PORTRAIT);
         break;
       case 'q':
-        if (this.projectInfo?.id) {
-          this.pdfGenerationService.exportToPDFLandscape();
-          this.shortcutSubject.next(ShortcutAction.EXPORT_PDF_LANDSCAPE);
-        }
-        break;
-      case 't':
-        if (this.projectInfo?.id) {
-          this.shareService.createShare(this.projectInfo.id, 'high');
-          this.shortcutSubject.next(ShortcutAction.CREATE_SHARE);
-        }
+        this.pdfGenerationService.exportToPDFLandscape();
+        this.shortcutSubject.next(ShortcutAction.EXPORT_PDF_LANDSCAPE);
         break;
     }
   }
