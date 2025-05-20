@@ -17,7 +17,6 @@ export interface ScoreEntry {
 export class StatisticsService {
   private _visible = new BehaviorSubject<boolean>(false);
   visible$ = this._visible.asObservable();
-
   constructor(private mapBuildService: MapBuildService) { }
 
   get visible(): boolean {

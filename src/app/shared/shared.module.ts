@@ -77,7 +77,8 @@ import { InputSwitchModule } from 'primeng/inputswitch';
     OverlayPanelModule,
     ToggleSwitchModule,
     SliderModule,
-    InputSwitchModule
+    InputSwitchModule,
+    ProgressSpinnerModule
   ],
   exports: [
     CommonModule,
@@ -116,7 +117,8 @@ import { InputSwitchModule } from 'primeng/inputswitch';
     OverlayPanelModule,
     ToggleSwitchModule,
     SliderModule,
-    InputSwitchModule
+    InputSwitchModule,
+    ProgressSpinnerModule
   ],
   providers: [MessageService]
 })
