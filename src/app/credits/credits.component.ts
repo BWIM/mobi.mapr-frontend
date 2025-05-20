@@ -51,7 +51,14 @@ export class CreditsComponent implements OnInit {
     { code: 'en', name: 'English', icon: 'pi pi-check' }
   ];
 
-  shortcuts: Shortcut[] = [];
+  shortcuts: Shortcut[] = [
+    { key: 'C', description: '' },
+    { key: 'F', description: '' },
+    { key: 'S', description: '' },
+    { key: 'H', description: '' },
+    { key: 'Q', description: '' },
+    { key: 'T', description: '' }
+  ];
 
   showShortcutsDialog = false;
 
@@ -65,6 +72,16 @@ export class CreditsComponent implements OnInit {
       this.translate.use(savedLang);
     }
 
+    // Subscribe to language changes to update translations
+    this.translate.onLangChange.subscribe(() => {
+      this.updateShortcutTranslations();
+    });
+
+    // Initial translation update
+    this.updateShortcutTranslations();
+  }
+
+  private updateShortcutTranslations() {
     this.shortcuts = [
       { key: 'C', description: this.translate.instant('CREDITS.SHORTCUTS.CENTER_MAP') },
       { key: 'F', description: this.translate.instant('CREDITS.SHORTCUTS.FREEZE_MAP') },
@@ -72,7 +89,6 @@ export class CreditsComponent implements OnInit {
       { key: 'H', description: this.translate.instant('CREDITS.SHORTCUTS.EXPORT_PDF_PORTRAIT') },
       { key: 'Q', description: this.translate.instant('CREDITS.SHORTCUTS.EXPORT_PDF_LANDSCAPE') },
       { key: 'T', description: this.translate.instant('CREDITS.SHORTCUTS.SHARE') }
-  
     ];
   }
 
