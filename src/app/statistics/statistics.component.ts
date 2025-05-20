@@ -22,7 +22,7 @@ import { LoadingService } from '../services/loading.service';
 export class StatisticsComponent implements OnInit, OnDestroy {
   visible: boolean = false;
   private subscription: Subscription;
-  
+  loading: boolean = false;
   stateScores: ScoreEntry[] = [];
   countyScores: ScoreEntry[] = [];
   municipalityScores: ScoreEntry[] = [];
@@ -95,6 +95,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
   private async updateScores(): Promise<void> {
     try {
+      this.loading = true;
       this.loadingService.startLoading();
       const [stateResult, countyResult, municipalityResult] = await Promise.all([
         this.statisticsService.getTopScores('state'),
@@ -113,6 +114,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       this.municipalityScores = [];
     } finally {
       this.loadingService.stopLoading();
+      this.loading = false;
     }
   }
 
