@@ -77,7 +77,7 @@ export class MapBuildService {
             this.averageType = settings.averageType;
             
             if (populationAreaChanged || averageTypeChanged) {
-                this.resetCache(false);
+                this.resetCache(true);
                 this.resetStatisticsCache();
             } else if (settings.updatedLevel) {
                 this.refreshFeatureColors(settings.updatedLevel);
@@ -89,24 +89,43 @@ export class MapBuildService {
 
     async buildMap(landkreise: { [key: string]: any }, level: 'county' | 'municipality' | 'hexagon' | 'state' = 'state', currentFeatures?: Feature[]) {
         this.landkreise = landkreise;
-        // Only load states initially
+        
+        // Check if we should build state or county level
         if (level === 'state') {
-            await this.loadStates(landkreise);
-            const features = Object.values(this.cache.states);
+            // Get all state IDs from landkreise
+            const stateIds = [...new Set(Object.keys(landkreise).map(id => id.substring(0, 2)))];
             
-            // Update opacity for state features
-            features.forEach(feature => {
-                const populationDensity = feature.properties.population_density || 0;
-                const opacity = this.calculateOpacity(populationDensity, 'state');
-                const currentColor = feature.properties.rgbColor;
-                feature.properties.rgbColor = [...currentColor.slice(0, 3), opacity];
+            // Check if all counties for each state are present
+            const allCountiesPresent = stateIds.every(stateId => {
+                const stateCounties = Object.keys(landkreise).filter(id => id.startsWith(stateId));
+                // Get expected number of counties for this state (this would need to be defined somewhere)
+                const expectedCountyCount = this.getExpectedCountyCount(stateId);
+                return stateCounties.length === expectedCountyCount;
             });
 
-            return {
-                type: "FeatureCollection",
-                features
-            };
-        } else if (level === 'county') {
+            if (allCountiesPresent) {
+                await this.loadStates(landkreise);
+                const features = Object.values(this.cache.states);
+                
+                // Update opacity for state features
+                features.forEach(feature => {
+                    const populationDensity = feature.properties.population_density || 0;
+                    const opacity = this.calculateOpacity(populationDensity, 'state');
+                    const currentColor = feature.properties.rgbColor;
+                    feature.properties.rgbColor = [...currentColor.slice(0, 3), opacity];
+                });
+
+                return {
+                    type: "FeatureCollection",
+                    features
+                };
+            } else {
+                // If not all counties are present, fall back to county level
+                level = 'county';
+            }
+        }
+
+        if (level === 'county') {
             await this.loadCounties(landkreise, currentFeatures);
             const features = Object.values(this.cache.counties);
             return {
@@ -414,7 +433,6 @@ export class MapBuildService {
             countiesToLoad = Object.keys(landkreise).filter(id => !this.cache.hexagons[id]);
         }
         if (!countiesToLoad || countiesToLoad.length === 0) {
-            console.error("No hexagons")
             return
         }
         // Hexagon area in km² (assuming all hexagons have the same size)
@@ -605,5 +623,29 @@ export class MapBuildService {
 
         // Force a single redraw after all updates
         source?.changed();
+    }
+
+    // Helper method to get expected county count for a state
+    private getExpectedCountyCount(stateId: string): number {
+        // This is a simplified example - you would need to define the actual expected counts
+        const expectedCounts: { [key: string]: number } = {
+            '01': 15, // Schleswig-Holstein
+            '02': 1,  // Hamburg
+            '03': 45,  // Niedersachsen
+            '04': 2,  // Bremen
+            '05': 53, // Nordrhein-Westfalen
+            '06': 26, // Hessen
+            '07': 36, // Rheinland-Pfalz
+            '08': 44, // Baden-Württemberg
+            '09': 96, // Bayern
+            '10': 6,  // Saarland
+            '11': 1, // Berlin
+            '12': 18, // Brandenburg
+            '13': 8,  // Mecklenburg-Vorpommern
+            '14': 13, // Sachsen
+            '15': 14, // Sachsen-Anhalt
+            '16': 22  // Thüringen
+        };
+        return expectedCounts[stateId] || 0;
     }
 }
