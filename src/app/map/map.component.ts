@@ -343,6 +343,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private determineFeatureLevel(zoom: number): 'state' | 'county' | 'municipality' | 'hexagon' {
+    if (this.mapService.getAddingSingleFeature()) {
+      return 'municipality';
+    }
     if (zoom >= 11) return 'hexagon';
     if (zoom >= 9) return 'municipality';
     if (zoom >= 8) return 'county';
@@ -432,14 +435,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
 
     try {
-        // Adjust maxZoom based on the current level
-        const maxZoom = this.level === 'state' ? 8 : 10;
-        
-        this.map.getView().fit(extent, {
-            duration: 1000,
-            padding: [50, 50, 50, 50],
-            maxZoom: maxZoom
-        });
+      const maxZoom = this.level === 'state' ? 8 : 10;
+      const duration = this.mapService.getAddingSingleFeature() ? 0 : 1000;
+      this.map.getView().fit(extent, {
+          duration: duration,
+          padding: [50, 50, 50, 50],
+          maxZoom: maxZoom
+      });
     } catch (error) {
         console.error('Error zooming to features:', error);
     } finally {

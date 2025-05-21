@@ -149,7 +149,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         isPublic: [false],
         allowSharing: [false],
         sendEmail: [true],
-        loadAreasOnMap: [true],
+        loadAreasOnMap: [false],
         projectGroup: [null],
       })
     });
@@ -183,7 +183,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         isPublic: false,
         allowSharing: false,
         sendEmail: true,
-        loadAreasOnMap: true,
+        loadAreasOnMap: false,
       }
     });
 
