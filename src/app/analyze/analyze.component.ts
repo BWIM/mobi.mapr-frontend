@@ -28,6 +28,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   currentScoreColor: string = '';
   weightingType: 'population' | 'area' = 'population';
   isAreaWeighting: boolean = false;
+  sortBy: 'score' | 'weight' = 'score';
 
   // Diagrammdaten
   personaChartData: any;
@@ -38,6 +39,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   pieChartOptions: any;
   activitiesChartType: 'bar' | 'doughnut' = 'bar';
   doughnutChartOptions: any;
+  activitiesWeightChartData: any;
+  weightChartOptions: any;
 
   getScore(): {score: number, color: string} {
     if (!this.properties) return {score: 0, color: ''};
@@ -389,200 +392,133 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Get category names and weights from formatted_categories
     const categoryMap = new Map(this.projectDetails.categories.map(cat => [cat.id, { name: cat.name, weight: cat.weight }]));
 
-    // Create array with all necessary data and filter for weights > 3%
+    // Create array with all necessary data
     const categoryData = weightedCategoryScores
       .map(category => ({
         name: categoryMap.get(category.category)?.name || `${category.category}`,
         score: category.score,
         weight: categoryMap.get(category.category)?.weight || 1
-      }))
-      .filter(item => item.weight > 3); // Filter for weights greater than 3%
+      }));
 
-    // Sort based on chart type
-    let sortedData;
-    if (this.activitiesChartType === 'bar') {
-      // Sort by score for bar chart (ascending)
-      sortedData = [...categoryData].sort((a, b) => a.score - b.score);
-    } else {
-      // Sort by weight for doughnut chart (descending)
-      sortedData = [...categoryData].sort((a, b) => b.weight - a.weight);
-    }
+    // Sort based on current sort type
+    const sortedData = [...categoryData].sort((a, b) => {
+      if (this.sortBy === 'score') {
+        return a.score - b.score;
+      } else {
+        return b.weight - a.weight;
+      }
+    });
 
     // Extract sorted arrays
     const labels = sortedData.map(item => item.name);
-    const data = sortedData.map(item => item.score);
+    const scores = sortedData.map(item => item.score * 100);
     const weights = sortedData.map(item => item.weight);
 
     // Farbzuordnung basierend auf den Werten
     const getColorForValue = (value: number): string => {
-      if (value >= 1.41) return '#9656a2';      // Lila (F)
-      if (value >= 1) return '#c21807';      // Rot (E)
-      if (value >= 0.72) return '#ed7014';      // Orange (D)
-      if (value >= 0.51) return '#eed202';      // Gelb (C)
-      if (value >= 0.35) return '#3cb043';      // Hellgrün (B)
+      if (value >= 141) return '#9656a2';      // Lila (F)
+      if (value >= 100) return '#c21807';      // Rot (E)
+      if (value >= 72) return '#ed7014';      // Orange (D)
+      if (value >= 51) return '#eed202';      // Gelb (C)
+      if (value >= 35) return '#3cb043';      // Hellgrün (B)
       return '#32612d';                         // Dunkelgrün (A)
     };
 
-    const backgroundColor = data.map(value => getColorForValue(value));
+    const scoreColors = scores.map(value => getColorForValue(value));
 
-    if (this.activitiesChartType === 'bar') {
-      this.activitiesChartData = {
-        labels: labels,
-        datasets: [
-          {
-            label: 'Aktivitätswerte',
-            data: data,
-            backgroundColor: backgroundColor,
-            borderColor: backgroundColor,
-            borderWidth: 1,
-            yAxisID: 'y',
-            order: 2
-          }
-        ]
-      };
+    this.activitiesChartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Score',
+          data: scores,
+          backgroundColor: scoreColors,
+          borderColor: scoreColors,
+          borderWidth: 1,
+          yAxisID: 'y',
+          barPercentage: 1
+        },
+        {
+          label: 'Gewichtung',
+          data: weights,
+          backgroundColor: 'rgba(74, 144, 226, 0.3)',  // More transparent blue
+          borderColor: 'rgba(74, 144, 226, 0.5)',      // Semi-transparent border
+          borderWidth: 1,
+          yAxisID: 'y1',
+          barPercentage: 0.4,                          // Thinner bars
+          order: 2                                     // Draw behind score bars
+        }
+      ]
+    };
 
-      // Aktualisiere die Chart-Optionen
-      this.barChartOptions = {
-        indexAxis: 'x',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          tooltip: {
-            mode: 'index',
-            intersect: false,
-            callbacks: {
-              label: function(context: any) {
-                const weight = weights[context.dataIndex];
-                return `${context.dataset.label}: ${context.raw.toFixed(2)} (Weight: ${weight})`;
+    this.barChartOptions = {
+      indexAxis: 'x',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            label: function(context: any) {
+              const value = context.raw;
+              if (context.dataset.label === 'Score') {
+                return `Score: ${value.toFixed(1)}%`;
               }
+              return `Gesamtgewicht: ${value}%`;
             }
-          },
-          legend: {
-            labels: {
-              color: '#495057'
-            },
-            position: 'bottom'
           }
         },
-        scales: {
-          x: {
-            ticks: {
-              color: '#495057'
-            },
-            grid: {
-              color: '#ebedef'
-            }
+        legend: {
+          labels: {
+            color: '#495057'
           },
-          y: {
-            type: 'linear',
+          position: 'bottom'
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#495057'
+          },
+          grid: {
+            color: '#ebedef'
+          }
+        },
+        y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          beginAtZero: true,
+          ticks: {
+            color: '#495057'
+          },
+          grid: {
+            color: '#ebedef'
+          },
+          title: {
             display: true,
-            position: 'left',
-            beginAtZero: true,
-            ticks: {
-              color: '#495057'
-            },
-            grid: {
-              color: '#ebedef'
-            },
-            title: {
-              display: true,
-              text: 'Aktivitätswerte'
-            }
-          }
-        }
-      };
-    } else {
-      // Create a new dataset that shows activities multiplied by their weight
-      const weightedScores = sortedData.map(item => ({
-        name: item.name,
-        weightedValue: item.score * item.weight,
-        score: item.score,
-        weight: item.weight
-      }));
-      
-      // Sort by weighted value (descending)
-      const sortedWeightedScores = [...weightedScores].sort((a, b) => b.weightedValue - a.weightedValue);
-      
-      const weightedLabels = sortedWeightedScores.map(item => item.name);
-      const weightedData = sortedWeightedScores.map(item => item.weightedValue);
-      const originalScores = sortedWeightedScores.map(item => item.score);
-      const weights = sortedWeightedScores.map(item => item.weight);
-      
-      const weightedBackgroundColors = sortedWeightedScores.map(item => {
-        const score = item.score;
-        if (score >= 1.41) return '#9656a2';      // Purple (F)
-        if (score >= 1.0) return '#c21807';       // Red (E)
-        if (score >= 0.72) return '#ed7014';      // Orange (D)
-        if (score >= 0.51) return '#eed202';      // Yellow (C)
-        if (score >= 0.35) return '#3cb043';      // Light green (B)
-        return '#32612d';                         // Dark green (A)
-      });
-
-      this.activitiesChartData = {
-        labels: weightedLabels,
-        datasets: [
-          {
-            label: 'Gewichtete Aktivitätswerte',
-            data: weightedData,
-            backgroundColor: weightedBackgroundColors,
-            borderColor: weightedBackgroundColors,
-            borderWidth: 1
-          }
-        ]
-      };
-
-      // Update chart options for weighted bar chart
-      this.barChartOptions = {
-        indexAxis: 'x',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          tooltip: {
-            mode: 'index',
-            intersect: false,
-            callbacks: {
-              label: function(context: any) {
-                const index = context.dataIndex;
-                return [
-                  `Gewichteter Wert: ${context.raw.toFixed(2)}`,
-                  `Score: ${originalScores[index].toFixed(2)}`,
-                  `Gewichtung: ${weights[index]}`
-                ];
-              }
-            }
-          },
-          legend: {
-            labels: {
-              color: '#495057'
-            },
-            position: 'bottom'
+            text: 'Score (%)'
           }
         },
-        scales: {
-          x: {
-            ticks: {
-              color: '#495057'
-            },
-            grid: {
-              color: '#ebedef'
-            }
+        y1: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          beginAtZero: true,
+          ticks: {
+            color: '#495057'
           },
-          y: {
-            beginAtZero: true,
-            ticks: {
-              color: '#495057'
-            },
-            grid: {
-              color: '#ebedef'
-            },
-            title: {
-              display: true,
-              text: 'Gewichtete Aktivitätswerte (Score × Gewichtung)'
-            }
+          grid: {
+            drawOnChartArea: false
+          },
+          title: {
+            display: true,
+            text: 'Gewichtung (%)'
           }
         }
-      };
-    }
+      }
+    };
   }
 
   private initializePersonaChart(): void {
@@ -774,6 +710,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.initializeActivitiesChart();
     // Trigger resize after chart type change with sufficient delay to ensure rendering completes
     setTimeout(() => this.triggerChartResize(), 100);
+  }
+
+  toggleSort(): void {
+    this.sortBy = this.sortBy === 'score' ? 'weight' : 'score';
+    this.initializeActivitiesChart();
+    this.triggerChartResize();
   }
 
   /**

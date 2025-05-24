@@ -74,23 +74,15 @@
                                 <div class="flex justify-between items-center mb-4">
                                     <h3 class="text-xl">{{ 'ANALYZE.ACTIVITIES.TITLE' | translate }}</h3>
                                     <p-button 
-                                        [icon]="activitiesChartType === 'bar' ? 'pi pi-sort-amount-down' : 'pi pi-sort-amount-up'"
-                                        (onClick)="toggleActivitiesChartType()"
-                                        [pTooltip]="activitiesChartType === 'bar' ? 'Wechseln zu gewichteten Werten' : 'Wechseln zu ungewichteten Werten'"
+                                        [icon]="sortBy === 'score' ? 'pi pi-sort-amount-down' : 'pi pi-sort-amount-up'"
+                                        (onClick)="toggleSort()"
+                                        [pTooltip]="sortBy === 'score' ? 'Nach Gewichtung sortieren' : 'Nach Score sortieren'"
                                         tooltipPosition="left"
                                         styleClass="p-button-text">
                                     </p-button>
                                 </div>
                                 <div *ngIf="hasActivityData()" class="h-full flex flex-col w-full">
-                                    <div *ngIf="activitiesChartType === 'bar'" class="chart-container">
-                                        <p-chart 
-                                            [type]="activitiesChartType" 
-                                            [data]="activitiesChartData" 
-                                            [options]="barChartOptions"
-                                            class="h-full w-full min-h-[400px]">
-                                        </p-chart>
-                                    </div>
-                                    <div *ngIf="activitiesChartType === 'doughnut'" class="chart-container">
+                                    <div class="chart-container">
                                         <p-chart 
                                             type="bar" 
                                             [data]="activitiesChartData" 
@@ -98,7 +90,6 @@
                                             class="h-full w-full min-h-[400px]">
                                         </p-chart>
                                     </div>
-                                    <p *ngIf="activitiesChartType === 'doughnut'" class="mt-2">{{ 'ANALYZE.ACTIVITIES.EXPLANATION' | translate }}</p>
                                     <p class="text-sm text-gray-500 mt-2">{{ 'ANALYZE.ACTIVITIES.HINT' | translate }}</p>
                                 </div>
                                 <div *ngIf="!hasActivityData()" class="text-center p-4">
