@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Subject, BehaviorSubject, debounceTime, Observable } from 'rxjs';
+import { Subject, BehaviorSubject, debounceTime } from 'rxjs';
 import Map from 'ol/Map';
 import WebGLVectorLayer from 'ol/layer/WebGLVector';
 import VectorSource from 'ol/source/Vector';
@@ -22,8 +22,6 @@ export class MapService {
   private currentFeatures: { [key: string]: any } = {};  // Store current features
   features$ = this.featuresSubject.asObservable();
 
-  private addingSingleFeature = new Subject<boolean>();
-  addingSingleFeature$ = this.addingSingleFeature.asObservable();
 
   private resetMapSubject = new Subject<void>();
   resetMap$ = this.resetMapSubject.asObservable();
@@ -99,7 +97,6 @@ export class MapService {
   }
 
   addSingleFeature(feature: { [key: string]: { [key: string]: any } }): void {
-    this.setAddingSingleFeature(true);
 
     const primaryKey = Object.keys(feature)[0];
     
@@ -111,7 +108,6 @@ export class MapService {
       }
     };
     this.featuresSubject.next(this.currentFeatures);
-    this.setAddingSingleFeature(false);
   }
 
   resetMap(): void {
@@ -135,13 +131,5 @@ export class MapService {
 
   updateOpacityThresholds(thresholds: Partial<OpacityThresholds>, level: keyof OpacityThresholds): void {
     this.opacityUpdateSubject.next({ thresholds, level });
-  }
-
-  setAddingSingleFeature(adding: boolean): void {
-    this.addingSingleFeature.next(adding);
-  }
-
-  getAddingSingleFeature(): Observable<boolean> {
-    return this.addingSingleFeature.asObservable();
   }
 }
