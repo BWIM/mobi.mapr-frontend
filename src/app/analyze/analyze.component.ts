@@ -402,11 +402,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Sort based on current sort type
     const sortedData = [...categoryData].sort((a, b) => {
-      if (this.sortBy === 'score') {
-        return a.score - b.score;
-      } else {
-        return b.weight - a.weight;
-      }
+      return b.weight - a.weight;  // Always sort by weight in descending order
     });
 
     // Extract sorted arrays
@@ -430,23 +426,13 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       labels: labels,
       datasets: [
         {
-          label: 'Score',
-          data: scores,
+          label: 'Aktivitäten',
+          data: weights,
           backgroundColor: scoreColors,
           borderColor: scoreColors,
           borderWidth: 1,
           yAxisID: 'y',
-          barPercentage: 1
-        },
-        {
-          label: 'Gewichtung',
-          data: weights,
-          backgroundColor: 'rgba(74, 144, 226, 0.3)',  // More transparent blue
-          borderColor: 'rgba(74, 144, 226, 0.5)',      // Semi-transparent border
-          borderWidth: 1,
-          yAxisID: 'y1',
-          barPercentage: 0.4,                          // Thinner bars
-          order: 2                                     // Draw behind score bars
+          barPercentage: 0.8
         }
       ]
     };
@@ -461,11 +447,11 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           intersect: false,
           callbacks: {
             label: function(context: any) {
-              const value = context.raw;
-              if (context.dataset.label === 'Score') {
-                return `Score: ${value.toFixed(1)}%`;
-              }
-              return `Gesamtgewicht: ${value}%`;
+              const index = context.dataIndex;
+              return [
+                `Score: ${scores[index].toFixed(1)}%`,
+                `Gewichtung: ${weights[index]}%`
+              ];
             }
           }
         },
@@ -495,22 +481,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           },
           grid: {
             color: '#ebedef'
-          },
-          title: {
-            display: true,
-            text: 'Score (%)'
-          }
-        },
-        y1: {
-          type: 'linear',
-          display: true,
-          position: 'right',
-          beginAtZero: true,
-          ticks: {
-            color: '#495057'
-          },
-          grid: {
-            drawOnChartArea: false
           },
           title: {
             display: true,
