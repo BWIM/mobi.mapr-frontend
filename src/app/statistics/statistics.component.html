@@ -84,8 +84,19 @@
         <!-- Municipalities -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <h2 class="text-xl font-bold p-4 border-b-2 border-primary text-gray-800">{{ 'STATISTICS.MUNICIPALITIES' | translate }}</h2>
+            <div class="p-4 border-b border-gray-100">
+                <p-multiSelect
+                    [options]="populationCategories"
+                    [(ngModel)]="selectedCategories"
+                    (onChange)="onPopulationCategoryChange()"
+                    optionLabel="label"
+                    placeholder="Filter by city size"
+                    filter="false"
+                    styleClass="w-full">
+                </p-multiSelect>
+            </div>
             <p-scrollPanel [style]="{ height: '400px' }">
-                <p-table [value]="municipalityScores" styleClass="text-sm">
+                <p-table [value]="filteredMunicipalityScores" styleClass="text-sm">
                     <ng-template pTemplate="header">
                         <tr class="bg-gray-100">
                             <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.RANK' | translate }}</th>

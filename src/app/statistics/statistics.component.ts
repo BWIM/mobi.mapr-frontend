@@ -7,6 +7,7 @@ import { ScrollPanelModule } from 'primeng/scrollpanel';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { LoadingService } from '../services/loading.service';
+import { MultiSelectModule } from 'primeng/multiselect';
 
 @Component({
   selector: 'app-statistics',
@@ -15,7 +16,8 @@ import { LoadingService } from '../services/loading.service';
     SharedModule,
     ScrollPanelModule,
     ButtonModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    MultiSelectModule
   ],
   templateUrl: './statistics.component.html'
 })
@@ -26,10 +28,22 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   stateScores: ScoreEntry[] = [];
   countyScores: ScoreEntry[] = [];
   municipalityScores: ScoreEntry[] = [];
+  filteredMunicipalityScores: ScoreEntry[] = [];
   loadingMunicipalities: boolean = false;
   
   averageType: 'mean' | 'median' = 'mean';
   populationArea: 'pop' | 'area' = 'pop';
+
+  populationCategories = [
+    { label: 'Landgemeinden (0-5.000)', value: 'small', min: 0, max: 5000 },
+    { label: 'Kleine Kleinstädte (5.001-10.000)', value: 'small', min: 5001, max: 10000 },
+    { label: 'Große Kleinstädte (10.001-20.000)', value: 'medium', min: 10001, max: 20000 },
+    { label: 'Kleine Mittelstädte (20.001-50.000)', value: 'medium', min: 20001, max: 50000 },
+    { label: 'Große Mittelstädte (50.001-100.000)', value: 'large', min: 50001, max: 100000 },
+    { label: 'Kleinere Großstädte (100.001-500.000)', value: 'large', min: 100001, max: 500000 },
+    { label: 'Große Großstädte (>500.000)', value: 'large', min: 500001, max: Infinity }
+  ];
+  selectedCategories: any[] = this.populationCategories;
 
   // Color mapping based on MapBuildService colors
   readonly scoreColors = {
@@ -106,16 +120,38 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       this.stateScores = stateResult;
       this.countyScores = countyResult;
       this.municipalityScores = municipalityResult;
+      this.applyPopulationFilter();
     } catch (error) {
       console.error('Error updating scores:', error);
       // Reset scores on error
       this.stateScores = [];
       this.countyScores = [];
       this.municipalityScores = [];
+      this.filteredMunicipalityScores = [];
     } finally {
       this.loadingService.stopLoading();
       this.loading = false;
     }
+  }
+
+  onPopulationCategoryChange(): void {
+    this.applyPopulationFilter();
+  }
+
+  private applyPopulationFilter(): void {
+    if (this.selectedCategories.length === 0) {
+      this.filteredMunicipalityScores = this.municipalityScores;
+      return;
+    }
+
+    this.filteredMunicipalityScores = this.municipalityScores.filter(score => {
+      if (!score.population) return false;
+      console.log(score);
+      return this.selectedCategories.some(category => {
+        const { min, max } = category;
+        return score.population > min && score.population <= max;
+      });
+    });
   }
 
   getScoreGrade(score: number): string {

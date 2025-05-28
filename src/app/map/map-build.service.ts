@@ -198,6 +198,7 @@ export class MapBuildService {
                 try {
                     const response = await fetch(`assets/boundaries/${stateId}/boundary.geojson.gz`);
                     const stateGeoJson = await response.json();
+                    console.log(stateGeoJson);
 
                     // Calculate state-level statistics from all hexagons in all counties in the state
                     let totalScore = 0;
@@ -389,14 +390,13 @@ export class MapBuildService {
                             const averageScore = this.populationArea === 'pop'
                                 ? (totalPopulation > 0 ? totalScore / totalPopulation : 0)
                                 : (totalHexagons > 0 ? totalScore / totalHexagons : 0);
-
                             feature.properties = {
                                 ...feature.properties,
                                 level: 'municipality',
                                 minZoom: 10,
                                 maxZoom: 12,
                                 score: averageScore,
-                                population: totalPopulation,
+                                population: feature.properties.population || 0,
                                 populationDensity: landkreise[landkreis]?.[municipalityId]?.['population_density'] || 0,
                                 rgbColor: this.getColorForScore(averageScore, feature.properties.population_density || 0, 'municipality')
                             };
