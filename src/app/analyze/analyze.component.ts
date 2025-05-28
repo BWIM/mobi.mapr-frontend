@@ -453,7 +453,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
             label: (context: any) => {
               const index = context.dataIndex;
               return [
-                `Score: ${this.getScoreName(scores[index])} (${scores[index].toFixed(1)}%)`,
+                `Score: ${this.getScoreName(scores[index])}`,
                 `Gewichtung: ${weights[index]}%`
               ];
             }
@@ -705,6 +705,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getScoreName(score: number): string {
+    score = score / 100;
     if (score <= 0) return "Error";
     if (score <= 0.28) return "A+";
     if (score <= 0.32) return "A";
