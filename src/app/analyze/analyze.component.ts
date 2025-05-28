@@ -562,10 +562,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       scales: {
         r: {
           beginAtZero: true,
-          max: maxValue,
+          max: 2,
           reverse: true, // This inverts the scale
           ticks: {
-            stepSize: maxValue > 2 ? 0.5 : 0.2,
+            stepSize: 0.5,
             font: {
               size: 10
             }
@@ -587,60 +587,50 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log(highestScore)
 
     // Basis-Datensatz für die Hintergrundfarben (inverted)
-    const baseDatasets = [];
-    if (highestScore >= 1.41) {
-      baseDatasets.push({
+    const baseDatasets = [
+      {
         label: 'F',
-        data: Array(labels.length).fill(Math.min(maxValue, 1.41)), // Use dynamic max value
+        data: Array(labels.length).fill(Math.min(2, 1.41)), // Use dynamic max value
         backgroundColor: 'rgba(150, 86, 162, 0.2)',
         borderWidth: 0,
         fill: 'start'
-      });
-    }
-    if (highestScore >= 1.0) {
-      baseDatasets.push({
+      },
+      {
         label: 'E',
-        data: Array(labels.length).fill(Math.min(maxValue, 1.0)),
+        data: Array(labels.length).fill(Math.min(1.41, 1.0)),
         backgroundColor: 'rgba(194, 24, 7, 0.2)',
         borderWidth: 0,
         fill: 'start'
-      });
-    }
-    if (highestScore >= 0.72) {
-      baseDatasets.push({
+      },
+      {
         label: 'D',
-        data: Array(labels.length).fill(Math.min(maxValue, 0.72)),
+        data: Array(labels.length).fill(Math.min(1.0, 0.72)),
         backgroundColor: 'rgba(237, 112, 20, 0.2)',
         borderWidth: 0,
         fill: 'start'
-      });
-    }
-    if (highestScore >= 0.51) {
-      baseDatasets.push({
+      },
+      {
         label: 'C',
-        data: Array(labels.length).fill(Math.min(maxValue, 0.51)),
+        data: Array(labels.length).fill(Math.min(0.72, 0.51)),
         backgroundColor: 'rgba(238, 210, 2, 0.2)',
         borderWidth: 0,
         fill: 'start'
-      });
-    }
-    if (highestScore >= 0.35) {
-      baseDatasets.push({
+      },
+      {
         label: 'B',
-        data: Array(labels.length).fill(Math.min(maxValue, 0.35)),
+        data: Array(labels.length).fill(Math.min(0.5, 0.35)),
         backgroundColor: 'rgba(60, 176, 67, 0.2)',
         borderWidth: 0,
         fill: 'start'
-      });
-    }
-    baseDatasets.push({
-      label: 'A',
-      data: Array(labels.length).fill(Math.min(0.35, 0)),
-      backgroundColor: 'rgba(50, 97, 45, 0.2)',
-      borderWidth: 0,
-      fill: 'start'
-    });
-
+      },
+      {
+        label: 'A',
+        data: Array(labels.length).fill(Math.min(0.35, 0)),
+        backgroundColor: 'rgba(50, 97, 45, 0.2)',
+        borderWidth: 0,
+        fill: 'start'
+      }
+    ]
     this.personaChartData = {
       labels: labels,
       datasets: [
