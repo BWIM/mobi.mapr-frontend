@@ -28,7 +28,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   currentScoreColor: string = '';
   weightingType: 'population' | 'area' = 'population';
   isAreaWeighting: boolean = false;
-  sortBy: 'score' | 'weight' = 'score';
+  sortBy: 'score' | 'weight' = 'weight';
 
   // Diagrammdaten
   personaChartData: any;
@@ -402,7 +402,11 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Sort based on current sort type
     const sortedData = [...categoryData].sort((a, b) => {
-      return b.weight - a.weight;  // Always sort by weight in descending order
+      if (this.sortBy === 'weight') {
+        return b.weight - a.weight;  // Sort by weight in descending order
+      } else {
+        return b.score - a.score;    // Sort by score in descending order
+      }
     });
 
     // Extract sorted arrays
@@ -446,10 +450,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           mode: 'index',
           intersect: false,
           callbacks: {
-            label: function(context: any) {
+            label: (context: any) => {
               const index = context.dataIndex;
               return [
-                `Score: ${scores[index].toFixed(1)}%`,
+                `Score: ${this.getScoreName(scores[index])} (${scores[index].toFixed(1)}%)`,
                 `Gewichtung: ${weights[index]}%`
               ];
             }
@@ -516,7 +520,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Sort personas by their weighted scores (descending)
     const sortedPersonas = weightedPersonaScores.sort((a, b) => b.score - a.score);
-    
+
     // Get persona names from formatted_personas
     const personaMap = new Map(this.projectDetails.personas.map(p => [p.id, p.name]));
     const labels = sortedPersonas.map(persona => personaMap.get(persona.persona) || `${persona.persona}`);
@@ -708,5 +712,27 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
+  }
+
+  getScoreName(score: number): string {
+    if (score <= 0) return "Error";
+    if (score <= 0.28) return "A+";
+    if (score <= 0.32) return "A";
+    if (score <= 0.35) return "A-";
+    if (score <= 0.4) return "B+";
+    if (score <= 0.45) return "B";
+    if (score <= 0.5) return "B-";
+    if (score <= 0.56) return "C+";
+    if (score <= 0.63) return "C";
+    if (score <= 0.71) return "C-";
+    if (score <= 0.8) return "D+";
+    if (score <= 0.9) return "D";
+    if (score <= 1.0) return "D-";
+    if (score <= 1.12) return "E+";
+    if (score <= 1.26) return "E";
+    if (score <= 1.41) return "E-";
+    if (score <= 1.59) return "F+";
+    if (score <= 1.78) return "F";
+    return "F-";
   }
 }

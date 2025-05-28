@@ -504,7 +504,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           if (this.keyboardShortcutsService.getIsFrozen()) {
             this.tooltip.innerHTML = `${score_name}`;
           } else {
-            this.tooltip.innerHTML = `${name}<br>${score_name}`;
+            this.tooltip.innerHTML = `${name}: ${score_name}`;
           }
           this.tooltip.style.display = 'block';
           this.tooltip.style.left = `${pixel[0] + 10}px`;
