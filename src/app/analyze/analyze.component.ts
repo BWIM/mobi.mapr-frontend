@@ -28,7 +28,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   currentScoreColor: string = '';
   weightingType: 'population' | 'area' = 'population';
   isAreaWeighting: boolean = false;
-  sortBy: 'score' | 'weight' = 'score';
+  sortBy: 'score' | 'weight' = 'weight';
 
   // Diagrammdaten
   personaChartData: any;
@@ -402,10 +402,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Sort based on current sort type
     const sortedData = [...categoryData].sort((a, b) => {
-      if (this.sortBy === 'score') {
-        return a.score - b.score;
+      if (this.sortBy === 'weight') {
+        return b.weight - a.weight;  // Sort by weight in descending order
       } else {
-        return b.weight - a.weight;
+        return b.score - a.score;    // Sort by score in descending order
       }
     });
 
@@ -430,23 +430,13 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       labels: labels,
       datasets: [
         {
-          label: 'Score',
-          data: scores,
+          label: 'Aktivitäten',
+          data: weights,
           backgroundColor: scoreColors,
           borderColor: scoreColors,
           borderWidth: 1,
           yAxisID: 'y',
-          barPercentage: 1
-        },
-        {
-          label: 'Gewichtung',
-          data: weights,
-          backgroundColor: 'rgba(74, 144, 226, 0.3)',  // More transparent blue
-          borderColor: 'rgba(74, 144, 226, 0.5)',      // Semi-transparent border
-          borderWidth: 1,
-          yAxisID: 'y1',
-          barPercentage: 0.4,                          // Thinner bars
-          order: 2                                     // Draw behind score bars
+          barPercentage: 0.8
         }
       ]
     };
@@ -460,12 +450,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           mode: 'index',
           intersect: false,
           callbacks: {
-            label: function(context: any) {
-              const value = context.raw;
-              if (context.dataset.label === 'Score') {
-                return `Score: ${value.toFixed(1)}%`;
-              }
-              return `Gesamtgewicht: ${value}%`;
+            label: (context: any) => {
+              const index = context.dataIndex;
+              return [
+                `Score: ${this.getScoreName(scores[index])} (${scores[index].toFixed(1)}%)`,
+                `Gewichtung: ${weights[index]}%`
+              ];
             }
           }
         },
@@ -495,22 +485,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           },
           grid: {
             color: '#ebedef'
-          },
-          title: {
-            display: true,
-            text: 'Score (%)'
-          }
-        },
-        y1: {
-          type: 'linear',
-          display: true,
-          position: 'right',
-          beginAtZero: true,
-          ticks: {
-            color: '#495057'
-          },
-          grid: {
-            drawOnChartArea: false
           },
           title: {
             display: true,
@@ -544,9 +518,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       score: data.totalWeightedScore / data.totalWeight
     }));
 
-    // Sort personas by their weighted scores (ascending)
-    const sortedPersonas = weightedPersonaScores.sort((a, b) => a.score - b.score);
-    
+    // Sort personas by their weighted scores (descending)
+    const sortedPersonas = weightedPersonaScores.sort((a, b) => b.score - a.score);
+
     // Get persona names from formatted_personas
     const personaMap = new Map(this.projectDetails.personas.map(p => [p.id, p.name]));
     const labels = sortedPersonas.map(persona => personaMap.get(persona.persona) || `${persona.persona}`);
@@ -556,31 +530,31 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const highestScore = Math.max(...data);
 
     // Calculate dynamic max value - round up to next 0.5 increment and add small padding
-    const maxValue = highestScore * 1.05;
+    const maxValue = highestScore * 1.05 + 0.35;
 
-    // Farbzuordnung basierend auf den Werten
+    // Farbzuordnung basierend auf den Werten (inverted)
     const getColorForValue = (value: number): string => {
-      if (value >= 1.41) return '#9656a2';      // Lila (F)
-      if (value >= 1) return '#c21807';      // Rot (E)
-      if (value >= 0.72) return '#ed7014';      // Orange (D)
-      if (value >= 0.51) return '#eed202';      // Gelb (C)
-      if (value >= 0.35) return '#3cb043';      // Hellgrün (B)
-      return '#32612d';                         // Dunkelgrün (A)
-    };
+    if (value >= 1.41) return '#9656a2';      // Lila (F)
+    if (value >= 1) return '#c21807';      // Rot (E)
+    if (value >= 0.72) return '#ed7014';      // Orange (D)
+    if (value >= 0.51) return '#eed202';      // Gelb (C)
+    if (value >= 0.35) return '#3cb043';      // Hellgrün (B)
+    return '#32612d';                         // Dunkelgrün (A)
+  };
 
-    const getBackgroundColorForValue = (value: number): string => {
-      if (value >= 1.41) return 'rgba(150, 86, 162, 0.2)';    // Lila (F)
-      if (value >= 1) return 'rgba(194, 24, 7, 0.2)';    // Rot (E)
-      if (value >= 0.72) return 'rgba(237, 112, 20, 0.2)';    // Orange (D)
-      if (value >= 0.51) return 'rgba(238, 210, 2, 0.2)';    // Gelb (C)
-      if (value >= 0.35) return 'rgba(60, 176, 67, 0.2)';    // Hellgrün (B)
-      return 'rgba(50, 97, 45, 0.2)';                       // Dunkelgrün (A)
-    };
+  const getBackgroundColorForValue = (value: number): string => {
+    if (value >= 1.41) return 'rgba(150, 86, 162, 0.2)';    // Lila (F)
+    if (value >= 1) return 'rgba(194, 24, 7, 0.2)';    // Rot (E)
+    if (value >= 0.72) return 'rgba(237, 112, 20, 0.2)';    // Orange (D)
+    if (value >= 0.51) return 'rgba(238, 210, 2, 0.2)';    // Gelb (C)
+    if (value >= 0.35) return 'rgba(60, 176, 67, 0.2)';    // Hellgrün (B)
+    return 'rgba(50, 97, 45, 0.2)';                       // Dunkelgrün (A)
+  };
 
     const borderColors = data.map(value => getColorForValue(value));
     const backgroundColors = data.map(value => getBackgroundColorForValue(value));
 
-    // Update radar options with dynamic max value
+    // Update radar options with dynamic max value and inverted scale
     this.radarChartOptions = {
       ...this.radarChartOptions,
       responsive: true,
@@ -589,6 +563,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         r: {
           beginAtZero: true,
           max: maxValue,
+          reverse: true, // This inverts the scale
           ticks: {
             stepSize: maxValue > 2 ? 0.5 : 0.2,
             font: {
@@ -609,13 +584,14 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       }
     };
+    console.log(highestScore)
 
-    // Basis-Datensatz für die Hintergrundfarben
+    // Basis-Datensatz für die Hintergrundfarben (inverted)
     const baseDatasets = [];
     if (highestScore >= 1.41) {
       baseDatasets.push({
         label: 'F',
-        data: Array(labels.length).fill(Math.min(maxValue, 2)), // Use dynamic max value
+        data: Array(labels.length).fill(Math.min(maxValue, 1.41)), // Use dynamic max value
         backgroundColor: 'rgba(150, 86, 162, 0.2)',
         borderWidth: 0,
         fill: 'start'
@@ -624,7 +600,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     if (highestScore >= 1.0) {
       baseDatasets.push({
         label: 'E',
-        data: Array(labels.length).fill(Math.min(maxValue, 1.41)),
+        data: Array(labels.length).fill(Math.min(maxValue, 1.0)),
         backgroundColor: 'rgba(194, 24, 7, 0.2)',
         borderWidth: 0,
         fill: 'start'
@@ -633,7 +609,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     if (highestScore >= 0.72) {
       baseDatasets.push({
         label: 'D',
-        data: Array(labels.length).fill(Math.min(maxValue, 1.0)),
+        data: Array(labels.length).fill(Math.min(maxValue, 0.72)),
         backgroundColor: 'rgba(237, 112, 20, 0.2)',
         borderWidth: 0,
         fill: 'start'
@@ -642,7 +618,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     if (highestScore >= 0.51) {
       baseDatasets.push({
         label: 'C',
-        data: Array(labels.length).fill(Math.min(maxValue, 0.72)),
+        data: Array(labels.length).fill(Math.min(maxValue, 0.51)),
         backgroundColor: 'rgba(238, 210, 2, 0.2)',
         borderWidth: 0,
         fill: 'start'
@@ -651,7 +627,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     if (highestScore >= 0.35) {
       baseDatasets.push({
         label: 'B',
-        data: Array(labels.length).fill(Math.min(maxValue, 0.51)),
+        data: Array(labels.length).fill(Math.min(maxValue, 0.35)),
         backgroundColor: 'rgba(60, 176, 67, 0.2)',
         borderWidth: 0,
         fill: 'start'
@@ -659,7 +635,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     baseDatasets.push({
       label: 'A',
-      data: Array(labels.length).fill(Math.min(maxValue, 0.35)),
+      data: Array(labels.length).fill(Math.min(0.35, 0)),
       backgroundColor: 'rgba(50, 97, 45, 0.2)',
       borderWidth: 0,
       fill: 'start'
@@ -736,5 +712,27 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
+  }
+
+  getScoreName(score: number): string {
+    if (score <= 0) return "Error";
+    if (score <= 0.28) return "A+";
+    if (score <= 0.32) return "A";
+    if (score <= 0.35) return "A-";
+    if (score <= 0.4) return "B+";
+    if (score <= 0.45) return "B";
+    if (score <= 0.5) return "B-";
+    if (score <= 0.56) return "C+";
+    if (score <= 0.63) return "C";
+    if (score <= 0.71) return "C-";
+    if (score <= 0.8) return "D+";
+    if (score <= 0.9) return "D";
+    if (score <= 1.0) return "D-";
+    if (score <= 1.12) return "E+";
+    if (score <= 1.26) return "E";
+    if (score <= 1.41) return "E-";
+    if (score <= 1.59) return "F+";
+    if (score <= 1.78) return "F";
+    return "F-";
   }
 }

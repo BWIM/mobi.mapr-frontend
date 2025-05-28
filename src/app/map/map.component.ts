@@ -498,15 +498,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         if (feature) {
           const properties = feature.getProperties();
           const name = properties['name'] || 'N/A';
-          const score = properties['score'] !== undefined ? 
-            (properties['score'] * 100).toFixed(0) : 'N/A';
 
           const score_name = this.getScoreName(properties['score']);
           
           if (this.keyboardShortcutsService.getIsFrozen()) {
-            this.tooltip.innerHTML = `${score_name} (${score}%)`;
+            this.tooltip.innerHTML = `${score_name}`;
           } else {
-            this.tooltip.innerHTML = `${name}<br>${score_name} (${score}%)`;
+            this.tooltip.innerHTML = `${name}: ${score_name}`;
           }
           this.tooltip.style.display = 'block';
           this.tooltip.style.left = `${pixel[0] + 10}px`;
@@ -575,7 +573,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           
           const labelFeature = new Feature({
             geometry: new Point([centerX, centerY]),
-            labelText: `${score_name} (${score}%)`,
+            labelText: `${score_name}`,
             ars: properties['ars']
           });
           
@@ -598,11 +596,23 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private getScoreName(score: number): string {
     if (score <= 0) return "Error";
-    if (score <= 0.35) return "A";
-    if (score <= 0.5) return "B";
-    if (score <= 0.71) return "C";
-    if (score <= 1) return "D";
-    if (score <= 1.41) return "E";
-    return "F";
+    if (score <= 0.28) return "A+";
+    if (score <= 0.32) return "A";
+    if (score <= 0.35) return "A-";
+    if (score <= 0.4) return "B+";
+    if (score <= 0.45) return "B";
+    if (score <= 0.5) return "B-";
+    if (score <= 0.56) return "C+";
+    if (score <= 0.63) return "C";
+    if (score <= 0.71) return "C-";
+    if (score <= 0.8) return "D+";
+    if (score <= 0.9) return "D";
+    if (score <= 1.0) return "D-";
+    if (score <= 1.12) return "E+";
+    if (score <= 1.26) return "E";
+    if (score <= 1.41) return "E-";
+    if (score <= 1.59) return "F+";
+    if (score <= 1.78) return "F";
+    return "F-";
   }
 }
