@@ -72,8 +72,7 @@ export class StatisticsService {
         level
       }))
       .filter(entry => entry.score > 0)
-      .sort((a, b) => a.score - b.score)
-      .slice(0, 10);
+      .sort((a, b) => a.score - b.score);
 
     return scores;
   }
