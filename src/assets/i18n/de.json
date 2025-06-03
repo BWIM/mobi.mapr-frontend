@@ -243,7 +243,6 @@
       "TITLE": "Aktivitäten",
       "NO_DATA": "Keine Daten verfügbar",
       "SWITCH_TO_DOUGHNUT": "Ansicht wechseln",
-      "HINT": "Bitte beachte, dass es bei der Gewichtung auf Landkreis-Ebene zu Ungenauigkeiten kommen kann.",
       "EXPLANATION": "Die Aktivitäten gewichtet nach lokaler Relevanz"
     },
     "MODES": {

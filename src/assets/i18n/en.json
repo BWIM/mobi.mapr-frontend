@@ -243,7 +243,6 @@
       "TITLE": "Activities",
       "NO_DATA": "No data available",
       "SWITCH_TO_DOUGHNUT": "Change view",
-      "HINT": "Please be aware, that there might be some inaccuracities on county level",
       "EXPLANATION": "The activities weighted by their local relevance"
     },
     "MODES": {
