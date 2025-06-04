@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy } from '@angular/core';
 import { SharedModule } from '../../shared/shared.module';
 import { MenuItem, MessageService } from 'primeng/api';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
@@ -46,7 +46,7 @@ interface CheckboxChangeEvent {
   imports: [SharedModule],
   providers: [MessageService]
 })
-export class ProjectWizardComponent implements OnInit, OnDestroy {
+export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
   steps: MenuItem[] = [];
   activeIndex: number = 0;
   projectForm!: FormGroup;
@@ -102,6 +102,9 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
           this.loadProjectGroups();
           this.loadAreas();
           this.loadLands();
+          this.loadActivities();
+          this.loadPersonas();
+          this.loadModes();
         }
       }
     );
@@ -109,12 +112,8 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     this.initializeForm();
   }
 
-
-  ngOnInit() {
+  ngAfterViewInit() {
     this.initializeSteps();
-    this.loadActivities();
-    this.loadPersonas();
-    this.loadModes();
   }
 
   ngOnDestroy() {
