@@ -286,8 +286,14 @@
       "EXPORT_PDF_LANDSCAPE": "PDF im Querformat exportieren",
       "CENTER_MAP": "Karte zentrieren",
       "FREEZE_MAP": "Kartenoverlay einfrieren (für Screenshots)",
-      "SHARE": "Teile"
-    }
+      "SHARE": "Teile",
+      "TOGGLE_HEXAGON_VIEW": "Hexagon Ansicht togglen"
+    },
+    "LOGOUT": "Ade",
+    "SHOW_CREDITS": "Gugg e mol",
+    "SHOW_HELP": "Frog?",
+    "CHANGE_LANGUAGE": "Mol was anders",
+    "SHOW_SHORTCUTS": "Tastle zeige"
   },
   "EXPORT": {
     "IS_EXPORTING": "Export lauft grad...",

@@ -286,8 +286,13 @@
       "EXPORT_PDF_LANDSCAPE": "PDF im Querformat exportieren",
       "CENTER_MAP": "Karte zentrieren",
       "FREEZE_MAP": "Kartenoverlay einfrieren (für Screenshots)",
-      "SHARE": "Teile"
-    }
+      "SHARE": "Teile",
+      "TOGGLE_HEXAGON_VIEW": "Hexagon Ansicht togglen"
+    },
+    "LOGOUT": "Gange",
+    "SHOW_HELP": "Frage?",
+    "CHANGE_LANGUAGE": "Aasländisch schwätze",
+    "SHOW_SHORTCUTS": "Tastle zeige"
   },
   "EXPORT": {
     "IS_EXPORTING": "Export lauft grad...",

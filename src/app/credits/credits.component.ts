@@ -6,6 +6,7 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { AccordionModule } from 'primeng/accordion';
 import { SpeedDialModule } from 'primeng/speeddial';
+import { TooltipModule } from 'primeng/tooltip';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../auth/auth.service';
 import { Router } from '@angular/router';
@@ -30,7 +31,8 @@ interface Shortcut {
     CardModule,
     ButtonModule,
     AccordionModule,
-    SpeedDialModule
+    SpeedDialModule,
+    TooltipModule
   ],
   templateUrl: './credits.component.html',
   styleUrl: './credits.component.css'
@@ -57,7 +59,8 @@ export class CreditsComponent implements OnInit {
     { key: 'S', description: '' },
     { key: 'H', description: '' },
     { key: 'Q', description: '' },
-    { key: 'T', description: '' }
+    { key: 'T', description: '' },
+    { key: 'Z', description: '' }
   ];
 
   showShortcutsDialog = false;
@@ -75,10 +78,12 @@ export class CreditsComponent implements OnInit {
     // Subscribe to language changes to update translations
     this.translate.onLangChange.subscribe(() => {
       this.updateShortcutTranslations();
+      this.updateItems();
     });
 
     // Initial translation update
     this.updateShortcutTranslations();
+    this.updateItems();
   }
 
   private updateShortcutTranslations() {
@@ -87,7 +92,48 @@ export class CreditsComponent implements OnInit {
       { key: 'F', description: this.translate.instant('CREDITS.SHORTCUTS.FREEZE_MAP') },
       { key: 'S', description: this.translate.instant('CREDITS.SHORTCUTS.SHOW_STATISTICS') },
       { key: 'H', description: this.translate.instant('CREDITS.SHORTCUTS.EXPORT_PDF_PORTRAIT') },
-      { key: 'Q', description: this.translate.instant('CREDITS.SHORTCUTS.EXPORT_PDF_LANDSCAPE') }
+      { key: 'Q', description: this.translate.instant('CREDITS.SHORTCUTS.EXPORT_PDF_LANDSCAPE') },
+      { key: 'Z', description: this.translate.instant('CREDITS.SHORTCUTS.TOGGLE_HEXAGON_VIEW') }
+    ];
+  }
+
+  private updateItems() {
+    this.items = [
+      {
+        icon: 'pi pi-sign-out',
+        label: this.translate.instant('CREDITS.LOGOUT'),
+        command: () => {
+          this.logout();
+        }
+      },
+      {
+        icon: 'pi pi-info-circle',
+        label: this.translate.instant('CREDITS.SHOW_CREDITS'),
+        command: () => {
+          this.showCredits();
+        }
+      },
+      {
+        icon: 'pi pi-question-circle',
+        label: this.translate.instant('CREDITS.SHOW_HELP'),
+        command: () => {
+          this.showHelp();
+        }
+      },
+      {
+        icon: 'pi pi-globe',
+        label: this.translate.instant('CREDITS.CHANGE_LANGUAGE'),
+        command: () => {
+          this.showLanguageDialog = true;
+        }
+      },
+      {
+        icon: 'pi pi-key',
+        label: this.translate.instant('CREDITS.SHOW_SHORTCUTS'),
+        command: () => {
+          this.showShortcuts();
+        }
+      }
     ];
   }
 
@@ -119,50 +165,7 @@ export class CreditsComponent implements OnInit {
     { name: 'OpenRouteService', icon: 'pi pi-directions', url: 'https://openrouteservice.org' }
   ];
 
-  items: MenuItem[] = [
-    {
-      icon: 'pi pi-sign-out',
-      command: () => {
-        this.logout();
-      },
-      tooltip: 'Logout'
-    },
-    {
-      icon: 'pi pi-info-circle',
-      command: () => {
-        this.showCredits();
-      },
-      tooltip: 'Credits anzeigen'
-    },
-    {
-      icon: 'pi pi-question-circle',
-      command: () => {
-        this.showHelp();
-      },
-      tooltip: 'Hilfe'
-    },
-    {
-      icon: 'pi pi-globe',
-      command: () => {
-        this.showLanguageDialog = true;
-      },
-      tooltip: 'Sprache ändern'
-    },
-    {
-      icon: this.isDarkMode ? 'pi pi-sun' : 'pi pi-moon',
-      command: () => {
-        this.toggleTheme();
-      },
-      tooltip: this.isDarkMode ? 'Light Mode' : 'Dark Mode'
-    },
-    {
-      icon: 'pi pi-key',
-      command: () => {
-        this.showShortcuts();
-      },
-      tooltip: 'Tastenkürzel'
-    }
-  ];
+  items: MenuItem[] = [];
 
   showCredits() {
     this.showCreditsDialog = true;

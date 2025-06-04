@@ -310,8 +310,14 @@
       "SHOW_STATISTICS": "Statistiken anzeigen",
       "EXPORT_PDF_PORTRAIT": "PDF im Hochformat exportieren",
       "EXPORT_PDF_LANDSCAPE": "PDF im Querformat exportieren",
-      "SHARE": "Teilen"
-    }
+      "SHARE": "Teilen",
+      "TOGGLE_HEXAGON_VIEW": "Hexagon Ansicht togglen"
+    },
+    "LOGOUT": "Abmelden",
+    "SHOW_CREDITS": "Infos anzeigen",
+    "SHOW_HELP": "Hilfe anzeigen",
+    "CHANGE_LANGUAGE": "Sprache wechseln",
+    "SHOW_SHORTCUTS": "Tastaturkürzel"
   },
   "HELP": {
     "GETTING_STARTED_TOOLTIP": "Erste Schritte mit der Anwendung",
