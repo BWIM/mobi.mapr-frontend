@@ -319,5 +319,10 @@
     "GETTING_STARTED_TOOLTIP": "Erschte Schritt mit dr Awendung",
     "FAQ_TOOLTIP": "Häufig gstellte Froga ond Antworda",
     "CONTACT_TOOLTIP": "Kontaktinformationen für da Support"
+  },
+  "AUTH": {
+    "LOGIN": {
+      "LOGIN": "Anmelde"
+    }
   }
 }

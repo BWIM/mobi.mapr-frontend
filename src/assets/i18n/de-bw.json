@@ -320,5 +320,10 @@
     "GETTING_STARTED_TOOLTIP": "Erste Schritt mit de Awendig",
     "FAQ_TOOLTIP": "Häufig gstellti Froge un Antworte",
     "CONTACT_TOOLTIP": "Kontaktinformatione für de Support"
+  },
+  "AUTH": {
+    "LOGIN": {
+      "LOGIN": "Anmelde"
+    }
   }
 }
