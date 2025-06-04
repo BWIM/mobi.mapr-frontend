@@ -10,7 +10,8 @@ export enum ShortcutAction {
   SHOW_STATISTICS = 'SHOW_STATISTICS',
   EXPORT_PDF_PORTRAIT = 'EXPORT_PDF_PORTRAIT',
   EXPORT_PDF_LANDSCAPE = 'EXPORT_PDF_LANDSCAPE',
-  CREATE_SHARE = 'CREATE_SHARE'
+  CREATE_SHARE = 'CREATE_SHARE',
+  TOGGLE_HEXAGON_VIEW = 'TOGGLE_HEXAGON_VIEW'
 }
 
 @Injectable({
@@ -75,6 +76,9 @@ export class KeyboardShortcutsService {
       case 'q':
         this.pdfGenerationService.exportToPDFLandscape();
         this.shortcutSubject.next(ShortcutAction.EXPORT_PDF_LANDSCAPE);
+        break;
+      case 'z':
+        this.shortcutSubject.next(ShortcutAction.TOGGLE_HEXAGON_VIEW);
         break;
     }
   }
