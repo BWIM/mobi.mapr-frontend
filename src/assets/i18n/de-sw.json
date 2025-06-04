@@ -80,7 +80,10 @@
       "LOAD_ERROR": "Ergebnis könne nit glade werre"
     },
     "DEFAULT_GROUP": "Vorberechneti Karte",
-    "AUTO_CLOSE_SIDEBAR": "Sidebar pinne"
+    "AUTO_CLOSE_SIDEBAR": "Sidebar pinne",
+    "HINT": {
+      "UPGRADE": "Aufgrund von Änderungen der Datenstruktur mussten alle Projekte, die vor dem 4.6.25 erstellt wurden, gelöscht werden."
+    }
   },
   "PROJECT_GROUPS": {
     "CREATE": {
