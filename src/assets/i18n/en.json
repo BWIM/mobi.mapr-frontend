@@ -80,7 +80,10 @@
       "LOAD_ERROR": "Results cannot be loaded"
     },
     "DEFAULT_GROUP": "Precalculated maps",
-    "AUTO_CLOSE_SIDEBAR": "Pin sidebar"
+    "AUTO_CLOSE_SIDEBAR": "Pin sidebar",
+    "HINT": {
+      "UPGRADE": "Due to changes in the data model, all projects created before the 4.6.25 needed to be removed."
+    }
   },
   "PROJECT_GROUPS": {
     "CREATE": {
@@ -243,7 +246,6 @@
       "TITLE": "Activities",
       "NO_DATA": "No data available",
       "SWITCH_TO_DOUGHNUT": "Change view",
-      "HINT": "Please be aware, that there might be some inaccuracities on county level",
       "EXPLANATION": "The activities weighted by their local relevance"
     },
     "MODES": {

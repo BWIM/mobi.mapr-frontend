@@ -80,7 +80,10 @@
       "LOAD_ERROR": "Ergebnisse können nicht geladen werden"
     },
     "DEFAULT_GROUP": "Vorberechnete Karten",
-    "AUTO_CLOSE_SIDEBAR": "Sidebar pinnen"
+    "AUTO_CLOSE_SIDEBAR": "Sidebar pinnen",
+    "HINT": {
+      "UPGRADE": "Aufgrund von Änderungen der Datenstruktur mussten alle Projekte, die vor dem 4.6.25 erstellt wurden, gelöscht werden."
+    }
   },
   "PROJECT_GROUPS": {
     "CREATE": {
@@ -243,7 +246,6 @@
       "TITLE": "Aktivitäten",
       "NO_DATA": "Keine Daten verfügbar",
       "SWITCH_TO_DOUGHNUT": "Ansicht wechseln",
-      "HINT": "Bitte beachte, dass es bei der Gewichtung auf Landkreis-Ebene zu Ungenauigkeiten kommen kann.",
       "EXPLANATION": "Die Aktivitäten gewichtet nach lokaler Relevanz"
     },
     "MODES": {
