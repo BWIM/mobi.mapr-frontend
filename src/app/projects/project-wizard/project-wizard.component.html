@@ -162,7 +162,7 @@
                     <h3>Wählen Sie die relevanten Modi aus</h3>
                     <div class="grid">
                         <div class="col-12">
-                            <p-panel header="Verfügbare Modi">
+                            <p-panel header="Verfügbare Modi" styleClass="h-full">
                                 <ng-template pTemplate="header">
                                     <div class="right-10">
                                         <div class="flex gap-2">
@@ -181,18 +181,39 @@
                                         </div>
                                     </div>
                                 </ng-template>
-                                <p-scrollPanel [style]="{width: '100%', height: '200px'}">
-                                    <div class="flex flex-wrap gap-3" *ngFor="let mode of modes">
-                                        <div class="flex align-items-center gap-2">
-                                            <p-checkbox
-                                                [value]="mode"
-                                                [name]="'modes'"
-                                                [inputId]="'mode_' + mode.id"
-                                                [ariaLabel]="mode.display_name || mode.name"
-                                                formControlName="selectedModes">
-                                                {{mode.display_name || mode.name}}
-                                            </p-checkbox>
-                                            <label [for]="'mode_' + mode.id">{{mode.display_name || mode.name}}</label>
+                                <p-scrollPanel [style]="{width: '100%', height: '100%'}">
+                                    <div class="flex flex-col gap-4">
+                                        <div *ngFor="let mode of modes" class="mode-container">
+                                            <div class="flex items-center gap-2">
+                                                <p-checkbox
+                                                    [value]="mode.id"
+                                                    [name]="'modes'"
+                                                    [inputId]="'mode_' + mode.id"
+                                                    [ariaLabel]="mode.display_name || mode.name"
+                                                    [binary]="true"
+                                                    [ngModel]="selectedModeMap[mode.id]"
+                                                    [ngModelOptions]="{standalone: true}"
+                                                    (onChange)="onModeChange(mode, $event.checked)">
+                                                </p-checkbox>
+                                                <label [for]="'mode_' + mode.id" class="font-medium">{{mode.display_name || mode.name}}</label>
+                                            </div>
+                                            
+                                            <!-- Profile selection -->
+                                            <div *ngIf="isModeSelected(mode) && mode.profiles && mode.profiles.length > 0" 
+                                                 class="ml-8 mt-2">
+                                                <div class="flex flex-col gap-2">
+                                                    <div *ngFor="let profile of mode.profiles" 
+                                                         class="flex items-center gap-2">
+                                                        <p-radioButton
+                                                            [name]="'profile_' + mode.id"
+                                                            [value]="profile.id"
+                                                            [(ngModel)]="selectedProfiles[mode.id]"
+                                                            [ngModelOptions]="{standalone: true}">
+                                                        </p-radioButton>
+                                                        <label class="text-sm">{{profile.display_name || profile.name}}</label>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </p-scrollPanel>

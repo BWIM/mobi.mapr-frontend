@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { SharedModule } from '../../shared/shared.module';
-import { MenuItem } from 'primeng/api';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MenuItem, MessageService } from 'primeng/api';
+import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { ProjectsService } from '../projects.service';
 import { ActivitiesService } from '../../services/activities.service';
 import { PersonasService } from '../../services/personas.service';
@@ -11,12 +11,11 @@ import { ProjectWizardService } from './project-wizard.service';
 import { Subscription } from 'rxjs';
 import { GroupedActivities } from '../../services/interfaces/activity.interface';
 import { Persona } from '../../services/interfaces/persona.interface';
-import { Mode } from '../../services/interfaces/mode.interface';
+import { Mode, Profile } from '../../services/interfaces/mode.interface';
 import { TranslateService } from '@ngx-translate/core';
 import { ProjectsReloadService } from '../projects-reload.service';
 import { Activity } from '../../services/interfaces/activity.interface';
 import { ProjectGroup } from '../project.interface';
-import { MessageService } from 'primeng/api';
 import { MapService } from '../../map/map.service';
 import { AreasService } from '../../services/areas.service';
 import { LandsService } from '../../services/lands.service';
@@ -33,6 +32,11 @@ import { Fill, Stroke, Style } from 'ol/style';
 import { fromLonLat } from 'ol/proj';
 import Overlay from 'ol/Overlay';
 
+// Add this interface for the checkbox event
+interface CheckboxChangeEvent {
+  checked: boolean;
+  originalEvent: Event;
+}
 
 @Component({
   selector: 'app-project-wizard',
@@ -50,6 +54,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   groupedActivities: GroupedActivities[] = [];
   personas: Persona[] = [];
   modes: Mode[] = [];
+  selectedModeMap: { [key: number]: boolean } = {};
   projectGroups: ProjectGroup[] = [];
   private subscription: Subscription;
   selectedAreaIds: string[] = [];
@@ -70,6 +75,9 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   private selectedFeatures: Set<string> = new Set();
   private overlay?: Overlay;
   private tooltipElement?: HTMLElement;
+
+  selectedProfiles: { [key: number]: number } = {};
+  profileControls: { [modeId: number]: FormControl } = {};
 
   constructor(
     private fb: FormBuilder,
@@ -136,7 +144,8 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
       }),
       // Schritt 3: Modi
       modes: this.fb.group({
-        selectedModes: [[], Validators.required]
+        selectedModes: [[]],
+        selectedProfiles: this.fb.group({})
       }),
       // Schritt 4: Gebiet auswählen
       area: this.fb.group({
@@ -263,8 +272,28 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
     this.modesService.getModes().subscribe({
       next: (modes) => {
         this.modes = modes.results;
-        // Alle Modi automatisch auswählen
-        this.projectForm.get('modes.selectedModes')?.setValue(this.modes);
+        
+        // Initialize modes and their profiles
+        this.modes.forEach(mode => {
+          // Select all modes by default
+          this.selectedModeMap[mode.id] = true;
+          
+          // Initialize profile selection with first profile ID if available
+          if (mode.profiles && mode.profiles.length > 0) {
+            const firstProfile = mode.profiles[0];
+            this.selectedProfiles[mode.id] = firstProfile.id;
+          }
+        });
+
+        // Set all mode IDs as selected in the form
+        const selectedModeIds = this.modes.map(mode => mode.id);
+        
+        this.projectForm.patchValue({
+          modes: {
+            selectedModes: selectedModeIds,
+            selectedProfiles: this.selectedProfiles
+          }
+        });
       },
       error: (error) => {
         console.error('Fehler beim Laden der Modi:', error);
@@ -404,11 +433,98 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
   }
 
   selectAllModes() {
-    this.projectForm.get('modes.selectedModes')?.setValue([...this.modes]);
+    const profilesGroup = this.projectForm.get('modes.selectedProfiles') as FormGroup;
+    
+    this.modes.forEach(mode => {
+      this.selectedModeMap[mode.id] = true;
+      
+      if (mode.profiles && mode.profiles.length > 0) {
+        const firstProfileId = mode.profiles[0].id;
+        if (!this.profileControls[mode.id]) {
+          const profileControl = new FormControl(firstProfileId);
+          this.profileControls[mode.id] = profileControl;
+          profilesGroup.setControl(mode.id.toString(), profileControl);
+        } else {
+          this.profileControls[mode.id].setValue(firstProfileId);
+        }
+      }
+    });
+
+    const selectedModeIds = this.modes.map(mode => mode.id);
+    this.projectForm.patchValue({
+      modes: {
+        selectedModes: selectedModeIds
+      }
+    });
   }
 
   deselectAllModes() {
-    this.projectForm.get('modes.selectedModes')?.setValue([]);
+    this.modes.forEach(mode => {
+      this.selectedModeMap[mode.id] = false;
+    });
+
+    const profilesGroup = this.projectForm.get('modes.selectedProfiles') as FormGroup;
+    Object.keys(this.profileControls).forEach(modeId => {
+      profilesGroup.removeControl(modeId);
+      delete this.profileControls[parseInt(modeId)];
+    });
+
+    this.projectForm.patchValue({
+      modes: {
+        selectedModes: []
+      }
+    });
+  }
+
+  onModeChange(mode: Mode, checked: boolean) {
+    this.selectedModeMap[mode.id] = checked;
+    const selectedModeIds = this.modes
+      .filter(m => this.selectedModeMap[m.id])
+      .map(m => m.id);
+    
+    if (checked) {
+      // When selecting a mode, ensure its first profile is selected
+      if (mode.profiles && mode.profiles.length > 0) {
+        const firstProfile = mode.profiles[0];
+        this.selectedProfiles[mode.id] = firstProfile.id;
+      }
+    } else {
+      // When deselecting a mode, remove its profile selection
+      delete this.selectedProfiles[mode.id];
+    }
+    // Update selected modes in form
+    this.projectForm.patchValue({
+      modes: {
+        selectedModes: selectedModeIds,
+        selectedProfiles: this.selectedProfiles
+      }
+    });
+  }
+
+  getProfileFormControl(mode: Mode): FormControl {
+    
+    if (!this.profileControls[mode.id] && mode.profiles && mode.profiles.length > 0) {
+      const firstProfile = mode.profiles[0];
+      const profileControl = new FormControl(firstProfile.id);
+      this.profileControls[mode.id] = profileControl;
+      const profilesGroup = this.projectForm.get('modes.selectedProfiles') as FormGroup;
+      profilesGroup.setControl(mode.id.toString(), profileControl);
+  
+    }
+    return this.profileControls[mode.id];
+  }
+
+  isModeSelected(mode: Mode): boolean {
+    const isSelected = this.selectedModeMap[mode.id] || false;
+    return isSelected;
+  }
+
+  getCurrentProfileId(mode: Mode): number | null {
+    return this.selectedProfiles[mode.id] || null;
+  }
+
+  getSelectedProfile(mode: Mode): number | undefined {
+    return this.selectedProfiles[mode.id];
   }
 
   onSubmit() {
@@ -430,8 +546,10 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
       if (selectedNonMidActivity) {
         allSelectedActivities = [selectedNonMidActivity];
         personas = "";
-
       }
+
+      // Get selected profiles only
+      const selectedProfiles = Object.values(this.selectedProfiles).join(',');
 
       const projectData = {
         name: this.projectForm.get('summary.name')?.value,
@@ -440,7 +558,7 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
         infos: this.projectForm.get('summary.loadAreasOnMap')?.value,
         activities: allSelectedActivities.map((a: any) => a.id).join(','),
         personas: personas,
-        modes: this.projectForm.get('modes.selectedModes')?.value.map((m: any) => m.id).join(','),
+        profiles: selectedProfiles,
         landkreise: this.selectedAreaIds.join(','),
         projectgroup: this.projectForm.get('summary.projectGroup')?.value?.id || null,
         laender: this.hasCompletelySelectedLands
@@ -506,7 +624,6 @@ export class ProjectWizardComponent implements OnInit, OnDestroy {
       const allMidActivities = this.groupedActivities.flatMap(group => group.activities);
       this.projectForm.get('activities.selectedMidActivities')?.setValue(allMidActivities);
     } else {
-      console.log('Non-MID activity selected');
       this.projectForm.get('activities.selectedNonMidActivity')?.setValue('');
     }
   }
