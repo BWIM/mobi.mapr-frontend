@@ -310,8 +310,14 @@
       "SHOW_STATISTICS": "Show statistics",
       "EXPORT_PDF_PORTRAIT": "Export PDF Portrait",
       "EXPORT_PDF_LANDSCAPE": "Export PDF Landscape",
-      "SHARE": "Share"
-    }
+      "SHARE": "Share",
+      "TOGGLE_HEXAGON_VIEW": "toggle Hexagon view"
+    },
+    "LOGOUT": "Logout",
+    "SHOW_CREDITS": "Show attributions",
+    "SHOW_HELP": "show help",
+    "CHANGE_LANGUAGE": "Change language",
+    "SHOW_SHORTCUTS": "Keyboard shortcuts"
   },
   "HELP": {
     "GETTING_STARTED_TOOLTIP": "Getting started with the application",

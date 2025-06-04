@@ -1,4 +1,4 @@
-<p-speedDial [model]="items" direction="up" buttonClassName="p-button-info" [showIcon]="'pi pi-info'" [hideIcon]="'pi pi-times'" [pTooltip]="'CREDITS.INFO_BUTTON_TOOLTIP' | translate"></p-speedDial>
+<p-speedDial [model]="items" direction="up" buttonClassName="p-button-info" [showIcon]="'pi pi-info'" [hideIcon]="'pi pi-times'" [tooltipOptions]="{ tooltipPosition: 'left' }"></p-speedDial>
 
 <p-dialog [(visible)]="showCreditsDialog" [modal]="true" styleClass="credits-dialog" header="mobi.mapr">
     <div class="grid">
@@ -7,7 +7,7 @@
             <p-card>
                 <div class="flex flex-column gap-3">
                     <div class="text-center mb-4">
-                        <h2 class="text-4xl font-bold mb-3">BWIM MÄX</h2>
+                        <h2 class="text-4xl font-bold mb-3">BWIM mobi.mapr</h2>
                         <p class="text-xl line-height-3">Dies ist ein Projekt des Baden-Württemberg Instituts für nachhaltige Mobilität</p>
                         <p-button label="bw-im.de besuchen" styleClass="p-button-link" [pTooltip]="'CREDITS.VISIT_WEBSITE' | translate" (onClick)="openLink('https://bw-im.de')"></p-button>
                     </div>

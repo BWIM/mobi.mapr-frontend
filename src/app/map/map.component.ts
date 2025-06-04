@@ -46,6 +46,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private landkreise: { [key: string]: any } | null = null;
   private tooltip!: HTMLElement;
   private level: 'state' | 'county' | 'municipality' | 'hexagon' = 'county';
+  private forceHexagonView: boolean = false;
 
   constructor(
     private mapService: MapService,
@@ -61,6 +62,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         switch(action) {
           case ShortcutAction.ZOOM_TO_FEATURES:
             this.zoomToFeatures();
+            break;
+          case ShortcutAction.TOGGLE_HEXAGON_VIEW:
+            this.forceHexagonView = !this.forceHexagonView;
+            if (this.forceHexagonView) {
+              this.switchToHexagonView();
+            } else {
+              this.updateMapFeatures();
+            }
             break;
         }
       })
@@ -268,7 +277,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
       this.loadingService.startLoading();
 
-      const level = this.determineFeatureLevel(zoom);
+      // If hexagon view is forced, always use hexagon level
+      const level = this.forceHexagonView ? 'hexagon' : this.determineFeatureLevel(zoom);
       
       // Always ensure we have counties in the hidden layer if needed
       if (level !== 'state' && hiddenSource.getFeatures().length === 0) {
@@ -614,5 +624,14 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     if (score <= 1.59) return "F+";
     if (score <= 1.78) return "F";
     return "F-";
+  }
+
+  private async switchToHexagonView(): Promise<void> {
+    if (!this.landkreise) return;
+    const geojson = await this.mapBuildService.buildMap(this.landkreise, 'hexagon');
+    if (geojson?.features) {
+      await this.updateVectorLayerFeatures(geojson, 'hexagon');
+      this.level = 'hexagon';
+    }
   }
 }
