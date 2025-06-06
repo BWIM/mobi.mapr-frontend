@@ -37,7 +37,7 @@
                                         <div class="flex flex-col">
                                             <div class="flex items-center" [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
                                                 <span class="text-overflow-ellipsis overflow-hidden break-words"
-                                                      [pTooltip]="project.display_name + '. Version: (' + project.version + ')'">
+                                                      [pTooltip]="project.display_name + '. (Version: ' + project.version + ')'">
                                                     {{ project.display_name }}
                                                 </span>
                                             </div>
@@ -101,7 +101,7 @@
                                             <div class="flex items-center" [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
                                                 
                                                 <span class="text-overflow-ellipsis overflow-hidden break-words"
-                                                      [pTooltip]="project.display_name + '. Version: (' + project.version + ')'">
+                                                      [pTooltip]="project.display_name + '. (Version: ' + project.version + ')'">
                                                     {{ project.display_name }}
                                                 </span>
                                             </div>
