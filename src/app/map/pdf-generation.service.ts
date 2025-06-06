@@ -3,16 +3,27 @@ import jsPDF, { GState } from 'jspdf';
 import {MapService} from './map.service';
 import {ProjectsService} from '../projects/projects.service';
 
+export type PaperSize = 'a4' | 'a3' | 'a2' | 'a1' | 'a0';
+export type Orientation = 'portrait' | 'landscape';
+
 @Injectable({
   providedIn: 'root'
 })
 export class PdfGenerationService {
+  private readonly paperSizes: {[key in PaperSize]: [number, number]} = {
+    a4: [297, 210],  // A4 in mm
+    a3: [420, 297],  // A3 in mm
+    a2: [594, 420],  // A2 in mm
+    a1: [841, 594],  // A1 in mm
+    a0: [1189, 841]  // A0 in mm
+  };
+
   constructor(
     private mapService: MapService,
     private projectsService: ProjectsService
   ) {}
 
-  centerMapOnLayerWithPadding(layer: any, orientation: 'portrait' | 'landscape') {
+  centerMapOnLayerWithPadding(layer: any, orientation: Orientation, paperSize: PaperSize = 'a4') {
     const map = this.mapService.getMap();
     if (!map) {
       console.error('Map could not be found.');
@@ -20,12 +31,8 @@ export class PdfGenerationService {
     }
 
     const extent = layer.getSource().getExtent();
-    const dims = {
-      a4: [297, 210]
-    };
-    const format = 'a4';
+    const dim = this.paperSizes[paperSize];
     const resolution = 300;
-    const dim = dims[format];
     
     // Setze temporär die PDF-Größe für korrekte Zoom-Berechnung
     const [width, height] = orientation === 'landscape' 
@@ -217,7 +224,7 @@ export class PdfGenerationService {
     }
   }
 
-  private async generatePDF(orientation: 'portrait' | 'landscape'): Promise<jsPDF> {
+  private async generatePDF(orientation: Orientation, paperSize: PaperSize = 'a4'): Promise<jsPDF> {
     const map = this.mapService.getMap();
     const layer = this.mapService.getMainLayer();
 
@@ -225,13 +232,8 @@ export class PdfGenerationService {
       throw new Error('Map or layer could not be found.');
     }
 
-    const dims: {[key: string]: [number, number]} = {
-      a4: [297, 210]
-    };
-
-    const format: string = 'a4';
+    const dim = this.paperSizes[paperSize];
     const resolution: number = 150;
-    const dim: [number, number] = dims[format];
     
     const [width, height] = orientation === 'landscape' 
       ? [Math.round((dim[0] * resolution) / 25.4), Math.round((dim[1] * resolution) / 25.4)]
@@ -283,7 +285,7 @@ export class PdfGenerationService {
         // Größe wiederherstellen
         map.setSize(originalSize);
 
-        const pdf: jsPDF = new jsPDF(orientation, undefined, format);
+        const pdf: jsPDF = new jsPDF(orientation, undefined, paperSize);
         const [pdfWidth, pdfHeight] = orientation === 'landscape' 
           ? [dim[0], dim[1]]
           : [dim[1], dim[0]];
@@ -315,7 +317,7 @@ export class PdfGenerationService {
     return `${formattedDate}_${formattedTime}_${sanitizedProjectName}.pdf`;
   }
 
-  private async exportToPDF(orientation: 'portrait' | 'landscape'): Promise<void> {
+  private async exportToPDF(orientation: Orientation, paperSize: PaperSize = 'a4'): Promise<void> {
     try {
       const projectInfo = await new Promise((resolve, reject) => {
         this.projectsService.getExportInfo().subscribe({
@@ -327,7 +329,7 @@ export class PdfGenerationService {
         });
       });
 
-      const pdf = await this.generatePDF(orientation);
+      const pdf = await this.generatePDF(orientation, paperSize);
       
       await this.addProjectDetails(pdf, orientation, projectInfo);
       await this.addLogo(pdf, orientation);
@@ -341,11 +343,11 @@ export class PdfGenerationService {
     }
   }
 
-  async exportToPDFPortrait(): Promise<void> {
-    await this.exportToPDF('portrait');
+  async exportToPDFPortrait(paperSize: PaperSize = 'a4'): Promise<void> {
+    await this.exportToPDF('portrait', paperSize);
   }
 
-  async exportToPDFLandscape(): Promise<void> {
-    await this.exportToPDF('landscape');
+  async exportToPDFLandscape(paperSize: PaperSize = 'a4'): Promise<void> {
+    await this.exportToPDF('landscape', paperSize);
   }
 }
