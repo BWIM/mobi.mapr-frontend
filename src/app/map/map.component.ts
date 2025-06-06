@@ -47,6 +47,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private tooltip!: HTMLElement;
   private level: 'state' | 'county' | 'municipality' | 'hexagon' = 'county';
   private forceHexagonView: boolean = false;
+  private showingHexagons: boolean = false;
 
   constructor(
     private mapService: MapService,
@@ -229,15 +230,17 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private setupMapEventHandlers(): void {
     // Debounced view change handler to prevent too many updates
     let debounceTimeout: number;
+    
     const handleViewChange = () => {
       if (debounceTimeout) {
         window.clearTimeout(debounceTimeout);
-        this.loadingService.stopLoading(); // Stop loading if there was a pending update
+        this.loadingService.stopLoading();
       }
+      
       this.loadingService.startLoading();
       debounceTimeout = window.setTimeout(async () => {
         await this.updateMapFeatures();
-      }, 100);
+      }, 200);
     };
 
     this.map.getView().on('change:resolution', handleViewChange);
@@ -245,11 +248,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     // Add map dragging opacity handlers
     this.map.on('movestart', () => {
-      this.setLowOpacity();
+      // Reduce opacity during movement
+      this.vectorLayer.setOpacity(0.7);
     });
 
     this.map.on('moveend', () => {
-      this.resetOpacity();
+      // Restore full opacity
+      this.vectorLayer.setOpacity(1);
     });
   }
 
@@ -539,22 +544,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  private setLowOpacity(): void {
-    const vectorLayer = this.mapService.getMainLayer();
-    if (!vectorLayer) return;
-
-    // Update the layer's style directly
-    vectorLayer.setOpacity(0.5);
-  }
-
-  private resetOpacity(): void {
-    const vectorLayer = this.mapService.getMainLayer();
-    if (!vectorLayer) return;
-
-    // Reset to original style
-    vectorLayer.setOpacity(1);
-  }
-
   private handleFrozenStateChange(isFrozen: boolean): void {
     if (isFrozen) {
       // Show labels for all visible features
@@ -627,11 +616,16 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private async switchToHexagonView(): Promise<void> {
+    if (this.showingHexagons) return;
     if (!this.landkreise) return;
+    this.showingHexagons = true;
+    this.loadingService.startLoading();
     const geojson = await this.mapBuildService.buildMap(this.landkreise, 'hexagon');
     if (geojson?.features) {
       await this.updateVectorLayerFeatures(geojson, 'hexagon');
       this.level = 'hexagon';
+      this.loadingService.stopLoading();
     }
+    this.showingHexagons = false;
   }
 }
