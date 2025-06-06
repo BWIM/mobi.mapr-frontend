@@ -5,6 +5,14 @@ import {ProjectsService} from '../projects/projects.service';
 
 export type PaperSize = 'a4' | 'a3' | 'a2' | 'a1' | 'a0';
 export type Orientation = 'portrait' | 'landscape';
+export type MapExtent = 'current' | 'full';
+
+export interface PdfExportOptions {
+  orientation: Orientation;
+  paperSize: PaperSize;
+  resolution: number;
+  mapExtent: MapExtent;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -23,208 +31,16 @@ export class PdfGenerationService {
     private projectsService: ProjectsService
   ) {}
 
-  centerMapOnLayerWithPadding(layer: any, orientation: Orientation, paperSize: PaperSize = 'a4') {
-    const map = this.mapService.getMap();
-    if (!map) {
-      console.error('Map could not be found.');
-      return;
+  private getMapExtent(layer: any, mapExtent: MapExtent) {
+    if (mapExtent === 'current') {
+      const view = this.mapService.getMap()?.getView();
+      if (!view) return null;
+      return view.calculateExtent(this.mapService.getMap()?.getSize());
     }
-
-    const extent = layer.getSource().getExtent();
-    const dim = this.paperSizes[paperSize];
-    const resolution = 300;
-    
-    // Setze temporär die PDF-Größe für korrekte Zoom-Berechnung
-    const [width, height] = orientation === 'landscape' 
-      ? [Math.round((dim[0] * resolution) / 25.4), Math.round((dim[1] * resolution) / 25.4)]
-      : [Math.round((dim[1] * resolution) / 25.4), Math.round((dim[0] * resolution) / 25.4)];
-    
-    map.setSize([width, height]);
-
-    const padding = orientation === 'portrait' 
-      ? [10, 30, 60, 10]
-      : [50, 20, 100, 10];
-
-    map.getView().fit(extent, {
-      size: [width, height],
-      padding: padding,
-      nearest: false
-    });
+    return layer.getSource().getExtent();
   }
 
-  private async addLogo(pdf: jsPDF, orientation: 'portrait' | 'landscape'): Promise<void> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.src = 'assets/images/logo_transparent.png';
-      img.onload = () => {
-        const imgWidth = 40;  // Logo Breite in mm
-        const imgHeight = (img.height * imgWidth) / img.width;
-        const pageWidth = orientation === 'portrait' ? 210 : 297;  // A4 Maße
-        const margin = orientation === 'portrait' ? 10 : 0;  // Abstand vom Rand in mm
-        
-        pdf.addImage(
-          img, 
-          'PNG',
-          pageWidth - imgWidth,  // X-Position (von rechts)
-          margin,  // Y-Position (von oben)
-          imgWidth,
-          imgHeight
-        );
-        resolve();
-      };
-    });
-  }
-
-  private async addBWIMLogo(pdf: jsPDF, orientation: 'portrait' | 'landscape'): Promise<void> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.src = 'assets/images/BWIM.png';
-      img.onload = () => {
-        const imgWidth = 30;  // Logo Breite in mm
-        const imgHeight = (img.height * imgWidth) / img.width;
-        const pageWidth = orientation === 'portrait' ? 210 : 297;  // A4 Maße
-        const pageHeight = orientation === 'portrait' ? 297 : 210;  // A4 Maße
-        const margin = 5;  // Abstand vom Rand in mm
-        const textSpace = 7;  // Platz für Text unter dem Logo in mm
-        
-        pdf.addImage(
-          img, 
-          'PNG',
-          pageWidth - imgWidth - margin,  // X-Position (von rechts)
-          pageHeight - imgHeight - margin - textSpace,  // Y-Position (von unten + Textplatz)
-          imgWidth,
-          imgHeight
-        );
-        resolve();
-      };
-    });
-  }
-
-  private async addLegend(pdf: jsPDF, orientation: 'portrait' | 'landscape'): Promise<void> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.src = 'assets/images/legend.png';
-      img.onload = () => {
-        const imgWidth = 18;  // Legende noch kleiner (von 20 auf 15)
-        const imgHeight = (img.height * imgWidth) / img.width;
-        const pageWidth = orientation === 'portrait' ? 210 : 297;  // A4 Maße
-        const pageHeight = orientation === 'portrait' ? 297 : 210;  // A4 Maße
-        const margin = 5;  // Abstand vom Rand in mm
-        const padding = 2;   // Padding für Hintergrund in mm
-        const cornerRadius = 3; // Radius für abgerundete Ecken in mm
-        const textSpace = 7;  // Platz für Text unter dem Logo in mm
-        
-        // Position berechnen (weiter nach unten)
-        const bwimLogoHeight = 18 * (img.height / img.width);
-        const yPosition = pageHeight - bwimLogoHeight - margin - textSpace - (imgHeight / 2); // Näher am unteren Rand
-
-        // Weißen, noch transparenteren Hintergrund zeichnen
-        pdf.setFillColor(255, 255, 255);
-        pdf.setGState(new GState({opacity: 0.4})); // Noch transparenter (von 0.8 auf 0.6)
-        pdf.roundedRect(
-          pageWidth - imgWidth - margin - padding,
-          yPosition - padding,
-          imgWidth + (padding * 2),
-          imgHeight + (padding * 2),
-          cornerRadius,
-          cornerRadius,
-          'F'
-        );
-
-        // Legende zeichnen
-        pdf.setGState(new GState({opacity: 1.0}));
-        pdf.addImage(
-          img,
-          'PNG',
-          pageWidth - imgWidth - margin,
-          yPosition,
-          imgWidth,
-          imgHeight
-        );
-        resolve();
-      };
-    });
-  }
-
-  private async addProjectDetails(pdf: jsPDF, orientation: 'portrait' | 'landscape', project: any): Promise<void> {
-    const pageWidth = orientation === 'portrait' ? 210 : 297;  // A4 Maße
-    const pageHeight = orientation === 'portrait' ? 297 : 210;  // A4 Maße
-
-    // Projektname größer und weiter rechts oben
-    pdf.setFont('times', 'bold');
-    pdf.setFontSize(20);
-    pdf.text(project.project_name, 10, 15);
-    const maxWidth = orientation === 'portrait' ? 150 : 250;
-
-    // Beschreibung nur hinzufügen, wenn verfügbar
-    if (project.project_description) {
-      pdf.setFont('times', 'normal');
-      pdf.setFontSize(10);
-      
-      const lines = pdf.splitTextToSize(project.project_description, maxWidth);
-      pdf.text(lines, 10, 20);
-    }
-
-    // Zusätzliche Projektinformationen unten links
-    const margin = 10;
-    
-    pdf.setFont('times', 'normal');
-    pdf.setFontSize(10);
-    
-    const personas = project.persona_abbreviations ? "Personas: " + project.persona_abbreviations : "";
-    const profiles = project.profile_modes ? "Modi: " + project.profile_modes : "";
-    const activities = project.activity_abbreviations ? pdf.splitTextToSize("Aktivitäten: " + project.activity_abbreviations, maxWidth) : [];
-    
-    // Gesamthöhe berechnen
-    const lineHeight = 4;
-    const startY = pageHeight - 5;
-    
-    const textHeight = lineHeight * (2 + activities.length);
-    const totalHeight = textHeight + 6;
-    
-    // Hintergrund
-    pdf.setFillColor(255, 255, 255);
-    pdf.setGState(new GState({opacity: 0.6}));
-    pdf.roundedRect(
-      margin - 3,
-      startY - totalHeight,
-      maxWidth + 6,
-      totalHeight,
-      3,
-      3,
-      'F'
-    );
-    
-    // Text zeichnen
-    pdf.setGState(new GState({opacity: 1.0}));
-    pdf.setTextColor(0, 0, 0);
-    
-    let currentY = startY - totalHeight + lineHeight;
-    
-    if (profiles) {
-      pdf.text(profiles, margin, currentY);
-      currentY += lineHeight;
-    }
-
-    if (personas) {
-      pdf.text(personas, margin, currentY);
-      currentY += lineHeight;
-    }
-    
-    if (activities.length > 0) {
-      pdf.text(activities, margin, currentY);
-    }
-
-    // Copyright
-    if (project.creation_date) {
-      pdf.setFont('times', 'normal');
-      pdf.setFontSize(6);
-      const copyrightText = "© bwim, " + project.creation_date;
-      pdf.text(copyrightText, pageWidth - 10, pageHeight - 10, { align: 'right' });
-    }
-  }
-
-  private async generatePDF(orientation: Orientation, paperSize: PaperSize = 'a4'): Promise<jsPDF> {
+  private async generatePDF(options: PdfExportOptions): Promise<jsPDF> {
     const map = this.mapService.getMap();
     const layer = this.mapService.getMainLayer();
 
@@ -232,23 +48,22 @@ export class PdfGenerationService {
       throw new Error('Map or layer could not be found.');
     }
 
-    const dim = this.paperSizes[paperSize];
-    const resolution: number = 150;
+    const dim = this.paperSizes[options.paperSize];
     
-    const [width, height] = orientation === 'landscape' 
-      ? [Math.round((dim[0] * resolution) / 25.4), Math.round((dim[1] * resolution) / 25.4)]
-      : [Math.round((dim[1] * resolution) / 25.4), Math.round((dim[0] * resolution) / 25.4)];
+    const [width, height] = options.orientation === 'landscape' 
+      ? [Math.round((dim[0] * options.resolution) / 25.4), Math.round((dim[1] * options.resolution) / 25.4)]
+      : [Math.round((dim[1] * options.resolution) / 25.4), Math.round((dim[0] * options.resolution) / 25.4)];
 
     // Einmalige Größenanpassung
     const originalSize = map.getSize();
     map.setSize([width, height]);
 
     // Fit extent
-    const extent = layer.getSource()?.getExtent();
+    const extent = this.getMapExtent(layer, options.mapExtent);
     if (!extent) {
       throw new Error('Layer extent could not be found.');
     }
-    const padding = orientation === 'portrait' 
+    const padding = options.orientation === 'portrait' 
       ? [10, 20, 50, 10]
       : [50, 50, 50, 50];
 
@@ -285,8 +100,8 @@ export class PdfGenerationService {
         // Größe wiederherstellen
         map.setSize(originalSize);
 
-        const pdf: jsPDF = new jsPDF(orientation, undefined, paperSize);
-        const [pdfWidth, pdfHeight] = orientation === 'landscape' 
+        const pdf: jsPDF = new jsPDF(options.orientation, undefined, options.paperSize);
+        const [pdfWidth, pdfHeight] = options.orientation === 'landscape' 
           ? [dim[0], dim[1]]
           : [dim[1], dim[0]];
         
@@ -317,7 +132,7 @@ export class PdfGenerationService {
     return `${formattedDate}_${formattedTime}_${sanitizedProjectName}.pdf`;
   }
 
-  private async exportToPDF(orientation: Orientation, paperSize: PaperSize = 'a4'): Promise<void> {
+  async exportToPDF(options: PdfExportOptions): Promise<void> {
     try {
       const projectInfo = await new Promise((resolve, reject) => {
         this.projectsService.getExportInfo().subscribe({
@@ -329,25 +144,35 @@ export class PdfGenerationService {
         });
       });
 
-      const pdf = await this.generatePDF(orientation, paperSize);
+      const pdf = await this.generatePDF(options);
       
-      await this.addProjectDetails(pdf, orientation, projectInfo);
-      await this.addLogo(pdf, orientation);
-      await this.addLegend(pdf, orientation);
-      await this.addBWIMLogo(pdf, orientation);
+      // await this.addProjectDetails(pdf, options.orientation, projectInfo);
+      // await this.addLogo(pdf, options.orientation);
+      // await this.addLegend(pdf, options.orientation);
+      // await this.addBWIMLogo(pdf, options.orientation);
 
       const filename = this.getFilename(projectInfo);
       pdf.save(filename);
     } catch (error) {
-      console.error(`Fehler beim Generieren des PDFs im ${orientation === 'portrait' ? 'Hoch' : 'Quer'}format:`, error);
+      console.error(`Fehler beim Generieren des PDFs:`, error);
     }
   }
 
   async exportToPDFPortrait(paperSize: PaperSize = 'a4'): Promise<void> {
-    await this.exportToPDF('portrait', paperSize);
+    await this.exportToPDF({
+      orientation: 'portrait',
+      paperSize,
+      resolution: 300,
+      mapExtent: 'current'
+    });
   }
 
   async exportToPDFLandscape(paperSize: PaperSize = 'a4'): Promise<void> {
-    await this.exportToPDF('landscape', paperSize);
+    await this.exportToPDF({
+      orientation: 'landscape',
+      paperSize,
+      resolution: 300,
+      mapExtent: 'current'
+    });
   }
 }

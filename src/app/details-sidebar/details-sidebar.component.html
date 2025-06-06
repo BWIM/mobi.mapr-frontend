@@ -125,21 +125,10 @@
 
         <div class="mt-6 flex justify-center">
           <p-button 
-            (onClick)="exportToPDFLandscape()"
+            (onClick)="showPdfExportDialog()"
             icon="pi pi-file-pdf"
-            [label]="'SIDEBAR.EXPORT_PDF_LANDSCAPE' | translate"
-            [pTooltip]="'SIDEBAR.EXPORT_PDF_LANDSCAPE_TOOLTIP' | translate"
-            styleClass="p-button-primary"
-            [disabled]="isExporting">
-          </p-button>
-        </div>
-
-        <div class="mt-6 flex justify-center">
-          <p-button 
-            (onClick)="exportToPDFPortrait()"
-            icon="pi pi-file-pdf"
-            [label]="'SIDEBAR.EXPORT_PDF_PORTRAIT' | translate"
-            [pTooltip]="'SIDEBAR.EXPORT_PDF_PORTRAIT_TOOLTIP' | translate"
+            [label]="'SIDEBAR.EXPORT_PDF' | translate"
+            [pTooltip]="'SIDEBAR.EXPORT_PDF_TOOLTIP' | translate"
             styleClass="p-button-primary"
             [disabled]="isExporting">
           </p-button>

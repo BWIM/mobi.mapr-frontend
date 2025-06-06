@@ -91,9 +91,8 @@ export class CreditsComponent implements OnInit {
       { key: 'C', description: this.translate.instant('CREDITS.SHORTCUTS.CENTER_MAP') },
       { key: 'F', description: this.translate.instant('CREDITS.SHORTCUTS.FREEZE_MAP') },
       { key: 'S', description: this.translate.instant('CREDITS.SHORTCUTS.SHOW_STATISTICS') },
-      { key: 'H', description: this.translate.instant('CREDITS.SHORTCUTS.EXPORT_PDF_PORTRAIT') },
-      { key: 'Q', description: this.translate.instant('CREDITS.SHORTCUTS.EXPORT_PDF_LANDSCAPE') },
-      { key: 'Z', description: this.translate.instant('CREDITS.SHORTCUTS.TOGGLE_HEXAGON_VIEW') }
+      { key: 'E', description: this.translate.instant('CREDITS.SHORTCUTS.EXPORT_PDF') },
+      { key: 'H', description: this.translate.instant('CREDITS.SHORTCUTS.TOGGLE_HEXAGON_VIEW') }
     ];
   }
 

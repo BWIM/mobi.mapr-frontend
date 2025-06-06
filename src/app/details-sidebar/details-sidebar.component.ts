@@ -13,6 +13,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ShareService } from '../share/share.service';
 import { OpacityThresholds } from '../map/map.service';
 import { StatisticsService } from '../statistics/statistics.service';
+import { PdfExportService } from '../map/pdf-export.service';
 
 @Component({
   selector: 'app-details-sidebar',
@@ -49,7 +50,8 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     private mapService: MapService,
     private pdfService: PdfGenerationService,
     private shareService: ShareService,
-    private statisticsService: StatisticsService
+    private statisticsService: StatisticsService,
+    private pdfExportService: PdfExportService
   ) {
     this.subscription = new Subscription();
     
@@ -91,22 +93,8 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     this.mapService.updateOpacityThresholds(thresholds, level);
   }
 
-  async exportToPDFLandscape(): Promise<void> {
-    try {
-      this.isExporting = true;
-      await this.pdfService.exportToPDFLandscape();
-    } finally {
-      this.isExporting = false;
-    }
-  }
-
-  async exportToPDFPortrait(): Promise<void> {
-    try {
-      this.isExporting = true;
-      await this.pdfService.exportToPDFPortrait();
-    } finally {
-      this.isExporting = false;
-    }
+  showPdfExportDialog() {
+    this.pdfExportService.showDialog();
   }
 
   async generateShareLink(): Promise<void> {

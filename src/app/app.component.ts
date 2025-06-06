@@ -12,11 +12,22 @@ import { StatisticsComponent } from './statistics/statistics.component';
 import { KeyboardShortcutsService, ShortcutAction } from './map/keyboard-shortcuts.service';
 import { Subscription } from 'rxjs';
 import { HostListener } from '@angular/core';
+import { PdfExportDialogComponent } from './map/pdf-export-dialog/pdf-export-dialog.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, MenubarModule, ButtonModule, SharedModule, ProjectWizardComponent, AnalyzeComponent, CreditsComponent, StatisticsComponent],
+  imports: [
+    RouterOutlet, 
+    MenubarModule, 
+    ButtonModule, 
+    SharedModule, 
+    ProjectWizardComponent, 
+    AnalyzeComponent, 
+    CreditsComponent, 
+    StatisticsComponent,
+    PdfExportDialogComponent
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -43,6 +54,8 @@ export class AppComponent implements OnDestroy {
             break;
           case ShortcutAction.EXPORT_PDF_PORTRAIT:
           case ShortcutAction.EXPORT_PDF_LANDSCAPE:
+            // These actions are now handled by the PDF export dialog
+            break;
           case ShortcutAction.CREATE_SHARE:
             // These actions are handled by their respective services
             break;

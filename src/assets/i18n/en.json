@@ -141,7 +141,9 @@
       },
       "CONFIRM_DELETE": "Are you sure you want to delete this project?",
       "CONFIRM_DELETE_GROUP": "Are you sure you want to delete this project group?"
-    }
+    },
+    "CANCEL": "Cancel",
+    "EXPORT": "Export"
   },
   "LEGEND": {
     "LVLA": "The required mobility time is max. 35% of the local average.",
@@ -235,7 +237,9 @@
     "REDUCE_OPACITY_TOOLTIP": "Reduce opacity of features",
     "RESTORE_OPACITY": "Restore opacity",
     "ZOOM_TO_FEATURES": "Recenter Map",
-    "ZOOM_TO_FEATURES_TOOLTIP": "Recenters the map to the original state"
+    "ZOOM_TO_FEATURES_TOOLTIP": "Recenters the map to the original state",
+    "EXPORT_PDF_TOOLTIP": "export pdf",
+    "EXPORT_PDF": "Export PDF"
   },
   "ANALYZE": {
     "PERSONA": {
@@ -311,7 +315,8 @@
       "EXPORT_PDF_PORTRAIT": "Export PDF Portrait",
       "EXPORT_PDF_LANDSCAPE": "Export PDF Landscape",
       "SHARE": "Share",
-      "TOGGLE_HEXAGON_VIEW": "toggle Hexagon view"
+      "TOGGLE_HEXAGON_VIEW": "toggle Hexagon view",
+      "EXPORT_PDF": "Export map to PDF"
     },
     "LOGOUT": "Logout",
     "SHOW_CREDITS": "Show attributions",
@@ -337,5 +342,16 @@
     "CURRENT_SETTINGS": "Current settings",
     "POPULATION_WEIGHTED": "Population weighted",
     "AREA_WEIGHTED": "Area weighted"
+  },
+  "PDF_EXPORT": {
+    "FULL_MAP": "Full map",
+    "CURRENT_VIEW": "Current view",
+    "MAP_EXTENT": "Map extent",
+    "RESOLUTION": "Resolution (DPI)",
+    "PAPER_SIZE": "Paper size",
+    "LANDSCAPE": "Landscape",
+    "PORTRAIT": "Portrait",
+    "ORIENTATION": "Ortientation",
+    "TITLE": "PDF Export"
   }
 }

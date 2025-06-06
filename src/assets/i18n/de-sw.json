@@ -141,7 +141,9 @@
       },
       "CONFIRM_DELETE": "Bisch sicher, dass des Projäkkd glöscht werre soll?",
       "CONFIRM_DELETE_GROUP": "Bisch sicher, dass die Projäkkdgruppe glöscht werre soll?"
-    }
+    },
+    "CANCEL": "Abbräche",
+    "EXPORT": "Export"
   },
   "LEGEND": {
     "LVLA": "D erforderlichi Mobilitätszit isch maximal 35 % im lokale Vergliich.",
@@ -235,7 +237,9 @@
     "REDUCE_OPACITY_TOOLTIP": "Features weniger intensiv azeige",
     "RESTORE_OPACITY": "Karte widerherstelle",
     "ZOOM_TO_FEATURES": "Karte zentriere",
-    "ZOOM_TO_FEATURES_TOOLTIP": "Zentriert d'Karte wider zum Initialzustand"
+    "ZOOM_TO_FEATURES_TOOLTIP": "Zentriert d'Karte wider zum Initialzustand",
+    "EXPORT_PDF_TOOLTIP": "Rus mit",
+    "EXPORT_PDF": "Naus mit"
   },
   "ANALYZE": {
     "PERSONA": {
@@ -287,7 +291,8 @@
       "CENTER_MAP": "Karte zentrieren",
       "FREEZE_MAP": "Kartenoverlay einfrieren (für Screenshots)",
       "SHARE": "Teile",
-      "TOGGLE_HEXAGON_VIEW": "Hexagon Ansicht togglen"
+      "TOGGLE_HEXAGON_VIEW": "Hexagon Ansicht togglen",
+      "EXPORT_PDF": "Kärtle als PDFel naus gäbe"
     },
     "LOGOUT": "Gange",
     "SHOW_HELP": "Frage?",
@@ -324,5 +329,15 @@
     "LOGIN": {
       "LOGIN": "Anmelde"
     }
+  },
+  "PDF_EXPORT": {
+    "CURRENT_VIEW": "Ausschnitt",
+    "MAP_EXTENT": "Kärtle Bereich",
+    "RESOLUTION": "Auflösung (DPI)",
+    "PAPER_SIZE": "Blättlegröß",
+    "LANDSCAPE": "Breit",
+    "PORTRAIT": "Hoch",
+    "ORIENTATION": "Richtung",
+    "TITLE": "PDF Export"
   }
 }
