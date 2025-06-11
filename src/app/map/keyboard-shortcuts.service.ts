@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { StatisticsService } from '../statistics/statistics.service';
-import { PdfGenerationService } from './pdf-generation.service';
+import { PdfGenerationService } from './pdf-export-dialog/pdf-generation.service';
 import { ShareService } from '../share/share.service';
 import { Subject } from 'rxjs';
-import { PdfExportService } from './pdf-export.service';
+import { PdfExportService } from './pdf-export-dialog/pdf-export.service';
 
 export enum ShortcutAction {
   ZOOM_TO_FEATURES = 'ZOOM_TO_FEATURES',

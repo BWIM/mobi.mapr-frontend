@@ -8,12 +8,12 @@ import { Subscription } from 'rxjs';
 import { ProjectsService } from '../projects/projects.service';
 import { ProjectInfo } from '../projects/project.interface';
 import { MapService } from '../map/map.service';
-import { PdfGenerationService } from '../map/pdf-generation.service';
+import { PdfGenerationService } from '../map/pdf-export-dialog/pdf-generation.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ShareService } from '../share/share.service';
 import { OpacityThresholds } from '../map/map.service';
 import { StatisticsService } from '../statistics/statistics.service';
-import { PdfExportService } from '../map/pdf-export.service';
+import { PdfExportService } from '../map/pdf-export-dialog/pdf-export.service';
 
 @Component({
   selector: 'app-details-sidebar',

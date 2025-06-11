@@ -1,7 +1,8 @@
 import {Injectable} from '@angular/core';
 import jsPDF, { GState } from 'jspdf';
-import {MapService} from './map.service';
-import {ProjectsService} from '../projects/projects.service';
+import {MapService} from '../map.service';
+import {ProjectsService} from '../../projects/projects.service';
+import * as olExtent from 'ol/extent';
 
 export type PaperSize = 'a4' | 'a3' | 'a2' | 'a1' | 'a0';
 export type Orientation = 'portrait' | 'landscape';
@@ -32,12 +33,36 @@ export class PdfGenerationService {
   ) {}
 
   private getMapExtent(layer: any, mapExtent: MapExtent) {
+    const map = this.mapService.getMap();
+    if (!map) return null;
     if (mapExtent === 'current') {
-      const view = this.mapService.getMap()?.getView();
+      const view = map.getView();
       if (!view) return null;
-      return view.calculateExtent(this.mapService.getMap()?.getSize());
+      return view.calculateExtent(map.getSize());
     }
-    return layer.getSource().getExtent();
+    // For 'full', calculate the extent from all features if possible
+    const source = layer.getSource();
+    if (source && typeof source.getFeatures === 'function') {
+      const features = source.getFeatures();
+      if (features && features.length > 0) {
+        // Use ol/extent to combine all feature extents
+        let fullExtent = olExtent.createEmpty();
+        features.forEach((feature: any) => {
+          olExtent.extend(fullExtent, feature.getGeometry().getExtent());
+        });
+        return fullExtent;
+      }
+    }
+    // Fallback to source extent if getFeatures is not available
+    if (source && typeof source.getExtent === 'function') {
+      return source.getExtent();
+    }
+    // Fallback to current view if all else fails
+    const view = map.getView();
+    if (view) {
+      return view.calculateExtent(map.getSize());
+    }
+    return null;
   }
 
   private async generatePDF(options: PdfExportOptions): Promise<jsPDF> {
@@ -63,15 +88,14 @@ export class PdfGenerationService {
     if (!extent) {
       throw new Error('Layer extent could not be found.');
     }
-    const padding = options.orientation === 'portrait' 
-      ? [10, 20, 50, 10]
-      : [50, 50, 50, 50];
-
-    map.getView().fit(extent, {
-      size: [width, height],
-      padding: padding,
-      nearest: false
-    });
+    if (options.mapExtent === 'full') {
+      map.getView().fit(extent, {
+        size: [width, height],
+        // padding: padding,
+        nearest: false
+      });
+    }
+    // For 'current', do not change the view (no fit call)
 
     return new Promise((resolve) => {
       const renderComplete = () => {

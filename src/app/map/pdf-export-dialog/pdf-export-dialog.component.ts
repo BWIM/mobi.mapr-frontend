@@ -7,8 +7,8 @@ import { DropdownModule } from 'primeng/dropdown';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
-import { PdfGenerationService, PaperSize, Orientation, MapExtent, PdfExportOptions } from '../pdf-generation.service';
-import { PdfExportService } from '../pdf-export.service';
+import { PdfGenerationService, PaperSize, Orientation, MapExtent, PdfExportOptions } from './pdf-generation.service';
+import { PdfExportService } from './pdf-export.service';
 import { Subscription } from 'rxjs';
 
 @Component({
