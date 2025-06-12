@@ -5,7 +5,6 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { finalize } from 'rxjs/operators';
 import { SharedModule } from '../shared/shared.module';
 import { TranslateService } from '@ngx-translate/core';
-import { MapService } from '../map/map.service';
 import { MenuItem } from 'primeng/api';
 import { Router } from '@angular/router';
 import { ProjectWizardService } from './project-wizard/project-wizard.service';
@@ -16,6 +15,7 @@ import { ProjectsReloadService } from './projects-reload.service';
 import { LoadingService } from '../services/loading.service';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { forkJoin } from 'rxjs';
+import { MapV2Service } from '../map-v2/map-v2.service';
 
 interface GroupedProjects {
   group: ProjectGroup;
@@ -86,14 +86,14 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     private projectsService: ProjectsService,
     private messageService: MessageService,
     private translate: TranslateService,
-    private mapService: MapService,
     private analyzeService: AnalyzeService,
     private router: Router,
     private wizardService: ProjectWizardService,
     private websocketService: WebsocketService,
     private reloadService: ProjectsReloadService,
     private loadingService: LoadingService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private mapv2Service: MapV2Service
   ) {
     this.initializeMapActions();
     
@@ -276,23 +276,9 @@ export class ProjectsComponent implements OnInit, OnDestroy {
           console.error('Fehler beim Laden der Projektinformationen:', error);
         }
       });
-
-      this.projectsService.getProjectResults(project.id).subscribe({
-        next: (results) => {
-          this.mapService.resetMap();
-          this.mapService.updateFeatures(results);
-          this.selectedTableProject = project;
-          this.projectAction.emit();
-        },
-        error: () => {
-          this.loadingService.stopLoading(); // Stop loading on error
-          this.messageService.add({
-            severity: 'error',
-            summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
-            detail: this.translate.instant('PROJECTS.RESULTS.LOAD_ERROR')
-          });
-        }
-      });
+      
+      this.mapv2Service.setProject(project.id.toString());
+      this.loadingService.stopLoading();
     }
     catch (error) {
       console.error(error);
@@ -335,49 +321,49 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   private setupWebsocketForProject(project: Project): void {
     if (project.finished) return;
     
-    if (this.websocketConnections.has(project.id)) return;
+    // if (this.websocketConnections.has(project.id)) return;
     
-    const wsSubject = this.websocketService.connect<WebsocketResult>(
-      `${environment.wsURL}/projects/?project=${project.id}`
-    );
+    // const wsSubject = this.websocketService.connect<WebsocketResult>(
+    //   `${environment.wsURL}/projects/?project=${project.id}`
+    // );
 
-    this.websocketConnections.set(project.id, wsSubject);
+    // this.websocketConnections.set(project.id, wsSubject);
 
-    wsSubject.subscribe({
-      next: (result: WebsocketResult) => {
-        if (result.result.hex_scores) {
-          const scores = JSON.parse(result.result.hex_scores);
-          this.mapService.addSingleFeature(scores);
-        }
+    // wsSubject.subscribe({
+    //   next: (result: WebsocketResult) => {
+    //     if (result.result.hex_scores) {
+    //       const scores = JSON.parse(result.result.hex_scores);
+    //       this.mapService.addSingleFeature(scores);
+    //     }
         
-        const projectToUpdate = this.findProjectById(result.result.project);
-        if (projectToUpdate) {
-          projectToUpdate.calculated = result.result.calculated;
-          projectToUpdate.areas = result.result.total;
-          projectToUpdate.finished = result.result.finished;
-        }
+    //     const projectToUpdate = this.findProjectById(result.result.project);
+    //     if (projectToUpdate) {
+    //       projectToUpdate.calculated = result.result.calculated;
+    //       projectToUpdate.areas = result.result.total;
+    //       projectToUpdate.finished = result.result.finished;
+    //     }
 
-        if (result.result.finished) {
-          const finishedProjectId = result.result.project;
-          this.closeWebsocketConnection(finishedProjectId);
-          this.mapService.resetMap();
-          setTimeout(() => {
-            this.loadData();
-            // Nach dem Laden der Daten das Projekt anzeigen
-            setTimeout(() => {
-              const project = this.findProjectById(finishedProjectId);
-              if (project) {
-                this.showResults(project);
-              }
-            }, 500);
-          }, 500);
-        }
-      },
-      error: (error) => {
-        console.error(`WebSocket Fehler für Projekt ${project.id}:`, error);
-        this.closeWebsocketConnection(project.id);
-      }
-    });
+    //     if (result.result.finished) {
+    //       const finishedProjectId = result.result.project;
+    //       this.closeWebsocketConnection(finishedProjectId);
+    //       this.mapService.resetMap();
+    //       setTimeout(() => {
+    //         this.loadData();
+    //         // Nach dem Laden der Daten das Projekt anzeigen
+    //         setTimeout(() => {
+    //           const project = this.findProjectById(finishedProjectId);
+    //           if (project) {
+    //             this.showResults(project);
+    //           }
+    //         }, 500);
+    //       }, 500);
+    //     }
+    //   },
+    //   error: (error) => {
+    //     console.error(`WebSocket Fehler für Projekt ${project.id}:`, error);
+    //     this.closeWebsocketConnection(project.id);
+    //   }
+    // });
   }
 
   private findProjectById(projectId: number): Project | undefined {

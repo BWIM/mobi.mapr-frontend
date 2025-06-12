@@ -1,6 +1,7 @@
 <mgl-map
-    [style]="'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json'"
-    [zoom]="[10]"
-    [center]="[13.404954, 52.520008]"
+    [style]="mapStyle"
+    [zoom]="zoom"
+    [center]="center"
+    (zoomEnd)="onZoomChange($event)"
 >
 </mgl-map>
