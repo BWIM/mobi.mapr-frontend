@@ -6,7 +6,6 @@ import { ProjectsService } from '../projects.service';
 import { ActivitiesService } from '../../services/activities.service';
 import { PersonasService } from '../../services/personas.service';
 import { ModesService } from '../../services/modes.service';
-import { Router } from '@angular/router';
 import { ProjectWizardService } from './project-wizard.service';
 import { Subscription } from 'rxjs';
 import { GroupedActivities } from '../../services/interfaces/activity.interface';
@@ -16,7 +15,6 @@ import { TranslateService } from '@ngx-translate/core';
 import { ProjectsReloadService } from '../projects-reload.service';
 import { Activity } from '../../services/interfaces/activity.interface';
 import { ProjectGroup } from '../project.interface';
-import { MapService } from '../../map/map.service';
 import { AreasService } from '../../services/areas.service';
 import { LandsService } from '../../services/lands.service';
 import { Land } from '../../services/interfaces/land.interface';
@@ -85,12 +83,10 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     private activitiesService: ActivitiesService,
     private personasService: PersonasService,
     private modesService: ModesService,
-    private router: Router,
     private wizardService: ProjectWizardService,
     private translate: TranslateService,
     private reloadService: ProjectsReloadService,
     private messageService: MessageService,
-    private mapService: MapService,
     private areasService: AreasService,
     private landsService: LandsService
   ) {
@@ -573,7 +569,6 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
             });
             return;
           }
-          this.mapService.resetMap();
           this.messageService.add({
             severity: 'success',
             summary: this.translate.instant('COMMON.MESSAGES.SUCCESS.CREATE'),

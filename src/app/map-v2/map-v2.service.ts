@@ -4,7 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { LoadingService } from '../services/loading.service';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../auth/auth.service';
-import { StyleSpecification, SourceSpecification, LayerSpecification } from 'maplibre-gl';
+import { StyleSpecification, SourceSpecification, LayerSpecification, Map } from 'maplibre-gl';
 
 interface Bounds {
   minLng: number;
@@ -24,12 +24,21 @@ export class MapV2Service {
   averageType: 'avg' | 'pop' = 'pop';
   private boundsSubject = new BehaviorSubject<Bounds | null>(null);
   bounds$ = this.boundsSubject.asObservable();
+  private map: Map | null = null;
 
   constructor(
     private loadingService: LoadingService,
     private http: HttpClient,
     private authService: AuthService
   ) { }
+
+  setMap(map: Map): void {
+    this.map = map;
+  }
+
+  getMap(): Map | null {
+    return this.map;
+  }
 
   getBaseMapStyle(): StyleSpecification {
     return {

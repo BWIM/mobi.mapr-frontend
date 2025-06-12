@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
-import Feature from "ol/Feature";
 import { BehaviorSubject } from "rxjs";
+import { MapGeoJSONFeature } from "maplibre-gl";
 
 @Injectable({
     providedIn: 'root'
@@ -11,7 +11,7 @@ import { BehaviorSubject } from "rxjs";
   
     private currentProjectId: string | null = null;
     private currentMapType: string | null = null;
-    private selectedFeature: Feature | null = null;
+    private selectedFeature: MapGeoJSONFeature | null = null;
   
     show() {
       this.visibleSubject.next(true);
@@ -30,7 +30,7 @@ import { BehaviorSubject } from "rxjs";
       this.currentMapType = mapType;
     }
   
-    setSelectedFeature(feature: Feature) {
+    setSelectedFeature(feature: MapGeoJSONFeature) {
       this.selectedFeature = feature;
       this.show(); // Automatisch das Analyse-Panel öffnen, wenn ein Feature ausgewählt wurde
     }

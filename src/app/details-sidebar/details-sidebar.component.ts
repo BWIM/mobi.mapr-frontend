@@ -7,11 +7,9 @@ import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../projects/projects.service';
 import { ProjectInfo } from '../projects/project.interface';
-import { MapService } from '../map/map.service';
-import { PdfGenerationService } from '../map/pdf-generation.service';
+// import { PdfGenerationService } from '../map-v2/pdf-generation.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ShareService } from '../share/share.service';
-import { OpacityThresholds } from '../map/map.service';
 import { StatisticsService } from '../statistics/statistics.service';
 
 @Component({
@@ -35,21 +33,14 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
   isGeneratingShare: boolean = false;
   selectedAverageType: 'mean' | 'median' = 'mean';
   selectedPopulationArea: 'pop' | 'area' = 'pop';
-  opacityThresholds: OpacityThresholds = {
-    state: 500,
-    county: 500,
-    municipality: 500,
-    hexagon: 1000
-  };
   @Output() projectLoaded = new EventEmitter<void>();
 
   constructor(
     private translate: TranslateService,
     private projectsService: ProjectsService,
-    private mapService: MapService,
-    private pdfService: PdfGenerationService,
+    // private pdfService: PdfGenerationService,
     private shareService: ShareService,
-    private statisticsService: StatisticsService
+    // private statisticsService: StatisticsService
   ) {
     this.subscription = new Subscription();
     
@@ -63,38 +54,15 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
         }
       )
     );
-
-    this.subscription.add(
-      this.mapService.visualizationSettings$.subscribe(settings => {
-        this.selectedAverageType = settings.averageType;
-        this.selectedPopulationArea = settings.populationArea;
-        this.opacityThresholds = settings.opacityThresholds;
-      })
-    );
   }
 
   onVisualizationChange(): void {
-    this.mapService.updateVisualizationSettings(
-        this.selectedAverageType,
-        this.selectedPopulationArea,
-        this.opacityThresholds
-    );
-  }
-
-  onOpacityThresholdChange(level: keyof OpacityThresholds, value: number | undefined): void {
-    if (value === undefined) return;
-    
-    const thresholds = {
-        [level]: value
-    };
-    
-    this.mapService.updateOpacityThresholds(thresholds, level);
   }
 
   async exportToPDFLandscape(): Promise<void> {
     try {
       this.isExporting = true;
-      await this.pdfService.exportToPDFLandscape();
+      // await this.pdfService.exportToPDFLandscape();
     } finally {
       this.isExporting = false;
     }
@@ -103,7 +71,7 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
   async exportToPDFPortrait(): Promise<void> {
     try {
       this.isExporting = true;
-      await this.pdfService.exportToPDFPortrait();
+      // await this.pdfService.exportToPDFPortrait();
     } finally {
       this.isExporting = false;
     }
@@ -137,25 +105,8 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     );
   }
 
-  zoomToFeatures(): void {
-    const map = this.mapService.getMap();
-    if (map) {
-      const vectorSource = this.mapService.getMainLayer()?.getSource();
-      if (vectorSource && vectorSource.getFeatures().length > 0) {
-        const extent = vectorSource.getExtent();
-        if (extent) {
-          map.getView().fit(extent, {
-            duration: 1000,
-            padding: [50, 50, 50, 50],
-            maxZoom: 10
-          });
-        }
-      }
-    }
-  }
-
   toggleStatistics(): void {
-    this.statisticsService.visible = true;
+  //   this.statisticsService.visible = true;
   }
 
   ngOnInit() {}

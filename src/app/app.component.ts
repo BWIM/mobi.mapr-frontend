@@ -9,7 +9,7 @@ import { AnalyzeComponent } from './analyze/analyze.component';
 import { CreditsComponent } from './credits/credits.component';
 import { AuthService } from './auth/auth.service';
 import { StatisticsComponent } from './statistics/statistics.component';
-import { KeyboardShortcutsService, ShortcutAction } from './map/keyboard-shortcuts.service';
+import { KeyboardShortcutsService, ShortcutAction } from './map-v2/keyboard-shortcuts.service';
 import { Subscription } from 'rxjs';
 import { HostListener } from '@angular/core';
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { StatisticsService } from '../statistics/statistics.service';
-import { PdfGenerationService } from './pdf-generation.service';
+// import { PdfGenerationService } from './pdf-generation.service';
 import { ShareService } from '../share/share.service';
 import { Subject } from 'rxjs';
 
@@ -24,8 +24,8 @@ export class KeyboardShortcutsService {
   private frozenStateSubject = new Subject<boolean>();
 
   constructor(
-    private statisticsService: StatisticsService,
-    private pdfGenerationService: PdfGenerationService,
+    // private statisticsService: StatisticsService,
+    // private pdfGenerationService: PdfGenerationService,
     private shareService: ShareService
   ) {}
 
@@ -65,18 +65,18 @@ export class KeyboardShortcutsService {
         this.setIsFrozen(!this.isFrozen);
         this.shortcutSubject.next(ShortcutAction.TOGGLE_FREEZE);
         break;
-      case 's':
-        this.statisticsService.visible = true;
-        this.shortcutSubject.next(ShortcutAction.SHOW_STATISTICS);
-        break;
-      case 'h':
-        this.pdfGenerationService.exportToPDFPortrait();
-        this.shortcutSubject.next(ShortcutAction.EXPORT_PDF_PORTRAIT);
-        break;
-      case 'q':
-        this.pdfGenerationService.exportToPDFLandscape();
-        this.shortcutSubject.next(ShortcutAction.EXPORT_PDF_LANDSCAPE);
-        break;
+      // case 's':
+      //   this.statisticsService.visible = true;
+      //   this.shortcutSubject.next(ShortcutAction.SHOW_STATISTICS);
+      //   break;
+      // case 'h':
+      //   this.pdfGenerationService.exportToPDFPortrait();
+      //   this.shortcutSubject.next(ShortcutAction.EXPORT_PDF_PORTRAIT);
+      //   break;
+      // case 'q':
+      //   this.pdfGenerationService.exportToPDFLandscape();
+      //   this.shortcutSubject.next(ShortcutAction.EXPORT_PDF_LANDSCAPE);
+      //   break;
       case 'z':
         this.shortcutSubject.next(ShortcutAction.TOGGLE_HEXAGON_VIEW);
         break;

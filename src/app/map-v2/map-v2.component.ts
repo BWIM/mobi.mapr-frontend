@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { MapV2Service } from './map-v2.service';
 import { Subscription } from 'rxjs';
-import { LngLatBounds, Map, Popup } from 'maplibre-gl';
+import { Feature, LngLatBounds, Map, Popup } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { AnalyzeService } from '../analyze/analyze.service';
 
 @Component({
   selector: 'app-map-v2',
@@ -19,7 +20,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   private subscription: Subscription;
   private boundsSubscription: Subscription;
 
-  constructor(private mapService: MapV2Service) {
+  constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService) {
     this.subscription = this.mapService.mapStyle$.subscribe(style => {
       this.mapStyle = style;
       if (this.map) {
@@ -53,6 +54,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
         center: this.center,
         zoom: this.zoom
       });
+      this.mapService.setMap(this.map);
 
       this.popup = new Popup({
         closeButton: false,
@@ -68,18 +70,11 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
           const feature = e.features[0];
           const properties = feature.properties;
           if (properties) {
-            console.log(properties);
             const name = properties['name'] || 'Unknown';
-            const score = properties['score'] ? (properties['score'] * 100).toFixed(1) + '%' : 'N/A';
-            const population = properties['population'] ? properties['population'].toLocaleString() : 'N/A';
-            const density = properties['population_density'] ? properties['population_density'].toFixed(2) : 'N/A';
 
             const popupContent = `
               <div style="padding: 5px;">
-                <strong>${name}</strong><br>
-                Score: ${score}<br>
-                Population: ${population}<br>
-                Density: ${density} per km²
+                ${name}: <strong>${this.getScoreName(properties['score'])}</strong>
               </div>
             `;
 
@@ -93,6 +88,13 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
 
       this.map.on('mouseleave', 'geodata-fill', () => {
         this.popup!.remove();
+      });
+
+      this.map.on('click', 'geodata-fill', (e) => {
+        if (e.features && e.features[0]) {
+          const feature = e.features[0];
+          this.analyzeService.setSelectedFeature(feature);
+        }
       });
     }
   }
@@ -111,5 +113,27 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
 
   setProject(projectId: string) {
     this.mapService.setProject(projectId);
+  }
+
+  private getScoreName(score: number): string {
+    if (score <= 0) return "Error";
+    if (score <= 0.28) return "A+";
+    if (score <= 0.32) return "A";
+    if (score <= 0.35) return "A-";
+    if (score <= 0.4) return "B+";
+    if (score <= 0.45) return "B";
+    if (score <= 0.5) return "B-";
+    if (score <= 0.56) return "C+";
+    if (score <= 0.63) return "C";
+    if (score <= 0.71) return "C-";
+    if (score <= 0.8) return "D+";
+    if (score <= 0.9) return "D";
+    if (score <= 1.0) return "D-";
+    if (score <= 1.12) return "E+";
+    if (score <= 1.26) return "E";
+    if (score <= 1.41) return "E-";
+    if (score <= 1.59) return "F+";
+    if (score <= 1.78) return "F";
+    return "F-";
   }
 }
