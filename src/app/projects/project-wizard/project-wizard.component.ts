@@ -45,7 +45,43 @@ interface CheckboxChangeEvent {
   providers: [MessageService]
 })
 export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
-  steps: MenuItem[] = [];
+  steps: MenuItem[] = [
+    {
+      label: 'Aktivitäten',
+      command: (event: any) => {
+        this.activeIndex = 0;
+      }
+    },
+    {
+      label: 'Personas',
+      command: (event: any) => {
+        this.activeIndex = 1;
+      }
+    },
+    {
+      label: 'Modi',
+      command: (event: any) => {
+        this.activeIndex = 2;
+      }
+    },
+    {
+      label: 'Gebiet auswählen',
+      command: (event: any) => {
+        this.activeIndex = 3;
+        // Initialize map when directly selecting this step
+        setTimeout(() => {
+          this.initializeMap();
+          this.setupAreaSelection();
+        }, 0);
+      }
+    },
+    {
+      label: 'Projektinformationen',
+      command: (event: any) => {
+        this.activeIndex = 4;
+      }
+    }
+  ];
   activeIndex: number = 0;
   projectForm!: FormGroup;
   visible: boolean = false;
@@ -108,9 +144,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     this.initializeForm();
   }
 
-  ngAfterViewInit() {
-    this.initializeSteps();
-  }
+  ngAfterViewInit() {}
 
   ngOnDestroy() {
     if (this.subscription) {
@@ -294,46 +328,6 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
         console.error('Fehler beim Laden der Modi:', error);
       }
     });
-  }
-
-  private initializeSteps() {
-    this.steps = [
-      {
-        label: 'Aktivitäten',
-        command: (event: any) => {
-          this.activeIndex = 0;
-        }
-      },
-      {
-        label: 'Personas',
-        command: (event: any) => {
-          this.activeIndex = 1;
-        }
-      },
-      {
-        label: 'Modi',
-        command: (event: any) => {
-          this.activeIndex = 2;
-        }
-      },
-      {
-        label: 'Gebiet auswählen',
-        command: (event: any) => {
-          this.activeIndex = 3;
-          // Initialize map when directly selecting this step
-          setTimeout(() => {
-            this.initializeMap();
-            this.setupAreaSelection();
-          }, 0);
-        }
-      },
-      {
-        label: 'Projektinformationen',
-        command: (event: any) => {
-          this.activeIndex = 4;
-        }
-      }
-    ];
   }
 
   nextStep() {
