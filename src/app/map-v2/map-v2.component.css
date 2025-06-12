@@ -1,4 +1,5 @@
-mgl-map {
-  height: 100%;
+.map-container {
   width: 100%;
+  height: 100%;
+  position: relative;
 }

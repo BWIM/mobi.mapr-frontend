@@ -4,38 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { LoadingService } from '../services/loading.service';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../auth/auth.service';
-
-interface MapSource {
-  type: string;
-  tiles: string[];
-  tileSize?: number;
-  attribution?: string;
-  minzoom?: number;
-  maxzoom?: number;
-}
-
-interface MapLayer {
-  id: string;
-  type: string;
-  source: string;
-  'source-layer'?: string;
-  paint?: {
-    'fill-color'?: string | any[];
-    'fill-opacity'?: number;
-    'line-color'?: string;
-    'line-width'?: number;
-  };
-  minzoom?: number;
-  maxzoom?: number;
-}
-
-interface MapStyle {
-  version: number;
-  sources: {
-    [key: string]: MapSource;
-  };
-  layers: MapLayer[];
-}
+import { StyleSpecification, SourceSpecification, LayerSpecification } from 'maplibre-gl';
 
 interface Bounds {
   minLng: number;
@@ -50,7 +19,7 @@ interface Bounds {
 export class MapV2Service {
   private currentProject: string | null = null;
   private currentZoom: number = 7;
-  private mapStyleSubject = new BehaviorSubject<MapStyle>(this.getBaseMapStyle());
+  private mapStyleSubject = new BehaviorSubject<StyleSpecification>(this.getBaseMapStyle());
   mapStyle$ = this.mapStyleSubject.asObservable();
   averageType: 'avg' | 'pop' = 'pop';
   private boundsSubject = new BehaviorSubject<Bounds | null>(null);
@@ -62,7 +31,7 @@ export class MapV2Service {
     private authService: AuthService
   ) { }
 
-  getBaseMapStyle(): MapStyle {
+  getBaseMapStyle(): StyleSpecification {
     return {
       version: 8,
       sources: {
@@ -71,7 +40,7 @@ export class MapV2Service {
           tiles: ['https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'],
           tileSize: 256,
           attribution: '© OpenStreetMap contributors © CARTO'
-        }
+        } as SourceSpecification
       },
       layers: [
         {
@@ -80,7 +49,7 @@ export class MapV2Service {
           source: 'carto-light',
           minzoom: 0,
           maxzoom: 19
-        }
+        } as LayerSpecification
       ]
     };
   }
@@ -137,7 +106,7 @@ export class MapV2Service {
     }
   }
 
-  private getProjectMapStyle(): MapStyle {
+  private getProjectMapStyle(): StyleSpecification {
     const baseStyle = this.getBaseMapStyle();
     
     if (this.currentProject) {
@@ -149,7 +118,7 @@ export class MapV2Service {
         minzoom: 0,
         maxzoom: 14,
         tileSize: 512
-      };
+      } as SourceSpecification;
 
       baseStyle.layers.push({
         id: 'geodata-fill',
@@ -173,9 +142,17 @@ export class MapV2Service {
             'rgba(194, 24, 7, 0.7)',
             'rgba(150, 86, 162, 0.7)'
           ],
-          'fill-opacity': 0.8
+          'fill-opacity': [
+            'interpolate',
+            ['cubic-bezier', 0.26, 0.38, 0.82, 0.36],
+            ['get', 'population_density'],
+            0, 0.2,
+            100, 0.5,
+            1000, 0.8,
+            5000, 0.9
+          ]
         }
-      });
+      } as LayerSpecification);
     }
 
     return baseStyle;
