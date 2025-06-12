@@ -5,6 +5,7 @@ import { LoadingService } from '../services/loading.service';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../auth/auth.service';
 import { StyleSpecification, SourceSpecification, LayerSpecification, Map } from 'maplibre-gl';
+import { AnalyzeService } from '../analyze/analyze.service';
 
 interface Bounds {
   minLng: number;
@@ -29,7 +30,8 @@ export class MapV2Service {
   constructor(
     private loadingService: LoadingService,
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private analyzeService: AnalyzeService
   ) { }
 
   setMap(map: Map): void {
@@ -75,13 +77,20 @@ export class MapV2Service {
         this.boundsSubject.next(bounds);
         const updatedStyle = this.getProjectMapStyle();
         this.mapStyleSubject.next(updatedStyle);
-        this.loadingService.stopLoading();
       },
       error => {
         console.error('Error fetching bounds:', error);
         this.loadingService.stopLoading();
       }
     );
+  }
+
+  setAverageType(averageType: 'avg' | 'pop'): void {
+    this.averageType = averageType;
+    if (this.currentProject) {
+      const updatedStyle = this.getProjectMapStyle();
+      this.mapStyleSubject.next(updatedStyle);
+    }
   }
 
   updateZoom(zoom: number): void {
@@ -101,16 +110,21 @@ export class MapV2Service {
     // Define zoom level thresholds
     if (this.currentZoom < 7) {
       // State level
+      this.analyzeService.setMapType('state');
       return `${environment.apiUrl}/tiles/laender/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${this.currentProject}${authParam}`;
     } else if (this.currentZoom < 8) {
       // County level
+      this.analyzeService.setMapType('county');
       return `${environment.apiUrl}/tiles/landkreise/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${this.currentProject}${authParam}`;
     } else if (this.currentZoom < 9) {
       // Municipality level
+      this.analyzeService.setMapType('municipality');
       return `${environment.apiUrl}/tiles/gemeinden/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${this.currentProject}${authParam}`;
     } else if (this.currentZoom < 10) {
+      this.analyzeService.setMapType('hexagon');
       return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${this.currentProject}&resolution=8${authParam}`;
     } else {
+      this.analyzeService.setMapType('hexagon');
       return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${this.currentProject}&resolution=9${authParam}`;
     }
   }

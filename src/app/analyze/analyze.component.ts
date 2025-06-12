@@ -246,7 +246,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private initializeChartData(): void {
-    this.initializeModesChart();
+    // this.initializeModesChart();
     this.initializeActivitiesChart();
     this.initializePersonaChart();
     this.loading = false;
@@ -583,7 +583,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       }
     };
-    console.log(highestScore)
 
     // Basis-Datensatz für die Hintergrundfarben (inverted)
     const baseDatasets = [

@@ -40,20 +40,20 @@
                     </div>
 
                     <!-- Weighting Toggle -->
-                    <div class="flex items-center justify-end mb-4 gap-2">
+                    <!-- <div class="flex items-center justify-end mb-4 gap-2">
                         <span class="text-sm">{{ 'ANALYZE.WEIGHTING.POPULATION' | translate }}</span>
                         <p-inputSwitch 
                             [(ngModel)]="isAreaWeighting"
                             (onChange)="onWeightingChange($event)">
                         </p-inputSwitch>
                         <span class="text-sm">{{ 'ANALYZE.WEIGHTING.AREA' | translate }}</span>
-                    </div>
+                    </div> -->
 
                     <p-tabs [value]="'activities'" class="flex flex-col h-full" (activeIndexChange)="triggerChartResize()">
                         <p-tablist>
                             <p-tab value="activities">Aktivitäten</p-tab>
                             <p-tab value="persona">Persona</p-tab>
-                            <p-tab value="modes">Modi</p-tab>
+                            <!-- <p-tab value="modes">Modi</p-tab> -->
                         </p-tablist>
                         <!-- Persona Tab -->
                         <p-tabpanel [value]="'persona'" class="flex-grow flex flex-col h-full">
@@ -97,7 +97,7 @@
                             </div>
                         </p-tabpanel>
 
-                        <!-- Modi Tab -->
+                        <!-- Modi Tab 
                         <p-tabpanel [value]="'modes'" class="flex-grow flex flex-col h-full">
                             <div class="p-4 flex flex-col h-full">
                                 <h3 class="text-xl mb-4">{{ 'ANALYZE.MODES.TITLE' | translate }}</h3>
@@ -108,7 +108,7 @@
                                     <p>{{ 'ANALYZE.MODES.NO_DATA' | translate }}</p>
                                 </div>
                             </div>
-                        </p-tabpanel>
+                        </p-tabpanel> -->
                     </p-tabs>
                 </div>
             </p-scrollPanel>

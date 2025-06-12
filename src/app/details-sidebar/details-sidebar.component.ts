@@ -11,6 +11,7 @@ import { ProjectInfo } from '../projects/project.interface';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ShareService } from '../share/share.service';
 import { StatisticsService } from '../statistics/statistics.service';
+import { MapV2Service } from '../map-v2/map-v2.service';
 
 @Component({
   selector: 'app-details-sidebar',
@@ -40,6 +41,7 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     private projectsService: ProjectsService,
     // private pdfService: PdfGenerationService,
     private shareService: ShareService,
+    private mapService: MapV2Service,
     // private statisticsService: StatisticsService
   ) {
     this.subscription = new Subscription();
@@ -57,6 +59,7 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
   }
 
   onVisualizationChange(): void {
+    this.mapService.setAverageType(this.selectedPopulationArea === 'area' ? 'avg' : 'pop');
   }
 
   async exportToPDFLandscape(): Promise<void> {

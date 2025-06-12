@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { Feature, LngLatBounds, Map, Popup } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { AnalyzeService } from '../analyze/analyze.service';
+import { LoadingService } from '../services/loading.service';
 
 @Component({
   selector: 'app-map-v2',
@@ -20,7 +21,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   private subscription: Subscription;
   private boundsSubscription: Subscription;
 
-  constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService) {
+  constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService) {
     this.subscription = this.mapService.mapStyle$.subscribe(style => {
       this.mapStyle = style;
       if (this.map) {
@@ -63,6 +64,13 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
 
       this.map.on('zoomend', () => {
         this.mapService.updateZoom(this.map!.getZoom());
+      });
+
+      // Add sourcedata event handler to track tile loading
+      this.map.on('sourcedata', (e) => {
+        if (e.sourceId === 'geodata' && e.isSourceLoaded) {
+          this.loadingService.stopLoading();
+        }
       });
 
       this.map.on('mousemove', 'geodata-fill', (e) => {
