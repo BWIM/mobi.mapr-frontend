@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { SharedModule } from '../shared/shared.module';
 import { ProjectsComponent } from '../projects/projects.component';
-import { MapComponent } from '../map/map.component';
 import { DetailsSidebarComponent } from '../details-sidebar/details-sidebar.component';
 import { LoadingSpinnerComponent } from '../shared/loading-spinner/loading-spinner.component';
+import { MapV2Component } from '../map-v2/map-v2.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,7 +11,7 @@ import { LoadingSpinnerComponent } from '../shared/loading-spinner/loading-spinn
   imports: [
     SharedModule,
     ProjectsComponent,
-    MapComponent,
+    MapV2Component,
     DetailsSidebarComponent,
     LoadingSpinnerComponent,
   ],
