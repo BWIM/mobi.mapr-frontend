@@ -100,7 +100,7 @@
                         </tr>
                     </ng-template>
                     <ng-template pTemplate="body" let-score let-i="rowIndex">
-                        <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
+                        <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer" [title]="score.name + ' (' + score.county + ')'">
                             <td class="p-3">{{i + 1}}</td>
                             <td class="p-3" (click)="onFeatureClick(score)">{{score.name}}</td>
                             <td class="p-3 font-semibold" [style.color]="getScoreColor(score.score)">
