@@ -65,6 +65,11 @@ export class MapV2Service {
     };
   }
 
+  resetMap(): void {
+    this.map = null;
+    this.mapStyleSubject.next(this.getBaseMapStyle());
+  }
+
   setProject(projectId: string): void {
     this.currentProject = projectId;
     this.loadingService.startLoading();
@@ -179,5 +184,9 @@ export class MapV2Service {
     }
 
     return baseStyle;
+  }
+
+  addSingleFeature(scores: any): void {
+    console.log(scores);
   }
 }

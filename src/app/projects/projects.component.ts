@@ -321,49 +321,49 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   private setupWebsocketForProject(project: Project): void {
     if (project.finished) return;
     
-    // if (this.websocketConnections.has(project.id)) return;
+    if (this.websocketConnections.has(project.id)) return;
     
-    // const wsSubject = this.websocketService.connect<WebsocketResult>(
-    //   `${environment.wsURL}/projects/?project=${project.id}`
-    // );
+    const wsSubject = this.websocketService.connect<WebsocketResult>(
+      `${environment.wsURL}/projects/?project=${project.id}`
+    );
 
-    // this.websocketConnections.set(project.id, wsSubject);
+    this.websocketConnections.set(project.id, wsSubject);
 
-    // wsSubject.subscribe({
-    //   next: (result: WebsocketResult) => {
-    //     if (result.result.hex_scores) {
-    //       const scores = JSON.parse(result.result.hex_scores);
-    //       this.mapService.addSingleFeature(scores);
-    //     }
+    wsSubject.subscribe({
+      next: (result: WebsocketResult) => {
+        if (result.result.hex_scores) {
+          const scores = JSON.parse(result.result.hex_scores);
+          this.mapv2Service.addSingleFeature(scores);
+        }
         
-    //     const projectToUpdate = this.findProjectById(result.result.project);
-    //     if (projectToUpdate) {
-    //       projectToUpdate.calculated = result.result.calculated;
-    //       projectToUpdate.areas = result.result.total;
-    //       projectToUpdate.finished = result.result.finished;
-    //     }
+        const projectToUpdate = this.findProjectById(result.result.project);
+        if (projectToUpdate) {
+          projectToUpdate.calculated = result.result.calculated;
+          projectToUpdate.areas = result.result.total;
+          projectToUpdate.finished = result.result.finished;
+        }
 
-    //     if (result.result.finished) {
-    //       const finishedProjectId = result.result.project;
-    //       this.closeWebsocketConnection(finishedProjectId);
-    //       this.mapService.resetMap();
-    //       setTimeout(() => {
-    //         this.loadData();
-    //         // Nach dem Laden der Daten das Projekt anzeigen
-    //         setTimeout(() => {
-    //           const project = this.findProjectById(finishedProjectId);
-    //           if (project) {
-    //             this.showResults(project);
-    //           }
-    //         }, 500);
-    //       }, 500);
-    //     }
-    //   },
-    //   error: (error) => {
-    //     console.error(`WebSocket Fehler für Projekt ${project.id}:`, error);
-    //     this.closeWebsocketConnection(project.id);
-    //   }
-    // });
+        if (result.result.finished) {
+          const finishedProjectId = result.result.project;
+          this.closeWebsocketConnection(finishedProjectId);
+          this.mapv2Service.resetMap();
+          setTimeout(() => {
+            this.loadData();
+            // Nach dem Laden der Daten das Projekt anzeigen
+            setTimeout(() => {
+              const project = this.findProjectById(finishedProjectId);
+              if (project) {
+                this.showResults(project);
+              }
+            }, 500);
+          }, 500);
+        }
+      },
+      error: (error) => {
+        console.error(`WebSocket Fehler für Projekt ${project.id}:`, error);
+        this.closeWebsocketConnection(project.id);
+      }
+    });
   }
 
   private findProjectById(projectId: number): Project | undefined {
