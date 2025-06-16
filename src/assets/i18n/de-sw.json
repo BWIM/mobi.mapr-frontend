@@ -315,7 +315,8 @@
     "FIELDS": {
       "OVERVIEW": "Übersicht",
       "ACTIVITIES": "Aktivitäta"
-    }
+    },
+    "TITLE": "Details"
   },
   "HELP": {
     "GETTING_STARTED_TOOLTIP": "Erschte Schritt mit dr Awendung",

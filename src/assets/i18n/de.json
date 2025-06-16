@@ -287,7 +287,8 @@
     "FIELDS": {
       "OVERVIEW": "Übersicht",
       "ACTIVITIES": "Aktivitäten"
-    }
+    },
+    "TITLE": "Details"
   },
   "EDIT": {
     "TITLE": "Projekt bearbeiten"

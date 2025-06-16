@@ -3,7 +3,6 @@
 
     <div class="h-full overflow-hidden min-w-0">
         <p-scrollPanel [style]="{width: '100%', height: '100%'}">
-            <p-message severity="info" styleClass="mb-4" [text]="'PROJECTS.HINT.UPGRADE' | translate"></p-message>
             <!-- Gruppierte Projekte -->
             <div class="space-y-4 px-3 min-w-0">
                 <div class="mb-4 min-w-0 overflow-hidden" *ngFor="let group of groupedProjects">
@@ -145,13 +144,14 @@
                 </div>
 
                 <!-- Keine Projekte -->
-                <p-message *ngIf="groupedProjects.length === 0 && ungroupedProjects.length === 0"
+                <p-progress-spinner *ngIf="loading" styleClass="w-full h-full"></p-progress-spinner>
+                <p-message *ngIf="!loading && groupedProjects.length === 0 && ungroupedProjects.length === 0"
                     severity="info"
                     text="{{ 'PROJECTS.LIST.NO_PROJECTS' | translate }}">
                 </p-message>
 
                 <!-- Button für nicht zugewiesene Gruppen -->
-                <div class="mt-4 p-2">
+                <div class="mt-4 p-2" *ngIf="!loading">
                     <button pButton
                         icon="pi pi-trash"
                         [label]="'PROJECT_GROUPS.MANAGE_UNUSED' | translate"
@@ -204,7 +204,7 @@
     </p-overlayPanel>
 
     <!-- Action Buttons am unteren Rand -->
-    <div class="p-3 bg-surface-ground border-t grid grid-cols-2 gap-2">
+    <div class="p-3 bg-surface-ground border-t grid grid-cols-2 gap-2" *ngIf="!loading">
         <p-button 
             icon="pi pi-users" 
             label="{{ 'PROJECTS.ACTIONS.CREATE_GROUP' | translate }}"

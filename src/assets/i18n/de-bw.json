@@ -316,7 +316,8 @@
     "FIELDS": {
       "OVERVIEW": "Übersicht",
       "ACTIVITIES": "Aktivitäte"
-    }
+    },
+    "TITLE": "Details"
   },
   "HELP": {
     "GETTING_STARTED_TOOLTIP": "Erste Schritt mit de Awendig",

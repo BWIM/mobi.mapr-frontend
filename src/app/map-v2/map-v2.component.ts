@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { MapV2Service } from './map-v2.service';
 import { Subscription } from 'rxjs';
-import { Feature, LngLatBounds, Map, Popup } from 'maplibre-gl';
+import { Feature, LngLatBounds, Map, Popup, NavigationControl, ScaleControl, AttributionControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { LoadingService } from '../services/loading.service';
@@ -53,9 +53,17 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
         container: this.mapContainer.nativeElement,
         style: this.mapStyle,
         center: this.center,
-        zoom: this.zoom
+        zoom: this.zoom,
+        dragRotate: false,
+        touchZoomRotate: false
       });
       this.mapService.setMap(this.map);
+
+      // Add navigation control
+      this.map.addControl(new NavigationControl({showCompass: false}), 'top-left');
+      this.map.addControl(new ScaleControl(), 'bottom-left');
+      this.map.dragRotate.disable();
+      this.map.touchZoomRotate.disable();
 
       this.popup = new Popup({
         closeButton: false,

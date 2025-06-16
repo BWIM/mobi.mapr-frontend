@@ -60,7 +60,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   editDialogVisible = false;
   projectToEdit: Project | null = null;
   progress: number = 0;
-  
+  loading: boolean = false;
   // Neue Properties für Projektgruppen
   projectGroupDialogVisible = false;
   projectGroupToEdit: ProjectGroup | null = null;
@@ -148,6 +148,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   }
 
   loadData(): void {
+    this.loading = true;
     this.loadingService.startLoading();
     this.menuItemsCache.clear();
     
@@ -165,6 +166,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
             summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
             detail: this.translate.instant('PROJECTS.LIST.NO_PROJECTS')
           });
+          this.loading = false;
         }
       });
   }
@@ -217,6 +219,10 @@ export class ProjectsComponent implements OnInit, OnDestroy {
             summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
             detail: this.translate.instant('PROJECTS.LIST.NO_PROJECTS')
           });
+          this.loading = false;
+        },
+        complete: () => {
+          this.loading = false;
         }
       });
   }

@@ -60,7 +60,6 @@ export class MapV2Service {
           type: 'raster',
           tiles: ['https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'],
           tileSize: 256,
-          attribution: '© OpenStreetMap contributors © CARTO'
         } as SourceSpecification
       },
       layers: [

@@ -28,7 +28,8 @@
         [resizable]="true"
         styleClass="projects-sidebar"
         [style]="{width: '500px'}"
-        (onHide)="isLeftPinned = false">
+        (onHide)="isLeftPinned = false"
+        [header]="'PROJECTS.TITLE' | translate">
         <div class="p-3 h-full">
             <app-projects (projectSelected)="leftSidebarExpanded = $event"></app-projects>
         </div>
@@ -53,7 +54,8 @@
         [resizable]="true"
         styleClass="details-sidebar"
         [style]="{width: '400px'}"
-        (onHide)="isRightPinned = false">
+        (onHide)="isRightPinned = false"
+        [header]="'DETAILS.TITLE' | translate">
         <div class="p-3 h-full">
             <div class="info-section h-full">
                 <app-details-sidebar (projectLoaded)="showRightSidebar()"></app-details-sidebar>
