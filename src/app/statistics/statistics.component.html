@@ -27,7 +27,7 @@
                     <ng-template pTemplate="body" let-score let-i="rowIndex">
                         <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
                             <td class="p-3">{{i + 1}}</td>
-                            <td class="p-3">{{score.name}}</td>
+                            <td class="p-3" (click)="onFeatureClick(score)">{{score.name}}</td>
                             <td class="p-3 font-semibold" [style.color]="getScoreColor(score.score)">
                                 {{getScoreName(score.score)}}
                             </td>
@@ -59,7 +59,7 @@
                     <ng-template pTemplate="body" let-score let-i="rowIndex">
                         <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
                             <td class="p-3">{{i + 1}}</td>
-                            <td class="p-3">{{score.name}}</td>
+                            <td class="p-3" (click)="onFeatureClick(score)">{{score.name}}</td>
                             <td class="p-3 font-semibold" [style.color]="getScoreColor(score.score)">
                                 {{getScoreName(score.score)}}
                             </td>
@@ -102,7 +102,7 @@
                     <ng-template pTemplate="body" let-score let-i="rowIndex">
                         <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
                             <td class="p-3">{{i + 1}}</td>
-                            <td class="p-3">{{score.name}}</td>
+                            <td class="p-3" (click)="onFeatureClick(score)">{{score.name}}</td>
                             <td class="p-3 font-semibold" [style.color]="getScoreColor(score.score)">
                                 {{getScoreName(score.score)}}
                             </td>
@@ -125,29 +125,19 @@
         <div class="flex items-center justify-between">
             <p class="text-sm text-gray-600">
                 {{ 'STATISTICS.CURRENT_SETTINGS' | translate }}: 
-                {{ scoreType === 'pop' ? ('STATISTICS.POPULATION_WEIGHTED' | translate) : ('STATISTICS.AVERAGE' | translate) }}
+                {{ scoreType === 'pop' ? ('STATISTICS.POPULATION_WEIGHTED' | translate) : ('STATISTICS.AREA_WEIGHTED' | translate) }}
             </p>
-            <div class="flex items-center space-x-4">
-                <button 
-                    pButton 
-                    [class.bg-primary]="scoreType === 'pop'"
-                    [class.text-white]="scoreType === 'pop'"
-                    [class.bg-gray-200]="scoreType !== 'pop'"
-                    [class.text-gray-700]="scoreType !== 'pop'"
-                    class="px-4 py-2 rounded"
-                    (click)="onScoreTypeChange('pop')">
-                    {{ 'STATISTICS.POPULATION_WEIGHTED' | translate }}
-                </button>
-                <button 
-                    pButton 
-                    [class.bg-primary]="scoreType === 'avg'"
-                    [class.text-white]="scoreType === 'avg'"
-                    [class.bg-gray-200]="scoreType !== 'avg'"
-                    [class.text-gray-700]="scoreType !== 'avg'"
-                    class="px-4 py-2 rounded"
-                    (click)="onScoreTypeChange('avg')">
-                    {{ 'STATISTICS.AVERAGE' | translate }}
-                </button>
+            <div class="flex items-center">
+                <p-selectButton 
+                    [options]="[
+                        { label: ('STATISTICS.POPULATION_WEIGHTED' | translate), value: 'pop' },
+                        { label: ('STATISTICS.AREA_WEIGHTED' | translate), value: 'avg' }
+                    ]"
+                    [(ngModel)]="scoreType"
+                    (onChange)="onScoreTypeChange($event.value)"
+                    optionLabel="label"
+                    optionValue="value">
+                </p-selectButton>
             </div>
         </div>
     </div>

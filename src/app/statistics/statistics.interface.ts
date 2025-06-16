@@ -14,6 +14,7 @@ export interface PaginatedResponse<T> {
     };
     score_avg: number;
     score_pop: number;
+    landkreis: string;
   }
   
   export interface CountyScore {

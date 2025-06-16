@@ -141,7 +141,9 @@ export class CreditsComponent implements OnInit {
     { name: 'OpenStreetMap', icon: 'pi pi-map', url: 'https://www.openstreetmap.org' },
     { name: 'Angular', icon: 'pi pi-code', url: 'https://angular.io' },
     { name: 'PrimeNG', icon: 'pi pi-desktop', url: 'https://primeng.org' },
-    { name: 'Carto', icon: 'pi pi-map-marker', url: 'https://carto.com' }
+    { name: 'Carto', icon: 'pi pi-map-marker', url: 'https://carto.com' },
+    { name: 'MapLibre', icon: 'pi pi-map-marker', url: 'https://maplibre.org' },
+    { name: 'Nominatim', icon: 'pi pi-map-marker', url: 'https://nominatim.org' }
   ];
 
   dataComponents: InfoComponent[] = [

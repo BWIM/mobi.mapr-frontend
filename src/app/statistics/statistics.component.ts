@@ -11,6 +11,8 @@ import { MapV2Service } from '../map-v2/map-v2.service';
 import { PaginatorModule } from 'primeng/paginator';
 import { Feature } from 'ol';
 import { Geometry } from 'ol/geom';
+import { GeocodingService } from '../services/geocoding.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-statistics',
@@ -71,7 +73,8 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   constructor(
     private statisticsService: StatisticsService,
     private mapService: MapV2Service,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private geocodingService: GeocodingService
   ) {
     this.subscription.add(
       this.statisticsService.visible$.subscribe(visible => {
@@ -200,7 +203,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       if (!score.population) return false;
       return this.selectedCategories.some(category => {
         const { min, max } = category;
-        return score.population > min && score.population <= max;
+        return score.population && score.population > min && score.population <= max;
       });
     });
   }
@@ -237,82 +240,51 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     return "F-";
   }
 
-  // onFeatureClick(entry: ScoreEntry): void {
-  //   this.statisticsService.visible = false;
+  async onFeatureClick(entry: ScoreEntry): Promise<void> {
+    this.statisticsService.visible = false;
+    this.loadingService.startLoading();
 
-  //   const map = this.mapService.getMap();
-  //   if (!map) return;
+    try {
+      const map = this.mapService.getMap();
+      if (!map) return;
 
-  //   const vectorLayer = this.mapService.getMainLayer();
-  //   if (!vectorLayer || !vectorLayer.getSource()) return;
+      // Determine target zoom level based on administrative level
+      let targetZoom = 7.5;
+      console.log(entry);
+      if (entry.level === 'county') {
+        targetZoom = 10;
+      } else if (entry.level === 'municipality') {
+        targetZoom = 12;
+      }
 
-  //   let targetZoom = 7.5;
-  //   if (entry.level === 'county') {
-  //     targetZoom = 9;
-  //   } else if (entry.level === 'municipality') {
-  //     targetZoom = 10;
-  //   }
-
-  //   function animateView(view: any, options: any): Promise<void> {
-  //     return new Promise(resolve => {
-  //       view.animate({ ...options, duration: 600 }, resolve);
-  //     });
-  //   }
-
-  //   const view = map.getView();
-  //   let safeZoom = 6;
-  //   if (entry.level === 'county') {
-  //     safeZoom = 8;
-  //   } else if (entry.level === 'municipality') {
-  //     safeZoom = 10;
-  //   }
-  //   const currentZoom = view.getZoom();
-  //   let zoomOutPromise: Promise<void>;
-
-  //   if (currentZoom && currentZoom > safeZoom) {
-  //     zoomOutPromise = animateView(view, { zoom: safeZoom });
-  //   } else {
-  //     zoomOutPromise = Promise.resolve();
-  //   }
-
-  //   zoomOutPromise.then(() => {
-  //     const maxTries = 10;
-  //     const delay = 200;
-
-  //     function findFeature(): Feature<Geometry> | undefined {
-  //       const features = vectorLayer?.getSource()?.getFeatures();
-  //       return features?.find((f: Feature<Geometry>) => {
-  //         const featureName = (f.get('name') || '').trim().toLowerCase();
-  //         const entryName = (entry.name || '').trim().toLowerCase();
-  //         const featureLevel = (f.get('level') || '').trim().toLowerCase();
-  //         const entryLevel = (entry.level || '').trim().toLowerCase();
-  //         return featureName === entryName && featureLevel === entryLevel;
-  //       });
-  //     }
-
-  //     function pollForFeature(triesLeft: number) {
-  //       const feature = findFeature();
-  //       if (feature) {
-  //         const extent = feature.getGeometry()?.getExtent();
-  //         if (extent) {
-  //           view.animate(
-  //             { zoom: targetZoom, duration: 800 },
-  //             () => {
-  //               view.fit(extent, {
-  //                 duration: 1000,
-  //                 padding: [50, 50, 50, 50]
-  //               });
-  //             }
-  //           );
-  //         }
-  //       } else if (triesLeft > 0) {
-  //         setTimeout(() => pollForFeature(triesLeft - 1), delay);
-  //       } else {
-  //         console.warn('Feature not found after zooming out and polling:', entry);
-  //       }
-  //     }
-
-  //     pollForFeature(maxTries);
-  //   });
-  // }
+      // Use geocoding to find the location
+      let searchQuery = entry.name;
+      
+      // Add county information for municipalities
+      if (entry.level === 'municipality' && entry.county) {
+        searchQuery = `${entry.name}, ${entry.county}`;
+      }
+      
+      // Always add Germany to the query
+      searchQuery += ', Germany';
+      
+      console.log('Search query:', searchQuery);
+      const results = await firstValueFrom(this.geocodingService.search(searchQuery));
+      
+      if (results.length > 0) {
+        const bestMatch = results[0];
+        map.flyTo({
+          center: [bestMatch.lng, bestMatch.lat],
+          zoom: targetZoom,
+          duration: 2000
+        });
+      } else {
+        console.warn('No location found for:', searchQuery);
+      }
+    } catch (error) {
+      console.error('Error finding feature location:', error);
+    } finally {
+      this.loadingService.stopLoading();
+    }
+  }
 }

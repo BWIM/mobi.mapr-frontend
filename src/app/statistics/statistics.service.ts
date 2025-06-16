@@ -7,9 +7,10 @@ import { PaginatedResponse, MunicipalityScore, CountyScore, StateScore } from '.
 export interface ScoreEntry {
   name: string;
   score: number;
-  population: number;
-  population_density: number;
   level: 'state' | 'county' | 'municipality';
+  population?: number;
+  population_density?: number;
+  county?: string;
 }
 
 @Injectable({
@@ -54,7 +55,8 @@ export class StatisticsService {
         score: data.score_pop,
         population: data.gemeinde.population,
         population_density: data.gemeinde.population_density,
-        level: 'municipality'
+        level: 'municipality',
+        county: data.landkreis
       };
     } else if ('landkreis' in data) {
       return {
