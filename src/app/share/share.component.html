@@ -1,16 +1,16 @@
 <div class="relative w-full h-screen overflow-hidden">
-    <!-- Hauptbereich mit Karte -->
+    <!-- Main area with map -->
     <div class="w-full h-full">
-        <!-- <app-map></app-map> -->
+        <app-map-v2></app-map-v2>
 
-        <!-- Header mit Logo -->
+        <!-- Header with logo -->
         <div class="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
             <img src="assets/images/logo.png" alt="Logo" class="w-auto h-auto max-h-25">
         </div>
     </div>
 
     <div class="sidebar-tab absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-r-lg z-20 cursor-pointer hover:bg-gray-50 transition-all duration-200"
-        (click)="showRightSidebar()">
+        (click)="toggleSidebar()">
         <div class="flex flex-col items-center p-3 gap-3">
             <i class="pi pi-angle-right text-gray-800 text-xl" [class.rotate-180]="rightSidebarExpanded"></i>
             <span class="rotate-text text-gray-800 font-semibold text-base">Details</span>
@@ -20,7 +20,7 @@
     <!-- Details Dialog -->
     <p-dialog 
         [(visible)]="rightSidebarExpanded"
-        position="right"
+        position="left"
         [closable]="true"
         [draggable]="false"
         class="h-full"

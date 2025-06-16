@@ -308,7 +308,9 @@
     "PERSONAS": "Personas",
     "NO_ACTIVITIES": "Kei Aktivitäte",
     "NO_PERSONAS": "Kei Personas",
-    "NO_DESCRIPTION": "Kei Beschriibig"
+    "NO_DESCRIPTION": "Kei Beschriibig",
+    "MODES": "Modes",
+    "NO_PROFILES": "Keine Profile gefunde"
   },
   "DETAILS": {
     "FIELDS": {

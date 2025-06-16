@@ -279,7 +279,9 @@
     "PERSONAS": "Personas",
     "NO_ACTIVITIES": "Keine Aktivitäten",
     "NO_PERSONAS": "Keine Personas",
-    "NO_DESCRIPTION": "Keine Beschreibung"
+    "NO_DESCRIPTION": "Keine Beschreibung",
+    "MODES": "Modi",
+    "NO_PROFILES": "Keine Profile gefunden"
   },
   "DETAILS": {
     "FIELDS": {

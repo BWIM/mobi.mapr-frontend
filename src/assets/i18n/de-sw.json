@@ -307,7 +307,9 @@
     "PERSONAS": "Personas",
     "NO_ACTIVITIES": "Koine Aktivitäta",
     "NO_PERSONAS": "Koine Personas",
-    "NO_DESCRIPTION": "Koi Beschreibung"
+    "NO_DESCRIPTION": "Koi Beschreibung",
+    "MODES": "Modes",
+    "NO_PROFILES": "Keine Profile gefunde"
   },
   "DETAILS": {
     "FIELDS": {

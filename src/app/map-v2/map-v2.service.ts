@@ -26,6 +26,7 @@ export class MapV2Service {
   private boundsSubject = new BehaviorSubject<Bounds | null>(null);
   bounds$ = this.boundsSubject.asObservable();
   private map: Map | null = null;
+  private shareKey: string | null = null;
 
   constructor(
     private loadingService: LoadingService,
@@ -76,15 +77,22 @@ export class MapV2Service {
 
   resetMap(): void {
     this.map = null;
+    this.shareKey = null;
     this.mapStyleSubject.next(this.getBaseMapStyle());
   }
 
-  setProject(projectId: string): void {
+  setProject(projectId: string, shareKey?: string): void {
     this.currentProject = projectId;
+    this.shareKey = shareKey || null;
     this.loadingService.startLoading();
 
     const token = this.authService.getAuthorizationHeaders().get('Authorization')?.split(' ')[1];
-    const authParam = token ? `&token=${token}` : '';
+    let authParam = '';
+    if (this.shareKey) {
+      authParam = `&key=${this.shareKey}`;
+    } else if (token) {
+      authParam = `&token=${token}`;
+    }
     
     this.http.get<Bounds>(`${environment.apiUrl}/bounds?project=${projectId}${authParam}`).subscribe(
       bounds => {
@@ -119,7 +127,12 @@ export class MapV2Service {
     if (!this.currentProject) return '';
     
     const token = this.authService.getAuthorizationHeaders().get('Authorization')?.split(' ')[1];
-    const authParam = token ? `&token=${token}` : '';
+    let authParam = '';
+    if (this.shareKey) {
+      authParam = `&key=${this.shareKey}`;
+    } else if (token) {
+      authParam = `&token=${token}`;
+    }
     
     // Define zoom level thresholds
     if (this.currentZoom < 7) {
