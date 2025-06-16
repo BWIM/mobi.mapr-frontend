@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter, Input } from '@angular/core';
 import { SharedModule } from '../shared/shared.module';
 import { ButtonModule } from 'primeng/button';
 import { PanelModule } from 'primeng/panel';
@@ -27,13 +27,17 @@ import { MapV2Service } from '../map-v2/map-v2.service';
   styleUrl: './details-sidebar.component.css'
 })
 export class DetailsSidebarComponent implements OnInit, OnDestroy {
-  projectInfo: ProjectInfo | null = null;
+  @Input() projectInfo: ProjectInfo | null = null;
   private subscription: Subscription;
   isExporting: boolean = false;
   shareUrl: string | null = null;
   isGeneratingShare: boolean = false;
   selectedAverageType: 'mean' | 'median' = 'mean';
-  selectedPopulationArea: 'pop' | 'area' = 'pop';
+  selectedPopulationArea: string = 'pop';
+  populationAreaOptions = [
+    { label: 'SIDEBAR.POPULATION', value: 'pop' },
+    { label: 'SIDEBAR.AREA', value: 'area' }
+  ];
   @Output() projectLoaded = new EventEmitter<void>();
 
   constructor(

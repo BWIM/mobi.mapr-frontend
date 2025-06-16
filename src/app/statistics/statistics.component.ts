@@ -47,7 +47,11 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   rowsPerPage: number = 15;
 
   // Score type
-  scoreType: 'avg' | 'pop' = 'pop';
+  scoreType: 'pop' | 'avg' = 'pop';
+  scoreTypeOptions = [
+    { label: 'STATISTICS.POPULATION_WEIGHTED', value: 'pop' },
+    { label: 'STATISTICS.AREA_WEIGHTED', value: 'avg' }
+  ];
 
   populationCategories = [
     { label: 'Landgemeinden (0-5.000)', value: 'small', min: 0, max: 5000 },
@@ -181,7 +185,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     }
   }
 
-  onScoreTypeChange(type: 'avg' | 'pop'): void {
+  onScoreTypeChange(type: 'pop' | 'avg'): void {
     this.scoreType = type;
     const projectId = this.mapService.getCurrentProject();
     if (projectId) {

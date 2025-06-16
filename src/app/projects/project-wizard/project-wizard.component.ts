@@ -30,11 +30,6 @@ import { Fill, Stroke, Style } from 'ol/style';
 import { fromLonLat } from 'ol/proj';
 import Overlay from 'ol/Overlay';
 
-// Add this interface for the checkbox event
-interface CheckboxChangeEvent {
-  checked: boolean;
-  originalEvent: Event;
-}
 
 @Component({
   selector: 'app-project-wizard',
@@ -855,6 +850,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     const hasPartiallySelectedLands = this.lands.some(land => this.isLandIndeterminate(land));
     
     this.hasCompletelySelectedLands = hasCompletelySelectedLands && !hasPartiallySelectedLands;
+    console.log('calculateStates', this.hasCompletelySelectedLands);
   }
   
   getLandSelectionState(land: Land): boolean {

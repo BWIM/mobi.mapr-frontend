@@ -130,10 +130,7 @@
             </p>
             <div class="flex items-center">
                 <p-selectButton 
-                    [options]="[
-                        { label: ('STATISTICS.POPULATION_WEIGHTED' | translate), value: 'pop' },
-                        { label: ('STATISTICS.AREA_WEIGHTED' | translate), value: 'avg' }
-                    ]"
+                    [options]="scoreTypeOptions"
                     [(ngModel)]="scoreType"
                     (onChange)="onScoreTypeChange($event.value)"
                     optionLabel="label"
