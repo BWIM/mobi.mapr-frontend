@@ -1,1 +1,3 @@
-<div #mapContainer class="map-container"></div>
+<div #mapContainer class="map-container">
+  <app-search-overlay (locationSelected)="onLocationSelected($event)"></app-search-overlay>
+</div>

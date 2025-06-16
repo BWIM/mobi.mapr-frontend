@@ -5,11 +5,14 @@ import { LngLatBounds, Map, Popup, NavigationControl, ScaleControl } from 'mapli
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { LoadingService } from '../services/loading.service';
+import { SearchOverlayComponent } from './search-overlay/search-overlay.component';
 
 @Component({
   selector: 'app-map-v2',
   templateUrl: './map-v2.component.html',
-  styleUrl: './map-v2.component.css'
+  styleUrl: './map-v2.component.css',
+  imports: [SearchOverlayComponent],
+  standalone: true
 })
 export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   private map?: Map;
@@ -174,5 +177,15 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     if (score <= 1.59) return "F+";
     if (score <= 1.78) return "F";
     return "F-";
+  }
+
+  onLocationSelected(location: {lng: number, lat: number}) {
+    if (this.map) {
+      this.map.flyTo({
+        center: [location.lng, location.lat],
+        zoom: 11,
+        duration: 2000
+      });
+    }
   }
 }
