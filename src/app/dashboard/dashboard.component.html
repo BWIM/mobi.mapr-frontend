@@ -24,6 +24,7 @@
         position="left"
         [closable]="true"
         [draggable]="false"
+        [maximizable]="true"
         class="h-full"
         [resizable]="true"
         styleClass="projects-sidebar"
@@ -55,6 +56,7 @@
         styleClass="details-sidebar"
         [style]="{width: '400px'}"
         (onHide)="isRightPinned = false"
+        [maximizable]="true"
         [header]="'DETAILS.TITLE' | translate">
         <div class="p-3 h-full">
             <div class="info-section h-full">
