@@ -50,7 +50,7 @@ export interface ProjectInfo {
     display_name: string;
     description: string;
     activities: string[];
-    modes: string[];
+    profiles: string[];
     personas: string[];
     type: string;
   }
