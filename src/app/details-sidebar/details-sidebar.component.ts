@@ -42,7 +42,7 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     // private pdfService: PdfGenerationService,
     private shareService: ShareService,
     private mapService: MapV2Service,
-    // private statisticsService: StatisticsService
+    private statisticsService: StatisticsService
   ) {
     this.subscription = new Subscription();
     
@@ -109,7 +109,7 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
   }
 
   toggleStatistics(): void {
-  //   this.statisticsService.visible = true;
+    this.statisticsService.visible = true;
   }
 
   ngOnInit() {}

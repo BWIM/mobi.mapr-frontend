@@ -42,6 +42,15 @@ export class MapV2Service {
     return this.map;
   }
 
+  getCurrentProject(): string | null {
+    return this.currentProject;
+  }
+
+  getMainLayer(): any {
+    if (!this.map) return null;
+    return this.map.getLayer('geodata-fill');
+  }
+
   getBaseMapStyle(): StyleSpecification {
     return {
       version: 8,

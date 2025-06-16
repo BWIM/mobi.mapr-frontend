@@ -24,7 +24,7 @@ export class KeyboardShortcutsService {
   private frozenStateSubject = new Subject<boolean>();
 
   constructor(
-    // private statisticsService: StatisticsService,
+    private statisticsService: StatisticsService,
     // private pdfGenerationService: PdfGenerationService,
     private shareService: ShareService
   ) {}
@@ -65,10 +65,10 @@ export class KeyboardShortcutsService {
         this.setIsFrozen(!this.isFrozen);
         this.shortcutSubject.next(ShortcutAction.TOGGLE_FREEZE);
         break;
-      // case 's':
-      //   this.statisticsService.visible = true;
-      //   this.shortcutSubject.next(ShortcutAction.SHOW_STATISTICS);
-      //   break;
+      case 's':
+        this.statisticsService.visible = true;
+        this.shortcutSubject.next(ShortcutAction.SHOW_STATISTICS);
+        break;
       // case 'h':
       //   this.pdfGenerationService.exportToPDFPortrait();
       //   this.shortcutSubject.next(ShortcutAction.EXPORT_PDF_PORTRAIT);

@@ -1,4 +1,4 @@
-<!-- <p-dialog 
+<p-dialog 
     [(visible)]="visible"
     [modal]="true"
     [style]="{width: '80vw', maxWidth: '1200px'}"
@@ -21,29 +21,28 @@
                         <tr class="bg-gray-100">
                             <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.RANK' | translate }}</th>
                             <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.NAME' | translate }}</th>
-                            <th class="p-3 text-left font-semibold text-gray-700">
-                                {{ 'STATISTICS.SCORE' | translate }}
-                                
-                            </th>
                             <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.GRADE' | translate }}</th>
                         </tr>
                     </ng-template>
                     <ng-template pTemplate="body" let-score let-i="rowIndex">
-                        <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer" (click)="onFeatureClick(score)">
+                        <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
                             <td class="p-3">{{i + 1}}</td>
                             <td class="p-3">{{score.name}}</td>
-                            <td class="p-3">
-                                <span [style.color]="getScoreColor(score.score)">
-                                    {{score.score | number:'1.2-2'}}
-                                </span>
-                            </td>
                             <td class="p-3 font-semibold" [style.color]="getScoreColor(score.score)">
-                                {{getScoreGrade(score.score)}}
+                                {{getScoreName(score.score)}}
                             </td>
                         </tr>
                     </ng-template>
                 </p-table>
             </p-scrollPanel>
+            <div class="p-4 border-t border-gray-100">
+                <p-paginator 
+                    [rows]="rowsPerPage" 
+                    [totalRecords]="stateTotalRecords"
+                    (onPageChange)="onStatePageChange($event)"
+                    [rowsPerPageOptions]="[15]">
+                </p-paginator>
+            </div>
         </div>
 
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
@@ -54,29 +53,28 @@
                         <tr class="bg-gray-100">
                             <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.RANK' | translate }}</th>
                             <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.NAME' | translate }}</th>
-                            <th class="p-3 text-left font-semibold text-gray-700">
-                                {{ 'STATISTICS.SCORE' | translate }}
-                                
-                            </th>
                             <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.GRADE' | translate }}</th>
                         </tr>
                     </ng-template>
                     <ng-template pTemplate="body" let-score let-i="rowIndex">
-                        <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer" (click)="onFeatureClick(score)">
+                        <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
                             <td class="p-3">{{i + 1}}</td>
                             <td class="p-3">{{score.name}}</td>
-                            <td class="p-3">
-                                <span [style.color]="getScoreColor(score.score)">
-                                    {{score.score | number:'1.2-2'}}
-                                </span>
-                            </td>
                             <td class="p-3 font-semibold" [style.color]="getScoreColor(score.score)">
-                                {{getScoreGrade(score.score)}}
+                                {{getScoreName(score.score)}}
                             </td>
                         </tr>
                     </ng-template>
                 </p-table>
             </p-scrollPanel>
+            <div class="p-4 border-t border-gray-100">
+                <p-paginator 
+                    [rows]="rowsPerPage" 
+                    [totalRecords]="countyTotalRecords"
+                    (onPageChange)="onCountyPageChange($event)"
+                    [rowsPerPageOptions]="[15]">
+                </p-paginator>
+            </div>
         </div>
 
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
@@ -98,36 +96,59 @@
                         <tr class="bg-gray-100">
                             <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.RANK' | translate }}</th>
                             <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.NAME' | translate }}</th>
-                            <th class="p-3 text-left font-semibold text-gray-700">
-                                {{ 'STATISTICS.SCORE' | translate }}
-                                
-                            </th>
                             <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.GRADE' | translate }}</th>
                         </tr>
                     </ng-template>
                     <ng-template pTemplate="body" let-score let-i="rowIndex">
-                        <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer" (click)="onFeatureClick(score)">
+                        <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
                             <td class="p-3">{{i + 1}}</td>
                             <td class="p-3">{{score.name}}</td>
-                            <td class="p-3">
-                                <span [style.color]="getScoreColor(score.score)">
-                                    {{score.score | number:'1.2-2'}}
-                                </span>
-                            </td>
                             <td class="p-3 font-semibold" [style.color]="getScoreColor(score.score)">
-                                {{getScoreGrade(score.score)}}
+                                {{getScoreName(score.score)}}
                             </td>
                         </tr>
                     </ng-template>
                 </p-table>
             </p-scrollPanel>
+            <div class="p-4 border-t border-gray-100">
+                <p-paginator 
+                    [rows]="rowsPerPage" 
+                    [totalRecords]="municipalityTotalRecords"
+                    (onPageChange)="onMunicipalityPageChange($event)"
+                    [rowsPerPageOptions]="[15]">
+                </p-paginator>
+            </div>
         </div>
     </div>
 
     <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-        <p class="text-sm text-gray-600">
-            {{ 'STATISTICS.CURRENT_SETTINGS' | translate }}: 
-            {{ populationArea === 'pop' ? ('STATISTICS.POPULATION_WEIGHTED' | translate) : ('STATISTICS.AREA_WEIGHTED' | translate) }}
-        </p>
+        <div class="flex items-center justify-between">
+            <p class="text-sm text-gray-600">
+                {{ 'STATISTICS.CURRENT_SETTINGS' | translate }}: 
+                {{ scoreType === 'pop' ? ('STATISTICS.POPULATION_WEIGHTED' | translate) : ('STATISTICS.AVERAGE' | translate) }}
+            </p>
+            <div class="flex items-center space-x-4">
+                <button 
+                    pButton 
+                    [class.bg-primary]="scoreType === 'pop'"
+                    [class.text-white]="scoreType === 'pop'"
+                    [class.bg-gray-200]="scoreType !== 'pop'"
+                    [class.text-gray-700]="scoreType !== 'pop'"
+                    class="px-4 py-2 rounded"
+                    (click)="onScoreTypeChange('pop')">
+                    {{ 'STATISTICS.POPULATION_WEIGHTED' | translate }}
+                </button>
+                <button 
+                    pButton 
+                    [class.bg-primary]="scoreType === 'avg'"
+                    [class.text-white]="scoreType === 'avg'"
+                    [class.bg-gray-200]="scoreType !== 'avg'"
+                    [class.text-gray-700]="scoreType !== 'avg'"
+                    class="px-4 py-2 rounded"
+                    (click)="onScoreTypeChange('avg')">
+                    {{ 'STATISTICS.AVERAGE' | translate }}
+                </button>
+            </div>
+        </div>
     </div>
-</p-dialog> -->
+</p-dialog>

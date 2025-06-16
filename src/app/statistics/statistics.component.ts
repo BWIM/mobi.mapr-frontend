@@ -8,6 +8,9 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { LoadingService } from '../services/loading.service';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { MapV2Service } from '../map-v2/map-v2.service';
+import { PaginatorModule } from 'primeng/paginator';
+import { Feature } from 'ol';
+import { Geometry } from 'ol/geom';
 
 @Component({
   selector: 'app-statistics',
@@ -17,165 +20,224 @@ import { MapV2Service } from '../map-v2/map-v2.service';
     ScrollPanelModule,
     ButtonModule,
     ProgressSpinnerModule,
-    MultiSelectModule
+    MultiSelectModule,
+    PaginatorModule
   ],
   templateUrl: './statistics.component.html'
 })
-export class StatisticsComponent{
-  // visible: boolean = false;
-  // private subscription: Subscription;
-  // loading: boolean = false;
-  // stateScores: ScoreEntry[] = [];
-  // countyScores: ScoreEntry[] = [];
-  // municipalityScores: ScoreEntry[] = [];
-  // filteredMunicipalityScores: ScoreEntry[] = [];
-  // loadingMunicipalities: boolean = false;
+export class StatisticsComponent implements OnInit, OnDestroy {
+  visible: boolean = false;
+  private subscription: Subscription = new Subscription();
+  loading: boolean = false;
   
-  // averageType: 'mean' | 'median' = 'mean';
-  // populationArea: 'pop' | 'area' = 'pop';
+  stateScores: ScoreEntry[] = [];
+  countyScores: ScoreEntry[] = [];
+  municipalityScores: ScoreEntry[] = [];
+  filteredMunicipalityScores: ScoreEntry[] = [];
+  
+  // Pagination
+  stateTotalRecords: number = 0;
+  countyTotalRecords: number = 0;
+  municipalityTotalRecords: number = 0;
+  currentStatePage: number = 1;
+  currentCountyPage: number = 1;
+  currentMunicipalityPage: number = 1;
+  rowsPerPage: number = 15;
 
-  // populationCategories = [
-  //   { label: 'Landgemeinden (0-5.000)', value: 'small', min: 0, max: 5000 },
-  //   { label: 'Kleine Kleinstädte (5.001-10.000)', value: 'small', min: 5001, max: 10000 },
-  //   { label: 'Große Kleinstädte (10.001-20.000)', value: 'medium', min: 10001, max: 20000 },
-  //   { label: 'Kleine Mittelstädte (20.001-50.000)', value: 'medium', min: 20001, max: 50000 },
-  //   { label: 'Große Mittelstädte (50.001-100.000)', value: 'large', min: 50001, max: 100000 },
-  //   { label: 'Kleinere Großstädte (100.001-500.000)', value: 'large', min: 100001, max: 500000 },
-  //   { label: 'Große Großstädte (>500.000)', value: 'large', min: 500001, max: Infinity }
-  // ];
-  // selectedCategories: any[] = this.populationCategories;
+  // Score type
+  scoreType: 'avg' | 'pop' = 'pop';
 
-  // // Color mapping based on MapBuildService colors
-  // readonly scoreColors = {
-  //   error: 'rgb(128, 128, 128)',
-  //   best: 'rgb(50, 97, 45)',
-  //   good: 'rgb(60, 176, 67)',
-  //   medium: 'rgb(238, 210, 2)',
-  //   poor: 'rgb(237, 112, 20)',
-  //   bad: 'rgb(194, 24, 7)',
-  //   worst: 'rgb(150, 86, 162)'
-  // };
+  populationCategories = [
+    { label: 'Landgemeinden (0-5.000)', value: 'small', min: 0, max: 5000 },
+    { label: 'Kleine Kleinstädte (5.001-10.000)', value: 'small', min: 5001, max: 10000 },
+    { label: 'Große Kleinstädte (10.001-20.000)', value: 'medium', min: 10001, max: 20000 },
+    { label: 'Kleine Mittelstädte (20.001-50.000)', value: 'medium', min: 20001, max: 50000 },
+    { label: 'Große Mittelstädte (50.001-100.000)', value: 'large', min: 50001, max: 100000 },
+    { label: 'Kleinere Großstädte (100.001-500.000)', value: 'large', min: 100001, max: 500000 },
+    { label: 'Große Großstädte (>500.000)', value: 'large', min: 500001, max: Infinity }
+  ];
+  selectedCategories: any[] = this.populationCategories;
 
-  // constructor(
-  //   private statisticsService: StatisticsService,
-  //   private mapService: MapV2Service,
-  //   private loadingService: LoadingService
-  // ) {
-  //   this.subscription = new Subscription();
-    
-  //   // Subscribe to visibility changes
-  //   this.subscription.add(
-  //     this.statisticsService.visible$.subscribe(
-  //       visible => {
-  //         this.visible = visible;
-  //         if (visible) {
-  //           this.updateScores();
-  //         }
-  //       }
-  //     )
-  //   );
+  readonly scoreColors = {
+    error: 'rgb(128, 128, 128)',
+    best: 'rgb(50, 97, 45)',
+    good: 'rgb(60, 176, 67)',
+    medium: 'rgb(238, 210, 2)',
+    poor: 'rgb(237, 112, 20)',
+    bad: 'rgb(194, 24, 7)',
+    worst: 'rgb(150, 86, 162)'
+  };
 
-  //   // Subscribe to visualization settings changes
-  //   // this.subscription.add(
-  //   //   this.mapService.visualizationSettings$.subscribe(settings => {
-  //   //     this.averageType = settings.averageType;
-  //   //     this.populationArea = settings.populationArea;
-  //   //     if (this.visible) {
-  //   //       this.updateScores();
-  //   //     }
-  //   //   })
-  //   // );
-  // }
+  constructor(
+    private statisticsService: StatisticsService,
+    private mapService: MapV2Service,
+    private loadingService: LoadingService
+  ) {
+    this.subscription.add(
+      this.statisticsService.visible$.subscribe(visible => {
+        this.visible = visible;
+        if (visible) {
+          this.loadAllData();
+        }
+      })
+    );
+  }
 
-  // ngOnInit() {}
+  ngOnInit() {}
 
-  // ngOnDestroy() {
-  //   if (this.subscription) {
-  //     this.subscription.unsubscribe();
-  //   }
-  // }
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
 
-  // async loadAllMunicipalities(): Promise<void> {
-  //   try {
-  //     this.loadingMunicipalities = true;
-  //     await this.statisticsService.loadAllMunicipalities();
-  //     await this.updateScores();
-  //   } catch (error) {
-  //     console.error('Error loading municipalities:', error);
-  //   } finally {
-  //     this.loadingMunicipalities = false;
-  //   }
-  // }
+  private loadAllData(): void {
+    this.loading = true;
+    this.loadingService.startLoading();
 
-  // private async updateScores(): Promise<void> {
-  //   try {
-  //     this.loading = true;
-  //     this.loadingService.startLoading();
-  //     const [stateResult, countyResult, municipalityResult] = await Promise.all([
-  //       this.statisticsService.getTopScores('state'),
-  //       this.statisticsService.getTopScores('county'),
-  //       this.statisticsService.getTopScores('municipality')
-  //     ]);
-      
-  //     this.stateScores = stateResult;
-  //     this.countyScores = countyResult;
-  //     this.municipalityScores = municipalityResult;
-  //     this.applyPopulationFilter();
-  //   } catch (error) {
-  //     console.error('Error updating scores:', error);
-  //     // Reset scores on error
-  //     this.stateScores = [];
-  //     this.countyScores = [];
-  //     this.municipalityScores = [];
-  //     this.filteredMunicipalityScores = [];
-  //   } finally {
-  //     this.loadingService.stopLoading();
-  //     this.loading = false;
-  //   }
-  // }
+    const projectId = this.mapService.getCurrentProject();
+    if (!projectId) {
+      console.error('No project ID available');
+      this.loading = false;
+      this.loadingService.stopLoading();
+      return;
+    }
 
-  // onPopulationCategoryChange(): void {
-  //   this.applyPopulationFilter();
-  // }
+    Promise.all([
+      this.loadStateScores(projectId),
+      this.loadCountyScores(projectId),
+      this.loadMunicipalityScores(projectId)
+    ]).finally(() => {
+      this.loading = false;
+      this.loadingService.stopLoading();
+    });
+  }
 
-  // private applyPopulationFilter(): void {
-  //   if (this.selectedCategories.length === 0) {
-  //     this.filteredMunicipalityScores = this.municipalityScores;
-  //     return;
-  //   }
+  private async loadStateScores(projectId: string): Promise<void> {
+    try {
+      const response = await this.statisticsService.getStateScores(projectId, this.currentStatePage, this.scoreType).toPromise();
+      if (response) {
+        this.stateTotalRecords = response.count;
+        this.stateScores = response.results.map(score => 
+          this.statisticsService.convertToScoreEntry(score, 'state')
+        );
+      }
+    } catch (error) {
+      console.error('Error loading state scores:', error);
+    }
+  }
 
-  //   this.filteredMunicipalityScores = this.municipalityScores.filter(score => {
-  //     if (!score.population) return false;
-  //     console.log(score);
-  //     return this.selectedCategories.some(category => {
-  //       const { min, max } = category;
-  //       return score.population > min && score.population <= max;
-  //     });
-  //   });
-  // }
+  private async loadCountyScores(projectId: string): Promise<void> {
+    try {
+      const response = await this.statisticsService.getCountyScores(projectId, this.currentCountyPage, this.scoreType).toPromise();
+      if (response) {
+        this.countyTotalRecords = response.count;
+        this.countyScores = response.results.map(score => 
+          this.statisticsService.convertToScoreEntry(score, 'county')
+        );
+      }
+    } catch (error) {
+      console.error('Error loading county scores:', error);
+    }
+  }
 
-  // getScoreGrade(score: number): string {
-  //   if (score <= 0) return "Error";
-  //   if (score <= 0.35) return "A";
-  //   if (score <= 0.5) return "B";
-  //   if (score <= 0.71) return "C";
-  //   if (score <= 1) return "D";
-  //   if (score <= 1.41) return "E";
-  //   return "F";
-  // }
+  private async loadMunicipalityScores(projectId: string): Promise<void> {
+    try {
+      const response = await this.statisticsService.getMunicipalityScores(projectId, this.currentMunicipalityPage, this.scoreType).toPromise();
+      if (response) {
+        this.municipalityTotalRecords = response.count;
+        this.municipalityScores = response.results.map(score => 
+          this.statisticsService.convertToScoreEntry(score, 'municipality')
+        );
+        this.applyPopulationFilter();
+      }
+    } catch (error) {
+      console.error('Error loading municipality scores:', error);
+    }
+  }
 
-  // getScoreColor(score: number): string {
-  //   if (score <= 0) return this.scoreColors.error;
-  //   if (score <= 0.35) return this.scoreColors.best;
-  //   if (score <= 0.5) return this.scoreColors.good;
-  //   if (score <= 0.71) return this.scoreColors.medium;
-  //   if (score <= 1) return this.scoreColors.poor;
-  //   if (score <= 1.41) return this.scoreColors.bad;
-  //   return this.scoreColors.worst;
-  // }
+  onStatePageChange(event: any): void {
+    this.currentStatePage = event.page + 1;
+    const projectId = this.mapService.getCurrentProject();
+    if (projectId) {
+      this.loadStateScores(projectId);
+    }
+  }
+
+  onCountyPageChange(event: any): void {
+    this.currentCountyPage = event.page + 1;
+    const projectId = this.mapService.getCurrentProject();
+    if (projectId) {
+      this.loadCountyScores(projectId);
+    }
+  }
+
+  onMunicipalityPageChange(event: any): void {
+    this.currentMunicipalityPage = event.page + 1;
+    const projectId = this.mapService.getCurrentProject();
+    if (projectId) {
+      this.loadMunicipalityScores(projectId);
+    }
+  }
+
+  onScoreTypeChange(type: 'avg' | 'pop'): void {
+    this.scoreType = type;
+    const projectId = this.mapService.getCurrentProject();
+    if (projectId) {
+      this.loadAllData();
+    }
+  }
+
+  onPopulationCategoryChange(): void {
+    this.applyPopulationFilter();
+  }
+
+  private applyPopulationFilter(): void {
+    if (this.selectedCategories.length === 0) {
+      this.filteredMunicipalityScores = this.municipalityScores;
+      return;
+    }
+
+    this.filteredMunicipalityScores = this.municipalityScores.filter(score => {
+      if (!score.population) return false;
+      return this.selectedCategories.some(category => {
+        const { min, max } = category;
+        return score.population > min && score.population <= max;
+      });
+    });
+  }
+
+  getScoreColor(score: number): string {
+    if (score <= 0) return this.scoreColors.error;
+    if (score <= 0.35) return this.scoreColors.best;
+    if (score <= 0.5) return this.scoreColors.good;
+    if (score <= 0.71) return this.scoreColors.medium;
+    if (score <= 1) return this.scoreColors.poor;
+    if (score <= 1.41) return this.scoreColors.bad;
+    return this.scoreColors.worst;
+  }
+
+  getScoreName(score: number): string {
+    if (score <= 0) return "Error";
+    if (score <= 0.28) return "A+";
+    if (score <= 0.32) return "A";
+    if (score <= 0.35) return "A-";
+    if (score <= 0.4) return "B+";
+    if (score <= 0.45) return "B";
+    if (score <= 0.5) return "B-";
+    if (score <= 0.56) return "C+";
+    if (score <= 0.63) return "C";
+    if (score <= 0.71) return "C-";
+    if (score <= 0.8) return "D+";
+    if (score <= 0.9) return "D";
+    if (score <= 1.0) return "D-";
+    if (score <= 1.12) return "E+";
+    if (score <= 1.26) return "E";
+    if (score <= 1.41) return "E-";
+    if (score <= 1.59) return "F+";
+    if (score <= 1.78) return "F";
+    return "F-";
+  }
 
   // onFeatureClick(entry: ScoreEntry): void {
-  //   // Close the statistics overlay
   //   this.statisticsService.visible = false;
 
   //   const map = this.mapService.getMap();
@@ -191,7 +253,6 @@ export class StatisticsComponent{
   //     targetZoom = 10;
   //   }
 
-  //   // Helper to animate and return a promise
   //   function animateView(view: any, options: any): Promise<void> {
   //     return new Promise(resolve => {
   //       view.animate({ ...options, duration: 600 }, resolve);
@@ -199,8 +260,6 @@ export class StatisticsComponent{
   //   }
 
   //   const view = map.getView();
-
-  //   // Step 1: Zoom out to a safe level if needed
   //   let safeZoom = 6;
   //   if (entry.level === 'county') {
   //     safeZoom = 8;
@@ -217,13 +276,12 @@ export class StatisticsComponent{
   //   }
 
   //   zoomOutPromise.then(() => {
-  //     // Step 2: Poll for the feature (case-insensitive, trimmed)
   //     const maxTries = 10;
   //     const delay = 200;
 
-  //     function findFeature(): any {
+  //     function findFeature(): Feature<Geometry> | undefined {
   //       const features = vectorLayer?.getSource()?.getFeatures();
-  //       return features?.find(f => {
+  //       return features?.find((f: Feature<Geometry>) => {
   //         const featureName = (f.get('name') || '').trim().toLowerCase();
   //         const entryName = (entry.name || '').trim().toLowerCase();
   //         const featureLevel = (f.get('level') || '').trim().toLowerCase();
@@ -258,4 +316,3 @@ export class StatisticsComponent{
   //   });
   // }
 }
- // TODO: Click on name to zoom on map

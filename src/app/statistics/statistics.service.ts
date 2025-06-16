@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import Feature from 'ol/Feature';
-import { Geometry } from 'ol/geom';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
+import { PaginatedResponse, MunicipalityScore, CountyScore, StateScore } from './statistics.interface';
 
 export interface ScoreEntry {
   name: string;
   score: number;
   population: number;
+  population_density: number;
   level: 'state' | 'county' | 'municipality';
 }
 
@@ -14,65 +16,62 @@ export interface ScoreEntry {
   providedIn: 'root'
 })
 export class StatisticsService {
-  // private _visible = new BehaviorSubject<boolean>(false);
-  // visible$ = this._visible.asObservable();
-  // constructor(private mapBuildService: MapBuildService) { }
+  private _visible = new BehaviorSubject<boolean>(false);
+  visible$ = this._visible.asObservable();
 
-  // get visible(): boolean {
-  //   return this._visible.value;
-  // }
+  constructor(private http: HttpClient) {}
 
-  // set visible(value: boolean) {
-  //   this._visible.next(value);
-  // }
+  get visible(): boolean {
+    return this._visible.value;
+  }
 
-  // async loadAllMunicipalities(): Promise<void> {
-  //   const counties = Object.keys(this.mapBuildService.getStatisticsCache().counties);
-  //   if (counties.length > 0) {
-  //     const features: Feature<Geometry>[] = counties.map(id => {
-  //       const feature = new Feature();
-  //       feature.setProperties({ ars: id.substring(0, 5) + '0000000' });
-  //       return feature;
-  //     });
-  //     await this.mapBuildService.buildMap(this.mapBuildService.getLandkreise(), 'municipality', features);
-  //   }
-  // }
+  set visible(value: boolean) {
+    this._visible.next(value);
+  }
 
-  // async getTopScores(level: 'state' | 'county' | 'municipality'): Promise<ScoreEntry[]> {
-  //   let features: any[] = [];
-    
-  //   switch(level) {
-  //     case 'state':
-  //       features = Object.values(this.mapBuildService.getStatisticsCache().states);
-  //       break;
-  //     case 'county':
-  //       features = Object.values(this.mapBuildService.getStatisticsCache().counties);
-  //       break;
-  //     case 'municipality':
-  //       // Get all counties from the cache
-  //       const counties = Object.keys(this.mapBuildService.getStatisticsCache().counties);
-  //       if (counties.length > 0) {
-  //         // Check if we have municipalities loaded for each county
-  //         const municipalitiesInCache = Object.keys(this.mapBuildService.getStatisticsCache().municipalities);
-  //         if (municipalitiesInCache.length < counties.length) {
-  //           await this.loadAllMunicipalities();
-  //         }
-  //         features = Object.values(this.mapBuildService.getStatisticsCache().municipalities)
-  //           .flatMap(municipalityGroup => Object.values(municipalityGroup));
-  //       }
-  //       break;
-  //   }
+  getMunicipalityScores(projectId: string, page: number = 1, type: 'avg' | 'pop' = 'pop'): Observable<PaginatedResponse<MunicipalityScore>> {
+    return this.http.get<PaginatedResponse<MunicipalityScore>>(
+      `${environment.apiUrl}/gemeinden-stats?project=${projectId}&page=${page}&type=${type}`
+    );
+  }
 
-  //   const scores = features
-  //     .map(feature => ({
-  //       name: feature.properties.name,
-  //       score: feature.properties.score,
-  //       population: feature.properties.population,
-  //       level
-  //     }))
-  //     .filter(entry => entry.score > 0)
-  //     .sort((a, b) => a.score - b.score);
+  getCountyScores(projectId: string, page: number = 1, type: 'avg' | 'pop' = 'pop'): Observable<PaginatedResponse<CountyScore>> {
+    return this.http.get<PaginatedResponse<CountyScore>>(
+      `${environment.apiUrl}/landkreis-stats?project=${projectId}&page=${page}&type=${type}`
+    );
+  }
 
-  //   return scores;
-  // }
+  getStateScores(projectId: string, page: number = 1, type: 'avg' | 'pop' = 'pop'): Observable<PaginatedResponse<StateScore>> {
+    return this.http.get<PaginatedResponse<StateScore>>(
+      `${environment.apiUrl}/land-stats?project=${projectId}&page=${page}&type=${type}`
+    );
+  }
+
+  convertToScoreEntry(data: MunicipalityScore | CountyScore | StateScore, level: 'state' | 'county' | 'municipality'): ScoreEntry {
+    if ('gemeinde' in data) {
+      return {
+        name: data.gemeinde.name,
+        score: data.score_pop,
+        population: data.gemeinde.population,
+        population_density: data.gemeinde.population_density,
+        level: 'municipality'
+      };
+    } else if ('landkreis' in data) {
+      return {
+        name: data.landkreis.name,
+        score: data.score_pop,
+        population: data.landkreis.population,
+        population_density: data.landkreis.population_density,
+        level: 'county'
+      };
+    } else {
+      return {
+        name: data.land.name,
+        score: data.score_pop,
+        population: data.land.population,
+        population_density: data.land.population_density,
+        level: 'state'
+      };
+    }
+  }
 }
