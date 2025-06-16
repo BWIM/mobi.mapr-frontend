@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { MapV2Service } from './map-v2.service';
 import { Subscription } from 'rxjs';
-import { Feature, LngLatBounds, Map, Popup, NavigationControl, ScaleControl, AttributionControl } from 'maplibre-gl';
+import { LngLatBounds, Map, Popup, NavigationControl, ScaleControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { LoadingService } from '../services/loading.service';
@@ -37,7 +37,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
         );
         this.map.fitBounds(mapBounds, {
           padding: 50,
-          duration: 1000
+          duration: 2000
         });
       }
     });
@@ -64,6 +64,29 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       this.map.addControl(new ScaleControl(), 'bottom-left');
       this.map.dragRotate.disable();
       this.map.touchZoomRotate.disable();
+
+      // Add panning event listeners to adjust layer opacity
+      this.map.on('dragstart', () => {
+        if (this.map?.getLayer('geodata-fill')) {
+          const currentOpacity = this.map.getPaintProperty('geodata-fill', 'fill-opacity');
+          if (Array.isArray(currentOpacity)) {
+            // Create a new expression that multiplies the result by 0.5
+            const newOpacity = ['*', currentOpacity, 0.25];
+            this.map.setPaintProperty('geodata-fill', 'fill-opacity', newOpacity);
+          }
+        }
+      });
+
+      this.map.on('dragend', () => {
+        if (this.map?.getLayer('geodata-fill')) {
+          const currentOpacity = this.map.getPaintProperty('geodata-fill', 'fill-opacity');
+          if (Array.isArray(currentOpacity)) {
+            // Create a new expression that multiplies the result by 2
+            const newOpacity = ['*', currentOpacity, 4];
+            this.map.setPaintProperty('geodata-fill', 'fill-opacity', newOpacity);
+          }
+        }
+      });
 
       this.popup = new Popup({
         closeButton: false,
