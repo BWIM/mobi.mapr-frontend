@@ -198,7 +198,14 @@
     "BACK_TOOLTIP": "Go back one step",
     "FINISH_TOOLTIP": "finish",
     "NEXT_TOOLTIP": "next",
-    "STEPS_TOOLTIP": "steps"
+    "STEPS_TOOLTIP": "steps",
+    "STEPS": {
+      "ACTIVITIES": "Activities",
+      "PERSONAS": "Personas",
+      "MODES": "Modes",
+      "AREA": "Select Area",
+      "PROJECT_INFO": "Project Information"
+    }
   },
   "SIDEBAR": {
     "TITLE": "Details",

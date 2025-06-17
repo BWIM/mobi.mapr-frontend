@@ -86,6 +86,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
   selectedModeMap: { [key: number]: boolean } = {};
   projectGroups: ProjectGroup[] = [];
   private subscription: Subscription;
+  private langSubscription: Subscription;
   selectedAreaIds: string[] = [];
   showMidActivities: boolean = true;
   selectedGroupToDelete: ProjectGroup | null = null;
@@ -136,14 +137,24 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       }
     );
 
+    // Subscribe to language changes
+    this.langSubscription = this.translate.onLangChange.subscribe(() => {
+      this.updateStepLabels();
+    });
+
     this.initializeForm();
   }
 
-  ngAfterViewInit() {}
+  ngAfterViewInit() {
+    this.updateStepLabels();
+  }
 
   ngOnDestroy() {
     if (this.subscription) {
       this.subscription.unsubscribe();
+    }
+    if (this.langSubscription) {
+      this.langSubscription.unsubscribe();
     }
     
     // Clean up map resources
@@ -153,6 +164,46 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       }
       this.map.dispose();
     }
+  }
+
+  private updateStepLabels() {
+    this.steps = [
+      {
+        label: this.translate.instant('PROJECT_WIZARD.STEPS.ACTIVITIES'),
+        command: (event: any) => {
+          this.activeIndex = 0;
+        }
+      },
+      {
+        label: this.translate.instant('PROJECT_WIZARD.STEPS.PERSONAS'),
+        command: (event: any) => {
+          this.activeIndex = 1;
+        }
+      },
+      {
+        label: this.translate.instant('PROJECT_WIZARD.STEPS.MODES'),
+        command: (event: any) => {
+          this.activeIndex = 2;
+        }
+      },
+      {
+        label: this.translate.instant('PROJECT_WIZARD.STEPS.AREA'),
+        command: (event: any) => {
+          this.activeIndex = 3;
+          // Initialize map when directly selecting this step
+          setTimeout(() => {
+            this.initializeMap();
+            this.setupAreaSelection();
+          }, 0);
+        }
+      },
+      {
+        label: this.translate.instant('PROJECT_WIZARD.STEPS.PROJECT_INFO'),
+        command: (event: any) => {
+          this.activeIndex = 4;
+        }
+      }
+    ];
   }
 
   private initializeForm() {

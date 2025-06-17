@@ -198,7 +198,14 @@
     "BACK_TOOLTIP": "E Schritt zrugggah",
     "FINISH_TOOLTIP": "Fertigstelle",
     "NEXT_TOOLTIP": "Wiiter",
-    "STEPS_TOOLTIP": "Schritt"
+    "STEPS_TOOLTIP": "Schritt",
+    "STEPS": {
+      "ACTIVITIES": "Aktivitäte",
+      "PERSONAS": "Personas",
+      "MODES": "Modi",
+      "AREA": "Gebiet uswähle",
+      "PROJECT_INFO": "Projäktinformatione"
+    }
   },
   "SIDEBAR": {
     "TITLE": "Details",
