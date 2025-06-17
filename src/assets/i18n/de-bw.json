@@ -351,5 +351,8 @@
     "PORTRAIT": "Hoch",
     "ORIENTATION": "Richtung",
     "TITLE": "PDF Export"
+  },
+  "SEARCH_OVERLAY": {
+    "SEARCH_PLACEHOLDER": "Gugge gehn"
   }
 }
