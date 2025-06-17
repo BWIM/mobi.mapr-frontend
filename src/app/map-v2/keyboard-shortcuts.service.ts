@@ -13,7 +13,8 @@ export enum ShortcutAction {
   EXPORT_PDF_PORTRAIT = 'EXPORT_PDF_PORTRAIT',
   EXPORT_PDF_LANDSCAPE = 'EXPORT_PDF_LANDSCAPE',
   CREATE_SHARE = 'CREATE_SHARE',
-  TOGGLE_HEXAGON_VIEW = 'TOGGLE_HEXAGON_VIEW'
+  TOGGLE_HEXAGON_VIEW = 'TOGGLE_HEXAGON_VIEW',
+  TOGGLE_SCORE_DISPLAY = 'TOGGLE_SCORE_DISPLAY'
 }
 
 @Injectable({
@@ -63,10 +64,6 @@ export class KeyboardShortcutsService {
       case 'z':
         this.shortcutSubject.next(ShortcutAction.ZOOM_TO_FEATURES);
         break;
-      // case 'f':
-      //   this.setIsFrozen(!this.isFrozen);
-      //   this.shortcutSubject.next(ShortcutAction.TOGGLE_FREEZE);
-      //   break;
       case 's':
         this.statisticsService.visible = true;
         this.shortcutSubject.next(ShortcutAction.SHOW_STATISTICS);
@@ -77,6 +74,9 @@ export class KeyboardShortcutsService {
       //   break;
       case 'h':
         this.shortcutSubject.next(ShortcutAction.TOGGLE_HEXAGON_VIEW);
+        break;
+      case 'f':
+        this.shortcutSubject.next(ShortcutAction.TOGGLE_SCORE_DISPLAY);
         break;
     }
   }
