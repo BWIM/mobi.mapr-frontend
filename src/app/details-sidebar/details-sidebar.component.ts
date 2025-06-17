@@ -12,6 +12,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ShareService } from '../share/share.service';
 import { StatisticsService } from '../statistics/statistics.service';
 import { MapV2Service } from '../map-v2/map-v2.service';
+import { PdfExportService } from '../map-v2/pdf-export-dialog/pdf-export.service';
 
 @Component({
   selector: 'app-details-sidebar',
@@ -46,7 +47,8 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     // private pdfService: PdfGenerationService,
     private shareService: ShareService,
     private mapService: MapV2Service,
-    private statisticsService: StatisticsService
+    private statisticsService: StatisticsService,
+    private pdfExportService: PdfExportService
   ) {
     this.subscription = new Subscription();
     
@@ -66,22 +68,8 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     this.mapService.setAverageType(this.selectedPopulationArea === 'area' ? 'avg' : 'pop');
   }
 
-  async exportToPDFLandscape(): Promise<void> {
-    try {
-      this.isExporting = true;
-      // await this.pdfService.exportToPDFLandscape();
-    } finally {
-      this.isExporting = false;
-    }
-  }
-
-  async exportToPDFPortrait(): Promise<void> {
-    try {
-      this.isExporting = true;
-      // await this.pdfService.exportToPDFPortrait();
-    } finally {
-      this.isExporting = false;
-    }
+  showPdfExportDialog() {
+    this.pdfExportService.showDialog();
   }
 
   async generateShareLink(): Promise<void> {

@@ -1,0 +1,111 @@
+<p-dialog 
+      [header]="'PDF_EXPORT.TITLE' | translate" 
+      [(visible)]="visible" 
+      [modal]="true"
+      [style]="{width: '50vw', height: '50vh'}"
+      [draggable]="false"
+      [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+      [resizable]="false">
+      
+      <div class="pdf-export-fields">
+        <!-- Orientation Selection -->
+        <div class="field mb-3">
+          <label class="block mb-2">{{ 'PDF_EXPORT.ORIENTATION' | translate }}</label>
+          <div class="flex gap-3">
+            <div class="flex align-items-center">
+              <p-radioButton 
+                [value]="'portrait'" 
+                [(ngModel)]="options.orientation" 
+                [inputId]="'portrait'"
+                name="orientation">
+              </p-radioButton>
+              <label [for]="'portrait'" class="ml-2">{{ 'PDF_EXPORT.PORTRAIT' | translate }}</label>
+            </div>
+            <div class="flex align-items-center">
+              <p-radioButton 
+                [value]="'landscape'" 
+                [(ngModel)]="options.orientation" 
+                [inputId]="'landscape'"
+                name="orientation">
+              </p-radioButton>
+              <label [for]="'landscape'" class="ml-2">{{ 'PDF_EXPORT.LANDSCAPE' | translate }}</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paper Size Selection -->
+        <div class="field mb-3">
+          <label class="block mb-2">{{ 'PDF_EXPORT.PAPER_SIZE' | translate }}</label>
+          <p-dropdown 
+            [options]="paperSizes" 
+            [(ngModel)]="options.paperSize"
+            optionLabel="label"
+            optionValue="value"
+            [style]="{'width':'100%'}">
+          </p-dropdown>
+        </div>
+
+        <!-- Resolution Selection -->
+        <div class="field mb-3">
+          <label class="block mb-2">{{ 'PDF_EXPORT.RESOLUTION' | translate }}</label>
+          <p-inputNumber 
+            [(ngModel)]="options.resolution" 
+            [min]="72" 
+            [max]="600"
+            [step]="72"
+            [style]="{'width':'100%'}">
+          </p-inputNumber>
+        </div>
+
+        <!-- Map Extent Selection -->
+        <div class="field mb-3">
+          <label class="block mb-2">{{ 'PDF_EXPORT.MAP_EXTENT' | translate }}</label>
+          <div class="flex gap-3">
+            <div class="flex align-items-center">
+              <p-radioButton 
+                [value]="'current'" 
+                [(ngModel)]="options.mapExtent" 
+                [inputId]="'current'"
+                name="mapExtent">
+              </p-radioButton>
+              <label [for]="'current'" class="ml-2">{{ 'PDF_EXPORT.CURRENT_VIEW' | translate }}</label>
+            </div>
+            <div class="flex align-items-center">
+              <p-radioButton 
+                [value]="'full'" 
+                [(ngModel)]="options.mapExtent" 
+                [inputId]="'full'"
+                name="mapExtent">
+              </p-radioButton>
+              <label [for]="'full'" class="ml-2">{{ 'PDF_EXPORT.FULL_MAP' | translate }}</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style>
+        .pdf-export-fields {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+        .pdf-export-fields .field {
+          width: 100%;
+        }
+      </style>
+
+      <ng-template pTemplate="footer">
+        <div class="flex justify-content-end gap-2">
+          <p-button 
+            [label]="'COMMON.CANCEL' | translate" 
+            (onClick)="visible = false"
+            styleClass="p-button-text">
+          </p-button>
+          <p-button 
+            [label]="'COMMON.EXPORT' | translate" 
+            (onClick)="exportPdf()"
+            styleClass="p-button-primary">
+          </p-button>
+        </div>
+      </ng-template>
+    </p-dialog>

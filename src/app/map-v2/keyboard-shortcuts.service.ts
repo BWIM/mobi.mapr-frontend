@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { StatisticsService } from '../statistics/statistics.service';
 // import { PdfGenerationService } from './pdf-generation.service';
+import { PdfGenerationService } from './pdf-export-dialog/pdf-generation.service';
 import { ShareService } from '../share/share.service';
 import { Subject } from 'rxjs';
 
@@ -26,7 +27,8 @@ export class KeyboardShortcutsService {
   constructor(
     private statisticsService: StatisticsService,
     // private pdfGenerationService: PdfGenerationService,
-    private shareService: ShareService
+    private shareService: ShareService,
+    private pdfGenerationService: PdfGenerationService
   ) {}
 
   setProjectInfo(info: any) {
@@ -69,15 +71,10 @@ export class KeyboardShortcutsService {
         this.statisticsService.visible = true;
         this.shortcutSubject.next(ShortcutAction.SHOW_STATISTICS);
         break;
-      // case 'h':
-      //   this.pdfGenerationService.exportToPDFPortrait();
-      //   this.shortcutSubject.next(ShortcutAction.EXPORT_PDF_PORTRAIT);
-      //   break;
-      // case 'q':
-      //   this.pdfGenerationService.exportToPDFLandscape();
-      //   this.shortcutSubject.next(ShortcutAction.EXPORT_PDF_LANDSCAPE);
-      //   break;
-      case 'z':
+      case 'e':
+        this.pdfGenerationService.exportToPDFPortrait();
+        break;
+      case 'h':
         this.shortcutSubject.next(ShortcutAction.TOGGLE_HEXAGON_VIEW);
         break;
     }
