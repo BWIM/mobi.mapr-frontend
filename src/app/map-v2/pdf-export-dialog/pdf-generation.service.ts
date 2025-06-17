@@ -1,8 +1,5 @@
 import {Injectable} from '@angular/core';
 import jsPDF, { GState } from 'jspdf';
-import {ProjectsService} from '../../projects/projects.service';
-import * as olExtent from 'ol/extent';
-import { MapV2Service } from '../map-v2.service';
 
 export type PaperSize = 'a4' | 'a3' | 'a2' | 'a1' | 'a0';
 export type Orientation = 'portrait' | 'landscape';
@@ -28,8 +25,6 @@ export class PdfGenerationService {
   };
 
   constructor(
-    private mapService: MapV2Service,
-    private projectsService: ProjectsService
   ) {}
 
   private getMapExtent(layer: any, mapExtent: MapExtent) {

@@ -88,10 +88,10 @@ export class CreditsComponent implements OnInit {
 
   private updateShortcutTranslations() {
     this.shortcuts = [
-      { key: 'C', description: this.translate.instant('CREDITS.SHORTCUTS.CENTER_MAP') },
-      { key: 'F', description: this.translate.instant('CREDITS.SHORTCUTS.FREEZE_MAP') },
+      { key: 'Z', description: this.translate.instant('CREDITS.SHORTCUTS.CENTER_MAP') },
+      // { key: 'F', description: this.translate.instant('CREDITS.SHORTCUTS.FREEZE_MAP') },
       { key: 'S', description: this.translate.instant('CREDITS.SHORTCUTS.SHOW_STATISTICS') },
-      { key: 'E', description: this.translate.instant('CREDITS.SHORTCUTS.EXPORT_PDF') },
+      // { key: 'E', description: this.translate.instant('CREDITS.SHORTCUTS.EXPORT_PDF_PORTRAIT') },
       { key: 'H', description: this.translate.instant('CREDITS.SHORTCUTS.TOGGLE_HEXAGON_VIEW') }
     ];
   }

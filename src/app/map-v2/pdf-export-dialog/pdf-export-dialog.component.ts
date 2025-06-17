@@ -56,7 +56,7 @@ export class PdfExportDialogComponent implements OnDestroy {
 
   async exportPdf() {
     try {
-      await this.pdfService.exportToPDF(this.options);
+      await this.pdfService.exportToPDFPortrait(this.options.paperSize);
       this.pdfExportService.hideDialog();
     } catch (error) {
       console.error('Error exporting PDF:', error);
