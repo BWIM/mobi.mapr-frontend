@@ -9,8 +9,6 @@ import { LoadingService } from '../services/loading.service';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { MapV2Service } from '../map-v2/map-v2.service';
 import { PaginatorModule } from 'primeng/paginator';
-import { Feature } from 'ol';
-import { Geometry } from 'ol/geom';
 import { GeocodingService } from '../services/geocoding.service';
 import { firstValueFrom } from 'rxjs';
 
@@ -82,9 +80,14 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   ) {
     this.subscription.add(
       this.statisticsService.visible$.subscribe(visible => {
-        this.visible = visible;
-        if (visible) {
-          this.loadAllData();
+        const projectId = this.mapService.getCurrentProject();
+        if (projectId) {
+          this.visible = visible;
+          if (visible) {
+            this.loadAllData();
+          }
+        } else {
+          console.info('No project ID available, not loading statistics');
         }
       })
     );

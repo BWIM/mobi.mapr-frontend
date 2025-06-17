@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { LoadingService } from '../services/loading.service';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../auth/auth.service';
-import { StyleSpecification, SourceSpecification, LayerSpecification, Map } from 'maplibre-gl';
+import { StyleSpecification, SourceSpecification, LayerSpecification, Map, LngLatBounds } from 'maplibre-gl';
 import { AnalyzeService } from '../analyze/analyze.service';
+import { KeyboardShortcutsService, ShortcutAction } from './keyboard-shortcuts.service';
 
 interface Bounds {
   minLng: number;
@@ -27,13 +28,43 @@ export class MapV2Service {
   bounds$ = this.boundsSubject.asObservable();
   private map: Map | null = null;
   private shareKey: string | null = null;
+  private shortcutSubscription: Subscription;
+  private hexagonView: boolean = false;
 
   constructor(
     private loadingService: LoadingService,
     private http: HttpClient,
     private authService: AuthService,
-    private analyzeService: AnalyzeService
-  ) { }
+    private analyzeService: AnalyzeService,
+    private keyboardShortcutsService: KeyboardShortcutsService
+  ) {
+    // Subscribe to keyboard shortcuts
+    this.shortcutSubscription = this.keyboardShortcutsService.getShortcutStream().subscribe(action => {
+      if (!this.map) return;
+
+      switch(action) {
+        case ShortcutAction.ZOOM_TO_FEATURES:
+          // zoom to the bounds
+          const bounds = this.boundsSubject.getValue();
+          if (bounds && this.map) {
+            const mapBounds = new LngLatBounds(
+              [bounds.minLng, bounds.minLat],
+              [bounds.maxLng, bounds.maxLat]
+            );
+            this.map.fitBounds(mapBounds, {
+              padding: 50,
+              duration: 2000
+            });
+          }
+          break;
+        case ShortcutAction.TOGGLE_HEXAGON_VIEW:
+          this.hexagonView = !this.hexagonView;
+          const updatedStyle = this.getProjectMapStyle();
+          this.mapStyleSubject.next(updatedStyle);
+          break;
+      }
+    });
+  }
 
   setMap(map: Map): void {
     this.map = map;
@@ -133,7 +164,13 @@ export class MapV2Service {
       authParam = `&token=${token}`;
     }
     
-    // Define zoom level thresholds
+    // If hexagon view is enabled, always use the smallest hexagon layer
+    if (this.hexagonView) {
+      this.analyzeService.setMapType('hexagon');
+      return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${this.currentProject}&resolution=9${authParam}`;
+    }
+    
+    // Define zoom level thresholds for normal view
     if (this.currentZoom < 7) {
       // State level
       this.analyzeService.setMapType('state');
@@ -209,5 +246,11 @@ export class MapV2Service {
 
   addSingleFeature(scores: any): void {
     console.log(scores);
+  }
+
+  ngOnDestroy() {
+    if (this.shortcutSubscription) {
+      this.shortcutSubscription.unsubscribe();
+    }
   }
 }
