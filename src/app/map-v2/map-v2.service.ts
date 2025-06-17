@@ -30,6 +30,7 @@ export class MapV2Service {
   private shareKey: string | null = null;
   private shortcutSubscription: Subscription;
   private hexagonView: boolean = false;
+  private selectedFeatureId: string | null = null;
 
   constructor(
     private loadingService: LoadingService,
@@ -192,6 +193,14 @@ export class MapV2Service {
     }
   }
 
+  setSelectedFeature(featureId: string | null): void {
+    this.selectedFeatureId = featureId;
+    if (this.currentProject) {
+      const updatedStyle = this.getProjectMapStyle();
+      this.mapStyleSubject.next(updatedStyle);
+    }
+  }
+
   private getProjectMapStyle(): StyleSpecification {
     const baseStyle = this.getBaseMapStyle();
     
@@ -236,6 +245,27 @@ export class MapV2Service {
             100, 0.5,
             1000, 0.8,
             5000, 0.9
+          ],
+          'fill-outline-color': [
+            'case',
+            ['==', ['get', 'id'], this.selectedFeatureId],
+            '#000000',
+            [
+              'case',
+              ['<=', ['get', 'score'], 0],
+              'rgba(128, 128, 128, 0)',
+              ['<=', ['get', 'score'], 0.35],
+              'rgba(50, 97, 45, 0.7)',
+              ['<=', ['get', 'score'], 0.5],
+              'rgba(60, 176, 67, 0.7)',
+              ['<=', ['get', 'score'], 0.71],
+              'rgba(238, 210, 2, 0.7)',
+              ['<=', ['get', 'score'], 1],
+              'rgba(237, 112, 20, 0.7)',
+              ['<=', ['get', 'score'], 1.41],
+              'rgba(194, 24, 7, 0.7)',
+              'rgba(150, 86, 162, 0.7)'
+            ]
           ]
         }
       } as LayerSpecification);

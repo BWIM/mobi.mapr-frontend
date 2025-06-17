@@ -136,6 +136,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
         if (e.features && e.features[0]) {
           const feature = e.features[0];
           this.analyzeService.setSelectedFeature(feature);
+          this.mapService.setSelectedFeature(feature.properties['id']);
         }
       });
     }
