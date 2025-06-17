@@ -363,5 +363,8 @@
     "PORTRAIT": "Portrait",
     "ORIENTATION": "Ortientation",
     "TITLE": "PDF Export"
+  },
+  "SEARCH_OVERLAY": {
+    "SEARCH_PLACEHOLDER": "Search locations"
   }
 }

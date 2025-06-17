@@ -364,5 +364,8 @@
     "MAP_EXTENT": "Kartenausschnitt",
     "CURRENT_VIEW": "Aktuelle Ansicht",
     "FULL_MAP": "Gesamte Karte"
+  },
+  "SEARCH_OVERLAY": {
+    "SEARCH_PLACEHOLDER": "Orte suchen"
   }
 }

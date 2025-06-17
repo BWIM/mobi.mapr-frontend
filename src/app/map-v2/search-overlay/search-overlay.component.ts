@@ -1,39 +1,54 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { GeocodingService, GeocodingResult } from '../../services/geocoding.service';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { SharedModule } from '../../shared/shared.module';
+import { OverlayPanel } from 'primeng/overlaypanel';
 
 @Component({
   selector: 'app-search-overlay',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, SharedModule],
   template: `
     <div class="search-overlay">
-      <div class="search-container">
-        <div class="search-input-wrapper">
-          <input 
-            type="text" 
-            [(ngModel)]="searchQuery" 
-            (input)="onSearchInput()"
-            placeholder="Search locations..."
-            class="search-input"
-          />
-          <div class="loading-spinner" *ngIf="isLoading"></div>
-        </div>
-        <div class="search-results" *ngIf="showResults">
-          <div 
-            *ngFor="let result of searchResults" 
-            class="search-result-item"
-            (click)="selectLocation(result)"
-          >
-            {{ result.display_name }}
+      <p-button 
+        icon="pi pi-search" 
+        (click)="toggleSearch($event)"
+        class="p-button-rounded p-button-text"
+        [style]="{'width': '40px', 'height': '40px'}"
+      ></p-button>
+      
+      <p-overlayPanel #op [showCloseIcon]="false" [dismissable]="true" (onHide)="onOverlayHide()">
+        <div class="search-container">
+          <div class="search-input-wrapper">
+            <span class="p-input-icon-right w-full">
+              <i class="pi pi-search"></i>
+              <input 
+                type="text" 
+                pInputText
+                [(ngModel)]="searchQuery" 
+                (input)="onSearchInput()"
+                placeholder="{{ 'SEARCH_OVERLAY.SEARCH_PLACEHOLDER' | translate }}"
+                class="w-full"
+              />
+            </span>
+            <div class="loading-spinner" *ngIf="isLoading"></div>
           </div>
-          <div class="no-results" *ngIf="searchResults.length === 0 && !isLoading">
-            No results found
+          <div class="search-results" *ngIf="showResults">
+            <div 
+              *ngFor="let result of searchResults" 
+              class="search-result-item"
+              (click)="selectLocation(result)"
+            >
+              {{ result.display_name }}
+            </div>
+            <div class="no-results" *ngIf="searchResults.length === 0 && !isLoading">
+              No results found
+            </div>
           </div>
         </div>
-      </div>
+      </p-overlayPanel>
     </div>
   `,
   styles: [`
@@ -51,14 +66,7 @@ import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
     }
     .search-input-wrapper {
       position: relative;
-    }
-    .search-input {
-      width: 100%;
       padding: 10px;
-      border: none;
-      border-radius: 4px;
-      font-size: 14px;
-      outline: none;
     }
     .loading-spinner {
       position: absolute;
@@ -99,6 +107,7 @@ import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
   `]
 })
 export class SearchOverlayComponent {
+  @ViewChild('op') overlayPanel!: OverlayPanel;
   @Output() locationSelected = new EventEmitter<{lng: number, lat: number}>();
   
   searchQuery: string = '';
@@ -114,6 +123,15 @@ export class SearchOverlayComponent {
     ).subscribe(query => {
       this.performSearch(query);
     });
+  }
+
+  toggleSearch(event: Event) {
+    this.overlayPanel.toggle(event);
+  }
+
+  onOverlayHide() {
+    this.showResults = false;
+    this.searchQuery = '';
   }
 
   onSearchInput() {
@@ -145,5 +163,6 @@ export class SearchOverlayComponent {
     this.locationSelected.emit({ lng: location.lng, lat: location.lat });
     this.showResults = false;
     this.searchQuery = '';
+    this.overlayPanel.hide();
   }
 } 
