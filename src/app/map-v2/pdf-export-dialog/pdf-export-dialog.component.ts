@@ -1,28 +1,14 @@
 import { Component, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { DialogModule } from 'primeng/dialog';
-import { ButtonModule } from 'primeng/button';
-import { RadioButtonModule } from 'primeng/radiobutton';
-import { DropdownModule } from 'primeng/dropdown';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { FormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
 import { PdfGenerationService, PaperSize, Orientation, MapExtent, PdfExportOptions } from './pdf-generation.service';
 import { PdfExportService } from './pdf-export.service';
 import { Subscription } from 'rxjs';
+import { SharedModule } from '../../shared/shared.module';
 
 @Component({
   selector: 'app-pdf-export-dialog',
   standalone: true,
   imports: [
-    CommonModule,
-    DialogModule,
-    ButtonModule,
-    RadioButtonModule,
-    DropdownModule,
-    InputNumberModule,
-    FormsModule,
-    TranslateModule
+    SharedModule
   ],
   templateUrl: './pdf-export-dialog.component.html',
   styleUrl: './pdf-export-dialog.component.css'

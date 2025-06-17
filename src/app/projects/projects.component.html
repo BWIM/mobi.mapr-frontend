@@ -168,7 +168,7 @@
     </div>
 
     <!-- Overlay für nicht zugewiesene Gruppen -->
-    <p-overlayPanel #unusedGroupsOverlay>
+    <p-popover #unusedGroupsOverlay>
         <ng-template pTemplate>
             <div class="flex flex-column gap-3" style="min-width: 300px">
                 <h3>{{ 'PROJECT_GROUPS.UNUSED_GROUPS' | translate }}</h3>
@@ -201,7 +201,7 @@
                 </div>
             </div>
         </ng-template>
-    </p-overlayPanel>
+    </p-popover>
 
     <!-- Action Buttons am unteren Rand -->
     <div class="p-3 bg-surface-ground border-t grid grid-cols-2 gap-2" *ngIf="!loading">

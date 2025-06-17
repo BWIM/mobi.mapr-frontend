@@ -35,9 +35,12 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { ListboxModule } from 'primeng/listbox';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { PopoverModule } from 'primeng/popover';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { SliderModule } from 'primeng/slider';
 import { InputSwitchModule } from 'primeng/inputswitch';
+import { SelectModule } from 'primeng/select';
+import { InputNumberModule } from 'primeng/inputnumber';
 
 @NgModule({
   imports: [
@@ -75,10 +78,13 @@ import { InputSwitchModule } from 'primeng/inputswitch';
     SelectButtonModule,
     ListboxModule,
     OverlayPanelModule,
+    PopoverModule,
     ToggleSwitchModule,
     SliderModule,
     InputSwitchModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    SelectModule,
+    InputNumberModule
   ],
   exports: [
     CommonModule,
@@ -115,10 +121,13 @@ import { InputSwitchModule } from 'primeng/inputswitch';
     SelectButtonModule,
     ListboxModule,
     OverlayPanelModule,
+    PopoverModule,
     ToggleSwitchModule,
     SliderModule,
     InputSwitchModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    SelectModule,
+    InputNumberModule
   ],
   providers: [MessageService]
 })

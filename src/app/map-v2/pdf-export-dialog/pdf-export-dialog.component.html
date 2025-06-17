@@ -36,13 +36,13 @@
         <!-- Paper Size Selection -->
         <div class="field mb-3">
           <label class="block mb-2">{{ 'PDF_EXPORT.PAPER_SIZE' | translate }}</label>
-          <p-dropdown 
+          <p-select 
             [options]="paperSizes" 
             [(ngModel)]="options.paperSize"
             optionLabel="label"
             optionValue="value"
             [style]="{'width':'100%'}">
-          </p-dropdown>
+          </p-select>
         </div>
 
         <!-- Resolution Selection -->

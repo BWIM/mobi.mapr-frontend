@@ -86,8 +86,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
           if (visible) {
             this.loadAllData();
           }
-        } else {
-          console.info('No project ID available, not loading statistics');
         }
       })
     );
