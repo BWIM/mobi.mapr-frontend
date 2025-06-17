@@ -31,6 +31,7 @@ export class MapV2Service {
   private shortcutSubscription: Subscription;
   private hexagonView: boolean = false;
   private selectedFeatureId: string | null = null;
+  private scoreShown: boolean = false;
 
   constructor(
     private loadingService: LoadingService,
@@ -62,6 +63,9 @@ export class MapV2Service {
           this.hexagonView = !this.hexagonView;
           const updatedStyle = this.getProjectMapStyle();
           this.mapStyleSubject.next(updatedStyle);
+          break;
+        case ShortcutAction.TOGGLE_SCORE_DISPLAY:
+          this.toggleScoreDisplay();
           break;
       }
     });
@@ -102,7 +106,8 @@ export class MapV2Service {
           minzoom: 0,
           maxzoom: 19
         } as LayerSpecification
-      ]
+      ],
+      glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf'
     };
   }
 
@@ -201,6 +206,14 @@ export class MapV2Service {
     }
   }
 
+  toggleScoreDisplay(): void {
+    this.scoreShown = !this.scoreShown;
+    if (this.currentProject) {
+      const updatedStyle = this.getProjectMapStyle();
+      this.mapStyleSubject.next(updatedStyle);
+    }
+  }
+
   private getProjectMapStyle(): StyleSpecification {
     const baseStyle = this.getBaseMapStyle();
     
@@ -269,6 +282,48 @@ export class MapV2Service {
           ]
         }
       } as LayerSpecification);
+
+      // Add score labels layer if scoreShown is true
+      if (this.scoreShown) {
+        baseStyle.layers.push({
+          id: 'geodata-scores',
+          type: 'symbol',
+          source: 'geodata',
+          'source-layer': 'geodata',
+          layout: {
+            'text-field': [
+              'case',
+              ['<=', ['get', 'score'], 0], 'Error',
+              ['<=', ['get', 'score'], 0.28], 'A+',
+              ['<=', ['get', 'score'], 0.32], 'A',
+              ['<=', ['get', 'score'], 0.35], 'A-',
+              ['<=', ['get', 'score'], 0.4], 'B+',
+              ['<=', ['get', 'score'], 0.45], 'B',
+              ['<=', ['get', 'score'], 0.5], 'B-',
+              ['<=', ['get', 'score'], 0.56], 'C+',
+              ['<=', ['get', 'score'], 0.63], 'C',
+              ['<=', ['get', 'score'], 0.71], 'C-',
+              ['<=', ['get', 'score'], 0.8], 'D+',
+              ['<=', ['get', 'score'], 0.9], 'D',
+              ['<=', ['get', 'score'], 1.0], 'D-',
+              ['<=', ['get', 'score'], 1.12], 'E+',
+              ['<=', ['get', 'score'], 1.26], 'E',
+              ['<=', ['get', 'score'], 1.41], 'E-',
+              ['<=', ['get', 'score'], 1.59], 'F+',
+              ['<=', ['get', 'score'], 1.78], 'F',
+              'F-'
+            ],
+            'text-size': 12,
+            'text-allow-overlap': true,
+            'text-ignore-placement': true
+          },
+          paint: {
+            'text-color': '#000000',
+            'text-halo-color': '#ffffff',
+            'text-halo-width': 1
+          }
+        } as LayerSpecification);
+      }
     }
 
     return baseStyle;
