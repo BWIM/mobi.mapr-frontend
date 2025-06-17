@@ -125,7 +125,8 @@
       "SHARE": "Teilen",
       "DOWNLOAD": "Herunterladen",
       "CANCEL_TOOLTIP": "Abbrechen",
-      "SAVE_TOOLTIP": "Speichern"
+      "SAVE_TOOLTIP": "Speichern",
+      "EXPORT": "Exportieren"
     },
     "MESSAGES": {
       "ERROR": {
@@ -141,7 +142,9 @@
       },
       "CONFIRM_DELETE": "Sind Sie sicher, dass Sie dieses Projekt löschen möchten?",
       "CONFIRM_DELETE_GROUP": "Sind Sie sicher, dass Sie diese Projektgruppe löschen möchten?"
-    }
+    },
+    "CANCEL": "Abbrechen",
+    "EXPORT": "Export"
   },
   "LEGEND": {
     "LVLA": "Die erforderliche Mobilitätszeit beträgt maximal 35 % im lokalen Vergleich.",
@@ -198,7 +201,14 @@
     "BACK_TOOLTIP": "Einen Schritt zurückgehen",
     "FINISH_TOOLTIP": "Fertigstellen",
     "NEXT_TOOLTIP": "Weiter",
-    "STEPS_TOOLTIP": "Schritte"
+    "STEPS_TOOLTIP": "Schritte",
+    "STEPS": {
+      "ACTIVITIES": "Aktivitäten",
+      "PERSONAS": "Personas",
+      "MODES": "Modi",
+      "AREA": "Gebiet auswählen",
+      "PROJECT_INFO": "Projektinformationen"
+    }
   },
   "SIDEBAR": {
     "TITLE": "Details",
@@ -235,7 +245,9 @@
     "REDUCE_OPACITY_TOOLTIP": "Features weniger intensiv anzeigen",
     "RESTORE_OPACITY": "Karte wiederherstellen",
     "ZOOM_TO_FEATURES": "Karte zentrieren",
-    "ZOOM_TO_FEATURES_TOOLTIP": "Zentriert die Karte wieder zum Initialzustand"
+    "ZOOM_TO_FEATURES_TOOLTIP": "Zentriert die Karte wieder zum Initialzustand",
+    "EXPORT_PDF_TOOLTIP": "PDF exportieren",
+    "EXPORT_PDF": "PDF exportieren"
   },
   "ANALYZE": {
     "PERSONA": {
@@ -279,13 +291,16 @@
     "PERSONAS": "Personas",
     "NO_ACTIVITIES": "Keine Aktivitäten",
     "NO_PERSONAS": "Keine Personas",
-    "NO_DESCRIPTION": "Keine Beschreibung"
+    "NO_DESCRIPTION": "Keine Beschreibung",
+    "MODES": "Modi",
+    "NO_PROFILES": "Keine Profile gefunden"
   },
   "DETAILS": {
     "FIELDS": {
       "OVERVIEW": "Übersicht",
       "ACTIVITIES": "Aktivitäten"
-    }
+    },
+    "TITLE": "Details"
   },
   "EDIT": {
     "TITLE": "Projekt bearbeiten"
@@ -311,7 +326,8 @@
       "EXPORT_PDF_PORTRAIT": "PDF im Hochformat exportieren",
       "EXPORT_PDF_LANDSCAPE": "PDF im Querformat exportieren",
       "SHARE": "Teilen",
-      "TOGGLE_HEXAGON_VIEW": "Hexagon Ansicht togglen"
+      "TOGGLE_HEXAGON_VIEW": "Hexagon Ansicht togglen",
+      "EXPORT_PDF": "Karte als PDF exportieren"
     },
     "LOGOUT": "Abmelden",
     "SHOW_CREDITS": "Infos anzeigen",
@@ -337,5 +353,16 @@
     "CURRENT_SETTINGS": "Aktuelle Einstellungen",
     "POPULATION_WEIGHTED": "Bevölkerung gewichtet",
     "AREA_WEIGHTED": "Fläche gewichtet"
+  },
+  "PDF_EXPORT": {
+    "TITLE": "PDF Export",
+    "ORIENTATION": "Ausrichtung",
+    "PORTRAIT": "Hochformat",
+    "LANDSCAPE": "Querformat",
+    "PAPER_SIZE": "Papiergröße",
+    "RESOLUTION": "Auflösung (DPI)",
+    "MAP_EXTENT": "Kartenausschnitt",
+    "CURRENT_VIEW": "Aktuelle Ansicht",
+    "FULL_MAP": "Gesamte Karte"
   }
 }

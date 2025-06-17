@@ -5,7 +5,6 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { finalize } from 'rxjs/operators';
 import { SharedModule } from '../shared/shared.module';
 import { TranslateService } from '@ngx-translate/core';
-import { MapService } from '../map/map.service';
 import { MenuItem } from 'primeng/api';
 import { Router } from '@angular/router';
 import { ProjectWizardService } from './project-wizard/project-wizard.service';
@@ -16,6 +15,7 @@ import { ProjectsReloadService } from './projects-reload.service';
 import { LoadingService } from '../services/loading.service';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { forkJoin } from 'rxjs';
+import { MapV2Service } from '../map-v2/map-v2.service';
 
 interface GroupedProjects {
   group: ProjectGroup;
@@ -60,7 +60,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   editDialogVisible = false;
   projectToEdit: Project | null = null;
   progress: number = 0;
-  
+  loading: boolean = false;
   // Neue Properties für Projektgruppen
   projectGroupDialogVisible = false;
   projectGroupToEdit: ProjectGroup | null = null;
@@ -86,14 +86,14 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     private projectsService: ProjectsService,
     private messageService: MessageService,
     private translate: TranslateService,
-    private mapService: MapService,
     private analyzeService: AnalyzeService,
     private router: Router,
     private wizardService: ProjectWizardService,
     private websocketService: WebsocketService,
     private reloadService: ProjectsReloadService,
     private loadingService: LoadingService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private mapv2Service: MapV2Service
   ) {
     this.initializeMapActions();
     
@@ -148,6 +148,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   }
 
   loadData(): void {
+    this.loading = true;
     this.loadingService.startLoading();
     this.menuItemsCache.clear();
     
@@ -165,6 +166,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
             summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
             detail: this.translate.instant('PROJECTS.LIST.NO_PROJECTS')
           });
+          this.loading = false;
         }
       });
   }
@@ -217,6 +219,10 @@ export class ProjectsComponent implements OnInit, OnDestroy {
             summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
             detail: this.translate.instant('PROJECTS.LIST.NO_PROJECTS')
           });
+          this.loading = false;
+        },
+        complete: () => {
+          this.loading = false;
         }
       });
   }
@@ -276,23 +282,9 @@ export class ProjectsComponent implements OnInit, OnDestroy {
           console.error('Fehler beim Laden der Projektinformationen:', error);
         }
       });
-
-      this.projectsService.getProjectResults(project.id).subscribe({
-        next: (results) => {
-          this.mapService.resetMap();
-          this.mapService.updateFeatures(results);
-          this.selectedTableProject = project;
-          this.projectAction.emit();
-        },
-        error: () => {
-          this.loadingService.stopLoading(); // Stop loading on error
-          this.messageService.add({
-            severity: 'error',
-            summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
-            detail: this.translate.instant('PROJECTS.RESULTS.LOAD_ERROR')
-          });
-        }
-      });
+      
+      this.mapv2Service.setProject(project.id.toString());
+      this.loadingService.stopLoading();
     }
     catch (error) {
       console.error(error);
@@ -347,7 +339,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
       next: (result: WebsocketResult) => {
         if (result.result.hex_scores) {
           const scores = JSON.parse(result.result.hex_scores);
-          this.mapService.addSingleFeature(scores);
+          this.mapv2Service.addSingleFeature(scores);
         }
         
         const projectToUpdate = this.findProjectById(result.result.project);
@@ -360,7 +352,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         if (result.result.finished) {
           const finishedProjectId = result.result.project;
           this.closeWebsocketConnection(finishedProjectId);
-          this.mapService.resetMap();
+          this.mapv2Service.resetMap();
           setTimeout(() => {
             this.loadData();
             // Nach dem Laden der Daten das Projekt anzeigen

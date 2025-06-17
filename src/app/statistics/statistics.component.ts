@@ -2,12 +2,15 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { SharedModule } from '../shared/shared.module';
 import { StatisticsService, ScoreEntry } from './statistics.service';
 import { Subscription } from 'rxjs';
-import { MapService } from '../map/map.service';
 import { ScrollPanelModule } from 'primeng/scrollpanel';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { LoadingService } from '../services/loading.service';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { MapV2Service } from '../map-v2/map-v2.service';
+import { PaginatorModule } from 'primeng/paginator';
+import { GeocodingService } from '../services/geocoding.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-statistics',
@@ -17,22 +20,36 @@ import { MultiSelectModule } from 'primeng/multiselect';
     ScrollPanelModule,
     ButtonModule,
     ProgressSpinnerModule,
-    MultiSelectModule
+    MultiSelectModule,
+    PaginatorModule
   ],
   templateUrl: './statistics.component.html'
 })
 export class StatisticsComponent implements OnInit, OnDestroy {
   visible: boolean = false;
-  private subscription: Subscription;
+  private subscription: Subscription = new Subscription();
   loading: boolean = false;
+  
   stateScores: ScoreEntry[] = [];
   countyScores: ScoreEntry[] = [];
   municipalityScores: ScoreEntry[] = [];
   filteredMunicipalityScores: ScoreEntry[] = [];
-  loadingMunicipalities: boolean = false;
   
-  averageType: 'mean' | 'median' = 'mean';
-  populationArea: 'pop' | 'area' = 'pop';
+  // Pagination
+  stateTotalRecords: number = 0;
+  countyTotalRecords: number = 0;
+  municipalityTotalRecords: number = 0;
+  currentStatePage: number = 1;
+  currentCountyPage: number = 1;
+  currentMunicipalityPage: number = 1;
+  rowsPerPage: number = 15;
+
+  // Score type
+  scoreType: 'pop' | 'avg' = 'pop';
+  scoreTypeOptions = [
+    { label: 'STATISTICS.POPULATION_WEIGHTED', value: 'pop' },
+    { label: 'STATISTICS.AREA_WEIGHTED', value: 'avg' }
+  ];
 
   populationCategories = [
     { label: 'Landgemeinden (0-5.000)', value: 'small', min: 0, max: 5000 },
@@ -45,7 +62,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   ];
   selectedCategories: any[] = this.populationCategories;
 
-  // Color mapping based on MapBuildService colors
   readonly scoreColors = {
     error: 'rgb(128, 128, 128)',
     best: 'rgb(50, 97, 45)',
@@ -58,30 +74,20 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
   constructor(
     private statisticsService: StatisticsService,
-    private mapService: MapService,
-    private loadingService: LoadingService
+    private mapService: MapV2Service,
+    private loadingService: LoadingService,
+    private geocodingService: GeocodingService
   ) {
-    this.subscription = new Subscription();
-    
-    // Subscribe to visibility changes
     this.subscription.add(
-      this.statisticsService.visible$.subscribe(
-        visible => {
+      this.statisticsService.visible$.subscribe(visible => {
+        const projectId = this.mapService.getCurrentProject();
+        if (projectId) {
           this.visible = visible;
           if (visible) {
-            this.updateScores();
+            this.loadAllData();
           }
-        }
-      )
-    );
-
-    // Subscribe to visualization settings changes
-    this.subscription.add(
-      this.mapService.visualizationSettings$.subscribe(settings => {
-        this.averageType = settings.averageType;
-        this.populationArea = settings.populationArea;
-        if (this.visible) {
-          this.updateScores();
+        } else {
+          console.info('No project ID available, not loading statistics');
         }
       })
     );
@@ -90,47 +96,103 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   ngOnInit() {}
 
   ngOnDestroy() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
+    this.subscription.unsubscribe();
   }
 
-  async loadAllMunicipalities(): Promise<void> {
-    try {
-      this.loadingMunicipalities = true;
-      await this.statisticsService.loadAllMunicipalities();
-      await this.updateScores();
-    } catch (error) {
-      console.error('Error loading municipalities:', error);
-    } finally {
-      this.loadingMunicipalities = false;
-    }
-  }
+  private loadAllData(): void {
+    this.loading = true;
+    this.loadingService.startLoading();
 
-  private async updateScores(): Promise<void> {
-    try {
-      this.loading = true;
-      this.loadingService.startLoading();
-      const [stateResult, countyResult, municipalityResult] = await Promise.all([
-        this.statisticsService.getTopScores('state'),
-        this.statisticsService.getTopScores('county'),
-        this.statisticsService.getTopScores('municipality')
-      ]);
-      
-      this.stateScores = stateResult;
-      this.countyScores = countyResult;
-      this.municipalityScores = municipalityResult;
-      this.applyPopulationFilter();
-    } catch (error) {
-      console.error('Error updating scores:', error);
-      // Reset scores on error
-      this.stateScores = [];
-      this.countyScores = [];
-      this.municipalityScores = [];
-      this.filteredMunicipalityScores = [];
-    } finally {
-      this.loadingService.stopLoading();
+    const projectId = this.mapService.getCurrentProject();
+    if (!projectId) {
+      console.error('No project ID available');
       this.loading = false;
+      this.loadingService.stopLoading();
+      return;
+    }
+
+    Promise.all([
+      this.loadStateScores(projectId),
+      this.loadCountyScores(projectId),
+      this.loadMunicipalityScores(projectId)
+    ]).finally(() => {
+      this.loading = false;
+      this.loadingService.stopLoading();
+    });
+  }
+
+  private async loadStateScores(projectId: string): Promise<void> {
+    try {
+      const response = await this.statisticsService.getStateScores(projectId, this.currentStatePage, this.scoreType).toPromise();
+      if (response) {
+        this.stateTotalRecords = response.count;
+        this.stateScores = response.results.map(score => 
+          this.statisticsService.convertToScoreEntry(score, 'state')
+        );
+      }
+    } catch (error) {
+      console.error('Error loading state scores:', error);
+    }
+  }
+
+  private async loadCountyScores(projectId: string): Promise<void> {
+    try {
+      const response = await this.statisticsService.getCountyScores(projectId, this.currentCountyPage, this.scoreType).toPromise();
+      if (response) {
+        this.countyTotalRecords = response.count;
+        this.countyScores = response.results.map(score => 
+          this.statisticsService.convertToScoreEntry(score, 'county')
+        );
+      }
+    } catch (error) {
+      console.error('Error loading county scores:', error);
+    }
+  }
+
+  private async loadMunicipalityScores(projectId: string): Promise<void> {
+    try {
+      const response = await this.statisticsService.getMunicipalityScores(projectId, this.currentMunicipalityPage, this.scoreType).toPromise();
+      if (response) {
+        this.municipalityTotalRecords = response.count;
+        this.municipalityScores = response.results.map(score => 
+          this.statisticsService.convertToScoreEntry(score, 'municipality')
+        );
+        this.applyPopulationFilter();
+      }
+    } catch (error) {
+      console.error('Error loading municipality scores:', error);
+    }
+  }
+
+  onStatePageChange(event: any): void {
+    this.currentStatePage = event.page + 1;
+    const projectId = this.mapService.getCurrentProject();
+    if (projectId) {
+      this.loadStateScores(projectId);
+    }
+  }
+
+  onCountyPageChange(event: any): void {
+    this.currentCountyPage = event.page + 1;
+    const projectId = this.mapService.getCurrentProject();
+    if (projectId) {
+      this.loadCountyScores(projectId);
+    }
+  }
+
+  onMunicipalityPageChange(event: any): void {
+    this.currentMunicipalityPage = event.page + 1;
+    const projectId = this.mapService.getCurrentProject();
+    if (projectId) {
+      this.loadMunicipalityScores(projectId);
+    }
+  }
+
+  onScoreTypeChange(type: 'pop' | 'avg'): void {
+    this.scoreType = type;
+    const projectId = this.mapService.getCurrentProject();
+    if (projectId) {
+      this.loadAllData();
     }
   }
 
@@ -146,22 +208,11 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
     this.filteredMunicipalityScores = this.municipalityScores.filter(score => {
       if (!score.population) return false;
-      console.log(score);
       return this.selectedCategories.some(category => {
         const { min, max } = category;
-        return score.population > min && score.population <= max;
+        return score.population && score.population > min && score.population <= max;
       });
     });
-  }
-
-  getScoreGrade(score: number): string {
-    if (score <= 0) return "Error";
-    if (score <= 0.35) return "A";
-    if (score <= 0.5) return "B";
-    if (score <= 0.71) return "C";
-    if (score <= 1) return "D";
-    if (score <= 1.41) return "E";
-    return "F";
   }
 
   getScoreColor(score: number): string {
@@ -174,88 +225,73 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     return this.scoreColors.worst;
   }
 
-  onFeatureClick(entry: ScoreEntry): void {
-    // Close the statistics overlay
+  getScoreName(score: number): string {
+    if (score <= 0) return "Error";
+    if (score <= 0.28) return "A+";
+    if (score <= 0.32) return "A";
+    if (score <= 0.35) return "A-";
+    if (score <= 0.4) return "B+";
+    if (score <= 0.45) return "B";
+    if (score <= 0.5) return "B-";
+    if (score <= 0.56) return "C+";
+    if (score <= 0.63) return "C";
+    if (score <= 0.71) return "C-";
+    if (score <= 0.8) return "D+";
+    if (score <= 0.9) return "D";
+    if (score <= 1.0) return "D-";
+    if (score <= 1.12) return "E+";
+    if (score <= 1.26) return "E";
+    if (score <= 1.41) return "E-";
+    if (score <= 1.59) return "F+";
+    if (score <= 1.78) return "F";
+    return "F-";
+  }
+
+  async onFeatureClick(entry: ScoreEntry): Promise<void> {
     this.statisticsService.visible = false;
+    this.loadingService.startLoading();
 
-    const map = this.mapService.getMap();
-    if (!map) return;
+    try {
+      const map = this.mapService.getMap();
+      if (!map) return;
 
-    const vectorLayer = this.mapService.getMainLayer();
-    if (!vectorLayer || !vectorLayer.getSource()) return;
+      // Determine target zoom level based on administrative level
+      let targetZoom = 7.5;
+      console.log(entry);
+      if (entry.level === 'county') {
+        targetZoom = 10;
+      } else if (entry.level === 'municipality') {
+        targetZoom = 12;
+      }
 
-    let targetZoom = 7.5;
-    if (entry.level === 'county') {
-      targetZoom = 9;
-    } else if (entry.level === 'municipality') {
-      targetZoom = 10;
-    }
-
-    // Helper to animate and return a promise
-    function animateView(view: any, options: any): Promise<void> {
-      return new Promise(resolve => {
-        view.animate({ ...options, duration: 600 }, resolve);
-      });
-    }
-
-    const view = map.getView();
-
-    // Step 1: Zoom out to a safe level if needed
-    let safeZoom = 6;
-    if (entry.level === 'county') {
-      safeZoom = 8;
-    } else if (entry.level === 'municipality') {
-      safeZoom = 10;
-    }
-    const currentZoom = view.getZoom();
-    let zoomOutPromise: Promise<void>;
-
-    if (currentZoom && currentZoom > safeZoom) {
-      zoomOutPromise = animateView(view, { zoom: safeZoom });
-    } else {
-      zoomOutPromise = Promise.resolve();
-    }
-
-    zoomOutPromise.then(() => {
-      // Step 2: Poll for the feature (case-insensitive, trimmed)
-      const maxTries = 10;
-      const delay = 200;
-
-      function findFeature(): any {
-        const features = vectorLayer?.getSource()?.getFeatures();
-        return features?.find(f => {
-          const featureName = (f.get('name') || '').trim().toLowerCase();
-          const entryName = (entry.name || '').trim().toLowerCase();
-          const featureLevel = (f.get('level') || '').trim().toLowerCase();
-          const entryLevel = (entry.level || '').trim().toLowerCase();
-          return featureName === entryName && featureLevel === entryLevel;
+      // Use geocoding to find the location
+      let searchQuery = entry.name;
+      
+      // Add county information for municipalities
+      if (entry.level === 'municipality' && entry.county) {
+        searchQuery = `${entry.name}, ${entry.county}`;
+      }
+      
+      // Always add Germany to the query
+      searchQuery += ', Germany';
+      
+      console.log('Search query:', searchQuery);
+      const results = await firstValueFrom(this.geocodingService.search(searchQuery));
+      
+      if (results.length > 0) {
+        const bestMatch = results[0];
+        map.flyTo({
+          center: [bestMatch.lng, bestMatch.lat],
+          zoom: targetZoom,
+          duration: 2000
         });
+      } else {
+        console.warn('No location found for:', searchQuery);
       }
-
-      function pollForFeature(triesLeft: number) {
-        const feature = findFeature();
-        if (feature) {
-          const extent = feature.getGeometry()?.getExtent();
-          if (extent) {
-            view.animate(
-              { zoom: targetZoom, duration: 800 },
-              () => {
-                view.fit(extent, {
-                  duration: 1000,
-                  padding: [50, 50, 50, 50]
-                });
-              }
-            );
-          }
-        } else if (triesLeft > 0) {
-          setTimeout(() => pollForFeature(triesLeft - 1), delay);
-        } else {
-          console.warn('Feature not found after zooming out and polling:', entry);
-        }
-      }
-
-      pollForFeature(maxTries);
-    });
+    } catch (error) {
+      console.error('Error finding feature location:', error);
+    } finally {
+      this.loadingService.stopLoading();
+    }
   }
 }
- // TODO: Click on name to zoom on map

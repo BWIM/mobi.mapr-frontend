@@ -13,6 +13,7 @@ import {
   ProjectsFinishedStatus,
   ProjectDetails
 } from './project.interface';
+import { MapV2Service } from '../map-v2/map-v2.service';
 
 
 
@@ -24,7 +25,7 @@ export class ProjectsService {
   private currentProjectInfo = new BehaviorSubject<ProjectInfo | null>(null);
   public currentProjectInfo$ = this.currentProjectInfo.asObservable();
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private map2Service: MapV2Service) { }
 
   // Project CRUD Operations
   getProjects(page: number = 1, pageSize: number = 10): Observable<PaginatedResponse<Project>> {
@@ -41,6 +42,7 @@ export class ProjectsService {
 
   createProject(project: ProjectCreateUpdate): Observable<Project> {
     this.currentProjectInfo.next(null);
+    this.map2Service.resetMap();
     return this.http.post<Project>(`${this.apiUrl}/projects/`, project);
   }
 

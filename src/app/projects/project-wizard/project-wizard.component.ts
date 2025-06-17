@@ -6,7 +6,6 @@ import { ProjectsService } from '../projects.service';
 import { ActivitiesService } from '../../services/activities.service';
 import { PersonasService } from '../../services/personas.service';
 import { ModesService } from '../../services/modes.service';
-import { Router } from '@angular/router';
 import { ProjectWizardService } from './project-wizard.service';
 import { Subscription } from 'rxjs';
 import { GroupedActivities } from '../../services/interfaces/activity.interface';
@@ -16,7 +15,6 @@ import { TranslateService } from '@ngx-translate/core';
 import { ProjectsReloadService } from '../projects-reload.service';
 import { Activity } from '../../services/interfaces/activity.interface';
 import { ProjectGroup } from '../project.interface';
-import { MapService } from '../../map/map.service';
 import { AreasService } from '../../services/areas.service';
 import { LandsService } from '../../services/lands.service';
 import { Land } from '../../services/interfaces/land.interface';
@@ -32,11 +30,6 @@ import { Fill, Stroke, Style } from 'ol/style';
 import { fromLonLat } from 'ol/proj';
 import Overlay from 'ol/Overlay';
 
-// Add this interface for the checkbox event
-interface CheckboxChangeEvent {
-  checked: boolean;
-  originalEvent: Event;
-}
 
 @Component({
   selector: 'app-project-wizard',
@@ -47,7 +40,43 @@ interface CheckboxChangeEvent {
   providers: [MessageService]
 })
 export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
-  steps: MenuItem[] = [];
+  steps: MenuItem[] = [
+    {
+      label: 'Aktivitäten',
+      command: (event: any) => {
+        this.activeIndex = 0;
+      }
+    },
+    {
+      label: 'Personas',
+      command: (event: any) => {
+        this.activeIndex = 1;
+      }
+    },
+    {
+      label: 'Modi',
+      command: (event: any) => {
+        this.activeIndex = 2;
+      }
+    },
+    {
+      label: 'Gebiet auswählen',
+      command: (event: any) => {
+        this.activeIndex = 3;
+        // Initialize map when directly selecting this step
+        setTimeout(() => {
+          this.initializeMap();
+          this.setupAreaSelection();
+        }, 0);
+      }
+    },
+    {
+      label: 'Projektinformationen',
+      command: (event: any) => {
+        this.activeIndex = 4;
+      }
+    }
+  ];
   activeIndex: number = 0;
   projectForm!: FormGroup;
   visible: boolean = false;
@@ -57,6 +86,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
   selectedModeMap: { [key: number]: boolean } = {};
   projectGroups: ProjectGroup[] = [];
   private subscription: Subscription;
+  private langSubscription: Subscription;
   selectedAreaIds: string[] = [];
   showMidActivities: boolean = true;
   selectedGroupToDelete: ProjectGroup | null = null;
@@ -85,12 +115,10 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     private activitiesService: ActivitiesService,
     private personasService: PersonasService,
     private modesService: ModesService,
-    private router: Router,
     private wizardService: ProjectWizardService,
     private translate: TranslateService,
     private reloadService: ProjectsReloadService,
     private messageService: MessageService,
-    private mapService: MapService,
     private areasService: AreasService,
     private landsService: LandsService
   ) {
@@ -109,16 +137,24 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       }
     );
 
+    // Subscribe to language changes
+    this.langSubscription = this.translate.onLangChange.subscribe(() => {
+      this.updateStepLabels();
+    });
+
     this.initializeForm();
   }
 
   ngAfterViewInit() {
-    this.initializeSteps();
+    this.updateStepLabels();
   }
 
   ngOnDestroy() {
     if (this.subscription) {
       this.subscription.unsubscribe();
+    }
+    if (this.langSubscription) {
+      this.langSubscription.unsubscribe();
     }
     
     // Clean up map resources
@@ -128,6 +164,46 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       }
       this.map.dispose();
     }
+  }
+
+  private updateStepLabels() {
+    this.steps = [
+      {
+        label: this.translate.instant('PROJECT_WIZARD.STEPS.ACTIVITIES'),
+        command: (event: any) => {
+          this.activeIndex = 0;
+        }
+      },
+      {
+        label: this.translate.instant('PROJECT_WIZARD.STEPS.PERSONAS'),
+        command: (event: any) => {
+          this.activeIndex = 1;
+        }
+      },
+      {
+        label: this.translate.instant('PROJECT_WIZARD.STEPS.MODES'),
+        command: (event: any) => {
+          this.activeIndex = 2;
+        }
+      },
+      {
+        label: this.translate.instant('PROJECT_WIZARD.STEPS.AREA'),
+        command: (event: any) => {
+          this.activeIndex = 3;
+          // Initialize map when directly selecting this step
+          setTimeout(() => {
+            this.initializeMap();
+            this.setupAreaSelection();
+          }, 0);
+        }
+      },
+      {
+        label: this.translate.instant('PROJECT_WIZARD.STEPS.PROJECT_INFO'),
+        command: (event: any) => {
+          this.activeIndex = 4;
+        }
+      }
+    ];
   }
 
   private initializeForm() {
@@ -298,46 +374,6 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
         console.error('Fehler beim Laden der Modi:', error);
       }
     });
-  }
-
-  private initializeSteps() {
-    this.steps = [
-      {
-        label: 'Aktivitäten',
-        command: (event: any) => {
-          this.activeIndex = 0;
-        }
-      },
-      {
-        label: 'Personas',
-        command: (event: any) => {
-          this.activeIndex = 1;
-        }
-      },
-      {
-        label: 'Modi',
-        command: (event: any) => {
-          this.activeIndex = 2;
-        }
-      },
-      {
-        label: 'Gebiet auswählen',
-        command: (event: any) => {
-          this.activeIndex = 3;
-          // Initialize map when directly selecting this step
-          setTimeout(() => {
-            this.initializeMap();
-            this.setupAreaSelection();
-          }, 0);
-        }
-      },
-      {
-        label: 'Projektinformationen',
-        command: (event: any) => {
-          this.activeIndex = 4;
-        }
-      }
-    ];
   }
 
   nextStep() {
@@ -573,7 +609,6 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
             });
             return;
           }
-          this.mapService.resetMap();
           this.messageService.add({
             severity: 'success',
             summary: this.translate.instant('COMMON.MESSAGES.SUCCESS.CREATE'),
@@ -866,6 +901,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     const hasPartiallySelectedLands = this.lands.some(land => this.isLandIndeterminate(land));
     
     this.hasCompletelySelectedLands = hasCompletelySelectedLands && !hasPartiallySelectedLands;
+    console.log('calculateStates', this.hasCompletelySelectedLands);
   }
   
   getLandSelectionState(land: Land): boolean {

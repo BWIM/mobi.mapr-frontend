@@ -88,12 +88,11 @@ export class CreditsComponent implements OnInit {
 
   private updateShortcutTranslations() {
     this.shortcuts = [
-      { key: 'C', description: this.translate.instant('CREDITS.SHORTCUTS.CENTER_MAP') },
-      { key: 'F', description: this.translate.instant('CREDITS.SHORTCUTS.FREEZE_MAP') },
+      { key: 'Z', description: this.translate.instant('CREDITS.SHORTCUTS.CENTER_MAP') },
+      // { key: 'F', description: this.translate.instant('CREDITS.SHORTCUTS.FREEZE_MAP') },
       { key: 'S', description: this.translate.instant('CREDITS.SHORTCUTS.SHOW_STATISTICS') },
-      { key: 'H', description: this.translate.instant('CREDITS.SHORTCUTS.EXPORT_PDF_PORTRAIT') },
-      { key: 'Q', description: this.translate.instant('CREDITS.SHORTCUTS.EXPORT_PDF_LANDSCAPE') },
-      { key: 'Z', description: this.translate.instant('CREDITS.SHORTCUTS.TOGGLE_HEXAGON_VIEW') }
+      // { key: 'E', description: this.translate.instant('CREDITS.SHORTCUTS.EXPORT_PDF_PORTRAIT') },
+      { key: 'H', description: this.translate.instant('CREDITS.SHORTCUTS.TOGGLE_HEXAGON_VIEW') }
     ];
   }
 
@@ -141,7 +140,9 @@ export class CreditsComponent implements OnInit {
     { name: 'OpenStreetMap', icon: 'pi pi-map', url: 'https://www.openstreetmap.org' },
     { name: 'Angular', icon: 'pi pi-code', url: 'https://angular.io' },
     { name: 'PrimeNG', icon: 'pi pi-desktop', url: 'https://primeng.org' },
-    { name: 'Carto', icon: 'pi pi-map-marker', url: 'https://carto.com' }
+    { name: 'Carto', icon: 'pi pi-map-marker', url: 'https://carto.com' },
+    { name: 'MapLibre', icon: 'pi pi-map-marker', url: 'https://maplibre.org' },
+    { name: 'Nominatim', icon: 'pi pi-map-marker', url: 'https://nominatim.org' }
   ];
 
   dataComponents: InfoComponent[] = [

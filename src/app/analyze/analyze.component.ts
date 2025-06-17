@@ -3,10 +3,10 @@ import { SharedModule } from '../shared/shared.module';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../projects/projects.service';
 import { AnalyzeService } from './analyze.service';
-import { MapService } from '../map/map.service';
-import Feature from 'ol/Feature';
 import { Properties } from './analyze.interface';
 import { ProjectDetails } from '../projects/project.interface';
+import { MapGeoJSONFeature } from 'maplibre-gl';
+
 
 @Component({
   selector: 'app-analyze',
@@ -20,7 +20,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   loading: boolean = false;
   private subscriptions: Subscription[] = [];
   projectDetails: ProjectDetails | undefined;
-  feature: Feature | undefined;
+  feature: MapGeoJSONFeature | undefined;
   properties: Properties | undefined;
   averageType: 'mean' | 'median' = 'mean';
   populationArea: 'pop' | 'area' = 'pop';
@@ -72,7 +72,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private analyzeService: AnalyzeService,
     private projectsService: ProjectsService,
-    private mapService: MapService,
     private cdr: ChangeDetectorRef
   ) {
     this.subscriptions.push(
@@ -83,11 +82,11 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           const state = this.analyzeService.getCurrentState();
           if (state.feature) {
             this.feature = state.feature;
-            this.properties = this.feature.getProperties() as Properties;
+            this.properties = this.feature.properties as Properties;
           }
           if (state.projectId && state.mapType && state.feature) {
             this.loading = true;
-            this.projectsService.getProjectDetails(state.projectId, state.mapType, state.feature.getProperties()['id'])
+            this.projectsService.getProjectDetails(state.projectId, state.mapType, state.feature.properties['id'])
               .subscribe({
                 next: (details) => {
                   this.projectDetails = details;
@@ -104,12 +103,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       }
       ),
-      this.mapService.visualizationSettings$.subscribe(settings => {
-        this.averageType = settings.averageType;
-        this.populationArea = settings.populationArea;
-        this.getScore();
-        this.cdr.detectChanges();
-      })
+      // this.mapService.visualizationSettings$.subscribe(settings => {
+      //   this.averageType = settings.averageType;
+      //   this.populationArea = settings.populationArea;
+      //   this.getScore();
+      //   this.cdr.detectChanges();
+      // })
     );
     this.getScore();
 
@@ -247,7 +246,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private initializeChartData(): void {
-    this.initializeModesChart();
+    // this.initializeModesChart();
     this.initializeActivitiesChart();
     this.initializePersonaChart();
     this.loading = false;
@@ -584,7 +583,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       }
     };
-    console.log(highestScore)
 
     // Basis-Datensatz für die Hintergrundfarben (inverted)
     const baseDatasets = [

@@ -141,7 +141,9 @@
       },
       "CONFIRM_DELETE": "Bisch sicher, dass des Projäkt glöscht werre soll?",
       "CONFIRM_DELETE_GROUP": "Bisch sicher, dass die Projäktgruppe glöscht werre soll?"
-    }
+    },
+    "CANCEL": "Abrräsche",
+    "EXPORT": "Export"
   },
   "LEGEND": {
     "LVLA": "D erforderlichi Mobilitätszit isch maximal 35 % im lokale Vergliich.",
@@ -198,7 +200,14 @@
     "BACK_TOOLTIP": "E Schritt zrugggah",
     "FINISH_TOOLTIP": "Fertigstelle",
     "NEXT_TOOLTIP": "Wiiter",
-    "STEPS_TOOLTIP": "Schritt"
+    "STEPS_TOOLTIP": "Schritt",
+    "STEPS": {
+      "ACTIVITIES": "Aktivitäte",
+      "PERSONAS": "Personas",
+      "MODES": "Modi",
+      "AREA": "Gebiet uswähle",
+      "PROJECT_INFO": "Projäktinformatione"
+    }
   },
   "SIDEBAR": {
     "TITLE": "Details",
@@ -235,7 +244,9 @@
     "REDUCE_OPACITY_TOOLTIP": "Features weniger intensiv azeige",
     "RESTORE_OPACITY": "Karte widerherstelle",
     "ZOOM_TO_FEATURES": "Karte zentriere",
-    "ZOOM_TO_FEATURES_TOOLTIP": "Zentriert d'Karte wider zum Initialzustand"
+    "ZOOM_TO_FEATURES_TOOLTIP": "Zentriert d'Karte wider zum Initialzustand",
+    "EXPORT_PDF_TOOLTIP": "Naus haue",
+    "EXPORT_PDF": "Ins Blättle"
   },
   "ANALYZE": {
     "PERSONA": {
@@ -287,7 +298,8 @@
       "CENTER_MAP": "Karte zentrieren",
       "FREEZE_MAP": "Kartenoverlay einfrieren (für Screenshots)",
       "SHARE": "Teile",
-      "TOGGLE_HEXAGON_VIEW": "Hexagon Ansicht togglen"
+      "TOGGLE_HEXAGON_VIEW": "Hexagon Ansicht togglen",
+      "EXPORT_PDF": "Kärtle als PDFle exportirä"
     },
     "LOGOUT": "Ade",
     "SHOW_CREDITS": "Gugg e mol",
@@ -308,13 +320,16 @@
     "PERSONAS": "Personas",
     "NO_ACTIVITIES": "Kei Aktivitäte",
     "NO_PERSONAS": "Kei Personas",
-    "NO_DESCRIPTION": "Kei Beschriibig"
+    "NO_DESCRIPTION": "Kei Beschriibig",
+    "MODES": "Modes",
+    "NO_PROFILES": "Keine Profile gefunde"
   },
   "DETAILS": {
     "FIELDS": {
       "OVERVIEW": "Übersicht",
       "ACTIVITIES": "Aktivitäte"
-    }
+    },
+    "TITLE": "Details"
   },
   "HELP": {
     "GETTING_STARTED_TOOLTIP": "Erste Schritt mit de Awendig",
@@ -325,5 +340,16 @@
     "LOGIN": {
       "LOGIN": "Anmelde"
     }
+  },
+  "PDF_EXPORT": {
+    "FULL_MAP": "Ganzes Kärtle",
+    "CURRENT_VIEW": "Usschnitt",
+    "MAP_EXTENT": "Kärtle Bereich",
+    "RESOLUTION": "Auflösung (DPI)",
+    "PAPER_SIZE": "Pabbelesgrös",
+    "LANDSCAPE": "Breit",
+    "PORTRAIT": "Hoch",
+    "ORIENTATION": "Richtung",
+    "TITLE": "PDF Export"
   }
 }
