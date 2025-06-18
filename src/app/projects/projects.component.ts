@@ -33,7 +33,7 @@ interface ProjectProgress {
   calculated: number;
   finished: boolean;
   total: number;
-  hex_scores: any;
+  geojson: any;
 }
 
 @Component({
@@ -337,9 +337,8 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
     wsSubject.subscribe({
       next: (result: WebsocketResult) => {
-        if (result.result.hex_scores) {
-          const scores = JSON.parse(result.result.hex_scores);
-          this.mapv2Service.addSingleFeature(scores);
+        if (result.result.geojson) {
+          this.mapv2Service.addSingleFeature(result.result.geojson);
         }
         
         const projectToUpdate = this.findProjectById(result.result.project);

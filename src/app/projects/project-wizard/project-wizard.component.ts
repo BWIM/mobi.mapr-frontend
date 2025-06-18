@@ -901,7 +901,6 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     const hasPartiallySelectedLands = this.lands.some(land => this.isLandIndeterminate(land));
     
     this.hasCompletelySelectedLands = hasCompletelySelectedLands && !hasPartiallySelectedLands;
-    console.log('calculateStates', this.hasCompletelySelectedLands);
   }
   
   getLandSelectionState(land: Land): boolean {
