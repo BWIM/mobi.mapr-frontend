@@ -7,6 +7,7 @@ import { AuthService } from '../auth/auth.service';
 import { StyleSpecification, SourceSpecification, LayerSpecification, Map, LngLatBounds } from 'maplibre-gl';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { KeyboardShortcutsService, ShortcutAction } from './keyboard-shortcuts.service';
+import * as maplibregl from 'maplibre-gl';
 
 interface Bounds {
   minLng: number;
@@ -32,6 +33,9 @@ export class MapV2Service {
   private hexagonView: boolean = false;
   private selectedFeatureId: string | null = null;
   private scoreShown: boolean = false;
+  private temporaryFeatures: any[] = [];
+  private lastZoomTime: number = 0;
+  private readonly ZOOM_COOLDOWN = 3000; // 5 seconds in milliseconds
 
   constructor(
     private loadingService: LoadingService,
@@ -89,13 +93,20 @@ export class MapV2Service {
   }
 
   getBaseMapStyle(): StyleSpecification {
-    return {
+    const style: StyleSpecification = {
       version: 8,
       sources: {
         'carto-light': {
           type: 'raster',
           tiles: ['https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'],
           tileSize: 256,
+        } as SourceSpecification,
+        'temporary-geojson': {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: []
+          }
         } as SourceSpecification
       },
       layers: [
@@ -105,22 +116,63 @@ export class MapV2Service {
           source: 'carto-light',
           minzoom: 0,
           maxzoom: 19
+        } as LayerSpecification,
+        {
+          id: 'temporary-features',
+          type: 'fill',
+          source: 'temporary-geojson',
+          paint: {
+            'fill-color': [
+              'case',
+              ['<=', ['get', 'score'], 0],
+              'rgba(128, 128, 128, 0)',
+              ['<=', ['get', 'score'], 0.35],
+              'rgba(50, 97, 45, 0.7)',
+              ['<=', ['get', 'score'], 0.5],
+              'rgba(60, 176, 67, 0.7)',
+              ['<=', ['get', 'score'], 0.71],
+              'rgba(238, 210, 2, 0.7)',
+              ['<=', ['get', 'score'], 1],
+              'rgba(237, 112, 20, 0.7)',
+              ['<=', ['get', 'score'], 1.41],
+              'rgba(194, 24, 7, 0.7)',
+              'rgba(150, 86, 162, 0.7)'
+            ],
+            'fill-opacity': [
+              'interpolate',
+              ['cubic-bezier', 0.26, 0.38, 0.82, 0.36],
+              ['get', 'population_density'],
+              0, 0.2,
+              100, 0.5,
+              1000, 0.8,
+              5000, 0.9
+            ]
+          },
+          layout: {
+            visibility: 'visible'
+          }
         } as LayerSpecification
       ],
       glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf'
     };
+    return style;
   }
 
   resetMap(): void {
     this.map = null;
     this.shareKey = null;
+    this.currentProject = null;
     this.mapStyleSubject.next(this.getBaseMapStyle());
+    this.removeSingleFeatures();
   }
 
   setProject(projectId: string, shareKey?: string): void {
     this.currentProject = projectId;
     this.shareKey = shareKey || null;
     this.loadingService.startLoading();
+
+    // Clear any temporary features when loading a project
+    this.removeSingleFeatures();
 
     const token = this.authService.getAuthorizationHeaders().get('Authorization')?.split(' ')[1];
     let authParam = '';
@@ -329,8 +381,48 @@ export class MapV2Service {
     return baseStyle;
   }
 
-  addSingleFeature(scores: any): void {
-    console.log(scores);
+  addSingleFeature(geojson: any): void {
+    if (!this.map || this.currentProject) return;
+
+    this.temporaryFeatures.push(geojson.features[0]);
+
+    const source = this.map.getSource('temporary-geojson') as maplibregl.GeoJSONSource;
+    if (source) {
+      source.setData({
+        type: 'FeatureCollection',
+        features: this.temporaryFeatures
+      });
+
+      // Check if enough time has passed since last zoom
+      const currentTime = Date.now();
+      if (currentTime - this.lastZoomTime >= this.ZOOM_COOLDOWN) {
+        // zoom to the latest feature
+        if (geojson.features && geojson.features[0]?.geometry?.coordinates) {
+          const coordinates = geojson.features[0].geometry.coordinates[0][0];
+          const bounds = coordinates.reduce((bounds: LngLatBounds, coord: number[]) => {
+            return bounds.extend([coord[0], coord[1]]);
+          }, new LngLatBounds(coordinates[0], coordinates[0]));
+
+          this.map.fitBounds(bounds, {
+            padding: 50,
+            duration: 2000,
+            maxZoom: 10
+          });
+          this.lastZoomTime = currentTime;
+        }
+      }
+    }
+  }
+
+  removeSingleFeatures(): void {
+    this.temporaryFeatures = [];
+    const source = this.map?.getSource('temporary-geojson') as maplibregl.GeoJSONSource;
+    if (source) {
+      source.setData({
+        type: 'FeatureCollection',
+        features: []
+      });
+    }
   }
 
   ngOnDestroy() {
