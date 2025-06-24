@@ -16,11 +16,20 @@ interface ShareResponse {
 export class ShareService {
   private BASE_URL = `${environment.apiUrl}/share`;
   private currentShareKey: string | null = null;
+  private isShare: boolean = false;
 
   constructor(private http: HttpClient) {}
 
   setShareKey(key: string) {
     this.currentShareKey = key;
+  }
+
+  setIsShare(isShare: boolean) {
+    this.isShare = isShare;
+  }
+
+  getIsShare(): boolean {
+    return this.isShare;
   }
 
   getShareKey(): string | null {
@@ -36,7 +45,9 @@ export class ShareService {
   }
 
   createShare(project: number, resolution: string): Observable<ShareResponse> {
-    return this.http.get<ShareResponse>(`${this.BASE_URL}?id=${project}&resolution=${resolution}`);
+    return this.http.get<ShareResponse>(`${this.BASE_URL}/${project}/?resolution=${resolution}`, {
+      headers: this.getAuthHeaders()
+    });
   }
 
   getProject(key: string): Observable<ShareResponse | null> {

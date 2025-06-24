@@ -9,7 +9,7 @@
         </div>
     </div>
 
-    <div class="sidebar-tab absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-r-lg z-20 cursor-pointer hover:bg-gray-50 transition-all duration-200"
+    <div class="sidebar-tab absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-r-lg z-20 cursor-pointer hover:bg-gray-50 transition-all duration-200"
         (click)="toggleSidebar()">
         <div class="flex flex-col items-center p-3 gap-3">
             <i class="pi pi-angle-right text-gray-800 text-xl" [class.rotate-180]="rightSidebarExpanded"></i>
@@ -20,19 +20,17 @@
     <!-- Details Dialog -->
     <p-dialog 
         [(visible)]="rightSidebarExpanded"
-        position="left"
+        position="right"
         [closable]="true"
         [draggable]="false"
         class="h-full"
         [maximizable]="true"
         [resizable]="true"
-        styleClass="details-sidebar"
+        styleClass="share-sidebar"
         [style]="{width: '400px'}"
         (onHide)="isRightPinned = false">
-        <div class="p-3 h-full">
-            <div class="info-section h-full">
+        <div class="p-3 h-full" >
                 <app-share-sidebar [sharedProject]="sharedProject"></app-share-sidebar>
-            </div>
         </div>
     </p-dialog>
 </div>

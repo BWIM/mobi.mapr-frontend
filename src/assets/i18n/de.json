@@ -403,7 +403,7 @@
       },
       "STEP6": {
         "TITLE": "Details anzeigen",
-        "CONTENT": "Auf der rechten Seite des Bildschirms findest du alle Informationen zu dem Projekt, wie die Aktivitäten, Personas und Modi. Hier kannst du auch die Gewichtung auf der Karte umschalten oder die Karte exportieren."
+        "CONTENT": "Hier findest du alle Informationen zu dem Projekt, wie die Aktivitäten, Personas und Modi. Hier kannst du auch die Gewichtung auf der Karte umschalten oder die Karte exportieren."
       },
       "STEP7": {
         "TITLE": "Karte analysieren",
@@ -426,16 +426,40 @@
         "CONTENT": "Wir hoffen, dass dir das Tutorial gefallen hat und du viel Spaß mit mobi.mapr hast!"
       }
     },
-    "ADVANCED": {
-      "NAME": "Erweiterte Funktionen",
-      "DESCRIPTION": "Lerne erweiterte Funktionen und Tastenkürzel kennen",
+    "SHARE": {
+      "NAME": "Teilen",
+      "DESCRIPTION": "Lerne die wichtigsten Funktionen des Teilens kennen",
       "STEP1": {
-        "TITLE": "Tastenkürzel",
-        "CONTENT": "Verwenden Sie Tastenkürzel für schnelle Aktionen: Z für Karte zentrieren, F für Karte einfrieren, H für Hexagon-Ansicht."
+        "TITLE": "Willkommen!",
+        "CONTENT": "Willkommen beim mobi.mapr! Mit diesem kleinen Tutorial zeigen wir dir die wichtigsten Funktionen deiner geteilten Karte."
       },
       "STEP2": {
-        "TITLE": "Datenexport",
-        "CONTENT": "Exportiere deine Daten in verschiedenen Formaten über den Export-Button in den Projektdetails."
+        "TITLE": "Die Karte",
+        "CONTENT": "In der Mitte ist die Karte für Mobilitätsqualität. Du kannst zoomen, um andere Auflösungen zu erhalten. Du kannst direkt nach dem Tutorial anfangen zu spielen."
+      },
+      "STEP3": {
+        "TITLE": "Die Legende",
+        "CONTENT": "Unten links siehst du die Legende. Mit einem Klick erfährst du, was die einzelnen Farben bedeuten."
+      },
+      "STEP4": {
+        "TITLE": "Details anzeigen",
+        "CONTENT": "Hier findest du alle Informationen zu dem Projekt, wie die Aktivitäten, Personas und Modi."
+      },
+      "STEP5": {
+        "TITLE": "Karte analysieren",
+        "CONTENT": "Wenn du auf ein Gebiet auf der Karteklickst, bekommst du detaillierte Informationen, wie sich der Score zusammensetzt."
+      },
+      "STEP6": {
+        "TITLE": "Fokus auf Karte",
+        "CONTENT": "Um zur Karte zurückzukehren, klicke auf das schließen Symbol oben rechts."
+      },
+      "STEP7": {
+        "TITLE": "Mehr Informationen",
+        "CONTENT": "Unten rechts, kannst du mehr Informationen über die Anwendung erhalten, die Sprache einstellen, Tastaturkürzel anzeigen und dieses Tutorial erneut starten."
+      },
+      "STEP8": {
+        "TITLE": "Viel Spaß!",
+        "CONTENT": "Wir hoffen, dass dir das Tutorial gefallen hat und du viel Spaß mit mobi.mapr hast!"
       }
     }
   }

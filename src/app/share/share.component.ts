@@ -8,6 +8,7 @@ import { ShareProject } from './share.interface';
 import { LoadingService } from '../services/loading.service';
 import { MapV2Component } from '../map-v2/map-v2.component';
 import { MapV2Service } from '../map-v2/map-v2.service';
+import { TutorialService } from '../tutorial/tutorial.service';
 
 @Component({
   selector: 'app-share',
@@ -28,7 +29,8 @@ export class ShareComponent {
     private shareService: ShareService, 
     private route: ActivatedRoute, 
     private loadingService: LoadingService,
-    private mapService: MapV2Service
+    private mapService: MapV2Service,
+    private tutorialService: TutorialService
   ) {
     this.route.params.subscribe(params => {
       this.projectKey = params['key'];
@@ -37,6 +39,8 @@ export class ShareComponent {
 
   ngOnInit() {
     this.loadingService.startLoading();
+    this.shareService.setIsShare(true);
+    this.tutorialService.startTutorial('share');
     this.shareService.getProject(this.projectKey).subscribe(project => {
       this.project = project;
       if (project && project.id) {
@@ -49,6 +53,7 @@ export class ShareComponent {
       this.isRightPinned = true;
       this.toggleSidebar();
     });
+    this.loadingService.stopLoading();
   }
 
   toggleSidebar() {

@@ -11,6 +11,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../auth/auth.service';
 import { Router } from '@angular/router';
 import { TutorialService } from '../tutorial/tutorial.service';
+import { ShareService } from '../share/share.service';
 
 interface InfoComponent {
   name: string;
@@ -66,7 +67,7 @@ export class CreditsComponent implements OnInit {
 
   showShortcutsDialog = false;
 
-  constructor(private translate: TranslateService, private authService: AuthService, private router: Router, private tutorialService: TutorialService) {}
+  constructor(private translate: TranslateService, private authService: AuthService, private router: Router, private tutorialService: TutorialService, private shareService: ShareService) {}
 
   ngOnInit() {
     // Load saved language preference
@@ -134,15 +135,16 @@ export class CreditsComponent implements OnInit {
           this.showShortcuts();
         }
       },
-      // toggle tutorial
-      {
+    ];
+    if (!this.shareService.getIsShare()) {
+      this.items.push({
         icon: 'pi pi-book',
         label: this.translate.instant('CREDITS.TOGGLE_TUTORIAL'),
         command: () => {
           this.startTutorial();
         }
-      }
-    ];
+      });
+    }
   }
 
   visualComponents: InfoComponent[] = [

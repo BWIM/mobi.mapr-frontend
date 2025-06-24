@@ -122,26 +122,77 @@ export class TutorialService {
       ]
     },
     {
-      id: 'advanced',
-      name: 'TUTORIAL.ADVANCED.NAME',
-      description: 'TUTORIAL.ADVANCED.DESCRIPTION',
-      steps: [
-        {
-          id: 'advanced-1',
-          title: 'TUTORIAL.ADVANCED.STEP1.TITLE',
-          content: 'TUTORIAL.ADVANCED.STEP1.CONTENT',
-          type: 'informative'
-        },
-        {
-          id: 'advanced-2',
-          title: 'TUTORIAL.ADVANCED.STEP2.TITLE',
-          content: 'TUTORIAL.ADVANCED.STEP2.CONTENT',
-          type: 'highlight',
-          targetSelector: '.export-btn, [data-testid="export"], button:contains("Export")',
-          position: 'top',
-          offset: { x: 0, y: -10 }
-        }
-      ]
+      id: 'share',
+      name: 'TUTORIAL.SHARE.NAME',
+      description: 'TUTORIAL.SHARE.DESCRIPTION',
+      steps: [ {
+        id: 'share-1',
+        title: 'TUTORIAL.SHARE.STEP1.TITLE',
+        content: 'TUTORIAL.SHARE.STEP1.CONTENT',
+        type: 'informative'
+      },
+      {
+        id: 'share-2',
+        title: 'TUTORIAL.SHARE.STEP2.TITLE',
+        content: 'TUTORIAL.SHARE.STEP2.CONTENT',
+        type: 'informative',
+        targetSelector: '#map-container'
+      },
+      {
+        id: 'share-3',
+        title: 'TUTORIAL.SHARE.STEP3.TITLE',
+        content: 'TUTORIAL.SHARE.STEP3.CONTENT',
+        type: 'interactive',
+        targetSelector: '#legend',
+        position: 'right',
+        offset: { x: 0, y: 0 },
+        interactive: true
+      },{
+        id: 'share-4',
+        title: 'TUTORIAL.SHARE.STEP4.TITLE',
+        content: 'TUTORIAL.SHARE.STEP4.CONTENT',
+        type: 'highlight',
+        targetSelector: '.share-sidebar .p-dialog-content',
+        position: 'left',
+        offset: { x: -10, y: 0 }
+      },
+      {
+        id: 'share-5',
+        title: 'TUTORIAL.SHARE.STEP5.TITLE',
+        content: 'TUTORIAL.SHARE.STEP5.CONTENT',
+        type: 'interactive',
+        targetSelector: '#map-container',
+        offset: { x: 20, y: 20 },
+        position: 'center',
+        interactive: true,
+        showHighlight: false
+      },
+      {
+        id: 'share-6',
+        title: 'TUTORIAL.SHARE.STEP6.TITLE',
+        content: 'TUTORIAL.SHARE.STEP6.CONTENT',
+        type: 'interactive',
+        targetSelector: '.analyze-dialog .p-dialog-close-button',
+        offset: { x: 0, y: 0 },
+        position: 'bottom',
+        interactive: true
+      },{
+        id: 'share-7',
+        title: 'TUTORIAL.SHARE.STEP7.TITLE',
+        content: 'TUTORIAL.SHARE.STEP7.CONTENT',
+        type: 'interactive',
+        targetSelector: '#credits-sidebar .p-speeddial-button',
+        position: 'global-center',
+        offset: { x: 0, y: 0 },
+        interactive: true
+      },
+      {
+        id: 'share-8',
+        title: 'TUTORIAL.SHARE.STEP8.TITLE',
+        content: 'TUTORIAL.SHARE.STEP8.CONTENT',
+        type: 'informative',
+      }
+    ]
     }
   ];
 
@@ -237,7 +288,9 @@ export class TutorialService {
   }
 
   isLastStep(): boolean {
-    return this.config.currentStepIndex === 10;
+    const currentConfig = this.config;
+    const currentSet = this.getTutorialSet(currentConfig.currentSetId!);
+    return currentSet ? currentConfig.currentStepIndex === currentSet.steps.length - 1 : true;
   }
 
   markStepCompleted(): void {
