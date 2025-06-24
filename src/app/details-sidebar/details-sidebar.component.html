@@ -1,10 +1,11 @@
 <div class="h-full">
     <p-scrollPanel [style]="{width: '100%', height: '100%'}">
       <div *ngIf="projectInfo" class="p-4">
+        <div class="h-full">
         <div class="mb-4">
         </div>
 
-        <div class="mb-6">
+        <div class="mb-6"  id="details-sidebar-content" >
           <h3 class="text-xl font-semibold text-primary mb-2">
             {{ projectInfo.display_name }}
           </h3> 
@@ -43,7 +44,7 @@
         <!-- Separator -->
         <div class="my-6 border-t border-gray-200"></div>
 
-        <p-fieldset legend="{{'SIDEBAR.ACTIVITIES' | translate}}">
+        <p-fieldset legend="{{'SIDEBAR.ACTIVITIES' | translate}}" [toggleable]="true" [collapsed]="false">
           <ul class="list-disc pl-4 space-y-1">
             <li *ngFor="let activity of projectInfo.activities" class="text-gray-700">
               {{ activity }}
@@ -51,7 +52,7 @@
           </ul>
         </p-fieldset>
 
-        <p-fieldset legend="{{'SIDEBAR.MODES' | translate}}">
+        <p-fieldset legend="{{'SIDEBAR.MODES' | translate}}" [toggleable]="true" [collapsed]="true">
           <ul class="list-disc pl-4 space-y-1">
             <li *ngFor="let profile of projectInfo.profiles" class="text-gray-700">
               {{ profile }}
@@ -59,7 +60,7 @@
           </ul>
         </p-fieldset>
 
-        <p-fieldset legend="{{'SIDEBAR.PERSONAS' | translate}}">
+        <p-fieldset legend="{{'SIDEBAR.PERSONAS' | translate}}" [toggleable]="true" [collapsed]="true">
           <ul class="list-disc pl-4 space-y-1">
             <li *ngFor="let persona of projectInfo.personas" class="text-gray-700">
               {{ persona }}
@@ -122,6 +123,7 @@
       <div *ngIf="!projectInfo" class="p-4 text-center text-gray-500">
         {{ 'SIDEBAR.NO_PROJECT_SELECTED' | translate }}
       </div>
+    </div>
     </p-scrollPanel>
 </div>
 

@@ -76,14 +76,12 @@
     position: fixed;
     top: 0.5rem;
     left: 1rem;
-    z-index: 1000;
 }
 
 .right-controls {
     position: fixed;
     top: 0.5rem;
     right: 1rem;
-    z-index: 1000;
 }
 
 /* Button Styling */

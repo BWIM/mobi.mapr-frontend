@@ -6,6 +6,7 @@ import { AnalyzeService } from './analyze.service';
 import { Properties } from './analyze.interface';
 import { ProjectDetails } from '../projects/project.interface';
 import { MapGeoJSONFeature } from 'maplibre-gl';
+import { TutorialService } from '../tutorial/tutorial.service';
 
 
 @Component({
@@ -72,7 +73,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private analyzeService: AnalyzeService,
     private projectsService: ProjectsService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private tutorialService: TutorialService
   ) {
     this.subscriptions.push(
       this.analyzeService.visible$.subscribe(
@@ -660,6 +662,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   hide() {
     this.analyzeService.hide();
+  }
+
+  triggerTutorial() {
+    this.tutorialService.nextStep();
   }
 
   onWeightingChange(event: any): void {

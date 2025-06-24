@@ -305,7 +305,8 @@
     "SHOW_CREDITS": "Gugg e mol",
     "SHOW_HELP": "Frog?",
     "CHANGE_LANGUAGE": "Mol was anders",
-    "SHOW_SHORTCUTS": "Tastle zeige"
+    "SHOW_SHORTCUTS": "Tastle zeige",
+    "TOGGLE_TUTORIAL": "Gugg mol was ganget"
   },
   "EXPORT": {
     "IS_EXPORTING": "Export lauft grad...",

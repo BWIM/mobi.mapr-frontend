@@ -332,6 +332,7 @@
     "LOGOUT": "Abmelden",
     "SHOW_CREDITS": "Infos anzeigen",
     "SHOW_HELP": "Hilfe anzeigen",
+    "START_TUTORIAL": "Tutorial starten",
     "CHANGE_LANGUAGE": "Sprache wechseln",
     "SHOW_SHORTCUTS": "Tastaturkürzel"
   },
@@ -367,5 +368,75 @@
   },
   "SEARCH_OVERLAY": {
     "SEARCH_PLACEHOLDER": "Orte suchen"
+  },
+  "TUTORIAL": {
+    "STEP": "Schritt",
+    "OF": "von",
+    "PREVIOUS": "Zurück",
+    "NEXT": "Weiter",
+    "FINISH": "Fertig",
+    "SKIP": "Überspringen",
+    "SELECT_TUTORIAL": "Tutorial auswählen",
+    "CLICK_TO_CONTINUE": "Klicke auf das hervorgehobene Element, um fortzufahren",
+    "DASHBOARD": {
+      "NAME": "Willkommen Tutorial",
+      "DESCRIPTION": "Lerne die wichtigsten Funktionen der Anwendung kennen",
+      "STEP1": {
+        "TITLE": "Willkommen!",
+        "CONTENT": "Willkommen beim mobi.mapr! Mit diesem kleinen Tutorial zeigen wir dir die wichtigsten Funktionen des Tools. Du kannst das Tutorial jederzeit überspringen und später erneut starten. Um neu zu starten, klicke auf das gelbe i unten rechts und dann auf den obersten Knopf."
+      },
+      "STEP2": {
+        "TITLE": "Projekt-Übersicht",
+        "CONTENT": "Hier sind verschiedene vorberechnete Karten gelistet. Weiter unten findest du die Projekte, die du selbst erstellt hast."
+      },
+      "STEP3": {
+        "TITLE": "Karte anzeigen",
+        "CONTENT": "Um eine Karte anzuzeigen, klicke auf das kleine Symbol. Je nach Größe der Karte, dauert es ein paar Sekunden, bis die Karte geladen ist."
+      },
+      "STEP4": {
+        "TITLE": "Die Karte",
+        "CONTENT": "In der Mitte ist die Karte für Mobilitätsqualität. Du kannst zoomen, um andere Auflösungen zu erhalten. Du kannst direkt nach dem Tutorial anfangen zu spielen."
+      },
+      "STEP5": {
+        "TITLE": "Die Legende",
+        "CONTENT": "Unten links siehst du die Legende. Mit einem Klick erfährst du, was die einzelnen Farben bedeuten."
+      },
+      "STEP6": {
+        "TITLE": "Details anzeigen",
+        "CONTENT": "Auf der rechten Seite des Bildschirms findest du alle Informationen zu dem Projekt, wie die Aktivitäten, Personas und Modi. Hier kannst du auch die Gewichtung auf der Karte umschalten oder die Karte exportieren."
+      },
+      "STEP7": {
+        "TITLE": "Karte analysieren",
+        "CONTENT": "Wenn du auf ein Gebiet auf der Karteklickst, bekommst du detaillierte Informationen, wie sich der Score zusammensetzt."
+      },
+      "STEP8": {
+        "TITLE": "Fokus auf Karte",
+        "CONTENT": "Um zur Karte zurückzukehren, klicke auf das schließen Symbol oben rechts."
+      },
+      "STEP9": {
+        "TITLE": "Projekte anzeigen",
+        "CONTENT": "Klicke links auf die Projekte, um wieder alle Projekte anzuzeigen."
+      },
+      "STEP10": {
+        "TITLE": "Mehr Informationen",
+        "CONTENT": "Unten rechts, kannst du mehr Informationen über die Anwendung erhalten, die Sprache einstellen, Tastaturkürzel anzeigen und dieses Tutorial erneut starten."
+      },
+      "STEP11": {
+        "TITLE": "Viel Spaß!",
+        "CONTENT": "Wir hoffen, dass dir das Tutorial gefallen hat und du viel Spaß mit mobi.mapr hast!"
+      }
+    },
+    "ADVANCED": {
+      "NAME": "Erweiterte Funktionen",
+      "DESCRIPTION": "Lerne erweiterte Funktionen und Tastenkürzel kennen",
+      "STEP1": {
+        "TITLE": "Tastenkürzel",
+        "CONTENT": "Verwenden Sie Tastenkürzel für schnelle Aktionen: Z für Karte zentrieren, F für Karte einfrieren, H für Hexagon-Ansicht."
+      },
+      "STEP2": {
+        "TITLE": "Datenexport",
+        "CONTENT": "Exportiere deine Daten in verschiedenen Formaten über den Export-Button in den Projektdetails."
+      }
+    }
   }
 }

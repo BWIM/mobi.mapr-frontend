@@ -4,6 +4,7 @@ import { ProjectsComponent } from '../projects/projects.component';
 import { DetailsSidebarComponent } from '../details-sidebar/details-sidebar.component';
 import { LoadingSpinnerComponent } from '../shared/loading-spinner/loading-spinner.component';
 import { MapV2Component } from '../map-v2/map-v2.component';
+import { TutorialService } from '../tutorial/tutorial.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -26,9 +27,14 @@ export class DashboardComponent implements OnInit {
   isRightPinned: boolean = false;
   rightSidebarExpanded: boolean = false;
 
-  constructor() {}
+  constructor(private tutorialService: TutorialService) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
+    this.tutorialService.getTutorialStatus().subscribe((status) => {
+      if (status) {
+        this.tutorialService.startTutorial('dashboard');
+      }
+    });
   }
 
   showLeftSidebar() {

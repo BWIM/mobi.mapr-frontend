@@ -1,0 +1,118 @@
+<!-- Tutorial Overlay -->
+<div 
+  #overlay
+  *ngIf="config.showOverlay"
+  [class]="isFirstStep() || isLastStep() ? 'fixed inset-0 bg-transparent backdrop-blur-sm z-10000 flex items-center justify-center tutorial-overlay' : 'fixed inset-0 z-10000 flex items-center justify-center tutorial-overlay'"
+  [class.interactive-overlay]="isCurrentStepInteractive()"
+  [class.non-interactive-overlay]="!isCurrentStepInteractive()"
+  (click)="!isCurrentStepInteractive() && $event.stopPropagation()"
+>
+  <!-- Highlight Box for target elements -->
+  <div 
+    *ngIf="showHighlight && (currentStep?.type === 'highlight' || currentStep?.type === 'interactive') && currentStep?.showHighlight !== false"
+    [ngStyle]="highlightStyle"
+    class="tutorial-highlight"
+  ></div>
+
+  <!-- Info Box for highlight steps -->
+  <div 
+    *ngIf="currentStep?.type === 'highlight' || currentStep?.type === 'interactive'"
+    [ngStyle]="getInfoBoxPosition()"
+    class="bg-white rounded-lg shadow-lg p-4 max-w-sm border border-gray-200 tutorial-info-box z-[1200]"
+  >
+    <div class="flex items-start space-x-3">
+      <div class="flex-shrink-0">
+        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+          <i class="pi pi-info-circle text-blue-600 text-sm"></i>
+        </div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <h3 class="text-sm font-medium text-gray-900 mb-1">
+          {{ (currentStep?.title || '') | translate }}
+        </h3>
+        <p class="text-sm text-gray-600">
+          {{ (currentStep?.content || '') | translate }}
+        </p>
+        <p *ngIf="currentStep?.type === 'interactive'" class="text-xs text-blue-600 mt-2">
+          {{ 'TUTORIAL.CLICK_TO_CONTINUE' | translate }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Centered Info Box for informative steps -->
+  <div 
+    *ngIf="currentStep?.type === 'informative'"
+    class="bg-white rounded-lg shadow-lg p-6 max-w-md mx-4 border border-gray-200 tutorial-info-box z-[1200]"
+  >
+    <div class="text-center">
+      <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="pi pi-lightbulb text-blue-600 text-xl"></i>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-3">
+        {{ (currentStep?.title || '') | translate }}
+      </h3>
+      <p class="text-gray-600 mb-6">
+        {{ (currentStep?.content || '') | translate }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Navigation Controls -->
+  <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-[1200]">
+    <div class="bg-white rounded-lg shadow-lg p-4 flex items-center space-x-4">
+      <!-- Progress Indicator -->
+      <div class="flex items-center space-x-2">
+        <span class="text-sm text-gray-600">
+          {{ 'TUTORIAL.STEP' | translate }} {{ config.currentStepIndex + 1 }} {{ 'TUTORIAL.OF' | translate }} {{ currentSet?.steps?.length || 0 }}
+        </span>
+        <p-progressBar 
+          [value]="(config.currentStepIndex + 1) / (currentSet?.steps?.length || 1) * 100"
+          [showValue]="false"
+          styleClass="w-24"
+        ></p-progressBar>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="flex items-center space-x-2">
+        <!-- <p-button 
+          *ngIf="!isFirstStep()"
+          icon="pi pi-chevron-left"
+          [label]="'TUTORIAL.PREVIOUS' | translate"
+          size="small"
+          severity="secondary"
+          (onClick)="previousStep()"
+        ></p-button> -->
+        
+        <p-button 
+          *ngIf="!isLastStep()"
+          icon="pi pi-chevron-right"
+          iconPos="right"
+          [label]="'TUTORIAL.NEXT' | translate"
+          size="small"
+          [disabled]="isNextButtonDisabled()"
+          (onClick)="nextStep()"
+        ></p-button>
+        
+        <p-button 
+          *ngIf="isLastStep()"
+          icon="pi pi-check"
+          [label]="'TUTORIAL.FINISH' | translate"
+          size="small"
+          severity="success"
+          (onClick)="completeTutorial()"
+        ></p-button>
+      </div>
+
+      <!-- Skip Button -->
+      <p-button 
+        icon="pi pi-times"
+        [label]="'TUTORIAL.SKIP' | translate"
+        size="small"
+        severity="danger"
+        text
+        (onClick)="skipTutorial()"
+      ></p-button>
+    </div>
+  </div>
+</div>

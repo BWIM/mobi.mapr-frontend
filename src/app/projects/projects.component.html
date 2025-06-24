@@ -1,4 +1,4 @@
-<div class="h-full flex flex-col  overflow-hidden">
+<div class="h-full flex flex-col overflow-hidden">
     <p-toast></p-toast>
 
     <div class="h-full overflow-hidden min-w-0">
@@ -57,7 +57,8 @@
                                                 icon="pi pi-map"
                                                 (onClick)="showResults(project)"
                                                 [disabled]="!project.finished"
-                                                [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate">
+                                                [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate"
+                                                data-tutorial-target="show-results-btn">
                                             </p-button>
                                             <p-button 
                                                 icon="pi pi-ellipsis-v"

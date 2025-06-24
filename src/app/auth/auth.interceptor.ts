@@ -41,15 +41,6 @@ export const AuthInterceptor: HttpInterceptorFn = (
     return next(req.clone({ url }));
   }
 
-  // For protected assets (like boundaries)
-  if (req.url.includes('/assets/boundaries/')) {
-    if (!authService.isLoggedIn()) {
-      // Redirect to login if not authenticated
-      router.navigate(['/login']);
-      return throwError(() => new Error('Authentication required for this resource'));
-    }
-  }
-
   const headers = authService.getAuthorizationHeaders();
   const url = addSessionParameters(req.url, sessionService);
   

@@ -10,6 +10,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../auth/auth.service';
 import { Router } from '@angular/router';
+import { TutorialService } from '../tutorial/tutorial.service';
 
 interface InfoComponent {
   name: string;
@@ -65,7 +66,7 @@ export class CreditsComponent implements OnInit {
 
   showShortcutsDialog = false;
 
-  constructor(private translate: TranslateService, private authService: AuthService, private router: Router) {}
+  constructor(private translate: TranslateService, private authService: AuthService, private router: Router, private tutorialService: TutorialService) {}
 
   ngOnInit() {
     // Load saved language preference
@@ -132,6 +133,14 @@ export class CreditsComponent implements OnInit {
         command: () => {
           this.showShortcuts();
         }
+      },
+      // toggle tutorial
+      {
+        icon: 'pi pi-book',
+        label: this.translate.instant('CREDITS.TOGGLE_TUTORIAL'),
+        command: () => {
+          this.startTutorial();
+        }
       }
     ];
   }
@@ -187,6 +196,10 @@ export class CreditsComponent implements OnInit {
     const themeItem = this.items[3];
     themeItem.icon = this.isDarkMode ? 'pi pi-sun' : 'pi pi-moon';
     themeItem.tooltip = this.isDarkMode ? 'Light Mode' : 'Dark Mode';
+  }
+
+  startTutorial() {
+    this.tutorialService.startTutorial('dashboard');
   }
 
   switchLanguage(lang: string) {

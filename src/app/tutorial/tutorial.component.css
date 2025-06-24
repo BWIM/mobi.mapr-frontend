@@ -1,0 +1,50 @@
+.tutorial-highlight {
+  animation: pulse 2s infinite;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+  pointer-events: none;
+} 
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* Ensure the overlay blocks all interactions */
+.tutorial-overlay {
+  pointer-events: auto;
+}
+
+/* Interactive overlay allows clicks to pass through */
+.interactive-overlay {
+  pointer-events: none;
+}
+
+/* Non-interactive overlay blocks all interactions */
+.non-interactive-overlay {
+  pointer-events: auto;
+}
+
+/* Ensure info boxes and highlights are still interactive even in interactive mode */
+.interactive-overlay .tutorial-info-box {
+  pointer-events: auto;
+}
+
+/* Smooth transitions for info boxes */
+.tutorial-info-box {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .tutorial-info-box {
+    max-width: 90vw;
+    margin: 0 1rem;
+  }
+}

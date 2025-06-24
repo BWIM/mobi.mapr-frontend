@@ -16,6 +16,7 @@ import { LoadingService } from '../services/loading.service';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { forkJoin } from 'rxjs';
 import { MapV2Service } from '../map-v2/map-v2.service';
+import { TutorialService } from '../tutorial/tutorial.service';
 
 interface GroupedProjects {
   group: ProjectGroup;
@@ -93,7 +94,8 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     private reloadService: ProjectsReloadService,
     private loadingService: LoadingService,
     private confirmationService: ConfirmationService,
-    private mapv2Service: MapV2Service
+    private mapv2Service: MapV2Service,
+    private tutorialService: TutorialService
   ) {
     this.initializeMapActions();
     
@@ -268,6 +270,11 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   showResults(project: Project | undefined): void {
     try {
       if (!project) return;
+      
+      // Mark tutorial step as completed if this is an interactive step
+      if (this.tutorialService.isCurrentStepInteractive()) {
+        this.tutorialService.markStepCompleted();
+      }
       
       this.loadingService.startLoading();
       this.analyzeService.setCurrentProject(project.id.toString());

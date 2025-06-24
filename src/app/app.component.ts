@@ -13,6 +13,7 @@ import { KeyboardShortcutsService, ShortcutAction } from './map-v2/keyboard-shor
 import { Subscription } from 'rxjs';
 import { HostListener } from '@angular/core';
 import { PdfExportDialogComponent } from './map-v2/pdf-export-dialog/pdf-export-dialog.component';
+import { TutorialComponent } from './tutorial/tutorial.component';
 
 @Component({
   selector: 'app-root',
@@ -26,7 +27,8 @@ import { PdfExportDialogComponent } from './map-v2/pdf-export-dialog/pdf-export-
     AnalyzeComponent, 
     CreditsComponent, 
     StatisticsComponent,
-    PdfExportDialogComponent
+    PdfExportDialogComponent,
+    TutorialComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'

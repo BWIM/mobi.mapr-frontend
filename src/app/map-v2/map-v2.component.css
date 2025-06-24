@@ -3,3 +3,9 @@
   height: 100%;
   position: relative;
 }
+app-legend {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  z-index: 100;
+}

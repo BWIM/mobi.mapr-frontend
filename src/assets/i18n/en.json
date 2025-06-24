@@ -331,8 +331,10 @@
     "LOGOUT": "Logout",
     "SHOW_CREDITS": "Show attributions",
     "SHOW_HELP": "show help",
+    "START_TUTORIAL": "Start Tutorial",
     "CHANGE_LANGUAGE": "Change language",
-    "SHOW_SHORTCUTS": "Keyboard shortcuts"
+    "SHOW_SHORTCUTS": "Keyboard shortcuts",
+    "TOGGLE_TUTORIAL": "Start the tutorial"
   },
   "HELP": {
     "GETTING_STARTED_TOOLTIP": "Getting started with the application",
@@ -366,5 +368,51 @@
   },
   "SEARCH_OVERLAY": {
     "SEARCH_PLACEHOLDER": "Search locations"
+  },
+  "TUTORIAL": {
+    "STEP": "Step",
+    "OF": "of",
+    "PREVIOUS": "Previous",
+    "NEXT": "Next",
+    "FINISH": "Finish",
+    "SKIP": "Skip",
+    "SELECT_TUTORIAL": "Select Tutorial",
+    "CLICK_TO_CONTINUE": "Click the highlighted element to continue",
+    "DASHBOARD": {
+      "NAME": "Welcome Tutorial",
+      "DESCRIPTION": "Learn about the main features of the application",
+      "STEP1": {
+        "TITLE": "Welcome!",
+        "CONTENT": "Welcome to mobi.mapr! This tutorial will guide you through the main features of the application."
+      },
+      "STEP2": {
+        "TITLE": "Projects",
+        "CONTENT": "Here you can manage your projects. Click on the Projects tab to view and edit your projects."
+      },
+      "STEP3": {
+        "TITLE": "Details",
+        "CONTENT": "The Details tab shows you detailed information about selected projects and areas on the map."
+      },
+      "STEP4": {
+        "TITLE": "Help & Settings",
+        "CONTENT": "Use the Speed Dial menu to access help, settings, language selection and other features."
+      },
+      "STEP5": {
+        "TITLE": "You're all set!",
+        "CONTENT": "You've completed the welcome tutorial. Explore the application and discover all its features!"
+      }
+    },
+    "ADVANCED": {
+      "NAME": "Advanced Features",
+      "DESCRIPTION": "Learn about advanced features and keyboard shortcuts",
+      "STEP1": {
+        "TITLE": "Keyboard Shortcuts",
+        "CONTENT": "Use keyboard shortcuts for quick actions: Z to center map, F to freeze map, H to toggle hexagon view."
+      },
+      "STEP2": {
+        "TITLE": "Data Export",
+        "CONTENT": "Export your data in various formats using the export button in the project details."
+      }
+    }
   }
 }
