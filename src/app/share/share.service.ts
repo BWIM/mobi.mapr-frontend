@@ -18,6 +18,9 @@ export class ShareService {
   private currentShareKey: string | null = null;
   private isShare: boolean = false;
 
+  private isShareSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public isShare$: Observable<boolean> = this.isShareSubject.asObservable();
+
   private isRightSidebarExpanded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   public isRightSidebarExpanded$ = this.isRightSidebarExpanded.asObservable();
@@ -29,7 +32,9 @@ export class ShareService {
   }
 
   setIsShare(isShare: boolean) {
+    console.log('setIsShare', isShare);
     this.isShare = isShare;
+    this.isShareSubject.next(isShare);
   }
 
   getIsShare(): boolean {

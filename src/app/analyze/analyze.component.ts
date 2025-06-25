@@ -6,7 +6,7 @@ import { AnalyzeService } from './analyze.service';
 import { Properties } from './analyze.interface';
 import { ProjectDetails } from '../projects/project.interface';
 import { MapGeoJSONFeature } from 'maplibre-gl';
-import { TutorialService } from '../tutorial/tutorial.service';
+import { ShareService } from '../share/share.service';
 
 
 @Component({
@@ -16,7 +16,7 @@ import { TutorialService } from '../tutorial/tutorial.service';
   templateUrl: './analyze.component.html',
   styleUrl: './analyze.component.css'
 })
-export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
+export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   visible: boolean = false;
   loading: boolean = false;
   private subscriptions: Subscription[] = [];
@@ -42,6 +42,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   doughnutChartOptions: any;
   activitiesWeightChartData: any;
   weightChartOptions: any;
+  isShare: boolean = false;
 
   getScore(): {score: number, color: string} {
     if (!this.properties) return {score: 0, color: ''};
@@ -74,7 +75,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     private analyzeService: AnalyzeService,
     private projectsService: ProjectsService,
     private cdr: ChangeDetectorRef,
-    private tutorialService: TutorialService
+    private shareService: ShareService
   ) {
     this.subscriptions.push(
       this.analyzeService.visible$.subscribe(
@@ -105,6 +106,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       }
       ),
+      // Subscribe to isShare changes
+      this.shareService.isShare$.subscribe(isShare => {
+        this.isShare = isShare;
+      })
       // this.mapService.visualizationSettings$.subscribe(settings => {
       //   this.averageType = settings.averageType;
       //   this.populationArea = settings.populationArea;
@@ -245,6 +250,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       responsive: true,
       maintainAspectRatio: false
     };
+
   }
 
   private initializeChartData(): void {
@@ -651,9 +657,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     };
   }
 
-  ngOnInit() {
-  }
-
   ngOnDestroy() {
     if (this.subscriptions) {
       this.subscriptions.forEach(subscription => subscription.unsubscribe());
@@ -706,6 +709,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
+    // isShare is now handled by subscription in constructor
   }
 
   getScoreName(score: number): string {
