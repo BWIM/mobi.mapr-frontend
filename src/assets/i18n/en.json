@@ -383,7 +383,8 @@
       "DESCRIPTION": "Learn the main features of the application",
       "STEP1": {
         "TITLE": "Welcome!",
-        "CONTENT": "Welcome to mobi.mapr! This short tutorial will show you the main features of the tool. You can skip the tutorial at any time and restart it later. To restart, click the yellow 'i' in the bottom right and then click the top button."
+        "CONTENT": "Welcome to mobi.mapr! This short tutorial will show you the main features of the tool. You can skip the tutorial at any time and restart it later. To restart, click the yellow 'i' in the bottom right and then click the top button.",
+        "NEXT_HINT": "Click the button in the bottom center to start."
       },
       "STEP2": {
         "TITLE": "Project Overview",
@@ -391,7 +392,8 @@
       },
       "STEP3": {
         "TITLE": "View Map",
-        "CONTENT": "To view a map, click the small icon. Depending on the size of the map, it may take a few seconds to load."
+        "CONTENT": "To view a map, click the small icon. Depending on the size of the map, it may take a few seconds to load.",
+        "NEXT_HINT": "Click the button in the bottom center to start."
       },
       "STEP4": {
         "TITLE": "The Map",
@@ -399,31 +401,38 @@
       },
       "STEP5": {
         "TITLE": "The Legend",
-        "CONTENT": "In the bottom left, you’ll see the legend. Click on it to see what the different colors mean."
+        "CONTENT": "In the bottom left, you’ll see the legend. Click on it to see what the different colors mean.",
+        "NEXT_HINT": "Click on the legend to see what the different colors mean."
       },
       "STEP6": {
         "TITLE": "Show Details",
-        "CONTENT": "Here you’ll find all project-related information such as activities, personas, and modes. You can also switch map weighting or export the map here."
+        "CONTENT": "Here you’ll find all project-related information such as activities, personas, and modes. You can also switch map weighting or export the map here.",
+        "NEXT_HINT": "Click on the details to see more information."
       },
       "STEP7": {
         "TITLE": "Analyze Map",
-        "CONTENT": "Clicking on an area of the map will show you detailed information about how the score is composed."
+        "CONTENT": "Clicking on an area of the map will show you detailed information about how the score is composed.",
+        "NEXT_HINT": "Click on a colored area on the map."
       },
       "STEP8": {
         "TITLE": "Focus on Map",
-        "CONTENT": "To return to the map, click the close icon in the top right."
+        "CONTENT": "To return to the map, click the close icon in the top right.",
+        "NEXT_HINT": "Click on the close icon in the top right to return to the map."
       },
       "STEP9": {
         "TITLE": "Show Projects",
-        "CONTENT": "Click on 'Projects' on the left to view all projects again."
+        "CONTENT": "Click on 'Projects' on the left to view all projects again.",
+        "NEXT_HINT": "Click on the 'Projects' on the left to view all projects again."
       },
       "STEP10": {
         "TITLE": "More Information",
-        "CONTENT": "In the bottom right, you can get more information about the application, set the language, view keyboard shortcuts, and restart this tutorial."
+        "CONTENT": "In the bottom right, you can get more information about the application, set the language, view keyboard shortcuts, and restart this tutorial.",
+        "NEXT_HINT": "The 'i' button is in the bottom right corner."
       },
       "STEP11": {
         "TITLE": "Have Fun!",
-        "CONTENT": "We hope you enjoyed the tutorial and have lots of fun with mobi.mapr!"
+        "CONTENT": "We hope you enjoyed the tutorial and have lots of fun with mobi.mapr!",
+        "NEXT_HINT": "You can end the tutorial at the bottom."
       }
     },
     "SHARE": {
@@ -431,7 +440,8 @@
       "DESCRIPTION": "Learn the main features of sharing",
       "STEP1": {
         "TITLE": "Welcome!",
-        "CONTENT": "Welcome to mobi.mapr! This short tutorial will show you the key features of your shared map."
+        "CONTENT": "Welcome to mobi.mapr! This short tutorial will show you the key features of your shared map.",
+        "NEXT_HINT": "Click the button in the bottom center to start."
       },
       "STEP2": {
         "TITLE": "The Map",
@@ -439,11 +449,13 @@
       },
       "STEP3": {
         "TITLE": "The Legend",
-        "CONTENT": "In the bottom left, you’ll see the legend. Click on it to see what the different colors mean."
+        "CONTENT": "In the bottom left, you’ll see the legend. Click on it to see what the different colors mean.",
+        "NEXT_HINT": "Click somewhere on the legend."
       },
       "STEP3-1": {
         "TITLE": "Overview",
-        "CONTENT": "You can close the legend at any time by clicking on it again."
+        "CONTENT": "You can close the legend at any time by clicking on it again.",
+        "NEXT_HINT": "Click somewhere on the legend to close it."
       },
       "STEP4": {
         "TITLE": "Show Details",
@@ -451,19 +463,23 @@
       },
       "STEP5": {
         "TITLE": "Analyze Map",
-        "CONTENT": "Clicking on an area of the map will show you detailed information about how the score is composed."
+        "CONTENT": "Clicking on an area of the map will show you detailed information about how the score is composed.",
+        "NEXT_HINT": "Click on a colored area on the map."
       },
       "STEP6": {
         "TITLE": "Focus on Map",
-        "CONTENT": "To return to the map, click the close icon in the top right."
+        "CONTENT": "To return to the map, click the close icon in the top right.",
+        "NEXT_HINT": "Click on the close icon in the top right to return to the map."
       },
       "STEP7": {
         "TITLE": "More Information",
-        "CONTENT": "In the bottom right, you can get more information about the application, set the language, view keyboard shortcuts, and restart this tutorial."
+        "CONTENT": "In the bottom right, you can get more information about the application, set the language, view keyboard shortcuts, and restart this tutorial.",
+        "NEXT_HINT": "The 'i' button is in the bottom right corner."
       },
       "STEP8": {
         "TITLE": "Have Fun!",
-        "CONTENT": "We hope you enjoyed the tutorial and have lots of fun with mobi.mapr!"
+        "CONTENT": "We hope you enjoyed the tutorial and have lots of fun with mobi.mapr!",
+        "NEXT_HINT": "You can end the tutorial at the bottom."
       }
     }
   }

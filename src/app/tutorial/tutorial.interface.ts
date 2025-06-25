@@ -9,6 +9,7 @@ export interface TutorialStep {
   interactive?: boolean; // Whether the step requires user interaction to continue
   showHighlight?: boolean; // Whether to show the blue highlight box (defaults to true for highlight/interactive)
   requireMapFeatureClick?: boolean; // Whether the step requires clicking on a map feature specifically
+  nextHint?: string; // Hint for the next step
 }
 
 export interface TutorialSet {

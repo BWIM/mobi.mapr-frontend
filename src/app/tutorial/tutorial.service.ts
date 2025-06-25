@@ -25,7 +25,8 @@ export class TutorialService {
           id: 'dashboard-1',
           title: 'TUTORIAL.DASHBOARD.STEP1.TITLE',
           content: 'TUTORIAL.DASHBOARD.STEP1.CONTENT',
-          type: 'informative'
+          type: 'informative',
+          nextHint: 'TUTORIAL.DASHBOARD.STEP1.NEXT_HINT'
         },
         {
           id: 'dashboard-2',
@@ -44,7 +45,8 @@ export class TutorialService {
           targetSelector: '[data-tutorial-target="show-results-btn"]:first-of-type',
           position: 'right',
           offset: { x: 10, y: 0 },
-          interactive: true
+          interactive: true,
+          nextHint: 'TUTORIAL.DASHBOARD.STEP3.NEXT_HINT'
         },
         {
           id: 'dashboard-4',
@@ -62,7 +64,8 @@ export class TutorialService {
           position: 'right',
           offset: { x: 0, y: 0 },
           interactive: true,
-          requireMapFeatureClick: false
+          requireMapFeatureClick: false,
+          nextHint: 'TUTORIAL.DASHBOARD.STEP5.NEXT_HINT'
         },
         {
           id: 'dashboard-5-1',
@@ -74,7 +77,8 @@ export class TutorialService {
           offset: { x: 0, y: 0 },
           interactive: true,
           showHighlight: false,
-          requireMapFeatureClick: false
+          requireMapFeatureClick: false,
+          nextHint: 'TUTORIAL.SHARE.STEP3-1.NEXT_HINT'
         },
         {
           id: 'dashboard-6',
@@ -95,7 +99,8 @@ export class TutorialService {
           position: 'global-top-left',
           interactive: true,
           showHighlight: false,
-          requireMapFeatureClick: true
+          requireMapFeatureClick: true,
+          nextHint: 'TUTORIAL.DASHBOARD.STEP7.NEXT_HINT'
         },
         {
           id: 'dashboard-8',
@@ -107,7 +112,8 @@ export class TutorialService {
           position: 'bottom',
           showHighlight: false,
           interactive: true,
-          requireMapFeatureClick: false
+          requireMapFeatureClick: false,
+          nextHint: 'TUTORIAL.DASHBOARD.STEP8.NEXT_HINT'
         },
         {
           id: 'dashboard-9',
@@ -118,7 +124,8 @@ export class TutorialService {
           position: 'right',
           offset: { x: 0, y: 10 },
           interactive: true,
-          requireMapFeatureClick: false
+          requireMapFeatureClick: false,
+          nextHint: 'TUTORIAL.DASHBOARD.STEP9.NEXT_HINT'
         },
         {
           id: 'dashboard-10',
@@ -129,13 +136,15 @@ export class TutorialService {
           position: 'global-center',
           offset: { x: 0, y: 0 },
           interactive: true,
-          requireMapFeatureClick: false
+          requireMapFeatureClick: false,
+          nextHint: 'TUTORIAL.DASHBOARD.STEP10.NEXT_HINT'
         },
         {
           id: 'dashboard-11',
           title: 'TUTORIAL.DASHBOARD.STEP11.TITLE',
           content: 'TUTORIAL.DASHBOARD.STEP11.CONTENT',
           type: 'informative',
+          nextHint: 'TUTORIAL.DASHBOARD.STEP11.NEXT_HINT'
         }
       ]
     },
@@ -147,7 +156,8 @@ export class TutorialService {
         id: 'share-1',
         title: 'TUTORIAL.SHARE.STEP1.TITLE',
         content: 'TUTORIAL.SHARE.STEP1.CONTENT',
-        type: 'informative'
+        type: 'informative',
+        nextHint: 'TUTORIAL.SHARE.STEP1.NEXT_HINT'
       },
       {
         id: 'share-2',
@@ -165,7 +175,8 @@ export class TutorialService {
         position: 'right',
         offset: { x: 0, y: 0 },
         interactive: true,
-        requireMapFeatureClick: false
+        requireMapFeatureClick: false,
+        nextHint: 'TUTORIAL.SHARE.STEP3.NEXT_HINT'
       },
       {
         id: 'share-3-1',
@@ -177,15 +188,16 @@ export class TutorialService {
         offset: { x: 0, y: 0 },
         interactive: true,
         showHighlight: false,
-        requireMapFeatureClick: false
+        requireMapFeatureClick: false,
+        nextHint: 'TUTORIAL.SHARE.STEP3-1.NEXT_HINT'
       },{
         id: 'share-4',
         title: 'TUTORIAL.SHARE.STEP4.TITLE',
         content: 'TUTORIAL.SHARE.STEP4.CONTENT',
         type: 'highlight',
         targetSelector: '.share-sidebar .p-dialog-content',
-        position: 'top',
-        offset: { x: 0, y: -50 }
+        position: 'left',
+        offset: { x: -50, y: 0 }
       },
       {
         id: 'share-5',
@@ -197,7 +209,8 @@ export class TutorialService {
         position: 'global-top-left',
         interactive: true,
         showHighlight: false,
-        requireMapFeatureClick: true
+        requireMapFeatureClick: true,
+        nextHint: 'TUTORIAL.SHARE.STEP5.NEXT_HINT'
       },
       {
         id: 'share-6',
@@ -209,7 +222,8 @@ export class TutorialService {
         position: 'bottom',
         showHighlight: false,
         interactive: true,
-        requireMapFeatureClick: false
+        requireMapFeatureClick: false,
+        nextHint: 'TUTORIAL.SHARE.STEP6.NEXT_HINT'
       },{
         id: 'share-7',
         title: 'TUTORIAL.SHARE.STEP7.TITLE',
@@ -219,13 +233,15 @@ export class TutorialService {
         position: 'global-center',
         offset: { x: 0, y: 0 },
         interactive: true,
-        requireMapFeatureClick: false
+        requireMapFeatureClick: false,
+        nextHint: 'TUTORIAL.SHARE.STEP7.NEXT_HINT'
       },
       {
         id: 'share-8',
         title: 'TUTORIAL.SHARE.STEP8.TITLE',
         content: 'TUTORIAL.SHARE.STEP8.CONTENT',
         type: 'informative',
+        nextHint: 'TUTORIAL.SHARE.STEP8.NEXT_HINT'
       }
     ]
     }

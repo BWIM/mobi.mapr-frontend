@@ -384,7 +384,8 @@
       "DESCRIPTION": "Lerne die wichtigsten Funktionen der Anwendung kennen",
       "STEP1": {
         "TITLE": "Willkommen!",
-        "CONTENT": "Willkommen beim mobi.mapr! Mit diesem kleinen Tutorial zeigen wir dir die wichtigsten Funktionen des Tools. Du kannst das Tutorial jederzeit überspringen und später erneut starten. Um neu zu starten, klicke auf das gelbe i unten rechts und dann auf den obersten Knopf."
+        "CONTENT": "Willkommen beim mobi.mapr! Mit diesem kleinen Tutorial zeigen wir dir die wichtigsten Funktionen des Tools. Du kannst das Tutorial jederzeit überspringen und später erneut starten. Um neu zu starten, klicke auf das gelbe i unten rechts und dann auf den obersten Knopf.",
+        "NEXT_HINT": "Klicke auf den Knopf unten in der Mitte, um loszulegen."
       },
       "STEP2": {
         "TITLE": "Projekt-Übersicht",
@@ -392,7 +393,8 @@
       },
       "STEP3": {
         "TITLE": "Karte anzeigen",
-        "CONTENT": "Um eine Karte anzuzeigen, klicke auf das kleine Symbol. Je nach Größe der Karte, dauert es ein paar Sekunden, bis die Karte geladen ist."
+        "CONTENT": "Um eine Karte anzuzeigen, klicke auf das kleine Symbol. Je nach Größe der Karte, dauert es ein paar Sekunden, bis die Karte geladen ist.",
+        "NEXT_HINT": "Klicke auf den Knopf, um die Karte anzuzeigen."
       },
       "STEP4": {
         "TITLE": "Die Karte",
@@ -400,7 +402,8 @@
       },
       "STEP5": {
         "TITLE": "Die Legende",
-        "CONTENT": "Unten links siehst du die Legende. Mit einem Klick erfährst du, was die einzelnen Farben bedeuten."
+        "CONTENT": "Unten links siehst du die Legende. Mit einem Klick erfährst du, was die einzelnen Farben bedeuten.",
+        "NEXT_HINT": "Klicke auf die Legende, um mehr Informationen zu erhalten."
       },
       "STEP6": {
         "TITLE": "Details anzeigen",
@@ -408,23 +411,28 @@
       },
       "STEP7": {
         "TITLE": "Karte analysieren",
-        "CONTENT": "Wenn du auf ein Gebiet auf der Karte klickst, bekommst du detaillierte Informationen, wie sich der Score zusammensetzt."
+        "CONTENT": "Wenn du auf ein Gebiet auf der Karte klickst, bekommst du detaillierte Informationen, wie sich der Score zusammensetzt.",
+        "NEXT_HINT": "Klicke auf ein farbiges Gebiet auf der Karte, das du gerade siehst."
       },
       "STEP8": {
         "TITLE": "Fokus auf Karte",
-        "CONTENT": "Um zur Karte zurückzukehren, klicke auf das schließen Symbol oben rechts."
+        "CONTENT": "Um zur Karte zurückzukehren, klicke auf das schließen Symbol oben rechts.",
+        "NEXT_HINT": "Klicke auf das schließen Symbol oben rechts, um zur Karte zurückzukehren."
       },
       "STEP9": {
         "TITLE": "Projekte anzeigen",
-        "CONTENT": "Klicke links auf die Projekte, um wieder alle Projekte anzuzeigen."
+        "CONTENT": "Klicke links auf die Projekte, um wieder alle Projekte anzuzeigen.",
+        "NEXT_HINT": "Klicke links auf das Seitenelement."
       },
       "STEP10": {
         "TITLE": "Mehr Informationen",
-        "CONTENT": "Unten rechts, kannst du mehr Informationen über die Anwendung erhalten, die Sprache einstellen, Tastaturkürzel anzeigen und dieses Tutorial erneut starten."
+        "CONTENT": "Unten rechts, kannst du mehr Informationen über die Anwendung erhalten, die Sprache einstellen, Tastaturkürzel anzeigen und dieses Tutorial erneut starten.",
+        "NEXT_HINT": "Der i-Knopf ist ganz rechts unten in der Ecke"
       },
       "STEP11": {
         "TITLE": "Viel Spaß!",
-        "CONTENT": "Wir hoffen, dass dir das Tutorial gefallen hat und du viel Spaß mit mobi.mapr hast!"
+        "CONTENT": "Wir hoffen, dass dir das Tutorial gefallen hat und du viel Spaß mit mobi.mapr hast!",
+        "NEXT_HINT": "Du kannst unten das Tutorial beenden!"
       }
     },
     "SHARE": {
@@ -432,7 +440,8 @@
       "DESCRIPTION": "Lerne die wichtigsten Funktionen des Teilens kennen",
       "STEP1": {
         "TITLE": "Willkommen!",
-        "CONTENT": "Willkommen beim mobi.mapr! Mit diesem kleinen Tutorial zeigen wir dir die wichtigsten Funktionen deiner geteilten Karte."
+        "CONTENT": "Willkommen beim mobi.mapr! Mit diesem kleinen Tutorial zeigen wir dir die wichtigsten Funktionen deiner geteilten Karte.",
+        "NEXT_HINT": "Klicke auf den Knopf unten in der Mitte, um loszulegen."
       },
       "STEP2": {
         "TITLE": "Die Karte",
@@ -440,11 +449,13 @@
       },
       "STEP3": {
         "TITLE": "Die Legende",
-        "CONTENT": "Unten links siehst du die Legende. Mit einem Klick erfährst du, was die einzelnen Farben bedeuten."
+        "CONTENT": "Unten links siehst du die Legende. Mit einem Klick erfährst du, was die einzelnen Farben bedeuten.",
+        "NEXT_HINT": "Klicke irgendwo auf die Legende."
       },
       "STEP3-1": {
         "TITLE": "Übersicht",
-        "CONTENT": "Du kannst die Legende jederzeit schließen, indem du erneut auf diese klickst."
+        "CONTENT": "Du kannst die Legende jederzeit schließen, indem du erneut auf diese klickst.",
+        "NEXT_HINT": "Klicke irgendwo auf die Legende, um diese zu schließen."
       },
       "STEP4": {
         "TITLE": "Details anzeigen",
@@ -452,19 +463,23 @@
       },
       "STEP5": {
         "TITLE": "Karte analysieren",
-        "CONTENT": "Wenn du auf ein Gebiet auf der Karte klickst, bekommst du detaillierte Informationen, wie sich der Score zusammensetzt."
+        "CONTENT": "Wenn du auf ein Gebiet auf der Karte klickst, bekommst du detaillierte Informationen, wie sich der Score zusammensetzt.",
+        "NEXT_HINT": "Klicke auf ein farbiges Gebiet auf der Karte, das du gerade siehst."
       },
       "STEP6": {
         "TITLE": "Fokus auf Karte",
-        "CONTENT": "Um zur Karte zurückzukehren, klicke auf das schließen Symbol oben rechts."
+        "CONTENT": "Um zur Karte zurückzukehren, klicke auf das schließen Symbol oben rechts.",
+        "NEXT_HINT": "Klicke auf das schließen Symbol oben rechts, um zur Karte zurückzukehren."
       },
       "STEP7": {
         "TITLE": "Mehr Informationen",
-        "CONTENT": "Unten rechts, kannst du mehr Informationen über die Anwendung erhalten, die Sprache einstellen, Tastaturkürzel anzeigen und dieses Tutorial erneut starten."
+        "CONTENT": "Unten rechts, kannst du mehr Informationen über die Anwendung erhalten, die Sprache einstellen, Tastaturkürzel anzeigen und dieses Tutorial erneut starten.",
+        "NEXT_HINT": "Der i-Knopf ist ganz rechts unten in der Ecke"
       },
       "STEP8": {
         "TITLE": "Viel Spaß!",
-        "CONTENT": "Wir hoffen, dass dir das Tutorial gefallen hat und du viel Spaß mit mobi.mapr hast!"
+        "CONTENT": "Wir hoffen, dass dir das Tutorial gefallen hat und du viel Spaß mit mobi.mapr hast!",
+        "NEXT_HINT": "Du kannst unten das Tutorial beenden!"
       }
     }
   }
