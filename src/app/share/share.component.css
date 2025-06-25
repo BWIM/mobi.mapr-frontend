@@ -200,3 +200,13 @@
     padding: 0;
     height: calc(100vh - 4rem);
 }
+
+:host ::ng-deep .share-sidebar.p-dialog {
+    margin-right: 0 !important;
+    transform: translateX(0) !important;
+}
+
+:host ::ng-deep .share-sidebar .p-dialog-content {
+    padding: 0;
+    height: calc(100vh - 4rem);
+}
