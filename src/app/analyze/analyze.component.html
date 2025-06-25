@@ -40,11 +40,11 @@
         <p-tabs [value]="'activities'" class="flex-1" (activeIndexChange)="triggerChartResize()">
             <p-tablist>
                 <p-tab value="activities">Aktivitäten</p-tab>
-                <p-tab value="persona" *ngIf="!isShare">Persona</p-tab>
+                <p-tab value="persona">Persona</p-tab>
             </p-tablist>
             
             <!-- Activities Tab -->
-            <p-tabpanel [value]="'activities'" >
+            <p-tabpanel [value]="'activities'" class="h-full">
                 <div class="flex flex-col h-full">
                     <div class="flex justify-between items-center mb-3">
                         <h3 class="text-lg font-medium">{{ 'ANALYZE.ACTIVITIES.TITLE' | translate }}</h3>
@@ -70,7 +70,7 @@
             </p-tabpanel>
 
             <!-- Persona Tab -->
-            <p-tabpanel *ngIf="!isShare" [value]="'persona'">
+            <p-tabpanel [value]="'persona'" class="h-full">
                 <div class="flex flex-col h-full">
                     <h3 class="text-lg font-medium mb-3">{{ 'ANALYZE.PERSONA.TITLE' | translate }}</h3>
                     <div *ngIf="hasPersonaData()" class="flex-1 chart-wrapper">
