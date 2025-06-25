@@ -665,7 +665,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   triggerTutorial() {
-    this.tutorialService.nextStep();
+    // this.tutorialService.nextStep();
   }
 
   onWeightingChange(event: any): void {

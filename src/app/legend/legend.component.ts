@@ -2,6 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
 import {Subscription} from 'rxjs';
 import { SharedModule } from '../shared/shared.module';
+import { LegendService } from './legend.service';
 
 type ScoreLevel = {
   name: string; 
@@ -23,7 +24,7 @@ export class LegendComponent implements OnInit, OnDestroy {
   isPinned: boolean = false;
   isExpanded: boolean = false;
 
-  constructor(private translate: TranslateService) {}
+  constructor(private translate: TranslateService, private legendService: LegendService) {}
 
   scoreLevel?: ScoreLevel;
   sliderElementId: string = 'slider';
@@ -32,11 +33,11 @@ export class LegendComponent implements OnInit, OnDestroy {
   scoreLevels: ScoreLevel[] = [];
 
   togglePin() {
-    this.isPinned = !this.isPinned;
+    this.legendService.togglePin();
   }
 
   toggleExpand() {
-    this.isExpanded = !this.isExpanded;
+    this.legendService.toggleExpand();
   }
 
   ngOnInit() {
@@ -45,6 +46,14 @@ export class LegendComponent implements OnInit, OnDestroy {
     // Listen for language changes and update translations
     this.langChangeSubscription = this.translate.onLangChange.subscribe(() => {
       this.initializeScoreLevels();
+    });
+
+    this.legendService.isPinned$.subscribe((pinned) => {
+      this.isPinned = pinned;
+    });
+
+    this.legendService.isExpanded$.subscribe((expanded) => {  
+      this.isExpanded = expanded;
     });
   }
 

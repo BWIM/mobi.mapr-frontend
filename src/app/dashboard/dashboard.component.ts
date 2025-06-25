@@ -5,6 +5,7 @@ import { DetailsSidebarComponent } from '../details-sidebar/details-sidebar.comp
 import { LoadingSpinnerComponent } from '../shared/loading-spinner/loading-spinner.component';
 import { MapV2Component } from '../map-v2/map-v2.component';
 import { TutorialService } from '../tutorial/tutorial.service';
+import { DashboardService } from './dashboard.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -27,13 +28,16 @@ export class DashboardComponent implements OnInit {
   isRightPinned: boolean = false;
   rightSidebarExpanded: boolean = false;
 
-  constructor(private tutorialService: TutorialService) {}
+  constructor(private tutorialService: TutorialService, private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
     this.tutorialService.getTutorialStatus().subscribe((status) => {
       if (status) {
         this.tutorialService.startTutorial('dashboard');
       }
+    });
+    this.dashboardService.rightSidebarExpanded$.subscribe((expanded) => {
+      this.rightSidebarExpanded = expanded;
     });
   }
 
@@ -42,7 +46,11 @@ export class DashboardComponent implements OnInit {
   }
 
   showRightSidebar() {
-    this.rightSidebarExpanded = true;
+    this.dashboardService.toggleRightSidebarExpanded();
+  }
+
+  toggleSidebar() {
+    this.dashboardService.toggleRightSidebarExpanded();
   }
 
 }

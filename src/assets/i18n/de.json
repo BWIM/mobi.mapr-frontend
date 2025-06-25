@@ -334,7 +334,8 @@
     "SHOW_HELP": "Hilfe anzeigen",
     "START_TUTORIAL": "Tutorial starten",
     "CHANGE_LANGUAGE": "Sprache wechseln",
-    "SHOW_SHORTCUTS": "Tastaturkürzel"
+    "SHOW_SHORTCUTS": "Tastaturkürzel",
+    "TOGGLE_TUTORIAL": "Tutorial anzeigen"
   },
   "HELP": {
     "GETTING_STARTED_TOOLTIP": "Erste Schritte mit der Anwendung",
@@ -407,7 +408,7 @@
       },
       "STEP7": {
         "TITLE": "Karte analysieren",
-        "CONTENT": "Wenn du auf ein Gebiet auf der Karteklickst, bekommst du detaillierte Informationen, wie sich der Score zusammensetzt."
+        "CONTENT": "Wenn du auf ein Gebiet auf der Karte klickst, bekommst du detaillierte Informationen, wie sich der Score zusammensetzt."
       },
       "STEP8": {
         "TITLE": "Fokus auf Karte",
@@ -441,13 +442,17 @@
         "TITLE": "Die Legende",
         "CONTENT": "Unten links siehst du die Legende. Mit einem Klick erfährst du, was die einzelnen Farben bedeuten."
       },
+      "STEP3-1": {
+        "TITLE": "Übersicht",
+        "CONTENT": "Du kannst die Legende jederzeit schließen, indem du erneut auf diese klickst."
+      },
       "STEP4": {
         "TITLE": "Details anzeigen",
         "CONTENT": "Hier findest du alle Informationen zu dem Projekt, wie die Aktivitäten, Personas und Modi."
       },
       "STEP5": {
         "TITLE": "Karte analysieren",
-        "CONTENT": "Wenn du auf ein Gebiet auf der Karteklickst, bekommst du detaillierte Informationen, wie sich der Score zusammensetzt."
+        "CONTENT": "Wenn du auf ein Gebiet auf der Karte klickst, bekommst du detaillierte Informationen, wie sich der Score zusammensetzt."
       },
       "STEP6": {
         "TITLE": "Fokus auf Karte",

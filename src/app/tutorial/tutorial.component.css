@@ -4,6 +4,7 @@
   pointer-events: none;
 } 
 
+
 @keyframes pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
@@ -16,11 +17,34 @@
   }
 }
 
+.continue-button {
+  animation: goldenPulse 2s infinite;
+  box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.3);
+}
+
+.continue-button:disabled {
+  animation: none !important;
+  box-shadow: none !important;
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+@keyframes goldenPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(194, 165, 64, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+  }
+}
+
 /* Ensure the overlay blocks all interactions */
 .tutorial-overlay {
   pointer-events: auto;
 }
-
 /* Interactive overlay allows clicks to pass through */
 .interactive-overlay {
   pointer-events: none;

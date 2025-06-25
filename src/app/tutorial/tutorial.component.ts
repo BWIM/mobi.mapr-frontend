@@ -3,6 +3,10 @@ import { SharedModule } from '../shared/shared.module';
 import { TutorialService } from './tutorial.service';
 import { TutorialStep, TutorialSet, TutorialConfig } from './tutorial.interface';
 import { Subscription } from 'rxjs';
+import { LegendService } from '../legend/legend.service';
+import { DashboardService } from '../dashboard/dashboard.service';
+import { ShareService } from '../share/share.service';
+import { MapV2Service } from '../map-v2/map-v2.service';
 
 @Component({
   selector: 'app-tutorial',
@@ -29,8 +33,9 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
   showHighlight = false;
   
   private subscription = new Subscription();
+  private mapFeatureClickHandler: ((event: any) => void) | null = null;
 
-  constructor(private tutorialService: TutorialService) {}
+  constructor(private tutorialService: TutorialService, private legendService: LegendService, private dashboardService: DashboardService, private shareService: ShareService, private mapV2Service: MapV2Service) {}
 
   ngOnInit(): void {
     this.tutorialSets = this.tutorialService.getTutorialSets();
@@ -70,6 +75,7 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
     this.removeTargetElementClickListener();
+    this.removeMapFeatureClickListener();
   }
 
   startTutorial(setId: string): void {
@@ -114,7 +120,19 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onTargetElementClick(event?: Event): void {
     if (this.isCurrentStepInteractive() && !this.isStepCompleted()) {
-      this.tutorialService.markStepCompleted();
+      // Check if this step requires map feature clicks
+      if (this.currentStep?.requireMapFeatureClick == false) {
+        this.tutorialService.markStepCompleted();
+      }
+    }
+  }
+
+  onMapFeatureClick(): void {
+    if (this.isCurrentStepInteractive() && !this.isStepCompleted() && this.currentStep?.requireMapFeatureClick) {
+      console.log('onMapFeatureClick', this.currentStep?.requireMapFeatureClick);
+      setTimeout(() => {
+        this.tutorialService.markStepCompleted();
+      }, 10);
     }
   }
 
@@ -227,6 +245,14 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
         left = window.innerWidth / 2 - 150 + offset.x;
         top = window.innerHeight / 2 - 60 + offset.y;
         break;
+      case 'global-top-left':
+        left = 50 + offset.x;
+        top = 50 + offset.y;
+        break;
+      case 'global-top-right':
+        left = window.innerWidth - 300 + offset.x;
+        top = 10 + offset.y;
+        break;
     }
 
     return {
@@ -244,6 +270,11 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
     if (targetElement) {
       targetElement.addEventListener('click', this.onTargetElementClick.bind(this));
     }
+
+    // Set up map feature click listener if this step requires it
+    if (this.currentStep.requireMapFeatureClick) {
+      this.setupMapFeatureClickListener();
+    }
   }
 
   private removeTargetElementClickListener(): void {
@@ -253,38 +284,66 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
     if (targetElement) {
       targetElement.removeEventListener('click', this.onTargetElementClick.bind(this));
     }
+
+    // Remove map feature click listener if it was set up
+    if (this.currentStep.requireMapFeatureClick) {
+      this.removeMapFeatureClickListener();
+    }
   }
 
   private handleUIStateChanges(): void {
     if (!this.currentStep) return;
-    
-    // Collapse legend after legend step (dashboard-5) when moving to next step
-    if (this.currentStep.id === 'dashboard-6') {
-      setTimeout(() => {
-        this.collapseLegend();
-      }, 1000);
+
+    if (this.currentStep.id === 'share-2') {
+      console.log('share-2');
+      this.shareService.toggleRightSidebarExpanded();
     }
-    
+
+    if (this.currentStep.id === 'share-4') {
+      this.shareService.toggleRightSidebarExpanded();
+    }
+
+    if (this.currentStep.id === 'share-5') {
+      this.shareService.toggleRightSidebarExpanded();
+    }
+
+    if (this.currentStep.id === 'dashboard-4') {
+      console.log('dashboard-4');
+      setTimeout(() => {
+        this.dashboardService.toggleRightSidebarExpanded();
+      }, 10);
+    }
+
+    if (this.currentStep.id === 'dashboard-6') {
+      console.log('dashboard-5-1');
+      this.dashboardService.toggleRightSidebarExpanded();;
+    }
+
     // Close details sidebar before map step (dashboard-7)
     if (this.currentStep.id === 'dashboard-7') {
-      this.closeDetailsSidebar();
+      console.log('dashboard-7');
+      setTimeout(() => {
+        this.dashboardService.toggleRightSidebarExpanded();
+      }, 10);
+    }
+
+  }
+
+  private setupMapFeatureClickListener(): void {
+    const map = this.mapV2Service.getMap();
+    if (map) {
+      // Store the bound function so we can remove it later
+      this.mapFeatureClickHandler = this.onMapFeatureClick.bind(this);
+      map.on('click', 'geodata-fill', this.mapFeatureClickHandler);
     }
   }
 
-  private collapseLegend(): void {
-    // Find and collapse the legend element
-    const legendElement = document.querySelector('#legend');
-    if (legendElement) {
-      // click on the legend element
-      (legendElement as HTMLElement).click();
+  private removeMapFeatureClickListener(): void {
+    const map = this.mapV2Service.getMap();
+    if (map && this.mapFeatureClickHandler) {
+      map.off('click', 'geodata-fill', this.mapFeatureClickHandler);
+      this.mapFeatureClickHandler = null;
     }
   }
 
-  private closeDetailsSidebar(): void {
-    // Find and close the details sidebar
-    const detailsSidebar = document.querySelector('.details-sidebar .p-dialog-close-button');
-    if (detailsSidebar) {
-        (detailsSidebar as HTMLElement).click();
-    }
-  }
 }

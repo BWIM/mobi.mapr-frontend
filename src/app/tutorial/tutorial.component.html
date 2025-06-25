@@ -2,7 +2,7 @@
 <div 
   #overlay
   *ngIf="config.showOverlay"
-  [class]="isFirstStep() || isLastStep() ? 'fixed inset-0 bg-transparent backdrop-blur-sm z-10000 flex items-center justify-center tutorial-overlay' : 'fixed inset-0 z-10000 flex items-center justify-center tutorial-overlay'"
+  [class]="isFirstStep() ? 'fixed inset-0 bg-transparent backdrop-blur-sm z-10000 flex items-center justify-center tutorial-overlay' : 'fixed inset-0 z-10000 flex items-center justify-center tutorial-overlay'"
   [class.interactive-overlay]="isCurrentStepInteractive()"
   [class.non-interactive-overlay]="!isCurrentStepInteractive()"
   (click)="!isCurrentStepInteractive() && $event.stopPropagation()"
@@ -43,7 +43,7 @@
   <!-- Centered Info Box for informative steps -->
   <div 
     *ngIf="currentStep?.type === 'informative'"
-    class="bg-white rounded-lg shadow-lg p-6 max-w-md mx-4 border border-gray-200 tutorial-info-box z-[1200]"
+    class="absolute top-[16.67vh] left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg p-6 max-w-md mx-4 border border-gray-200 tutorial-info-box z-[1200]"
   >
     <div class="text-center">
       <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -89,7 +89,9 @@
           icon="pi pi-chevron-right"
           iconPos="right"
           [label]="'TUTORIAL.NEXT' | translate"
+          title="{{'TUTORIAL.NEXT' | translate}}"
           size="small"
+          class="continue-button"
           [disabled]="isNextButtonDisabled()"
           (onClick)="nextStep()"
         ></p-button>
@@ -98,8 +100,10 @@
           *ngIf="isLastStep()"
           icon="pi pi-check"
           [label]="'TUTORIAL.FINISH' | translate"
+          title="{{'TUTORIAL.FINISH' | translate}}"
           size="small"
-          severity="success"
+          class="continue-button"
+          severity="info"
           (onClick)="completeTutorial()"
         ></p-button>
       </div>
@@ -107,9 +111,11 @@
       <!-- Skip Button -->
       <p-button 
         icon="pi pi-times"
-        [label]="'TUTORIAL.SKIP' | translate"
         size="small"
-        severity="danger"
+        severity="secondary"
+        class="skip-button"
+        *ngIf="!isLastStep()"
+        title="{{'TUTORIAL.SKIP' | translate}}"
         text
         (onClick)="skipTutorial()"
       ></p-button>

@@ -61,15 +61,28 @@ export class TutorialService {
           targetSelector: '#legend',
           position: 'right',
           offset: { x: 0, y: 0 },
-          interactive: true
+          interactive: true,
+          requireMapFeatureClick: false
+        },
+        {
+          id: 'dashboard-5-1',
+          title: 'TUTORIAL.SHARE.STEP3-1.TITLE',
+          content: 'TUTORIAL.SHARE.STEP3-1.CONTENT',
+          type: 'interactive',
+          targetSelector: '#legend-full',
+          position: 'top',
+          offset: { x: 0, y: 0 },
+          interactive: true,
+          showHighlight: false,
+          requireMapFeatureClick: false
         },
         {
           id: 'dashboard-6',
           title: 'TUTORIAL.DASHBOARD.STEP6.TITLE',
           content: 'TUTORIAL.DASHBOARD.STEP6.CONTENT',
           type: 'highlight',
-          targetSelector: '#details-sidebar',
-          position: 'left',
+          targetSelector: '.details-sidebar .p-dialog-content',
+          position: 'global-top-right',
           offset: { x: -10, y: 0 }
         },
         {
@@ -79,9 +92,10 @@ export class TutorialService {
           type: 'interactive',
           targetSelector: '#map-container',
           offset: { x: 20, y: 20 },
-          position: 'center',
+          position: 'global-top-left',
           interactive: true,
-          showHighlight: false
+          showHighlight: false,
+          requireMapFeatureClick: true
         },
         {
           id: 'dashboard-8',
@@ -91,7 +105,9 @@ export class TutorialService {
           targetSelector: '.analyze-dialog .p-dialog-close-button',
           offset: { x: 0, y: 0 },
           position: 'bottom',
-          interactive: true
+          showHighlight: false,
+          interactive: true,
+          requireMapFeatureClick: false
         },
         {
           id: 'dashboard-9',
@@ -101,7 +117,8 @@ export class TutorialService {
           targetSelector: '#projects-sidebar-tab',
           position: 'right',
           offset: { x: 0, y: 10 },
-          interactive: true
+          interactive: true,
+          requireMapFeatureClick: false
         },
         {
           id: 'dashboard-10',
@@ -111,7 +128,8 @@ export class TutorialService {
           targetSelector: '#credits-sidebar .p-speeddial-button',
           position: 'global-center',
           offset: { x: 0, y: 0 },
-          interactive: true
+          interactive: true,
+          requireMapFeatureClick: false
         },
         {
           id: 'dashboard-11',
@@ -146,15 +164,28 @@ export class TutorialService {
         targetSelector: '#legend',
         position: 'right',
         offset: { x: 0, y: 0 },
-        interactive: true
+        interactive: true,
+        requireMapFeatureClick: false
+      },
+      {
+        id: 'share-3-1',
+        title: 'TUTORIAL.SHARE.STEP3-1.TITLE',
+        content: 'TUTORIAL.SHARE.STEP3-1.CONTENT',
+        type: 'interactive',
+        targetSelector: '#legend-full',
+        position: 'top',
+        offset: { x: 0, y: 0 },
+        interactive: true,
+        showHighlight: false,
+        requireMapFeatureClick: false
       },{
         id: 'share-4',
         title: 'TUTORIAL.SHARE.STEP4.TITLE',
         content: 'TUTORIAL.SHARE.STEP4.CONTENT',
         type: 'highlight',
         targetSelector: '.share-sidebar .p-dialog-content',
-        position: 'left',
-        offset: { x: -10, y: 0 }
+        position: 'top',
+        offset: { x: 0, y: -50 }
       },
       {
         id: 'share-5',
@@ -163,9 +194,10 @@ export class TutorialService {
         type: 'interactive',
         targetSelector: '#map-container',
         offset: { x: 20, y: 20 },
-        position: 'center',
+        position: 'global-top-left',
         interactive: true,
-        showHighlight: false
+        showHighlight: false,
+        requireMapFeatureClick: true
       },
       {
         id: 'share-6',
@@ -175,7 +207,9 @@ export class TutorialService {
         targetSelector: '.analyze-dialog .p-dialog-close-button',
         offset: { x: 0, y: 0 },
         position: 'bottom',
-        interactive: true
+        showHighlight: false,
+        interactive: true,
+        requireMapFeatureClick: false
       },{
         id: 'share-7',
         title: 'TUTORIAL.SHARE.STEP7.TITLE',
@@ -184,7 +218,8 @@ export class TutorialService {
         targetSelector: '#credits-sidebar .p-speeddial-button',
         position: 'global-center',
         offset: { x: 0, y: 0 },
-        interactive: true
+        interactive: true,
+        requireMapFeatureClick: false
       },
       {
         id: 'share-8',

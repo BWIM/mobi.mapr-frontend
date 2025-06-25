@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {environment} from '../../environments/environment';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {Observable, of} from 'rxjs';
+import {BehaviorSubject, Observable, of} from 'rxjs';
 import {catchError} from 'rxjs/operators';
 import { ShareProject } from './share.interface';
 
@@ -17,6 +17,10 @@ export class ShareService {
   private BASE_URL = `${environment.apiUrl}/share`;
   private currentShareKey: string | null = null;
   private isShare: boolean = false;
+
+  private isRightSidebarExpanded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
+  public isRightSidebarExpanded$ = this.isRightSidebarExpanded.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -71,5 +75,13 @@ export class ShareService {
         return of(null);
       })
     );
+  }
+
+  toggleRightSidebarExpanded() {
+    this.isRightSidebarExpanded.next(!this.isRightSidebarExpanded.value);
+  }
+
+  getRightSidebarExpanded() {
+    return this.isRightSidebarExpanded.asObservable();
   }
 }
