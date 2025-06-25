@@ -55,5 +55,22 @@
         </p-button>
       </div>
     </form>
+
+    <!-- Language Selector -->
+    <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div class="flex items-center justify-center space-x-2">
+        <i class="pi pi-globe text-gray-600 dark:text-gray-400"></i>
+        <p-dropdown
+          [options]="languages"
+          [(ngModel)]="currentLang"
+          optionLabel="name"
+          optionValue="code"
+          placeholder="Sprache wählen"
+          (onChange)="onLanguageChange($event)"
+          styleClass="w-32"
+          [showClear]="false">
+        </p-dropdown>
+      </div>
+    </div>
   </p-card>
 </div>

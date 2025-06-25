@@ -376,42 +376,94 @@
     "NEXT": "Next",
     "FINISH": "Finish",
     "SKIP": "Skip",
-    "SELECT_TUTORIAL": "Select Tutorial",
-    "CLICK_TO_CONTINUE": "Click the highlighted element to continue",
+    "SELECT_TUTORIAL": "Select tutorial",
+    "CLICK_TO_CONTINUE": "Click on the highlighted element to continue",
     "DASHBOARD": {
       "NAME": "Welcome Tutorial",
-      "DESCRIPTION": "Learn about the main features of the application",
+      "DESCRIPTION": "Learn the main features of the application",
       "STEP1": {
         "TITLE": "Welcome!",
-        "CONTENT": "Welcome to mobi.mapr! This tutorial will guide you through the main features of the application."
+        "CONTENT": "Welcome to mobi.mapr! This short tutorial will show you the main features of the tool. You can skip the tutorial at any time and restart it later. To restart, click the yellow 'i' in the bottom right and then click the top button."
       },
       "STEP2": {
-        "TITLE": "Projects",
-        "CONTENT": "Here you can manage your projects. Click on the Projects tab to view and edit your projects."
+        "TITLE": "Project Overview",
+        "CONTENT": "Here you can find various precomputed maps. Further down, you will find the projects you created yourself."
       },
       "STEP3": {
-        "TITLE": "Details",
-        "CONTENT": "The Details tab shows you detailed information about selected projects and areas on the map."
+        "TITLE": "View Map",
+        "CONTENT": "To view a map, click the small icon. Depending on the size of the map, it may take a few seconds to load."
       },
       "STEP4": {
-        "TITLE": "Help & Settings",
-        "CONTENT": "Use the Speed Dial menu to access help, settings, language selection and other features."
+        "TITLE": "The Map",
+        "CONTENT": "In the center is the map showing mobility quality. You can zoom to get different resolutions. You can start exploring right after the tutorial."
       },
       "STEP5": {
-        "TITLE": "You're all set!",
-        "CONTENT": "You've completed the welcome tutorial. Explore the application and discover all its features!"
+        "TITLE": "The Legend",
+        "CONTENT": "In the bottom left, you’ll see the legend. Click on it to see what the different colors mean."
+      },
+      "STEP6": {
+        "TITLE": "Show Details",
+        "CONTENT": "Here you’ll find all project-related information such as activities, personas, and modes. You can also switch map weighting or export the map here."
+      },
+      "STEP7": {
+        "TITLE": "Analyze Map",
+        "CONTENT": "Clicking on an area of the map will show you detailed information about how the score is composed."
+      },
+      "STEP8": {
+        "TITLE": "Focus on Map",
+        "CONTENT": "To return to the map, click the close icon in the top right."
+      },
+      "STEP9": {
+        "TITLE": "Show Projects",
+        "CONTENT": "Click on 'Projects' on the left to view all projects again."
+      },
+      "STEP10": {
+        "TITLE": "More Information",
+        "CONTENT": "In the bottom right, you can get more information about the application, set the language, view keyboard shortcuts, and restart this tutorial."
+      },
+      "STEP11": {
+        "TITLE": "Have Fun!",
+        "CONTENT": "We hope you enjoyed the tutorial and have lots of fun with mobi.mapr!"
       }
     },
-    "ADVANCED": {
-      "NAME": "Advanced Features",
-      "DESCRIPTION": "Learn about advanced features and keyboard shortcuts",
+    "SHARE": {
+      "NAME": "Share",
+      "DESCRIPTION": "Learn the main features of sharing",
       "STEP1": {
-        "TITLE": "Keyboard Shortcuts",
-        "CONTENT": "Use keyboard shortcuts for quick actions: Z to center map, F to freeze map, H to toggle hexagon view."
+        "TITLE": "Welcome!",
+        "CONTENT": "Welcome to mobi.mapr! This short tutorial will show you the key features of your shared map."
       },
       "STEP2": {
-        "TITLE": "Data Export",
-        "CONTENT": "Export your data in various formats using the export button in the project details."
+        "TITLE": "The Map",
+        "CONTENT": "In the center is the map showing mobility quality. You can zoom to get different resolutions. You can start exploring right after the tutorial."
+      },
+      "STEP3": {
+        "TITLE": "The Legend",
+        "CONTENT": "In the bottom left, you’ll see the legend. Click on it to see what the different colors mean."
+      },
+      "STEP3-1": {
+        "TITLE": "Overview",
+        "CONTENT": "You can close the legend at any time by clicking on it again."
+      },
+      "STEP4": {
+        "TITLE": "Show Details",
+        "CONTENT": "Here you’ll find all project-related information such as activities, personas, and modes."
+      },
+      "STEP5": {
+        "TITLE": "Analyze Map",
+        "CONTENT": "Clicking on an area of the map will show you detailed information about how the score is composed."
+      },
+      "STEP6": {
+        "TITLE": "Focus on Map",
+        "CONTENT": "To return to the map, click the close icon in the top right."
+      },
+      "STEP7": {
+        "TITLE": "More Information",
+        "CONTENT": "In the bottom right, you can get more information about the application, set the language, view keyboard shortcuts, and restart this tutorial."
+      },
+      "STEP8": {
+        "TITLE": "Have Fun!",
+        "CONTENT": "We hope you enjoyed the tutorial and have lots of fun with mobi.mapr!"
       }
     }
   }

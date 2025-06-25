@@ -353,5 +353,103 @@
   },
   "SEARCH_OVERLAY": {
     "SEARCH_PLACEHOLDER": "Lurge gan"
+  },
+  "TUTORIAL": {
+    "STEP": "Schrittle",
+    "OF": "von",
+    "PREVIOUS": "Zrugg",
+    "NEXT": "Weiterle",
+    "FINISH": "Ferdig",
+    "SKIP": "Ibrspringa",
+    "SELECT_TUTORIAL": "Tutorial aussuacha",
+    "CLICK_TO_CONTINUE": "Drugg uff des glenkte Elementle, zom witerganga",
+    "DASHBOARD": {
+      "NAME": "Willkomme-Tutorial",
+      "DESCRIPTION": "Lern d' Hauptsacha vo dr App kenne",
+      "STEP1": {
+        "TITLE": "Grüß Gottle!",
+        "CONTENT": "Grüß dich bei mobi.mapr! Mit dem kloine Tutorial zeiga mr dir d' wichtischde Funktiona. Du kasch's jederzit abbrecha ond spädr nomol aafanga. Zum Neistarta drucksch unte rechts uff's gelbe i ond dann uff dr erschde Knopf."
+      },
+      "STEP2": {
+        "TITLE": "Projekt-Übersichtle",
+        "CONTENT": "Do siehst fertiga Kartla. No weiter unte findsch dei eigana Projekte."
+      },
+      "STEP3": {
+        "TITLE": "Kärtle aaluega",
+        "CONTENT": "Zum Kärtle aaluega, druck uff s kloine Symbol. Je nochdem wia groß s Kärtle isch, dauert's a weng."
+      },
+      "STEP4": {
+        "TITLE": "Des Kärtle",
+        "CONTENT": "In dr Midd isch s Kärtle zur Mobilitätsqualität. Du kasch zomma ond nufffahra, wia du wittsch. No'm Tutorial kannst glei loslegga."
+      },
+      "STEP5": {
+        "TITLE": "Dr Beschreib",
+        "CONTENT": "Unte links siehsch dr Beschreib. Klick nei, dann siehsch was d' Farb bedeuta."
+      },
+      "STEP6": {
+        "TITLE": "Details aaluega",
+        "CONTENT": "Do findsch Infos zum Projekt: Aktivitäta, Personas ond Modi. Da kasch au d' Wertig ännra oder s Kärtle exportiera."
+      },
+      "STEP7": {
+        "TITLE": "Kärtle analysiera",
+        "CONTENT": "Wenn du uff e Gebiet drucksch, kriegsch genau Infos, wie sich dr Score zammesetzt."
+      },
+      "STEP8": {
+        "TITLE": "Zruck zum Kärtle",
+        "CONTENT": "Zum zruckkomma, druck oben rechts uff's X-Symbol."
+      },
+      "STEP9": {
+        "TITLE": "Projekte aaluega",
+        "CONTENT": "Drugg links uff Projekte, no siehsch wieder alle."
+      },
+      "STEP10": {
+        "TITLE": "Mehr Infos",
+        "CONTENT": "Unte rechts kriegsch mehr Infos, kasch d'Sproch ännra, Tastaturkürzel aaluega ond s Tutorial noamol aafanga."
+      },
+      "STEP11": {
+        "TITLE": "Viel Spaß!",
+        "CONTENT": "Mr hoffat, s Tutorial hot da g'falla - viel Spaß mit mobi.mapr!"
+      }
+    },
+    "SHARE": {
+      "NAME": "Teila",
+      "DESCRIPTION": "Lern d' Hauptfunktiona vom Teil a bissle kenne",
+      "STEP1": {
+        "TITLE": "Grüß Gottle!",
+        "CONTENT": "Willkomme bei mobi.mapr! Do zeiga mr dir kurz, wie du d' Kärtle gugge kasch."
+      },
+      "STEP2": {
+        "TITLE": "Des Kärtle",
+        "CONTENT": "In dr Midd siehsch s Kärtle zur Mobilität. Du kasch zomma ond gleich loslegga."
+      },
+      "STEP3": {
+        "TITLE": "Dr Beschreib",
+        "CONTENT": "Unte links isch dr Beschreib. Klick nei, dann weißt was d' Farb bedeuta."
+      },
+      "STEP3-1": {
+        "TITLE": "Übersichtle",
+        "CONTENT": "Dr Beschreib kasch jederzeit z'macha, klick noamol drauf."
+      },
+      "STEP4": {
+        "TITLE": "Details aaluega",
+        "CONTENT": "Do kriegsch Infos über s Projekt - Aktivitäta, Personas ond Modi."
+      },
+      "STEP5": {
+        "TITLE": "Kärtle analysiera",
+        "CONTENT": "Drugg uff e Bereich - dann kriegsch genauere Infos über dr Score."
+      },
+      "STEP6": {
+        "TITLE": "Fokus aufs Kärtle",
+        "CONTENT": "Zum zruckkomma, druck oben rechts uff's X-Symbol."
+      },
+      "STEP7": {
+        "TITLE": "Mehr Infos",
+        "CONTENT": "Unte rechts gibt's mehr Infos, Sproch astelle, Tastenkürzel aaluega ond des Tutorial noamol mache."
+      },
+      "STEP8": {
+        "TITLE": "Viel Spaß!",
+        "CONTENT": "Mir hoffat, s hot da g'falla - viel Spaß mit mobi.mapr!"
+      }
+    }
   }
 }

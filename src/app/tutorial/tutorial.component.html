@@ -7,6 +7,48 @@
   [class.non-interactive-overlay]="!isCurrentStepInteractive()"
   (click)="!isCurrentStepInteractive() && $event.stopPropagation()"
 >
+  <!-- Language Change Button -->
+  <div class="absolute top-4 right-4 z-[1200]">
+    <p-button
+      icon="pi pi-globe"
+      size="small"
+      severity="secondary"
+      [text]="true"
+      [rounded]="true"
+      [title]="'CREDITS.CHANGE_LANGUAGE' | translate"
+      (onClick)="showLanguageDialog = true"
+      class="bg-white shadow-lg hover:bg-gray-50"
+    ></p-button>
+  </div>
+
+  <!-- Language Selection Dialog -->
+  <p-dialog
+    [(visible)]="showLanguageDialog"
+    [modal]="true"
+    [closable]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{width: '300px'}"
+    [header]="'CREDITS.CHANGE_LANGUAGE' | translate"
+    styleClass="tutorial-language-dialog"
+  >
+    <div class="space-y-3">
+      <div
+        *ngFor="let lang of languages"
+        class="flex items-center justify-between p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition-colors"
+        [class.border-blue-500]="currentLang === lang.code"
+        [class.bg-blue-50]="currentLang === lang.code"
+        (click)="switchLanguage(lang.code)"
+      >
+        <div class="flex items-center space-x-3">
+          <i class="pi pi-check text-blue-600" *ngIf="currentLang === lang.code"></i>
+          <i class="pi pi-circle text-gray-300" *ngIf="currentLang !== lang.code"></i>
+          <span class="font-medium">{{ lang.name }}</span>
+        </div>
+      </div>
+    </div>
+  </p-dialog>
+
   <!-- Highlight Box for target elements -->
   <div 
     *ngIf="showHighlight && (currentStep?.type === 'highlight' || currentStep?.type === 'interactive') && currentStep?.showHighlight !== false"

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { SharedModule } from '../shared/shared.module';
 import { TutorialService } from './tutorial.service';
 import { TutorialStep, TutorialSet, TutorialConfig } from './tutorial.interface';
@@ -7,10 +7,12 @@ import { LegendService } from '../legend/legend.service';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { ShareService } from '../share/share.service';
 import { MapV2Service } from '../map-v2/map-v2.service';
+import { DialogModule } from 'primeng/dialog';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-tutorial',
-  imports: [SharedModule],
+  imports: [SharedModule, DialogModule],
   templateUrl: './tutorial.component.html',
   styleUrl: './tutorial.component.css'
 })
@@ -28,6 +30,18 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
   currentSet: TutorialSet | null = null;
   tutorialSets: TutorialSet[] = [];
   
+  // Language selection properties
+  showLanguageDialog = false;
+  currentLang = 'de';
+  private readonly LANGUAGE_KEY = 'mobi.mapr.language';
+
+  languages = [
+    { code: 'de', name: 'Deutsch' },
+    { code: 'de-bw', name: 'Badisch' },
+    { code: 'de-sw', name: 'Schwäbisch' },
+    { code: 'en', name: 'English' }
+  ];
+  
   // Highlight positioning
   highlightStyle: any = {};
   showHighlight = false;
@@ -35,10 +49,19 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
   private subscription = new Subscription();
   private mapFeatureClickHandler: ((event: any) => void) | null = null;
 
-  constructor(private tutorialService: TutorialService, private legendService: LegendService, private dashboardService: DashboardService, private shareService: ShareService, private mapV2Service: MapV2Service) {}
+  constructor(
+    private tutorialService: TutorialService, 
+    private legendService: LegendService, 
+    private dashboardService: DashboardService, 
+    private shareService: ShareService, 
+    private mapV2Service: MapV2Service,
+    private translate: TranslateService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.tutorialSets = this.tutorialService.getTutorialSets();
+    this.loadLanguagePreference();
     
     this.subscription.add(
       this.tutorialService.config$.subscribe(config => {
@@ -63,6 +86,35 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       })
     );
+
+    // Subscribe to language changes to refresh tutorial texts
+    this.subscription.add(
+      this.translate.onLangChange.subscribe(() => {
+        // Force change detection to update translated texts
+        this.cdr.detectChanges();
+      })
+    );
+  }
+
+  private loadLanguagePreference(): void {
+    const savedLang = localStorage.getItem(this.LANGUAGE_KEY);
+    if (savedLang) {
+      this.currentLang = savedLang;
+      this.translate.use(savedLang);
+    } else {
+      this.translate.setDefaultLang('de');
+      this.translate.use('de');
+    }
+  }
+
+  switchLanguage(lang: string): void {
+    this.currentLang = lang;
+    this.translate.use(lang);
+    localStorage.setItem(this.LANGUAGE_KEY, lang);
+    this.showLanguageDialog = false;
+    
+    // Force change detection to update all translated texts immediately
+    this.cdr.detectChanges();
   }
 
   ngAfterViewInit(): void {

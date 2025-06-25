@@ -355,5 +355,103 @@
   },
   "SEARCH_OVERLAY": {
     "SEARCH_PLACEHOLDER": "Gugge gehn"
+  },
+  "TUTORIAL": {
+    "STEP": "Schrittle",
+    "OF": "vun",
+    "PREVIOUS": "Zruck",
+    "NEXT": "Weiter",
+    "FINISH": "Fertig",
+    "SKIP": "Iwwerpringe",
+    "SELECT_TUTORIAL": "Tutorial uuswähle",
+    "CLICK_TO_CONTINUE": "Klick uff s markierti Element, zum witergoh",
+    "DASHBOARD": {
+      "NAME": "Willkomme-Tutorial",
+      "DESCRIPTION": "Lern die Hauptsach vum Programm kenne",
+      "STEP1": {
+        "TITLE": "Grüß di!",
+        "CONTENT": "Willkomme bi mobi.mapr! Mit dem klenne Tutorial zeige mir dir die wichtischste Funktione. Du kannsch des Tutorial jederzit iwwerpringe un später nomol starte. Zum nomol aafange, klick unte rechts uff s gelbe i un denn uff dr erste Knopf."
+      },
+      "STEP2": {
+        "TITLE": "Projekt-Übersicht",
+        "CONTENT": "Do si vorgrechneti Kärt uffglistet. No weiter unte findsch dei eige Projekte."
+      },
+      "STEP3": {
+        "TITLE": "Karte aaluege",
+        "CONTENT": "Zum e Kärt aaluege, klick uff s kloine Symbol. Je noch Größe goht's e paar Sekunde, bis sie laade isch."
+      },
+      "STEP4": {
+        "TITLE": "D' Kärt",
+        "CONTENT": "In dr Mitte siehsch d' Kärt zur Mobilitätsqualität. Du kannsch neizoome oder uusezoome. Gleich nach'm Tutorial kannsch loslege."
+      },
+      "STEP5": {
+        "TITLE": "D' Legend",
+        "CONTENT": "Uffe links isch d' Legend. Mit em Klick erfahrsch, was d' Farbe bedeite."
+      },
+      "STEP6": {
+        "TITLE": "Details aaluege",
+        "CONTENT": "Do findsch alles zum Projekt: Aktivitäte, Personas un Modi. Do kannsch au d' Gwichdig ändere oder d' Kärt exportiere."
+      },
+      "STEP7": {
+        "TITLE": "Kärt analysiere",
+        "CONTENT": "Wenn du uff e Gebiet klicksch, kriegsch genau Infos, wie sich dr Score zämme setzt."
+      },
+      "STEP8": {
+        "TITLE": "Fokus uff d' Kärt",
+        "CONTENT": "Zum zruck zur Kärt, klick uff s Schließ-Symbol oben rechts."
+      },
+      "STEP9": {
+        "TITLE": "Projekte aaluege",
+        "CONTENT": "Klick links uff d' Projekte, dann siehsch sie all widder."
+      },
+      "STEP10": {
+        "TITLE": "Meh Infos",
+        "CONTENT": "Unte rechts kriegsch meh Infos zum Programm, kasch d'Sproch wächsle, Tastaturkürzel aaluege un des Tutorial nomol starte."
+      },
+      "STEP11": {
+        "TITLE": "Viel Spaß!",
+        "CONTENT": "Mir hoffe, s Tutorial hot da g'falle - viel Spaß mit mobi.mapr!"
+      }
+    },
+    "SHARE": {
+      "NAME": "Teile",
+      "DESCRIPTION": "Lern die Funktione vum Teile kenne",
+      "STEP1": {
+        "TITLE": "Grüß di!",
+        "CONTENT": "Willkomme bi mobi.mapr! Mit dem Tutorial zeige mir dir wie du dei Kärt gugge kasch."
+      },
+      "STEP2": {
+        "TITLE": "D' Kärt",
+        "CONTENT": "In dr Mitte siehsch d' Kärt zur Mobilitätsqualität. Du kannsch zomme- oder uusezoome un direkt loslegge."
+      },
+      "STEP3": {
+        "TITLE": "D' Legend",
+        "CONTENT": "Uffe links isch d' Legend. Klick druff, un du siehsch, was d' Farbe bedeite."
+      },
+      "STEP3-1": {
+        "TITLE": "Übersicht",
+        "CONTENT": "Du kasch d' Legend jederzit zumaache, einfach nomol druffklicka."
+      },
+      "STEP4": {
+        "TITLE": "Details aaluege",
+        "CONTENT": "Do findsch alle Infos zum Projekt: Aktivitäte, Personas un Modi."
+      },
+      "STEP5": {
+        "TITLE": "Kärt analysiere",
+        "CONTENT": "Wenn du uff e Bereich klicksch, kriegsch d' Detail wie dr Score zämme kommt."
+      },
+      "STEP6": {
+        "TITLE": "Fokus uff d' Kärt",
+        "CONTENT": "Zum zruck zur Kärt, klick uff's Schließ-Symbol oben rechts."
+      },
+      "STEP7": {
+        "TITLE": "Meh Infos",
+        "CONTENT": "Unte rechts kasch Infos hole, d'Sproch ändere, Tastaturkürzel aaluege un s Tutorial nomol starte."
+      },
+      "STEP8": {
+        "TITLE": "Viel Spaß!",
+        "CONTENT": "Mir hoffe, s hot da g'falle - hab Spaß mit mobi.mapr!"
+      }
+    }
   }
 }
