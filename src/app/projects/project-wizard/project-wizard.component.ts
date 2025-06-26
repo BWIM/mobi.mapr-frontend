@@ -108,6 +108,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
 
   selectedProfiles: { [key: number]: number } = {};
   profileControls: { [modeId: number]: FormControl } = {};
+  nonMidActivities: Activity[] = []; // For OSM activity dropdown
 
   constructor(
     private fb: FormBuilder,
@@ -131,6 +132,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
           this.loadAreas();
           this.loadLands();
           this.loadActivities();
+          this.loadOSMActivities();
           this.loadPersonas();
           this.loadModes();
         }
@@ -235,6 +237,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
         sendEmail: [true],
         loadAreasOnMap: [false],
         projectGroup: [null],
+        startActivity: [null], // OSM activity selection
       })
     });
   }
@@ -306,6 +309,19 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       },
       error: (error) => {
         console.error('Fehler beim Laden der Aktivitäten:', error);
+      }
+    });
+  }
+
+  private loadOSMActivities() { 
+    this.activitiesService.getOSMActivities().subscribe({
+      next: (response) => {
+        this.nonMidActivities = response.results;
+        this.nonMidActivities = this.nonMidActivities.sort((a, b) => 
+          (a.display_name || a.name).localeCompare(b.display_name || b.name)
+        );
+
+        console.log(this.nonMidActivities);
       }
     });
   }
@@ -596,7 +612,8 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
         profiles: selectedProfiles,
         landkreise: this.selectedAreaIds.join(','),
         projectgroup: this.projectForm.get('summary.projectGroup')?.value?.id || null,
-        laender: this.hasCompletelySelectedLands
+        laender: this.hasCompletelySelectedLands,
+        start_activity: this.projectForm.get('summary.startActivity')?.value?.id || null
       };
       
       this.projectsService.createProject(projectData).subscribe({

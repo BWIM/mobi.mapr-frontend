@@ -303,6 +303,21 @@
                                 class="w-full">
                             </p-dropdown>
                         </div>
+
+                        <!-- OSM Aktivität -->
+                        <div class="field">
+                            <label for="startActivity" class="block mb-2">{{ 'PROJECT_WIZARD.START_ACTIVITY' | translate }}</label>
+                            <p-dropdown 
+                                id="startActivity"
+                                [options]="nonMidActivities"
+                                formControlName="startActivity"
+                                optionLabel="display_name"
+                                [showClear]="true"
+                                [appendTo]="'body'"
+                                [pTooltip]="'PROJECT_WIZARD.START_ACTIVITY_TOOLTIP' | translate"
+                                class="w-full">
+                            </p-dropdown>
+                        </div>
                     </div>
 
                     <!-- Projekteinstellungen -->

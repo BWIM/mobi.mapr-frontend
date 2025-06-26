@@ -208,7 +208,9 @@
       "MODES": "Modi",
       "AREA": "Gebiet auswählen",
       "PROJECT_INFO": "Projektinformationen"
-    }
+    },
+    "START_ACTIVITY": "Start Aktivität",
+    "START_ACTIVITY_TOOLTIP": "Berechnet den score nur für Hexagone, in denen ein Ort dieser Aktivität ist"
   },
   "SIDEBAR": {
     "TITLE": "Details",

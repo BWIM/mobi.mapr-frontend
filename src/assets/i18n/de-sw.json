@@ -207,7 +207,9 @@
       "MODES": "Modi",
       "AREA": "Gebiet uswähle",
       "PROJECT_INFO": "Projäkkdinformatione"
-    }
+    },
+    "START_ACTIVITY": "Start Aktivität",
+    "START_ACTIVITY_TOOLTIP": "Wilscht du ä bsondere Start filter sätze?"
   },
   "SIDEBAR": {
     "TITLE": "Details",
