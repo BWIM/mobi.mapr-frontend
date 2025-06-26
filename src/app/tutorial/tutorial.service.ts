@@ -319,6 +319,10 @@ export class TutorialService {
     }
   }
 
+  resetTutorial(): Observable<void> {
+    return this.http.get<void>(`${environment.apiUrl}/permissions/reset-tutorial/`);
+  }
+
   skipTutorial(): void {
     this.completeTutorial();
   }

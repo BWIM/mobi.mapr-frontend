@@ -206,7 +206,9 @@ export class CreditsComponent implements OnInit {
   }
 
   startTutorial() {
-    this.tutorialService.startTutorial('dashboard');
+    this.tutorialService.resetTutorial().subscribe(() => {
+      window.location.reload();
+    });
   }
 
   switchLanguage(lang: string) {
