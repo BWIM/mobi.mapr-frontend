@@ -407,7 +407,8 @@
       "STEP6": {
         "TITLE": "Show Details",
         "CONTENT": "Here you’ll find all project-related information such as activities, personas, and modes. You can also switch map weighting or export the map here.",
-        "NEXT_HINT": "Click on the details to see more information."
+        "NEXT_HINT": "Click on the details to see more information.",
+        "NEXT_HINT_2": "The tutorial continues below."
       },
       "STEP7": {
         "TITLE": "Analyze Map",
@@ -427,7 +428,7 @@
       "STEP10": {
         "TITLE": "More Information",
         "CONTENT": "In the bottom right, you can get more information about the application, set the language, view keyboard shortcuts, and restart this tutorial.",
-        "NEXT_HINT": "The 'i' button is in the bottom right corner."
+        "NEXT_HINT": "The tutorial continues below."
       },
       "STEP11": {
         "TITLE": "Have Fun!",

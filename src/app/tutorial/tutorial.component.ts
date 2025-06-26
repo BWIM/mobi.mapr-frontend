@@ -306,6 +306,10 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
         left = window.innerWidth - 300 + offset.x;
         top = 10 + offset.y;
         break;
+      case 'global-bottom-right':
+        left = window.innerWidth - 300 + offset.x;
+        top = window.innerHeight - 300 + offset.y;
+        break;
     }
 
     return {

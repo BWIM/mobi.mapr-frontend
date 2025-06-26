@@ -391,7 +391,8 @@
       },
       "STEP6": {
         "TITLE": "Details aaluega",
-        "CONTENT": "Do findsch Infos zum Projekt: Aktivitäta, Personas ond Modi. Da kasch au d' Wertig ännra oder s Kärtle exportiera."
+        "CONTENT": "Do findsch Infos zum Projekt: Aktivitäta, Personas ond Modi. Da kasch au d' Wertig ännra oder s Kärtle exportiera.",
+        "NEXT_HINT": "Unta gehts wieder weiter."
       },
       "STEP7": {
         "TITLE": "Kärtle analysiera",
@@ -411,7 +412,7 @@
       "STEP10": {
         "TITLE": "Mehr Infos",
         "CONTENT": "Unte rechts kriegsch mehr Infos, kasch d'Sproch ännra, Tastaturkürzel aaluega ond s Tutorial noamol aafanga.",
-        "NEXT_HINT": "Dr i-Knopf isch ganz rechts unte in dr Ecka"
+        "NEXT_HINT": "Unta gehts wieder weiter."
       },
       "STEP11": {
         "TITLE": "Viel Spaß!",

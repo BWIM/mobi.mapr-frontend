@@ -4,7 +4,7 @@ export interface TutorialStep {
   content: string;
   type: 'informative' | 'highlight' | 'interactive';
   targetSelector?: string; // CSS selector for the element to highlight
-  position?: 'top' | 'bottom' | 'left' | 'right' | 'center' | 'top-left' | 'top-right' | 'global-center' | 'global-top' | 'global-top-left' | 'global-top-right'; // Position of the info box relative to target
+  position?: 'top' | 'bottom' | 'left' | 'right' | 'center' | 'top-left' | 'top-right' | 'global-center' | 'global-top' | 'global-top-left' | 'global-top-right' | 'global-bottom-right'; // Position of the info box relative to target
   offset?: { x: number; y: number }; // Offset from the target element
   interactive?: boolean; // Whether the step requires user interaction to continue
   showHighlight?: boolean; // Whether to show the blue highlight box (defaults to true for highlight/interactive)

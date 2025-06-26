@@ -88,7 +88,8 @@ export class TutorialService {
           type: 'highlight',
           targetSelector: '.details-sidebar .p-dialog-content',
           position: 'global-top-right',
-          offset: { x: -10, y: 0 }
+          offset: { x: -10, y: 0 },
+          nextHint: 'TUTORIAL.DASHBOARD.STEP6.NEXT_HINT'
         },
         {
           id: 'dashboard-7',
@@ -132,12 +133,11 @@ export class TutorialService {
           id: 'dashboard-10',
           title: 'TUTORIAL.DASHBOARD.STEP10.TITLE',
           content: 'TUTORIAL.DASHBOARD.STEP10.CONTENT',
-          type: 'interactive',
+          type: 'highlight',
           targetSelector: '#credits-sidebar .p-speeddial-button',
-          position: 'global-center',
+          position: 'global-bottom-right',
           offset: { x: 0, y: 0 },
-          interactive: true,
-          requireMapFeatureClick: false,
+          showHighlight: false,
           nextHint: 'TUTORIAL.DASHBOARD.STEP10.NEXT_HINT'
         },
         {
@@ -233,7 +233,7 @@ export class TutorialService {
         content: 'TUTORIAL.SHARE.STEP7.CONTENT',
         type: 'highlight',
         targetSelector: '#credits-sidebar .p-speeddial-button',
-        position: 'global-center',
+        position: 'global-bottom-right',
         offset: { x: 0, y: 0 },
         showHighlight: false,
         nextHint: 'TUTORIAL.SHARE.STEP7.NEXT_HINT'

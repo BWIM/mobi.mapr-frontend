@@ -407,7 +407,8 @@
       },
       "STEP6": {
         "TITLE": "Details anzeigen",
-        "CONTENT": "Hier findest du alle Informationen zu dem Projekt, wie die Aktivitäten, Personas und Modi. Hier kannst du auch die Gewichtung auf der Karte umschalten oder die Karte exportieren."
+        "CONTENT": "Hier findest du alle Informationen zu dem Projekt, wie die Aktivitäten, Personas und Modi. Hier kannst du auch die Gewichtung auf der Karte umschalten oder die Karte exportieren.",
+        "NEXT_HINT": "Unten geht es wieder weiter."
       },
       "STEP7": {
         "TITLE": "Karte analysieren",
@@ -427,7 +428,7 @@
       "STEP10": {
         "TITLE": "Mehr Informationen",
         "CONTENT": "Unten rechts, kannst du mehr Informationen über die Anwendung erhalten, die Sprache einstellen, Tastaturkürzel anzeigen und dieses Tutorial erneut starten.",
-        "NEXT_HINT": "Der i-Knopf ist ganz rechts unten in der Ecke"
+        "NEXT_HINT": "Unten geht es wieder weiter."
       },
       "STEP11": {
         "TITLE": "Viel Spaß!",

@@ -393,7 +393,8 @@
       },
       "STEP6": {
         "TITLE": "Details aaluege",
-        "CONTENT": "Do findsch alles zum Projekt: Aktivitäte, Personas un Modi. Do kannsch au d' Gwichdig ändere oder d' Kärt exportiere."
+        "CONTENT": "Do findsch alles zum Projekt: Aktivitäte, Personas un Modi. Do kannsch au d' Gwichdig ändere oder d' Kärt exportiere.",
+        "NEXT_HINT": "Unta gehts wieder weiter."
       },
       "STEP7": {
         "TITLE": "Kärt analysiere",
@@ -413,7 +414,7 @@
       "STEP10": {
         "TITLE": "Meh Infos",
         "CONTENT": "Unte rechts kriegsch meh Infos zum Programm, kasch d'Sproch wächsle, Tastaturkürzel aaluege un des Tutorial nomol starte.",
-        "NEXT_HINT": "Dr i-Knopf isch ganz rechts unte in dr Ecke"
+        "NEXT_HINT": "Unta gehts wieder weiter."
       },
       "STEP11": {
         "TITLE": "Viel Spaß!",
