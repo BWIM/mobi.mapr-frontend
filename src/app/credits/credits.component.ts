@@ -92,21 +92,27 @@ export class CreditsComponent implements OnInit {
     this.shortcuts = [
       { key: 'Z', description: this.translate.instant('CREDITS.SHORTCUTS.CENTER_MAP') },
       { key: 'F', description: this.translate.instant('CREDITS.SHORTCUTS.FREEZE_MAP') },
-      { key: 'S', description: this.translate.instant('CREDITS.SHORTCUTS.SHOW_STATISTICS') },
       // { key: 'E', description: this.translate.instant('CREDITS.SHORTCUTS.EXPORT_PDF_PORTRAIT') },
       { key: 'H', description: this.translate.instant('CREDITS.SHORTCUTS.TOGGLE_HEXAGON_VIEW') }
     ];
+    if (!this.shareService.getIsShare()) {
+      this.shortcuts.push({ key: 'S', description: this.translate.instant('CREDITS.SHORTCUTS.SHOW_STATISTICS') });
+    }
   }
 
   private updateItems() {
-    this.items = [
+    this.items = [];
+    if (!this.shareService.getIsShare()) {
+      this.items.push(
       {
         icon: 'pi pi-sign-out',
         label: this.translate.instant('CREDITS.LOGOUT'),
         command: () => {
           this.logout();
         }
-      },
+      });
+    }
+    this.items.push(
       {
         icon: 'pi pi-info-circle',
         label: this.translate.instant('CREDITS.SHOW_CREDITS'),
@@ -134,8 +140,7 @@ export class CreditsComponent implements OnInit {
         command: () => {
           this.showShortcuts();
         }
-      },
-    ];
+      });
     if (!this.shareService.getIsShare()) {
       this.items.push({
         icon: 'pi pi-book',

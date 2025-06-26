@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { PaginatedResponse, MunicipalityScore, CountyScore, StateScore } from './statistics.interface';
+import { ShareService } from '../share/share.service';
 
 export interface ScoreEntry {
   name: string;
@@ -20,13 +21,16 @@ export class StatisticsService {
   private _visible = new BehaviorSubject<boolean>(false);
   visible$ = this._visible.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private shareService: ShareService) {}
 
   get visible(): boolean {
     return this._visible.value;
   }
 
   set visible(value: boolean) {
+    if (this.shareService.getIsShare()) {
+      return;
+    }
     this._visible.next(value);
   }
 
