@@ -106,9 +106,9 @@
 
   <!-- Navigation Controls -->
   <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-[1200]">
-    <div class="bg-white rounded-lg shadow-lg p-4 flex items-center space-x-2">
+    <div class="bg-white rounded-lg shadow-lg p-4 tutorial-navigation-container">
       <!-- Progress Indicator -->
-      <div class="flex items-center space-x-2">
+      <div class="tutorial-progress-container">
         <span class="text-sm text-gray-600">
           {{ 'TUTORIAL.STEP' | translate }} {{ config.currentStepIndex + 1 }} {{ 'TUTORIAL.OF' | translate }} {{ currentSet?.steps?.length || 0 }}
         </span>
@@ -120,7 +120,7 @@
       </div>
 
       <!-- Navigation Buttons -->
-      <div class="flex items-center space-x-2 pl-2">
+      <div class="tutorial-buttons-container">
         <!-- <p-button 
           *ngIf="!isFirstStep()"
           icon="pi pi-chevron-left"

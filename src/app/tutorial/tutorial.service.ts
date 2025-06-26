@@ -196,11 +196,14 @@ export class TutorialService {
         id: 'share-4',
         title: 'TUTORIAL.SHARE.STEP4.TITLE',
         content: 'TUTORIAL.SHARE.STEP4.CONTENT',
-        type: 'highlight',
-        targetSelector: '.share-sidebar .p-dialog-content',
+        type: 'interactive',
+        targetSelector: '.share-sidebar .p-dialog-close-button',
+        infoBoxSelector: '.share-sidebar .p-dialog-content',
         position: 'left',
-        offset: { x: -50, y: 0 },
-        nextHint: 'TUTORIAL.SHARE.STEP4.NEXT_HINT'
+        interactive: true,
+        offset: { x: -100, y: 0 },
+        nextHint: 'TUTORIAL.SHARE.STEP4.NEXT_HINT',
+        requireMapFeatureClick: false
       },
       {
         id: 'share-5',
@@ -231,11 +234,14 @@ export class TutorialService {
         id: 'share-7',
         title: 'TUTORIAL.SHARE.STEP7.TITLE',
         content: 'TUTORIAL.SHARE.STEP7.CONTENT',
-        type: 'highlight',
+        type: 'interactive',
         targetSelector: '#credits-sidebar .p-speeddial-button',
-        position: 'global-bottom-right',
+        infoBoxSelector: '#credits-sidebar .p-speeddial',
+        position: 'left',
         offset: { x: 0, y: 0 },
         showHighlight: false,
+        interactive: true,
+        requireMapFeatureClick: false,
         nextHint: 'TUTORIAL.SHARE.STEP7.NEXT_HINT'
       },
       {
@@ -353,6 +359,7 @@ export class TutorialService {
   }
 
   markStepCompleted(): void {
+    console.log('markStepCompleted');
     const currentConfig = this.config;
     const currentStep = this.getCurrentStep();
     

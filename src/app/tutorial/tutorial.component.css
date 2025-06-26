@@ -65,10 +65,46 @@
   transition: all 0.3s ease-in-out;
 }
 
+/* Navigation controls layout - explicit spacing instead of Tailwind utilities */
+.tutorial-navigation-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* 8px spacing */
+}
+
+.tutorial-progress-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* 8px spacing */
+}
+
+.tutorial-buttons-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* 8px spacing */
+  padding-left: 0.5rem; /* 8px left padding */
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .tutorial-info-box {
     max-width: 90vw;
     margin: 0 1rem;
+  }
+  
+  .tutorial-navigation-container {
+    flex-direction: column;
+    gap: 0.75rem; /* 12px spacing for mobile */
+  }
+  
+  .tutorial-progress-container {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .tutorial-buttons-container {
+    width: 100%;
+    justify-content: center;
+    padding-left: 0;
   }
 }
