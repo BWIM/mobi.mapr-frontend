@@ -28,6 +28,14 @@ export class ActivitiesService {
     return this.http.get<PaginatedResponse<Activity>>(`${this.apiUrl}/categories/`, { params });
   }
 
+  getOSMActivities(page: number = 1, pageSize: number = 100): Observable<PaginatedResponse<Activity>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('page_size', pageSize.toString());
+
+    return this.http.get<PaginatedResponse<Activity>>(`${this.apiUrl}/activities/`, { params });
+  }
+
   getGroupedActivities(showMid: boolean = false): Observable<GroupedActivities[]> {
     // Wenn wir noch keine Aktivitäten haben, laden wir sie
     if (this.allActivities.length === 0) {

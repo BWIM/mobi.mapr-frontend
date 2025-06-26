@@ -207,7 +207,9 @@
       "MODES": "Modes",
       "AREA": "Select Area",
       "PROJECT_INFO": "Project Information"
-    }
+    },
+    "START_ACTIVITY": "Start activity",
+    "START_ACTIVITY_TOOLTIP": "Only calculates the score for a hexagon that has said activity"
   },
   "SIDEBAR": {
     "TITLE": "Details",
