@@ -429,7 +429,8 @@
       },
       "STEP2": {
         "TITLE": "Des Kärtle",
-        "CONTENT": "In dr Midd siehsch s Kärtle zur Mobilität. Du kasch zomma ond gleich loslegga."
+        "CONTENT": "In dr Midd siehsch s Kärtle zur Mobilität. Du kasch zomma ond gleich loslegga.",
+        "NEXT_HINT": "Drucksch unte na dr Mitte uff dr middläre Knopf."
       },
       "STEP3": {
         "TITLE": "Dr Beschreib",
@@ -443,7 +444,8 @@
       },
       "STEP4": {
         "TITLE": "Details aaluega",
-        "CONTENT": "Do kriegsch Infos über s Projekt - Aktivitäta, Personas ond Modi."
+        "CONTENT": "Do kriegsch Infos über s Projekt - Aktivitäta, Personas ond Modi.",
+        "NEXT_HINT": "Unta gehts wieder weiter."
       },
       "STEP5": {
         "TITLE": "Kärtle analysiera",
@@ -458,7 +460,7 @@
       "STEP7": {
         "TITLE": "Mehr Infos",
         "CONTENT": "Unte rechts gibt's mehr Infos, Sproch astelle, Tastenkürzel aaluega ond des Tutorial noamol mache.",
-        "NEXT_HINT": "Dr i-Knopf isch ganz rechts unte in dr Ecka"
+        "NEXT_HINT": "Unta gehts wieder weiter."
       },
       "STEP8": {
         "TITLE": "Viel Spaß!",

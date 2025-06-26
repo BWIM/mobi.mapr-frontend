@@ -135,6 +135,7 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   nextStep(): void {
+    console.log('nextStep');
     this.tutorialService.nextStep();
   }
 
@@ -173,6 +174,7 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
   onTargetElementClick(event?: Event): void {
     if (this.isCurrentStepInteractive() && !this.isStepCompleted()) {
       // Check if this step requires map feature clicks
+      // if clicking on the skip button, skip the step
       if (this.currentStep?.requireMapFeatureClick == false) {
         this.tutorialService.markStepCompleted();
       }
@@ -181,7 +183,6 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onMapFeatureClick(): void {
     if (this.isCurrentStepInteractive() && !this.isStepCompleted() && this.currentStep?.requireMapFeatureClick) {
-      console.log('onMapFeatureClick', this.currentStep?.requireMapFeatureClick);
       setTimeout(() => {
         this.tutorialService.markStepCompleted();
       }, 10);
@@ -347,7 +348,6 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!this.currentStep) return;
 
     if (this.currentStep.id === 'share-2') {
-      console.log('share-2');
       this.shareService.toggleRightSidebarExpanded();
     }
 
@@ -360,20 +360,17 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     if (this.currentStep.id === 'dashboard-4') {
-      console.log('dashboard-4');
       setTimeout(() => {
         this.dashboardService.toggleRightSidebarExpanded();
       }, 10);
     }
 
     if (this.currentStep.id === 'dashboard-6') {
-      console.log('dashboard-5-1');
       this.dashboardService.toggleRightSidebarExpanded();;
     }
 
     // Close details sidebar before map step (dashboard-7)
     if (this.currentStep.id === 'dashboard-7') {
-      console.log('dashboard-7');
       setTimeout(() => {
         this.dashboardService.toggleRightSidebarExpanded();
       }, 10);

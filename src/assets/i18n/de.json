@@ -445,7 +445,8 @@
       },
       "STEP2": {
         "TITLE": "Die Karte",
-        "CONTENT": "In der Mitte ist die Karte für Mobilitätsqualität. Du kannst zoomen, um andere Auflösungen zu erhalten. Du kannst direkt nach dem Tutorial anfangen zu spielen."
+        "CONTENT": "In der Mitte ist die Karte für Mobilitätsqualität. Du kannst zoomen, um andere Auflösungen zu erhalten. Du kannst direkt nach dem Tutorial anfangen zu spielen.",
+        "NEXT_HINT": "Klicke unten auf den Weiter-Knopf, wenn du bereit bist."
       },
       "STEP3": {
         "TITLE": "Die Legende",
@@ -459,7 +460,8 @@
       },
       "STEP4": {
         "TITLE": "Details anzeigen",
-        "CONTENT": "Hier findest du alle Informationen zu dem Projekt, wie die Aktivitäten, Personas und Modi."
+        "CONTENT": "Hier findest du alle Informationen zu dem Projekt, wie die Aktivitäten, Personas und Modi.",
+        "NEXT_HINT": "Unten geht es wieder weiter."
       },
       "STEP5": {
         "TITLE": "Karte analysieren",
@@ -474,7 +476,7 @@
       "STEP7": {
         "TITLE": "Mehr Informationen",
         "CONTENT": "Unten rechts, kannst du mehr Informationen über die Anwendung erhalten, die Sprache einstellen, Tastaturkürzel anzeigen und dieses Tutorial erneut starten.",
-        "NEXT_HINT": "Der i-Knopf ist ganz rechts unten in der Ecke"
+        "NEXT_HINT": "Unten geht es wieder weiter."
       },
       "STEP8": {
         "TITLE": "Viel Spaß!",

@@ -445,7 +445,8 @@
       },
       "STEP2": {
         "TITLE": "The Map",
-        "CONTENT": "In the center is the map showing mobility quality. You can zoom to get different resolutions. You can start exploring right after the tutorial."
+        "CONTENT": "In the center is the map showing mobility quality. You can zoom to get different resolutions. You can start exploring right after the tutorial.",
+        "NEXT_HINT": "Click the button in the bottom center to continue."
       },
       "STEP3": {
         "TITLE": "The Legend",
@@ -459,7 +460,8 @@
       },
       "STEP4": {
         "TITLE": "Show Details",
-        "CONTENT": "Here you’ll find all project-related information such as activities, personas, and modes."
+        "CONTENT": "Here you’ll find all project-related information such as activities, personas, and modes.",
+        "NEXT_HINT": "The tutorial continues below."
       },
       "STEP5": {
         "TITLE": "Analyze Map",
@@ -474,7 +476,7 @@
       "STEP7": {
         "TITLE": "More Information",
         "CONTENT": "In the bottom right, you can get more information about the application, set the language, view keyboard shortcuts, and restart this tutorial.",
-        "NEXT_HINT": "The 'i' button is in the bottom right corner."
+        "NEXT_HINT": "The tutorial continues below."
       },
       "STEP8": {
         "TITLE": "Have Fun!",

@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { TutorialStep, TutorialSet, TutorialConfig } from './tutorial.interface';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
+import { ShareService } from '../share/share.service';
 
 @Injectable({
   providedIn: 'root'
@@ -164,7 +165,8 @@ export class TutorialService {
         title: 'TUTORIAL.SHARE.STEP2.TITLE',
         content: 'TUTORIAL.SHARE.STEP2.CONTENT',
         type: 'informative',
-        targetSelector: '#map-container'
+        targetSelector: '#map-container',
+        nextHint: 'TUTORIAL.SHARE.STEP2.NEXT_HINT'
       },
       {
         id: 'share-3',
@@ -197,7 +199,8 @@ export class TutorialService {
         type: 'highlight',
         targetSelector: '.share-sidebar .p-dialog-content',
         position: 'left',
-        offset: { x: -50, y: 0 }
+        offset: { x: -50, y: 0 },
+        nextHint: 'TUTORIAL.SHARE.STEP4.NEXT_HINT'
       },
       {
         id: 'share-5',
@@ -228,12 +231,11 @@ export class TutorialService {
         id: 'share-7',
         title: 'TUTORIAL.SHARE.STEP7.TITLE',
         content: 'TUTORIAL.SHARE.STEP7.CONTENT',
-        type: 'interactive',
+        type: 'highlight',
         targetSelector: '#credits-sidebar .p-speeddial-button',
         position: 'global-center',
         offset: { x: 0, y: 0 },
-        interactive: true,
-        requireMapFeatureClick: false,
+        showHighlight: false,
         nextHint: 'TUTORIAL.SHARE.STEP7.NEXT_HINT'
       },
       {
@@ -247,7 +249,7 @@ export class TutorialService {
     }
   ];
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private shareService: ShareService) {}
 
   get config$(): Observable<TutorialConfig> {
     return this.configSubject.asObservable();
@@ -312,7 +314,9 @@ export class TutorialService {
       showOverlay: false,
       stepCompleted: false
     });
-    this.http.get<void>(`${environment.apiUrl}/permissions/complete-tutorial/`).subscribe();
+    if (!this.shareService.getIsShare()) {
+      this.http.get<void>(`${environment.apiUrl}/permissions/complete-tutorial/`).subscribe();
+    }
   }
 
   skipTutorial(): void {

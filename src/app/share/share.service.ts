@@ -32,7 +32,6 @@ export class ShareService {
   }
 
   setIsShare(isShare: boolean) {
-    console.log('setIsShare', isShare);
     this.isShare = isShare;
     this.isShareSubject.next(isShare);
   }
