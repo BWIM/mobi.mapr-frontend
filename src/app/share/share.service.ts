@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {environment} from '../../environments/environment';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {Observable, of} from 'rxjs';
+import {BehaviorSubject, Observable, of} from 'rxjs';
 import {catchError} from 'rxjs/operators';
 import { ShareProject } from './share.interface';
 
@@ -16,11 +16,28 @@ interface ShareResponse {
 export class ShareService {
   private BASE_URL = `${environment.apiUrl}/share`;
   private currentShareKey: string | null = null;
+  private isShare: boolean = false;
+
+  private isShareSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  public isShare$: Observable<boolean> = this.isShareSubject.asObservable();
+
+  private isRightSidebarExpanded: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
+  public isRightSidebarExpanded$ = this.isRightSidebarExpanded.asObservable();
 
   constructor(private http: HttpClient) {}
 
   setShareKey(key: string) {
     this.currentShareKey = key;
+  }
+
+  setIsShare(isShare: boolean) {
+    this.isShare = isShare;
+    this.isShareSubject.next(isShare);
+  }
+
+  getIsShare(): boolean {
+    return this.isShare;
   }
 
   getShareKey(): string | null {
@@ -36,7 +53,9 @@ export class ShareService {
   }
 
   createShare(project: number, resolution: string): Observable<ShareResponse> {
-    return this.http.get<ShareResponse>(`${this.BASE_URL}?id=${project}&resolution=${resolution}`);
+    return this.http.get<ShareResponse>(`${this.BASE_URL}/${project}/?resolution=${resolution}`, {
+      headers: this.getAuthHeaders()
+    });
   }
 
   getProject(key: string): Observable<ShareResponse | null> {
@@ -60,5 +79,13 @@ export class ShareService {
         return of(null);
       })
     );
+  }
+
+  toggleRightSidebarExpanded() {
+    this.isRightSidebarExpanded.next(!this.isRightSidebarExpanded.value);
+  }
+
+  getRightSidebarExpanded() {
+    return this.isRightSidebarExpanded.asObservable();
   }
 }

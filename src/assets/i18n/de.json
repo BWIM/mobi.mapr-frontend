@@ -332,8 +332,10 @@
     "LOGOUT": "Abmelden",
     "SHOW_CREDITS": "Infos anzeigen",
     "SHOW_HELP": "Hilfe anzeigen",
+    "START_TUTORIAL": "Tutorial starten",
     "CHANGE_LANGUAGE": "Sprache wechseln",
-    "SHOW_SHORTCUTS": "Tastaturkürzel"
+    "SHOW_SHORTCUTS": "Tastaturkürzel",
+    "TOGGLE_TUTORIAL": "Tutorial anzeigen"
   },
   "HELP": {
     "GETTING_STARTED_TOOLTIP": "Erste Schritte mit der Anwendung",
@@ -367,5 +369,121 @@
   },
   "SEARCH_OVERLAY": {
     "SEARCH_PLACEHOLDER": "Orte suchen"
+  },
+  "TUTORIAL": {
+    "STEP": "Schritt",
+    "OF": "von",
+    "PREVIOUS": "Zurück",
+    "NEXT": "Weiter",
+    "FINISH": "Fertig",
+    "SKIP": "Überspringen",
+    "SELECT_TUTORIAL": "Tutorial auswählen",
+    "CLICK_TO_CONTINUE": "Klicke auf das hervorgehobene Element, um fortzufahren",
+    "DASHBOARD": {
+      "NAME": "Willkommen Tutorial",
+      "DESCRIPTION": "Lerne die wichtigsten Funktionen der Anwendung kennen",
+      "STEP1": {
+        "TITLE": "Willkommen!",
+        "CONTENT": "Willkommen beim mobi.mapr! Mit diesem kleinen Tutorial zeigen wir dir die wichtigsten Funktionen des Tools. Du kannst das Tutorial jederzeit überspringen und später erneut starten. Um neu zu starten, klicke auf das gelbe i unten rechts und dann auf den obersten Knopf.",
+        "NEXT_HINT": "Klicke auf den Knopf unten in der Mitte, um loszulegen."
+      },
+      "STEP2": {
+        "TITLE": "Projekt-Übersicht",
+        "CONTENT": "Hier sind verschiedene vorberechnete Karten gelistet. Weiter unten findest du die Projekte, die du selbst erstellt hast."
+      },
+      "STEP3": {
+        "TITLE": "Karte anzeigen",
+        "CONTENT": "Um eine Karte anzuzeigen, klicke auf das kleine Symbol. Je nach Größe der Karte, dauert es ein paar Sekunden, bis die Karte geladen ist.",
+        "NEXT_HINT": "Klicke auf den Knopf, um die Karte anzuzeigen."
+      },
+      "STEP4": {
+        "TITLE": "Die Karte",
+        "CONTENT": "In der Mitte ist die Karte für Mobilitätsqualität. Du kannst zoomen, um andere Auflösungen zu erhalten. Du kannst direkt nach dem Tutorial anfangen zu spielen."
+      },
+      "STEP5": {
+        "TITLE": "Die Legende",
+        "CONTENT": "Unten links siehst du die Legende. Mit einem Klick erfährst du, was die einzelnen Farben bedeuten.",
+        "NEXT_HINT": "Klicke auf die Legende, um mehr Informationen zu erhalten."
+      },
+      "STEP6": {
+        "TITLE": "Details anzeigen",
+        "CONTENT": "Hier findest du alle Informationen zu dem Projekt, wie die Aktivitäten, Personas und Modi. Hier kannst du auch die Gewichtung auf der Karte umschalten oder die Karte exportieren.",
+        "NEXT_HINT": "Unten geht es wieder weiter."
+      },
+      "STEP7": {
+        "TITLE": "Karte analysieren",
+        "CONTENT": "Wenn du auf ein Gebiet auf der Karte klickst, bekommst du detaillierte Informationen, wie sich der Score zusammensetzt.",
+        "NEXT_HINT": "Klicke auf ein farbiges Gebiet auf der Karte, das du gerade siehst."
+      },
+      "STEP8": {
+        "TITLE": "Fokus auf Karte",
+        "CONTENT": "Um zur Karte zurückzukehren, klicke auf das schließen Symbol oben rechts.",
+        "NEXT_HINT": "Klicke auf das schließen Symbol oben rechts, um zur Karte zurückzukehren."
+      },
+      "STEP9": {
+        "TITLE": "Projekte anzeigen",
+        "CONTENT": "Klicke links auf die Projekte, um wieder alle Projekte anzuzeigen.",
+        "NEXT_HINT": "Klicke links auf das Seitenelement."
+      },
+      "STEP10": {
+        "TITLE": "Mehr Informationen",
+        "CONTENT": "Unten rechts, kannst du mehr Informationen über die Anwendung erhalten, die Sprache einstellen, Tastaturkürzel anzeigen und dieses Tutorial erneut starten.",
+        "NEXT_HINT": "Unten geht es wieder weiter."
+      },
+      "STEP11": {
+        "TITLE": "Viel Spaß!",
+        "CONTENT": "Wir hoffen, dass dir das Tutorial gefallen hat und du viel Spaß mit mobi.mapr hast!",
+        "NEXT_HINT": "Du kannst unten das Tutorial beenden!"
+      }
+    },
+    "SHARE": {
+      "NAME": "Teilen",
+      "DESCRIPTION": "Lerne die wichtigsten Funktionen des Teilens kennen",
+      "STEP1": {
+        "TITLE": "Willkommen!",
+        "CONTENT": "Willkommen beim mobi.mapr! Mit diesem kleinen Tutorial zeigen wir dir die wichtigsten Funktionen deiner geteilten Karte.",
+        "NEXT_HINT": "Klicke auf den Knopf unten in der Mitte, um loszulegen."
+      },
+      "STEP2": {
+        "TITLE": "Die Karte",
+        "CONTENT": "In der Mitte ist die Karte für Mobilitätsqualität. Du kannst zoomen, um andere Auflösungen zu erhalten. Du kannst direkt nach dem Tutorial anfangen zu spielen.",
+        "NEXT_HINT": "Klicke unten auf den Weiter-Knopf, wenn du bereit bist."
+      },
+      "STEP3": {
+        "TITLE": "Die Legende",
+        "CONTENT": "Unten links siehst du die Legende. Mit einem Klick erfährst du, was die einzelnen Farben bedeuten.",
+        "NEXT_HINT": "Klicke irgendwo auf die Legende."
+      },
+      "STEP3-1": {
+        "TITLE": "Übersicht",
+        "CONTENT": "Du kannst die Legende jederzeit schließen, indem du erneut auf diese klickst.",
+        "NEXT_HINT": "Klicke irgendwo auf die Legende, um diese zu schließen."
+      },
+      "STEP4": {
+        "TITLE": "Details anzeigen",
+        "CONTENT": "Hier findest du alle Informationen zu dem Projekt, wie die Aktivitäten, Personas und Modi.",
+        "NEXT_HINT": "Unten geht es wieder weiter."
+      },
+      "STEP5": {
+        "TITLE": "Karte analysieren",
+        "CONTENT": "Wenn du auf ein Gebiet auf der Karte klickst, bekommst du detaillierte Informationen, wie sich der Score zusammensetzt.",
+        "NEXT_HINT": "Klicke auf ein farbiges Gebiet auf der Karte, das du gerade siehst."
+      },
+      "STEP6": {
+        "TITLE": "Fokus auf Karte",
+        "CONTENT": "Um zur Karte zurückzukehren, klicke auf das schließen Symbol oben rechts.",
+        "NEXT_HINT": "Klicke auf das schließen Symbol oben rechts, um zur Karte zurückzukehren."
+      },
+      "STEP7": {
+        "TITLE": "Mehr Informationen",
+        "CONTENT": "Unten rechts, kannst du mehr Informationen über die Anwendung erhalten, wie z.B. die Tastaturkürzel anzeigen lassen.",
+        "NEXT_HINT": "Unten geht es wieder weiter."
+      },
+      "STEP8": {
+        "TITLE": "Viel Spaß!",
+        "CONTENT": "Wir hoffen, dass dir das Tutorial gefallen hat und du viel Spaß mit mobi.mapr hast!",
+        "NEXT_HINT": "Du kannst unten das Tutorial beenden!"
+      }
+    }
   }
 }

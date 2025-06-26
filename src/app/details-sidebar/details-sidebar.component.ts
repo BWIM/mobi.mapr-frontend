@@ -35,10 +35,7 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
   isGeneratingShare: boolean = false;
   selectedAverageType: 'mean' | 'median' = 'mean';
   selectedPopulationArea: string = 'pop';
-  populationAreaOptions = [
-    { label: 'SIDEBAR.POPULATION', value: 'pop' },
-    { label: 'SIDEBAR.AREA', value: 'area' }
-  ];
+  populationAreaOptions: { label: string; value: string }[] = [];
   @Output() projectLoaded = new EventEmitter<void>();
 
   constructor(
@@ -62,6 +59,23 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
         }
       )
     );
+
+    // Initialize population area options with translated labels
+    this.updatePopulationAreaOptions();
+    
+    // Update options when language changes
+    this.subscription.add(
+      this.translate.onLangChange.subscribe(() => {
+        this.updatePopulationAreaOptions();
+      })
+    );
+  }
+
+  private updatePopulationAreaOptions(): void {
+    this.populationAreaOptions = [
+      { label: this.translate.instant('SIDEBAR.POPULATION'), value: 'pop' },
+      { label: this.translate.instant('SIDEBAR.AREA'), value: 'area' }
+    ];
   }
 
   onVisualizationChange(): void {

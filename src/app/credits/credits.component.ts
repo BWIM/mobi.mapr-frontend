@@ -10,6 +10,8 @@ import { TooltipModule } from 'primeng/tooltip';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../auth/auth.service';
 import { Router } from '@angular/router';
+import { TutorialService } from '../tutorial/tutorial.service';
+import { ShareService } from '../share/share.service';
 
 interface InfoComponent {
   name: string;
@@ -65,7 +67,7 @@ export class CreditsComponent implements OnInit {
 
   showShortcutsDialog = false;
 
-  constructor(private translate: TranslateService, private authService: AuthService, private router: Router) {}
+  constructor(private translate: TranslateService, private authService: AuthService, private router: Router, private tutorialService: TutorialService, private shareService: ShareService) {}
 
   ngOnInit() {
     // Load saved language preference
@@ -90,21 +92,27 @@ export class CreditsComponent implements OnInit {
     this.shortcuts = [
       { key: 'Z', description: this.translate.instant('CREDITS.SHORTCUTS.CENTER_MAP') },
       { key: 'F', description: this.translate.instant('CREDITS.SHORTCUTS.FREEZE_MAP') },
-      { key: 'S', description: this.translate.instant('CREDITS.SHORTCUTS.SHOW_STATISTICS') },
       // { key: 'E', description: this.translate.instant('CREDITS.SHORTCUTS.EXPORT_PDF_PORTRAIT') },
       { key: 'H', description: this.translate.instant('CREDITS.SHORTCUTS.TOGGLE_HEXAGON_VIEW') }
     ];
+    if (!this.shareService.getIsShare()) {
+      this.shortcuts.push({ key: 'S', description: this.translate.instant('CREDITS.SHORTCUTS.SHOW_STATISTICS') });
+    }
   }
 
   private updateItems() {
-    this.items = [
+    this.items = [];
+    if (!this.shareService.getIsShare()) {
+      this.items.push(
       {
         icon: 'pi pi-sign-out',
         label: this.translate.instant('CREDITS.LOGOUT'),
         command: () => {
           this.logout();
         }
-      },
+      });
+    }
+    this.items.push(
       {
         icon: 'pi pi-info-circle',
         label: this.translate.instant('CREDITS.SHOW_CREDITS'),
@@ -132,8 +140,16 @@ export class CreditsComponent implements OnInit {
         command: () => {
           this.showShortcuts();
         }
-      }
-    ];
+      });
+    if (!this.shareService.getIsShare()) {
+      this.items.push({
+        icon: 'pi pi-book',
+        label: this.translate.instant('CREDITS.TOGGLE_TUTORIAL'),
+        command: () => {
+          this.startTutorial();
+        }
+      });
+    }
   }
 
   visualComponents: InfoComponent[] = [
@@ -187,6 +203,12 @@ export class CreditsComponent implements OnInit {
     const themeItem = this.items[3];
     themeItem.icon = this.isDarkMode ? 'pi pi-sun' : 'pi pi-moon';
     themeItem.tooltip = this.isDarkMode ? 'Light Mode' : 'Dark Mode';
+  }
+
+  startTutorial() {
+    this.tutorialService.resetTutorial().subscribe(() => {
+      window.location.reload();
+    });
   }
 
   switchLanguage(lang: string) {

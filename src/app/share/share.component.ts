@@ -8,6 +8,8 @@ import { ShareProject } from './share.interface';
 import { LoadingService } from '../services/loading.service';
 import { MapV2Component } from '../map-v2/map-v2.component';
 import { MapV2Service } from '../map-v2/map-v2.service';
+import { TutorialService } from '../tutorial/tutorial.service';
+import { AnalyzeService } from '../analyze/analyze.service';
 
 @Component({
   selector: 'app-share',
@@ -18,17 +20,19 @@ import { MapV2Service } from '../map-v2/map-v2.service';
 })
 export class ShareComponent {
   detailsVisible: boolean = false;
-  rightSidebarExpanded: boolean = false;
   isRightPinned: boolean = false;
   projectKey: string = '';
   project: any = null;
   sharedProject: ShareProject | null = null;
+  rightSidebarExpanded: boolean = false;
 
   constructor(
     private shareService: ShareService, 
     private route: ActivatedRoute, 
     private loadingService: LoadingService,
-    private mapService: MapV2Service
+    private mapService: MapV2Service,
+    private analyzeService: AnalyzeService,
+    private tutorialService: TutorialService
   ) {
     this.route.params.subscribe(params => {
       this.projectKey = params['key'];
@@ -37,11 +41,20 @@ export class ShareComponent {
 
   ngOnInit() {
     this.loadingService.startLoading();
+    this.shareService.setIsShare(true);
+    this.tutorialService.startTutorial('share');
+    
+    // Subscribe to the sidebar expansion state
+    this.shareService.isRightSidebarExpanded$.subscribe(expanded => {
+      this.rightSidebarExpanded = expanded;
+    });
+    
     this.shareService.getProject(this.projectKey).subscribe(project => {
       this.project = project;
       if (project && project.id) {
         // Set the project in the map service with the share key
         this.mapService.setProject(project.id.toString(), this.projectKey);
+        this.analyzeService.setCurrentProject(project.id.toString());
       }
     });
     this.shareService.getProjectDetails(this.projectKey).subscribe(project => {
@@ -49,9 +62,10 @@ export class ShareComponent {
       this.isRightPinned = true;
       this.toggleSidebar();
     });
+    this.loadingService.stopLoading();
   }
 
   toggleSidebar() {
-    this.rightSidebarExpanded = !this.rightSidebarExpanded;
+    this.shareService.toggleRightSidebarExpanded();
   }
 }

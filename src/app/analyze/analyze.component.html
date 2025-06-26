@@ -7,110 +7,96 @@
     [dismissableMask]="true"
     [maximizable]="true"
     styleClass="analyze-dialog"
+    (onHide)="triggerTutorial()"
     [header]="'ANALYZE.TITLE' | translate">
     
-    <div class="flex flex-col h-full">
-        <!-- Loading Spinner -->
-        <div *ngIf="loading" class="flex justify-center items-center p-4">
-            <div class="flex flex-col items-center">
-                <p class="text-center text-sm text-gray-500 mb-4">{{ 'ANALYZE.LOADING.HINT' | translate }}</p>
-                <p-progressSpinner></p-progressSpinner>
+    <!-- Loading Spinner -->
+    <div *ngIf="loading" class="flex justify-center items-center h-full">
+        <div class="flex flex-col items-center">
+            <p class="text-center text-sm text-gray-500 mb-4">{{ 'ANALYZE.LOADING.HINT' | translate }}</p>
+            <p-progressSpinner></p-progressSpinner>
+        </div>
+    </div>
+    
+    <!-- Content -->
+    <div *ngIf="!loading" class="flex flex-col h-full">
+        <!-- Properties Header - Minimal Space -->
+        <div *ngIf="properties" class="flex items-center justify-between p-3 bg-gray-50 border-b">
+            <div class="flex items-center space-x-3">
+                <h2 class="text-lg font-semibold">{{properties.name}}</h2>
+                <span class="px-2 py-1 rounded-full text-white text-sm font-medium"
+                      [style.backgroundColor]="getScore().color">
+                    {{ getScoreName(getScore().score) }} ({{ getScore().score * 100 | number: '1.0-0' }}%)
+                </span>
+            </div>
+            <div class="tooltip-container">
+                <i class="pi pi-info-circle cursor-help"
+                   pTooltip="{{'ANALYZE.PROPERTIES.POPULATION' | translate}}: {{properties.population}}"
+                   tooltipPosition="top"></i>
             </div>
         </div>
-        
-        <!-- Content -->
-        <div *ngIf="!loading" class="flex-1 flex flex-col">
-            <div class="grid grid-cols-1 gap-4 h-full">
-                <!-- Properties Card -->
-                <div *ngIf="properties" class="bg-white rounded-lg shadow p-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <h2 class="text-xl font-semibold">{{properties.name}}</h2>
-                            <span class="px-3 py-1 rounded-full text-white text-sm font-medium"
-                                  [style.backgroundColor]="getScore().color">
-                                {{ getScoreName(getScore().score) }} ({{ getScore().score * 100 | number: '1.0-0' }}%)
-                            </span>
+
+        <!-- Tabs Container - Takes Remaining Space -->
+        <p-tabs [value]="'activities'" class="flex-1">
+            <p-tablist>
+                <p-tab value="activities">{{ 'ANALYZE.ACTIVITIES.TITLE' | translate }}</p-tab>
+                <p-tab value="persona">{{ 'ANALYZE.PERSONA.TITLE' | translate }}</p-tab>
+            </p-tablist>
+            
+            <!-- Activities Tab -->
+            <p-tabpanel [value]="'activities'" class="h-full">
+                <div class="flex flex-col h-full">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-medium">{{ 'ANALYZE.ACTIVITIES.TITLE' | translate }}</h3>
+                        <p-button 
+                            [icon]="sortBy === 'score' ? 'pi pi-sort-amount-down' : 'pi pi-sort-amount-up'"
+                            (onClick)="toggleSort()"
+                            [pTooltip]="sortBy === 'score' ? 'Nach Gewichtung sortieren' : 'Nach Score sortieren'"
+                            tooltipPosition="left"
+                            styleClass="p-button-text p-button-sm">
+                        </p-button>
+                    </div>
+                    <div *ngIf="hasActivityData()" class="flex-1 chart-wrapper" style="min-height:0;">
+                        <div style="height:100%; min-height:0;">
+                            <p-chart 
+                                #activitiesChart
+                                type="bar" 
+                                [data]="activitiesChartData" 
+                                [options]="barChartOptions"
+                                style="height:100%; width:100%;">
+                            </p-chart>
                         </div>
-                        <div class="tooltip-container relative">
-                            <i class="pi pi-info-circle cursor-help"
-                               pTooltip="{{'ANALYZE.PROPERTIES.POPULATION' | translate}}: {{properties.population}}"
-                               tooltipPosition="top"></i>
+                    </div>
+                    <div *ngIf="!hasActivityData()" class="flex-1 flex items-center justify-center">
+                        <p class="text-gray-500">{{ 'ANALYZE.ACTIVITIES.NO_DATA' | translate }}</p>
+                    </div>
+                </div>
+            </p-tabpanel>
+
+            <!-- Persona Tab -->
+            <p-tabpanel [value]="'persona'" class="h-full">
+                <div class="flex flex-col h-full"  *ngIf="showPersona">
+                    <h3 class="text-lg font-medium mb-3">{{ 'ANALYZE.PERSONA.TITLE' | translate }}</h3>
+                    <div *ngIf="hasPersonaData()" class="flex-1 chart-wrapper" style="min-height:0;">
+                        <div style="height:100%; min-height:0;">
+                            <p-chart 
+                                #personaChart
+                                type="radar" 
+                                [data]="personaChartData" 
+                                [options]="radarChartOptions"
+                                style="height:100%; width:100%;">
+                            </p-chart>
                         </div>
+                    </div>
+                    <div *ngIf="!hasPersonaData()" class="flex-1 flex items-center justify-center">
+                        <p class="text-gray-500">{{ 'ANALYZE.PERSONA.NO_DATA' | translate }}</p>
                     </div>
                 </div>
 
-                <!-- Weighting Toggle -->
-                <!-- <div class="flex items-center justify-end mb-4 gap-2">
-                    <span class="text-sm">{{ 'ANALYZE.WEIGHTING.POPULATION' | translate }}</span>
-                    <p-inputSwitch 
-                        [(ngModel)]="isAreaWeighting"
-                        (onChange)="onWeightingChange($event)">
-                    </p-inputSwitch>
-                    <span class="text-sm">{{ 'ANALYZE.WEIGHTING.AREA' | translate }}</span>
-                </div> -->
-
-                <p-tabs [value]="'activities'" class="flex-1 flex flex-col" (activeIndexChange)="triggerChartResize()">
-                    <p-tablist>
-                        <p-tab value="activities">Aktivitäten</p-tab>
-                        <p-tab value="persona">Persona</p-tab>
-                        <!-- <p-tab value="modes">Modi</p-tab> -->
-                    </p-tablist>
-                    <!-- Persona Tab -->
-                    <p-tabpanel [value]="'persona'" class="flex-1 flex flex-col">
-                        <div class="flex-1 flex flex-col">
-                            <h3 class="text-xl mb-4">{{ 'ANALYZE.PERSONA.TITLE' | translate }}</h3>
-                            <div *ngIf="hasPersonaData()" class="flex-1">
-                                <p-chart type="radar" [data]="personaChartData" [options]="radarChartOptions" class="h-full w-full"></p-chart>
-                            </div>
-                            <div *ngIf="!hasPersonaData()" class="text-center p-4">
-                                <p>{{ 'ANALYZE.PERSONA.NO_DATA' | translate }}</p>
-                            </div>
-                        </div>
-                    </p-tabpanel>
-
-                    <!-- Aktivitäten Tab -->
-                    <p-tabpanel [value]="'activities'" class="flex-1 flex flex-col">
-                        <div class="flex-1 flex flex-col">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-xl">{{ 'ANALYZE.ACTIVITIES.TITLE' | translate }}</h3>
-                                <p-button 
-                                    [icon]="sortBy === 'score' ? 'pi pi-sort-amount-down' : 'pi pi-sort-amount-up'"
-                                    (onClick)="toggleSort()"
-                                    [pTooltip]="sortBy === 'score' ? 'Nach Gewichtung sortieren' : 'Nach Score sortieren'"
-                                    tooltipPosition="left"
-                                    styleClass="p-button-text">
-                                </p-button>
-                            </div>
-                            <div *ngIf="hasActivityData()" class="flex-1">
-                                <div class="chart-container">
-                                    <p-chart 
-                                        type="bar" 
-                                        [data]="activitiesChartData" 
-                                        [options]="barChartOptions"
-                                        class="h-full w-full">
-                                    </p-chart>
-                                </div>
-                            </div>
-                            <div *ngIf="!hasActivityData()" class="text-center p-4">
-                                <p>{{ 'ANALYZE.ACTIVITIES.NO_DATA' | translate }}</p>
-                            </div>
-                        </div>
-                    </p-tabpanel>
-
-                    <!-- Modi Tab 
-                    <p-tabpanel [value]="'modes'" class="flex-grow flex flex-col h-full">
-                        <div class="p-4 flex flex-col h-full">
-                            <h3 class="text-xl mb-4">{{ 'ANALYZE.MODES.TITLE' | translate }}</h3>
-                            <div *ngIf="hasModeData()" class="flex-grow h-full min-h-[400px]">
-                                <p-chart type="bar" [data]="modesChartData" [options]="barChartOptions" class="h-full w-full"></p-chart>
-                            </div>
-                            <div *ngIf="!hasModeData()" class="text-center p-4">
-                                <p>{{ 'ANALYZE.MODES.NO_DATA' | translate }}</p>
-                            </div>
-                        </div>
-                    </p-tabpanel> -->
-                </p-tabs>
-            </div>
-        </div>
+                <div *ngIf="!showPersona" class="flex-1 flex items-center justify-center">
+                    <p class="text-gray-500">{{ 'ANALYZE.PERSONA.NO_DATA' | translate }}</p>
+                </div>
+            </p-tabpanel>
+        </p-tabs>
     </div>
 </p-dialog>

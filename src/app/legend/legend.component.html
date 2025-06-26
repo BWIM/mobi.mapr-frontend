@@ -1,7 +1,7 @@
 <div class="container">
   <!-- Legend -->
-  <div class="legend" (click)="toggleExpand()" [class.expanded]="isExpanded">
-    <div *ngFor="let level of scoreLevels" class="legend-item" [class]="level.name.toLowerCase()">
+  <div class="legend" id="legend" (click)="toggleExpand()" [class.expanded]="isExpanded">
+    <div *ngFor="let level of scoreLevels" class="legend-item" [class]="level.name.toLowerCase()" id="legend-full">
       <span>{{ level.name }}</span>
       <div class="description">{{ level.description }}</div>
     </div>

@@ -10,7 +10,7 @@
     </div>
 
     <!-- Linke Sidebar -->
-    <div class="sidebar-tab absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-r-lg z-20 cursor-pointer hover:bg-gray-50 transition-all duration-200 clickable-tab"
+    <div class="sidebar-tab absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-r-lg z-10 cursor-pointer hover:bg-gray-50 transition-all duration-200 clickable-tab" id="projects-sidebar-tab"
          (click)="showLeftSidebar()">
         <div class="flex flex-col items-center p-3 gap-3">
             <i class="pi pi-angle-right text-gray-800 text-xl" [class.rotate-180]="leftSidebarExpanded"></i>
@@ -30,20 +30,22 @@
         styleClass="projects-sidebar"
         [style]="{width: '500px'}"
         (onHide)="isLeftPinned = false"
-        [header]="'PROJECTS.TITLE' | translate">
-        <div class="p-3 h-full">
+        [header]="'PROJECTS.TITLE' | translate"
+        >
+        <div class="p-3 h-full" id="projects-sidebar">
             <app-projects (projectSelected)="leftSidebarExpanded = $event"></app-projects>
         </div>
     </p-dialog>
 
     <!-- Details Tab -->
-    <div class="sidebar-tab absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-l-lg z-20 cursor-pointer hover:bg-gray-50 transition-all duration-200 clickable-tab"
-        (click)="showRightSidebar()">
+    <div class="sidebar-tab absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-r-lg z-20 cursor-pointer hover:bg-gray-50 transition-all duration-200 clickable-tab"
+        (click)="toggleSidebar()">
         <div class="flex flex-col items-center p-3 gap-3">
             <i class="pi pi-angle-left text-gray-800 text-xl" [class.rotate-180]="rightSidebarExpanded"></i>
             <span class="rotate-text text-gray-800 font-semibold text-base">Details</span>
         </div>
     </div>
+
 
     <!-- Details Dialog -->
     <p-dialog 
@@ -58,10 +60,8 @@
         (onHide)="isRightPinned = false"
         [maximizable]="true"
         [header]="'DETAILS.TITLE' | translate">
-        <div class="p-3 h-full">
-            <div class="info-section h-full">
-                <app-details-sidebar (projectLoaded)="showRightSidebar()"></app-details-sidebar>
-            </div>
+        <div class="p-3 h-full info-section" id="details-sidebar">
+                <app-details-sidebar (projectLoaded)="toggleSidebar()"></app-details-sidebar>
         </div>
     </p-dialog>
 </div>

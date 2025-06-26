@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, AfterViewInit, ViewChild } from '@angular/core';
 import { SharedModule } from '../shared/shared.module';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../projects/projects.service';
@@ -6,6 +6,8 @@ import { AnalyzeService } from './analyze.service';
 import { Properties } from './analyze.interface';
 import { ProjectDetails } from '../projects/project.interface';
 import { MapGeoJSONFeature } from 'maplibre-gl';
+import { ShareService } from '../share/share.service';
+import { UIChart } from 'primeng/chart';
 
 
 @Component({
@@ -15,7 +17,7 @@ import { MapGeoJSONFeature } from 'maplibre-gl';
   templateUrl: './analyze.component.html',
   styleUrl: './analyze.component.css'
 })
-export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
+export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   visible: boolean = false;
   loading: boolean = false;
   private subscriptions: Subscription[] = [];
@@ -29,6 +31,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   weightingType: 'population' | 'area' = 'population';
   isAreaWeighting: boolean = false;
   sortBy: 'score' | 'weight' = 'weight';
+  showPersona: boolean = true;
 
   // Diagrammdaten
   personaChartData: any;
@@ -41,6 +44,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   doughnutChartOptions: any;
   activitiesWeightChartData: any;
   weightChartOptions: any;
+
+  @ViewChild('activitiesChart') activitiesChart?: UIChart;
+  @ViewChild('personaChart') personaChart?: UIChart;
 
   getScore(): {score: number, color: string} {
     if (!this.properties) return {score: 0, color: ''};
@@ -72,7 +78,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private analyzeService: AnalyzeService,
     private projectsService: ProjectsService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {
     this.subscriptions.push(
       this.analyzeService.visible$.subscribe(
@@ -243,6 +249,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       responsive: true,
       maintainAspectRatio: false
     };
+
   }
 
   private initializeChartData(): void {
@@ -253,116 +260,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.cdr.detectChanges();
     // Trigger resize after charts are initialized and rendered
     setTimeout(() => this.triggerChartResize(), 100);
-  }
-
-  private initializeModesChart(): void {
-    if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0) return;
-
-    // Calculate weighted averages for each mode
-    const modeScores = new Map<number, { totalWeightedScore: number, totalWeight: number }>();
-    
-    // Sum up weighted scores and weights for each mode
-    this.projectDetails.hexagons.forEach(hexagon => {
-      const weight = this.weightingType === 'population' ? hexagon.population : 1;
-      hexagon.mode_scores.forEach(modeScore => {
-        const current = modeScores.get(modeScore.mode) || { totalWeightedScore: 0, totalWeight: 0 };
-        current.totalWeightedScore += modeScore.score * weight;
-        current.totalWeight += weight;
-        modeScores.set(modeScore.mode, current);
-      });
-    });
-
-    // Calculate final weighted averages
-    const weightedModeScores = Array.from(modeScores.entries()).map(([mode, data]) => ({
-      mode,
-      score: data.totalWeightedScore / data.totalWeight
-    }));
-
-    // Sort modes by their weighted scores (ascending)
-    const sortedModes = weightedModeScores.sort((a, b) => a.score - b.score);
-    
-    // Get mode names from formatted_modes
-    const modeMap = new Map(this.projectDetails.modes.map(mode => [mode.id, mode.name]));
-    const labels = sortedModes.map(mode => modeMap.get(mode.mode) || `${mode.mode}`);
-    const data = sortedModes.map(mode => mode.score);
-
-    // Farbzuordnung basierend auf den Werten
-    const getColorForValue = (value: number): string => {
-      if (value >= 1.41) return '#9656a2';      // Lila (F)
-      if (value >= 1) return '#c21807';      // Rot (E)
-      if (value >= 0.72) return '#ed7014';      // Orange (D)
-      if (value >= 0.51) return '#eed202';      // Gelb (C)
-      if (value >= 0.35) return '#3cb043';      // Hellgrün (B)
-      return '#32612d';                         // Dunkelgrün (A)
-    };
-
-    const backgroundColor = data.map(value => getColorForValue(value));
-
-    this.modesChartData = {
-      type: 'bar',
-      labels: labels,
-      datasets: [
-        {
-          label: 'Verkehrsmittelwerte',
-          data: data,
-          backgroundColor: backgroundColor,
-          borderColor: backgroundColor,
-          borderWidth: 1,
-          yAxisID: 'y',
-          order: 2
-        }
-      ]
-    };
-
-    // Aktualisiere die Chart-Optionen
-    this.barChartOptions = {
-      indexAxis: 'x',
-      maintainAspectRatio: false,
-      responsive: true,
-      plugins: {
-        tooltip: {
-          mode: 'index',
-          intersect: false,
-          callbacks: {
-            label: function(context: any) {
-              return `${context.dataset.label}: ${context.raw.toFixed(2)}`;
-            }
-          }
-        },
-        legend: {
-          labels: {
-            color: '#495057'
-          },
-          position: 'bottom'
-        }
-      },
-      scales: {
-        x: {
-          ticks: {
-            color: '#495057'
-          },
-          grid: {
-            color: '#ebedef'
-          }
-        },
-        y: {
-          type: 'linear',
-          display: true,
-          position: 'left',
-          beginAtZero: true,
-          ticks: {
-            color: '#495057'
-          },
-          grid: {
-            color: '#ebedef'
-          },
-          title: {
-            display: true,
-            text: 'Verkehrsmittelwerte'
-          }
-        }
-      }
-    };
   }
 
   private initializeActivitiesChart(): void {
@@ -510,7 +407,11 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         personaScores.set(personaScore.persona, current);
       });
     });
-
+    if (personaScores.size === 0) {
+      this.showPersona = false;
+    } else {
+      this.showPersona = true;
+    }
     // Calculate final weighted averages
     const weightedPersonaScores = Array.from(personaScores.entries()).map(([persona, data]) => ({
       persona,
@@ -649,9 +550,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     };
   }
 
-  ngOnInit() {
-  }
-
   ngOnDestroy() {
     if (this.subscriptions) {
       this.subscriptions.forEach(subscription => subscription.unsubscribe());
@@ -660,6 +558,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   hide() {
     this.analyzeService.hide();
+  }
+
+  triggerTutorial() {
+    // this.tutorialService.nextStep();
   }
 
   onWeightingChange(event: any): void {
@@ -686,11 +588,19 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
    * Triggers a resize event on window to make charts adjust to their container size
    */
   triggerChartResize(): void {
-    // Initial resize
+    // Try to refresh charts directly if available
+    setTimeout(() => {
+      if (this.activitiesChart && this.activitiesChart.refresh) {
+        this.activitiesChart.refresh();
+      }
+      if (this.personaChart && this.personaChart.refresh) {
+        this.personaChart.refresh();
+      }
+    }, 50);
+    // Fallback: Initial resize
     window.dispatchEvent(new Event('resize'));
-    
     // Series of delayed resizes to ensure chart properly adjusts
-    const delays = [50, 150, 300];
+    const delays = [150, 300];
     delays.forEach(delay => {
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'));
@@ -700,6 +610,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
+    // isShare is now handled by subscription in constructor
   }
 
   getScoreName(score: number): string {

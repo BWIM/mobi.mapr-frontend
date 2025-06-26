@@ -6,12 +6,13 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { LoadingService } from '../services/loading.service';
 import { SearchOverlayComponent } from './search-overlay/search-overlay.component';
+import { LegendComponent } from '../legend/legend.component';
 
 @Component({
   selector: 'app-map-v2',
   templateUrl: './map-v2.component.html',
   styleUrl: './map-v2.component.css',
-  imports: [SearchOverlayComponent],
+  imports: [SearchOverlayComponent, LegendComponent],
   standalone: true
 })
 export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {

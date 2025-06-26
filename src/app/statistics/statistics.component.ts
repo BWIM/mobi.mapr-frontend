@@ -255,7 +255,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
       // Determine target zoom level based on administrative level
       let targetZoom = 7.5;
-      console.log(entry);
       if (entry.level === 'county') {
         targetZoom = 10;
       } else if (entry.level === 'municipality') {
@@ -273,7 +272,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       // Always add Germany to the query
       searchQuery += ', Germany';
       
-      console.log('Search query:', searchQuery);
       const results = await firstValueFrom(this.geocodingService.search(searchQuery));
       
       if (results.length > 0) {

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
 import { ButtonModule } from 'primeng/button';
@@ -9,6 +9,7 @@ import { PasswordModule } from 'primeng/password';
 import { CardModule } from 'primeng/card';
 import { MessagesModule } from 'primeng/messages';
 import { MessageModule } from 'primeng/message';
+import { DropdownModule } from 'primeng/dropdown';
 import { finalize } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
@@ -20,12 +21,14 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     ButtonModule,
     InputTextModule,
     PasswordModule,
     CardModule,
     MessagesModule,
     MessageModule,
+    DropdownModule,
     TranslateModule
   ]
 })
@@ -33,6 +36,15 @@ export class LoginComponent {
   loginForm!: FormGroup;
   error: string = '';
   isLoading: boolean = false;
+  currentLang = 'de';
+  private readonly LANGUAGE_KEY = 'mobi.mapr.language';
+
+  languages = [
+    { code: 'de', name: 'Deutsch' },
+    { code: 'de-bw', name: 'Badisch' },
+    { code: 'de-sw', name: 'Schwäbisch' },
+    { code: 'en', name: 'English' }
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -41,8 +53,18 @@ export class LoginComponent {
     private translate: TranslateService
   ) {
     this.initForm();
-    this.translate.setDefaultLang('de');
-    this.translate.use('de');
+    this.loadLanguagePreference();
+  }
+
+  private loadLanguagePreference(): void {
+    const savedLang = localStorage.getItem(this.LANGUAGE_KEY);
+    if (savedLang) {
+      this.currentLang = savedLang;
+      this.translate.use(savedLang);
+    } else {
+      this.translate.setDefaultLang('de');
+      this.translate.use('de');
+    }
   }
 
   private initForm(): void {
@@ -50,6 +72,13 @@ export class LoginComponent {
       username: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+  }
+
+  onLanguageChange(event: any): void {
+    const selectedLang = event.value?.code || 'de';
+    this.currentLang = selectedLang;
+    this.translate.use(selectedLang);
+    localStorage.setItem(this.LANGUAGE_KEY, selectedLang);
   }
 
   isFieldInvalid(fieldName: string): boolean {

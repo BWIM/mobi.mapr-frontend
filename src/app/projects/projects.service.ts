@@ -14,6 +14,7 @@ import {
   ProjectDetails
 } from './project.interface';
 import { MapV2Service } from '../map-v2/map-v2.service';
+import { ShareService } from '../share/share.service';
 
 
 
@@ -25,7 +26,7 @@ export class ProjectsService {
   private currentProjectInfo = new BehaviorSubject<ProjectInfo | null>(null);
   public currentProjectInfo$ = this.currentProjectInfo.asObservable();
 
-  constructor(private http: HttpClient, private map2Service: MapV2Service) { }
+  constructor(private http: HttpClient, private map2Service: MapV2Service, private shareService: ShareService) { }
 
   // Project CRUD Operations
   getProjects(page: number = 1, pageSize: number = 10): Observable<PaginatedResponse<Project>> {
@@ -88,12 +89,21 @@ export class ProjectsService {
   }
 
   getProjectDetails(project: string, maptype: string, featureId: string): Observable<ProjectDetails> {
-    const params = new HttpParams()
+    if (this.shareService.getIsShare()) {
+      const params = new HttpParams()
+        .set('key', this.shareService.getShareKey()!)
+        .set('project', project)
+        .set('maptype', maptype)
+        .set('featureId', featureId);
+      return this.http.get<ProjectDetails>(`${this.apiUrl}/share-analyze/`, { params });
+    } else {
+
+      const params = new HttpParams()
       .set('project', project)
       .set('maptype', maptype)
       .set('featureId', featureId);
-    
-    return this.http.get<ProjectDetails>(`${this.apiUrl}/projects/details/`, { params });
+      return this.http.get<ProjectDetails>(`${this.apiUrl}/projects/details/`, { params });
+    }
   }
 
   getProjectInfo(projectId: number): Observable<ProjectInfo> {

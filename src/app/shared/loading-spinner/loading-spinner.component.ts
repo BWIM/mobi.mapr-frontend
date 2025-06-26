@@ -8,7 +8,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
   standalone: true,
   imports: [CommonModule, ProgressSpinnerModule],
   template: `
-    <div class="fixed top-5 right-5 z-[9999]" *ngIf="loadingService.loading$ | async">
+    <div class="fixed top-5 right-5 z-[10]" *ngIf="loadingService.loading$ | async">
       <p-progressSpinner 
         [style]="{width: '50px', height: '50px'}"
         strokeWidth="4"
