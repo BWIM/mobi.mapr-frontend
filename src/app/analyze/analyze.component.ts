@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectorRef, AfterViewInit, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { SharedModule } from '../shared/shared.module';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../projects/projects.service';
@@ -6,9 +6,7 @@ import { AnalyzeService } from './analyze.service';
 import { Properties } from './analyze.interface';
 import { ProjectDetails } from '../projects/project.interface';
 import { MapGeoJSONFeature } from 'maplibre-gl';
-import { ShareService } from '../share/share.service';
 import { UIChart } from 'primeng/chart';
-
 
 @Component({
   selector: 'app-analyze',
@@ -32,6 +30,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   isAreaWeighting: boolean = false;
   sortBy: 'score' | 'weight' = 'weight';
   showPersona: boolean = true;
+  activeTab: string = 'activities';
 
   // Diagrammdaten
   personaChartData: any;
@@ -47,6 +46,10 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
   @ViewChild('activitiesChart') activitiesChart?: UIChart;
   @ViewChild('personaChart') personaChart?: UIChart;
+  @ViewChild('dialogContainer') dialogContainer?: ElementRef;
+
+  private resizeObserver?: ResizeObserver;
+  private resizeTimeout?: any;
 
   getScore(): {score: number, color: string} {
     if (!this.properties) return {score: 0, color: ''};
@@ -97,6 +100,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
                 next: (details) => {
                   this.projectDetails = details;
                   this.initializeChartData();
+                  setTimeout(() => {
+                    this.resizeCharts();
+                  }, 100);
                 },
                 error: (error) => {
                   console.error('Error loading project details:', error);
@@ -257,9 +263,11 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     this.initializeActivitiesChart();
     this.initializePersonaChart();
     this.loading = false;
-    this.cdr.detectChanges();
-    // Trigger resize after charts are initialized and rendered
-    setTimeout(() => this.triggerChartResize(), 100);
+    
+    // Ensure charts are properly sized after initialization
+    setTimeout(() => {
+      this.resizeCharts();
+    }, 200);
   }
 
   private initializeActivitiesChart(): void {
@@ -554,14 +562,23 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     if (this.subscriptions) {
       this.subscriptions.forEach(subscription => subscription.unsubscribe());
     }
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
+    if (this.resizeTimeout) {
+      clearTimeout(this.resizeTimeout);
+    }
   }
 
   hide() {
     this.analyzeService.hide();
   }
 
-  triggerTutorial() {
-    // this.tutorialService.nextStep();
+  onDialogShow(): void {
+    // Resize charts when dialog becomes visible
+    setTimeout(() => {
+      this.resizeCharts();
+    }, 200);
   }
 
   onWeightingChange(event: any): void {
@@ -574,43 +591,66 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   toggleActivitiesChartType(): void {
     this.activitiesChartType = this.activitiesChartType === 'bar' ? 'doughnut' : 'bar';
     this.initializeActivitiesChart();
-    // Trigger resize after chart type change with sufficient delay to ensure rendering completes
-    setTimeout(() => this.triggerChartResize(), 100);
+    setTimeout(() => {
+      this.resizeCharts();
+    }, 100);
   }
 
   toggleSort(): void {
     this.sortBy = this.sortBy === 'score' ? 'weight' : 'score';
     this.initializeActivitiesChart();
-    this.triggerChartResize();
-  }
-
-  /**
-   * Triggers a resize event on window to make charts adjust to their container size
-   */
-  triggerChartResize(): void {
-    // Try to refresh charts directly if available
     setTimeout(() => {
-      if (this.activitiesChart && this.activitiesChart.refresh) {
-        this.activitiesChart.refresh();
-      }
-      if (this.personaChart && this.personaChart.refresh) {
-        this.personaChart.refresh();
-      }
-    }, 50);
-    // Fallback: Initial resize
-    window.dispatchEvent(new Event('resize'));
-    // Series of delayed resizes to ensure chart properly adjusts
-    const delays = [150, 300];
-    delays.forEach(delay => {
-      setTimeout(() => {
-        window.dispatchEvent(new Event('resize'));
-        this.cdr.detectChanges();
-      }, delay);
-    });
+      this.resizeCharts();
+    }, 100);
   }
 
   ngAfterViewInit() {
     // isShare is now handled by subscription in constructor
+    this.setupResizeObserver();
+  }
+
+  private setupResizeObserver(): void {
+    if (this.dialogContainer?.nativeElement) {
+      this.resizeObserver = new ResizeObserver(() => {
+        // Debounce resize events
+        if (this.resizeTimeout) {
+          clearTimeout(this.resizeTimeout);
+        }
+        this.resizeTimeout = setTimeout(() => {
+          this.resizeCharts();
+        }, 100);
+      });
+      
+      this.resizeObserver.observe(this.dialogContainer.nativeElement);
+    }
+  }
+
+  private resizeCharts(): void {
+    // Force chart resize after a small delay to ensure DOM is ready
+    setTimeout(() => {
+      if (this.activitiesChart?.chart) {
+        this.activitiesChart.chart.resize();
+      }
+      if (this.personaChart?.chart) {
+        this.personaChart.chart.resize();
+      }
+    }, 50);
+  }
+
+  onTabChange(event: any): void {
+    this.activeTab = event.value;
+    // Resize charts when switching tabs
+    setTimeout(() => {
+      this.resizeCharts();
+    }, 100);
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    // Resize charts when window is resized
+    setTimeout(() => {
+      this.resizeCharts();
+    }, 100);
   }
 
   getScoreName(score: number): string {

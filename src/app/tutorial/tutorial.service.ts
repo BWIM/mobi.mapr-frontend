@@ -54,7 +54,8 @@ export class TutorialService {
           title: 'TUTORIAL.DASHBOARD.STEP4.TITLE',
           content: 'TUTORIAL.DASHBOARD.STEP4.CONTENT',
           type: 'informative',
-          targetSelector: '#map-container'
+          targetSelector: '#map-container',
+          nextHint: 'TUTORIAL.DASHBOARD.STEP4.NEXT_HINT'
         },
         {
           id: 'dashboard-5',
@@ -86,10 +87,13 @@ export class TutorialService {
           title: 'TUTORIAL.DASHBOARD.STEP6.TITLE',
           content: 'TUTORIAL.DASHBOARD.STEP6.CONTENT',
           type: 'highlight',
-          targetSelector: '.details-sidebar .p-dialog-content',
-          position: 'global-top-right',
-          offset: { x: -10, y: 0 },
-          nextHint: 'TUTORIAL.DASHBOARD.STEP6.NEXT_HINT'
+          targetSelector: '.details-sidebar .p-dialog-close-button',
+          infoBoxSelector: '.details-sidebar .p-dialog-content',
+          position: 'left',
+          interactive: true,
+          offset: { x: -100, y: 0 },
+          nextHint: 'TUTORIAL.SHARE.STEP4.NEXT_HINT',
+          requireMapFeatureClick: false
         },
         {
           id: 'dashboard-7',
@@ -133,12 +137,15 @@ export class TutorialService {
           id: 'dashboard-10',
           title: 'TUTORIAL.DASHBOARD.STEP10.TITLE',
           content: 'TUTORIAL.DASHBOARD.STEP10.CONTENT',
-          type: 'highlight',
+          type: 'interactive',
           targetSelector: '#credits-sidebar .p-speeddial-button',
-          position: 'global-bottom-right',
+          infoBoxSelector: '#credits-sidebar .p-speeddial',
+          position: 'left',
           offset: { x: 0, y: 0 },
           showHighlight: false,
-          nextHint: 'TUTORIAL.DASHBOARD.STEP10.NEXT_HINT'
+          interactive: true,
+          requireMapFeatureClick: false,
+          nextHint: 'TUTORIAL.SHARE.STEP7.NEXT_HINT'
         },
         {
           id: 'dashboard-11',
@@ -158,7 +165,8 @@ export class TutorialService {
         title: 'TUTORIAL.SHARE.STEP1.TITLE',
         content: 'TUTORIAL.SHARE.STEP1.CONTENT',
         type: 'informative',
-        nextHint: 'TUTORIAL.SHARE.STEP1.NEXT_HINT'
+        nextHint: 'TUTORIAL.SHARE.STEP1.NEXT_HINT',
+        languageHint: 'TUTORIAL.SHARE.LANGUAGE_HINT'
       },
       {
         id: 'share-2',
@@ -196,11 +204,14 @@ export class TutorialService {
         id: 'share-4',
         title: 'TUTORIAL.SHARE.STEP4.TITLE',
         content: 'TUTORIAL.SHARE.STEP4.CONTENT',
-        type: 'highlight',
-        targetSelector: '.share-sidebar .p-dialog-content',
+        type: 'interactive',
+        targetSelector: '.share-sidebar .p-dialog-close-button',
+        infoBoxSelector: '.share-sidebar .p-dialog-content',
         position: 'left',
-        offset: { x: -50, y: 0 },
-        nextHint: 'TUTORIAL.SHARE.STEP4.NEXT_HINT'
+        interactive: true,
+        offset: { x: -100, y: 0 },
+        nextHint: 'TUTORIAL.SHARE.STEP4.NEXT_HINT',
+        requireMapFeatureClick: false
       },
       {
         id: 'share-5',
@@ -231,11 +242,14 @@ export class TutorialService {
         id: 'share-7',
         title: 'TUTORIAL.SHARE.STEP7.TITLE',
         content: 'TUTORIAL.SHARE.STEP7.CONTENT',
-        type: 'highlight',
+        type: 'interactive',
         targetSelector: '#credits-sidebar .p-speeddial-button',
-        position: 'global-bottom-right',
+        infoBoxSelector: '#credits-sidebar .p-speeddial',
+        position: 'left',
         offset: { x: 0, y: 0 },
         showHighlight: false,
+        interactive: true,
+        requireMapFeatureClick: false,
         nextHint: 'TUTORIAL.SHARE.STEP7.NEXT_HINT'
       },
       {
@@ -353,6 +367,7 @@ export class TutorialService {
   }
 
   markStepCompleted(): void {
+    console.log('markStepCompleted');
     const currentConfig = this.config;
     const currentStep = this.getCurrentStep();
     

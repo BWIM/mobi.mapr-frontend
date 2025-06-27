@@ -384,7 +384,8 @@
       },
       "STEP4": {
         "TITLE": "Des Kärtle",
-        "CONTENT": "In dr Midd isch s Kärtle zur Mobilitätsqualität. Du kasch zomma ond nufffahra, wia du wittsch. No'm Tutorial kannst glei loslegga."
+        "CONTENT": "In dr Midd isch s Kärtle zur Mobilitätsqualität. Du kasch zomma ond nufffahra, wia du wittsch. No'm Tutorial kannst glei loslegga.",
+        "NEXT_HINT": "Drucksch unte na dr Mitte uff dr middläre Knopf."
       },
       "STEP5": {
         "TITLE": "Dr Beschreib",
@@ -425,6 +426,7 @@
     "SHARE": {
       "NAME": "Teila",
       "DESCRIPTION": "Lern d' Hauptfunktiona vom Teil a bissle kenne",
+      "LANGUAGE_HINT": "You can change the language in the top right corner!",
       "STEP1": {
         "TITLE": "Grüß Gottle!",
         "CONTENT": "Willkomme bei mobi.mapr! Do zeiga mr dir kurz, wie du d' Kärtle gugge kasch.",

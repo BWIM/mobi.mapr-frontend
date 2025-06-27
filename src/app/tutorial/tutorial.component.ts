@@ -74,6 +74,8 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
         
         if (config.isActive && this.currentStep) {
           this.updateHighlight();
+
+
           // Add click listener for interactive steps
           if (this.isCurrentStepInteractive()) {
             this.addTargetElementClickListener();
@@ -172,7 +174,9 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onTargetElementClick(event?: Event): void {
+    console.log('onTargetElementClick', this.currentStep);
     if (this.isCurrentStepInteractive() && !this.isStepCompleted()) {
+      console.log('onTargetElementClick 2', this.currentStep);
       // Check if this step requires map feature clicks
       // if clicking on the skip button, skip the step
       if (this.currentStep?.requireMapFeatureClick == false) {
@@ -206,6 +210,10 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
     const targetElement = document.querySelector(this.currentStep.targetSelector);
     if (!targetElement) {
       this.showHighlight = false;
+      // If element doesn't exist and we need to show highlight, poll for it
+      if (this.currentStep.showHighlight === undefined || this.currentStep.showHighlight === true) {
+        this.pollForHighlightElement();
+      }
       return;
     }
 
@@ -239,6 +247,28 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
     this.showHighlight = true;
   }
 
+  private pollForHighlightElement(): void {
+    if (!this.currentStep?.targetSelector) return;
+
+    const maxAttempts = 50; // 5 seconds with 100ms intervals
+    let attempts = 0;
+    const targetSelector = this.currentStep.targetSelector;
+
+    const pollInterval = setInterval(() => {
+      attempts++;
+      const targetElement = document.querySelector(targetSelector);
+      
+      if (targetElement) {
+        clearInterval(pollInterval);
+        // Update highlight after element is found
+        setTimeout(() => this.updateHighlight(), 50);
+      } else if (attempts >= maxAttempts) {
+        clearInterval(pollInterval);
+        console.warn(`Highlight target element not found after ${maxAttempts} attempts: ${targetSelector}`);
+      }
+    }, 100);
+  }
+
   getInfoBoxPosition(): any {
     if (!this.currentStep || 
         (this.currentStep.type !== 'highlight' && this.currentStep.type !== 'interactive') || 
@@ -246,7 +276,7 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
       return {};
     }
 
-    const targetElement = document.querySelector(this.currentStep.targetSelector);
+    const targetElement = document.querySelector(this.currentStep.infoBoxSelector || this.currentStep.targetSelector);
     if (!targetElement) {
       return {};
     }
@@ -323,15 +353,44 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
   private addTargetElementClickListener(): void {
     if (!this.currentStep?.targetSelector) return;
 
-    const targetElement = document.querySelector(this.currentStep.targetSelector);
+    // Try to find the target element immediately
+    let targetElement = document.querySelector(this.currentStep.targetSelector);
+    
     if (targetElement) {
+      // Element exists, add listener immediately
       targetElement.addEventListener('click', this.onTargetElementClick.bind(this));
+    } else {
+      // Element doesn't exist yet, poll for it
+      this.pollForTargetElement();
     }
 
     // Set up map feature click listener if this step requires it
     if (this.currentStep.requireMapFeatureClick) {
       this.setupMapFeatureClickListener();
     }
+  }
+
+  private pollForTargetElement(): void {
+    if (!this.currentStep?.targetSelector) return;
+
+    const maxAttempts = 50; // 5 seconds with 100ms intervals
+    let attempts = 0;
+    const targetSelector = this.currentStep.targetSelector;
+
+    const pollInterval = setInterval(() => {
+      attempts++;
+      const targetElement = document.querySelector(targetSelector);
+      
+      if (targetElement) {
+        clearInterval(pollInterval);
+        targetElement.addEventListener('click', this.onTargetElementClick.bind(this));
+        // Update highlight after element is found
+        setTimeout(() => this.updateHighlight(), 50);
+      } else if (attempts >= maxAttempts) {
+        clearInterval(pollInterval);
+        console.warn(`Target element not found after ${maxAttempts} attempts: ${targetSelector}`);
+      }
+    }, 100);
   }
 
   private removeTargetElementClickListener(): void {

@@ -400,7 +400,8 @@
       },
       "STEP4": {
         "TITLE": "Die Karte",
-        "CONTENT": "In der Mitte ist die Karte für Mobilitätsqualität. Du kannst zoomen, um andere Auflösungen zu erhalten. Du kannst direkt nach dem Tutorial anfangen zu spielen."
+        "CONTENT": "In der Mitte ist die Karte für Mobilitätsqualität. Du kannst zoomen, um andere Auflösungen zu erhalten. Du kannst direkt nach dem Tutorial anfangen zu spielen.",
+        "NEXT_HINT": "Klicke unten auf den Weiter-Knopf, wenn du bereit bist."
       },
       "STEP5": {
         "TITLE": "Die Legende",
@@ -440,6 +441,7 @@
     },
     "SHARE": {
       "NAME": "Teilen",
+      "LANGUAGE_HINT": "You can change the language in the top right corner!",
       "DESCRIPTION": "Lerne die wichtigsten Funktionen des Teilens kennen",
       "STEP1": {
         "TITLE": "Willkommen!",
@@ -464,7 +466,7 @@
       "STEP4": {
         "TITLE": "Details anzeigen",
         "CONTENT": "Hier findest du alle Informationen zu dem Projekt, wie die Aktivitäten, Personas und Modi.",
-        "NEXT_HINT": "Unten geht es wieder weiter."
+        "NEXT_HINT": "Schließe die Details, um fortzufahren."
       },
       "STEP5": {
         "TITLE": "Karte analysieren",

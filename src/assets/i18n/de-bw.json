@@ -386,7 +386,8 @@
       },
       "STEP4": {
         "TITLE": "D' Kärt",
-        "CONTENT": "In dr Mitte siehsch d' Kärt zur Mobilitätsqualität. Du kannsch neizoome oder uusezoome. Gleich nach'm Tutorial kannsch loslege."
+        "CONTENT": "In dr Mitte siehsch d' Kärt zur Mobilitätsqualität. Du kannsch neizoome oder uusezoome. Gleich nach'm Tutorial kannsch loslege.",
+        "NEXT_HINT": "Drucksch unte na dr Mitte uff dr middläre Knopf."
       },
       "STEP5": {
         "TITLE": "D' Legend",
@@ -427,6 +428,7 @@
     "SHARE": {
       "NAME": "Teile",
       "DESCRIPTION": "Lern die Funktione vum Teile kenne",
+      "LANGUAGE_HINT": "You can change the language in the top right corner!",
       "STEP1": {
         "TITLE": "Grüß di!",
         "CONTENT": "Willkomme bi mobi.mapr! Mit dem Tutorial zeige mir dir wie du dei Kärt gugge kasch.",
