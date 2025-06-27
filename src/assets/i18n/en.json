@@ -399,7 +399,8 @@
       },
       "STEP4": {
         "TITLE": "The Map",
-        "CONTENT": "In the center is the map showing mobility quality. You can zoom to get different resolutions. You can start exploring right after the tutorial."
+        "CONTENT": "In the center is the map showing mobility quality. You can zoom to get different resolutions. You can start exploring right after the tutorial.",
+        "NEXT_HINT": "Click the button in the bottom center to continue."
       },
       "STEP5": {
         "TITLE": "The Legend",

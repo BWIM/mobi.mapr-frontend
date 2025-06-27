@@ -400,7 +400,8 @@
       },
       "STEP4": {
         "TITLE": "Die Karte",
-        "CONTENT": "In der Mitte ist die Karte für Mobilitätsqualität. Du kannst zoomen, um andere Auflösungen zu erhalten. Du kannst direkt nach dem Tutorial anfangen zu spielen."
+        "CONTENT": "In der Mitte ist die Karte für Mobilitätsqualität. Du kannst zoomen, um andere Auflösungen zu erhalten. Du kannst direkt nach dem Tutorial anfangen zu spielen.",
+        "NEXT_HINT": "Klicke unten auf den Weiter-Knopf, wenn du bereit bist."
       },
       "STEP5": {
         "TITLE": "Die Legende",
