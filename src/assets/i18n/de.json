@@ -441,6 +441,7 @@
     },
     "SHARE": {
       "NAME": "Teilen",
+      "LANGUAGE_HINT": "You can change the language in the top right corner!",
       "DESCRIPTION": "Lerne die wichtigsten Funktionen des Teilens kennen",
       "STEP1": {
         "TITLE": "Willkommen!",

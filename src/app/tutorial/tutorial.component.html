@@ -76,9 +76,13 @@
         <p class="text-sm text-gray-600">
           {{ (currentStep?.content || '') | translate }}
         </p>
+        <p *ngIf="currentStep?.languageHint" class="text-xs text-blue-600 mt-2">
+          {{ currentStep?.languageHint || '' | translate }}
+        </p>
         <p *ngIf="currentStep?.nextHint" class="text-xs text-blue-600 mt-2">
           {{ currentStep?.nextHint || '' | translate }}
         </p>
+
       </div>
     </div>
   </div>

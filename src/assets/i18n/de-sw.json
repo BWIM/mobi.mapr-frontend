@@ -426,6 +426,7 @@
     "SHARE": {
       "NAME": "Teila",
       "DESCRIPTION": "Lern d' Hauptfunktiona vom Teil a bissle kenne",
+      "LANGUAGE_HINT": "You can change the language in the top right corner!",
       "STEP1": {
         "TITLE": "Grüß Gottle!",
         "CONTENT": "Willkomme bei mobi.mapr! Do zeiga mr dir kurz, wie du d' Kärtle gugge kasch.",

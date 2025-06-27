@@ -165,7 +165,8 @@ export class TutorialService {
         title: 'TUTORIAL.SHARE.STEP1.TITLE',
         content: 'TUTORIAL.SHARE.STEP1.CONTENT',
         type: 'informative',
-        nextHint: 'TUTORIAL.SHARE.STEP1.NEXT_HINT'
+        nextHint: 'TUTORIAL.SHARE.STEP1.NEXT_HINT',
+        languageHint: 'TUTORIAL.SHARE.LANGUAGE_HINT'
       },
       {
         id: 'share-2',

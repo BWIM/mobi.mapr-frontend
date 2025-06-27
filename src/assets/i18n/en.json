@@ -442,6 +442,7 @@
     "SHARE": {
       "NAME": "Share",
       "DESCRIPTION": "Learn the main features of sharing",
+      "LANGUAGE_HINT": "You can change the language in the top right corner!",
       "STEP1": {
         "TITLE": "Welcome!",
         "CONTENT": "Welcome to mobi.mapr! This short tutorial will show you the key features of your shared map.",

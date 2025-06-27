@@ -12,6 +12,7 @@ export interface TutorialStep {
   requireMapFeatureClick?: boolean; // Whether the step requires clicking on a map feature specifically
   nextHint?: string; // Hint for the next step
   enableContinueButton?: boolean; // Whether to show the continue button
+  languageHint?: string; // Hint for the language
 }
 
 export interface TutorialSet {

@@ -428,6 +428,7 @@
     "SHARE": {
       "NAME": "Teile",
       "DESCRIPTION": "Lern die Funktione vum Teile kenne",
+      "LANGUAGE_HINT": "You can change the language in the top right corner!",
       "STEP1": {
         "TITLE": "Grüß di!",
         "CONTENT": "Willkomme bi mobi.mapr! Mit dem Tutorial zeige mir dir wie du dei Kärt gugge kasch.",
