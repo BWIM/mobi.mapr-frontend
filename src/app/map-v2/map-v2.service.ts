@@ -233,15 +233,18 @@ export class MapV2Service {
       // State level
       this.analyzeService.setMapType('state');
       return `${environment.apiUrl}/tiles/laender/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${this.currentProject}${authParam}`;
-    } else if (this.currentZoom < 8) {
+    } else if (this.currentZoom < 9) {
       // County level
       this.analyzeService.setMapType('county');
       return `${environment.apiUrl}/tiles/landkreise/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${this.currentProject}${authParam}`;
-    } else if (this.currentZoom < 9) {
+    } else if (this.currentZoom < 10) {
       // Municipality level
       this.analyzeService.setMapType('municipality');
       return `${environment.apiUrl}/tiles/gemeinden/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${this.currentProject}${authParam}`;
-    } else if (this.currentZoom < 10) {
+    } else if (this.currentZoom < 11) {
+      this.analyzeService.setMapType('hexagon');
+      return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${this.currentProject}&resolution=7${authParam}`;
+    } else if (this.currentZoom < 12) {
       this.analyzeService.setMapType('hexagon');
       return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${this.currentProject}&resolution=8${authParam}`;
     } else {
