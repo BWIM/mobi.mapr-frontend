@@ -12,6 +12,7 @@ import { AuthService } from '../auth/auth.service';
 import { Router } from '@angular/router';
 import { TutorialService } from '../tutorial/tutorial.service';
 import { ShareService } from '../share/share.service';
+import { CreditsService } from './credits.service';
 
 interface InfoComponent {
   name: string;
@@ -67,7 +68,7 @@ export class CreditsComponent implements OnInit {
 
   showShortcutsDialog = false;
 
-  constructor(private translate: TranslateService, private authService: AuthService, private router: Router, private tutorialService: TutorialService, private shareService: ShareService) {}
+  constructor(private translate: TranslateService, private authService: AuthService, private router: Router, private tutorialService: TutorialService, private shareService: ShareService, private creditsService: CreditsService) {}
 
   ngOnInit() {
     // Load saved language preference
@@ -86,6 +87,14 @@ export class CreditsComponent implements OnInit {
     // Initial translation update
     this.updateShortcutTranslations();
     this.updateItems();
+
+    this.creditsService.isExpanded$.subscribe((isExpanded: boolean) => {
+      this.showCreditsDialog = isExpanded;
+    });
+
+    this.creditsService.isExpanded$.subscribe((isExpanded: boolean) => {
+      this.showCreditsDialog = isExpanded;
+    });
   }
 
   private updateShortcutTranslations() {
@@ -187,7 +196,7 @@ export class CreditsComponent implements OnInit {
   items: MenuItem[] = [];
 
   showCredits() {
-    this.showCreditsDialog = true;
+    this.creditsService.showCredits();
   }
 
   showHelp() {

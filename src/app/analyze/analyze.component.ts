@@ -317,6 +317,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const labels = sortedData.map(item => item.name);
     const scores = sortedData.map(item => item.score * 100);
     const weights = sortedData.map(item => item.weight);
+    const scoreNames = sortedData.map(item => this.getScoreName(item.score * 100));
 
     // Farbzuordnung basierend auf den Werten
     const getColorForValue = (value: number): string => {
@@ -357,17 +358,88 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
             label: (context: any) => {
               const index = context.dataIndex;
               return [
-                `Score: ${this.getScoreName(scores[index])}`,
+                `Score: ${scoreNames[index]}`,
                 `Gewichtung: ${weights[index]}%`
               ];
             }
           }
         },
         legend: {
+          position: 'bottom',
           labels: {
-            color: '#495057'
-          },
-          position: 'bottom'
+            generateLabels: function(chart: any) {
+              return [
+                {
+                  text: 'A',
+                  fillStyle: 'rgba(50, 97, 45, 0.2)',
+                  strokeStyle: '#32612d',
+                  fontColor: '#000000',
+                  lineWidth: 1,
+                  hidden: false,
+                  boxWidth: 30,
+                  boxHeight: 20,
+                  borderRadius: 4
+                },
+                {
+                  text: 'B',
+                  fillStyle: 'rgba(60, 176, 67, 0.2)',
+                  strokeStyle: '#3cb043',
+                  fontColor: '#000000',
+                  lineWidth: 1,
+                  hidden: false,
+                  boxWidth: 30,
+                  boxHeight: 20,
+                  borderRadius: 4
+                },
+                {
+                  text: 'C',
+                  fillStyle: 'rgba(238, 210, 2, 0.2)',
+                  strokeStyle: '#eed202',
+                  fontColor: '#000000',
+                  lineWidth: 1,
+                  hidden: false,
+                  boxWidth: 30,
+                  boxHeight: 20,
+                  borderRadius: 4
+                },
+                {
+                  text: 'D',
+                  fillStyle: 'rgba(237, 112, 20, 0.2)',
+                  strokeStyle: '#ed7014',
+                  fontColor: '#000000',
+                  lineWidth: 1,
+                  hidden: false,
+                  boxWidth: 30,
+                  boxHeight: 20,
+                  borderRadius: 4
+                },
+                {
+                  text: 'E',
+                  fillStyle: 'rgba(194, 24, 7, 0.2)',
+                  strokeStyle: '#c21807',
+                  fontColor: '#000000',
+                  lineWidth: 1,
+                  hidden: false,
+                  boxWidth: 30,
+                  boxHeight: 20,
+                  borderRadius: 4
+                },
+                {
+                  text: 'F',
+                  fillStyle: 'rgba(150, 86, 162, 0.2)',
+                  strokeStyle: '#9656a2',
+                  fontColor: '#000000',
+                  lineWidth: 1,
+                  hidden: false,
+                  boxWidth: 30,
+                  boxHeight: 20,
+                  borderRadius: 4
+                }
+              ];
+            },
+            usePointStyle: false,
+            padding: 15
+          }
         }
       },
       scales: {
@@ -433,12 +505,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const personaMap = new Map(this.projectDetails.personas.map(p => [p.id, p.name]));
     const labels = sortedPersonas.map(persona => personaMap.get(persona.persona) || `${persona.persona}`);
     const data = sortedPersonas.map(persona => persona.score);
-
-    // Find the highest score for background bands
-    const highestScore = Math.max(...data);
-
-    // Calculate dynamic max value - round up to next 0.5 increment and add small padding
-    const maxValue = highestScore * 1.05 + 0.35;
+    const scoreNames = sortedPersonas.map(persona => this.getScoreName(persona.score * 100));
 
     // Farbzuordnung basierend auf den Werten (inverted)
     const getColorForValue = (value: number): string => {
@@ -450,23 +517,34 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     return '#32612d';                         // Dunkelgrün (A)
   };
 
-  const getBackgroundColorForValue = (value: number): string => {
-    if (value >= 1.41) return 'rgba(150, 86, 162, 0.2)';    // Lila (F)
-    if (value >= 1) return 'rgba(194, 24, 7, 0.2)';    // Rot (E)
-    if (value >= 0.72) return 'rgba(237, 112, 20, 0.2)';    // Orange (D)
-    if (value >= 0.51) return 'rgba(238, 210, 2, 0.2)';    // Gelb (C)
-    if (value >= 0.35) return 'rgba(60, 176, 67, 0.2)';    // Hellgrün (B)
-    return 'rgba(50, 97, 45, 0.2)';                       // Dunkelgrün (A)
-  };
 
     const borderColors = data.map(value => getColorForValue(value));
-    const backgroundColors = data.map(value => getBackgroundColorForValue(value));
 
     // Update radar options with dynamic max value and inverted scale
     this.radarChartOptions = {
       ...this.radarChartOptions,
       responsive: true,
       maintainAspectRatio: false,
+      plugins: {
+        ...this.radarChartOptions.plugins,
+        tooltip: {
+          callbacks: {
+            title: (context: any) => {
+              if (context[0].dataset.label === 'Persona-Werte') {
+                return context[0].label;
+              }
+              return context[0].dataset.label;
+            },
+            label: (context: any) => {
+              if (context.dataset.label === 'Persona-Werte') {
+                const index = context.dataIndex;
+                return `Score: ${scoreNames[index]}`;
+              }
+              return context.dataset.label;
+            }
+          }
+        }
+      },
       scales: {
         r: {
           beginAtZero: true,
@@ -476,7 +554,8 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
             stepSize: 0.5,
             font: {
               size: 10
-            }
+            },
+            display: false
           },
           grid: {
             color: '#ebedef'
@@ -497,45 +576,57 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const baseDatasets = [
       {
         label: 'F',
-        data: Array(labels.length).fill(Math.min(2, 1.41)), // Use dynamic max value
+        data: labels.map(() => 1.41), // Fills from 1.41 to 2.0
         backgroundColor: 'rgba(150, 86, 162, 0.2)',
         borderWidth: 0,
-        fill: 'start'
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        fill: 'start' // Fill to the next dataset (E)
       },
       {
         label: 'E',
-        data: Array(labels.length).fill(Math.min(1.41, 1.0)),
+        data: labels.map(() => 1.0), // Fills from 1.0 to 1.41
         backgroundColor: 'rgba(194, 24, 7, 0.2)',
         borderWidth: 0,
-        fill: 'start'
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        fill: '+1' // Fill to the next dataset (D)
       },
       {
         label: 'D',
-        data: Array(labels.length).fill(Math.min(1.0, 0.72)),
+        data: labels.map(() => 0.72), // Fills from 0.72 to 1.0
         backgroundColor: 'rgba(237, 112, 20, 0.2)',
         borderWidth: 0,
-        fill: 'start'
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        fill: '+1' // Fill to the next dataset (C)
       },
       {
         label: 'C',
-        data: Array(labels.length).fill(Math.min(0.72, 0.51)),
+        data: labels.map(() => 0.5), // Fills from 0.51 to 0.72
         backgroundColor: 'rgba(238, 210, 2, 0.2)',
         borderWidth: 0,
-        fill: 'start'
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        fill: '+1' // Fill to the next dataset (B)
       },
       {
         label: 'B',
-        data: Array(labels.length).fill(Math.min(0.5, 0.35)),
+        data: labels.map(() => 0.35), // Fills from 0.35 to 0.51
         backgroundColor: 'rgba(60, 176, 67, 0.2)',
         borderWidth: 0,
-        fill: 'start'
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        fill: '+1' // Fill to the next dataset (A)
       },
       {
         label: 'A',
-        data: Array(labels.length).fill(Math.min(0.35, 0)),
+        data: labels.map(() => 0.35), // Fills from 0 to 0.35
         backgroundColor: 'rgba(50, 97, 45, 0.2)',
         borderWidth: 0,
-        fill: 'start'
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        fill: 'origin' // Fill to the origin (0)
       }
     ]
     this.personaChartData = {
@@ -545,7 +636,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         {
           label: 'Persona-Werte',
           data: data,
-          backgroundColor: 'transparent',
+          backgroundColor: 'rgba(0, 0, 0, 0.0)',
           borderColor: borderColors,
           borderWidth: 2,
           pointBackgroundColor: borderColors,

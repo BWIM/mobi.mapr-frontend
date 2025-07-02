@@ -59,7 +59,7 @@
 
   <!-- Info Box for highlight steps -->
   <div 
-    *ngIf="currentStep?.type === 'highlight' || currentStep?.type === 'interactive'"
+    *ngIf="currentStep?.type === 'highlight' || currentStep?.type === 'interactive' || currentStep?.type === 'informative'"
     [ngStyle]="getInfoBoxPosition()"
     class="bg-white rounded-lg shadow-lg p-4 max-w-sm border border-gray-200 tutorial-info-box z-[1200]"
   >
@@ -79,7 +79,7 @@
         <p *ngIf="currentStep?.languageHint" class="text-xs text-blue-600 mt-2">
           {{ currentStep?.languageHint || '' | translate }}
         </p>
-        <p *ngIf="currentStep?.nextHint" class="text-xs text-blue-600 mt-2">
+        <p *ngIf="currentStep?.interactive && currentStep?.nextHint" class="text-xs text-blue-600 mt-2">
           {{ currentStep?.nextHint || '' | translate }}
         </p>
 
@@ -87,7 +87,7 @@
     </div>
   </div>
 
-  <!-- Centered Info Box for informative steps -->
+  <!-- Centered Info Box for informative steps
   <div 
     *ngIf="currentStep?.type === 'informative'"
     class="absolute top-[16.67vh] left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg p-6 max-w-md mx-4 border border-gray-200 tutorial-info-box z-[1200]"
@@ -102,11 +102,8 @@
       <p class="text-gray-600 mb-6">
         {{ (currentStep?.content || '') | translate }}
       </p>
-      <p *ngIf="currentStep?.nextHint" class="text-xs text-blue-600 mt-2">
-        {{ currentStep?.nextHint || '' | translate }}
-      </p>
     </div>
-  </div>
+  </div> -->
 
   <!-- Navigation Controls -->
   <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-[1200]">
@@ -125,14 +122,14 @@
 
       <!-- Navigation Buttons -->
       <div class="tutorial-buttons-container">
-        <!-- <p-button 
+        <p-button 
           *ngIf="!isFirstStep()"
           icon="pi pi-chevron-left"
           [label]="'TUTORIAL.PREVIOUS' | translate"
           size="small"
           severity="secondary"
           (onClick)="previousStep()"
-        ></p-button> -->
+        ></p-button>
         
         <p-button 
           *ngIf="!isLastStep()"
@@ -165,7 +162,7 @@
         severity="secondary"
         class="skip-button"
         id="skip-button"
-        *ngIf="isFirstStep()"
+        *ngIf="!isLastStep()"
         title="{{'TUTORIAL.SKIP' | translate}}"
         text
         (onClick)="skipTutorial(); $event.stopPropagation()"

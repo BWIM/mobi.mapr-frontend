@@ -254,7 +254,8 @@
   "ANALYZE": {
     "PERSONA": {
       "TITLE": "Persona",
-      "NO_DATA": "Keine Daten verfügbar"
+      "NO_DATA": "Keine Daten verfügbar",
+      "HINT": "Hinweis: Die Werte der Persona können bei einer limitieren Anzahl an Modi sehr ähnlich sein."
     },
     "ACTIVITIES": {
       "TITLE": "Aktivitäten",

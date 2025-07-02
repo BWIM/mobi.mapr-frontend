@@ -5,6 +5,7 @@ export interface ShareProject {
     expires: string;
     categories: string[];
     personas: string[];
+    modes: string[];
     profiles: string[];
   }
   

@@ -253,7 +253,8 @@
   "ANALYZE": {
     "PERSONA": {
       "TITLE": "Persona",
-      "NO_DATA": "No data available"
+      "NO_DATA": "No data available",
+      "HINT": "Hint: The values of the persona can be very similar with a limited number of modes."
     },
     "ACTIVITIES": {
       "TITLE": "Activities",
