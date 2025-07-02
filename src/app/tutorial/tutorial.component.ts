@@ -9,6 +9,8 @@ import { ShareService } from '../share/share.service';
 import { MapV2Service } from '../map-v2/map-v2.service';
 import { DialogModule } from 'primeng/dialog';
 import { TranslateService } from '@ngx-translate/core';
+import { AnalyzeService } from '../analyze/analyze.service';
+import { CreditsService } from '../credits/credits.service';
 
 @Component({
   selector: 'app-tutorial',
@@ -29,6 +31,7 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
   currentStep: TutorialStep | null = null;
   currentSet: TutorialSet | null = null;
   tutorialSets: TutorialSet[] = [];
+  goingBack = false;
   
   // Language selection properties
   showLanguageDialog = false;
@@ -56,7 +59,9 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
     private shareService: ShareService, 
     private mapV2Service: MapV2Service,
     private translate: TranslateService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private analyzeService: AnalyzeService,
+    private creditsService: CreditsService
   ) {}
 
   ngOnInit(): void {
@@ -137,11 +142,12 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   nextStep(): void {
-    console.log('nextStep');
+    this.goingBack = false;
     this.tutorialService.nextStep();
   }
 
   previousStep(): void {
+    this.goingBack = true;
     this.tutorialService.previousStep();
   }
 
@@ -174,7 +180,6 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onTargetElementClick(event?: Event): void {
-    console.log('onTargetElementClick', this.currentStep);
     if (this.isCurrentStepInteractive() && !this.isStepCompleted()) {
       console.log('onTargetElementClick 2', this.currentStep);
       // Check if this step requires map feature clicks
@@ -271,7 +276,7 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
 
   getInfoBoxPosition(): any {
     if (!this.currentStep || 
-        (this.currentStep.type !== 'highlight' && this.currentStep.type !== 'interactive') || 
+        (this.currentStep.type !== 'highlight' && this.currentStep.type !== 'interactive' && this.currentStep.type !== 'informative') || 
         !this.currentStep.targetSelector) {
       return {};
     }
@@ -339,6 +344,10 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
       case 'global-bottom-right':
         left = window.innerWidth - 300 + offset.x;
         top = window.innerHeight - 300 + offset.y;
+        break;
+      case 'global-top-center':
+        left = window.innerWidth / 2 - 150 + offset.x;
+        top = 150 + offset.y;
         break;
     }
 
@@ -409,18 +418,56 @@ export class TutorialComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private handleUIStateChanges(): void {
     if (!this.currentStep) return;
+    console.log('handleUIStateChanges', this.currentStep);
 
-    if (this.currentStep.id === 'share-2') {
-      this.shareService.toggleRightSidebarExpanded();
+    if (this.currentStep.id === 'share-1') {
+      if (this.goingBack) {
+        this.shareService.toggleRightSidebarExpanded();
+      } else {
+      }
+    } else if (this.currentStep.id === 'share-2') {
+      if (!this.goingBack) {
+        this.shareService.toggleRightSidebarExpanded();
+      } else {
+        this.legendService.toggleExpand();
+      }
+    } else if (this.currentStep.id === 'share-3') {
+      if (!this.goingBack) {
+        this.legendService.toggleExpand();
+      } else {
+        this.shareService.toggleRightSidebarExpanded();
+        this.legendService.toggleExpand();
+      }
     }
 
     if (this.currentStep.id === 'share-4') {
-      this.shareService.toggleRightSidebarExpanded();
+      if (!this.goingBack) {
+        this.legendService.toggleExpand();
+        this.shareService.toggleRightSidebarExpanded();
+      } else {
+        this.shareService.toggleRightSidebarExpanded();
+      }
     }
 
     if (this.currentStep.id === 'share-5') {
-      this.shareService.toggleRightSidebarExpanded();
+      if (!this.goingBack) {
+        this.shareService.toggleRightSidebarExpanded();
+      } else {
+        this.analyzeService.hide();
+      }
     }
+
+    if (this.currentStep.id === 'share-6') {
+        this.mapV2Service.manuallyClickMap();
+    }
+
+    if (this.currentStep.id === 'share-7') {
+      if (!this.goingBack) {
+        this.analyzeService.hide();
+      } else {
+      }
+    }
+
 
     if (this.currentStep.id === 'dashboard-4') {
       setTimeout(() => {

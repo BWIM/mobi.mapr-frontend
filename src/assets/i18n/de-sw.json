@@ -253,7 +253,8 @@
   "ANALYZE": {
     "PERSONA": {
       "TITLE": "Persona",
-      "NO_DATA": "Kei Date verfüegbar"
+      "NO_DATA": "Kei Date verfüegbar",
+      "HINT": "Obacht: Die Werte der Persona können bei einer limitieren Anzahl an Modi sehr ähnlich sei."
     },
     "ACTIVITIES": {
       "TITLE": "Aktivitäte",

@@ -431,4 +431,16 @@ export class MapV2Service {
       this.shortcutSubscription.unsubscribe();
     }
   }
+
+  manuallyClickMap(): void {
+    if (!this.map) return;
+    // click randomly on any existing feature
+    const features = this.map.queryRenderedFeatures();
+    if (features.length > 0) {
+      const randomFeature = features[Math.floor(Math.random() * features.length)];
+      console.log(randomFeature);
+      this.analyzeService.setSelectedFeature(randomFeature);
+      this.setSelectedFeature(randomFeature.properties['id']);
+    }
+  }
 }

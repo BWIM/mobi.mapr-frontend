@@ -31,6 +31,7 @@ import { MapGeoJSONFeature } from "maplibre-gl";
     }
   
     setSelectedFeature(feature: MapGeoJSONFeature) {
+      console.log(feature);
       this.selectedFeature = feature;
       this.show(); // Automatisch das Analyse-Panel öffnen, wenn ein Feature ausgewählt wurde
     }

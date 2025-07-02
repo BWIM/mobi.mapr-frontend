@@ -21,10 +21,11 @@
                 <!-- Aktivitäten -->
                 <p-panel [header]="'SHARE.ACTIVITIES' | translate" [toggleable]="true" [collapsed]="false">
                     <div class="flex flex-wrap gap-2">
-                        <span *ngFor="let activity of sharedProject.categories" 
-                            class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                            {{ activity }}
-                        </span>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li *ngFor="let activity of sharedProject.categories" class="text-gray-700">
+                                {{ activity }}
+                            </li>
+                        </ul>
                         <p *ngIf="!sharedProject.categories?.length" class="text-gray-500">
                             {{ 'SHARE.NO_ACTIVITIES' | translate }}
                         </p>
@@ -34,10 +35,11 @@
                 <!-- Personas -->
                 <p-panel [header]="'SHARE.PERSONAS' | translate" [toggleable]="true" [collapsed]="false">
                     <div class="flex flex-wrap gap-2">
-                        <span *ngFor="let persona of sharedProject.personas" 
-                            class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                            {{ persona }}
-                        </span>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li *ngFor="let persona of sharedProject.personas" class="text-gray-700">
+                                {{ persona }}
+                            </li>
+                        </ul>
                         <p *ngIf="!sharedProject.personas?.length" class="text-gray-500">
                             {{ 'SHARE.NO_PERSONAS' | translate }}
                         </p>
@@ -47,10 +49,11 @@
                 <!-- Profile -->
                 <p-panel [header]="'SHARE.MODES' | translate" [toggleable]="true" [collapsed]="false">
                     <div class="flex flex-wrap gap-2">
-                        <span *ngFor="let profile of sharedProject.profiles" 
-                            class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
-                            {{ profile }}
-                        </span>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li *ngFor="let mode of sharedProject.modes; let i = index" class="text-gray-700">
+                                {{ mode }} - {{ sharedProject.profiles[i] }}
+                            </li>
+                        </ul>
                         <p *ngIf="!sharedProject.profiles?.length" class="text-gray-500">
                             {{ 'SHARE.NO_PROFILES' | translate }}
                         </p>
