@@ -68,10 +68,10 @@ export class KeyboardShortcutsService {
         this.statisticsService.visible = true;
         this.shortcutSubject.next(ShortcutAction.SHOW_STATISTICS);
         break;
-      // case 'e':
-      //   this.pdfExportService.showDialog();
-      //   this.shortcutSubject.next(ShortcutAction.EXPORT_PDF_PORTRAIT);
-      //   break;
+      case 'e':
+        this.pdfExportService.showDialog();
+        this.shortcutSubject.next(ShortcutAction.EXPORT_PDF_PORTRAIT);
+        break;
       case 'h':
         this.shortcutSubject.next(ShortcutAction.TOGGLE_HEXAGON_VIEW);
         break;

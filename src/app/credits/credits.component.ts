@@ -158,7 +158,8 @@ export class CreditsComponent implements OnInit {
     { name: 'PrimeNG', icon: 'pi pi-desktop', url: 'https://primeng.org' },
     { name: 'Carto', icon: 'pi pi-map-marker', url: 'https://carto.com' },
     { name: 'MapLibre', icon: 'pi pi-map-marker', url: 'https://maplibre.org' },
-    { name: 'Nominatim', icon: 'pi pi-map-marker', url: 'https://nominatim.org' }
+    { name: 'Nominatim', icon: 'pi pi-map-marker', url: 'https://nominatim.org' },
+    { name: 'Flaticon (Surang, fjstudio, Freepik, Kiranshastry)', icon: 'pi pi-map-marker', url: 'https://www.flaticon.com' }
   ];
 
   dataComponents: InfoComponent[] = [
@@ -168,7 +169,8 @@ export class CreditsComponent implements OnInit {
     { name: 'MID', icon: 'pi pi-car', url: 'https://www.mobilitaet-in-deutschland.de' },
     { name: 'OpenStreetMap', icon: 'pi pi-map', url: 'https://www.openstreetmap.org' },
     { name: 'OpenDataSoft', icon: 'pi pi-database', url: 'https://www.opendatasoft.com' },
-    { name: 'GeoJsonUtilities', icon: 'pi pi-map-marker', url: 'https://geodata.bw-im.de' }
+    { name: 'GeoJsonUtilities', icon: 'pi pi-map-marker', url: 'https://geodata.bw-im.de' },
+    { name: 'PDF-LIB', icon: 'pi pi-file', url: 'https://pdf-lib.js.org' }
   ];
 
   backendComponents: InfoComponent[] = [
