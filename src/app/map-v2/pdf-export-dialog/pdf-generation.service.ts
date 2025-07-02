@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import { MapV2Service } from '../map-v2.service';
 import fontkit from '@pdf-lib/fontkit';
 import { ProjectsService } from '../../projects/projects.service';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, rgb } from 'pdf-lib';
 
 export type PaperSize = 'a4' | 'a3' | 'a2' | 'a1' | 'a0';
 export type Orientation = 'portrait' | 'landscape';
