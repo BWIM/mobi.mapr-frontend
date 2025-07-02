@@ -26,6 +26,7 @@
                 [value]="'landscape'" 
                 [(ngModel)]="options.orientation" 
                 [inputId]="'landscape'"
+                [disabled]="true"
                 name="orientation">
               </p-radioButton>
               <label [for]="'landscape'" class="ml-2">{{ 'PDF_EXPORT.LANDSCAPE' | translate }}</label>
@@ -40,6 +41,7 @@
             [options]="paperSizes" 
             [(ngModel)]="options.paperSize"
             optionLabel="label"
+            [disabled]="true"
             optionValue="value"
             [style]="{'width':'100%'}">
           </p-select>
@@ -53,6 +55,7 @@
             [min]="72" 
             [max]="600"
             [step]="72"
+            [disabled]="true"
             [style]="{'width':'100%'}">
           </p-inputNumber>
         </div>
@@ -75,6 +78,7 @@
                 [value]="'full'" 
                 [(ngModel)]="options.mapExtent" 
                 [inputId]="'full'"
+                [disabled]="true"
                 name="mapExtent">
               </p-radioButton>
               <label [for]="'full'" class="ml-2">{{ 'PDF_EXPORT.FULL_MAP' | translate }}</label>

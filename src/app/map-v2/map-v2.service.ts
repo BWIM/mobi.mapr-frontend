@@ -195,6 +195,10 @@ export class MapV2Service {
     );
   }
 
+  getDataBounds(): Bounds | null {
+    return this.boundsSubject.getValue();
+  }
+
   setAverageType(averageType: 'avg' | 'pop'): void {
     this.averageType = averageType;
     if (this.currentProject) {
