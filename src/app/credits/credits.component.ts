@@ -149,16 +149,15 @@ export class CreditsComponent implements OnInit {
         command: () => {
           this.showShortcuts();
         }
-      });
-    if (!this.shareService.getIsShare()) {
-      this.items.push({
+      },
+      {
         icon: 'pi pi-book',
         label: this.translate.instant('CREDITS.TOGGLE_TUTORIAL'),
         command: () => {
           this.startTutorial();
         }
-      });
-    }
+      }
+    );
   }
 
   visualComponents: InfoComponent[] = [
@@ -217,9 +216,14 @@ export class CreditsComponent implements OnInit {
   }
 
   startTutorial() {
-    this.tutorialService.resetTutorial().subscribe(() => {
+    if (this.shareService.getIsShare()) {
+      localStorage.setItem('tutorialStatus', 'false');
       window.location.reload();
-    });
+    } else {
+      this.tutorialService.resetTutorial().subscribe(() => {
+        window.location.reload();
+      });
+    }
   }
 
   switchLanguage(lang: string) {

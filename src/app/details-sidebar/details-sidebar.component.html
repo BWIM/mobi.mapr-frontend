@@ -4,6 +4,8 @@
         <div class="mb-4">
         </div>
 
+        
+
         <div class="mb-6"  id="details-sidebar-content" >
           <h3 class="text-xl font-semibold text-primary mb-2">
             {{ projectInfo.display_name }}
@@ -104,8 +106,8 @@
 
         <div *ngIf="shareUrl" class="mt-4 p-4 bg-gray-100 rounded">
           <div class="flex justify-between items-center mb-2">
-            <p class="text-sm text-gray-600">{{ 'SIDEBAR.SHARE_LINK' | translate }}:</p>
-            <button class="text-blue-600 hover:text-blue-800 text-sm"
+            <p class="text-sm text-gray-600" (click)="copyToClipboard(shareUrl)">{{ 'SIDEBAR.SHARE_LINK' | translate }}:</p>
+            <button class="text-blue-600 hover:text-blue-800 text-sm hover:cursor-pointer"
                     (click)="copyToClipboard(shareUrl)">
               <i class="pi pi-copy mr-1"></i>
               {{ 'SIDEBAR.COPY_LINK' | translate }}
@@ -139,3 +141,5 @@
         <h3>{{ 'EXPORT.GENERATING_PDF' | translate }}</h3>
     </div>
 </p-dialog>
+
+<p-toast></p-toast>
