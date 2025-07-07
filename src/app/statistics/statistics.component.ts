@@ -11,6 +11,7 @@ import { MapV2Service } from '../map-v2/map-v2.service';
 import { PaginatorModule } from 'primeng/paginator';
 import { GeocodingService } from '../services/geocoding.service';
 import { firstValueFrom } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-statistics',
@@ -46,10 +47,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
   // Score type
   scoreType: 'pop' | 'avg' = 'pop';
-  scoreTypeOptions = [
-    { label: 'STATISTICS.POPULATION_WEIGHTED', value: 'pop' },
-    { label: 'STATISTICS.AREA_WEIGHTED', value: 'avg' }
-  ];
+  scoreTypeOptions: any[] = [];
 
   populationCategories = [
     { label: 'Landgemeinden (0-5.000)', value: 'small', min: 0, max: 5000 },
@@ -76,8 +74,11 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     private statisticsService: StatisticsService,
     private mapService: MapV2Service,
     private loadingService: LoadingService,
+    private translate: TranslateService,
     private geocodingService: GeocodingService
   ) {
+    this.updateScoreTypeOptions();
+    
     this.subscription.add(
       this.statisticsService.visible$.subscribe(visible => {
         const projectId = this.mapService.getCurrentProject();
@@ -87,6 +88,13 @@ export class StatisticsComponent implements OnInit, OnDestroy {
             this.loadAllData();
           }
         }
+      })
+    );
+
+    // Update options when language changes
+    this.subscription.add(
+      this.translate.onLangChange.subscribe(() => {
+        this.updateScoreTypeOptions();
       })
     );
   }
@@ -289,5 +297,12 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     } finally {
       this.loadingService.stopLoading();
     }
+  }
+
+  private updateScoreTypeOptions(): void {
+    this.scoreTypeOptions = [
+      { label: this.translate.instant('STATISTICS.POPULATION_WEIGHTED'), value: 'pop' },
+      { label: this.translate.instant('STATISTICS.AREA_WEIGHTED'), value: 'avg' }
+    ];
   }
 }
