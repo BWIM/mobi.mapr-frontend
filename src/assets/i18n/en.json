@@ -229,6 +229,10 @@
     "SHARE": "Share",
     "COPY_LINK": "Copy Link",
     "COPY_LINK_SUCCESS": "Link successfully copied",
+    "COPY_LINK_SUCCESS_TITLE": "Success",
+    "COPY_LINK_SUCCESS_MESSAGE": "Share link copied to clipboard",
+    "COPY_LINK_ERROR_TITLE": "Error",
+    "COPY_LINK_ERROR_MESSAGE": "Failed to copy link to clipboard",
     "SHARE_TOOLTIP": "Share",
     "EXPORT_PDF_LANDSCAPE_TOOLTIP": "Export in Landscape",
     "EXPORT_PDF_PORTRAIT_TOOLTIP": "Export in portrait",
@@ -405,12 +409,12 @@
       },
       "STEP5": {
         "TITLE": "The Legend",
-        "CONTENT": "In the bottom left, you’ll see the legend. Click on it to see what the different colors mean.",
+        "CONTENT": "In the bottom left, you'll see the legend. Click on it to see what the different colors mean.",
         "NEXT_HINT": "Click on the legend to see what the different colors mean."
       },
       "STEP6": {
         "TITLE": "Show Details",
-        "CONTENT": "Here you’ll find all project-related information such as activities, personas, and modes. You can also switch map weighting or export the map here.",
+        "CONTENT": "Here you'll find all project-related information such as activities, personas, and modes. You can also switch map weighting or export the map here.",
         "NEXT_HINT": "Click on the details to see more information.",
         "NEXT_HINT_2": "The tutorial continues below."
       },
@@ -456,7 +460,7 @@
       },
       "STEP3": {
         "TITLE": "The Legend",
-        "CONTENT": "In the bottom left, you’ll see the legend. Click on it to see what the different colors mean.",
+        "CONTENT": "In the bottom left, you'll see the legend. Click on it to see what the different colors mean.",
         "NEXT_HINT": "Click somewhere on the legend."
       },
       "STEP3-1": {
@@ -466,7 +470,7 @@
       },
       "STEP4": {
         "TITLE": "Show Details",
-        "CONTENT": "Here you’ll find all project-related information such as activities, personas, and modes.",
+        "CONTENT": "Here you'll find all project-related information such as activities, personas, and modes.",
         "NEXT_HINT": "The tutorial continues below."
       },
       "STEP5": {

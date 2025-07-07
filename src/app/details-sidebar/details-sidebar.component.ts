@@ -13,6 +13,7 @@ import { ShareService } from '../share/share.service';
 import { StatisticsService } from '../statistics/statistics.service';
 import { MapV2Service } from '../map-v2/map-v2.service';
 import { PdfExportService } from '../map-v2/pdf-export-dialog/pdf-export.service';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-details-sidebar',
@@ -45,7 +46,8 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     private shareService: ShareService,
     private mapService: MapV2Service,
     private statisticsService: StatisticsService,
-    private pdfExportService: PdfExportService
+    private pdfExportService: PdfExportService,
+    private messageService: MessageService
   ) {
     this.subscription = new Subscription();
     
@@ -106,10 +108,21 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
   copyToClipboard(text: string): void {
     navigator.clipboard.writeText(text).then(
       () => {
-        this.translate.instant('SIDEBAR.COPY_LINK_SUCCESS');
+        this.messageService.add({
+          severity: 'success',
+          summary: this.translate.instant('SIDEBAR.COPY_LINK_SUCCESS_TITLE'),
+          detail: this.translate.instant('SIDEBAR.COPY_LINK_SUCCESS_MESSAGE'),
+          life: 3000
+        });
       },
       (err) => {
         console.error('Could not copy text: ', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: this.translate.instant('SIDEBAR.COPY_LINK_ERROR_TITLE'),
+          detail: this.translate.instant('SIDEBAR.COPY_LINK_ERROR_MESSAGE'),
+          life: 3000
+        });
       }
     );
   }
