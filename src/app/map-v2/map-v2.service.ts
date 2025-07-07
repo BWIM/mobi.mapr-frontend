@@ -44,7 +44,6 @@ export class MapV2Service {
     private analyzeService: AnalyzeService,
     private keyboardShortcutsService: KeyboardShortcutsService
   ) {
-    // Subscribe to keyboard shortcuts
     this.shortcutSubscription = this.keyboardShortcutsService.getShortcutStream().subscribe(action => {
       if (!this.map) return;
 

@@ -320,8 +320,6 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
         this.nonMidActivities = this.nonMidActivities.sort((a, b) => 
           (a.display_name || a.name).localeCompare(b.display_name || b.name)
         );
-
-        console.log(this.nonMidActivities);
       }
     });
   }
