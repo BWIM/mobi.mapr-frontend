@@ -358,7 +358,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         if (result.result.finished) {
           const finishedProjectId = result.result.project;
           this.closeWebsocketConnection(finishedProjectId);
-          this.mapv2Service.resetMap();
+          // this.mapv2Service.emptyMap();
           setTimeout(() => {
             this.loadData();
             // Nach dem Laden der Daten das Projekt anzeigen
