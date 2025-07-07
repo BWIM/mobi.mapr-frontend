@@ -42,7 +42,9 @@ export class ShareComponent {
   ngOnInit() {
     this.loadingService.startLoading();
     this.shareService.setIsShare(true);
-    this.tutorialService.startTutorial('share');
+    if (!localStorage.getItem('tutorialStatus') || localStorage.getItem('tutorialStatus') === 'false') {
+      this.tutorialService.startTutorial('share');
+    }
     
     // Subscribe to the sidebar expansion state
     this.shareService.isRightSidebarExpanded$.subscribe(expanded => {

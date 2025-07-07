@@ -306,6 +306,8 @@ export class TutorialService {
     });
     if (!this.shareService.getIsShare()) {
       this.http.get<void>(`${environment.apiUrl}/permissions/complete-tutorial/`).subscribe();
+    } else {
+      localStorage.setItem('tutorialStatus', 'true');
     }
   }
 
