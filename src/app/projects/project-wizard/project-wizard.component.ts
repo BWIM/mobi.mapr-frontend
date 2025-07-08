@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, HostListener, OnDestroy } from '@angular/core';
 import { SharedModule } from '../../shared/shared.module';
 import { MenuItem, MessageService } from 'primeng/api';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
@@ -42,25 +42,25 @@ import Overlay from 'ol/Overlay';
 export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
   steps: MenuItem[] = [
     {
-      label: 'Aktivitäten',
+      label: 'PROJECT_WIZARD.STEPS.ACTIVITIES',
       command: (event: any) => {
         this.activeIndex = 0;
       }
     },
     {
-      label: 'Personas',
+      label: 'PROJECT_WIZARD.STEPS.PERSONAS',
       command: (event: any) => {
         this.activeIndex = 1;
       }
     },
     {
-      label: 'Modi',
+      label: 'PROJECT_WIZARD.STEPS.MODES',
       command: (event: any) => {
         this.activeIndex = 2;
       }
     },
     {
-      label: 'Gebiet auswählen',
+      label: 'PROJECT_WIZARD.STEPS.AREA',
       command: (event: any) => {
         this.activeIndex = 3;
         // Initialize map when directly selecting this step
@@ -71,7 +71,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       }
     },
     {
-      label: 'Projektinformationen',
+      label: 'PROJECT_WIZARD.STEPS.PROJECT_INFO',
       command: (event: any) => {
         this.activeIndex = 4;
       }
@@ -96,6 +96,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     mid: [],
     nonMid: []
   };
+  isMobile: boolean = false;
 
   // Area selection properties
   lands: Land[] = [];
@@ -145,6 +146,8 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     });
 
     this.initializeForm();
+    this.checkMobile();
+    this.updateStepLabels(); // Initialize step labels
   }
 
   ngAfterViewInit() {
@@ -576,6 +579,10 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     return this.selectedProfiles[mode.id];
   }
 
+  getCurrentStepLabel(): string {
+    return this.steps[this.activeIndex]?.label || '';
+  }
+
   onSubmit() {
     // Prüfe die Validität aller Schritte
     const isValid = [0, 1, 2, 3, 4].every(step => {
@@ -691,6 +698,15 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
         });
       }
     });
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.checkMobile();
+  }
+
+  private checkMobile(): void {
+    this.isMobile = window.innerWidth < 768;
   }
 
   deleteProjectGroup(group: ProjectGroup | null) {

@@ -4,3 +4,86 @@
     font-weight: bold !important;
     color: var(--primary-color) !important;
 }
+
+/* Mobile-responsive styles for projects component */
+@media screen and (max-width: 768px) {
+    /* Improve table layout for mobile */
+    :host ::ng-deep .p-datatable .p-datatable-thead > tr > th,
+    :host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    /* Make buttons larger for touch */
+    :host ::ng-deep .p-button {
+        min-width: 2.5rem;
+        min-height: 2.5rem;
+    }
+    
+    /* Improve panel spacing */
+    :host ::ng-deep .p-panel .p-panel-content {
+        padding: 0.75rem;
+    }
+    
+    /* Better text overflow handling */
+    .text-overflow-ellipsis {
+        max-width: 150px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    /* Improve toggle switch touch target */
+    :host ::ng-deep .p-togglebutton {
+        min-width: 3rem;
+        min-height: 2rem;
+    }
+    
+    /* Better spacing for mobile */
+    .space-y-4 > * + * {
+        margin-top: 1rem;
+    }
+    
+    /* Improve scroll panel for mobile */
+    :host ::ng-deep .p-scrollpanel {
+        border-radius: 0;
+    }
+    
+    /* Better button spacing in action columns */
+    .flex.gap-2 {
+        gap: 0.5rem;
+    }
+}
+
+/* Tablet-specific adjustments */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+    .text-overflow-ellipsis {
+        max-width: 200px;
+    }
+    
+    :host ::ng-deep .p-button {
+        min-width: 2.25rem;
+        min-height: 2.25rem;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    :host ::ng-deep .p-button {
+        min-width: 3rem;
+        min-height: 3rem;
+    }
+    
+    :host ::ng-deep .p-button.p-button-text {
+        min-width: 3rem;
+        min-height: 3rem;
+    }
+    
+    /* Improve table row touch targets */
+    :host ::ng-deep .p-datatable .p-datatable-tbody > tr {
+        min-height: 3.5rem;
+    }
+    
+    :host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+        padding: 1rem 0.75rem;
+    }
+}

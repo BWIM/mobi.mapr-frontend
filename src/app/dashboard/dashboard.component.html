@@ -5,20 +5,20 @@
 
         <!-- Header mit Logo -->
         <div class="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
-            <img src="assets/images/logo.png" alt="Logo" class="w-auto h-auto max-h-25">
+            <img src="assets/images/logo.png" alt="Logo" class="w-auto h-auto max-h-25 md:max-h-25 max-h-16">
         </div>
     </div>
 
-    <!-- Linke Sidebar -->
-    <div class="sidebar-tab absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-r-lg z-10 cursor-pointer hover:bg-gray-50 transition-all duration-200 clickable-tab" id="projects-sidebar-tab"
+    <!-- Linke Sidebar Tab - Mobile optimized -->
+    <div class="sidebar-tab absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-r-lg z-10 cursor-pointer hover:bg-gray-50 transition-all duration-200 clickable-tab md:p-3 p-2" id="projects-sidebar-tab"
          (click)="showLeftSidebar()">
-        <div class="flex flex-col items-center p-3 gap-3">
-            <i class="pi pi-angle-right text-gray-800 text-xl" [class.rotate-180]="leftSidebarExpanded"></i>
-            <span class="rotate-text text-gray-800 font-semibold text-base">Projekte</span>
+        <div class="flex flex-col items-center gap-3">
+            <i class="pi pi-angle-right text-gray-800 md:text-xl text-lg" [class.rotate-180]="leftSidebarExpanded"></i>
+            <span class="rotate-text text-gray-800 font-semibold md:text-base text-sm hidden sm:block">Projekte</span>
         </div>
     </div>
 
-    <!-- Projekte Dialog -->
+    <!-- Projekte Dialog - Mobile responsive -->
     <p-dialog 
         [(visible)]="leftSidebarExpanded"
         position="left"
@@ -28,7 +28,7 @@
         class="h-full"
         [resizable]="true"
         styleClass="projects-sidebar"
-        [style]="{width: '500px'}"
+        [style]="{'width': isMobile ? '100vw' : '500px'}"
         (onHide)="isLeftPinned = false"
         [header]="'PROJECTS.TITLE' | translate"
         >
@@ -37,17 +37,16 @@
         </div>
     </p-dialog>
 
-    <!-- Details Tab -->
-    <div class="sidebar-tab absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-r-lg z-20 cursor-pointer hover:bg-gray-50 transition-all duration-200 clickable-tab"
+    <!-- Details Tab - Mobile optimized -->
+    <div class="sidebar-tab absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-l-lg z-20 cursor-pointer hover:bg-gray-50 transition-all duration-200 clickable-tab md:p-3 p-2"
         (click)="toggleSidebar()">
-        <div class="flex flex-col items-center p-3 gap-3">
-            <i class="pi pi-angle-left text-gray-800 text-xl" [class.rotate-180]="rightSidebarExpanded"></i>
-            <span class="rotate-text text-gray-800 font-semibold text-base">Details</span>
+        <div class="flex flex-col items-center gap-3">
+            <i class="pi pi-angle-left text-gray-800 md:text-xl text-lg" [class.rotate-180]="rightSidebarExpanded"></i>
+            <span class="rotate-text text-gray-800 font-semibold md:text-base text-sm hidden sm:block">Details</span>
         </div>
     </div>
 
-
-    <!-- Details Dialog -->
+    <!-- Details Dialog - Mobile responsive -->
     <p-dialog 
         [(visible)]="rightSidebarExpanded"
         position="right"
@@ -56,7 +55,7 @@
         class="h-full"
         [resizable]="true"
         styleClass="details-sidebar"
-        [style]="{width: '400px'}"
+        [style]="{'width': isMobile ? '100vw' : '400px'}"
         (onHide)="isRightPinned = false"
         [maximizable]="true"
         [header]="'DETAILS.TITLE' | translate">
@@ -64,6 +63,24 @@
                 <app-details-sidebar (projectLoaded)="toggleSidebar()"></app-details-sidebar>
         </div>
     </p-dialog>
+
+    <!-- Mobile Navigation Bar (only visible on mobile) -->
+    <div class="md:hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 z-30" *ngIf="isMobile">
+        <div class="flex gap-2 bg-white rounded-full shadow-lg p-2">
+            <p-button 
+                styleClass="p-button-secondary p-button-rounded"
+                (click)="showLeftSidebar()"
+                title="Projekte">
+                <i class="pi pi-folder text-lg"></i>
+            </p-button>
+            <p-button 
+                styleClass="p-button-secondary p-button-rounded"
+                (click)="toggleSidebar()"
+                title="Details">
+                <i class="pi pi-info-circle text-lg"></i>
+            </p-button>
+        </div>
+    </div>
 </div>
 
 <app-loading-spinner></app-loading-spinner>

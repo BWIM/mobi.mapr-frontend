@@ -175,6 +175,8 @@
   "PROJECT_WIZARD": {
     "CREATE_NEW_PROJECT": "Neues Projekt erstellen",
     "SELECT_ACTIVITIES": "Relevante Aktivitäten auswählen",
+    "SELECT_PERSONAS": "Relevante Personas auswählen",
+    "SELECT_MODES": "Relevante Modi auswählen",
     "CREATE_PROJECT": "Projekt erstellen",
     "PROJECT_NAME": "Projektname",
     "DESCRIPTION": "Beschreibung",
@@ -183,8 +185,19 @@
     "ALLOW_SHARING": "Freigabe erlauben",
     "SEND_EMAIL": "E-Mail nach Abschluss senden",
     "LOAD_AREAS_ON_MAP": "Berechnete Gemeinden direkt auf der Karte anzeigen",
+    "AVAILABLE_PERSONAS": "Verfügbare Personas",
+    "AVAILABLE_MODES": "Verfügbare Modi",
+    "NON_MID_ACTIVITIES": "Nicht-MID Aktivitäten",
+    "CANCEL": "Abbrechen",
+    "BACK": "Zurück",
+    "NEXT": "Weiter",
+    "FINISH": "Fertigstellen",
     "ERRORS": {
-      "NAME_REQUIRED": "Bitte einen Projektnamen eingeben."
+      "NAME_REQUIRED": "Bitte einen Projektnamen eingeben.",
+      "SELECT_MID_ACTIVITIES": "Bitte wählen Sie mindestens eine MID-Aktivität aus.",
+      "SELECT_NON_MID_ACTIVITY": "Bitte wählen Sie eine Nicht-MID-Aktivität aus.",
+      "SELECT_PERSONAS": "Bitte wählen Sie mindestens eine Persona aus.",
+      "SELECT_MODES": "Bitte wählen Sie mindestens einen Modus aus."
     },
     "ACTIVITIES": {
       "MID": "Aktivitäten",
@@ -203,6 +216,8 @@
     "NEXT_TOOLTIP": "Weiter",
     "STEPS_TOOLTIP": "Schritte",
     "STEPS": {
+      "STEP": "Schritt",
+      "OF": "von",
       "ACTIVITIES": "Aktivitäten",
       "PERSONAS": "Personas",
       "MODES": "Modi",

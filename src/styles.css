@@ -162,6 +162,116 @@ body {
     :root {
         --border-radius: 2px;
     }
+    
+    /* Mobile-optimized typography */
+    body {
+        font-size: 14px;
+        line-height: 1.4;
+    }
+    
+    /* Better touch targets for mobile */
+    .p-button {
+        min-width: 1.5rem;
+        min-height: 1.5rem;
+    }
+    
+    /* Mobile-optimized dialogs */
+    .p-dialog {
+        margin: 0 !important;
+        border-radius: 0 !important;
+    }
+    
+    .p-dialog .p-dialog-content {
+        padding: 1rem !important;
+    }
+    
+    /* Mobile-optimized tables */
+    .p-datatable .p-datatable-thead > tr > th,
+    .p-datatable .p-datatable-tbody > tr > td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    /* Mobile-optimized panels */
+    .p-panel .p-panel-content {
+        padding: 1rem;
+    }
+    
+    /* Mobile-optimized fieldsets */
+    .p-fieldset .p-fieldset-content {
+        padding: 1rem;
+    }
+    
+    /* Mobile-optimized scroll panels */
+    .p-scrollpanel {
+        border-radius: 0;
+    }
+    
+    /* Better mobile navigation */
+    .p-menubar {
+        padding: 0.5rem;
+    }
+    
+    .p-menubar .p-menuitem-link {
+        padding: 0.75rem;
+    }
+}
+
+/* Tablet-specific adjustments */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+    body {
+        font-size: 15px;
+    }
+    
+    .p-button {
+        min-width: 1.25rem;
+        min-height: 1.25rem;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    .p-button {
+        min-width: 1.5rem;
+        min-height: 1.5rem;
+    }
+    
+    .p-button.p-button-text {
+        min-width: 1.5rem;
+        min-height: 1.5rem;
+    }
+    
+    /* Improve table row touch targets */
+    .p-datatable .p-datatable-tbody > tr {
+        min-height: 3.5rem;
+    }
+    
+    .p-datatable .p-datatable-tbody > tr > td {
+        padding: 1rem 0.75rem;
+    }
+    
+    /* Better link touch targets */
+    a {
+        min-height: 2.5rem;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    button {
+        min-height: 2.5rem;
+        display: inline-flex;
+        align-items: center;
+    }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .p-card {
+        border-width: 0.5px;
+    }
+    
+    .p-fieldset {
+        border-width: 0.5px;
+    }
 }
 
 button.ol-zoom-in {
