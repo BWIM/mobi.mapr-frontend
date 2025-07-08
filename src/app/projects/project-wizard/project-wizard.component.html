@@ -40,7 +40,8 @@
                             offLabel="{{ 'PROJECT_WIZARD.ACTIVITIES.NON_MID' | translate }}"
                             [pTooltip]="'PROJECT_WIZARD.ACTIVITIES.TOGGLE_TOOLTIP' | translate"
                             (onChange)="toggleMidActivities()"
-                            styleClass="p-button-sm">
+                            styleClass="p-button-sm"
+                            [disabled]="!activitiesLoaded">
                         </p-toggleButton>
                     </div>
                     <div class="grid w-full">
@@ -217,8 +218,9 @@
                                                         <p-radioButton
                                                             [name]="'profile_' + mode.id"
                                                             [value]="profile.id"
-                                                            [(ngModel)]="selectedProfiles[mode.id]"
-                                                            [ngModelOptions]="{standalone: true}">
+                                                            [ngModel]="selectedProfiles[mode.id]"
+                                                            [ngModelOptions]="{standalone: true}"
+                                                            (onClick)="onProfileChange(mode, profile.id)">
                                                         </p-radioButton>
                                                         <label class="text-sm">{{profile.display_name || profile.name}}</label>
                                                     </div>
