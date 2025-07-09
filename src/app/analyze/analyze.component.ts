@@ -539,14 +539,18 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
 
   onDataSelect(event: any) {
-    if (event.dataset && event.dataset.length > 0) {
-      // Get the first selected element's index
-      const selectedElement = event.dataset[0];
-      const categoryIndex = selectedElement.index;
+    const index = event.element.index;
+    if (index !== undefined && index >= 0) {
+      const categoryData = this.activitiesChartData.labels[index];
+      // Find the category ID from the category name
+      const category = this.projectDetails?.categories.find(cat => cat.name === categoryData);
+      if (!category) return;
       
-      if (categoryIndex !== undefined && categoryIndex >= 0) {
-        this.onCategoryHover({ dataIndex: categoryIndex });
-      }
+      this.hoveredCategoryId = category.id;
+      this.hoveredCategoryName = categoryData;
+      this.generateSubactivitiesPieData(category.id);
+      this.showSubactivitiesPie = true;
+      this.initializeSubActivitiesChart(category.id); // Update subactivities chart for the hovered category
     }
   }
 
@@ -717,22 +721,6 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     };
   }
 
-  onCategoryHover(event: any): void {
-    if (!this.projectDetails?.hexagons) return;
-    
-    const categoryIndex = event.dataIndex;
-    const categoryData = this.activitiesChartData.labels[categoryIndex];
-    
-    // Find the category ID from the category name
-    const category = this.projectDetails.categories.find(cat => cat.name === categoryData);
-    if (!category) return;
-    
-    this.hoveredCategoryId = category.id;
-    this.hoveredCategoryName = categoryData;
-    this.generateSubactivitiesPieData(category.id);
-    this.showSubactivitiesPie = true;
-    this.initializeSubActivitiesChart(category.id); // Update subactivities chart for the hovered category
-  }
 
   onCategoryLeave(): void {
     this.showSubactivitiesPie = false;
