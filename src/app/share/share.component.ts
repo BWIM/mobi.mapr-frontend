@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { LoadingSpinnerComponent } from '../shared/loading-spinner/loading-spinner.component';
 import { SharedModule } from '../shared/shared.module';
 import { ShareService } from './share.service';
@@ -18,13 +18,14 @@ import { AnalyzeService } from '../analyze/analyze.service';
   templateUrl: './share.component.html',
   styleUrl: './share.component.css'
 })
-export class ShareComponent {
+export class ShareComponent implements OnInit {
   detailsVisible: boolean = false;
   isRightPinned: boolean = false;
   projectKey: string = '';
   project: any = null;
   sharedProject: ShareProject | null = null;
   rightSidebarExpanded: boolean = false;
+  isMobile: boolean = false;
 
   constructor(
     private shareService: ShareService, 
@@ -34,6 +35,7 @@ export class ShareComponent {
     private analyzeService: AnalyzeService,
     private tutorialService: TutorialService
   ) {
+    this.checkMobile();
     this.route.params.subscribe(params => {
       this.projectKey = params['key'];
     });
@@ -65,6 +67,20 @@ export class ShareComponent {
       this.toggleSidebar();
     });
     this.loadingService.stopLoading();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.checkMobile();
+  }
+
+  private checkMobile(): void {
+    this.isMobile = window.innerWidth < 768;
+    
+    // Auto-close sidebar on mobile when switching to desktop
+    if (!this.isMobile && this.rightSidebarExpanded) {
+      this.rightSidebarExpanded = false;
+    }
   }
 
   toggleSidebar() {

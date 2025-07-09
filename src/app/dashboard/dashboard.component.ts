@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { SharedModule } from '../shared/shared.module';
 import { ProjectsComponent } from '../projects/projects.component';
 import { DetailsSidebarComponent } from '../details-sidebar/details-sidebar.component';
@@ -27,8 +27,11 @@ export class DashboardComponent implements OnInit {
   leftSidebarExpanded: boolean = true;
   isRightPinned: boolean = false;
   rightSidebarExpanded: boolean = false;
+  isMobile: boolean = false;
 
-  constructor(private tutorialService: TutorialService, private dashboardService: DashboardService) {}
+  constructor(private tutorialService: TutorialService, private dashboardService: DashboardService) {
+    this.checkMobile();
+  }
 
   ngOnInit(): void {
     this.tutorialService.getTutorialStatus().subscribe((status) => {
@@ -39,6 +42,25 @@ export class DashboardComponent implements OnInit {
     this.dashboardService.rightSidebarExpanded$.subscribe((expanded) => {
       this.rightSidebarExpanded = expanded;
     });
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.checkMobile();
+  }
+
+  private checkMobile(): void {
+    this.isMobile = window.innerWidth < 768;
+    
+    // Auto-close sidebars on mobile when switching to desktop
+    if (!this.isMobile) {
+      if (!this.leftSidebarExpanded) {
+        this.leftSidebarExpanded = true;
+      }
+      if (this.rightSidebarExpanded) {
+        this.rightSidebarExpanded = false;
+      }
+    }
   }
 
   showLeftSidebar() {

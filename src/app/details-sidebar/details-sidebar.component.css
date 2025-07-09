@@ -1,1 +1,118 @@
+/* Mobile-responsive styles for details sidebar component */
+@media screen and (max-width: 768px) {
+    /* Improve button sizes for mobile */
+    :host ::ng-deep .p-button {
+        min-width: 2.5rem;
+        min-height: 2.5rem;
+        font-size: 0.875rem;
+    }
+    
+    /* Better spacing for mobile */
+    .p-4 {
+        padding: 1rem;
+    }
+    
+    .mb-4 {
+        margin-bottom: 1rem;
+    }
+    
+    .mb-6 {
+        margin-bottom: 1.5rem;
+    }
+    
+    .mt-6 {
+        margin-top: 1.5rem;
+    }
+    
+    /* Improve fieldset spacing */
+    :host ::ng-deep .p-fieldset .p-fieldset-content {
+        padding: 1rem;
+    }
+    
+    /* Better text sizing for mobile */
+    .text-xl {
+        font-size: 1.25rem;
+    }
+    
+    /* Improve select button layout */
+    :host ::ng-deep .p-selectbutton .p-button {
+        min-width: 4rem;
+        min-height: 2.5rem;
+        font-size: 0.75rem;
+    }
+    
+    /* Better share link display */
+    .break-all {
+        word-break: break-all;
+        font-size: 0.75rem;
+    }
+    
+    /* Improve scroll panel for mobile */
+    :host ::ng-deep .p-scrollpanel {
+        border-radius: 0;
+    }
+    
+    /* Better button spacing */
+    .flex.justify-center {
+        gap: 0.5rem;
+    }
+    
+    /* Improve list spacing */
+    .list-disc.pl-4.space-y-1 li {
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+    }
+}
 
+/* Tablet-specific adjustments */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+    :host ::ng-deep .p-button {
+        min-width: 2.25rem;
+        min-height: 2.25rem;
+    }
+    
+    :host ::ng-deep .p-selectbutton .p-button {
+        min-width: 5rem;
+        min-height: 2.25rem;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    :host ::ng-deep .p-button {
+        min-width: 3rem;
+        min-height: 3rem;
+    }
+    
+    :host ::ng-deep .p-selectbutton .p-button {
+        min-width: 4.5rem;
+        min-height: 3rem;
+    }
+    
+    /* Improve fieldset touch targets */
+    :host ::ng-deep .p-fieldset .p-fieldset-legend {
+        min-height: 3rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Better link touch targets */
+    a {
+        min-height: 2.5rem;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    button {
+        min-height: 2.5rem;
+        display: inline-flex;
+        align-items: center;
+    }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    :host ::ng-deep .p-fieldset {
+        border-width: 0.5px;
+    }
+}

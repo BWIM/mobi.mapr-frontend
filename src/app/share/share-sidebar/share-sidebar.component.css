@@ -6,3 +6,104 @@
 :host ::ng-deep .p-scrollpanel {
     height: 100%;
 }
+
+/* Mobile-responsive styles for share sidebar component */
+@media screen and (max-width: 768px) {
+    /* Better spacing for mobile */
+    .flex.flex-col.gap-4 {
+        gap: 1rem;
+    }
+    
+    .p-4 {
+        padding: 1rem;
+    }
+    
+    .mb-2 {
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Improve panel spacing */
+    :host ::ng-deep .p-panel .p-panel-content {
+        padding: 1rem;
+    }
+    
+    /* Better text sizing for mobile */
+    .text-xl {
+        font-size: 1.25rem;
+    }
+    
+    .text-sm {
+        font-size: 0.875rem;
+    }
+    
+    /* Improve scroll panel for mobile */
+    :host ::ng-deep .p-scrollpanel {
+        border-radius: 0;
+    }
+    
+    /* Better list spacing */
+    .list-disc.pl-4.space-y-1 li {
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+    }
+    
+    /* Improve flex wrap spacing */
+    .flex.flex-wrap.gap-2 {
+        gap: 0.5rem;
+    }
+    
+    /* Better panel header touch targets */
+    :host ::ng-deep .p-panel .p-panel-header {
+        min-height: 3rem;
+        display: flex;
+        align-items: center;
+    }
+}
+
+/* Tablet-specific adjustments */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+    .flex.flex-col.gap-4 {
+        gap: 1.5rem;
+    }
+    
+    .p-4 {
+        padding: 1.25rem;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    /* Improve panel touch targets */
+    :host ::ng-deep .p-panel .p-panel-header {
+        min-height: 3rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Better link touch targets */
+    a {
+        min-height: 2.5rem;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    button {
+        min-height: 2.5rem;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    /* Improve list item touch targets */
+    .list-disc.pl-4.space-y-1 li {
+        min-height: 2rem;
+        display: flex;
+        align-items: center;
+    }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    :host ::ng-deep .p-panel {
+        border-width: 0.5px;
+    }
+}

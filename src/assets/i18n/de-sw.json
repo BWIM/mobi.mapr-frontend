@@ -174,6 +174,8 @@
   "PROJECT_WIZARD": {
     "CREATE_NEW_PROJECT": "Neis Projäkkd erstelle",
     "SELECT_ACTIVITIES": "Relevanti Aktivitete uswähle",
+    "SELECT_PERSONAS": "Relevanti Personas uswähle",
+    "SELECT_MODES": "Relevanti Modi uswähle",
     "CREATE_PROJECT": "Projäkkd erstelle",
     "PROJECT_NAME": "Projäkkdnamme",
     "DESCRIPTION": "Beschriibig",
@@ -182,8 +184,19 @@
     "ALLOW_SHARING": "Freigab erlaube",
     "SEND_EMAIL": "E-Mail nach Abschluss schicke",
     "LOAD_AREAS_ON_MAP": "Berechneti Gmeinde direkt uf de Karte zeige",
+    "AVAILABLE_PERSONAS": "Verfüegbari Personas",
+    "AVAILABLE_MODES": "Verfüegbari Modi",
+    "NON_MID_ACTIVITIES": "Nicht-MID Aktivitäte",
+    "CANCEL": "Abbreche",
+    "BACK": "Zrugg",
+    "NEXT": "Wiiter",
+    "FINISH": "Fertigstelle",
     "ERRORS": {
-      "NAME_REQUIRED": "Bitte e Projäkkdnamme iigä."
+      "NAME_REQUIRED": "Bitte e Projäkkdnamme iigä.",
+      "SELECT_MID_ACTIVITIES": "Bitte wähl mindestens e MID-Aktivität us.",
+      "SELECT_NON_MID_ACTIVITY": "Bitte wähl e Nicht-MID-Aktivität us.",
+      "SELECT_PERSONAS": "Bitte wähl mindestens e Persona us.",
+      "SELECT_MODES": "Bitte wähl mindestens e Modus us."
     },
     "ACTIVITIES": {
       "MID": "Aktivitäte",
@@ -202,6 +215,8 @@
     "NEXT_TOOLTIP": "Wiiter",
     "STEPS_TOOLTIP": "Schritt",
     "STEPS": {
+      "STEP": "Schritt",
+      "OF": "vun",
       "ACTIVITIES": "Aktivitäte",
       "PERSONAS": "Personas",
       "MODES": "Modi",

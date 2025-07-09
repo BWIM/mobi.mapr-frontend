@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, HostListener, OnDestroy } from '@angular/core';
 import { SharedModule } from '../../shared/shared.module';
 import { MenuItem, MessageService } from 'primeng/api';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
@@ -42,25 +42,25 @@ import Overlay from 'ol/Overlay';
 export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
   steps: MenuItem[] = [
     {
-      label: 'Aktivitäten',
+      label: 'PROJECT_WIZARD.STEPS.ACTIVITIES',
       command: (event: any) => {
         this.activeIndex = 0;
       }
     },
     {
-      label: 'Personas',
+      label: 'PROJECT_WIZARD.STEPS.PERSONAS',
       command: (event: any) => {
         this.activeIndex = 1;
       }
     },
     {
-      label: 'Modi',
+      label: 'PROJECT_WIZARD.STEPS.MODES',
       command: (event: any) => {
         this.activeIndex = 2;
       }
     },
     {
-      label: 'Gebiet auswählen',
+      label: 'PROJECT_WIZARD.STEPS.AREA',
       command: (event: any) => {
         this.activeIndex = 3;
         // Initialize map when directly selecting this step
@@ -71,7 +71,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       }
     },
     {
-      label: 'Projektinformationen',
+      label: 'PROJECT_WIZARD.STEPS.PROJECT_INFO',
       command: (event: any) => {
         this.activeIndex = 4;
       }
@@ -96,6 +96,8 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     mid: [],
     nonMid: []
   };
+  isMobile: boolean = false;
+  activitiesLoaded: boolean = false;
 
   // Area selection properties
   lands: Land[] = [];
@@ -145,6 +147,8 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     });
 
     this.initializeForm();
+    this.checkMobile();
+    this.updateStepLabels(); // Initialize step labels
   }
 
   ngAfterViewInit() {
@@ -261,6 +265,10 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       land.checked = false;
     });
     
+    // Reset mode and profile selections
+    this.selectedModeMap = {};
+    this.selectedProfiles = {};
+    
     // Wizard zum ersten Schritt zurücksetzen
     this.activeIndex = 0;
     
@@ -279,7 +287,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       this.projectForm.get('personas.selectedPersonas')?.setValue(this.personas);
     }
     if (this.modes.length > 0) {
-      this.projectForm.get('modes.selectedModes')?.setValue(this.modes);
+      this.selectAllModes();
     }
     
     // Reset the map if it exists
@@ -306,6 +314,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
         
         // Setze initial die MID-Aktivitäten
         this.updateDisplayedActivities(true);
+        this.activitiesLoaded = true;
       },
       error: (error) => {
         console.error('Fehler beim Laden der Aktivitäten:', error);
@@ -361,28 +370,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     this.modesService.getModes().subscribe({
       next: (modes) => {
         this.modes = modes.results;
-        
-        // Initialize modes and their profiles
-        this.modes.forEach(mode => {
-          // Select all modes by default
-          this.selectedModeMap[mode.id] = true;
-          
-          // Initialize profile selection with first profile ID if available
-          if (mode.profiles && mode.profiles.length > 0) {
-            const firstProfile = mode.profiles[0];
-            this.selectedProfiles[mode.id] = firstProfile.id;
-          }
-        });
-
-        // Set all mode IDs as selected in the form
-        const selectedModeIds = this.modes.map(mode => mode.id);
-        
-        this.projectForm.patchValue({
-          modes: {
-            selectedModes: selectedModeIds,
-            selectedProfiles: this.selectedProfiles
-          }
-        });
+        this.selectAllModes();
       },
       error: (error) => {
         console.error('Fehler beim Laden der Modi:', error);
@@ -445,7 +433,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       case 1:
         return this.projectForm.get('personas.selectedPersonas')?.value?.length > 0;
       case 2:
-        return this.projectForm.get('modes.selectedModes')?.value?.length > 0;
+        return this.areModesAndProfilesValid();
       case 3:
         return this.selectedAreaIds.length > 0;
       case 4:
@@ -453,6 +441,28 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       default:
         return false;
     }
+  }
+
+  // Method to validate that modes and profiles are properly selected
+  private areModesAndProfilesValid(): boolean {
+    const selectedModeIds = this.projectForm.get('modes.selectedModes')?.value || [];
+    
+    if (selectedModeIds.length === 0) {
+      return false;
+    }
+    
+    // Check that all selected modes have valid profile selections if they have profiles
+    for (const modeId of selectedModeIds) {
+      const mode = this.modes.find(m => m.id === modeId);
+      if (mode && mode.profiles && mode.profiles.length > 0) {
+        const selectedProfile = this.selectedProfiles[modeId];
+        if (!selectedProfile) {
+          return false;
+        }
+      }
+    }
+    
+    return true;
   }
 
   hide() {
@@ -482,54 +492,37 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
   }
 
   selectAllModes() {
-    const profilesGroup = this.projectForm.get('modes.selectedProfiles') as FormGroup;
+    // Clear existing selections
+    this.selectedModeMap = {};
+    this.selectedProfiles = {};
     
+    // Initialize modes and their profiles
     this.modes.forEach(mode => {
+      // Select all modes by default
       this.selectedModeMap[mode.id] = true;
       
+      // Initialize profile selection with first profile ID if available
       if (mode.profiles && mode.profiles.length > 0) {
-        const firstProfileId = mode.profiles[0].id;
-        if (!this.profileControls[mode.id]) {
-          const profileControl = new FormControl(firstProfileId);
-          this.profileControls[mode.id] = profileControl;
-          profilesGroup.setControl(mode.id.toString(), profileControl);
-        } else {
-          this.profileControls[mode.id].setValue(firstProfileId);
-        }
+        const firstProfile = mode.profiles[0];
+        this.selectedProfiles[mode.id] = firstProfile.id;
       }
     });
 
-    const selectedModeIds = this.modes.map(mode => mode.id);
-    this.projectForm.patchValue({
-      modes: {
-        selectedModes: selectedModeIds
-      }
-    });
+    // Update form with all selections
+    this.updateModesForm();
   }
 
   deselectAllModes() {
-    this.modes.forEach(mode => {
-      this.selectedModeMap[mode.id] = false;
-    });
-
-    const profilesGroup = this.projectForm.get('modes.selectedProfiles') as FormGroup;
-    Object.keys(this.profileControls).forEach(modeId => {
-      profilesGroup.removeControl(modeId);
-      delete this.profileControls[parseInt(modeId)];
-    });
-
-    this.projectForm.patchValue({
-      modes: {
-        selectedModes: []
-      }
-    });
+    // Clear all mode selections
+    this.selectedModeMap = {};
+    this.selectedProfiles = {};
+    
+    // Update form with empty selections
+    this.updateModesForm();
   }
 
   onModeChange(mode: Mode, checked: boolean) {
     this.selectedModeMap[mode.id] = checked;
-    const selectedModeIds = this.modes
-      .filter(m => this.selectedModeMap[m.id])
-      .map(m => m.id);
     
     if (checked) {
       // When selecting a mode, ensure its first profile is selected
@@ -541,31 +534,32 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       // When deselecting a mode, remove its profile selection
       delete this.selectedProfiles[mode.id];
     }
-    // Update selected modes in form
-    this.projectForm.patchValue({
-      modes: {
-        selectedModes: selectedModeIds,
-        selectedProfiles: this.selectedProfiles
-      }
-    });
+    
+    // Update form with current selections
+    this.updateModesForm();
+  }
+
+  onProfileChange(mode: Mode, profileId: number) {
+    this.selectedProfiles[mode.id] = profileId;
+    
+    // Update form with current selections
+    this.updateModesForm();
   }
 
   getProfileFormControl(mode: Mode): FormControl {
-    
     if (!this.profileControls[mode.id] && mode.profiles && mode.profiles.length > 0) {
       const firstProfile = mode.profiles[0];
       const profileControl = new FormControl(firstProfile.id);
       this.profileControls[mode.id] = profileControl;
+      
       const profilesGroup = this.projectForm.get('modes.selectedProfiles') as FormGroup;
       profilesGroup.setControl(mode.id.toString(), profileControl);
-  
     }
     return this.profileControls[mode.id];
   }
 
   isModeSelected(mode: Mode): boolean {
-    const isSelected = this.selectedModeMap[mode.id] || false;
-    return isSelected;
+    return this.selectedModeMap[mode.id] || false;
   }
 
   getCurrentProfileId(mode: Mode): number | null {
@@ -574,6 +568,24 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
 
   getSelectedProfile(mode: Mode): number | undefined {
     return this.selectedProfiles[mode.id];
+  }
+
+  // Helper method to update the form with current mode and profile selections
+  private updateModesForm() {
+    const selectedModeIds = this.modes
+      .filter(m => this.selectedModeMap[m.id])
+      .map(m => m.id);
+    
+    this.projectForm.patchValue({
+      modes: {
+        selectedModes: selectedModeIds,
+        selectedProfiles: this.selectedProfiles
+      }
+    });
+  }
+
+  getCurrentStepLabel(): string {
+    return this.steps[this.activeIndex]?.label || '';
   }
 
   onSubmit() {
@@ -613,7 +625,6 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
         laender: this.hasCompletelySelectedLands,
         start_activity: this.projectForm.get('summary.startActivity')?.value?.id || null
       };
-      
       this.projectsService.createProject(projectData).subscribe({
         next: (response) => {
           if (!response) {
@@ -691,6 +702,15 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
         });
       }
     });
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.checkMobile();
+  }
+
+  private checkMobile(): void {
+    this.isMobile = window.innerWidth < 768;
   }
 
   deleteProjectGroup(group: ProjectGroup | null) {

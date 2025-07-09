@@ -174,6 +174,8 @@
   "PROJECT_WIZARD": {
     "CREATE_NEW_PROJECT": "Create New Project",
     "SELECT_ACTIVITIES": "Select relevant activities",
+    "SELECT_PERSONAS": "Select relevant personas",
+    "SELECT_MODES": "Select relevant modes",
     "CREATE_PROJECT": "Create Project",
     "PROJECT_NAME": "Project Name",
     "DESCRIPTION": "Description",
@@ -182,8 +184,19 @@
     "ALLOW_SHARING": "Allow Sharing",
     "SEND_EMAIL": "Send Email after Completion",
     "LOAD_AREAS_ON_MAP": "Load calculated municipalities directly on map",
+    "AVAILABLE_PERSONAS": "Available Personas",
+    "AVAILABLE_MODES": "Available Modes",
+    "NON_MID_ACTIVITIES": "Non-MID Activities",
+    "CANCEL": "Cancel",
+    "BACK": "Back",
+    "NEXT": "Next",
+    "FINISH": "Finish",
     "ERRORS": {
-      "NAME_REQUIRED": "Please enter a project name."
+      "NAME_REQUIRED": "Please enter a project name.",
+      "SELECT_MID_ACTIVITIES": "Please select at least one MID activity.",
+      "SELECT_NON_MID_ACTIVITY": "Please select a non-MID activity.",
+      "SELECT_PERSONAS": "Please select at least one persona.",
+      "SELECT_MODES": "Please select at least one mode."
     },
     "ACTIVITIES": {
       "MID": "Activities",
@@ -202,6 +215,8 @@
     "NEXT_TOOLTIP": "next",
     "STEPS_TOOLTIP": "steps",
     "STEPS": {
+      "STEP": "Step",
+      "OF": "of",
       "ACTIVITIES": "Activities",
       "PERSONAS": "Personas",
       "MODES": "Modes",

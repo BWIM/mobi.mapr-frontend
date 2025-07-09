@@ -50,7 +50,6 @@
     height: 100%;
 }
 
-
 /* Responsive Anpassungen */
 @media screen and (max-width: 768px) {
     .map-container {
@@ -69,7 +68,6 @@
     height: 100%;
     z-index: 1;
 }
-
 
 /* Control Buttons */
 .left-controls {
@@ -163,10 +161,20 @@
 .sidebar-tab {
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
+    pointer-events: all;
 }
 
 .sidebar-tab:hover {
     background-color: rgba(255, 255, 255, 1);
+}
+
+.sidebar-tab * {
+    pointer-events: none;
+}
+
+/* Additional clickable tab styling */
+.clickable-tab {
+    user-select: none;
 }
 
 .rotate-text {
@@ -209,4 +217,112 @@
 :host ::ng-deep .share-sidebar .p-dialog-content {
     padding: 0;
     height: calc(100vh - 4rem);
+}
+
+/* Mobile-specific styles */
+@media screen and (max-width: 768px) {
+    /* Hide sidebar tabs on mobile */
+    .sidebar-tab {
+        display: none;
+    }
+    
+    /* Full-screen dialogs on mobile */
+    :host ::ng-deep .share-sidebar.p-dialog {
+        width: 100vw !important;
+        height: 100vh !important;
+        margin: 0 !important;
+        transform: none !important;
+        border-radius: 0 !important;
+    }
+    
+    :host ::ng-deep .share-sidebar .p-dialog-content {
+        height: 100vh !important;
+        padding: 0 !important;
+    }
+    
+    /* Mobile navigation bar */
+    .mobile-nav {
+        position: fixed;
+        bottom: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        background: white;
+        border-radius: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        padding: 0.5rem;
+    }
+    
+    .mobile-nav button {
+        min-width: 3rem;
+        min-height: 3rem;
+        border-radius: 50%;
+        border: none;
+        margin: 0 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+    
+    .mobile-nav button:active {
+        transform: scale(0.95);
+    }
+    
+    /* Improve touch targets */
+    .sidebar-tab {
+        min-width: 3rem;
+        min-height: 3rem;
+    }
+    
+    /* Mobile logo adjustments */
+    .logo {
+        max-height: 3rem !important;
+    }
+}
+
+/* Tablet-specific adjustments */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+    .sidebar-tab {
+        padding: 0.75rem !important;
+    }
+    
+    .rotate-text {
+        font-size: 0.875rem;
+    }
+}
+
+/* Large screen optimizations */
+@media screen and (min-width: 1025px) {
+    .sidebar-tab {
+        padding: 1rem !important;
+    }
+    
+    .rotate-text {
+        font-size: 1rem;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    .sidebar-tab {
+        min-width: 3.5rem;
+        min-height: 3.5rem;
+    }
+    
+    .sidebar-tab:hover {
+        background-color: rgba(255, 255, 255, 0.9);
+    }
+    
+    :host ::ng-deep .p-button.p-button-text {
+        min-width: 3rem;
+        min-height: 3rem;
+    }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .sidebar-tab {
+        border: 0.5px solid rgba(0, 0, 0, 0.1);
+    }
 }
