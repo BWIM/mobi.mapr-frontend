@@ -44,15 +44,37 @@
                                     styleClass="p-button-text p-button-sm">
                                 </p-button>
                             </div>
-                            <div *ngIf="hasActivityData()" class="h-full">
+                            <div *ngIf="hasActivityData()" class="h-full relative">
                                 <p-chart 
                                     #activitiesChart
                                     type="bar" 
                                     [data]="activitiesChartData" 
                                     [options]="barChartOptions"
                                     [width]="'100%'"
-                                    [height]="'100%'">
+                                    [height]="'100%'"
+                                    style="cursor: pointer;"
+                                    (onDataSelect)="onDataSelect($event)">
                                 </p-chart>
+                                
+                                <!-- Subactivities Pie Chart Dialog -->
+                                <p-dialog 
+                                    [(visible)]="showSubactivitiesPie"
+                                    [modal]="true"
+                                    [draggable]="false"
+                                    [resizable]="false"
+                                    [dismissableMask]="true"
+                                    [style]="{width: '75%', height: '50%'}"
+                                    [header]="hoveredCategoryName"
+                                    (onHide)="onCategoryLeave()">
+                                    <p-chart 
+                                        #subactivitiesPieChart
+                                        type="bar" 
+                                        [data]="subactivitiesPieData" 
+                                        [options]="subBarChartOptions"
+                                        [width]="'100%'"
+                                        [height]="'100%'">
+                                    </p-chart>
+                                </p-dialog>
                             </div>
                             <div *ngIf="!hasActivityData()" class="flex-1 flex items-center justify-center">
                                 <p class="text-gray-500 text-center">{{ 'ANALYZE.ACTIVITIES.NO_DATA' | translate }}</p>

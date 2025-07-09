@@ -31,6 +31,17 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   sortBy: 'score' | 'weight' = 'weight';
   showPersona: boolean = true;
   activeTab: string = 'activities';
+  showActivityOverlay: boolean = false;
+  selectedCategory: number | null = null;
+  selectedCategoryName: string = '';
+
+  // Subactivities pie chart properties
+  showSubactivitiesPie: boolean = false;
+  subactivitiesPieData: any;
+  subactivitiesPieOptions: any;
+  hoveredCategoryId: number | null = null;
+  hoveredCategoryName: string = '';
+  generateLabels: any;
 
   // Diagrammdaten
   personaChartData: any;
@@ -38,14 +49,12 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   modesChartData: any;
   radarChartOptions: any;
   barChartOptions: any;
-  pieChartOptions: any;
-  activitiesChartType: 'bar' | 'doughnut' = 'bar';
-  doughnutChartOptions: any;
-  activitiesWeightChartData: any;
-  weightChartOptions: any;
+  subBarChartOptions: any;
+  subactivitiesChartData: any;
 
   @ViewChild('activitiesChart') activitiesChart?: UIChart;
   @ViewChild('personaChart') personaChart?: UIChart;
+  @ViewChild('subactivitiesPieChart') subactivitiesPieChart?: UIChart;
   @ViewChild('dialogContainer') dialogContainer?: ElementRef;
 
   private resizeObserver?: ResizeObserver;
@@ -124,82 +133,84 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     );
     this.getScore();
 
+    this.generateLabels = function(chart: any) {
+      return [
+        {
+          text: 'A',
+          fillStyle: 'rgba(50, 97, 45, 0.2)',
+          strokeStyle: '#32612d',
+          fontColor: '#000000',
+          lineWidth: 1,
+          hidden: false,
+          boxWidth: 30,
+          boxHeight: 20,
+          borderRadius: 4
+        },
+        {
+          text: 'B',
+          fillStyle: 'rgba(60, 176, 67, 0.2)',
+          strokeStyle: '#3cb043',
+          fontColor: '#000000',
+          lineWidth: 1,
+          hidden: false,
+          boxWidth: 30,
+          boxHeight: 20,
+          borderRadius: 4
+        },
+        {
+          text: 'C',
+          fillStyle: 'rgba(238, 210, 2, 0.2)',
+          strokeStyle: '#eed202',
+          fontColor: '#000000',
+          lineWidth: 1,
+          hidden: false,
+          boxWidth: 30,
+          boxHeight: 20,
+          borderRadius: 4
+        },
+        {
+          text: 'D',
+          fillStyle: 'rgba(237, 112, 20, 0.2)',
+          strokeStyle: '#ed7014',
+          fontColor: '#000000',
+          lineWidth: 1,
+          hidden: false,
+          boxWidth: 30,
+          boxHeight: 20,
+          borderRadius: 4
+        },
+        {
+          text: 'E',
+          fillStyle: 'rgba(194, 24, 7, 0.2)',
+          strokeStyle: '#c21807',
+          fontColor: '#000000',
+          lineWidth: 1,
+          hidden: false,
+          boxWidth: 30,
+          boxHeight: 20,
+          borderRadius: 4
+        },
+        {
+          text: 'F',
+          fillStyle: 'rgba(150, 86, 162, 0.2)',
+          strokeStyle: '#9656a2',
+          fontColor: '#000000',
+          lineWidth: 1,
+          hidden: false,
+          boxWidth: 30,
+          boxHeight: 20,
+          borderRadius: 4
+        }
+      ];
+    }
+
     // Grundlegende Chart-Optionen für verschiedene Diagrammtypen
     this.radarChartOptions = {
       plugins: {
         legend: {
           position: 'bottom',
           labels: {
-            generateLabels: function(chart: any) {
-              return [
-                {
-                  text: 'A',
-                  fillStyle: 'rgba(50, 97, 45, 0.2)',
-                  strokeStyle: '#32612d',
-                  fontColor: '#000000',
-                  lineWidth: 1,
-                  hidden: false,
-                  boxWidth: 30,
-                  boxHeight: 20,
-                  borderRadius: 4
-                },
-                {
-                  text: 'B',
-                  fillStyle: 'rgba(60, 176, 67, 0.2)',
-                  strokeStyle: '#3cb043',
-                  fontColor: '#000000',
-                  lineWidth: 1,
-                  hidden: false,
-                  boxWidth: 30,
-                  boxHeight: 20,
-                  borderRadius: 4
-                },
-                {
-                  text: 'C',
-                  fillStyle: 'rgba(238, 210, 2, 0.2)',
-                  strokeStyle: '#eed202',
-                  fontColor: '#000000',
-                  lineWidth: 1,
-                  hidden: false,
-                  boxWidth: 30,
-                  boxHeight: 20,
-                  borderRadius: 4
-                },
-                {
-                  text: 'D',
-                  fillStyle: 'rgba(237, 112, 20, 0.2)',
-                  strokeStyle: '#ed7014',
-                  fontColor: '#000000',
-                  lineWidth: 1,
-                  hidden: false,
-                  boxWidth: 30,
-                  boxHeight: 20,
-                  borderRadius: 4
-                },
-                {
-                  text: 'E',
-                  fillStyle: 'rgba(194, 24, 7, 0.2)',
-                  strokeStyle: '#c21807',
-                  fontColor: '#000000',
-                  lineWidth: 1,
-                  hidden: false,
-                  boxWidth: 30,
-                  boxHeight: 20,
-                  borderRadius: 4
-                },
-                {
-                  text: 'F',
-                  fillStyle: 'rgba(150, 86, 162, 0.2)',
-                  strokeStyle: '#9656a2',
-                  fontColor: '#000000',
-                  lineWidth: 1,
-                  hidden: false,
-                  boxWidth: 30,
-                  boxHeight: 20,
-                  borderRadius: 4
-                }
-              ];
-            },
+            generateLabels: this.generateLabels,
             usePointStyle: false,
             padding: 15
           }
@@ -213,55 +224,13 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         }
       }
     };
-
-    this.barChartOptions = {
-      plugins: {
-        legend: {
-          position: 'bottom'
-        }
-      },
-      responsive: true,
-      maintainAspectRatio: false
-    };
-
-    this.pieChartOptions = {
-      plugins: {
-        legend: {
-          position: 'bottom'
-        }
-      },
-      responsive: true,
-      maintainAspectRatio: false
-    };
-
-    this.doughnutChartOptions = {
-      plugins: {
-        legend: {
-          display: false
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context: any) {
-              const dataset = context.dataset;
-              const value = dataset.data[context.dataIndex];
-              const label = context.label;
-              const weight = dataset.weights[context.dataIndex];
-              return `${label}: ${value.toFixed(2)} (Weight: ${weight})`;
-            }
-          }
-        }
-      },
-      cutout: '60%',
-      responsive: true,
-      maintainAspectRatio: false
-    };
-
   }
 
   private initializeChartData(): void {
     // this.initializeModesChart();
     this.initializeActivitiesChart();
     this.initializePersonaChart();
+    this.initializeSubActivitiesChart(); // Initialize without category to show empty chart
     this.loading = false;
     
     // Ensure charts are properly sized after initialization
@@ -269,6 +238,15 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       this.resizeCharts();
     }, 200);
   }
+
+  private getColorForValue = (value: number): string => {
+    if (value >= 141) return '#9656a2';      // Lila (F)
+    if (value >= 100) return '#c21807';      // Rot (E)
+    if (value >= 72) return '#ed7014';      // Orange (D)
+    if (value >= 51) return '#eed202';      // Gelb (C)
+    if (value >= 35) return '#3cb043';      // Hellgrün (B)
+    return '#32612d';                         // Dunkelgrün (A)
+  };
 
   private initializeActivitiesChart(): void {
     if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0) return;
@@ -319,17 +297,8 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const weights = sortedData.map(item => item.weight);
     const scoreNames = sortedData.map(item => this.getScoreName(item.score * 100));
 
-    // Farbzuordnung basierend auf den Werten
-    const getColorForValue = (value: number): string => {
-      if (value >= 141) return '#9656a2';      // Lila (F)
-      if (value >= 100) return '#c21807';      // Rot (E)
-      if (value >= 72) return '#ed7014';      // Orange (D)
-      if (value >= 51) return '#eed202';      // Gelb (C)
-      if (value >= 35) return '#3cb043';      // Hellgrün (B)
-      return '#32612d';                         // Dunkelgrün (A)
-    };
 
-    const scoreColors = scores.map(value => getColorForValue(value));
+    const scoreColors = scores.map(value => this.getColorForValue(value));
 
     this.activitiesChartData = {
       labels: labels,
@@ -359,7 +328,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
               const index = context.dataIndex;
               return [
                 `Score: ${scoreNames[index]}`,
-                `Gewichtung: ${weights[index]}%`
+                `Weight: ${weights[index]}`
               ];
             }
           }
@@ -367,76 +336,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         legend: {
           position: 'bottom',
           labels: {
-            generateLabels: function(chart: any) {
-              return [
-                {
-                  text: 'A',
-                  fillStyle: 'rgba(50, 97, 45, 0.2)',
-                  strokeStyle: '#32612d',
-                  fontColor: '#000000',
-                  lineWidth: 1,
-                  hidden: false,
-                  boxWidth: 30,
-                  boxHeight: 20,
-                  borderRadius: 4
-                },
-                {
-                  text: 'B',
-                  fillStyle: 'rgba(60, 176, 67, 0.2)',
-                  strokeStyle: '#3cb043',
-                  fontColor: '#000000',
-                  lineWidth: 1,
-                  hidden: false,
-                  boxWidth: 30,
-                  boxHeight: 20,
-                  borderRadius: 4
-                },
-                {
-                  text: 'C',
-                  fillStyle: 'rgba(238, 210, 2, 0.2)',
-                  strokeStyle: '#eed202',
-                  fontColor: '#000000',
-                  lineWidth: 1,
-                  hidden: false,
-                  boxWidth: 30,
-                  boxHeight: 20,
-                  borderRadius: 4
-                },
-                {
-                  text: 'D',
-                  fillStyle: 'rgba(237, 112, 20, 0.2)',
-                  strokeStyle: '#ed7014',
-                  fontColor: '#000000',
-                  lineWidth: 1,
-                  hidden: false,
-                  boxWidth: 30,
-                  boxHeight: 20,
-                  borderRadius: 4
-                },
-                {
-                  text: 'E',
-                  fillStyle: 'rgba(194, 24, 7, 0.2)',
-                  strokeStyle: '#c21807',
-                  fontColor: '#000000',
-                  lineWidth: 1,
-                  hidden: false,
-                  boxWidth: 30,
-                  boxHeight: 20,
-                  borderRadius: 4
-                },
-                {
-                  text: 'F',
-                  fillStyle: 'rgba(150, 86, 162, 0.2)',
-                  strokeStyle: '#9656a2',
-                  fontColor: '#000000',
-                  lineWidth: 1,
-                  hidden: false,
-                  boxWidth: 30,
-                  boxHeight: 20,
-                  borderRadius: 4
-                }
-              ];
-            },
+            generateLabels: this.generateLabels,
             usePointStyle: false,
             padding: 15
           }
@@ -469,6 +369,185 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         }
       }
     };
+  }
+
+  private initializeSubActivitiesChart(categoryId?: number): void {
+    if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0) return;
+
+    // If no categoryId is provided, don't show any data
+    if (!categoryId) {
+      this.subactivitiesChartData = {
+        labels: [],
+        datasets: [{
+          label: 'Subaktivitäten',
+          data: [],
+          backgroundColor: [],
+          borderColor: [],
+          borderWidth: 1,
+          yAxisID: 'y',
+          barPercentage: 0.8
+        }]
+      };
+      return;
+    }
+
+    // Calculate weighted averages for subactivities of the specific category
+    const subactivityScores = new Map<number, { 
+      name: string, 
+      totalWeightedScore: number, 
+      totalWeight: number,
+      totalWeightedWeight: number
+    }>();
+    
+    // Sum up weighted scores and weights for each subactivity in the specific category
+    this.projectDetails.hexagons.forEach(hexagon => {
+      const weight = this.weightingType === 'population' ? hexagon.population : 1;
+      
+      // Find the category score for this specific category
+      const categoryScore = hexagon.category_scores.find(cs => cs.category === categoryId);
+      if (categoryScore && categoryScore.activities) {
+        categoryScore.activities.forEach(activity => {
+          const current = subactivityScores.get(activity.activity) || { 
+            name: activity.activity_name, 
+            totalWeightedScore: 0, 
+            totalWeight: 0,
+            totalWeightedWeight: 0
+          };
+          current.totalWeightedScore += activity.score * weight;
+          current.totalWeightedWeight += activity.weight * weight;
+          current.totalWeight += weight;
+          subactivityScores.set(activity.activity, current);
+        });
+      }
+    });
+
+    // Calculate final weighted averages
+    const weightedSubactivityScores = Array.from(subactivityScores.entries())
+      .map(([activityId, data]) => ({
+        id: activityId,
+        name: data.name,
+        score: data.totalWeightedScore / data.totalWeight,
+        weight: data.totalWeightedWeight / data.totalWeight
+      }))
+      .sort((a, b) => b.weight - a.weight); // Sort by weight descending
+
+    if (weightedSubactivityScores.length === 0) {
+      this.subactivitiesChartData = {
+        labels: [],
+        datasets: [{
+          label: 'Subaktivitäten',
+          data: [],
+          backgroundColor: [],
+          borderColor: [],
+          borderWidth: 1,
+          yAxisID: 'y',
+          barPercentage: 0.8
+        }]
+      };
+      return;
+    }
+
+    // Normalize weights to percentages
+    const rawWeights = weightedSubactivityScores.map(item => item.weight);
+    const totalWeight = rawWeights.reduce((sum, weight) => sum + weight, 0);
+    const normalizedWeights = rawWeights.map(weight => (weight / totalWeight) * 100);
+
+    // Extract sorted arrays
+    const labels = weightedSubactivityScores.map(item => item.name);
+    const scores = weightedSubactivityScores.map(item => item.score * 100);
+    const weights = normalizedWeights;
+    
+    // Create labels with activity name and percentage
+    const labelsWithPercentages = weightedSubactivityScores.map((item, index) => 
+      `${item.name} (${weights[index].toFixed(1)}%)`
+    );
+    
+    const scoreNames = weightedSubactivityScores.map(item => this.getScoreName(item.score * 100));
+    const scoreColors = scores.map(value => this.getColorForValue(value));
+
+    // Create chart data
+    this.subactivitiesChartData = {
+      labels: labelsWithPercentages,
+      datasets: [
+        {
+          label: 'Subaktivitäten',
+          data: weights,
+          backgroundColor: scoreColors,
+          borderColor: scoreColors,
+          borderWidth: 1,
+          yAxisID: 'y',
+          barPercentage: 0.8
+        }
+      ]
+    };
+
+    this.subBarChartOptions = {
+      indexAxis: 'x',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            label: (context: any) => {
+              const index = context.dataIndex;
+              return [
+                `Score: ${scoreNames[index]}`,
+                `Weight: ${weights[index].toFixed(1)}%`
+              ];
+            }
+          }
+        },
+        legend: {
+          position: 'bottom',
+          labels: {
+            generateLabels: this.generateLabels,
+            usePointStyle: false,
+            padding: 15
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#495057'
+          },
+          grid: {
+            color: '#ebedef'
+          }
+        },
+        y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          beginAtZero: true,
+          ticks: {
+            color: '#495057'
+          },
+          grid: {
+            color: '#ebedef'
+          },
+          title: {
+            display: true,
+            text: 'Gewichtung (%)'
+          }
+        }
+      }
+    };
+  }
+
+
+  onDataSelect(event: any) {
+    if (event.dataset && event.dataset.length > 0) {
+      // Get the first selected element's index
+      const selectedElement = event.dataset[0];
+      const categoryIndex = selectedElement.index;
+      
+      if (categoryIndex !== undefined && categoryIndex >= 0) {
+        this.onCategoryHover({ dataIndex: categoryIndex });
+      }
+    }
   }
 
   private initializePersonaChart(): void {
@@ -507,18 +586,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const data = sortedPersonas.map(persona => persona.score);
     const scoreNames = sortedPersonas.map(persona => this.getScoreName(persona.score * 100));
 
-    // Farbzuordnung basierend auf den Werten (inverted)
-    const getColorForValue = (value: number): string => {
-    if (value >= 1.41) return '#9656a2';      // Lila (F)
-    if (value >= 1) return '#c21807';      // Rot (E)
-    if (value >= 0.72) return '#ed7014';      // Orange (D)
-    if (value >= 0.51) return '#eed202';      // Gelb (C)
-    if (value >= 0.35) return '#3cb043';      // Hellgrün (B)
-    return '#32612d';                         // Dunkelgrün (A)
-  };
-
-
-    const borderColors = data.map(value => getColorForValue(value));
+    const borderColors = data.map(value => this.getColorForValue(value * 100));
 
     // Update radar options with dynamic max value and inverted scale
     this.radarChartOptions = {
@@ -649,6 +717,97 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     };
   }
 
+  onCategoryHover(event: any): void {
+    if (!this.projectDetails?.hexagons) return;
+    
+    const categoryIndex = event.dataIndex;
+    const categoryData = this.activitiesChartData.labels[categoryIndex];
+    
+    // Find the category ID from the category name
+    const category = this.projectDetails.categories.find(cat => cat.name === categoryData);
+    if (!category) return;
+    
+    this.hoveredCategoryId = category.id;
+    this.hoveredCategoryName = categoryData;
+    this.generateSubactivitiesPieData(category.id);
+    this.showSubactivitiesPie = true;
+    this.initializeSubActivitiesChart(category.id); // Update subactivities chart for the hovered category
+  }
+
+  onCategoryLeave(): void {
+    this.showSubactivitiesPie = false;
+    this.hoveredCategoryId = null;
+    this.hoveredCategoryName = '';
+    this.initializeSubActivitiesChart(); // Reset subactivities chart when leaving
+  }
+
+  private generateSubactivitiesPieData(categoryId: number): void {
+    if (!this.projectDetails?.hexagons) return;
+
+    // Collect all activities for this category across all hexagons
+    const activityScores = new Map<number, { 
+      name: string, 
+      totalWeightedScore: number, 
+      totalWeight: number,
+      totalWeightedWeight: number
+    }>();
+
+    this.projectDetails.hexagons.forEach(hexagon => {
+      const weight = this.weightingType === 'population' ? hexagon.population : 1;
+      
+      // Find the category score for this category
+      const categoryScore = hexagon.category_scores.find(cs => cs.category === categoryId);
+      if (categoryScore && categoryScore.activities) {
+        categoryScore.activities.forEach(activity => {
+          const current = activityScores.get(activity.activity) || { 
+            name: activity.activity_name, 
+            totalWeightedScore: 0, 
+            totalWeight: 0,
+            totalWeightedWeight: 0
+          };
+          current.totalWeightedScore += activity.score * weight;
+          current.totalWeightedWeight += activity.weight * weight;
+          current.totalWeight += weight;
+          activityScores.set(activity.activity, current);
+        });
+      }
+    });
+
+    // Calculate weighted averages and prepare pie chart data
+    const pieData = Array.from(activityScores.entries())
+      .map(([activityId, data]) => ({
+        name: data.name,
+        score: data.totalWeightedScore / data.totalWeight,
+        weight: data.totalWeightedWeight / data.totalWeight
+      }))
+      .sort((a, b) => b.weight - a.weight); // Sort by weight descending
+
+    if (pieData.length === 0) {
+      this.showSubactivitiesPie = false;
+      return;
+    }
+
+    // Normalize weights to percentages
+    const rawWeights = pieData.map(item => item.weight);
+    const totalWeight = rawWeights.reduce((sum, weight) => sum + weight, 0);
+    const normalizedWeights = rawWeights.map(weight => (weight / totalWeight) * 100);
+
+    // Create labels with activity name and score
+    const labels = pieData.map(item => {
+      return item.name;
+    });
+
+    this.subactivitiesPieData = {
+      labels: labels,
+      datasets: [{
+        data: normalizedWeights, // Use normalized weights as data
+        backgroundColor: pieData.map(item => this.getColorForValue(item.score * 100)),
+        borderColor: '#ffffff',
+        borderWidth: 2
+      }]
+    };
+  }
+
   ngOnDestroy() {
     if (this.subscriptions) {
       this.subscriptions.forEach(subscription => subscription.unsubscribe());
@@ -676,11 +835,14 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     this.isAreaWeighting = event.checked;
     this.weightingType = this.isAreaWeighting ? 'area' : 'population';
     this.initializeChartData();
+    // Regenerate subactivities pie chart if currently showing
+    if (this.showSubactivitiesPie && this.hoveredCategoryId) {
+      this.generateSubactivitiesPieData(this.hoveredCategoryId);
+    }
     // No need for an additional trigger here as initializeChartData already has one
   }
 
   toggleActivitiesChartType(): void {
-    this.activitiesChartType = this.activitiesChartType === 'bar' ? 'doughnut' : 'bar';
     this.initializeActivitiesChart();
     setTimeout(() => {
       this.resizeCharts();
@@ -690,6 +852,10 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   toggleSort(): void {
     this.sortBy = this.sortBy === 'score' ? 'weight' : 'score';
     this.initializeActivitiesChart();
+    // Regenerate subactivities pie chart if currently showing
+    if (this.showSubactivitiesPie && this.hoveredCategoryId) {
+      this.generateSubactivitiesPieData(this.hoveredCategoryId);
+    }
     setTimeout(() => {
       this.resizeCharts();
     }, 100);
@@ -725,6 +891,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       if (this.personaChart?.chart) {
         this.personaChart.chart.resize();
       }
+      if (this.subactivitiesPieChart?.chart) {
+        this.subactivitiesPieChart.chart.resize();
+      }
     }, 50);
   }
 
@@ -747,23 +916,23 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   getScoreName(score: number): string {
     score = score / 100;
     if (score <= 0) return "Error";
-    if (score <= 0.28) return "A+";
-    if (score <= 0.32) return "A";
-    if (score <= 0.35) return "A-";
-    if (score <= 0.4) return "B+";
-    if (score <= 0.45) return "B";
-    if (score <= 0.5) return "B-";
-    if (score <= 0.56) return "C+";
-    if (score <= 0.63) return "C";
-    if (score <= 0.71) return "C-";
-    if (score <= 0.8) return "D+";
-    if (score <= 0.9) return "D";
-    if (score <= 1.0) return "D-";
-    if (score <= 1.12) return "E+";
-    if (score <= 1.26) return "E";
-    if (score <= 1.41) return "E-";
-    if (score <= 1.59) return "F+";
-    if (score <= 1.78) return "F";
+    if (score < 0.28) return "A+";
+    if (score < 0.32) return "A";
+    if (score < 0.35) return "A-";
+    if (score < 0.4) return "B+";
+    if (score < 0.45) return "B";
+    if (score < 0.5) return "B-";
+    if (score < 0.56) return "C+";
+    if (score < 0.63) return "C";
+    if (score < 0.71) return "C-";
+    if (score < 0.8) return "D+";
+    if (score < 0.9) return "D";
+    if (score < 1.0) return "D-";
+    if (score < 1.12) return "E+";
+    if (score < 1.26) return "E";
+    if (score < 1.41) return "E-";
+    if (score < 1.59) return "F+";
+    if (score < 1.78) return "F";
     return "F-";
   }
 }
