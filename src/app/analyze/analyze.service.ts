@@ -1,6 +1,9 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
 import { MapGeoJSONFeature } from "maplibre-gl";
+import { environment } from "../../environments/environment";
+import { HttpClient } from "@angular/common/http";
+import { Place } from "./analyze.interface";
 
 @Injectable({
     providedIn: 'root'
@@ -8,10 +11,15 @@ import { MapGeoJSONFeature } from "maplibre-gl";
   export class AnalyzeService {
     private visibleSubject = new BehaviorSubject<boolean>(false);
     visible$ = this.visibleSubject.asObservable();
+
+    constructor(private http: HttpClient) {}
   
     private currentProjectId: string | null = null;
     private currentMapType: string | null = null;
     private selectedFeature: MapGeoJSONFeature | null = null;
+    private featureId: string | null = null;
+    private resolution: string | null = null;
+    private coordinates: number[] | null = null;
   
     show() {
       this.visibleSubject.next(true);
@@ -25,14 +33,20 @@ import { MapGeoJSONFeature } from "maplibre-gl";
       this.currentProjectId = projectId;
     }
 
+    getCoordinates(): number[] | null {
+      return this.coordinates;
+    }
+
   
     setMapType(mapType: string) {
       this.currentMapType = mapType;
     }
   
-    setSelectedFeature(feature: MapGeoJSONFeature) {
-      console.log(feature);
+    setSelectedFeature(feature: MapGeoJSONFeature, resolution: string, coordinates: number[]) {
       this.selectedFeature = feature;
+      this.featureId = feature['properties']['id'];
+      this.coordinates = coordinates;
+      this.resolution = resolution;
       this.show(); // Automatisch das Analyse-Panel öffnen, wenn ein Feature ausgewählt wurde
     }
   
@@ -42,5 +56,16 @@ import { MapGeoJSONFeature } from "maplibre-gl";
         mapType: this.currentMapType,
         feature: this.selectedFeature
       };
+    }
+
+    getPlaces(activityId: number) {
+      const type = this.resolution;
+      const featureId = this.featureId;
+
+
+      const url = `${environment.apiUrl}/places/details?activity=${activityId}&type=${type}&feature=${featureId}&project=${this.currentProjectId}`;
+      console.log(url);
+      return this.http.get<Place[]>(url);
+
     }
   }

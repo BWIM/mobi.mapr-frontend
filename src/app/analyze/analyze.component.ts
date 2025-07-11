@@ -3,10 +3,23 @@ import { SharedModule } from '../shared/shared.module';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../projects/projects.service';
 import { AnalyzeService } from './analyze.service';
-import { Properties } from './analyze.interface';
+import { Place, Properties } from './analyze.interface';
 import { ProjectDetails } from '../projects/project.interface';
 import { MapGeoJSONFeature } from 'maplibre-gl';
 import { UIChart } from 'primeng/chart';
+
+import { default as OlMap } from 'ol/Map';
+import View from 'ol/View';
+import TileLayer from 'ol/layer/Tile';
+import VectorLayer from 'ol/layer/Vector';
+import XYZ from 'ol/source/XYZ';
+import VectorSource from 'ol/source/Vector';
+import Feature from 'ol/Feature';
+import Point from 'ol/geom/Point';
+import { fromLonLat } from 'ol/proj';
+import Overlay from 'ol/Overlay';
+import { Style, Circle as CircleStyle, Fill, Stroke, Text } from 'ol/style';
+import { boundingExtent } from 'ol/extent';
 
 @Component({
   selector: 'app-analyze',
@@ -34,6 +47,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   showActivityOverlay: boolean = false;
   selectedCategory: number | null = null;
   selectedCategoryName: string = '';
+  showSubactivitiesMap: boolean = false;
+  hoveredSubactivityName: string = '';
+  mapLoaded: boolean = false;
 
   // Subactivities pie chart properties
   showSubactivitiesPie: boolean = false;
@@ -52,6 +68,14 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   subBarChartOptions: any;
   subactivitiesChartData: any;
 
+  // Map properties
+  private map?: OlMap;
+  private overlay?: Overlay;
+  private placesLayer?: VectorLayer<VectorSource>;
+  private tooltipElement?: HTMLElement;
+  private tooltipOverlay?: Overlay;
+
+
   @ViewChild('activitiesChart') activitiesChart?: UIChart;
   @ViewChild('personaChart') personaChart?: UIChart;
   @ViewChild('subactivitiesPieChart') subactivitiesPieChart?: UIChart;
@@ -60,13 +84,13 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   private resizeObserver?: ResizeObserver;
   private resizeTimeout?: any;
 
-  getScore(): {score: number, color: string} {
-    if (!this.properties) return {score: 0, color: ''};
+  getScore(): { score: number, color: string } {
+    if (!this.properties) return { score: 0, color: '' };
     const mapType = `${this.populationArea}_${this.averageType}`;
     this.currentScore = this.properties[mapType] as number || 0;
-    const color =`${this.populationArea}_${this.averageType}_color`;
+    const color = `${this.populationArea}_${this.averageType}_color`;
     this.currentScoreColor = this.properties[color] as string || '';
-    return {score: this.currentScore, color: this.currentScoreColor};
+    return { score: this.currentScore, color: this.currentScoreColor };
   }
 
   hasPersonaData(): boolean {
@@ -94,35 +118,35 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   ) {
     this.subscriptions.push(
       this.analyzeService.visible$.subscribe(
-      visible => {
-        this.visible = visible;
-        if (visible) {
-          const state = this.analyzeService.getCurrentState();
-          if (state.feature) {
-            this.feature = state.feature;
-            this.properties = this.feature.properties as Properties;
-          }
-          if (state.projectId && state.mapType && state.feature) {
-            this.loading = true;
-            this.projectsService.getProjectDetails(state.projectId, state.mapType, state.feature.properties['id'])
-              .subscribe({
-                next: (details) => {
-                  this.projectDetails = details;
-                  this.initializeChartData();
-                  setTimeout(() => {
-                    this.resizeCharts();
-                  }, 100);
-                },
-                error: (error) => {
-                  console.error('Error loading project details:', error);
-                  this.loading = false;
-                }
-              });
-          } else {
-            console.warn('Nicht alle erforderlichen Parameter sind verfügbar:', state);
+        visible => {
+          this.visible = visible;
+          if (visible) {
+            const state = this.analyzeService.getCurrentState();
+            if (state.feature) {
+              this.feature = state.feature;
+              this.properties = this.feature.properties as Properties;
+            }
+            if (state.projectId && state.mapType && state.feature) {
+              this.loading = true;
+              this.projectsService.getProjectDetails(state.projectId, state.mapType, state.feature.properties['id'])
+                .subscribe({
+                  next: (details) => {
+                    this.projectDetails = details;
+                    this.initializeChartData();
+                    setTimeout(() => {
+                      this.resizeCharts();
+                    }, 100);
+                  },
+                  error: (error) => {
+                    console.error('Error loading project details:', error);
+                    this.loading = false;
+                  }
+                });
+            } else {
+              console.warn('Nicht alle erforderlichen Parameter sind verfügbar:', state);
+            }
           }
         }
-      }
       ),
       // this.mapService.visualizationSettings$.subscribe(settings => {
       //   this.averageType = settings.averageType;
@@ -133,7 +157,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     );
     this.getScore();
 
-    this.generateLabels = function(chart: any) {
+    this.generateLabels = function (chart: any) {
       return [
         {
           text: 'A',
@@ -232,7 +256,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     this.initializePersonaChart();
     this.initializeSubActivitiesChart(); // Initialize without category to show empty chart
     this.loading = false;
-    
+
     // Ensure charts are properly sized after initialization
     setTimeout(() => {
       this.resizeCharts();
@@ -252,13 +276,13 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0) return;
 
     // Calculate weighted averages for each category
-    const categoryScores = new Map<number, { totalWeightedScore: number, totalWeight: number }>();
-    
+    const categoryScores = new Map<number, { totalWeightedScore: number, totalWeight: number, id: number }>();
+
     // Sum up weighted scores and weights for each category
     this.projectDetails.hexagons.forEach(hexagon => {
       const weight = this.weightingType === 'population' ? hexagon.population : 1;
       hexagon.category_scores.forEach(categoryScore => {
-        const current = categoryScores.get(categoryScore.category) || { totalWeightedScore: 0, totalWeight: 0 };
+        const current = categoryScores.get(categoryScore.category) || { totalWeightedScore: 0, totalWeight: 0, id: categoryScore.category };
         current.totalWeightedScore += categoryScore.score * weight;
         current.totalWeight += weight;
         categoryScores.set(categoryScore.category, current);
@@ -392,24 +416,26 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     }
 
     // Calculate weighted averages for subactivities of the specific category
-    const subactivityScores = new Map<number, { 
-      name: string, 
-      totalWeightedScore: number, 
+    const subactivityScores = new Map<number, {
+      name: string,
+      id: number,
+      totalWeightedScore: number,
       totalWeight: number,
       totalWeightedWeight: number
     }>();
-    
+
     // Sum up weighted scores and weights for each subactivity in the specific category
     this.projectDetails.hexagons.forEach(hexagon => {
       const weight = this.weightingType === 'population' ? hexagon.population : 1;
-      
+
       // Find the category score for this specific category
       const categoryScore = hexagon.category_scores.find(cs => cs.category === categoryId);
       if (categoryScore && categoryScore.activities) {
         categoryScore.activities.forEach(activity => {
-          const current = subactivityScores.get(activity.activity) || { 
-            name: activity.activity_name, 
-            totalWeightedScore: 0, 
+          const current = subactivityScores.get(activity.activity) || {
+            name: activity.activity_name,
+            id: activity.activity,
+            totalWeightedScore: 0,
             totalWeight: 0,
             totalWeightedWeight: 0
           };
@@ -456,12 +482,12 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const labels = weightedSubactivityScores.map(item => item.name);
     const scores = weightedSubactivityScores.map(item => item.score * 100);
     const weights = normalizedWeights;
-    
+
     // Create labels with activity name and percentage
-    const labelsWithPercentages = weightedSubactivityScores.map((item, index) => 
+    const labelsWithPercentages = weightedSubactivityScores.map((item, index) =>
       `${item.name} (${weights[index].toFixed(1)}%)`
     );
-    
+
     const scoreNames = weightedSubactivityScores.map(item => this.getScoreName(item.score * 100));
     const scoreColors = scores.map(value => this.getColorForValue(value));
 
@@ -545,7 +571,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       // Find the category ID from the category name
       const category = this.projectDetails?.categories.find(cat => cat.name === categoryData);
       if (!category) return;
-      
+
       this.hoveredCategoryId = category.id;
       this.hoveredCategoryName = categoryData;
       this.generateSubactivitiesPieData(category.id);
@@ -554,12 +580,33 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     }
   }
 
+
+  onSelectSubactivity(event: any) {
+    const index = event.element.index;
+    this.mapLoaded = false;
+    if (index !== undefined && index >= 0) {
+      const subactivityData = this.subactivitiesChartData.labels[index];
+      // Get the activity ID from the pie chart data
+      const activityId = this.subactivitiesPieData.activityIds[index];
+      this.showSubactivitiesMap = true;
+      this.hoveredSubactivityName = subactivityData;
+      setTimeout(() => {
+        this.initializeMap();
+      }, 100);
+      this.analyzeService.getPlaces(activityId).subscribe((res: Place[]) => {
+        this.addPlacesToMap(res);
+        this.zoomToPlaces(res);
+        this.mapLoaded = true;
+      });
+    }
+  }
+
   private initializePersonaChart(): void {
     if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0) return;
 
     // Calculate weighted averages for each persona
     const personaScores = new Map<number, { totalWeightedScore: number, totalWeight: number }>();
-    
+
     // Sum up weighted scores and weights for each persona
     this.projectDetails.hexagons.forEach(hexagon => {
       const weight = this.weightingType === 'population' ? hexagon.population : 1;
@@ -733,23 +780,25 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     if (!this.projectDetails?.hexagons) return;
 
     // Collect all activities for this category across all hexagons
-    const activityScores = new Map<number, { 
-      name: string, 
-      totalWeightedScore: number, 
+    const activityScores = new Map<number, {
+      name: string,
+      id: number,
+      totalWeightedScore: number,
       totalWeight: number,
       totalWeightedWeight: number
     }>();
 
     this.projectDetails.hexagons.forEach(hexagon => {
       const weight = this.weightingType === 'population' ? hexagon.population : 1;
-      
+
       // Find the category score for this category
       const categoryScore = hexagon.category_scores.find(cs => cs.category === categoryId);
       if (categoryScore && categoryScore.activities) {
         categoryScore.activities.forEach(activity => {
-          const current = activityScores.get(activity.activity) || { 
-            name: activity.activity_name, 
-            totalWeightedScore: 0, 
+          const current = activityScores.get(activity.activity) || {
+            name: activity.activity_name,
+            id: activity.activity,
+            totalWeightedScore: 0,
             totalWeight: 0,
             totalWeightedWeight: 0
           };
@@ -765,6 +814,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const pieData = Array.from(activityScores.entries())
       .map(([activityId, data]) => ({
         name: data.name,
+        id: data.id,
         score: data.totalWeightedScore / data.totalWeight,
         weight: data.totalWeightedWeight / data.totalWeight
       }))
@@ -788,12 +838,15 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     this.subactivitiesPieData = {
       labels: labels,
       datasets: [{
-        data: normalizedWeights, // Use normalized weights as data
+        data: normalizedWeights, // Use only normalized weights as data
         backgroundColor: pieData.map(item => this.getColorForValue(item.score * 100)),
         borderColor: '#ffffff',
-        borderWidth: 2
+        borderWidth: 2,
       }]
     };
+
+    // Store the pie data with IDs for later use
+    this.subactivitiesPieData.activityIds = pieData.map(item => item.id);
   }
 
   ngOnDestroy() {
@@ -865,7 +918,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           this.resizeCharts();
         }, 100);
       });
-      
+
       this.resizeObserver.observe(this.dialogContainer.nativeElement);
     }
   }
@@ -922,5 +975,175 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     if (score < 1.59) return "F+";
     if (score < 1.78) return "F";
     return "F-";
+  }
+
+  private initializeMap() {
+    // Clean up existing map if it exists
+    if (this.map) {
+      if (this.overlay) {
+        this.map.removeOverlay(this.overlay);
+      }
+      if (this.tooltipOverlay) {
+        this.map.removeOverlay(this.tooltipOverlay);
+      }
+      this.map.dispose();
+      this.map = undefined;
+    }
+
+    const mapElement = document.getElementById('places-map');
+    if (!mapElement) {
+      console.error("Map container not found");
+      return;
+    }
+
+    // Create tooltip element
+    this.tooltipElement = document.createElement('div');
+    this.tooltipElement.className = 'tooltip';
+    this.tooltipElement.style.cssText = `
+      position: absolute;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      pointer-events: none;
+      z-index: 1000;
+      display: none;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    `;
+
+    // Create tooltip overlay
+    this.tooltipOverlay = new Overlay({
+      element: this.tooltipElement,
+      offset: [10, 0],
+      positioning: 'bottom-left'
+    });
+
+    const baseLayer = new TileLayer({
+      source: new XYZ({
+        url: 'https://{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+        attributions: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        crossOrigin: 'anonymous'
+      })
+    });
+
+    // Create places vector layer
+    this.placesLayer = new VectorLayer({
+      source: new VectorSource(),
+      style: new Style({
+        image: new CircleStyle({
+          radius: 6,
+          fill: new Fill({
+            color: '#ff5722'
+          }),
+          stroke: new Stroke({
+            color: '#ffffff',
+            width: 2
+          })
+        })
+      })
+    });
+
+    this.map = new OlMap({
+      target: 'places-map',
+      layers: [baseLayer, this.placesLayer],
+      view: new View({
+        center: fromLonLat([49.320099, 9.2156505]),
+        zoom: 10
+      }),
+      overlays: [this.tooltipOverlay]
+    });
+    
+    const coordinates = this.analyzeService.getCoordinates();
+    console.log(coordinates);
+    if (coordinates) {
+      this.map.getView().setCenter(fromLonLat([coordinates![0], coordinates![1]]));
+    }
+
+    // Add hover event handlers
+    this.map.on('pointermove', (event) => {
+      if (event.dragging) {
+        this.tooltipElement!.style.display = 'none';
+        return;
+      }
+
+      const feature = this.map?.forEachFeatureAtPixel(event.pixel, (feature) => feature);
+
+      if (feature) {
+        const name = feature.get('name');
+        const rating = feature.get('rating');
+        const activity = feature.get('activity');
+        
+        if (name) {
+          this.tooltipElement!.style.display = '';
+          this.tooltipElement!.innerHTML = `
+            <div><strong>${name}</strong></div>
+            ${rating ? `<div>Rating: ${rating}</div>` : ''}
+            ${activity ? `<div>Activity: ${activity}</div>` : ''}
+          `;
+          this.tooltipOverlay!.setPosition(event.coordinate);
+        } else {
+          this.tooltipElement!.style.display = 'none';
+        }
+      } else {
+        this.tooltipElement!.style.display = 'none';
+      }
+    });
+  }
+
+  private addPlacesToMap(places: Place[]) {
+    if (!this.map || !this.placesLayer) {
+      console.error("Map or places layer not initialized.");
+      return;
+    }
+
+    // Clear existing features from the layer
+    this.placesLayer.getSource()?.clear();
+
+    const coordinates = this.analyzeService.getCoordinates();
+    // add center point to map
+    this.placesLayer.getSource()?.addFeature(new Feature({
+      geometry: new Point(fromLonLat([coordinates![0], coordinates![1]])),
+      name: "Center",
+      id: "center",
+      rating: 0,
+      activity: "center"
+    }));
+    
+
+    // Add new features to the layer
+    places.forEach(place => {
+      const feature = new Feature({
+        geometry: new Point(fromLonLat([place.lon, place.lat])),
+        name: place.name,
+        id: place.id,
+        rating: place.rating,
+        activity: place.activity
+      });
+      this.placesLayer?.getSource()?.addFeature(feature);
+    });
+  }
+
+  private zoomToPlaces(places: Place[]) {
+    if (!this.map || places.length === 0) {
+      console.error("Map not initialized or no places to zoom to.");
+      return;
+    }
+
+    // Create extent from place coordinates
+    const coordinates = places.map(place => fromLonLat([place.lon, place.lat]));
+    const extent = boundingExtent(coordinates);
+
+    // Add some padding to the extent
+    const padding = [50, 50, 50, 50]; // [top, right, bottom, left]
+    
+    this.map.getView().fit(extent, {
+      duration: 500,
+      padding: padding,
+      maxZoom: 15
+    });
   }
 }

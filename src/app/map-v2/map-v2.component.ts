@@ -136,7 +136,11 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       this.map.on('click', 'geodata-fill', (e) => {
         if (e.features && e.features[0]) {
           const feature = e.features[0];
-          this.analyzeService.setSelectedFeature(feature);
+          // Use the click coordinates as the center
+          const coordinates = [e.lngLat.lng, e.lngLat.lat];
+          
+          const resolution = this.map && this.map.getZoom() > 10 ? "hexagon" : "gemeinde";
+          this.analyzeService.setSelectedFeature(feature, resolution, coordinates);
           this.mapService.setSelectedFeature(feature.properties['id']);
         }
       });

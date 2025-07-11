@@ -437,8 +437,7 @@ export class MapV2Service {
     const features = this.map.queryRenderedFeatures();
     if (features.length > 0) {
       const randomFeature = features[Math.floor(Math.random() * features.length)];
-      console.log(randomFeature);
-      this.analyzeService.setSelectedFeature(randomFeature);
+      this.analyzeService.setSelectedFeature(randomFeature, "hexagon", [49.320099, 9.2156505]);
       this.setSelectedFeature(randomFeature.properties['id']);
     }
   }
