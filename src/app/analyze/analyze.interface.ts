@@ -9,3 +9,13 @@ export interface Properties {
     rgbColor: number[];
     [key: string]: number | string | MultiPolygon | number[];
 }
+
+export interface Place {
+    id: number;
+    name: string;
+    uri: string;
+    lat: number;
+    lon: number;
+    rating: number;
+    activity: number;
+}

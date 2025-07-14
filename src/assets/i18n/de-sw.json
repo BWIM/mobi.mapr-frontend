@@ -279,7 +279,8 @@
       "TITLE": "Aktivitäte",
       "NO_DATA": "Kei Date verfüegbar",
       "SWITCH_TO_DOUGHNUT": "Aasicht wechsle",
-      "EXPLANATION": "D Aktivitäte gwichtet nach lokaler Relevanz"
+      "EXPLANATION": "D Aktivitäte gwichtet nach lokaler Relevanz",
+      "HINT": "Uffbasse: Dabscht uff de Balke um mähr Infos z'krije"
     },
     "MODES": {
       "TITLE": "Modi"

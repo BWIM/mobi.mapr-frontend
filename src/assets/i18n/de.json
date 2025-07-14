@@ -280,7 +280,8 @@
       "TITLE": "Aktivitäten",
       "NO_DATA": "Keine Daten verfügbar",
       "SWITCH_TO_DOUGHNUT": "Ansicht wechseln",
-      "EXPLANATION": "Die Aktivitäten gewichtet nach lokaler Relevanz"
+      "EXPLANATION": "Die Aktivitäten gewichtet nach lokaler Relevanz",
+      "HINT": "Hinweis: Klicke auf einen Balken im Diagramm, um mehr Infos zu erhalten!"
     },
     "MODES": {
       "TITLE": "Modi",

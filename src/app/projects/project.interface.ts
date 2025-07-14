@@ -83,6 +83,15 @@ export interface PersonaScore {
 export interface CategoryScore {
   category: number;
   score: number;
+  category_name: string;
+  activities: ActivityScore[];
+}
+
+export interface ActivityScore {
+  activity: number;
+  activity_name: string;
+  score: number;
+  weight: number;
 }
 
 export interface ModeScore {
