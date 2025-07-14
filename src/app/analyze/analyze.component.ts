@@ -72,6 +72,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   private map?: OlMap;
   private overlay?: Overlay;
   private placesLayer?: VectorLayer<VectorSource>;
+  private centerLayer?: VectorLayer<VectorSource>;
   private tooltipElement?: HTMLElement;
   private tooltipOverlay?: Overlay;
 
@@ -583,11 +584,13 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
   onSelectSubactivity(event: any) {
     const index = event.element.index;
-    this.mapLoaded = false;
     if (index !== undefined && index >= 0) {
       const subactivityData = this.subactivitiesChartData.labels[index];
       // Get the activity ID from the pie chart data
       const activityId = this.subactivitiesPieData.activityIds[index];
+      
+      // Set loading state and show map dialog
+      this.mapLoaded = false;
       this.showSubactivitiesMap = true;
       this.hoveredSubactivityName = subactivityData;
       setTimeout(() => {
@@ -1047,9 +1050,26 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       })
     });
 
+    // Create center point layer
+    this.centerLayer = new VectorLayer({
+      source: new VectorSource(),
+      style: new Style({
+        image: new CircleStyle({
+          radius: 8,
+          fill: new Fill({
+            color: '#4CAF50' // A green color for the center point
+          }),
+          stroke: new Stroke({
+            color: '#ffffff',
+            width: 3
+          })
+        })
+      })
+    });
+
     this.map = new OlMap({
       target: 'places-map',
-      layers: [baseLayer, this.placesLayer],
+      layers: [baseLayer, this.placesLayer, this.centerLayer],
       view: new View({
         center: fromLonLat([49.320099, 9.2156505]),
         zoom: 10
@@ -1070,19 +1090,24 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         return;
       }
 
-      const feature = this.map?.forEachFeatureAtPixel(event.pixel, (feature) => feature);
+      // Check for features in both places and center layers
+      let foundFeature: any = null;
+      
+      // Use forEachFeatureAtPixel to find any feature at the pixel
+      this.map?.forEachFeatureAtPixel(event.pixel, (feature) => {
+        foundFeature = feature;
+        return true; // Stop iteration at first feature found
+      });
 
-      if (feature) {
-        const name = feature.get('name');
-        const rating = feature.get('rating');
-        const activity = feature.get('activity');
+      if (foundFeature) {
+        const name = foundFeature.get('name');
+        const rating = foundFeature.get('rating');
+        const activity = foundFeature.get('activity');
         
         if (name) {
           this.tooltipElement!.style.display = '';
           this.tooltipElement!.innerHTML = `
-            <div><strong>${name}</strong></div>
-            ${rating ? `<div>Rating: ${rating}</div>` : ''}
-            ${activity ? `<div>Activity: ${activity}</div>` : ''}
+            <div><strong>${name} ${activity ? `<div>(${activity})</div>` : ''}</strong></div>
           `;
           this.tooltipOverlay!.setPosition(event.coordinate);
         } else {
@@ -1095,26 +1120,27 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private addPlacesToMap(places: Place[]) {
-    if (!this.map || !this.placesLayer) {
-      console.error("Map or places layer not initialized.");
+    if (!this.map || !this.placesLayer || !this.centerLayer) {
+      console.error("Map or layers not initialized.");
       return;
     }
 
-    // Clear existing features from the layer
+    // Clear existing features from the layers
     this.placesLayer.getSource()?.clear();
+    this.centerLayer.getSource()?.clear();
 
     const coordinates = this.analyzeService.getCoordinates();
-    // add center point to map
-    this.placesLayer.getSource()?.addFeature(new Feature({
+    // add center point to center layer
+    this.centerLayer.getSource()?.addFeature(new Feature({
       geometry: new Point(fromLonLat([coordinates![0], coordinates![1]])),
       name: "Center",
       id: "center",
       rating: 0,
-      activity: "center"
+      activity: "clicked point"
     }));
     
 
-    // Add new features to the layer
+    // Add new features to the places layer
     places.forEach(place => {
       const feature = new Feature({
         geometry: new Point(fromLonLat([place.lon, place.lat])),
@@ -1133,9 +1159,19 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       return;
     }
 
-    // Create extent from place coordinates
-    const coordinates = places.map(place => fromLonLat([place.lon, place.lat]));
-    const extent = boundingExtent(coordinates);
+    // Get center coordinates
+    const coordinates = this.analyzeService.getCoordinates();
+    
+    // Create extent from place coordinates and center point
+    const placeCoordinates = places.map(place => fromLonLat([place.lon, place.lat]));
+    const centerCoordinate = coordinates ? fromLonLat([coordinates[0], coordinates[1]]) : null;
+    
+    // Combine all coordinates for extent calculation
+    const allCoordinates = centerCoordinate 
+      ? [...placeCoordinates, centerCoordinate]
+      : placeCoordinates;
+    
+    const extent = boundingExtent(allCoordinates);
 
     // Add some padding to the extent
     const padding = [50, 50, 50, 50]; // [top, right, bottom, left]
