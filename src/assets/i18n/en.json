@@ -376,7 +376,8 @@
     "GRADE": "Grade",
     "CURRENT_SETTINGS": "Current settings",
     "POPULATION_WEIGHTED": "Population weighted",
-    "AREA_WEIGHTED": "Area weighted"
+    "AREA_WEIGHTED": "Area weighted",
+    "PROJECT_VERSION_INVALID": "The version of the project is too low. Please recreate it, to also show statistics."
   },
   "PDF_EXPORT": {
     "FULL_MAP": "Full map",

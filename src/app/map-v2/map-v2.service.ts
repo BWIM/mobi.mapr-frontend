@@ -36,6 +36,7 @@ export class MapV2Service {
   private temporaryFeatures: any[] = [];
   private lastZoomTime: number = 0;
   private readonly ZOOM_COOLDOWN = 3000; // 5 seconds in milliseconds
+  private projectVersion: number = 0;
 
   constructor(
     private loadingService: LoadingService,
@@ -84,6 +85,14 @@ export class MapV2Service {
 
   getCurrentProject(): string | null {
     return this.currentProject;
+  }
+
+  getProjectVersion(): number {
+    return this.projectVersion;
+  }
+
+  setProjectVersion(version: number): void {
+    this.projectVersion = version;
   }
 
   getMainLayer(): any {

@@ -377,7 +377,8 @@
     "GRADE": "Note",
     "CURRENT_SETTINGS": "Aktuelle Einstellungen",
     "POPULATION_WEIGHTED": "Bevölkerung gewichtet",
-    "AREA_WEIGHTED": "Fläche gewichtet"
+    "AREA_WEIGHTED": "Fläche gewichtet",
+    "PROJECT_VERSION_INVALID": "Die Version des Projektes ist zu alt. Erstelle es neu, um Statistiken angezeigt zu bekommen!"
   },
   "PDF_EXPORT": {
     "TITLE": "PDF Export",

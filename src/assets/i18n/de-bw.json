@@ -311,7 +311,8 @@
     "GRADE": "Note",
     "CURRENT_SETTINGS": "Aktuelle Einstellungen",
     "POPULATION_WEIGHTED": "Bevölkerung gewichtet",
-    "AREA_WEIGHTED": "Fläche gewichtet"
+    "AREA_WEIGHTED": "Fläche gewichtet",
+    "PROJECT_VERSION_INVALID": "Des Projäkt isch zu alt. Machs neu, um die Schtadistige zu sehe."
   },
   "CREDITS": {
     "SHORTCUTS": {
