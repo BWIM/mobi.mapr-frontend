@@ -7,6 +7,7 @@ import { Place, Properties } from './analyze.interface';
 import { ProjectDetails } from '../projects/project.interface';
 import { MapGeoJSONFeature } from 'maplibre-gl';
 import { UIChart } from 'primeng/chart';
+import { MessageService } from 'primeng/api';
 
 import { default as OlMap } from 'ol/Map';
 import View from 'ol/View';
@@ -116,6 +117,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     private analyzeService: AnalyzeService,
     private projectsService: ProjectsService,
     private cdr: ChangeDetectorRef,
+    private messageService: MessageService,
   ) {
     this.subscriptions.push(
       this.analyzeService.visible$.subscribe(
@@ -132,13 +134,22 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
               this.projectsService.getProjectDetails(state.projectId, state.mapType, state.feature.properties['id'])
                 .subscribe({
                   next: (details) => {
+                    if (details.error) {
+                      this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: details.error,
+                        life: 5000
+                      });
+                    }
                     this.projectDetails = details;
                     this.initializeChartData();
-                    setTimeout(() => {
-                      this.resizeCharts();
-                    }, 100);
+                      setTimeout(() => {
+                        this.resizeCharts();
+                      }, 100);
+                    
                   },
-                  error: (error) => {
+                  error: (error) => { 
                     console.error('Error loading project details:', error);
                     this.loading = false;
                   }
