@@ -605,7 +605,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private initializePersonaChart(): void {
-    if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0) return;
+    if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0 || !this.projectDetails.personas) return;
 
     // Calculate weighted averages for each persona
     const personaScores = new Map<number, { totalWeightedScore: number, totalWeight: number }>();
@@ -613,12 +613,14 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     // Sum up weighted scores and weights for each persona
     this.projectDetails.hexagons.forEach(hexagon => {
       const weight = this.weightingType === 'population' ? hexagon.population : 1;
+      if (hexagon.persona_scores) {
       hexagon.persona_scores.forEach(personaScore => {
         const current = personaScores.get(personaScore.persona) || { totalWeightedScore: 0, totalWeight: 0 };
         current.totalWeightedScore += personaScore.score * weight;
-        current.totalWeight += weight;
-        personaScores.set(personaScore.persona, current);
-      });
+          current.totalWeight += weight;
+          personaScores.set(personaScore.persona, current);
+        });
+      }
     });
     if (personaScores.size === 0) {
       this.showPersona = false;
