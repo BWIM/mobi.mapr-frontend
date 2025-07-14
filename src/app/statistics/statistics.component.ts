@@ -12,6 +12,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import { GeocodingService } from '../services/geocoding.service';
 import { firstValueFrom } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-statistics',
@@ -30,6 +31,9 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   visible: boolean = false;
   private subscription: Subscription = new Subscription();
   loading: boolean = false;
+  
+  // Cache for project version validity
+  private _isProjectVersionValid: boolean = false;
   
   stateScores: ScoreEntry[] = [];
   countyScores: ScoreEntry[] = [];
@@ -75,9 +79,11 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     private mapService: MapV2Service,
     private loadingService: LoadingService,
     private translate: TranslateService,
-    private geocodingService: GeocodingService
+    private geocodingService: GeocodingService,
+    private messageService: MessageService
   ) {
     this.updateScoreTypeOptions();
+    this.updateProjectVersionValidity();
     
     this.subscription.add(
       this.statisticsService.visible$.subscribe(visible => {
@@ -85,7 +91,17 @@ export class StatisticsComponent implements OnInit, OnDestroy {
         if (projectId) {
           this.visible = visible;
           if (visible) {
-            this.loadAllData();
+            this.updateProjectVersionValidity();
+            if (this._isProjectVersionValid) {
+              this.loadAllData();
+            } else {
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Statistics are not available for this project.',
+                life: 5000
+              });
+            }
           }
         }
       })
@@ -97,6 +113,14 @@ export class StatisticsComponent implements OnInit, OnDestroy {
         this.updateScoreTypeOptions();
       })
     );
+  }
+
+  private updateProjectVersionValidity(): void {
+    this._isProjectVersionValid = this.mapService.getProjectVersion() >= 0.7;
+  }
+
+  get isProjectVersionValid(): boolean {
+    return this._isProjectVersionValid;
   }
 
   ngOnInit() {}

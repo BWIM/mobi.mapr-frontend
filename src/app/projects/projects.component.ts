@@ -289,6 +289,8 @@ export class ProjectsComponent implements OnInit, OnDestroy {
           console.error('Fehler beim Laden der Projektinformationen:', error);
         }
       });
+
+      this.mapv2Service.setProjectVersion(project.version);
       
       this.mapv2Service.setProject(project.id.toString());
       this.loadingService.stopLoading();

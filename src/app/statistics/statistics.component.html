@@ -13,7 +13,7 @@
         <p-progress-spinner strokeWidth="8" fill="transparent" animationDuration=".5s" [style]="{ width: '50px', height: '50px' }" class="center"/>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6" *ngIf="!loading">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6" *ngIf="!loading && isProjectVersionValid">
         <div *ngIf="stateScores.length > 0" class="bg-white rounded-lg shadow-md overflow-hidden">
             <h2 class="text-xl font-bold p-4 border-b-2 border-primary text-gray-800">{{ 'STATISTICS.STATES' | translate }}</h2>
             <p-scrollPanel [style]="{ height: '400px' }">
@@ -122,7 +122,7 @@
         </div>
     </div>
 
-    <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+    <div class="mt-6 p-4 bg-gray-50 rounded-lg" *ngIf="isProjectVersionValid">
         <div class="flex items-center justify-between">
             <p class="text-sm text-gray-600">
                 {{ 'STATISTICS.CURRENT_SETTINGS' | translate }}: 
@@ -138,5 +138,10 @@
                 </p-selectButton>
             </div>
         </div>
+    </div>
+    <div class="mt-6 p-4 bg-gray-50 rounded-lg" *ngIf="!isProjectVersionValid">
+        <p class="text-sm text-gray-600">
+            {{ 'STATISTICS.PROJECT_VERSION_INVALID' | translate }}
+        </p>
     </div>
 </p-dialog>

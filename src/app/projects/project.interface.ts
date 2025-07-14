@@ -124,6 +124,7 @@ export interface FormattedMode {
 }
 
 export interface ProjectDetails {
+  error?: string;
   project: {
     id: number;
     name: string;
