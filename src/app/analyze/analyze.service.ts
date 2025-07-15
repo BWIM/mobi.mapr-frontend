@@ -4,6 +4,7 @@ import { MapGeoJSONFeature } from "maplibre-gl";
 import { environment } from "../../environments/environment";
 import { HttpClient } from "@angular/common/http";
 import { Place } from "./analyze.interface";
+import { ShareService } from "../share/share.service";
 
 @Injectable({
     providedIn: 'root'
@@ -12,7 +13,7 @@ import { Place } from "./analyze.interface";
     private visibleSubject = new BehaviorSubject<boolean>(false);
     visible$ = this.visibleSubject.asObservable();
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient, private shareService: ShareService) {}
   
     private currentProjectId: string | null = null;
     private currentMapType: string | null = null;
@@ -62,10 +63,15 @@ import { Place } from "./analyze.interface";
       const type = this.resolution;
       const featureId = this.featureId;
 
-
-      const url = `${environment.apiUrl}/places/details?activity=${activityId}&type=${type}&feature=${featureId}&project=${this.currentProjectId}`;
-      console.log(url);
-      return this.http.get<Place[]>(url);
+      if (this.shareService.getIsShare()) {
+        const shareKey = this.shareService.getShareKey();
+        const url = `${environment.apiUrl}/share-place?activity=${activityId}&type=${type}&feature=${featureId}&project=${this.currentProjectId}&key=${shareKey}`;
+        return this.http.get<Place[]>(url);
+      } else {
+        const url = `${environment.apiUrl}/places/details?activity=${activityId}&type=${type}&feature=${featureId}&project=${this.currentProjectId}`;
+        return this.http.get<Place[]>(url);
+        
+      }
 
     }
   }
