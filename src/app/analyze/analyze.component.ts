@@ -792,6 +792,11 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     this.initializeSubActivitiesChart(); // Reset subactivities chart when leaving
   }
 
+  onSubactivityLeave(): void {
+    this.showSubactivitiesMap = false;
+    this.hoveredSubactivityName = '';
+  }
+
   private generateSubactivitiesPieData(categoryId: number): void {
     if (!this.projectDetails?.hexagons) return;
 
