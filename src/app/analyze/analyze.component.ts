@@ -1262,6 +1262,8 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   private zoomToPlaces(places: Place[]) {
     if (places.length === 0) {
       this.noPlaces = true;
+    } else {
+      this.noPlaces = false;
     }
     if (!this.map) {
       console.error("Map not initialized");
