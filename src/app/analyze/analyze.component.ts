@@ -276,11 +276,11 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private getColorForValue = (value: number): string => {
-    if (value >= 141) return '#9656a2';      // Lila (F)
-    if (value >= 100) return '#c21807';      // Rot (E)
-    if (value >= 72) return '#ed7014';      // Orange (D)
-    if (value >= 51) return '#eed202';      // Gelb (C)
-    if (value >= 35) return '#3cb043';      // Hellgrün (B)
+    if (value > 141) return '#9656a2';      // Lila (F)
+    if (value > 100) return '#c21807';      // Rot (E)
+    if (value > 72) return '#ed7014';      // Orange (D)
+    if (value > 51) return '#eed202';      // Gelb (C)
+    if (value > 35) return '#3cb043';      // Hellgrün (B)
     return '#32612d';                         // Dunkelgrün (A)
   };
 
@@ -331,7 +331,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const labels = sortedData.map(item => item.name);
     const scores = sortedData.map(item => item.score * 100);
     const weights = sortedData.map(item => item.weight);
-    const scoreNames = sortedData.map(item => this.getScoreName(item.score * 100));
+    const scoreNames = sortedData.map(item => this.getScoreName(item.score));
 
 
     const scoreColors = scores.map(value => this.getColorForValue(value));
@@ -491,8 +491,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const normalizedWeights = rawWeights.map(weight => (weight / totalWeight) * 100);
 
     // Extract sorted arrays
-    const labels = weightedSubactivityScores.map(item => item.name);
-    const scores = weightedSubactivityScores.map(item => item.score * 100);
+    const scores = weightedSubactivityScores.map(item => item.score);
     const weights = normalizedWeights;
 
     // Create labels with activity name and percentage
@@ -500,7 +499,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       `${item.name} (${weights[index].toFixed(1)}%)`
     );
 
-    const scoreNames = weightedSubactivityScores.map(item => this.getScoreName(item.score * 100));
+    const scoreNames = weightedSubactivityScores.map(item => this.getScoreName(item.score));
     const scoreColors = scores.map(value => this.getColorForValue(value));
 
     // Create chart data
@@ -651,7 +650,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const personaMap = new Map(this.projectDetails.personas.map(p => [p.id, p.name]));
     const labels = sortedPersonas.map(persona => personaMap.get(persona.persona) || `${persona.persona}`);
     const data = sortedPersonas.map(persona => persona.score);
-    const scoreNames = sortedPersonas.map(persona => this.getScoreName(persona.score * 100));
+    const scoreNames = sortedPersonas.map(persona => this.getScoreName(persona.score));
 
     const borderColors = data.map(value => this.getColorForValue(value * 100));
 
@@ -976,7 +975,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   getScoreName(score: number): string {
-    score = score / 100;
+    console.log(score);
     if (score <= 0) return "Error";
     if (score < 0.28) return "A+";
     if (score < 0.32) return "A";

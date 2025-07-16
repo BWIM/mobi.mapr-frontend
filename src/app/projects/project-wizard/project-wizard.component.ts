@@ -314,7 +314,9 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
         
         // Setze initial die MID-Aktivitäten
         this.updateDisplayedActivities(true);
-        this.activitiesLoaded = true;
+        setTimeout(() => {
+          this.activitiesLoaded = true;
+        }, 100);
       },
       error: (error) => {
         console.error('Fehler beim Laden der Aktivitäten:', error);
