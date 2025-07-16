@@ -1134,6 +1134,29 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         this.tooltipElement!.style.display = 'none';
       }
     });
+
+    // Add click event handler
+    this.map.on('click', (event) => {
+      // Check for features in places layer only (not center layer)
+      let clickedFeature: any = null;
+      
+      this.map?.forEachFeatureAtPixel(event.pixel, (feature) => {
+        // Only handle clicks on places (not center point)
+        if (feature.get('id') !== 'center') {
+          clickedFeature = feature;
+          return true; // Stop iteration at first feature found
+        }
+        return false; // Continue iteration
+      });
+
+      if (clickedFeature) {
+        const uri = clickedFeature.get('uri');
+        if (uri) {
+          // Open URL in new tab
+          window.open(uri, '_blank');
+        }
+      }
+    });
   }
 
   private addPlacesToMap(places: Place[]) {
@@ -1164,7 +1187,8 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         name: place.name,
         id: place.id,
         rating: place.rating,
-        activity: place.activity
+        activity: place.activity,
+        uri: place.uri // Add uri property
       });
       this.placesLayer?.getSource()?.addFeature(feature);
     });
