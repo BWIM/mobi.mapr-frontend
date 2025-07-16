@@ -21,6 +21,7 @@ import { ShareService } from "../share/share.service";
     private featureId: string | null = null;
     private resolution: string | null = null;
     private coordinates: number[] | null = null;
+    private hexagonView: boolean = false;
   
     show() {
       this.visibleSubject.next(true);
@@ -42,6 +43,10 @@ import { ShareService } from "../share/share.service";
     setMapType(mapType: string) {
       this.currentMapType = mapType;
     }
+
+    setHexagonView(hexagonView: boolean) {
+      this.hexagonView = hexagonView;
+    }
   
     setSelectedFeature(feature: MapGeoJSONFeature, resolution: string, coordinates: number[]) {
       this.selectedFeature = feature;
@@ -60,8 +65,12 @@ import { ShareService } from "../share/share.service";
     }
 
     getPlaces(activityId: number) {
-      const type = this.resolution;
+      let type = this.resolution;
       const featureId = this.featureId;
+
+      if (this.hexagonView) {
+        type = "hexagon"
+      }
 
       if (this.shareService.getIsShare()) {
         const shareKey = this.shareService.getShareKey();

@@ -276,11 +276,11 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private getColorForValue = (value: number): string => {
-    if (value >= 141) return '#9656a2';      // Lila (F)
-    if (value >= 100) return '#c21807';      // Rot (E)
-    if (value >= 72) return '#ed7014';      // Orange (D)
-    if (value >= 51) return '#eed202';      // Gelb (C)
-    if (value >= 35) return '#3cb043';      // Hellgrün (B)
+    if (value > 141) return '#9656a2';      // Lila (F)
+    if (value > 100) return '#c21807';      // Rot (E)
+    if (value > 72) return '#ed7014';      // Orange (D)
+    if (value > 51) return '#eed202';      // Gelb (C)
+    if (value > 35) return '#3cb043';      // Hellgrün (B)
     return '#32612d';                         // Dunkelgrün (A)
   };
 
@@ -331,7 +331,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const labels = sortedData.map(item => item.name);
     const scores = sortedData.map(item => item.score * 100);
     const weights = sortedData.map(item => item.weight);
-    const scoreNames = sortedData.map(item => this.getScoreName(item.score * 100));
+    const scoreNames = sortedData.map(item => this.getScoreName(item.score));
 
 
     const scoreColors = scores.map(value => this.getColorForValue(value));
@@ -491,8 +491,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const normalizedWeights = rawWeights.map(weight => (weight / totalWeight) * 100);
 
     // Extract sorted arrays
-    const labels = weightedSubactivityScores.map(item => item.name);
-    const scores = weightedSubactivityScores.map(item => item.score * 100);
+    const scores = weightedSubactivityScores.map(item => item.score);
     const weights = normalizedWeights;
 
     // Create labels with activity name and percentage
@@ -500,7 +499,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       `${item.name} (${weights[index].toFixed(1)}%)`
     );
 
-    const scoreNames = weightedSubactivityScores.map(item => this.getScoreName(item.score * 100));
+    const scoreNames = weightedSubactivityScores.map(item => this.getScoreName(item.score));
     const scoreColors = scores.map(value => this.getColorForValue(value));
 
     // Create chart data
@@ -651,7 +650,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const personaMap = new Map(this.projectDetails.personas.map(p => [p.id, p.name]));
     const labels = sortedPersonas.map(persona => personaMap.get(persona.persona) || `${persona.persona}`);
     const data = sortedPersonas.map(persona => persona.score);
-    const scoreNames = sortedPersonas.map(persona => this.getScoreName(persona.score * 100));
+    const scoreNames = sortedPersonas.map(persona => this.getScoreName(persona.score));
 
     const borderColors = data.map(value => this.getColorForValue(value * 100));
 
@@ -976,7 +975,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   getScoreName(score: number): string {
-    score = score / 100;
+    console.log(score);
     if (score <= 0) return "Error";
     if (score < 0.28) return "A+";
     if (score < 0.32) return "A";
@@ -1135,6 +1134,29 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         this.tooltipElement!.style.display = 'none';
       }
     });
+
+    // Add click event handler
+    this.map.on('click', (event) => {
+      // Check for features in places layer only (not center layer)
+      let clickedFeature: any = null;
+      
+      this.map?.forEachFeatureAtPixel(event.pixel, (feature) => {
+        // Only handle clicks on places (not center point)
+        if (feature.get('id') !== 'center') {
+          clickedFeature = feature;
+          return true; // Stop iteration at first feature found
+        }
+        return false; // Continue iteration
+      });
+
+      if (clickedFeature) {
+        const uri = clickedFeature.get('uri');
+        if (uri) {
+          // Open URL in new tab
+          window.open(uri, '_blank');
+        }
+      }
+    });
   }
 
   private addPlacesToMap(places: Place[]) {
@@ -1165,7 +1187,8 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         name: place.name,
         id: place.id,
         rating: place.rating,
-        activity: place.activity
+        activity: place.activity,
+        uri: place.uri // Add uri property
       });
       this.placesLayer?.getSource()?.addFeature(feature);
     });
