@@ -73,7 +73,10 @@
                                         [header]="hoveredSubactivityName"
                                         (onHide)="onSubactivityLeave()">
                                         <div class="relative h-full w-full">
-                                            <div id="places-map" class="h-full w-full rounded-lg"></div>
+                                            <div id="places-map" class="h-full w-full rounded-lg" ></div>
+                                            <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75" *ngIf="noPlaces">
+                                                <p class="text-gray-500 text-center">{{ 'ANALYZE.ACTIVITIES.NO_PLACES' | translate }}</p>
+                                            </div>
                                             <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75" *ngIf="!mapLoaded">
                                                 <div class="flex flex-col items-center">
                                                     <p-progressSpinner 

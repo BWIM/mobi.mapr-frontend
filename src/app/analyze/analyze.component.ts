@@ -68,6 +68,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   barChartOptions: any;
   subBarChartOptions: any;
   subactivitiesChartData: any;
+  noPlaces: boolean = false;
 
   // Map properties
   private map?: OlMap;
@@ -281,7 +282,8 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     if (value > 72) return '#ed7014';      // Orange (D)
     if (value > 51) return '#eed202';      // Gelb (C)
     if (value > 35) return '#3cb043';      // Hellgrün (B)
-    return '#32612d';                         // Dunkelgrün (A)
+    if (value > 0) return '#32612d';       // Dunkelgrün (A)
+    return '#9656a2';                     // Lila (F)
   };
 
   private initializeActivitiesChart(): void {
@@ -603,15 +605,43 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       this.mapLoaded = false;
       this.showSubactivitiesMap = true;
       this.hoveredSubactivityName = subactivityData;
+      
+      // Wait for dialog to be rendered before initializing map
       setTimeout(() => {
-        this.initializeMap();
-      }, 100);
+        this.initializeMapWithRetry();
+      }, 200);
+      
       this.analyzeService.getPlaces(activityId).subscribe((res: Place[]) => {
         this.addPlacesToMap(res);
         this.zoomToPlaces(res);
         this.mapLoaded = true;
       });
     }
+  }
+
+  private initializeMapWithRetry(maxRetries: number = 5, retryDelay: number = 100): void {
+    let retryCount = 0;
+    
+    const tryInitializeMap = () => {
+      const mapElement = document.getElementById('places-map');
+      if (mapElement) {
+        this.initializeMap();
+      } else if (retryCount < maxRetries) {
+        retryCount++;
+        console.log(`Map element not found, retrying in ${retryDelay}ms (attempt ${retryCount}/${maxRetries})`);
+        setTimeout(tryInitializeMap, retryDelay);
+      } else {
+        console.error("Map container not found after maximum retries");
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to initialize map. Please try again.',
+          life: 5000
+        });
+      }
+    };
+    
+    tryInitializeMap();
   }
 
   private initializePersonaChart(): void {
@@ -794,6 +824,26 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   onSubactivityLeave(): void {
     this.showSubactivitiesMap = false;
     this.hoveredSubactivityName = '';
+    
+    // Clean up map when dialog is closed
+    if (this.map) {
+      try {
+        if (this.overlay) {
+          this.map.removeOverlay(this.overlay);
+        }
+        if (this.tooltipOverlay) {
+          this.map.removeOverlay(this.tooltipOverlay);
+        }
+        this.map.dispose();
+        this.map = undefined;
+        this.placesLayer = undefined;
+        this.centerLayer = undefined;
+        this.tooltipElement = undefined;
+        this.tooltipOverlay = undefined;
+      } catch (error) {
+        console.error("Error cleaning up map:", error);
+      }
+    }
   }
 
   private generateSubactivitiesPieData(categoryId: number): void {
@@ -975,7 +1025,6 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   getScoreName(score: number): string {
-    console.log(score);
     if (score <= 0) return "Error";
     if (score < 0.28) return "A+";
     if (score < 0.32) return "A";
@@ -998,165 +1047,181 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private initializeMap() {
-    // Clean up existing map if it exists
-    if (this.map) {
-      if (this.overlay) {
-        this.map.removeOverlay(this.overlay);
+    try {
+      // Clean up existing map if it exists
+      if (this.map) {
+        if (this.overlay) {
+          this.map.removeOverlay(this.overlay);
+        }
+        if (this.tooltipOverlay) {
+          this.map.removeOverlay(this.tooltipOverlay);
+        }
+        this.map.dispose();
+        this.map = undefined;
       }
-      if (this.tooltipOverlay) {
-        this.map.removeOverlay(this.tooltipOverlay);
-      }
-      this.map.dispose();
-      this.map = undefined;
-    }
 
-    const mapElement = document.getElementById('places-map');
-    if (!mapElement) {
-      console.error("Map container not found");
-      return;
-    }
-
-    // Create tooltip element
-    this.tooltipElement = document.createElement('div');
-    this.tooltipElement.className = 'tooltip';
-    this.tooltipElement.style.cssText = `
-      position: absolute;
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 8px 12px;
-      border-radius: 4px;
-      font-size: 12px;
-      pointer-events: none;
-      z-index: 1000;
-      display: none;
-      max-width: 200px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    `;
-
-    // Create tooltip overlay
-    this.tooltipOverlay = new Overlay({
-      element: this.tooltipElement,
-      offset: [10, 0],
-      positioning: 'bottom-left'
-    });
-
-    const baseLayer = new TileLayer({
-      source: new XYZ({
-        url: 'https://{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-        attributions: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        crossOrigin: 'anonymous'
-      })
-    });
-
-    // Create places vector layer
-    this.placesLayer = new VectorLayer({
-      source: new VectorSource(),
-      style: new Style({
-        image: new CircleStyle({
-          radius: 6,
-          fill: new Fill({
-            color: '#ff5722'
-          }),
-          stroke: new Stroke({
-            color: '#ffffff',
-            width: 2
-          })
-        })
-      })
-    });
-
-    // Create center point layer
-    this.centerLayer = new VectorLayer({
-      source: new VectorSource(),
-      style: new Style({
-        image: new CircleStyle({
-          radius: 8,
-          fill: new Fill({
-            color: '#4CAF50' // A green color for the center point
-          }),
-          stroke: new Stroke({
-            color: '#ffffff',
-            width: 3
-          })
-        })
-      })
-    });
-
-    this.map = new OlMap({
-      target: 'places-map',
-      layers: [baseLayer, this.placesLayer, this.centerLayer],
-      view: new View({
-        center: fromLonLat([49.320099, 9.2156505]),
-        zoom: 10
-      }),
-      overlays: [this.tooltipOverlay]
-    });
-    
-    const coordinates = this.analyzeService.getCoordinates();
-    console.log(coordinates);
-    if (coordinates) {
-      this.map.getView().setCenter(fromLonLat([coordinates![0], coordinates![1]]));
-    }
-
-    // Add hover event handlers
-    this.map.on('pointermove', (event) => {
-      if (event.dragging) {
-        this.tooltipElement!.style.display = 'none';
+      const mapElement = document.getElementById('places-map');
+      if (!mapElement) {
+        console.error("Map container not found");
         return;
       }
 
-      // Check for features in both places and center layers
-      let foundFeature: any = null;
-      
-      // Use forEachFeatureAtPixel to find any feature at the pixel
-      this.map?.forEachFeatureAtPixel(event.pixel, (feature) => {
-        foundFeature = feature;
-        return true; // Stop iteration at first feature found
+      // Ensure the map container has proper dimensions
+      if (mapElement.offsetWidth === 0 || mapElement.offsetHeight === 0) {
+        console.warn("Map container has zero dimensions, waiting for layout...");
+        setTimeout(() => this.initializeMap(), 100);
+        return;
+      }
+
+      // Create tooltip element
+      this.tooltipElement = document.createElement('div');
+      this.tooltipElement.className = 'tooltip';
+      this.tooltipElement.style.cssText = `
+        position: absolute;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        pointer-events: none;
+        z-index: 1000;
+        display: none;
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      `;
+
+      // Create tooltip overlay
+      this.tooltipOverlay = new Overlay({
+        element: this.tooltipElement,
+        offset: [10, 0],
+        positioning: 'bottom-left'
       });
 
-      if (foundFeature) {
-        const name = foundFeature.get('name');
-        const rating = foundFeature.get('rating');
-        const activity = foundFeature.get('activity');
+      const baseLayer = new TileLayer({
+        source: new XYZ({
+          url: 'https://{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+          attributions: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          crossOrigin: 'anonymous'
+        })
+      });
+
+      // Create places vector layer
+      this.placesLayer = new VectorLayer({
+        source: new VectorSource(),
+        style: new Style({
+          image: new CircleStyle({
+            radius: 6,
+            fill: new Fill({
+              color: '#ff5722'
+            }),
+            stroke: new Stroke({
+              color: '#ffffff',
+              width: 2
+            })
+          })
+        })
+      });
+
+      // Create center point layer
+      this.centerLayer = new VectorLayer({
+        source: new VectorSource(),
+        style: new Style({
+          image: new CircleStyle({
+            radius: 8,
+            fill: new Fill({
+              color: '#4CAF50' // A green color for the center point
+            }),
+            stroke: new Stroke({
+              color: '#ffffff',
+              width: 3
+            })
+          })
+        })
+      });
+
+      this.map = new OlMap({
+        target: 'places-map',
+        layers: [baseLayer, this.placesLayer, this.centerLayer],
+        view: new View({
+          center: fromLonLat([49.320099, 9.2156505]),
+          zoom: 10
+        }),
+        overlays: [this.tooltipOverlay]
+      });
+      
+      const coordinates = this.analyzeService.getCoordinates();
+      if (coordinates) {
+        this.map.getView().setCenter(fromLonLat([coordinates![0], coordinates![1]]));
+      }
+
+      // Add hover event handlers
+      this.map.on('pointermove', (event) => {
+        if (event.dragging) {
+          this.tooltipElement!.style.display = 'none';
+          return;
+        }
+
+        // Check for features in both places and center layers
+        let foundFeature: any = null;
         
-        if (name) {
-          this.tooltipElement!.style.display = '';
-          this.tooltipElement!.innerHTML = `
-            <div><strong>${name} ${activity ? `<div>(${activity})</div>` : ''}</strong></div>
-          `;
-          this.tooltipOverlay!.setPosition(event.coordinate);
+        // Use forEachFeatureAtPixel to find any feature at the pixel
+        this.map?.forEachFeatureAtPixel(event.pixel, (feature) => {
+          foundFeature = feature;
+          return true; // Stop iteration at first feature found
+        });
+
+        if (foundFeature) {
+          const name = foundFeature.get('name');
+          const rating = foundFeature.get('rating');
+          const activity = foundFeature.get('activity');
+          
+          if (name) {
+            this.tooltipElement!.style.display = '';
+            this.tooltipElement!.innerHTML = `
+              <div><strong>${name} ${activity ? `<div>(${activity})</div>` : ''}</strong></div>
+            `;
+            this.tooltipOverlay!.setPosition(event.coordinate);
+          } else {
+            this.tooltipElement!.style.display = 'none';
+          }
         } else {
           this.tooltipElement!.style.display = 'none';
         }
-      } else {
-        this.tooltipElement!.style.display = 'none';
-      }
-    });
-
-    // Add click event handler
-    this.map.on('click', (event) => {
-      // Check for features in places layer only (not center layer)
-      let clickedFeature: any = null;
-      
-      this.map?.forEachFeatureAtPixel(event.pixel, (feature) => {
-        // Only handle clicks on places (not center point)
-        if (feature.get('id') !== 'center') {
-          clickedFeature = feature;
-          return true; // Stop iteration at first feature found
-        }
-        return false; // Continue iteration
       });
 
-      if (clickedFeature) {
-        const uri = clickedFeature.get('uri');
-        if (uri) {
-          // Open URL in new tab
-          window.open(uri, '_blank');
+      // Add click event handler
+      this.map.on('click', (event) => {
+        // Check for features in places layer only (not center layer)
+        let clickedFeature: any = null;
+        
+        this.map?.forEachFeatureAtPixel(event.pixel, (feature) => {
+          // Only handle clicks on places (not center point)
+          if (feature.get('id') !== 'center') {
+            clickedFeature = feature;
+            return true; // Stop iteration at first feature found
+          }
+          return false; // Continue iteration
+        });
+
+        if (clickedFeature) {
+          const uri = clickedFeature.get('uri');
+          if (uri) {
+            // Open URL in new tab
+            window.open(uri, '_blank');
+          }
         }
-      }
-    });
+      });
+    } catch (error) {
+      console.error("Error initializing map:", error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to initialize map: ' + error,
+        life: 5000
+      });
+    }
   }
 
   private addPlacesToMap(places: Place[]) {
@@ -1195,8 +1260,11 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private zoomToPlaces(places: Place[]) {
-    if (!this.map || places.length === 0) {
-      console.error("Map not initialized or no places to zoom to.");
+    if (places.length === 0) {
+      this.noPlaces = true;
+    }
+    if (!this.map) {
+      console.error("Map not initialized");
       return;
     }
 

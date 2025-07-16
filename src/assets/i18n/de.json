@@ -281,7 +281,8 @@
       "NO_DATA": "Keine Daten verfügbar",
       "SWITCH_TO_DOUGHNUT": "Ansicht wechseln",
       "EXPLANATION": "Die Aktivitäten gewichtet nach lokaler Relevanz",
-      "HINT": "Hinweis: Klicke auf einen Balken im Diagramm, um mehr Infos zu erhalten!"
+      "HINT": "Hinweis: Klicke auf einen Balken im Diagramm, um mehr Infos zu erhalten!",
+      "NO_PLACES": "Keine Orte gefunden"
     },
     "MODES": {
       "TITLE": "Modi",
