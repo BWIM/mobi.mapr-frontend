@@ -280,7 +280,8 @@
       "NO_DATA": "Kei Date verfüegbar",
       "SWITCH_TO_DOUGHNUT": "Aasicht wechsle",
       "EXPLANATION": "D Aktivitäte gwichtet nach lokaler Relevanz",
-      "HINT": "Uffbasse: Dabscht uff de Balke um mähr Infos z'krije"
+      "HINT": "Uffbasse: Dabscht uff de Balke um mähr Infos z'krije",
+      "NO_PLACES": "Koi plätzle gefunne"
     },
     "MODES": {
       "TITLE": "Modi"
