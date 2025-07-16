@@ -66,6 +66,7 @@ export class MapV2Service {
         case ShortcutAction.TOGGLE_HEXAGON_VIEW:
           this.hexagonView = !this.hexagonView;
           const updatedStyle = this.getProjectMapStyle();
+          this.analyzeService.setHexagonView(this.hexagonView);
           this.mapStyleSubject.next(updatedStyle);
           break;
         case ShortcutAction.TOGGLE_SCORE_DISPLAY:
