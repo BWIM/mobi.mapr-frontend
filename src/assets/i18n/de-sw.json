@@ -284,7 +284,13 @@
       "NO_PLACES": "Koi plätzle gefunne"
     },
     "MODES": {
-      "TITLE": "Modi"
+      "TITLE": "Modi",
+      "NO_DATA": "Keine Daten verfügbar"
+    },
+    "PROFILES": {
+      "TITLE": "Modi",
+      "NO_DATA": "Keine Daten verfügbar",
+      "HINT": "Hinweis: Die Werte der Modi können bei einer limitieren Anzahl an Personas sehr ähnlich sein."
     },
     "TITLE": "Details",
     "START": "Start",
