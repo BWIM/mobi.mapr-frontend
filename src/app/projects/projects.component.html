@@ -38,6 +38,7 @@
                                                 <span class="text-overflow-ellipsis overflow-hidden break-words"
                                                       [pTooltip]="project.display_name + '. (Version: ' + project.version + ')'">
                                                     {{ project.display_name }}
+                                                    <span style="font-size: 0.8em; color: #888;">v{{ project.version }}</span>
                                                 </span>
                                             </div>
                                             <div *ngIf="!project.finished" class="w-full mt-1">
@@ -103,6 +104,8 @@
                                                 <span class="text-overflow-ellipsis overflow-hidden break-words"
                                                       [pTooltip]="project.display_name + '. (Version: ' + project.version + ')'">
                                                     {{ project.display_name }}
+                                                    <br>
+                                                    <span style="font-size: 0.8em; color: #888;">v{{ project.version }}</span>
                                                 </span>
                                             </div>
                                             <div *ngIf="!project.finished" class="w-full mt-1">
