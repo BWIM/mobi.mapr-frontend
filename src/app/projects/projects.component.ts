@@ -292,7 +292,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
       this.mapv2Service.setProjectVersion(project.version);
       
-      this.mapv2Service.setProject(project.id.toString());
+      this.mapv2Service.setProject(project.id.toString(),undefined, project.display_name);
       this.loadingService.stopLoading();
     }
     catch (error) {

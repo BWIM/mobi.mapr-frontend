@@ -36,7 +36,8 @@
               "src/styles.css",
               "node_modules/ol/ol.css",
               "node_modules/primeicons/primeicons.css",
-              "node_modules/maplibre-gl/dist/maplibre-gl.css"
+              "node_modules/maplibre-gl/dist/maplibre-gl.css",
+              "node_modules/@maplibre/maplibre-gl-compare/dist/maplibre-gl-compare.css"
             ],
             "scripts": []
           },

@@ -21,7 +21,8 @@ interface Bounds {
   providedIn: 'root'
 })
 export class MapV2Service {
-  private currentProject: string | null = null;
+  projectName: string | null = null;
+  currentProject: string | null = null;
   private currentZoom: number = 7;
   private mapStyleSubject = new BehaviorSubject<StyleSpecification>(this.getBaseMapStyle());
   mapStyle$ = this.mapStyleSubject.asObservable();
@@ -38,7 +39,9 @@ export class MapV2Service {
   private lastZoomTime: number = 0;
   private readonly ZOOM_COOLDOWN = 3000; // 5 seconds in milliseconds
   private projectVersion: number = 0;
-  private comparisonProject: Project | null = null;
+  comparisonProject: Project | null = null;
+  private comparisonSubject = new BehaviorSubject<boolean>(false);
+  comparison$ = this.comparisonSubject.asObservable();
 
   constructor(
     private loadingService: LoadingService,
@@ -67,7 +70,7 @@ export class MapV2Service {
           break;
         case ShortcutAction.TOGGLE_HEXAGON_VIEW:
           this.hexagonView = !this.hexagonView;
-          const updatedStyle = this.getProjectMapStyle();
+          const updatedStyle = this.getProjectMapStyle(this.currentProject!);
           this.analyzeService.setHexagonView(this.hexagonView);
           this.mapStyleSubject.next(updatedStyle);
           break;
@@ -177,8 +180,9 @@ export class MapV2Service {
     this.removeSingleFeatures();
   }
 
-  setProject(projectId: string, shareKey?: string): void {
+  setProject(projectId: string, shareKey?: string, projectName?: string): void {
     this.currentProject = projectId;
+    this.projectName = projectName || null;
     this.shareKey = shareKey || null;
     this.loadingService.startLoading();
 
@@ -196,7 +200,7 @@ export class MapV2Service {
     this.http.get<Bounds>(`${environment.apiUrl}/bounds?project=${projectId}${authParam}`).subscribe(
       bounds => {
         this.boundsSubject.next(bounds);
-        const updatedStyle = this.getProjectMapStyle();
+        const updatedStyle = this.getProjectMapStyle(projectId);
         this.mapStyleSubject.next(updatedStyle);
       },
       error => {
@@ -204,6 +208,7 @@ export class MapV2Service {
         this.loadingService.stopLoading();
       }
     );
+    this.loadingService.stopLoading();
   }
 
   getDataBounds(): Bounds | null {
@@ -213,7 +218,7 @@ export class MapV2Service {
   setAverageType(averageType: 'avg' | 'pop'): void {
     this.averageType = averageType;
     if (this.currentProject) {
-      const updatedStyle = this.getProjectMapStyle();
+      const updatedStyle = this.getProjectMapStyle(this.currentProject);
       this.mapStyleSubject.next(updatedStyle);
     }
   }
@@ -221,13 +226,13 @@ export class MapV2Service {
   updateZoom(zoom: number): void {
     this.currentZoom = zoom;
     if (this.currentProject) {
-      const updatedStyle = this.getProjectMapStyle();
+      const updatedStyle = this.getProjectMapStyle(this.currentProject);
       this.mapStyleSubject.next(updatedStyle);
     }
   }
 
-  private getTileUrl(): string {
-    if (!this.currentProject) return '';
+  private getTileUrl(projectID: string): string {
+    if (!projectID) return '';
     
     const token = this.authService.getAuthorizationHeaders().get('Authorization')?.split(' ')[1];
     let authParam = '';
@@ -240,32 +245,32 @@ export class MapV2Service {
     // If hexagon view is enabled, always use the smallest hexagon layer
     if (this.hexagonView) {
       this.analyzeService.setMapType('hexagon');
-      return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${this.currentProject}&resolution=9${authParam}`;
+      return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}&resolution=9${authParam}`;
     }
     
     // Define zoom level thresholds for normal view
     if (this.currentZoom < 7) {
       // State level
       this.analyzeService.setMapType('state');
-      return `${environment.apiUrl}/tiles/laender/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${this.currentProject}${authParam}`;
+      return `${environment.apiUrl}/tiles/laender/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
     } else if (this.currentZoom < 9) {
       // County level
       this.analyzeService.setMapType('county');
-      return `${environment.apiUrl}/tiles/landkreise/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${this.currentProject}${authParam}`;
+      return `${environment.apiUrl}/tiles/landkreise/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
     } else if (this.currentZoom < 10) {
       // Municipality level
       this.analyzeService.setMapType('municipality');
-      return `${environment.apiUrl}/tiles/gemeinden/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${this.currentProject}${authParam}`;
+      return `${environment.apiUrl}/tiles/gemeinden/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
     } else {
       this.analyzeService.setMapType('hexagon');
-      return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${this.currentProject}&resolution=9${authParam}`;
+      return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}&resolution=9${authParam}`;
     }
   }
 
   setSelectedFeature(featureId: string | null): void {
     this.selectedFeatureId = featureId;
     if (this.currentProject) {
-      const updatedStyle = this.getProjectMapStyle();
+      const updatedStyle = this.getProjectMapStyle(this.currentProject);
       this.mapStyleSubject.next(updatedStyle);
     }
   }
@@ -273,16 +278,16 @@ export class MapV2Service {
   toggleScoreDisplay(): void {
     this.scoreShown = !this.scoreShown;
     if (this.currentProject) {
-      const updatedStyle = this.getProjectMapStyle();
+      const updatedStyle = this.getProjectMapStyle(this.currentProject);
       this.mapStyleSubject.next(updatedStyle);
     }
   }
 
-  private getProjectMapStyle(): StyleSpecification {
+  private getProjectMapStyle(projectID: string): StyleSpecification {
     const baseStyle = this.getBaseMapStyle();
     
-    if (this.currentProject) {
-      const tileUrl = this.getTileUrl();
+    if (projectID) {
+      const tileUrl = this.getTileUrl(projectID);
       
       baseStyle.sources['geodata'] = {
         type: 'vector',
@@ -456,5 +461,7 @@ export class MapV2Service {
 
   setComparisonProject(project: Project): void {
     this.comparisonProject = project;
+    this.comparisonSubject.next(true);
+    this.loadingService.stopLoading();
   }
 }

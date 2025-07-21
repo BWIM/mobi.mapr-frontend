@@ -2,3 +2,16 @@
   <app-search-overlay (locationSelected)="onLocationSelected($event)"></app-search-overlay>
   <app-legend></app-legend>
 </div>
+<div #comparisonContainer id="comparison-container" style="display: none;">
+  <div #beforeContainer class="map" id="before">
+    <div class="comparison-label">{{ projectName }}</div>
+    <app-search-overlay (locationSelected)="onLocationSelected($event)"></app-search-overlay>
+    <app-legend></app-legend>
+  </div>  
+  <div #mapContainer class="map" id="after">
+    <div class="comparison-label">{{ comparisonProject?.display_name }}</div>
+    <app-search-overlay (locationSelected)="onLocationSelected($event)"></app-search-overlay>
+    <app-legend></app-legend>
+  </div>
+</div>
+
