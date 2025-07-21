@@ -61,7 +61,7 @@
           </ul>
         </p-fieldset>
 
-        <p-fieldset legend="{{'SIDEBAR.PERSONAS' | translate}}" [toggleable]="true" [collapsed]="true">
+        <p-fieldset *ngIf="projectInfo.personas" legend="{{'SIDEBAR.PERSONAS' | translate}}" [toggleable]="true" [collapsed]="true">
           <ul class="list-disc pl-4 space-y-1">
             <li *ngFor="let persona of projectInfo.personas" class="text-gray-700">
               {{ persona }}

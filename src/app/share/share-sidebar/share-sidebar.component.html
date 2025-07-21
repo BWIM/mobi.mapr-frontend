@@ -33,7 +33,7 @@
                 </p-panel>
 
                 <!-- Personas -->
-                <p-panel [header]="'SHARE.PERSONAS' | translate" [toggleable]="true" [collapsed]="false">
+                <p-panel *ngIf="sharedProject.personas" [header]="'SHARE.PERSONAS' | translate" [toggleable]="true" [collapsed]="false">
                     <div class="flex flex-wrap gap-2">
                         <ul class="list-disc pl-4 space-y-1">
                             <li *ngFor="let persona of sharedProject.personas" class="text-gray-700">
@@ -47,7 +47,7 @@
                 </p-panel>
 
                 <!-- Profile -->
-                <p-panel [header]="'SHARE.MODES' | translate" [toggleable]="true" [collapsed]="false">
+                <p-panel *ngIf="sharedProject.profiles" [header]="'SHARE.MODES' | translate" [toggleable]="true" [collapsed]="false">
                     <div class="flex flex-wrap gap-2">
                         <ul class="list-disc pl-4 space-y-1">
                             <li *ngFor="let mode of sharedProject.modes; let i = index" class="text-gray-700">
