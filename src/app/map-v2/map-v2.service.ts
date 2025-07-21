@@ -8,6 +8,7 @@ import { StyleSpecification, SourceSpecification, LayerSpecification, Map, LngLa
 import { AnalyzeService } from '../analyze/analyze.service';
 import { KeyboardShortcutsService, ShortcutAction } from './keyboard-shortcuts.service';
 import * as maplibregl from 'maplibre-gl';
+import { Project } from '../projects/project.interface';
 
 interface Bounds {
   minLng: number;
@@ -37,6 +38,7 @@ export class MapV2Service {
   private lastZoomTime: number = 0;
   private readonly ZOOM_COOLDOWN = 3000; // 5 seconds in milliseconds
   private projectVersion: number = 0;
+  private comparisonProject: Project | null = null;
 
   constructor(
     private loadingService: LoadingService,
@@ -450,5 +452,9 @@ export class MapV2Service {
       this.analyzeService.setSelectedFeature(randomFeature, "hexagon", [49.320099, 9.2156505]);
       this.setSelectedFeature(randomFeature.properties['id']);
     }
+  }
+
+  setComparisonProject(project: Project): void {
+    this.comparisonProject = project;
   }
 }

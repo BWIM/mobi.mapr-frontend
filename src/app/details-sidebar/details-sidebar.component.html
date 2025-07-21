@@ -92,6 +92,15 @@
 
         <div class="mt-6 flex justify-center">
           <p-button 
+            (onClick)="compareProjects()"
+            icon="pi pi-arrows-h"
+            [label]="'PROJECTS.COMPARE' | translate"
+            styleClass="p-button-secondary">
+          </p-button>
+        </div>
+
+        <div class="mt-6 flex justify-center">
+          <p-button 
             (onClick)="generateShareLink()"
             icon="pi pi-share-alt"
             [label]="'SIDEBAR.SHARE' | translate"
@@ -103,6 +112,7 @@
               styleClass="ml-2"></p-progressSpinner>
           </p-button>
         </div>
+
 
         <div *ngIf="shareUrl" class="mt-4 p-4 bg-gray-100 rounded">
           <div class="flex justify-between items-center mb-2">
@@ -140,6 +150,44 @@
     <div class="flex flex-column align-items-center">
         <h3>{{ 'EXPORT.GENERATING_PDF' | translate }}</h3>
     </div>
+</p-dialog>
+
+<p-dialog 
+  [(visible)]="showComparisonDialog" 
+  [header]="translate.instant('SIDEBAR.COMPARISON_DIALOG_TITLE')"
+  [modal]="true"
+  [style]="{width: '50vw'}"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="p-fluid">
+  
+  <div class="max-h-[60vh] overflow-y-auto">
+    <div class="flex justify-center items-center h-full" *ngIf="comparisonProjects.length === 0">
+      <p class="text-gray-500">{{ 'SIDEBAR.COMPARISON_DIALOG_NO_PROJECTS' | translate }}</p>
+    </div>
+    <div *ngFor="let project of comparisonProjects" 
+         class="mb-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all duration-200 ease-in-out cursor-pointer transform hover:-translate-y-1 hover:shadow-md"
+         [class.border-primary]="selectedComparisonProject?.id === project.id"
+         [class.bg-primary-50]="selectedComparisonProject?.id === project.id"
+         (click)="onProjectSelect(project)">
+      
+      <div class="flex justify-between items-center mb-2">
+        <h3 class="text-lg font-medium text-gray-900">{{project.display_name}}</h3>
+        <span class="text-sm text-gray-500">v{{project.version}}</span>
+      </div>
+      
+      <p *ngIf="project.description" 
+         class="text-sm text-gray-600 mb-3">{{project.description}}</p>
+      
+      <div class="flex gap-4 text-xs text-gray-500">
+        <span class="flex items-center">
+          <i class="pi pi-calendar mr-1"></i>
+          {{ 'SIDEBAR.CREATED' | translate }}: {{project.created | date}}
+        </span>
+      </div>
+    </div>
+
+  </div>
 </p-dialog>
 
 <p-toast></p-toast>
