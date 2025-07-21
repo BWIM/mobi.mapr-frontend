@@ -94,8 +94,8 @@ export interface ActivityScore {
   weight: number;
 }
 
-export interface ModeScore {
-  mode: number;
+export interface ProfileScore {
+  profile: number;
   score: number;
 }
 
@@ -104,7 +104,7 @@ export interface HexagonScore {
   population: number;
   persona_scores: PersonaScore[];
   category_scores: CategoryScore[];
-  mode_scores: ModeScore[];
+  profile_scores: ProfileScore[];
 }
 
 export interface FormattedPersona {
@@ -118,7 +118,7 @@ export interface FormattedCategory {
   weight: number;
 }
 
-export interface FormattedMode {
+export interface FormattedProfile {
   name: string;
   id: number;
 }
@@ -136,6 +136,6 @@ export interface ProjectDetails {
   },
   personas: FormattedPersona[];
   categories: FormattedCategory[];
-  modes: FormattedMode[];
+  profiles: FormattedProfile[];
   hexagons: HexagonScore[];
 }

@@ -287,6 +287,11 @@
       "TITLE": "Modes",
       "NO_DATA": "No data available"
     },
+    "PROFILES": {
+      "TITLE": "Modes",
+      "NO_DATA": "No data available",
+      "HINT": "Hint: The values of the modes can be very similar with a limited number of personas."
+    },
     "TITLE": "Details",
     "START": "Start",
     "END": "End",

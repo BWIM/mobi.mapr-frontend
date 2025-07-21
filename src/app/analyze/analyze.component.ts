@@ -63,9 +63,10 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   // Diagrammdaten
   personaChartData: any;
   activitiesChartData: any;
-  modesChartData: any;
+  profilesChartData: any;
   radarChartOptions: any;
   barChartOptions: any;
+  profilesBarChartOptions: any;
   subBarChartOptions: any;
   subactivitiesChartData: any;
   noPlaces: boolean = false;
@@ -81,6 +82,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
   @ViewChild('activitiesChart') activitiesChart?: UIChart;
   @ViewChild('personaChart') personaChart?: UIChart;
+  @ViewChild('profilesChart') profilesChart?: UIChart;
   @ViewChild('subactivitiesPieChart') subactivitiesPieChart?: UIChart;
   @ViewChild('dialogContainer') dialogContainer?: ElementRef;
 
@@ -109,9 +111,15 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   hasModeData(): boolean {
-    if (!this.projectDetails) return false;
-    if (!this.projectDetails.hexagons || this.projectDetails.hexagons.length === 0) return false;
-    return true;
+    return this.projectDetails?.hexagons?.some(hexagon => 
+      hexagon.profile_scores && hexagon.profile_scores.length > 0
+    ) || false;
+  }
+
+  hasProfileData(): boolean {
+    return this.projectDetails?.hexagons?.some(hexagon => 
+      hexagon.profile_scores && hexagon.profile_scores.length > 0
+    ) || false;
   }
 
   constructor(
@@ -264,7 +272,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private initializeChartData(): void {
-    // this.initializeModesChart();
+    this.initializeProfilesChart();
     this.initializeActivitiesChart();
     this.initializePersonaChart();
     this.initializeSubActivitiesChart(); // Initialize without category to show empty chart
@@ -684,50 +692,43 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
     const borderColors = data.map(value => this.getColorForValue(value * 100));
 
-    // Update radar options with dynamic max value and inverted scale
     this.radarChartOptions = {
-      ...this.radarChartOptions,
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        ...this.radarChartOptions.plugins,
         tooltip: {
+          mode: 'index',
+          intersect: false,
           callbacks: {
-            title: (context: any) => {
-              if (context[0].dataset.label === 'Persona-Werte') {
-                return context[0].label;
-              }
-              return context[0].dataset.label;
-            },
             label: (context: any) => {
-              if (context.dataset.label === 'Persona-Werte') {
-                const index = context.dataIndex;
-                return `Score: ${scoreNames[index]}`;
-              }
-              return context.dataset.label;
+              const index = context.dataIndex;
+              return `Score: ${scoreNames[index]}`;
             }
+          }
+        },
+        legend: {
+          position: 'bottom',
+          labels: {
+            generateLabels: this.generateLabels,
+            usePointStyle: false,
+            padding: 15
           }
         }
       },
       scales: {
         r: {
           beginAtZero: true,
-          max: 2,
-          reverse: true, // This inverts the scale
+          max: 1.41,
+          min: 0,
           ticks: {
-            stepSize: 0.5,
-            font: {
-              size: 10
-            },
-            display: false
+            stepSize: 0.2,
+            color: '#495057'
           },
           grid: {
             color: '#ebedef'
           },
-          angleLines: {
-            color: '#ebedef'
-          },
           pointLabels: {
+            color: '#495057',
             font: {
               size: 12
             }
@@ -810,6 +811,116 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           fill: false
         }
       ]
+    };
+  }
+
+  private initializeProfilesChart(): void {
+    if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0 || !this.projectDetails.profiles) return;
+
+    // Calculate weighted averages for each profile
+    const profileScores = new Map<number, { totalWeightedScore: number, totalWeight: number }>();
+
+    // Sum up weighted scores and weights for each profile
+    this.projectDetails.hexagons.forEach(hexagon => {
+      const weight = this.weightingType === 'population' ? hexagon.population : 1;
+      if (hexagon.profile_scores) {
+        hexagon.profile_scores.forEach(profileScore => {
+          const current = profileScores.get(profileScore.profile) || { totalWeightedScore: 0, totalWeight: 0 };
+          current.totalWeightedScore += profileScore.score * weight;
+          current.totalWeight += weight;
+          profileScores.set(profileScore.profile, current);
+        });
+      }
+    });
+
+    if (profileScores.size === 0) {
+      return;
+    }
+
+    // Calculate final weighted averages
+    const weightedProfileScores = Array.from(profileScores.entries()).map(([profile, data]) => ({
+      profile,
+      score: data.totalWeightedScore / data.totalWeight
+    }));
+
+    // Sort profiles by their weighted scores (descending)
+    const sortedProfiles = weightedProfileScores.sort((a, b) => b.score - a.score);
+
+    // Get profile names from formatted_profiles
+    const profileMap = new Map(this.projectDetails.profiles.map(p => [p.id, p.name]));
+    const labels = sortedProfiles.map(profile => profileMap.get(profile.profile) || `${profile.profile}`);
+    const data = sortedProfiles.map(profile => profile.score * 100); // Convert to percentage for display
+    const scoreNames = sortedProfiles.map(profile => this.getScoreName(profile.score));
+
+    const scoreColors = data.map(value => this.getColorForValue(value));
+
+    this.profilesChartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Profile',
+          data: data,
+          backgroundColor: scoreColors,
+          borderColor: scoreColors,
+          borderWidth: 1,
+          yAxisID: 'y',
+          barPercentage: 0.8
+        }
+      ]
+    };
+
+    // Create bar chart options similar to activities chart
+    this.profilesBarChartOptions = {
+      indexAxis: 'x',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            label: (context: any) => {
+              const index = context.dataIndex;
+              return `Score: ${scoreNames[index]}`;
+            }
+          }
+        },
+        legend: {
+          position: 'bottom',
+          labels: {
+            generateLabels: this.generateLabels,
+            usePointStyle: false,
+            padding: 15
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#495057'
+          },
+          grid: {
+            color: '#ebedef'
+          }
+        },
+        y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          beginAtZero: true,
+          max: 141, // Maximum score value
+          ticks: {
+            color: '#495057'
+          },
+          grid: {
+            color: '#ebedef'
+          },
+          title: {
+            display: true,
+            text: 'Score (%)'
+          }
+        }
+      }
     };
   }
 
@@ -1001,6 +1112,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       }
       if (this.personaChart?.chart) {
         this.personaChart.chart.resize();
+      }
+      if (this.profilesChart?.chart) {
+        this.profilesChart.chart.resize();
       }
       if (this.subactivitiesPieChart?.chart) {
         this.subactivitiesPieChart.chart.resize();
