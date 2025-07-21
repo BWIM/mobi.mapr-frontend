@@ -52,53 +52,11 @@ export const AuthInterceptor: HttpInterceptorFn = (
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
-        if (!isRefreshing) {
-          isRefreshing = true;
-          refreshTokenSubject.next(null);
-
-          return authService.refreshToken().pipe(
-            switchMap((token) => {
-              isRefreshing = false;
-              refreshTokenSubject.next(token);
-              const newHeaders = authService.getAuthorizationHeaders();
-              return next(req.clone({ headers: newHeaders, url }));
-            }),
-            catchError((refreshError) => {
-              isRefreshing = false;
-              refreshTokenSubject.next(null);
-              authService.logout();
-              router.navigate(['/login']);
-              return throwError(() => refreshError);
-            })
-          );
-        } else {
-          return refreshTokenSubject.pipe(
-            filter(token => token !== null),
-            take(1),
-            switchMap(() => {
-              const newHeaders = authService.getAuthorizationHeaders();
-              return next(req.clone({ headers: newHeaders, url }));
-            })
-          );
-        }
-      }
-      return throwError(() => error);
-    }),
-    retry({
-      count: 1,
-      delay: (error, retryCount) => {
-        if (error instanceof HttpErrorResponse && error.status === 401) {
-          return refreshTokenSubject.pipe(
-            filter(token => token !== null),
-            take(1),
-            switchMap(() => {
-              const newHeaders = authService.getAuthorizationHeaders();
-              return next(req.clone({ headers: newHeaders, url }));
-            })
-          );
-        }
+        authService.logout();
+        router.navigate(['/login']);
         return throwError(() => error);
       }
+      return throwError(() => error);
     })
   );
 }; 
