@@ -134,7 +134,7 @@ export interface ProjectDetails {
     "maptype": string;
     "featureId": string;
   },
-  personas: FormattedPersona[];
+  personas?: FormattedPersona[];
   categories: FormattedCategory[];
   profiles: FormattedProfile[];
   hexagons: HexagonScore[];
