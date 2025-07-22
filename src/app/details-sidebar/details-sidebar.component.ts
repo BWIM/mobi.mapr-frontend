@@ -6,7 +6,7 @@ import { DialogModule } from 'primeng/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { ProjectsService } from '../projects/projects.service';
-import { ProjectInfo } from '../projects/project.interface';
+import { Project, ProjectInfo } from '../projects/project.interface';
 // import { PdfGenerationService } from '../map-v2/pdf-generation.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ShareService } from '../share/share.service';
@@ -14,6 +14,7 @@ import { StatisticsService } from '../statistics/statistics.service';
 import { MapV2Service } from '../map-v2/map-v2.service';
 import { PdfExportService } from '../map-v2/pdf-export-dialog/pdf-export.service';
 import { MessageService } from 'primeng/api';
+
 
 @Component({
   selector: 'app-details-sidebar',
@@ -38,9 +39,12 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
   selectedPopulationArea: string = 'pop';
   populationAreaOptions: { label: string; value: string }[] = [];
   @Output() projectLoaded = new EventEmitter<void>();
+  comparisonProjects: Project[] = [];
+  showComparisonDialog: boolean = false;
+  selectedComparisonProject: Project | null = null;
 
   constructor(
-    private translate: TranslateService,
+    public translate: TranslateService,
     private projectsService: ProjectsService,
     // private pdfService: PdfGenerationService,
     private shareService: ShareService,
@@ -137,5 +141,29 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+
+  compareProjects(): void {
+    if (!this.projectInfo?.id) return;
+    this.projectsService.compareProjects(this.projectInfo.id).subscribe({
+      next: (response: Project[]) => {
+        this.comparisonProjects = response;
+        this.showComparisonDialog = true;
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: this.translate.instant('SIDEBAR.COMPARISON_ERROR_TITLE'),
+          detail: this.translate.instant('SIDEBAR.COMPARISON_ERROR_TITLE'),
+          life: 3000
+        });
+      }
+    });
+  }
+
+  onProjectSelect(project: Project): void {
+    this.selectedComparisonProject = project;
+    this.mapService.setComparisonProject(project);
+    this.showComparisonDialog = false;
   }
 } 

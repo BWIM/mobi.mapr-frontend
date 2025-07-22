@@ -83,7 +83,8 @@
     "AUTO_CLOSE_SIDEBAR": "Sidebar pinne",
     "HINT": {
       "UPGRADE": "Aufgrund von Änderungen der Datenstruktur mussten alle Projekte, die vor dem 4.6.25 erstellt wurden, gelöscht werden."
-    }
+    },
+    "COMPARE": "Vergleiche"
   },
   "PROJECT_GROUPS": {
     "CREATE": {
@@ -267,7 +268,11 @@
     "ZOOM_TO_FEATURES": "Karte zentriere",
     "ZOOM_TO_FEATURES_TOOLTIP": "Zentriert d'Karte wider zum Initialzustand",
     "EXPORT_PDF_TOOLTIP": "Rus mit",
-    "EXPORT_PDF": "Naus mit"
+    "EXPORT_PDF": "Naus mit",
+    "COMPARISON_DIALOG_TITLE": "Projäkt wähle",
+    "CREATED": "Geschaffe",
+    "COMPARISON_ERROR_TITLE": "Kein Projäktle",
+    "COMPARISON_DIALOG_NO_PROJECTS": "S gibbet koi gschäts Projäktle"
   },
   "ANALYZE": {
     "PERSONA": {

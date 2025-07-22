@@ -83,7 +83,8 @@
     "AUTO_CLOSE_SIDEBAR": "Pin sidebar",
     "HINT": {
       "UPGRADE": "Due to changes in the data model, all projects created before the 4.6.25 needed to be removed."
-    }
+    },
+    "COMPARE": "Compare"
   },
   "PROJECT_GROUPS": {
     "CREATE": {
@@ -267,7 +268,11 @@
     "ZOOM_TO_FEATURES": "Recenter Map",
     "ZOOM_TO_FEATURES_TOOLTIP": "Recenters the map to the original state",
     "EXPORT_PDF_TOOLTIP": "export pdf",
-    "EXPORT_PDF": "Export PDF"
+    "EXPORT_PDF": "Export PDF",
+    "COMPARISON_DIALOG_TITLE": "Choose project",
+    "CREATED": "Created",
+    "COMPARISON_ERROR_TITLE": "No projects available",
+    "COMPARISON_DIALOG_NO_PROJECTS": "No similar project available"
   },
   "ANALYZE": {
     "PERSONA": {

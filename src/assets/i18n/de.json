@@ -83,7 +83,8 @@
     "AUTO_CLOSE_SIDEBAR": "Sidebar pinnen",
     "HINT": {
       "UPGRADE": "Aufgrund von Änderungen der Datenstruktur mussten alle Projekte, die vor dem 4.6.25 erstellt wurden, gelöscht werden."
-    }
+    },
+    "COMPARE": "Vergleichen"
   },
   "PROJECT_GROUPS": {
     "CREATE": {
@@ -268,7 +269,11 @@
     "ZOOM_TO_FEATURES": "Karte zentrieren",
     "ZOOM_TO_FEATURES_TOOLTIP": "Zentriert die Karte wieder zum Initialzustand",
     "EXPORT_PDF_TOOLTIP": "PDF exportieren",
-    "EXPORT_PDF": "PDF exportieren"
+    "EXPORT_PDF": "PDF exportieren",
+    "COMPARISON_DIALOG_TITLE": "Projekt wählen",
+    "CREATED": "Erstellt",
+    "COMPARISON_ERROR_TITLE": "Kein Projekt verfügbar",
+    "COMPARISON_DIALOG_NO_PROJECTS": "Keine ähnliche Projekte verfügbar"
   },
   "ANALYZE": {
     "PERSONA": {

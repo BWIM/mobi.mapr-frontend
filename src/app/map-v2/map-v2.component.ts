@@ -1,12 +1,16 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { MapV2Service } from './map-v2.service';
 import { Subscription } from 'rxjs';
-import { LngLatBounds, Map, Popup, NavigationControl, ScaleControl } from 'maplibre-gl';
+import { LngLatBounds, Map, Popup, LayerSpecification, SourceSpecification, NavigationControl, ScaleControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { LoadingService } from '../services/loading.service';
 import { SearchOverlayComponent } from './search-overlay/search-overlay.component';
 import { LegendComponent } from '../legend/legend.component';
+import { Project } from '../projects/project.interface';
+
+// @ts-ignore
+import MaplibreCompare from '@maplibre/maplibre-gl-compare';
 
 @Component({
   selector: 'app-map-v2',
@@ -19,12 +23,17 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   private map?: Map;
   private popup?: Popup;
   @ViewChild('mapContainer') mapContainer?: ElementRef;
+  @ViewChild('comparisonContainer') comparisonContainer?: ElementRef;
   mapStyle: any;
   zoom: number = 7;
   center: [number, number] = [9.2156505, 49.320099];
   private subscription: Subscription;
   private boundsSubscription: Subscription;
-
+  private comparisonSubscription: Subscription;
+  private isComparison: boolean = false;
+  projectName: string | null = null;
+  comparisonProject: Project | null = null;
+  currentProject: string | null = null;
   constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService) {
     this.subscription = this.mapService.mapStyle$.subscribe(style => {
       this.mapStyle = style;
@@ -43,6 +52,15 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
           padding: 50,
           duration: 2000
         });
+      }
+    });
+
+    this.comparisonSubscription = this.mapService.comparison$.subscribe(comparison => {
+      if (comparison) {
+        // Get the comparison project from the service
+        this.comparisonProject = this.mapService.comparisonProject;
+        this.projectName = this.mapService.projectName;
+        this.setupComparison();
       }
     });
   }
@@ -69,82 +87,100 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       this.map.dragRotate.disable();
       this.map.touchZoomRotate.disable();
 
-      // Add panning event listeners to adjust layer opacity
-      this.map.on('dragstart', () => {
-        if (this.map?.getLayer('geodata-fill')) {
-          const currentOpacity = this.map.getPaintProperty('geodata-fill', 'fill-opacity');
-          if (Array.isArray(currentOpacity)) {
-            // Create a new expression that multiplies the result by 0.5
-            const newOpacity = ['*', currentOpacity, 0.25];
-            this.map.setPaintProperty('geodata-fill', 'fill-opacity', newOpacity);
-          }
-        }
-      });
-
-      this.map.on('dragend', () => {
-        if (this.map?.getLayer('geodata-fill')) {
-          const currentOpacity = this.map.getPaintProperty('geodata-fill', 'fill-opacity');
-          if (Array.isArray(currentOpacity)) {
-            // Create a new expression that multiplies the result by 2
-            const newOpacity = ['*', currentOpacity, 4];
-            this.map.setPaintProperty('geodata-fill', 'fill-opacity', newOpacity);
-          }
-        }
-      });
-
-      this.popup = new Popup({
-        closeButton: false,
-        closeOnClick: false
-      });
-
-      this.map.on('zoomend', () => {
-        this.mapService.updateZoom(this.map!.getZoom());
-      });
-
-      // Add sourcedata event handler to track tile loading
-      this.map.on('sourcedata', (e) => {
-        if (e.sourceId === 'geodata' && e.isSourceLoaded) {
-          this.loadingService.stopLoading();
-        }
-      });
-
-      this.map.on('mousemove', 'geodata-fill', (e) => {
-        if (e.features && e.features[0]) {
-          const feature = e.features[0];
-          const properties = feature.properties;
-          if (properties) {
-            const name = properties['name'] || 'Unknown';
-
-            const popupContent = `
-              <div style="padding: 5px;">
-                ${name}: <strong>${this.getScoreName(properties['score'])}</strong>
-              </div>
-            `;
-
-            this.popup!
-              .setLngLat(e.lngLat)
-              .setHTML(popupContent)
-              .addTo(this.map!);
-          }
-        }
-      });
-
-      this.map.on('mouseleave', 'geodata-fill', () => {
-        this.popup!.remove();
-      });
-
-      this.map.on('click', 'geodata-fill', (e) => {
-        if (e.features && e.features[0]) {
-          const feature = e.features[0];
-          // Use the click coordinates as the center
-          const coordinates = [e.lngLat.lng, e.lngLat.lat];
-          
-          const resolution = this.map && this.map.getZoom() > 10 ? "hexagon" : "gemeinde";
-          this.analyzeService.setSelectedFeature(feature, resolution, coordinates);
-          this.mapService.setSelectedFeature(feature.properties['id']);
-        }
-      });
+      // Setup map events (no projectId for main map - it uses the service subscription)
+      this.setupMapEvents(this.map);
     }
+  }
+
+  private setupMapEvents(map: Map, projectId?: string): void {
+    // Add panning event listeners to adjust layer opacity
+    map.on('dragstart', () => {
+      if (map?.getLayer('geodata-fill')) {
+        const currentOpacity = map.getPaintProperty('geodata-fill', 'fill-opacity');
+        if (Array.isArray(currentOpacity)) {
+          // Create a new expression that multiplies the result by 0.5
+          const newOpacity = ['*', currentOpacity, 0.25];
+          map.setPaintProperty('geodata-fill', 'fill-opacity', newOpacity);
+        }
+      }
+    });
+
+    map.on('dragend', () => {
+      if (map?.getLayer('geodata-fill')) {
+        const currentOpacity = map.getPaintProperty('geodata-fill', 'fill-opacity');
+        if (Array.isArray(currentOpacity)) {
+          // Create a new expression that multiplies the result by 2
+          const newOpacity = ['*', currentOpacity, 4];
+          map.setPaintProperty('geodata-fill', 'fill-opacity', newOpacity);
+        }
+      }
+    });
+
+    // Create popup for this map instance
+    const popup = new Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
+
+    map.on('zoomend', () => {
+      this.mapService.updateZoom(map.getZoom());
+      
+      // If this is a compare map (projectId is provided), update its style manually
+      if (projectId) {
+        const style = this.mapService['getProjectMapStyle'](projectId);
+        map.setStyle(style);
+      }
+    });
+
+    // Add sourcedata event handler to track tile loading
+    map.on('sourcedata', (e) => {
+      if (e.sourceId === 'geodata' && e.isSourceLoaded) {
+        this.loadingService.stopLoading();
+      }
+    });
+
+    map.on('mousemove', 'geodata-fill', (e) => {
+      if (e.features && e.features[0]) {
+        const feature = e.features[0];
+        const properties = feature.properties;
+        if (properties) {
+          const name = properties['name'] || 'Unknown';
+
+          const popupContent = `
+            <div style="padding: 5px;">
+              ${name}: <strong>${this.getScoreName(properties['score'])}</strong>
+            </div>
+          `;
+
+          popup
+            .setLngLat(e.lngLat)
+            .setHTML(popupContent)
+            .addTo(map);
+        }
+      }
+    });
+
+    map.on('mouseleave', 'geodata-fill', () => {
+      popup.remove();
+    });
+
+    map.on('click', 'geodata-fill', (e) => {
+      if (e.features && e.features[0]) {
+        const feature = e.features[0];
+        // Use the click coordinates as the center
+        const coordinates = [e.lngLat.lng, e.lngLat.lat];
+        const metadata = feature['layer']?.['metadata'] as { 'project-id': string };
+        if (metadata) {
+          console.log(metadata);
+          this.analyzeService.setCurrentProject(metadata['project-id']);
+        }
+        
+        const resolution = map && map.getZoom() > 10 ? "hexagon" : "gemeinde";
+        // this.analyzeService.setCurrentProject(feature)
+        this.analyzeService.setSelectedFeature(feature, resolution, coordinates);
+        this.mapService.setSelectedFeature(feature.properties['id']);
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -193,5 +229,126 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
         duration: 2000
       });
     }
+  }
+
+  private setupComparison() {
+    this.mapContainer!.nativeElement.style.display = "none";
+    this.comparisonContainer!.nativeElement.style.display = "block";
+    this.setupCompareMap();
+  }
+
+  private setupCompareMap() {
+    this.isComparison = true;
+    
+    // Get bounds for proper zoom calculation
+    const bounds = this.mapService.getDataBounds();
+    let initialCenter = this.center;
+    let initialZoom = this.zoom;
+    
+    if (bounds) {
+      const mapBounds = new LngLatBounds(
+        [bounds.minLng, bounds.minLat],
+        [bounds.maxLng, bounds.maxLat]
+      );
+      
+      // Calculate center and zoom based on bounds
+      const center = mapBounds.getCenter();
+      initialCenter = [center.lng, center.lat];
+      
+      // Calculate appropriate zoom level for the bounds
+      const latDiff = bounds.maxLat - bounds.minLat;
+      const lngDiff = bounds.maxLng - bounds.minLng;
+      const latZoom = Math.log2(360 / latDiff);
+      const lngZoom = Math.log2(720 / lngDiff);
+      initialZoom = Math.min(latZoom, lngZoom) - 1; // Subtract 1 to add some padding
+    }
+
+    // Update the service's current zoom to match the calculated zoom
+    this.mapService.updateZoom(initialZoom);
+
+    const beforeMap = new Map({
+      container: "before",
+      style: this.mapStyle,
+      center: initialCenter,
+      zoom: initialZoom,
+      dragRotate: false,
+      touchZoomRotate: false
+    });
+
+    // Add navigation controls to before map
+    beforeMap.addControl(new NavigationControl({showCompass: false}), 'top-left');
+    beforeMap.addControl(new ScaleControl(), 'bottom-left');
+    beforeMap.dragRotate.disable();
+    beforeMap.touchZoomRotate.disable();
+
+    // Get the correct style for after map based on current zoom
+    let afterStyle = this.mapStyle;
+    if (this.comparisonProject && this.comparisonProject.id !== undefined && this.comparisonProject.id !== null) {
+      afterStyle = this.mapService['getProjectMapStyle'](String(this.comparisonProject.id));
+    }
+
+    const afterMap = new Map({
+      container: "after",
+      style: afterStyle,
+      center: initialCenter,
+      zoom: initialZoom,
+      dragRotate: false,
+      touchZoomRotate: false
+    });
+
+    // Add navigation controls to after map
+    afterMap.addControl(new NavigationControl({showCompass: false}), 'top-left');
+    afterMap.addControl(new ScaleControl(), 'bottom-left');
+    afterMap.dragRotate.disable();
+    afterMap.touchZoomRotate.disable();
+
+    // Wait for both maps to load, then zoom to bounds and setup events
+    let mapsLoaded = 0;
+    const totalMaps = 2;
+    
+    const setupMaps = () => {
+      mapsLoaded++;
+      if (mapsLoaded === totalMaps) {
+        // Both maps are loaded, now zoom to bounds and setup events
+        if (bounds) {
+          const mapBounds = new LngLatBounds(
+            [bounds.minLng, bounds.minLat],
+            [bounds.maxLng, bounds.maxLat]
+          );
+          
+          beforeMap.fitBounds(mapBounds, {
+            padding: 50,
+            duration: 0 // No animation for comparison setup
+          });
+          
+          afterMap.fitBounds(mapBounds, {
+            padding: 50,
+            duration: 0 // No animation for comparison setup
+          });
+        }
+        
+        // Setup events after zoom is complete
+        setTimeout(() => {
+          this.setupMapEvents(beforeMap, this.mapService.getCurrentProject() || undefined);
+          this.setupMapEvents(afterMap, this.comparisonProject ? String(this.comparisonProject.id) : undefined);
+        }, 100);
+      }
+    };
+
+    beforeMap.on('load', setupMaps);
+    afterMap.on('load', setupMaps);
+
+    var container = "#comparison-container";
+
+    var compare = new MaplibreCompare(beforeMap, afterMap, container, {
+      mousemove: false,
+      // orientation: 'vertical'
+    });
+  }
+
+  stopComparison() {
+    this.isComparison = false;
+    this.mapContainer!.nativeElement.style.display = "block";
+    this.comparisonContainer!.nativeElement.style.display = "none";
   }
 }

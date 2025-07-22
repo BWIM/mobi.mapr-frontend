@@ -125,4 +125,8 @@ export class ProjectsService {
   checkAllFinished(): Observable<ProjectsFinishedStatus> {
     return this.http.get<ProjectsFinishedStatus>(`${this.apiUrl}/projects/check-all-finished/`);
   }
+
+  compareProjects(projectId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/projects/${projectId}/compare/`);
+  }
 }

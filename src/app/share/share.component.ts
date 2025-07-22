@@ -57,7 +57,7 @@ export class ShareComponent implements OnInit {
       this.project = project;
       if (project && project.id) {
         // Set the project in the map service with the share key
-        this.mapService.setProject(project.id.toString(), this.projectKey);
+        this.mapService.setProject(project.id.toString(), this.projectKey, project.id as unknown as string);
         this.analyzeService.setCurrentProject(project.id.toString());
       }
     });
