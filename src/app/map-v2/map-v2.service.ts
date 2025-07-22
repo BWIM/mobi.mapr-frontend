@@ -215,6 +215,20 @@ export class MapV2Service {
     return this.boundsSubject.getValue();
   }
 
+  zoomToBounds(): Promise<void> {
+    const bounds = this.boundsSubject.getValue();
+    if (bounds && this.map) {
+      const mapBounds = new LngLatBounds(
+        [bounds.minLng, bounds.minLat],
+        [bounds.maxLng, bounds.maxLat]
+      );
+      this.map.fitBounds(mapBounds, {
+        padding: 50
+      });
+    }
+    return Promise.resolve();
+  }
+
   setAverageType(averageType: 'avg' | 'pop'): void {
     this.averageType = averageType;
     if (this.currentProject) {
@@ -302,6 +316,9 @@ export class MapV2Service {
         type: 'fill',
         source: 'geodata',
         'source-layer': 'geodata',
+        metadata: {
+          'project-id': projectID
+        },
         paint: {
           'fill-color': [
             'case',

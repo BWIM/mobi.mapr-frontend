@@ -87,12 +87,12 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       this.map.dragRotate.disable();
       this.map.touchZoomRotate.disable();
 
-      // Setup map events
+      // Setup map events (no projectId for main map - it uses the service subscription)
       this.setupMapEvents(this.map);
     }
   }
 
-  private setupMapEvents(map: Map): void {
+  private setupMapEvents(map: Map, projectId?: string): void {
     // Add panning event listeners to adjust layer opacity
     map.on('dragstart', () => {
       if (map?.getLayer('geodata-fill')) {
@@ -124,6 +124,12 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
 
     map.on('zoomend', () => {
       this.mapService.updateZoom(map.getZoom());
+      
+      // If this is a compare map (projectId is provided), update its style manually
+      if (projectId) {
+        const style = this.mapService['getProjectMapStyle'](projectId);
+        map.setStyle(style);
+      }
     });
 
     // Add sourcedata event handler to track tile loading
@@ -163,8 +169,14 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
         const feature = e.features[0];
         // Use the click coordinates as the center
         const coordinates = [e.lngLat.lng, e.lngLat.lat];
+        const metadata = feature['layer']?.['metadata'] as { 'project-id': string };
+        if (metadata) {
+          console.log(metadata);
+          this.analyzeService.setCurrentProject(metadata['project-id']);
+        }
         
         const resolution = map && map.getZoom() > 10 ? "hexagon" : "gemeinde";
+        // this.analyzeService.setCurrentProject(feature)
         this.analyzeService.setSelectedFeature(feature, resolution, coordinates);
         this.mapService.setSelectedFeature(feature.properties['id']);
       }
@@ -227,11 +239,38 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
 
   private setupCompareMap() {
     this.isComparison = true;
+    
+    // Get bounds for proper zoom calculation
+    const bounds = this.mapService.getDataBounds();
+    let initialCenter = this.center;
+    let initialZoom = this.zoom;
+    
+    if (bounds) {
+      const mapBounds = new LngLatBounds(
+        [bounds.minLng, bounds.minLat],
+        [bounds.maxLng, bounds.maxLat]
+      );
+      
+      // Calculate center and zoom based on bounds
+      const center = mapBounds.getCenter();
+      initialCenter = [center.lng, center.lat];
+      
+      // Calculate appropriate zoom level for the bounds
+      const latDiff = bounds.maxLat - bounds.minLat;
+      const lngDiff = bounds.maxLng - bounds.minLng;
+      const latZoom = Math.log2(360 / latDiff);
+      const lngZoom = Math.log2(720 / lngDiff);
+      initialZoom = Math.min(latZoom, lngZoom) - 1; // Subtract 1 to add some padding
+    }
+
+    // Update the service's current zoom to match the calculated zoom
+    this.mapService.updateZoom(initialZoom);
+
     const beforeMap = new Map({
       container: "before",
       style: this.mapStyle,
-      center: this.center,
-      zoom: this.zoom,
+      center: initialCenter,
+      zoom: initialZoom,
       dragRotate: false,
       touchZoomRotate: false
     });
@@ -242,11 +281,8 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     beforeMap.dragRotate.disable();
     beforeMap.touchZoomRotate.disable();
 
-    // Setup events for before map
-    this.setupMapEvents(beforeMap);
-
+    // Get the correct style for after map based on current zoom
     let afterStyle = this.mapStyle;
-
     if (this.comparisonProject && this.comparisonProject.id !== undefined && this.comparisonProject.id !== null) {
       afterStyle = this.mapService['getProjectMapStyle'](String(this.comparisonProject.id));
     }
@@ -254,8 +290,8 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     const afterMap = new Map({
       container: "after",
       style: afterStyle,
-      center: this.center,
-      zoom: this.zoom,
+      center: initialCenter,
+      zoom: initialZoom,
       dragRotate: false,
       touchZoomRotate: false
     });
@@ -266,8 +302,41 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     afterMap.dragRotate.disable();
     afterMap.touchZoomRotate.disable();
 
-    // Setup events for after map
-    this.setupMapEvents(afterMap);
+    // Wait for both maps to load, then zoom to bounds and setup events
+    let mapsLoaded = 0;
+    const totalMaps = 2;
+    
+    const setupMaps = () => {
+      mapsLoaded++;
+      if (mapsLoaded === totalMaps) {
+        // Both maps are loaded, now zoom to bounds and setup events
+        if (bounds) {
+          const mapBounds = new LngLatBounds(
+            [bounds.minLng, bounds.minLat],
+            [bounds.maxLng, bounds.maxLat]
+          );
+          
+          beforeMap.fitBounds(mapBounds, {
+            padding: 50,
+            duration: 0 // No animation for comparison setup
+          });
+          
+          afterMap.fitBounds(mapBounds, {
+            padding: 50,
+            duration: 0 // No animation for comparison setup
+          });
+        }
+        
+        // Setup events after zoom is complete
+        setTimeout(() => {
+          this.setupMapEvents(beforeMap, this.mapService.getCurrentProject() || undefined);
+          this.setupMapEvents(afterMap, this.comparisonProject ? String(this.comparisonProject.id) : undefined);
+        }, 100);
+      }
+    };
+
+    beforeMap.on('load', setupMaps);
+    afterMap.on('load', setupMaps);
 
     var container = "#comparison-container";
 
