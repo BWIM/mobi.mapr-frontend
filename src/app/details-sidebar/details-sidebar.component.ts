@@ -42,6 +42,7 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
   comparisonProjects: Project[] = [];
   showComparisonDialog: boolean = false;
   selectedComparisonProject: Project | null = null;
+  isComparisonMode: boolean = false;
 
   constructor(
     public translate: TranslateService,
@@ -62,6 +63,15 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
           if (info) {
             this.projectLoaded.emit();
           }
+        }
+      )
+    );
+
+    // Subscribe to comparison mode changes
+    this.subscription.add(
+      this.mapService.comparison$.subscribe(
+        isComparison => {
+          this.isComparisonMode = isComparison;
         }
       )
     );
@@ -165,5 +175,10 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     this.selectedComparisonProject = project;
     this.mapService.setComparisonProject(project);
     this.showComparisonDialog = false;
+  }
+
+  exitComparisonMode(): void {
+    this.mapService.exitComparisonMode();
+    this.selectedComparisonProject = null;
   }
 } 

@@ -272,7 +272,8 @@
     "COMPARISON_DIALOG_TITLE": "Choose project",
     "CREATED": "Created",
     "COMPARISON_ERROR_TITLE": "No projects available",
-    "COMPARISON_DIALOG_NO_PROJECTS": "No similar project available"
+    "COMPARISON_DIALOG_NO_PROJECTS": "No similar project available",
+    "EXIT_COMPARISON": "Exit comparison"
   },
   "ANALYZE": {
     "PERSONA": {
