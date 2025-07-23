@@ -171,7 +171,6 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
         const coordinates = [e.lngLat.lng, e.lngLat.lat];
         const metadata = feature['layer']?.['metadata'] as { 'project-id': string };
         if (metadata) {
-          console.log(metadata);
           this.analyzeService.setCurrentProject(metadata['project-id']);
         }
         

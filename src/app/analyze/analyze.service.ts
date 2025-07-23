@@ -83,4 +83,9 @@ import { ShareService } from "../share/share.service";
       }
 
     }
+
+    getShape(featureId: string, type: string) {
+      const url = `${environment.apiUrl}/shapes?feature=${featureId}&type=${type}`;
+      return this.http.get<any>(url);
+    }
   }
