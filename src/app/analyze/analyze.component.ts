@@ -21,6 +21,8 @@ import { fromLonLat } from 'ol/proj';
 import Overlay from 'ol/Overlay';
 import { Style, Circle as CircleStyle, Fill, Stroke, Text } from 'ol/style';
 import { boundingExtent } from 'ol/extent';
+import GeoJSON from 'ol/format/GeoJSON';
+import { MultiPolygon } from 'ol/geom';
 
 @Component({
   selector: 'app-analyze',
@@ -76,6 +78,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   private overlay?: Overlay;
   private placesLayer?: VectorLayer<VectorSource>;
   private centerLayer?: VectorLayer<VectorSource>;
+  private shapeLayer?: VectorLayer<VectorSource>;
   private tooltipElement?: HTMLElement;
   private tooltipOverlay?: Overlay;
 
@@ -506,7 +509,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
     // Create labels with activity name and percentage
     const labelsWithPercentages = weightedSubactivityScores.map((item, index) =>
-      `${item.name} (${weights[index].toFixed(1)}%)`
+      `${item.name}`
     );
 
     const scoreNames = weightedSubactivityScores.map(item => this.getScoreName(item.score));
@@ -949,6 +952,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         this.map = undefined;
         this.placesLayer = undefined;
         this.centerLayer = undefined;
+        this.shapeLayer = undefined;
         this.tooltipElement = undefined;
         this.tooltipOverlay = undefined;
       } catch (error) {
@@ -1221,6 +1225,20 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         })
       });
 
+      // Create shape layer for the clicked feature
+      this.shapeLayer = new VectorLayer({
+        source: new VectorSource(),
+        style: new Style({
+          fill: new Fill({
+            color: 'rgba(76, 175, 80, 0.2)' // Semi-transparent green
+          }),
+          stroke: new Stroke({
+            color: '#4CAF50',
+            width: 2
+          })
+        })
+      });
+
       // Create places vector layer
       this.placesLayer = new VectorLayer({
         source: new VectorSource(),
@@ -1257,7 +1275,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
       this.map = new OlMap({
         target: 'places-map',
-        layers: [baseLayer, this.placesLayer, this.centerLayer],
+        layers: [baseLayer, this.shapeLayer, this.placesLayer, this.centerLayer],
         view: new View({
           center: fromLonLat([49.320099, 9.2156505]),
           zoom: 10
@@ -1269,6 +1287,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       if (coordinates) {
         this.map.getView().setCenter(fromLonLat([coordinates![0], coordinates![1]]));
       }
+
+      // Load the shape data for the clicked feature
+      this.loadShapeData();
 
       // Add hover event handlers
       this.map.on('pointermove', (event) => {
@@ -1338,6 +1359,41 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     }
   }
 
+  private loadShapeData(): void {
+    if (!this.feature || !this.shapeLayer) return;
+
+    const featureId = this.feature.properties?.['id'];
+    const resolution = this.analyzeService.getCurrentState().mapType;
+    
+    if (!featureId || !resolution) {
+      console.warn('Missing feature ID or resolution for shape loading');
+      return;
+    }
+
+    this.analyzeService.getShape(featureId, resolution).subscribe({
+      next: (shapeData) => {
+        let shape = JSON.parse(shapeData);
+        if (shape && shape.type === 'MultiPolygon') {
+          // Create a feature from the MultiPolygon geometry
+          const feature = new MultiPolygon(shape.coordinates);
+
+          this.shapeLayer?.getSource()?.addFeature(new Feature({
+            geometry: feature
+          }));
+        }
+      },
+      error: (error) => {
+        console.error('Error loading shape data:', error);
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Warning',
+          detail: 'Could not load feature shape',
+          life: 3000
+        });
+      }
+    });
+  }
+
   private addPlacesToMap(places: Place[]) {
     if (!this.map || !this.placesLayer || !this.centerLayer) {
       console.error("Map or layers not initialized.");
@@ -1347,17 +1403,6 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     // Clear existing features from the layers
     this.placesLayer.getSource()?.clear();
     this.centerLayer.getSource()?.clear();
-
-    const coordinates = this.analyzeService.getCoordinates();
-    // add center point to center layer
-    this.centerLayer.getSource()?.addFeature(new Feature({
-      geometry: new Point(fromLonLat([coordinates![0], coordinates![1]])),
-      name: "Center",
-      id: "center",
-      rating: 0,
-      activity: "clicked point"
-    }));
-    
 
     // Add new features to the places layer
     places.forEach(place => {
@@ -1395,16 +1440,5 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const allCoordinates = centerCoordinate 
       ? [...placeCoordinates, centerCoordinate]
       : placeCoordinates;
-    
-    const extent = boundingExtent(allCoordinates);
-
-    // Add some padding to the extent
-    const padding = [50, 50, 50, 50]; // [top, right, bottom, left]
-    
-    this.map.getView().fit(extent, {
-      duration: 500,
-      padding: padding,
-      maxZoom: 15
-    });
   }
 }
