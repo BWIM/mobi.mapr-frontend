@@ -42,6 +42,8 @@ export class MapV2Service {
   comparisonProject: Project | null = null;
   private comparisonSubject = new BehaviorSubject<boolean>(false);
   comparison$ = this.comparisonSubject.asObservable();
+  private stopComparisonSubject = new BehaviorSubject<boolean>(false);
+  stopComparison$ = this.stopComparisonSubject.asObservable();
 
   constructor(
     private loadingService: LoadingService,
@@ -480,5 +482,18 @@ export class MapV2Service {
     this.comparisonProject = project;
     this.comparisonSubject.next(true);
     this.loadingService.stopLoading();
+  }
+
+  exitComparisonMode(): void {
+    this.comparisonProject = null;
+    this.comparisonSubject.next(false);
+    this.stopComparisonSubject.next(true);
+    // Reset the stop comparison subject after triggering it
+    setTimeout(() => this.stopComparisonSubject.next(false), 100);
+    // Don't reset the map - just restore the current project style
+    if (this.currentProject) {
+      const updatedStyle = this.getProjectMapStyle(this.currentProject);
+      this.mapStyleSubject.next(updatedStyle);
+    }
   }
 }

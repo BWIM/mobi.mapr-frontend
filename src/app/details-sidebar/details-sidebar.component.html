@@ -4,8 +4,6 @@
         <div class="mb-4">
         </div>
 
-        
-
         <div class="mb-6"  id="details-sidebar-content" >
           <h3 class="text-xl font-semibold text-primary mb-2">
             {{ projectInfo.display_name }}
@@ -90,12 +88,21 @@
           </p-button>
         </div>
 
-        <div class="mt-6 flex justify-center">
+        <div *ngIf="!isComparisonMode" class="mt-6 flex justify-center">
           <p-button 
             (onClick)="compareProjects()"
             icon="pi pi-arrows-h"
             [label]="'PROJECTS.COMPARE' | translate"
             styleClass="p-button-secondary">
+          </p-button>
+        </div>
+
+        <div *ngIf="isComparisonMode" class="mt-6 flex justify-center">
+          <p-button 
+            (onClick)="exitComparisonMode()"
+            icon="pi pi-times"
+            [label]="'SIDEBAR.EXIT_COMPARISON' | translate"
+            styleClass="p-button-danger">
           </p-button>
         </div>
 

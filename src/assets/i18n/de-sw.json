@@ -272,7 +272,8 @@
     "COMPARISON_DIALOG_TITLE": "Projäkt wähle",
     "CREATED": "Geschaffe",
     "COMPARISON_ERROR_TITLE": "Kein Projäktle",
-    "COMPARISON_DIALOG_NO_PROJECTS": "S gibbet koi gschäts Projäktle"
+    "COMPARISON_DIALOG_NO_PROJECTS": "S gibbet koi gschäts Projäktle",
+    "EXIT_COMPARISON": "Stops vergläiche"
   },
   "ANALYZE": {
     "PERSONA": {

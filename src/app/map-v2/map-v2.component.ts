@@ -30,6 +30,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   private subscription: Subscription;
   private boundsSubscription: Subscription;
   private comparisonSubscription: Subscription;
+  private stopComparisonSubscription: Subscription;
   private isComparison: boolean = false;
   projectName: string | null = null;
   comparisonProject: Project | null = null;
@@ -61,6 +62,12 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
         this.comparisonProject = this.mapService.comparisonProject;
         this.projectName = this.mapService.projectName;
         this.setupComparison();
+      }
+    });
+
+    this.stopComparisonSubscription = this.mapService.stopComparison$.subscribe(stop => {
+      if (stop) {
+        this.stopComparison();
       }
     });
   }
@@ -191,6 +198,12 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     }
     if (this.boundsSubscription) {
       this.boundsSubscription.unsubscribe();
+    }
+    if (this.comparisonSubscription) {
+      this.comparisonSubscription.unsubscribe();
+    }
+    if (this.stopComparisonSubscription) {
+      this.stopComparisonSubscription.unsubscribe();
     }
   }
 
