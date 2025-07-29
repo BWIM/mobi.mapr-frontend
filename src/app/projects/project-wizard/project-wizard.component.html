@@ -13,12 +13,12 @@
     
     <div class="flex flex-col h-full">
         <!-- Stepper -->
-        <div class="mb-8" *ngIf="!isMobile">
+        <div class="mb-8" *ngIf="!isMobile && activeIndex !== 3">
             <p-steps [model]="steps" [activeIndex]="activeIndex" [readonly]="true" [pTooltip]="'PROJECT_WIZARD.STEPS_TOOLTIP' | translate"></p-steps>
         </div>
 
         <!-- Mobile step indicator -->
-        <div class="mb-4" *ngIf="isMobile">
+        <div class="mb-4" *ngIf="isMobile && activeIndex !== 3">
             <div class="flex items-center justify-center">
                 <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-medium">
                     {{ 'PROJECT_WIZARD.STEPS.STEP' | translate }} {{ activeIndex + 1 }} {{ 'PROJECT_WIZARD.STEPS.OF' | translate }} {{ steps.length }}: {{ getCurrentStepLabel() | translate }}
@@ -27,8 +27,38 @@
         </div>
 
         <!-- Content -->
-        <div class="flex-grow overflow-auto p-4" [formGroup]="projectForm">
-            <p-scrollPanel [style]="{width: '100%', height: '100%'}">
+        <div class="flex-grow overflow-auto p-4" [formGroup]="projectForm" [class.p-0]="activeIndex === 3">
+            <!-- Map step - full height without scroll panel -->
+            <div *ngIf="activeIndex === 3" formGroupName="area" class="h-full w-full">
+                <div class="h-full w-full">
+                    <div class="flex h-full w-full">
+                        <div id="create-map" class="h-full w-2/3 rounded-lg">
+                        </div>      
+                        <div class="w-1/3 h-full pl-4">
+                            <p-scrollPanel [style]="{width: '100%', height: '100%'}" styleClass="custombar1">
+                                <div class="flex flex-col gap-2 p-2">
+                                    <div *ngFor="let land of lands" 
+                                        class="flex items-center p-3 bg-white rounded-lg shadow hover:bg-gray-50">
+                                        <p-checkbox
+                                            [binary]="true"
+                                            [indeterminate]="isLandIndeterminate(land)"
+                                            [(ngModel)]="land.checked"
+                                            [ngModelOptions]="{standalone: true}"
+                                            (onChange)="selectLand(land)">
+                                        </p-checkbox>
+                                        <label class="ml-2 cursor-pointer">
+                                            {{land.name}}
+                                        </label>
+                                    </div>
+                                </div>
+                            </p-scrollPanel>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other steps - with scroll panel -->
+            <p-scrollPanel *ngIf="activeIndex !== 3" [style]="{width: '100%', height: '100%'}">
                 <!-- Schritt 1: Aktivitätsauswahl -->
                 <div *ngIf="activeIndex === 0" formGroupName="activities">
                     <div class="flex justify-between items-center mb-4">
@@ -238,7 +268,8 @@
                 </div>
 
                 <!-- Schritt 4: Gebiet auswählen -->
-                <div *ngIf="activeIndex === 3" formGroupName="area" class="h-[calc(100%-4rem)]">
+                <!-- This step is now handled by the full-height container above -->
+                <!-- <div *ngIf="activeIndex === 3" formGroupName="area" class="h-[calc(100%-4rem)]">
                     <h2 class="text-2xl mb-4">{{ 'PROJECT_WIZARD.CREATE_PROJECT' | translate }}</h2>
                     <div class="h-[calc(100%-2rem)]">
                         <div class="flex h-full w-full">
@@ -265,7 +296,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Schritt 5: Zusammenfassung -->
                 <div *ngIf="activeIndex === 4" formGroupName="summary" class="animate-fadeIn">
