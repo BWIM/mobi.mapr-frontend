@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, Observable, of } from "rxjs";
 import { MapGeoJSONFeature } from "maplibre-gl";
 import { environment } from "../../environments/environment";
 import { HttpClient } from "@angular/common/http";
@@ -22,6 +22,7 @@ import { ShareService } from "../share/share.service";
     private resolution: string | null = null;
     private coordinates: number[] | null = null;
     private hexagonView: boolean = false;
+    private disablePlaces: boolean = false;
   
     show() {
       this.visibleSubject.next(true);
@@ -63,13 +64,19 @@ import { ShareService } from "../share/share.service";
         feature: this.selectedFeature
       };
     }
-
-    getPlaces(activityId: number) {
+    getPlaces(activityId: number): Observable<Place[]> {
       let type = this.resolution;
       const featureId = this.featureId;
 
       if (this.hexagonView) {
         type = "hexagon"
+      }
+
+      if (this.currentMapType === "state" || this.resolution === "county") {
+        this.disablePlaces = true;
+        return of([]);
+      } else {
+        this.disablePlaces = false;
       }
 
       if (this.shareService.getIsShare()) {
@@ -79,9 +86,7 @@ import { ShareService } from "../share/share.service";
       } else {
         const url = `${environment.apiUrl}/places/details?activity=${activityId}&type=${type}&feature=${featureId}&project=${this.currentProjectId}`;
         return this.http.get<Place[]>(url);
-        
       }
-
     }
 
     getShape(featureId: string, type: string) {

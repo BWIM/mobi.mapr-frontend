@@ -20,8 +20,6 @@ import Point from 'ol/geom/Point';
 import { fromLonLat } from 'ol/proj';
 import Overlay from 'ol/Overlay';
 import { Style, Circle as CircleStyle, Fill, Stroke, Text } from 'ol/style';
-import { boundingExtent } from 'ol/extent';
-import GeoJSON from 'ol/format/GeoJSON';
 import { MultiPolygon } from 'ol/geom';
 
 @Component({
@@ -72,6 +70,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   subBarChartOptions: any;
   subactivitiesChartData: any;
   noPlaces: boolean = false;
+  disablePlaces: boolean = false;
 
   // Map properties
   private map?: OlMap;
@@ -623,6 +622,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       }, 200);
       
       this.analyzeService.getPlaces(activityId).subscribe((res: Place[]) => {
+        this.disablePlaces = res.length === 0;
         this.addPlacesToMap(res);
         this.zoomToPlaces(res);
         this.mapLoaded = true;

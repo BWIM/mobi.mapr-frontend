@@ -289,7 +289,8 @@
       "SWITCH_TO_DOUGHNUT": "Ansicht wechseln",
       "EXPLANATION": "Die Aktivitäten gewichtet nach lokaler Relevanz",
       "HINT": "Hinweis: Klicke auf einen Balken im Diagramm, um mehr Infos zu erhalten!",
-      "NO_PLACES": "Keine Orte gefunden"
+      "NO_PLACES": "Keine Orte gefunden",
+      "DISABLE_PLACES": "Die Orts-Ansicht ist nur für Gemeinde-Ebene oder Hexagone aktiviert. Um mehr Details zu bekommen, zoome in die Karte hinein!"
     },
     "MODES": {
       "TITLE": "Modi",
