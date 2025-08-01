@@ -6,7 +6,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { LoadingService } from '../services/loading.service';
 import { SearchOverlayComponent } from './search-overlay/search-overlay.component';
-import { LegendComponent } from '../legend/legend.component';
+import { LegendComponent } from '../legend/legend.component';	
 import { Project } from '../projects/project.interface';
 
 // @ts-ignore

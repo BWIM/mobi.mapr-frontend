@@ -127,7 +127,8 @@
       "DOWNLOAD": "Herunterladen",
       "CANCEL_TOOLTIP": "Abbrechen",
       "SAVE_TOOLTIP": "Speichern",
-      "EXPORT": "Exportieren"
+      "EXPORT": "Exportieren",
+      "EXPORTING": "Exportieren..."
     },
     "MESSAGES": {
       "ERROR": {
@@ -401,7 +402,10 @@
     "RESOLUTION": "Auflösung (DPI)",
     "MAP_EXTENT": "Kartenausschnitt",
     "CURRENT_VIEW": "Aktuelle Ansicht",
-    "FULL_MAP": "Gesamte Karte"
+    "FULL_MAP": "Gesamte Karte",
+    "EXPORT_INFO": "Export-Informationen",
+    "SELECTED_SIZE": "Ausgewählte Größe",
+    "ESTIMATED_SIZE": "Hinweis: Die Dateigröße hängt von der Kartenkomplexität und den gewählten Optionen ab"
   },
   "SEARCH_OVERLAY": {
     "SEARCH_PLACEHOLDER": "Orte suchen"
