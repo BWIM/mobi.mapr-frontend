@@ -45,6 +45,10 @@ import { ShareService } from "../share/share.service";
       this.currentMapType = mapType;
     }
 
+    getMapType(): string | null {
+      return this.currentMapType;
+    }
+
     setHexagonView(hexagonView: boolean) {
       this.hexagonView = hexagonView;
     }
