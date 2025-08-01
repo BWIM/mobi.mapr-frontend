@@ -144,7 +144,8 @@
       "CONFIRM_DELETE_GROUP": "Are you sure you want to delete this project group?"
     },
     "CANCEL": "Cancel",
-    "EXPORT": "Export"
+    "EXPORT": "Export",
+    "EXPORTING": "Exporting..."
   },
   "LEGEND": {
     "LVLA": "The required mobility time is max. 35% of the local average.",
@@ -400,7 +401,10 @@
     "LANDSCAPE": "Landscape",
     "PORTRAIT": "Portrait",
     "ORIENTATION": "Ortientation",
-    "TITLE": "PDF Export"
+    "TITLE": "PDF Export",
+    "EXPORT_INFO": "Export Information",
+    "SELECTED_SIZE": "Selected Size",
+    "ESTIMATED_SIZE": "Note: File size will depend on map complexity and selected options"
   },
   "SEARCH_OVERLAY": {
     "SEARCH_PLACEHOLDER": "Search locations"

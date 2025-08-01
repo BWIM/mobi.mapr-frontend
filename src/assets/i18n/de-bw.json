@@ -144,7 +144,8 @@
       "CONFIRM_DELETE_GROUP": "Bisch sicher, dass die Projäktgruppe glöscht werre soll?"
     },
     "CANCEL": "Abrräsche",
-    "EXPORT": "Export"
+    "EXPORT": "Export",
+    "EXPORTING": "Exportiere..."
   },
   "LEGEND": {
     "LVLA": "D erforderlichi Mobilitätszit isch maximal 35 % im lokale Vergliich.",
@@ -388,7 +389,10 @@
     "LANDSCAPE": "Breit",
     "PORTRAIT": "Hoch",
     "ORIENTATION": "Richtung",
-    "TITLE": "PDF Export"
+    "TITLE": "PDF Export",
+    "EXPORT_INFO": "Export-Informatione",
+    "SELECTED_SIZE": "Uusgwählte Größe",
+    "ESTIMATED_SIZE": "Hinweis: D' Dateigröße hängt vun dr Kartenkomplexität un dr gewählte Optione ab"
   },
   "SEARCH_OVERLAY": {
     "SEARCH_PLACEHOLDER": "Gugge gehn"
