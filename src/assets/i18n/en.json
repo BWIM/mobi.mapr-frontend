@@ -288,7 +288,8 @@
       "SWITCH_TO_DOUGHNUT": "Change view",
       "EXPLANATION": "The activities weighted by their local relevance",
       "HINT": "Hint: Click on a bar in the diagram to get more information!",
-      "NO_PLACES": "No places available"
+      "NO_PLACES": "No places available",
+      "DISABLE_PLACES": "The places are only available for hexagons or municipalities. Please zoom into the map to get more details!"
     },
     "MODES": {
       "TITLE": "Modes",

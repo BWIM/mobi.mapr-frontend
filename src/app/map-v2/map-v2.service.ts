@@ -77,7 +77,9 @@ export class MapV2Service {
           this.mapStyleSubject.next(updatedStyle);
           break;
         case ShortcutAction.TOGGLE_SCORE_DISPLAY:
-          this.toggleScoreDisplay();
+          if (this.analyzeService.getMapType() !== "hexagon") {
+            this.toggleScoreDisplay();
+          }
           break;
       }
     });

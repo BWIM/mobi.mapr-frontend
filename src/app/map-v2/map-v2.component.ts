@@ -8,6 +8,7 @@ import { LoadingService } from '../services/loading.service';
 import { SearchOverlayComponent } from './search-overlay/search-overlay.component';
 import { LegendComponent } from '../legend/legend.component';	
 import { Project } from '../projects/project.interface';
+import { ScoringService } from '../services/scoring.service';
 
 // @ts-ignore
 import MaplibreCompare from '@maplibre/maplibre-gl-compare';
@@ -35,7 +36,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   projectName: string | null = null;
   comparisonProject: Project | null = null;
   currentProject: string | null = null;
-  constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService) {
+  constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService, private scoringService: ScoringService) {
     this.subscription = this.mapService.mapStyle$.subscribe(style => {
       this.mapStyle = style;
       if (this.map) {
@@ -155,7 +156,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
 
           const popupContent = `
             <div style="padding: 5px;">
-              ${name}: <strong>${this.getScoreName(properties['score'])}</strong>
+              ${name}: <strong>${this.scoringService.getScoreName(properties['score'])}</strong>
             </div>
           `;
 
@@ -180,7 +181,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
         if (metadata) {
           this.analyzeService.setCurrentProject(metadata['project-id']);
         }
-        
+
         const resolution = map && map.getZoom() > 10 ? "hexagon" : "gemeinde";
         // this.analyzeService.setCurrentProject(feature)
         this.analyzeService.setSelectedFeature(feature, resolution, coordinates);
@@ -209,28 +210,6 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
 
   setProject(projectId: string) {
     this.mapService.setProject(projectId);
-  }
-
-  private getScoreName(score: number): string {
-    if (score <= 0) return "Error";
-    if (score < 0.28) return "A+";
-    if (score < 0.32) return "A";
-    if (score < 0.35) return "A-";
-    if (score < 0.4) return "B+";
-    if (score < 0.45) return "B";
-    if (score < 0.5) return "B-";
-    if (score < 0.56) return "C+";
-    if (score < 0.63) return "C";
-    if (score < 0.71) return "C-";
-    if (score < 0.8) return "D+";
-    if (score < 0.9) return "D";
-    if (score < 1.0) return "D-";
-    if (score < 1.12) return "E+";
-    if (score < 1.26) return "E";
-    if (score < 1.41) return "E-";
-    if (score < 1.59) return "F+";
-    if (score < 1.78) return "F";
-    return "F-";
   }
 
   onLocationSelected(location: {lng: number, lat: number}) {

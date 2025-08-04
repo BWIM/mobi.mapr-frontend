@@ -288,7 +288,8 @@
       "SWITCH_TO_DOUGHNUT": "Aasicht wechsle",
       "EXPLANATION": "D Aktivitäte gwichtet nach lokaler Relevanz",
       "HINT": "Obacht: Dabb uff de balge, um mehr infos zu b'komme",
-      "NO_PLACES": "Kei Ort gefunne"
+      "NO_PLACES": "Kei Ort gefunne",
+      "DISABLE_PLACES": "Orte gibts nur für Gmeinde oder drunner"
     },
     "MODES": {
       "TITLE": "Modi",

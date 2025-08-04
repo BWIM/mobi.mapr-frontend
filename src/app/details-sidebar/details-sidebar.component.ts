@@ -110,6 +110,7 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
           const baseUrl = window.location.origin;
           this.shareUrl = `${baseUrl}/share/${response}`;
           this.isGeneratingShare = false;
+          this.copyToClipboard(this.shareUrl);
         },
         error: (error) => {
           console.error('Error generating share link:', error);
@@ -175,6 +176,7 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     this.selectedComparisonProject = project;
     this.mapService.setComparisonProject(project);
     this.showComparisonDialog = false;
+    this.shareUrl = null;
   }
 
   exitComparisonMode(): void {

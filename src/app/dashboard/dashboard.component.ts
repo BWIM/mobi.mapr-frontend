@@ -44,10 +44,10 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  @HostListener('window:resize', ['$event'])
-  onResize() {
-    this.checkMobile();
-  }
+  // @HostListener('window:resize', ['$event'])
+  // onResize() {
+  //   this.checkMobile();
+  // }
 
   private checkMobile(): void {
     this.isMobile = window.innerWidth < 768;

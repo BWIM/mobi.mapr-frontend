@@ -288,7 +288,8 @@
       "SWITCH_TO_DOUGHNUT": "Aasicht wechsle",
       "EXPLANATION": "D Aktivitäte gwichtet nach lokaler Relevanz",
       "HINT": "Uffbasse: Dabscht uff de Balke um mähr Infos z'krije",
-      "NO_PLACES": "Koi plätzle gefunne"
+      "NO_PLACES": "Koi plätzle gefunne",
+      "DISABLE_PLACES": "Die Orte gibbets nur uff Gemeinde-Ebene oder runner"
     },
     "MODES": {
       "TITLE": "Modi",

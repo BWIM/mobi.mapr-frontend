@@ -20,9 +20,8 @@ import Point from 'ol/geom/Point';
 import { fromLonLat } from 'ol/proj';
 import Overlay from 'ol/Overlay';
 import { Style, Circle as CircleStyle, Fill, Stroke, Text } from 'ol/style';
-import { boundingExtent } from 'ol/extent';
-import GeoJSON from 'ol/format/GeoJSON';
 import { MultiPolygon } from 'ol/geom';
+import { ScoringService } from '../services/scoring.service';
 
 @Component({
   selector: 'app-analyze',
@@ -67,11 +66,13 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   activitiesChartData: any;
   profilesChartData: any;
   radarChartOptions: any;
+  radarChartOptionsProfiles: any;
   barChartOptions: any;
   profilesBarChartOptions: any;
   subBarChartOptions: any;
   subactivitiesChartData: any;
   noPlaces: boolean = false;
+  disablePlaces: boolean = false;
 
   // Map properties
   private map?: OlMap;
@@ -130,6 +131,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     private projectsService: ProjectsService,
     private cdr: ChangeDetectorRef,
     private messageService: MessageService,
+    private scoringService: ScoringService
   ) {
     this.subscriptions.push(
       this.analyzeService.visible$.subscribe(
@@ -272,6 +274,14 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         }
       }
     };
+
+    this.radarChartOptionsProfiles = {
+      plugins: {
+        legend: {
+          position: 'bottom',
+        }
+      }
+    }
   }
 
   private initializeChartData(): void {
@@ -344,7 +354,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const labels = sortedData.map(item => item.name);
     const scores = sortedData.map(item => item.score * 100);
     const weights = sortedData.map(item => item.weight);
-    const scoreNames = sortedData.map(item => this.getScoreName(item.score));
+    const scoreNames = sortedData.map(item => this.scoringService.getScoreName(item.score));
 
 
     const scoreColors = scores.map(value => this.getColorForValue(value));
@@ -413,7 +423,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           },
           title: {
             display: true,
-            text: 'Gewichtung (%)'
+            text: 'Gewichtung'
           }
         }
       }
@@ -512,7 +522,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       `${item.name}`
     );
 
-    const scoreNames = weightedSubactivityScores.map(item => this.getScoreName(item.score));
+    const scoreNames = weightedSubactivityScores.map(item => this.scoringService.getScoreName(item.score));
     const scoreColors = scores.map(value => this.getColorForValue(value));
 
     // Create chart data
@@ -623,6 +633,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       }, 200);
       
       this.analyzeService.getPlaces(activityId).subscribe((res: Place[]) => {
+        this.disablePlaces = res.length === 0;
         this.addPlacesToMap(res);
         this.zoomToPlaces(res);
         this.mapLoaded = true;
@@ -653,6 +664,143 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     };
     
     tryInitializeMap();
+  }
+
+  private createRadarChartData(
+    labels: string[], 
+    data: number[], 
+    scoreNames: string[], 
+    datasetLabel: string
+  ): { chartData: any, chartOptions: any } {
+    const borderColors = data.map(value => this.getColorForValue(value * 100));
+
+    // Basis-Datensatz für die Hintergrundfarben (inverted)
+    const baseDatasets = [
+      {
+        label: '',
+        data: labels.map(() => 1.41), // Fills from 1.41 to 2.0
+        backgroundColor: 'rgba(150, 86, 162, 0.2)',
+        borderWidth: 0,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        fill: 'start' // Fill to the next dataset (E)
+      },
+      {
+        label: '',
+        data: labels.map(() => 1.0), // Fills from 1.0 to 1.41
+        backgroundColor: 'rgba(194, 24, 7, 0.2)',
+        borderWidth: 0,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        fill: '+1' // Fill to the next dataset (D)
+      },
+      {
+        label: '',
+        data: labels.map(() => 0.72), // Fills from 0.72 to 1.0
+        backgroundColor: 'rgba(237, 112, 20, 0.2)',
+        borderWidth: 0,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        fill: '+1' // Fill to the next dataset (C)
+      },
+      {
+        label: '',
+        data: labels.map(() => 0.5), // Fills from 0.51 to 0.72
+        backgroundColor: 'rgba(238, 210, 2, 0.2)',
+        borderWidth: 0,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        fill: '+1' // Fill to the next dataset (B)
+      },
+      {
+        label: '',
+        data: labels.map(() => 0.35), // Fills from 0.35 to 0.51
+        backgroundColor: 'rgba(60, 176, 67, 0.2)',
+        borderWidth: 0,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        fill: '+1' // Fill to the next dataset (A)
+      },
+      {
+        label: '',
+        data: labels.map(() => 0.35), // Fills from 0 to 0.35
+        backgroundColor: 'rgba(50, 97, 45, 0.2)',
+        borderWidth: 0,
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        fill: 'origin' // Fill to the origin (0)
+      }
+    ];
+
+    const chartData = {
+      labels: labels,
+      datasets: [
+        ...baseDatasets.reverse(),
+        {
+          label: datasetLabel,
+          data: data,
+          backgroundColor: 'rgba(0, 0, 0, 0.0)',
+          borderColor: borderColors,
+          borderWidth: 2,
+          pointBackgroundColor: borderColors,
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: borderColors,
+          fill: false
+        }
+      ]
+    };
+
+    const chartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            label: (context: any) => {
+              // Only show tooltip for datasets that have a label (actual data points)
+              if (context.dataset.label) {
+                const index = context.dataIndex;
+                return `Score: ${scoreNames[index]}`;
+              }
+              return null; // Hide background datasets from tooltip
+            }
+          }
+        },
+        legend: {
+          position: 'bottom',
+          labels: {
+            generateLabels: this.generateLabels,
+            usePointStyle: false,
+            padding: 15
+          }
+        }
+      },
+      scales: {
+        r: {
+          beginAtZero: true,
+          max: 1.41,
+          min: 0,
+          ticks: {
+            stepSize: 0.2,
+            color: '#495057'
+          },
+          grid: {
+            color: '#ebedef'
+          },
+          pointLabels: {
+            color: '#495057',
+            font: {
+              size: 12
+            }
+          }
+        }
+      }
+    };
+
+    return { chartData, chartOptions };
   }
 
   private initializePersonaChart(): void {
@@ -691,130 +839,11 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const personaMap = new Map(this.projectDetails.personas.map(p => [p.id, p.name]));
     const labels = sortedPersonas.map(persona => personaMap.get(persona.persona) || `${persona.persona}`);
     const data = sortedPersonas.map(persona => persona.score);
-    const scoreNames = sortedPersonas.map(persona => this.getScoreName(persona.score));
+    const scoreNames = sortedPersonas.map(persona => this.scoringService.getScoreName(persona.score));
 
-    const borderColors = data.map(value => this.getColorForValue(value * 100));
-
-    this.radarChartOptions = {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        tooltip: {
-          mode: 'index',
-          intersect: false,
-          callbacks: {
-            label: (context: any) => {
-              const index = context.dataIndex;
-              return `Score: ${scoreNames[index]}`;
-            }
-          }
-        },
-        legend: {
-          position: 'bottom',
-          labels: {
-            generateLabels: this.generateLabels,
-            usePointStyle: false,
-            padding: 15
-          }
-        }
-      },
-      scales: {
-        r: {
-          beginAtZero: true,
-          max: 1.41,
-          min: 0,
-          ticks: {
-            stepSize: 0.2,
-            color: '#495057'
-          },
-          grid: {
-            color: '#ebedef'
-          },
-          pointLabels: {
-            color: '#495057',
-            font: {
-              size: 12
-            }
-          }
-        }
-      }
-    };
-
-    // Basis-Datensatz für die Hintergrundfarben (inverted)
-    const baseDatasets = [
-      {
-        label: 'F',
-        data: labels.map(() => 1.41), // Fills from 1.41 to 2.0
-        backgroundColor: 'rgba(150, 86, 162, 0.2)',
-        borderWidth: 0,
-        pointRadius: 0,
-        pointHoverRadius: 0,
-        fill: 'start' // Fill to the next dataset (E)
-      },
-      {
-        label: 'E',
-        data: labels.map(() => 1.0), // Fills from 1.0 to 1.41
-        backgroundColor: 'rgba(194, 24, 7, 0.2)',
-        borderWidth: 0,
-        pointRadius: 0,
-        pointHoverRadius: 0,
-        fill: '+1' // Fill to the next dataset (D)
-      },
-      {
-        label: 'D',
-        data: labels.map(() => 0.72), // Fills from 0.72 to 1.0
-        backgroundColor: 'rgba(237, 112, 20, 0.2)',
-        borderWidth: 0,
-        pointRadius: 0,
-        pointHoverRadius: 0,
-        fill: '+1' // Fill to the next dataset (C)
-      },
-      {
-        label: 'C',
-        data: labels.map(() => 0.5), // Fills from 0.51 to 0.72
-        backgroundColor: 'rgba(238, 210, 2, 0.2)',
-        borderWidth: 0,
-        pointRadius: 0,
-        pointHoverRadius: 0,
-        fill: '+1' // Fill to the next dataset (B)
-      },
-      {
-        label: 'B',
-        data: labels.map(() => 0.35), // Fills from 0.35 to 0.51
-        backgroundColor: 'rgba(60, 176, 67, 0.2)',
-        borderWidth: 0,
-        pointRadius: 0,
-        pointHoverRadius: 0,
-        fill: '+1' // Fill to the next dataset (A)
-      },
-      {
-        label: 'A',
-        data: labels.map(() => 0.35), // Fills from 0 to 0.35
-        backgroundColor: 'rgba(50, 97, 45, 0.2)',
-        borderWidth: 0,
-        pointRadius: 0,
-        pointHoverRadius: 0,
-        fill: 'origin' // Fill to the origin (0)
-      }
-    ]
-    this.personaChartData = {
-      labels: labels,
-      datasets: [
-        ...baseDatasets.reverse(),
-        {
-          label: 'Persona-Werte',
-          data: data,
-          backgroundColor: 'rgba(0, 0, 0, 0.0)',
-          borderColor: borderColors,
-          borderWidth: 2,
-          pointBackgroundColor: borderColors,
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: borderColors,
-          fill: false
-        }
-      ]
-    };
+    const { chartData, chartOptions } = this.createRadarChartData(labels, data, scoreNames, 'Persona-Werte');
+    this.personaChartData = chartData;
+    this.radarChartOptions = chartOptions;
   }
 
   private initializeProfilesChart(): void {
@@ -852,79 +881,98 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     // Get profile names from formatted_profiles
     const profileMap = new Map(this.projectDetails.profiles.map(p => [p.id, p.name]));
     const labels = sortedProfiles.map(profile => profileMap.get(profile.profile) || `${profile.profile}`);
-    const data = sortedProfiles.map(profile => profile.score * 100); // Convert to percentage for display
-    const scoreNames = sortedProfiles.map(profile => this.getScoreName(profile.score));
+    const data = sortedProfiles.map(profile => profile.score);
+    const scoreNames = sortedProfiles.map(profile => this.scoringService.getScoreName(profile.score));
 
-    const scoreColors = data.map(value => this.getColorForValue(value));
+    // Check if we have multiple profiles for radar chart
+    if (sortedProfiles.length >= 3) {
+      const { chartData, chartOptions } = this.createRadarChartData(labels, data, scoreNames, 'Profile-Werte');
+      this.profilesChartData = chartData;
+      this.radarChartOptionsProfiles = chartOptions;
+    } else {
+      // Single profile - use bar chart
+      const scoreColors = data.map(value => this.getColorForValue(value * 100));
 
-    this.profilesChartData = {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Profile',
-          data: data,
-          backgroundColor: scoreColors,
-          borderColor: scoreColors,
-          borderWidth: 1,
-          yAxisID: 'y',
-          barPercentage: 0.8
-        }
-      ]
-    };
+      // Invert the data for bar height: lower scores (better) should be taller bars
+      // Assuming the maximum possible score is 1.41 (141/100), we'll use (1.41 - score) as the bar height
+      const maxScore = 1.41;
+      const invertedData = data.map(score => maxScore - score);
 
-    // Create bar chart options similar to activities chart
-    this.profilesBarChartOptions = {
-      indexAxis: 'x',
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        tooltip: {
-          mode: 'index',
-          intersect: false,
-          callbacks: {
-            label: (context: any) => {
-              const index = context.dataIndex;
-              return `Score: ${scoreNames[index]}`;
+      this.profilesChartData = {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Profile',
+            data: invertedData,
+            backgroundColor: scoreColors,
+            borderColor: scoreColors,
+            borderWidth: 1,
+            yAxisID: 'y',
+            barPercentage: 0.8
+          }
+        ]
+      };
+
+      // Create bar chart options for single profile
+      this.profilesBarChartOptions = {
+        indexAxis: 'x',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+            callbacks: {
+              label: (context: any) => {
+                const index = context.dataIndex;
+                return `Score: ${scoreNames[index]}`;
+              }
+            }
+          },
+          legend: {
+            position: 'bottom',
+            labels: {
+              generateLabels: this.generateLabels,
+              usePointStyle: false,
+              padding: 15
             }
           }
         },
-        legend: {
-          position: 'bottom',
-          labels: {
-            generateLabels: this.generateLabels,
-            usePointStyle: false,
-            padding: 15
-          }
-        }
-      },
-      scales: {
-        x: {
-          ticks: {
-            color: '#495057'
+        scales: {
+          x: {
+            ticks: {
+              color: '#495057'
+            },
+            grid: {
+              color: '#ebedef'
+            }
           },
-          grid: {
-            color: '#ebedef'
-          }
-        },
-        y: {
-          type: 'linear',
-          display: true,
-          position: 'left',
-          beginAtZero: true,
-          max: 141, // Maximum score value
-          ticks: {
-            color: '#495057'
-          },
-          grid: {
-            color: '#ebedef'
-          },
-          title: {
+          y: {
+            type: 'linear',
             display: true,
-            text: 'Score (%)'
+            beginAtZero: true,
+            max: 1.41,
+            ticks: {
+              color: '#495057',
+              callback: function(value: number) {
+                // Map numeric values to grade labels
+                if (value >= 1.41) return 'A';
+                if (value >= 1.0) return 'B';
+                if (value >= 0.72) return 'C';
+                if (value >= 0.51) return 'D';
+                if (value >= 0.35) return 'E';
+                if (value >= 0) return 'F';
+                return '';
+              },
+              stepSize: 0.2
+            },
+            grid: {
+              color: '#ebedef'
+            }
           }
         }
-      }
-    };
+      };
+    }
   }
 
 
@@ -1142,27 +1190,6 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     }, 100);
   }
 
-  getScoreName(score: number): string {
-    if (score <= 0) return "Error";
-    if (score < 0.28) return "A+";
-    if (score < 0.32) return "A";
-    if (score < 0.35) return "A-";
-    if (score < 0.4) return "B+";
-    if (score < 0.45) return "B";
-    if (score < 0.5) return "B-";
-    if (score < 0.56) return "C+";
-    if (score < 0.63) return "C";
-    if (score < 0.71) return "C-";
-    if (score < 0.8) return "D+";
-    if (score < 0.9) return "D";
-    if (score < 1.0) return "D-";
-    if (score < 1.12) return "E+";
-    if (score < 1.26) return "E";
-    if (score < 1.41) return "E-";
-    if (score < 1.59) return "F+";
-    if (score < 1.78) return "F";
-    return "F-";
-  }
 
   private initializeMap() {
     try {
