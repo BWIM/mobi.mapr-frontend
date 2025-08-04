@@ -21,6 +21,7 @@ import { fromLonLat } from 'ol/proj';
 import Overlay from 'ol/Overlay';
 import { Style, Circle as CircleStyle, Fill, Stroke, Text } from 'ol/style';
 import { MultiPolygon } from 'ol/geom';
+import { ScoringService } from '../services/scoring.service';
 
 @Component({
   selector: 'app-analyze',
@@ -129,6 +130,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     private projectsService: ProjectsService,
     private cdr: ChangeDetectorRef,
     private messageService: MessageService,
+    private scoringService: ScoringService
   ) {
     this.subscriptions.push(
       this.analyzeService.visible$.subscribe(
@@ -343,7 +345,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const labels = sortedData.map(item => item.name);
     const scores = sortedData.map(item => item.score * 100);
     const weights = sortedData.map(item => item.weight);
-    const scoreNames = sortedData.map(item => this.getScoreName(item.score));
+    const scoreNames = sortedData.map(item => this.scoringService.getScoreName(item.score));
 
 
     const scoreColors = scores.map(value => this.getColorForValue(value));
@@ -511,7 +513,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       `${item.name}`
     );
 
-    const scoreNames = weightedSubactivityScores.map(item => this.getScoreName(item.score));
+    const scoreNames = weightedSubactivityScores.map(item => this.scoringService.getScoreName(item.score));
     const scoreColors = scores.map(value => this.getColorForValue(value));
 
     // Create chart data
@@ -691,7 +693,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const personaMap = new Map(this.projectDetails.personas.map(p => [p.id, p.name]));
     const labels = sortedPersonas.map(persona => personaMap.get(persona.persona) || `${persona.persona}`);
     const data = sortedPersonas.map(persona => persona.score);
-    const scoreNames = sortedPersonas.map(persona => this.getScoreName(persona.score));
+    const scoreNames = sortedPersonas.map(persona => this.scoringService.getScoreName(persona.score));
 
     const borderColors = data.map(value => this.getColorForValue(value * 100));
 
@@ -853,7 +855,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const profileMap = new Map(this.projectDetails.profiles.map(p => [p.id, p.name]));
     const labels = sortedProfiles.map(profile => profileMap.get(profile.profile) || `${profile.profile}`);
     const data = sortedProfiles.map(profile => profile.score * 100); // Convert to percentage for display
-    const scoreNames = sortedProfiles.map(profile => this.getScoreName(profile.score));
+    const scoreNames = sortedProfiles.map(profile => this.scoringService.getScoreName(profile.score));
 
     const scoreColors = data.map(value => this.getColorForValue(value));
 
@@ -1142,27 +1144,6 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     }, 100);
   }
 
-  getScoreName(score: number): string {
-    if (score <= 0) return "Error";
-    if (score < 0.28) return "A+";
-    if (score < 0.32) return "A";
-    if (score < 0.35) return "A-";
-    if (score < 0.4) return "B+";
-    if (score < 0.45) return "B";
-    if (score < 0.5) return "B-";
-    if (score < 0.56) return "C+";
-    if (score < 0.63) return "C";
-    if (score < 0.71) return "C-";
-    if (score < 0.8) return "D+";
-    if (score < 0.9) return "D";
-    if (score < 1.0) return "D-";
-    if (score < 1.12) return "E+";
-    if (score < 1.26) return "E";
-    if (score < 1.41) return "E-";
-    if (score < 1.59) return "F+";
-    if (score < 1.78) return "F";
-    return "F-";
-  }
 
   private initializeMap() {
     try {
