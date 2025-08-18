@@ -12,6 +12,7 @@ export interface ScoreEntry {
   population?: number;
   population_density?: number;
   county?: string;
+  rank?: number;
 }
 
 @Injectable({
@@ -52,7 +53,7 @@ export class StatisticsService {
     );
   }
 
-  convertToScoreEntry(data: MunicipalityScore | CountyScore | StateScore, level: 'state' | 'county' | 'municipality'): ScoreEntry {
+  convertToScoreEntry(data: MunicipalityScore | CountyScore | StateScore, level: 'state' | 'county' | 'municipality', rank: number): ScoreEntry {
     if ('gemeinde' in data) {
       return {
         name: data.gemeinde.name,
@@ -60,7 +61,8 @@ export class StatisticsService {
         population: data.gemeinde.population,
         population_density: data.gemeinde.population_density,
         level: 'municipality',
-        county: data.landkreis
+        county: data.landkreis,
+        rank: rank
       };
     } else if ('landkreis' in data) {
       return {
@@ -68,7 +70,8 @@ export class StatisticsService {
         score: data.score_pop,
         population: data.landkreis.population,
         population_density: data.landkreis.population_density,
-        level: 'county'
+        level: 'county',
+        rank: rank
       };
     } else {
       return {
@@ -76,7 +79,8 @@ export class StatisticsService {
         score: data.score_pop,
         population: data.land.population,
         population_density: data.land.population_density,
-        level: 'state'
+        level: 'state',
+        rank: rank
       };
     }
   }

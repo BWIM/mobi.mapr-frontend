@@ -327,7 +327,9 @@
     "CURRENT_SETTINGS": "Aktuelle Einstellungen",
     "POPULATION_WEIGHTED": "Bevölkerung gewichtet",
     "AREA_WEIGHTED": "Fläche gewichtet",
-    "PROJECT_VERSION_INVALID": "Des Projäkt isch zu alt. Machs neu, um die Schtadistige zu sehe."
+    "FILTER_BY_CITY_SIZE": "Noch Bevölkerig filtere",
+    "PROJECT_VERSION_INVALID": "Des Projäkt isch zu alt. Machs neu, um die Schtadistige zu sehe.",
+    "POPULATION": "Bevölkerig"
   },
   "CREDITS": {
     "SHORTCUTS": {

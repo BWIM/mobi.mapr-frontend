@@ -6,7 +6,7 @@ import { ScrollPanelModule } from 'primeng/scrollpanel';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { LoadingService } from '../services/loading.service';
-import { MultiSelectModule } from 'primeng/multiselect';
+
 import { MapV2Service } from '../map-v2/map-v2.service';
 import { PaginatorModule } from 'primeng/paginator';
 import { GeocodingService } from '../services/geocoding.service';
@@ -23,7 +23,6 @@ import { ScoringService } from '../services/scoring.service';
     ScrollPanelModule,
     ButtonModule,
     ProgressSpinnerModule,
-    MultiSelectModule,
     PaginatorModule
   ],
   templateUrl: './statistics.component.html'
@@ -40,6 +39,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   countyScores: ScoreEntry[] = [];
   municipalityScores: ScoreEntry[] = [];
   filteredMunicipalityScores: ScoreEntry[] = [];
+  filteredCountyScores: ScoreEntry[] = [];
   
   // Pagination
   stateTotalRecords: number = 0;
@@ -48,20 +48,20 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   currentStatePage: number = 1;
   currentCountyPage: number = 1;
   currentMunicipalityPage: number = 1;
-  rowsPerPage: number = 15;
+  rowsPerPage: number = 50;
 
   // Score type
   scoreType: 'pop' | 'avg' = 'pop';
   scoreTypeOptions: any[] = [];
 
   populationCategories = [
-    { label: 'Landgemeinden (0-5.000)', value: 'small', min: 0, max: 5000 },
-    { label: 'Kleine Kleinstädte (5.001-10.000)', value: 'small', min: 5001, max: 10000 },
-    { label: 'Große Kleinstädte (10.001-20.000)', value: 'medium', min: 10001, max: 20000 },
-    { label: 'Kleine Mittelstädte (20.001-50.000)', value: 'medium', min: 20001, max: 50000 },
-    { label: 'Große Mittelstädte (50.001-100.000)', value: 'large', min: 50001, max: 100000 },
-    { label: 'Kleinere Großstädte (100.001-500.000)', value: 'large', min: 100001, max: 500000 },
-    { label: 'Große Großstädte (>500.000)', value: 'large', min: 500001, max: Infinity }
+    { label: 'Landgemeinden (0-5.000)', value: 'small', min: 0, max: 5000, displayText: '0-5K' },
+    { label: 'Kleine Kleinstädte (5.001-10.000)', value: 'small', min: 5001, max: 10000, displayText: '5-10K' },
+    { label: 'Große Kleinstädte (10.001-20.000)', value: 'medium', min: 10001, max: 20000, displayText: '10-20K' },
+    { label: 'Kleine Mittelstädte (20.001-50.000)', value: 'medium', min: 20001, max: 50000, displayText: '20-50K' },
+    { label: 'Große Mittelstädte (50.001-100.000)', value: 'large', min: 50001, max: 100000, displayText: '50-100K' },
+    { label: 'Kleinere Großstädte (100.001-500.000)', value: 'large', min: 100001, max: 500000, displayText: '100-500K' },
+    { label: 'Große Großstädte (>500.000)', value: 'large', min: 500001, max: Infinity, displayText: '>500K' }
   ];
   selectedCategories: any[] = this.populationCategories;
 
@@ -138,6 +138,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       this.loadCountyScores(projectId),
       this.loadMunicipalityScores(projectId)
     ]).finally(() => {
+      this.applyPopulationFilter();
       this.loading = false;
       this.loadingService.stopLoading();
     });
@@ -148,8 +149,8 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       const response = await this.statisticsService.getStateScores(projectId, this.currentStatePage, this.scoreType).toPromise();
       if (response) {
         this.stateTotalRecords = response.count;
-        this.stateScores = response.results.map(score => 
-          this.statisticsService.convertToScoreEntry(score, 'state')
+        this.stateScores = response.results.map((score, index) => 
+          this.statisticsService.convertToScoreEntry(score, 'state', index + 1)
         );
       }
     } catch (error) {
@@ -162,8 +163,8 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       const response = await this.statisticsService.getCountyScores(projectId, this.currentCountyPage, this.scoreType).toPromise();
       if (response) {
         this.countyTotalRecords = response.count;
-        this.countyScores = response.results.map(score => 
-          this.statisticsService.convertToScoreEntry(score, 'county')
+        this.countyScores = response.results.map((score, index) => 
+          this.statisticsService.convertToScoreEntry(score, 'county', index + 1)
         );
       }
     } catch (error) {
@@ -176,10 +177,9 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       const response = await this.statisticsService.getMunicipalityScores(projectId, this.currentMunicipalityPage, this.scoreType).toPromise();
       if (response) {
         this.municipalityTotalRecords = response.count;
-        this.municipalityScores = response.results.map(score => 
-          this.statisticsService.convertToScoreEntry(score, 'municipality')
+        this.municipalityScores = response.results.map((score, index) =>
+          this.statisticsService.convertToScoreEntry(score, 'municipality', index + 1)
         );
-        this.applyPopulationFilter();
       }
     } catch (error) {
       console.error('Error loading municipality scores:', error);
@@ -196,17 +196,20 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
   onCountyPageChange(event: any): void {
     this.currentCountyPage = event.page + 1;
-    const projectId = this.mapService.getCurrentProject();
-    if (projectId) {
-      this.loadCountyScores(projectId);
+    
+    const maxPages = Math.ceil(this.filteredCountyScores.length / this.rowsPerPage);
+    if (this.currentCountyPage > maxPages) {
+      this.currentCountyPage = maxPages;
     }
   }
 
   onMunicipalityPageChange(event: any): void {
+    console.log('onMunicipalityPageChange', event);
     this.currentMunicipalityPage = event.page + 1;
-    const projectId = this.mapService.getCurrentProject();
-    if (projectId) {
-      this.loadMunicipalityScores(projectId);
+
+    const maxPages = Math.ceil(this.filteredMunicipalityScores.length / this.rowsPerPage);
+    if (this.currentMunicipalityPage > maxPages) {
+      this.currentMunicipalityPage = maxPages;
     }
   }
 
@@ -218,23 +221,71 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     }
   }
 
-  onPopulationCategoryChange(): void {
+
+
+  isCategorySelected(category: any): boolean {
+    return this.selectedCategories.some(selected => selected.min === category.min && selected.max === category.max);
+  }
+
+  toggleCategory(category: any): void {
+    if (this.isCategorySelected(category)) {
+      this.selectedCategories = this.selectedCategories.filter(selected => 
+        !(selected.min === category.min && selected.max === category.max)
+      );
+    } else {
+      this.selectedCategories.push(category);
+    }
     this.applyPopulationFilter();
+    
+    // Reset pagination when filter changes
+    this.currentCountyPage = 1;
+    this.currentMunicipalityPage = 1;
+  }
+
+  getPopulationSizeText(category: any): string {
+    return category.displayText;
   }
 
   private applyPopulationFilter(): void {
     if (this.selectedCategories.length === 0) {
       this.filteredMunicipalityScores = this.municipalityScores;
-      return;
+      this.filteredCountyScores = this.countyScores;
+    } else {
+      this.filteredMunicipalityScores = this.municipalityScores.filter(score => {
+        if (!score.population) return false;
+        return this.selectedCategories.some(category => {
+          const { min, max } = category;
+          return score.population && score.population > min && score.population <= max;
+        });
+      });
+
+      this.filteredCountyScores = this.countyScores.filter(score => {
+        if (!score.population) return false;
+        return this.selectedCategories.some(category => {
+          const { min, max } = category;
+          return score.population && score.population > min && score.population <= max;
+        });
+      });
     }
 
-    this.filteredMunicipalityScores = this.municipalityScores.filter(score => {
-      if (!score.population) return false;
-      return this.selectedCategories.some(category => {
-        const { min, max } = category;
-        return score.population && score.population > min && score.population <= max;
-      });
-    });
+    // Reset page counters when filtering
+    this.currentCountyPage = 1;
+    this.currentMunicipalityPage = 1;
+
+    // Ensure current pages are valid after filtering
+    this.adjustPaginationAfterFilter();
+  }
+
+  private adjustPaginationAfterFilter(): void {
+    const maxCountyPages = Math.ceil(this.filteredCountyScores.length / this.rowsPerPage);
+    const maxMunicipalityPages = Math.ceil(this.filteredMunicipalityScores.length / this.rowsPerPage);
+    
+    if (this.currentCountyPage > maxCountyPages && maxCountyPages > 0) {
+      this.currentCountyPage = maxCountyPages;
+    }
+    if (this.currentMunicipalityPage > maxMunicipalityPages && maxMunicipalityPages > 0) {
+      this.currentMunicipalityPage = maxMunicipalityPages;
+    }
   }
 
 
@@ -245,6 +296,26 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
   getScoreColor(score: number): string {
     return this.scoringService.getScoreColor(score);
+  }
+
+  get filteredCountyCount(): number {
+    return this.filteredCountyScores.length;
+  }
+
+  get filteredMunicipalityCount(): number {
+    return this.filteredMunicipalityScores.length;
+  }
+
+  get paginatedCountyScores(): ScoreEntry[] {
+    const startIndex = (this.currentCountyPage - 1) * this.rowsPerPage;
+    const endIndex = startIndex + this.rowsPerPage;
+    return this.filteredCountyScores.slice(startIndex, endIndex);
+  }
+
+  get paginatedMunicipalityScores(): ScoreEntry[] {
+    const startIndex = (this.currentMunicipalityPage - 1) * this.rowsPerPage;
+    const endIndex = startIndex + this.rowsPerPage;
+    return this.filteredMunicipalityScores.slice(startIndex, endIndex);
   }
 
   async onFeatureClick(entry: ScoreEntry): Promise<void> {

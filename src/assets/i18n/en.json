@@ -391,7 +391,9 @@
     "CURRENT_SETTINGS": "Current settings",
     "POPULATION_WEIGHTED": "Population weighted",
     "AREA_WEIGHTED": "Area weighted",
-    "PROJECT_VERSION_INVALID": "The version of the project is too low. Please recreate it, to also show statistics."
+    "FILTER_BY_CITY_SIZE": "Filter by population",
+    "PROJECT_VERSION_INVALID": "The version of the project is too low. Please recreate it, to also show statistics.",
+    "POPULATION": "Population"
   },
   "PDF_EXPORT": {
     "FULL_MAP": "Full map",
