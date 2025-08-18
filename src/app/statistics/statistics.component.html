@@ -13,11 +13,31 @@
         <p-progress-spinner strokeWidth="8" fill="transparent" animationDuration=".5s" [style]="{ width: '50px', height: '50px' }" class="center"/>
     </div>
 
+    <!-- Population Filter Chips -->
+    <div class="mb-6 p-4 bg-gray-50 rounded-lg" *ngIf="!loading && isProjectVersionValid">
+        <h3 class="text-sm font-medium text-gray-700 mb-3">{{ 'STATISTICS.FILTER_BY_CITY_SIZE' | translate }}</h3>
+        <div class="flex flex-wrap gap-2">
+            <span *ngFor="let category of populationCategories" 
+                  class="px-3 py-2 rounded-full text-sm font-medium cursor-pointer transition-all duration-200 select-none"
+                  [class]="isCategorySelected(category) ? 'bg-primary shadow-md' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-300 line-through'"
+                  [title]="category.label"
+                  (click)="toggleCategory(category)">
+                {{ getPopulationSizeText(category) }}
+            </span>
+        </div>
+        
+        <!-- Background Loading Indicator -->
+        <div *ngIf="backgroundLoading" class="mt-3 flex items-center text-sm text-gray-600">
+            <p-progress-spinner strokeWidth="4" fill="transparent" animationDuration="1s" [style]="{ width: '20px', height: '20px' }" class="mr-2"/>
+            <span>{{ 'STATISTICS.LOADING_MORE_DATA' | translate }}</span>
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6" *ngIf="!loading && isProjectVersionValid">
         <div *ngIf="stateScores.length > 0" class="bg-white rounded-lg shadow-md overflow-hidden">
             <h2 class="text-xl font-bold p-4 border-b-2 border-primary text-gray-800">{{ 'STATISTICS.STATES' | translate }}</h2>
             <p-scrollPanel [style]="{ height: '400px' }">
-                <p-table [value]="stateScores" styleClass="text-sm">
+                <p-table [value]="paginatedStateScores" styleClass="text-sm">
                     <ng-template pTemplate="header">
                         <tr class="bg-gray-100">
                             <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.RANK' | translate }}</th>
@@ -27,8 +47,8 @@
                     </ng-template>
                     <ng-template pTemplate="body" let-score let-i="rowIndex">
                         <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
-                            <td class="p-3">{{i + 1}}</td>
-                            <td class="p-3" (click)="onFeatureClick(score)">{{score.name}}</td>
+                            <td class="p-3">{{score.rank}}</td>
+                            <td class="p-3" (click)="onFeatureClick(score)" title="{{score.name}} ({{'STATISTICS.POPULATION' | translate}}: {{(score.population) | number:'1.0-0'}})">{{score.name}}</td>
                             <td class="p-3 font-semibold" [style.color]="getScoreColor(score.score)">
                                 {{getScoreName(score.score)}}
                             </td>
@@ -39,9 +59,15 @@
             <div class="p-4 border-t border-gray-100">
                 <p-paginator 
                     [rows]="rowsPerPage" 
-                    [totalRecords]="stateTotalRecords"
+                    [totalRecords]="stateScores.length"
                     (onPageChange)="onStatePageChange($event)"
-                    [rowsPerPageOptions]="[15]">
+                    [showPageLinks]="false"
+                    [showFirstLastIcon]="true"
+                    [alwaysShow]="false"
+                    [showJumpToPageDropdown]="false"
+                    [first]="(currentStatePage - 1) * rowsPerPage"
+                    [showCurrentPageReport]="true"
+                    currentPageReportTemplate="{currentPage} / {totalPages}">
                 </p-paginator>
             </div>
         </div>
@@ -49,7 +75,7 @@
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <h2 class="text-xl font-bold p-4 border-b-2 border-primary text-gray-800">{{ 'STATISTICS.COUNTIES' | translate }}</h2>
             <p-scrollPanel [style]="{ height: '400px' }">
-                <p-table [value]="countyScores" styleClass="text-sm">
+                <p-table [value]="paginatedCountyScores" styleClass="text-sm">
                     <ng-template pTemplate="header">
                         <tr class="bg-gray-100">
                             <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.RANK' | translate }}</th>
@@ -59,8 +85,8 @@
                     </ng-template>
                     <ng-template pTemplate="body" let-score let-i="rowIndex">
                         <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
-                            <td class="p-3">{{i + 1}}</td>
-                            <td class="p-3" (click)="onFeatureClick(score)">{{score.name}}</td>
+                            <td class="p-3">{{score.rank}}</td>
+                            <td class="p-3" (click)="onFeatureClick(score)" title="{{score.name}} ({{'STATISTICS.POPULATION' | translate}}: {{score.population | number:'1.0-0'}})">{{score.name}}</td>
                             <td class="p-3 font-semibold" [style.color]="getScoreColor(score.score)">
                                 {{getScoreName(score.score)}}
                             </td>
@@ -71,28 +97,21 @@
             <div class="p-4 border-t border-gray-100">
                 <p-paginator 
                     [rows]="rowsPerPage" 
-                    [totalRecords]="countyTotalRecords"
+                    [totalRecords]="filteredCountyCount"
                     (onPageChange)="onCountyPageChange($event)"
-                    [rowsPerPageOptions]="[15]">
+                    [showPageLinks]="false"
+                    [showFirstLastIcon]="true"
+                    [alwaysShow]="false"
+                    [showJumpToPageDropdown]="false"
+                    [first]="(currentCountyPage - 1) * rowsPerPage">
                 </p-paginator>
             </div>
         </div>
 
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <h2 class="text-xl font-bold p-4 border-b-2 border-primary text-gray-800">{{ 'STATISTICS.MUNICIPALITIES' | translate }}</h2>
-            <div class="p-4 border-b border-gray-100">
-                <p-multiSelect
-                    [options]="populationCategories"
-                    [(ngModel)]="selectedCategories"
-                    (onChange)="onPopulationCategoryChange()"
-                    optionLabel="label"
-                    placeholder="Filter by city size"
-                    filter="false"
-                    styleClass="w-full">
-                </p-multiSelect>
-            </div>
             <p-scrollPanel [style]="{ height: '400px' }">
-                <p-table [value]="filteredMunicipalityScores" styleClass="text-sm">
+                <p-table [value]="paginatedMunicipalityScores" styleClass="text-sm">
                     <ng-template pTemplate="header">
                         <tr class="bg-gray-100">
                             <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.RANK' | translate }}</th>
@@ -102,8 +121,8 @@
                     </ng-template>
                     <ng-template pTemplate="body" let-score let-i="rowIndex">
                         <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer" [title]="score.name + ' (' + score.county + ')'">
-                            <td class="p-3">{{i + 1}}</td>
-                            <td class="p-3" (click)="onFeatureClick(score)">{{score.name}}</td>
+                            <td class="p-3">{{score.rank}}</td>
+                            <td class="p-3" (click)="onFeatureClick(score)" title="{{score.name}} - {{score.county}} ({{'STATISTICS.POPULATION' | translate}}: {{score.population | number:'1.0-0'}})">{{score.name}}</td>
                             <td class="p-3 font-semibold" [style.color]="getScoreColor(score.score)">
                                 {{getScoreName(score.score)}}
                             </td>
@@ -114,20 +133,22 @@
             <div class="p-4 border-t border-gray-100">
                 <p-paginator 
                     [rows]="rowsPerPage" 
-                    [totalRecords]="municipalityTotalRecords"
+                    [totalRecords]="filteredMunicipalityCount"
                     (onPageChange)="onMunicipalityPageChange($event)"
-                    [rowsPerPageOptions]="[15]">
+                    [showPageLinks]="false"
+                    [showFirstLastIcon]="true"
+                    [alwaysShow]="false"
+                    [showJumpToPageDropdown]="false"
+                    [showCurrentPageReport]="true"
+                    currentPageReportTemplate="{currentPage} / {totalPages}"
+                    [first]="(currentMunicipalityPage - 1) * rowsPerPage">
                 </p-paginator>
             </div>
         </div>
     </div>
 
-    <div class="mt-6 p-4 bg-gray-50 rounded-lg" *ngIf="isProjectVersionValid">
+    <!-- <div class="mt-6 p-4 bg-gray-50 rounded-lg" *ngIf="isProjectVersionValid">
         <div class="flex items-center justify-between">
-            <p class="text-sm text-gray-600">
-                {{ 'STATISTICS.CURRENT_SETTINGS' | translate }}: 
-                {{ scoreType === 'pop' ? ('STATISTICS.POPULATION_WEIGHTED' | translate) : ('STATISTICS.AREA_WEIGHTED' | translate) }}
-            </p>
             <div class="flex items-center">
                 <p-selectButton 
                     [options]="scoreTypeOptions"
@@ -138,7 +159,7 @@
                 </p-selectButton>
             </div>
         </div>
-    </div>
+    </div> -->
     <div class="mt-6 p-4 bg-gray-50 rounded-lg" *ngIf="!isProjectVersionValid">
         <p class="text-sm text-gray-600">
             {{ 'STATISTICS.PROJECT_VERSION_INVALID' | translate }}

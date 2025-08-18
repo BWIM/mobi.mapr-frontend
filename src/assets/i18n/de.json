@@ -383,7 +383,7 @@
     "TITLE": "Statistiken",
     "SHOW_STATISTICS_TOOLTIP": "Detaillierte Statistiken für dieses Projekt anzeigen",
     "STATES": "Bundesländer",
-    "COUNTIES": "Landkreise",
+    "COUNTIES": "Land-/ Stadtkreise",
     "MUNICIPALITIES": "Gemeinden",
     "RANK": "Rang",
     "NAME": "Name",
@@ -392,7 +392,10 @@
     "CURRENT_SETTINGS": "Aktuelle Einstellungen",
     "POPULATION_WEIGHTED": "Bevölkerung gewichtet",
     "AREA_WEIGHTED": "Fläche gewichtet",
-    "PROJECT_VERSION_INVALID": "Die Version des Projektes ist zu alt. Erstelle es neu, um Statistiken angezeigt zu bekommen!"
+    "FILTER_BY_CITY_SIZE": "Nach Bevölkerung filtern",
+    "LOADING_MORE_DATA": "Lade weitere Daten im Hintergrund...",
+    "PROJECT_VERSION_INVALID": "Die Version des Projektes ist zu alt. Erstelle es neu, um Statistiken angezeigt zu bekommen!",
+    "POPULATION": "Bevölkerung"
   },
   "PDF_EXPORT": {
     "TITLE": "PDF Export",

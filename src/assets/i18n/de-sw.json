@@ -327,7 +327,10 @@
     "CURRENT_SETTINGS": "Aktuelle Einstellungen",
     "POPULATION_WEIGHTED": "Bevölkerung gewichtet",
     "AREA_WEIGHTED": "Fläche gewichtet",
-    "PROJECT_VERSION_INVALID": "S Projäkt isch zu alt. Machs neu, um d' Schdadisdige zu sähe."
+    "FILTER_BY_CITY_SIZE": "Noch Bevölkerig filtere",
+    "LOADING_MORE_DATA": "Lad wyteri Date im Hindergrund...",
+    "PROJECT_VERSION_INVALID": "S Projäkt isch zu alt. Machs neu, um d' Schdadisdige zu sähe.",
+    "POPULATION": "Bevölkerung"
   },
   "CREDITS": {
     "SHORTCUTS": {
