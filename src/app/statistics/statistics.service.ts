@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { PaginatedResponse, MunicipalityScore, CountyScore, StateScore } from './statistics.interface';
 import { ShareService } from '../share/share.service';
@@ -35,21 +35,21 @@ export class StatisticsService {
     this._visible.next(value);
   }
 
-  getMunicipalityScores(projectId: string, page: number = 1, type: 'avg' | 'pop' = 'pop'): Observable<PaginatedResponse<MunicipalityScore>> {
+  getMunicipalityScores(projectId: string, offset: number = 0, limit: number = 200, type: 'avg' | 'pop' = 'pop'): Observable<PaginatedResponse<MunicipalityScore>> {
     return this.http.get<PaginatedResponse<MunicipalityScore>>(
-      `${environment.apiUrl}/gemeinden-stats?project=${projectId}&page=${page}&type=${type}`
+      `${environment.apiUrl}/gemeinden-stats?project=${projectId}&offset=${offset}&limit=${limit}&type=${type}`
     );
   }
 
-  getCountyScores(projectId: string, page: number = 1, type: 'avg' | 'pop' = 'pop'): Observable<PaginatedResponse<CountyScore>> {
+  getCountyScores(projectId: string, offset: number = 0, limit: number = 200, type: 'avg' | 'pop' = 'pop'): Observable<PaginatedResponse<CountyScore>> {
     return this.http.get<PaginatedResponse<CountyScore>>(
-      `${environment.apiUrl}/landkreis-stats?project=${projectId}&page=${page}&type=${type}`
+      `${environment.apiUrl}/landkreis-stats?project=${projectId}&offset=${offset}&limit=${limit}&type=${type}`
     );
   }
 
-  getStateScores(projectId: string, page: number = 1, type: 'avg' | 'pop' = 'pop'): Observable<PaginatedResponse<StateScore>> {
+  getStateScores(projectId: string, offset: number = 0, limit: number = 200, type: 'avg' | 'pop' = 'pop'): Observable<PaginatedResponse<StateScore>> {
     return this.http.get<PaginatedResponse<StateScore>>(
-      `${environment.apiUrl}/land-stats?project=${projectId}&page=${page}&type=${type}`
+      `${environment.apiUrl}/land-stats?project=${projectId}&offset=${offset}&limit=${limit}&type=${type}`
     );
   }
 

@@ -25,13 +25,19 @@
                 {{ getPopulationSizeText(category) }}
             </span>
         </div>
+        
+        <!-- Background Loading Indicator -->
+        <div *ngIf="backgroundLoading" class="mt-3 flex items-center text-sm text-gray-600">
+            <p-progress-spinner strokeWidth="4" fill="transparent" animationDuration="1s" [style]="{ width: '20px', height: '20px' }" class="mr-2"/>
+            <span>{{ 'STATISTICS.LOADING_MORE_DATA' | translate }}</span>
+        </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6" *ngIf="!loading && isProjectVersionValid">
         <div *ngIf="stateScores.length > 0" class="bg-white rounded-lg shadow-md overflow-hidden">
             <h2 class="text-xl font-bold p-4 border-b-2 border-primary text-gray-800">{{ 'STATISTICS.STATES' | translate }}</h2>
             <p-scrollPanel [style]="{ height: '400px' }">
-                <p-table [value]="stateScores" styleClass="text-sm">
+                <p-table [value]="paginatedStateScores" styleClass="text-sm">
                     <ng-template pTemplate="header">
                         <tr class="bg-gray-100">
                             <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.RANK' | translate }}</th>
@@ -53,13 +59,15 @@
             <div class="p-4 border-t border-gray-100">
                 <p-paginator 
                     [rows]="rowsPerPage" 
-                    [totalRecords]="stateTotalRecords"
+                    [totalRecords]="stateScores.length"
                     (onPageChange)="onStatePageChange($event)"
                     [showPageLinks]="false"
                     [showFirstLastIcon]="true"
                     [alwaysShow]="false"
                     [showJumpToPageDropdown]="false"
-                    [first]="(currentStatePage - 1) * rowsPerPage">
+                    [first]="(currentStatePage - 1) * rowsPerPage"
+                    [showCurrentPageReport]="true"
+                    currentPageReportTemplate="{currentPage} / {totalPages}">
                 </p-paginator>
             </div>
         </div>
