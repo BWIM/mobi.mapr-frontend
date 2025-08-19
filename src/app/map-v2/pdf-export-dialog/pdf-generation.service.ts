@@ -231,9 +231,10 @@ export class PdfGenerationService {
       }
 
       // Calculate pixel dimensions based on resolution
-      const resolution = options.resolution; // DPI
-      const pixelWidth = Math.round((mmWidth * resolution) / 25.4);
-      const pixelHeight = Math.round((mmHeight * resolution) / 25.4);
+      // For high-quality PDFs, we'll use 300 DPI as the target resolution
+      const targetDPI = 300;
+      const pixelWidth = Math.round((mmWidth * targetDPI) / 25.4);
+      const pixelHeight = Math.round((mmHeight * targetDPI) / 25.4);
 
       // Store original map size and view state
       const originalSize = map.getContainer().getBoundingClientRect();
@@ -247,8 +248,12 @@ export class PdfGenerationService {
             // Wait for the map to render with the new size
             map.once('idle', async () => {
               try {
-                // Get the canvas as data URL
-                const mapImage = map.getCanvas().toDataURL('image/png');
+                // Get the canvas as data URL with high DPI
+                const canvas = map.getCanvas();
+                
+                // For high-quality export, we'll use the canvas directly at the target resolution
+                // This avoids memory-intensive upscaling and produces better results
+                const mapImage = canvas.toDataURL('image/png', 1);
 
                 // Create PDF
                 const pdf = new jsPDF({
@@ -262,13 +267,13 @@ export class PdfGenerationService {
                 pdf.addImage(mapImage, 'PNG', 0, 0, mmWidth, mmHeight);
 
                 // Add project details (overlay on top)
-                this.addProjectDetails(pdf, projectInfo, mmWidth, mmHeight);
+                // this.addProjectDetails(pdf, projectInfo, mmWidth, mmHeight);
                 
                 // Add logo (overlay on top)
-                await this.addLogo(pdf, mmWidth, mmHeight);
+                // await this.addLogo(pdf, mmWidth, mmHeight);
                 
-                // Add legend and BWIM logo (overlay on top)
-                await this.addLegendAndBWIMLogo(pdf, mmWidth, mmHeight, projectInfo);
+                // // Add legend and BWIM logo (overlay on top)
+                // await this.addLegendAndBWIMLogo(pdf, mmWidth, mmHeight, projectInfo);
 
                 // Save the PDF
                 console.log('Saving PDF');
