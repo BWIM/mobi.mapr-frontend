@@ -6,6 +6,7 @@ import { LngLatBounds, Map } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { SharedModule } from '../../shared/shared.module';
 import { ExportMapService } from './export-map.service';
+import { PdfGenerationService } from './pdf-generation.service';
 
 // PDF Export Types
 export type PaperSize = 'a4' | 'a3' | 'a2' | 'a1' | 'a0';
@@ -49,6 +50,8 @@ export class ExportMapComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // PDF Export Options
   paperSizes = [
+    { label: 'A0', value: 'a0' },
+    { label: 'A1', value: 'a1' },
     { label: 'A2', value: 'a2' },
     { label: 'A3', value: 'a3' },
     { label: 'A4', value: 'a4' }
@@ -63,7 +66,8 @@ export class ExportMapComponent implements OnInit, OnDestroy, AfterViewInit {
   
   constructor(
     private mapService: MapV2Service,
-    private exportMapService: ExportMapService
+    private exportMapService: ExportMapService,
+    private pdfGenerationService: PdfGenerationService
   ) {
     // Subscribe to map style changes (includes geodata layer updates)
     this.subscription = this.mapService.mapStyle$.subscribe(style => {
@@ -96,6 +100,16 @@ export class ExportMapComponent implements OnInit, OnDestroy, AfterViewInit {
     this.dialogSubscription = this.exportMapService.dialogVisible$.subscribe(visible => {
       this.visible = visible;
       if (visible) {
+        // Copy current zoom and center from main map when dialog becomes visible
+        this.zoom = this.mapService.getZoom() - 1;
+        this.center = this.mapService.getCenter();
+        
+        // Update the export map with new zoom and center
+        if (this.exportMap) {
+          this.exportMap.setZoom(this.zoom);
+          this.exportMap.setCenter(this.center);
+        }
+        
         // Refresh the map when dialog becomes visible
         setTimeout(() => {
           this.refreshExportMap();
@@ -122,6 +136,9 @@ export class ExportMapComponent implements OnInit, OnDestroy, AfterViewInit {
         dragRotate: false,
         touchZoomRotate: false
       });
+
+      // Set the map in the service
+      this.exportMapService.setMap(this.exportMap);
 
       // Disable all interactions for export map (read-only)
       this.exportMap.dragRotate.disable();
@@ -186,10 +203,7 @@ export class ExportMapComponent implements OnInit, OnDestroy, AfterViewInit {
     
     this.isExporting = true;
     try {
-      // TODO: Implement PDF export functionality
-      console.log('Exporting PDF with options:', this.options);
-      // For now, just simulate export
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await this.pdfGenerationService.exportToPDF(this.options);
       this.hideDialog();
     } catch (error) {
       console.error('Error exporting PDF:', error);
@@ -201,6 +215,8 @@ export class ExportMapComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy() {
     if (this.exportMap) {
       this.exportMap.remove();
+      // Clear the map reference in the service
+      this.exportMapService.setMap(null);
     }
     if (this.subscription) {
       this.subscription.unsubscribe();
@@ -220,6 +236,12 @@ export class ExportMapComponent implements OnInit, OnDestroy, AfterViewInit {
   refreshExportMap(): void {
     if (this.exportMap && this.currentProject) {
       this.updateExportMapProject();
+      
+      // Ensure the export map has the same zoom and center as the main map
+      this.zoom = this.mapService.getZoom() - 1;
+      this.center = this.mapService.getCenter();
+      this.exportMap.setZoom(this.zoom);
+      this.exportMap.setCenter(this.center);
     }
   }
 

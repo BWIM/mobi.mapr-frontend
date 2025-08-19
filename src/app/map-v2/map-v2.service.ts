@@ -93,6 +93,14 @@ export class MapV2Service {
     return this.map;
   }
 
+  getZoom(): number {
+    return this.currentZoom;
+  }
+
+  getCenter(): [number, number] {
+    return this.map?.getCenter() as unknown as [number, number];
+  }
+
   getCurrentProject(): string | null {
     return this.currentProject;
   }

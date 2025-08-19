@@ -37,9 +37,9 @@
 /* Portrait orientation: 1:1.41 aspect ratio */
 .export-map-container.portrait .export-map {
   aspect-ratio: 1 / 1.41;
-  width: calc(100% * 0.709);
+  width: calc(100% * 0.707);
   height: calc(100% * 1);
-  max-width: calc(100% * 0.709);
+  max-width: calc(100% * 0.707);
   max-height: 100%;
 }
 
@@ -47,9 +47,9 @@
 .export-map-container.landscape .export-map {
   aspect-ratio: 1.41 / 1;
   width: calc(100% * 1);
-  height: calc(100% * 0.709);
+  height: calc(100% * 0.707);
   max-width: calc(100% * 1);
-  max-height: calc(100% * 0.709);
+  max-height: calc(100% * 0.707);
 }
 
 /* Ensure the map container maintains proper sizing */
