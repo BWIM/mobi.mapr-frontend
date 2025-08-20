@@ -2,14 +2,14 @@
       [header]="'PDF_EXPORT.TITLE' | translate" 
       [(visible)]="visible" 
       [modal]="true"
-      [style]="{width: '90vw', height: '80vh'}"
+      [style]="{width: '50vw', height: 'auto'}"
       [draggable]="false"
       [breakpoints]="{ '1199px': '95vw', '575px': '95vw' }"
       [resizable]="false"
       [closable]="!isExporting">
 
       <div class="export-layout">
-        <!-- Left side: PDF Export Options -->
+        <!-- PDF Export Options -->
         <div class="pdf-options-panel">
           <div class="pdf-export-fields">
             <!-- Orientation Selection -->
@@ -58,8 +58,8 @@
               <p-select 
                 [options]="resolutionOptions" 
                 [(ngModel)]="options.resolution"
-                optionLabel="label"
                 [disabled]="isExporting"
+                optionLabel="label"
                 optionValue="value"
                 [style]="{'width':'100%'}">
               </p-select>
@@ -75,13 +75,16 @@
                 <p class="text-xs text-500 mt-2">{{ 'PDF_EXPORT.ESTIMATED_SIZE' | translate }}</p>
               </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Right side: Map Preview -->
-        <div class="map-preview-panel">
-          <div class="export-map-container" [ngClass]="options.orientation">
-            <div #exportMapContainer class="export-map" id="export-map"></div>
+            <!-- Current Map Info -->
+            <div class="map-info mt-4 p-3 surface-50 border-round">
+              <h4 class="text-sm font-semibold mb-2">Current Map View</h4>
+              <div class="text-sm text-600">
+                <p><strong>Zoom:</strong> {{ zoom | number:'1.1-1' }}</p>
+                <p><strong>Center:</strong> {{ center[0] | number:'1.4-4' }}, {{ center[1] | number:'1.4-4' }}</p>
+                <p class="text-xs text-500 mt-2">The export will use the current map view and style</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

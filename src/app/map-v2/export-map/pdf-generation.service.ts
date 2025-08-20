@@ -1,8 +1,10 @@
 import {Injectable} from '@angular/core';
 import { ProjectsService } from '../../projects/projects.service';
 import jsPDF from 'jspdf';
-import maplibregl from 'maplibre-gl';
+import { print, downloadBlob } from '@camptocamp/inkmap';
 import { ExportMapService } from './export-map.service';
+import { MapV2Service } from '../map-v2.service';
+import { style } from '@angular/animations';
 
 export type PaperSize = 'a4' | 'a3' | 'a2' | 'a1' | 'a0';
 export type Orientation = 'portrait' | 'landscape';
@@ -20,11 +22,11 @@ export interface PdfExportOptions {
 })
 export class PdfGenerationService {
   private readonly paperSizes: {[key in PaperSize]: [number, number]} = {
-    a4: [297, 210],  // A4 in mm
-    a3: [420, 297],  // A3 in mm
-    a2: [594, 420],  // A2 in mm
-    a1: [841, 594],  // A1 in mm
-    a0: [1189, 841]  // A0 in mm
+    a4: [210, 297],  // A4 in mm (width, height)
+    a3: [297, 420],  // A3 in mm
+    a2: [420, 594],  // A2 in mm
+    a1: [594, 841],  // A1 in mm
+    a0: [841, 1189]  // A0 in mm
   };
 
   private readonly modeIcons: {[key in string]: string} = {
@@ -48,30 +50,11 @@ export class PdfGenerationService {
 
   constructor(
     private exportMapService: ExportMapService,
+    private mapService: MapV2Service,
     private projectsService: ProjectsService
   ) {}
 
-  private toPixels(length: number, unit: 'mm' | 'in' = 'mm'): string {
-    const conversionFactor = 96;
-    const factor = unit === 'mm' ? conversionFactor / 25.4 : conversionFactor;
-    return (factor * length) + 'px';
-  }
-
-  private async loadImageAsBase64(url: string): Promise<string> {
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    } catch (error) {
-      console.warn(`Could not load image: ${url}`, error);
-      return '';
-    }
-  }
+ 
 
   private addProjectDetails(pdf: jsPDF, project: any, pageWidth: number, pageHeight: number): void {
     // Calculate scaling factor based on paper size
@@ -211,12 +194,72 @@ export class PdfGenerationService {
     }
   }
 
+  private async loadImageAsBase64(url: string): Promise<string> {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.warn(`Could not load image: ${url}`, error);
+      return '';
+    }
+  }
+
   private getFilename(project: any): string {
     const now = new Date();
     const formattedDate = now.toISOString().split('T')[0];
     const formattedTime = now.toTimeString().split(' ')[0].replace(/:/g, '-');
     const sanitizedProjectName = project.project_name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
     return `${formattedDate}_${formattedTime}_${sanitizedProjectName}.pdf`;
+  }
+
+  private zoomToScale(zoom: number): number {
+    zoom = Math.ceil(zoom);
+    switch (zoom) {
+      case 1:
+        return 279541132.014;
+      case 2:
+        return 139770566.007;
+      case 3:
+        return 69885283.0036;
+      case 4:
+        return 34942641.5018;
+      case 5:
+        return 17471320.7509;
+      case 6:
+        return 8735660.37545;
+      case 7:
+        return 4367830.18772;
+      case 8:
+        return 2183915.09386;
+      case 9:
+        return 1091957.54693;
+      case 10:
+        return 545978.773466;
+      case 11:
+        return 272989.386733;
+      case 12:
+        return 136494.693366;
+      case 13:
+        return 68247.3466832;
+      case 14:
+        return 34123.6733416;
+      case 15:
+        return 17061.8366708;
+      case 16:
+        return 8530.9183354;
+      case 17:
+        return 4265.4591677;
+      case 18:
+        return 2132.72958385;
+      default:
+        return 2000000;
+    }
   }
 
   async exportToPDF(options: PdfExportOptions): Promise<void> {
@@ -232,161 +275,127 @@ export class PdfGenerationService {
         });
       });
 
-      // Calculate page size in mm
+      // Get paper dimensions in mm
       const [mmWidth, mmHeight] = options.orientation === 'landscape' 
-        ? [this.paperSizes[options.paperSize][0], this.paperSizes[options.paperSize][1]]
-        : [this.paperSizes[options.paperSize][1], this.paperSizes[options.paperSize][0]];
+        ? [this.paperSizes[options.paperSize][1], this.paperSizes[options.paperSize][0]]
+        : [this.paperSizes[options.paperSize][0], this.paperSizes[options.paperSize][1]];
 
-      const originalMap = this.exportMapService.getMap();
-      if (!originalMap) {
-        throw new Error('Map is not available');
+      const margin = 0;
+      const mapWidth = mmWidth - 2 * margin;
+      const mapHeight = mmHeight - 2 * margin;
+
+
+      let size = [this.paperSizes[options.paperSize][0], this.paperSizes[options.paperSize][1], "mm"]
+      if (options.orientation === 'landscape') {
+        size = [size[1], size[0], "mm"];
+      }
+      const center = this.mapService.getMap()?.getCenter();
+      console.log('Center:', center);
+      const zoom = this.mapService.getMap()?.getZoom();
+      console.log('Zoom:', zoom);
+      let scale = 2000000;
+      if (zoom) {
+        scale = this.zoomToScale(zoom);
+        console.log('Scale:', scale);
+      }
+      const geodataSource = this.mapService.getMap()?.getStyle().sources['geodata'];
+      let mapURL = '';
+      if (geodataSource && 'tiles' in geodataSource && geodataSource.tiles) {
+        mapURL = geodataSource.tiles[0];
+        console.log('Map URL:', mapURL);
+      } else {
+        console.warn('Geodata source or tiles not available');
       }
 
-      // Calculate pixel dimensions based on resolution
-      const targetDPI = options.resolution;
-      const pixelWidth = Math.round((mmWidth * targetDPI) / 25.4);
-      const pixelHeight = Math.round((mmHeight * targetDPI) / 25.4);
-
-      // Store original map state
-      const originalCenter = originalMap.getCenter();
-      const originalZoom = originalMap.getZoom();
-      const originalStyle = originalMap.getStyle();
-
-      // Calculate the zoom adjustment needed for the high-resolution export
-      // The export map will have much larger pixel dimensions, so we need to zoom in accordingly
-      const originalSize = originalMap.getContainer().getBoundingClientRect();
-      const originalPixelWidth = originalSize.width;
-      const originalPixelHeight = originalSize.height;
+      // Fetch geojson data first
+      console.log('Fetching geojson data...');
+      console.log('Current project:', this.mapService.currentProject);
+      console.log('Map type:', this.mapService.getMapType());
       
-      // Calculate zoom adjustment: log2(export_pixels / original_pixels)
-      const zoomAdjustment = Math.log2(Math.min(pixelWidth / originalPixelWidth, pixelHeight / originalPixelHeight));
-      const exportZoom = originalZoom + zoomAdjustment;
-
-      console.log('Zoom calculation:', {
-        originalZoom,
-        originalPixelWidth,
-        originalPixelHeight,
-        exportPixelWidth: pixelWidth,
-        exportPixelHeight: pixelHeight,
-        zoomAdjustment,
-        exportZoom
-      });
-
-      // Create a temporary high-resolution map container
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-9999px';
-      tempContainer.style.top = '-9999px';
-      tempContainer.style.width = `${pixelWidth}px`;
-      tempContainer.style.height = `${pixelHeight}px`;
-      document.body.appendChild(tempContainer);
-
-      let exportMap: maplibregl.Map | undefined;
-
-      // Create a new high-resolution map for export
-      exportMap = new maplibregl.Map({
-        container: tempContainer,
-        style: originalStyle,
-        center: originalCenter,
-        zoom: exportZoom, // Use the adjusted zoom level
-        // High-quality settings for crisp rendering
-        pixelRatio: Math.max(2, window.devicePixelRatio || 1), // Force higher pixel ratio for crisp tiles
-        fadeDuration: 0, // Disable fade animations for cleaner exports
-        // Disable interactions
-        dragRotate: false,
-        touchZoomRotate: false,
-        doubleClickZoom: false,
-        keyboard: false,
-        scrollZoom: false
-      });
-
-      // Force high-DPI tile loading by temporarily setting a very high pixel ratio
-      // This ensures we get the highest quality tiles available
-      const originalPixelRatio = exportMap.getPixelRatio();
-      const targetPixelRatio = Math.max(4, targetDPI / 72);
-      exportMap.setPixelRatio(targetPixelRatio);
+      if (!this.mapService.currentProject) {
+        throw new Error('No current project selected');
+      }
       
-      console.log('Quality enhancement:', {
-        originalPixelRatio,
-        targetPixelRatio,
-        targetDPI,
-        'tileQuality': `${targetPixelRatio}x standard resolution`
-      });
+      let geojson: any;
+      let features: any;
+      try {
+        geojson = JSON.parse(await this.mapService.getGeojson());
+        console.log('Geojson:', geojson);
 
-      // Wait for the export map to be ready
-      await new Promise<void>((resolve, reject) => {
-        if (exportMap) {
-          // First, wait for the initial idle state
-          exportMap.once('idle', () => {
-            // Force a repaint and wait for all tiles to be fully loaded at high quality
-            exportMap.triggerRepaint();
-            
-            // Wait additional time for high-DPI tiles to load
-            setTimeout(() => {
-              // Force another repaint to ensure all tiles are rendered at maximum quality
-              exportMap.triggerRepaint();
-              
-              // Final wait to ensure everything is crisp
-              setTimeout(() => {
-                resolve();
-              }, 2000);
-            }, 1500);
-          });
-
-          exportMap.once('error', (error) => {
-            reject(error);
-          });
+        if (!geojson) {
+          throw new Error('Failed to fetch geojson data');
         }
-      });
+      } catch (error) {
+        console.error('Error fetching geojson:', error);
+        throw new Error(`Failed to fetch geojson data: ${error}`);
+      }
 
-        // Get the high-resolution canvas
-        if (exportMap) {
-          const canvas = exportMap.getCanvas();
-          
-          // Ensure maximum canvas quality
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            // Set high-quality rendering context
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
+      const specValue = {
+        "layers": [
+          {
+            "type": "XYZ",
+            "url": "https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+            "attribution": "© OpenStreetMap contributors"
+          },
+          {
+            "type": "GeoJSON",
+            "geojson": geojson,
+            "attribution": "© bwim",
+            "opacity": 1.0,
+            "style": {
+              "fillColor": "#ff0000",
+              "fillOpacity": 0.8,
+              "strokeColor": "#000000",
+              "strokeWidth": 1
+            }
           }
-          
-          const mapImage = canvas.toDataURL('image/png', 1.0);
+        ],
+        "size": size,
+        "center": [center?.lng, center?.lat],
+        "dpi": options.resolution,
+        "scale": scale,
+        "scaleBar": false,
+        "projection": "EPSG:3857",
+        "northArrow": false,
+        "attributions": false
+      };
 
-        // Create PDF
-        const pdf = new jsPDF({
-          orientation: mmWidth > mmHeight ? 'l' : 'p',
-          unit: 'mm',
-          format: [mmWidth, mmHeight],
-          compress: true
-        });
+      // Generate map image using inkmap
+      console.log('Generating map image with inkmap...');
+      const blob = await print(specValue);
+      console.log('Blob:', blob);
 
-        // Add map image to PDF - fill the entire page
-        pdf.addImage(mapImage, 'PNG', 0, 0, mmWidth, mmHeight);
+      // Create PDF
+      const pdf = new jsPDF({
+        orientation: mmWidth > mmHeight ? 'l' : 'p',
+        unit: 'mm',
+        format: [mmWidth, mmHeight],
+        compress: true
+      });
 
-        // Add project details (overlay on top)
-        this.addProjectDetails(pdf, projectInfo, mmWidth, mmHeight);
-        
-        // Add logo (overlay on top)
-        await this.addLogo(pdf, mmWidth, mmHeight);
-        
-        // Add legend and BWIM logo (overlay on top)
-        await this.addLegendAndBWIMLogo(pdf, mmWidth, mmHeight, projectInfo);
+      // Create an Object URL from the map image blob and add it to the PDF
+      const imgUrl = URL.createObjectURL(blob);
+      pdf.addImage(imgUrl, 'JPEG', margin, margin, mapWidth, mapHeight);
 
-        // Save the PDF
-        console.log('Saving PDF');
-        pdf.save(this.getFilename(projectInfo));
-
-        // Restore original pixel ratio for cleanup
-        if (exportMap) {
-          exportMap.setPixelRatio(originalPixelRatio);
-        }
-        
-        console.log('High-quality export completed successfully');
-
+      // Add project details (overlay on top)
+      this.addProjectDetails(pdf, projectInfo, mmWidth, mmHeight);
       
-    }
-   } catch (error) {
+      // Add logo (overlay on top)
+      await this.addLogo(pdf, mmWidth, mmHeight);
+      
+      // Add legend and BWIM logo (overlay on top)
+      await this.addLegendAndBWIMLogo(pdf, mmWidth, mmHeight, projectInfo);
+
+      // Save the PDF
+      console.log('Saving PDF');
+      pdf.save(this.getFilename(projectInfo));
+
+      // Clean up the object URL
+      URL.revokeObjectURL(imgUrl);
+
+      console.log('Inkmap-based export completed successfully');
+
+    } catch (error) {
       console.error(`Fehler beim Generieren des PDFs:`, error);
       throw error;
     }

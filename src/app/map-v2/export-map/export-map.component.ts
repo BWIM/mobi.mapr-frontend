@@ -1,9 +1,7 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MapV2Service } from '../map-v2.service';
 import { Subscription } from 'rxjs';
-import { LngLatBounds, Map } from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
 import { SharedModule } from '../../shared/shared.module';
 import { ExportMapService } from './export-map.service';
 import { PdfGenerationService } from './pdf-generation.service';
@@ -27,18 +25,16 @@ export interface PdfExportOptions {
   templateUrl: './export-map.component.html',
   styleUrl: './export-map.component.css'
 })
-export class ExportMapComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ExportMapComponent implements OnInit, OnDestroy {
   visible: boolean = false;
   isExporting: boolean = false;
   options: PdfExportOptions = {
     orientation: 'portrait',
     paperSize: 'a4',
-    resolution: 300,
+    resolution: 72,
     mapExtent: 'current'
   };
   
-  @ViewChild('exportMapContainer') exportMapContainer?: ElementRef;
-  private exportMap?: Map;
   private subscription: Subscription;
   private boundsSubscription: Subscription;
   private projectSubscription: Subscription;
@@ -72,22 +68,14 @@ export class ExportMapComponent implements OnInit, OnDestroy, AfterViewInit {
     // Subscribe to map style changes (includes geodata layer updates)
     this.subscription = this.mapService.mapStyle$.subscribe(style => {
       this.mapStyle = style;
-      if (this.exportMap) {
-        this.exportMap.setStyle(style);
-      }
     });
 
     // Subscribe to bounds changes to ensure proper zoom
     this.boundsSubscription = this.mapService.bounds$.subscribe(bounds => {
-      if (bounds && this.exportMap) {
-        const mapBounds = new LngLatBounds(
-          [bounds.minLng, bounds.minLat],
-          [bounds.maxLng, bounds.maxLat]
-        );
-        this.exportMap.fitBounds(mapBounds, {
-          padding: 50,
-          duration: 2000
-        });
+      if (bounds) {
+        // Update zoom and center for export
+        this.zoom = this.mapService.getZoom();
+        this.center = this.mapService.getCenter();
       }
     });
 
@@ -101,19 +89,8 @@ export class ExportMapComponent implements OnInit, OnDestroy, AfterViewInit {
       this.visible = visible;
       if (visible) {
         // Copy current zoom and center from main map when dialog becomes visible
-        this.zoom = this.mapService.getZoom() - 1;
+        this.zoom = this.mapService.getZoom();
         this.center = this.mapService.getCenter();
-        
-        // Update the export map with new zoom and center
-        if (this.exportMap) {
-          this.exportMap.setZoom(this.zoom);
-          this.exportMap.setCenter(this.center);
-        }
-        
-        // Refresh the map when dialog becomes visible
-        setTimeout(() => {
-          this.refreshExportMap();
-        }, 100);
       }
     });
   }
@@ -121,64 +98,7 @@ export class ExportMapComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit() {
     // Get the current project from the service
     this.currentProject = this.mapService.getCurrentProject();
-    // Get default options from the service
-    this.options = this.exportMapService.getDefaultOptions();
-  }
-
-  ngAfterViewInit() {
-    if (this.exportMapContainer) {
-      // Create the export map with the same style as the main map
-      this.exportMap = new Map({
-        container: this.exportMapContainer.nativeElement,
-        style: this.mapStyle || this.mapService.getBaseMapStyle(),
-        center: this.center,
-        zoom: this.zoom,
-        dragRotate: false,
-        touchZoomRotate: false
-      });
-
-      // Set the map in the service
-      this.exportMapService.setMap(this.exportMap);
-
-      // Disable all interactions for export map (read-only)
-      this.exportMap.dragRotate.disable();
-      this.exportMap.touchZoomRotate.disable();
-      this.exportMap.doubleClickZoom.disable();
-      this.exportMap.keyboard.disable();
-
-      // Setup basic map events for export map
-      this.setupExportMapEvents(this.exportMap);
-
-      // If there's already a project loaded, ensure the export map gets the same data
-      if (this.currentProject) {
-        this.updateExportMapProject();
-      }
-    }
-  }
-
-  private updateExportMapProject(): void {
-    if (this.exportMap && this.currentProject) {
-      // Get the current project style from the service
-      const projectStyle = this.mapService['getProjectMapStyle'](this.currentProject);
-      if (projectStyle) {
-        this.exportMap.setStyle(projectStyle);
-      }
-    }
-  }
-
-  private setupExportMapEvents(map: Map): void {
-    // Add sourcedata event handler to track tile loading
-    map.on('sourcedata', (e) => {
-      if (e.sourceId === 'geodata' && e.isSourceLoaded) {
-        // Map is ready for export
-        console.log('Export map tiles loaded');
-      }
-    });
-
-    // Handle style loading to ensure geodata layer is properly displayed
-    map.on('style.load', () => {
-      console.log('Export map style loaded');
-    });
+    // Options are already initialized with defaults in the class
   }
 
   // PDF Export Helper Methods
@@ -203,6 +123,12 @@ export class ExportMapComponent implements OnInit, OnDestroy, AfterViewInit {
     
     this.isExporting = true;
     try {
+      // Set the current map state in the export service for Inkmap to use
+      const currentMap = this.mapService.getMap();
+      if (currentMap) {
+        this.exportMapService.setMap(currentMap);
+      }
+      
       await this.pdfGenerationService.exportToPDF(this.options);
       this.hideDialog();
     } catch (error) {
@@ -213,11 +139,6 @@ export class ExportMapComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy() {
-    if (this.exportMap) {
-      this.exportMap.remove();
-      // Clear the map reference in the service
-      this.exportMapService.setMap(null);
-    }
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
@@ -229,19 +150,6 @@ export class ExportMapComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     if (this.dialogSubscription) {
       this.dialogSubscription.unsubscribe();
-    }
-  }
-
-  // Method to refresh the export map when it becomes visible
-  refreshExportMap(): void {
-    if (this.exportMap && this.currentProject) {
-      this.updateExportMapProject();
-      
-      // Ensure the export map has the same zoom and center as the main map
-      this.zoom = this.mapService.getZoom() - 1;
-      this.center = this.mapService.getCenter();
-      this.exportMap.setZoom(this.zoom);
-      this.exportMap.setCenter(this.center);
     }
   }
 
