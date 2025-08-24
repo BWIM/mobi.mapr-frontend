@@ -530,9 +530,7 @@ export class MapV2Service {
       authParam = `&token=${token}`;
     }
 
-    const url = `${environment.apiUrl}/geojson?project=${this.currentProject}&type=${this.getMapType()}${authParam}`;
-    console.log('Making HTTP request to:', url);
-    console.log('Auth param:', authParam);
+    const url = `${environment.apiUrl}/geojson?project=${this.currentProject}&type=${this.averageType}&&resolution=${this.getMapType()}${authParam}`;
 
     return firstValueFrom(this.http.get<any>(url));
   }

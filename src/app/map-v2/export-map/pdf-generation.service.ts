@@ -48,6 +48,99 @@ export class PdfGenerationService {
     'Freizeit': 14,
   };
 
+
+  private createGeoStylerStyle(): any {
+    return {
+      name: 'BWIM Score Style',
+      rules: [
+        {
+          name: 'Score 0 - No Data',
+          filter: ['<=', 'score', 0],
+          symbolizers: [{
+            kind: 'Fill',
+            color: '#808080',
+            opacity: 0,
+            outlineColor: '#808080',
+            outlineOpacity: 0.8,
+            outlineWidth: 0.5
+          }]
+        },
+        {
+          name: 'Score 0-0.35 - Very Low',
+          filter: ['&&', ['>', 'score', 0], ['<=', 'score', 0.35]],
+          symbolizers: [{
+            kind: 'Fill',
+            color: '#32612D',
+            opacity: 0.6,
+            outlineColor: '#32612D',
+            outlineOpacity: 0.8,
+            outlineWidth: 0.5
+          }]
+        },
+        {
+          name: 'Score 0.35-0.5 - Low',
+          filter: ['&&', ['>', 'score', 0.35], ['<=', 'score', 0.5]],
+          symbolizers: [{
+            kind: 'Fill',
+            color: '#3CB043',
+            opacity: 0.6,
+            outlineColor: '#3CB043',
+            outlineOpacity: 0.8,
+            outlineWidth: 0.5
+          }]
+        },
+        {
+          name: 'Score 0.5-0.71 - Medium',
+          filter: ['&&', ['>', 'score', 0.5], ['<=', 'score', 0.71]],
+          symbolizers: [{
+            kind: 'Fill',
+            color: '#EED202',
+            opacity: 0.6,
+            outlineColor: '#EED202',
+            outlineOpacity: 0.8,
+            outlineWidth: 0.5
+          }]
+        },
+        {
+          name: 'Score 0.71-1.0 - High',
+          filter: ['&&', ['>', 'score', 0.71], ['<=', 'score', 1.0]],
+          symbolizers: [{
+            kind: 'Fill',
+            color: '#ed7014',
+            opacity: 0.6,
+            outlineColor: '#ed7014',
+            outlineOpacity: 0.8,
+            outlineWidth: 0.5
+          }]
+        },
+        {
+          name: 'Score 1.0-1.41 - Very High',
+          filter: ['&&', ['>', 'score', 1.0], ['<=', 'score', 1.41]],
+          symbolizers: [{
+            kind: 'Fill',
+            color: '#C21807',
+            opacity: 0.6,
+            outlineColor: '#C21807',
+            outlineOpacity: 0.8,
+            outlineWidth: 0.5
+          }]
+        },
+        {
+          name: 'Score > 1.41 - Critical',
+          filter: ['>', 'score', 1.41],
+          symbolizers: [{
+            kind: 'Fill',
+            color: '#9656A2',
+            opacity: 0.6,
+            outlineColor: '#9656A2',
+            outlineOpacity: 0.8,
+            outlineWidth: 0.5
+          }]
+        }
+      ]
+    };
+  }
+
   constructor(
     private exportMapService: ExportMapService,
     private mapService: MapV2Service,
@@ -290,36 +383,26 @@ export class PdfGenerationService {
         size = [size[1], size[0], "mm"];
       }
       const center = this.mapService.getMap()?.getCenter();
-      console.log('Center:', center);
       const zoom = this.mapService.getMap()?.getZoom();
-      console.log('Zoom:', zoom);
       let scale = 2000000;
       if (zoom) {
         scale = this.zoomToScale(zoom);
-        console.log('Scale:', scale);
       }
       const geodataSource = this.mapService.getMap()?.getStyle().sources['geodata'];
       let mapURL = '';
       if (geodataSource && 'tiles' in geodataSource && geodataSource.tiles) {
         mapURL = geodataSource.tiles[0];
-        console.log('Map URL:', mapURL);
       } else {
         console.warn('Geodata source or tiles not available');
       }
-
-      // Fetch geojson data first
-      console.log('Fetching geojson data...');
-      console.log('Current project:', this.mapService.currentProject);
-      console.log('Map type:', this.mapService.getMapType());
       
       if (!this.mapService.currentProject) {
         throw new Error('No current project selected');
       }
       
       let geojson: any;
-      let features: any;
       try {
-        geojson = JSON.parse(await this.mapService.getGeojson());
+        geojson = await this.mapService.getGeojson();
         console.log('Geojson:', geojson);
 
         if (!geojson) {
@@ -329,6 +412,8 @@ export class PdfGenerationService {
         console.error('Error fetching geojson:', error);
         throw new Error(`Failed to fetch geojson data: ${error}`);
       }
+
+      const geoStylerStyle = this.createGeoStylerStyle();
 
       const specValue = {
         "layers": [
@@ -342,12 +427,7 @@ export class PdfGenerationService {
             "geojson": geojson,
             "attribution": "© bwim",
             "opacity": 1.0,
-            "style": {
-              "fillColor": "#ff0000",
-              "fillOpacity": 0.8,
-              "strokeColor": "#000000",
-              "strokeWidth": 1
-            }
+            "style": geoStylerStyle
           }
         ],
         "size": size,
