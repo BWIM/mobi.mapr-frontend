@@ -12,7 +12,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ShareService } from '../share/share.service';
 import { StatisticsService } from '../statistics/statistics.service';
 import { MapV2Service } from '../map-v2/map-v2.service';
-import { PdfExportService } from '../map-v2/pdf-export-dialog/pdf-export.service';
+import { ExportMapService } from '../map-v2/export-map/export-map.service';
 import { MessageService } from 'primeng/api';
 
 
@@ -51,7 +51,7 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     private shareService: ShareService,
     private mapService: MapV2Service,
     private statisticsService: StatisticsService,
-    private pdfExportService: PdfExportService,
+    private exportMapService: ExportMapService,
     private messageService: MessageService
   ) {
     this.subscription = new Subscription();
@@ -99,7 +99,7 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
   }
 
   showPdfExportDialog() {
-    this.pdfExportService.showDialog();
+    this.exportMapService.showDialog();
   }
 
   async generateShareLink(): Promise<void> {

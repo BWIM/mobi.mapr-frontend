@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription, firstValueFrom } from 'rxjs';
 import { LoadingService } from '../services/loading.service';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../auth/auth.service';
@@ -39,6 +39,7 @@ export class MapV2Service {
   private lastZoomTime: number = 0;
   private readonly ZOOM_COOLDOWN = 3000; // 5 seconds in milliseconds
   private projectVersion: number = 0;
+  private mapType: 'hexagon' | 'county' | 'municipality' | 'state' = 'hexagon';
   comparisonProject: Project | null = null;
   private comparisonSubject = new BehaviorSubject<boolean>(false);
   comparison$ = this.comparisonSubject.asObservable();
@@ -93,8 +94,24 @@ export class MapV2Service {
     return this.map;
   }
 
+  getZoom(): number {
+    return this.currentZoom;
+  }
+
+  getCenter(): [number, number] {
+    return this.map?.getCenter() as unknown as [number, number];
+  }
+
   getCurrentProject(): string | null {
     return this.currentProject;
+  }
+
+  getMapType(): 'hexagon' | 'county' | 'municipality' | 'state' {
+    return this.mapType;
+  }
+
+  getShareKey(): string | null {
+    return this.shareKey;
   }
 
   getProjectVersion(): number {
@@ -263,6 +280,7 @@ export class MapV2Service {
     // If hexagon view is enabled, always use the smallest hexagon layer
     if (this.hexagonView) {
       this.analyzeService.setMapType('hexagon');
+      this.mapType = 'hexagon';
       return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}&resolution=9${authParam}`;
     }
     
@@ -270,17 +288,21 @@ export class MapV2Service {
     if (this.currentZoom < 7) {
       // State level
       this.analyzeService.setMapType('state');
+      this.mapType = 'state';
       return `${environment.apiUrl}/tiles/laender/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
     } else if (this.currentZoom < 9) {
       // County level
       this.analyzeService.setMapType('county');
+      this.mapType = 'county';
       return `${environment.apiUrl}/tiles/landkreise/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
     } else if (this.currentZoom < 10) {
       // Municipality level
       this.analyzeService.setMapType('municipality');
+      this.mapType = 'municipality';
       return `${environment.apiUrl}/tiles/gemeinden/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
     } else {
       this.analyzeService.setMapType('hexagon');
+      this.mapType = 'hexagon';
       return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}&resolution=9${authParam}`;
     }
   }
@@ -497,5 +519,19 @@ export class MapV2Service {
       const updatedStyle = this.getProjectMapStyle(this.currentProject);
       this.mapStyleSubject.next(updatedStyle);
     }
+  }
+
+  async getGeojson(): Promise<any> {
+    const token = this.authService.getAuthorizationHeaders().get('Authorization')?.split(' ')[1];
+    let authParam = '';
+    if (this.getShareKey()) {
+      authParam = `&key=${this.getShareKey()}`;
+    } else if (token) {
+      authParam = `&token=${token}`;
+    }
+
+    const url = `${environment.apiUrl}/geojson?project=${this.currentProject}&type=${this.averageType}&&resolution=${this.getMapType()}${authParam}`;
+
+    return firstValueFrom(this.http.get<any>(url));
   }
 }

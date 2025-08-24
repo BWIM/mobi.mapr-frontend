@@ -1,0 +1,483 @@
+import {Injectable} from '@angular/core';
+import { ProjectsService } from '../../projects/projects.service';
+import jsPDF from 'jspdf';
+import { print, downloadBlob } from '@camptocamp/inkmap';
+import { ExportMapService } from './export-map.service';
+import { MapV2Service } from '../map-v2.service';
+import { style } from '@angular/animations';
+
+export type PaperSize = 'a4' | 'a3' | 'a2' | 'a1' | 'a0';
+export type Orientation = 'portrait' | 'landscape';
+export type MapExtent = 'current' | 'full';
+
+export interface PdfExportOptions {
+  orientation: Orientation;
+  paperSize: PaperSize;
+  resolution: number;
+  mapExtent: MapExtent;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class PdfGenerationService {
+  private readonly paperSizes: {[key in PaperSize]: [number, number]} = {
+    a4: [210, 297],  // A4 in mm (width, height)
+    a3: [297, 420],  // A3 in mm
+    a2: [420, 594],  // A2 in mm
+    a1: [594, 841],  // A1 in mm
+    a0: [841, 1189]  // A0 in mm
+  };
+
+  private readonly modeIcons: {[key in string]: string} = {
+    'Fahrrad': '🚴',
+    'Auto': '🚗',
+    'Fußgänger': '🚶',
+    'ÖPNV': '🚋',
+  };
+
+  private readonly activityIcons: {[key in string]: string} = {
+    'Einkauf': '🛒',
+    'Erledigung': '🧹',
+    'Freizeit': '🎉',
+  };
+
+  private readonly activityCount: {[key in string]: number} = {
+    'Einkauf': 3,
+    'Erledigung': 12,
+    'Freizeit': 14,
+  };
+
+
+  private createGeoStylerStyle(): any {
+    return {
+      name: 'BWIM Score Style',
+      rules: [
+        {
+          name: 'Score 0 - No Data',
+          filter: ['<=', 'score', 0],
+          symbolizers: [{
+            kind: 'Fill',
+            color: '#808080',
+            opacity: 0,
+            outlineColor: '#808080',
+            outlineOpacity: 0.8,
+            outlineWidth: 0.5
+          }]
+        },
+        {
+          name: 'Score 0-0.35 - Very Low',
+          filter: ['&&', ['>', 'score', 0], ['<=', 'score', 0.35]],
+          symbolizers: [{
+            kind: 'Fill',
+            color: '#32612D',
+            opacity: 0.6,
+            outlineColor: '#32612D',
+            outlineOpacity: 0.8,
+            outlineWidth: 0.5
+          }]
+        },
+        {
+          name: 'Score 0.35-0.5 - Low',
+          filter: ['&&', ['>', 'score', 0.35], ['<=', 'score', 0.5]],
+          symbolizers: [{
+            kind: 'Fill',
+            color: '#3CB043',
+            opacity: 0.6,
+            outlineColor: '#3CB043',
+            outlineOpacity: 0.8,
+            outlineWidth: 0.5
+          }]
+        },
+        {
+          name: 'Score 0.5-0.71 - Medium',
+          filter: ['&&', ['>', 'score', 0.5], ['<=', 'score', 0.71]],
+          symbolizers: [{
+            kind: 'Fill',
+            color: '#EED202',
+            opacity: 0.6,
+            outlineColor: '#EED202',
+            outlineOpacity: 0.8,
+            outlineWidth: 0.5
+          }]
+        },
+        {
+          name: 'Score 0.71-1.0 - High',
+          filter: ['&&', ['>', 'score', 0.71], ['<=', 'score', 1.0]],
+          symbolizers: [{
+            kind: 'Fill',
+            color: '#ed7014',
+            opacity: 0.6,
+            outlineColor: '#ed7014',
+            outlineOpacity: 0.8,
+            outlineWidth: 0.5
+          }]
+        },
+        {
+          name: 'Score 1.0-1.41 - Very High',
+          filter: ['&&', ['>', 'score', 1.0], ['<=', 'score', 1.41]],
+          symbolizers: [{
+            kind: 'Fill',
+            color: '#C21807',
+            opacity: 0.6,
+            outlineColor: '#C21807',
+            outlineOpacity: 0.8,
+            outlineWidth: 0.5
+          }]
+        },
+        {
+          name: 'Score > 1.41 - Critical',
+          filter: ['>', 'score', 1.41],
+          symbolizers: [{
+            kind: 'Fill',
+            color: '#9656A2',
+            opacity: 0.6,
+            outlineColor: '#9656A2',
+            outlineOpacity: 0.8,
+            outlineWidth: 0.5
+          }]
+        }
+      ]
+    };
+  }
+
+  constructor(
+    private exportMapService: ExportMapService,
+    private mapService: MapV2Service,
+    private projectsService: ProjectsService
+  ) {}
+
+ 
+
+  private addProjectDetails(pdf: jsPDF, project: any, pageWidth: number, pageHeight: number): void {
+    // Calculate scaling factor based on paper size
+    const baseSize = 210; // A4 width in mm
+    const scaleFactor = Math.max(1, pageWidth / baseSize);
+    
+    // Project name - TOP LEFT
+    const fontSize = Math.round(14 * scaleFactor);
+    const x = 2 * scaleFactor;
+    const y = 15 * scaleFactor; // 10mm from top (PDF coordinates are bottom-up)
+    const maxWidth = pageWidth - 120 * scaleFactor; // Leave space for logo
+    
+    let text = project.project_name;
+    
+    pdf.setFontSize(fontSize);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(text, x, y);
+
+    // Project details - TOP LEFT
+    const detailsFontSize = Math.round(10 * scaleFactor);
+    let detailsY = y + fontSize/2;
+    let textX = x + 20 * scaleFactor;
+    
+    // Modes
+    if (project.profile_modes && Array.isArray(project.profile_modes)) {
+      const label = 'Modi:';
+      pdf.setFontSize(detailsFontSize);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(label, x, detailsY);
+      
+      const modesText = project.profile_modes.join(', ');
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(` ${modesText}`, textX, detailsY);
+      detailsY += detailsFontSize/2;
+    }
+
+    // Personas
+    if (project.persona_abbreviations && Array.isArray(project.persona_abbreviations)) {
+      const label = 'Personen:';
+      pdf.setFontSize(detailsFontSize);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(label, x, detailsY);
+      
+      const personasText = project.persona_abbreviations.length === 12 ? 'Alle Personengruppen' : 'Auswahl Personengruppen';
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(` ${personasText}`, textX, detailsY);
+      detailsY += detailsFontSize/2;
+    }
+
+    // Activities
+    if (project.activities && Array.isArray(project.activities)) {
+      const activityCounts: {[key in string]: number} = {};
+      project.activities.forEach((act: string) => {
+        activityCounts[act] = (activityCounts[act] || 0) + 1;
+      });
+      
+      const label = 'Aktivitäten:';
+      pdf.setFontSize(detailsFontSize);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(label, x, detailsY);
+      
+      const activitiesText = Object.entries(activityCounts)
+        .map(([act, count]) => `${act} (${count})`)
+        .join(', ');
+      
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(` ${activitiesText}`, textX, detailsY);
+    }
+  }
+
+  private async addLogo(pdf: jsPDF, pageWidth: number, pageHeight: number): Promise<void> {
+    try {
+      const logoBase64 = await this.loadImageAsBase64('assets/images/logo_transparent.png');
+      if (logoBase64) {
+        // Calculate scaling factor based on paper size
+        const baseSize = 210; // A4 width in mm
+        const scaleFactor = Math.max(1, pageWidth / baseSize);
+        
+        const logoWidth = 40 * scaleFactor; // Scaled size in mm
+        const logoHeight = 20 * scaleFactor; // Scaled size in mm
+        const x = pageWidth - logoWidth - 10 * scaleFactor; // TOP RIGHT
+        const y = 10 * scaleFactor; // 10mm from top
+
+        pdf.addImage(logoBase64, 'PNG', x, y, logoWidth, logoHeight);
+      }
+    } catch (error) {
+      console.warn('Could not load logo:', error);
+    }
+  }
+
+  private async addLegendAndBWIMLogo(pdf: jsPDF, pageWidth: number, pageHeight: number, project?: any): Promise<void> {
+    try {
+      // Load images in parallel
+      const [legendBase64, bwimBase64] = await Promise.all([
+        this.loadImageAsBase64('assets/images/legend.png'),
+        this.loadImageAsBase64('assets/images/BWIM.png')
+      ]);
+
+      // Calculate scaling factor based on paper size
+      const baseSize = 210; // A4 width in mm
+      const scaleFactor = Math.max(1, pageWidth / baseSize);
+
+      // Scaled sizes for consistency
+      const legendHeight = 50 * scaleFactor;
+      const bwimWidth = 30 * scaleFactor;
+      const bwimHeight = 15 * scaleFactor;
+      const legendWidth = 15 * scaleFactor;
+
+      // Position at BOTTOM RIGHT
+      const legendX = pageWidth - legendWidth - 10 * scaleFactor;
+      const bwimX = pageWidth - bwimWidth - 10 * scaleFactor;
+      const bwimY = pageHeight - 20 * scaleFactor; // 10mm from bottom
+      const legendY = bwimY - bwimHeight - 40 * scaleFactor; // Above BWIM logo
+
+      // Draw legend
+      if (legendBase64) {
+        pdf.addImage(legendBase64, 'PNG', legendX, legendY, legendWidth, legendHeight);
+      }
+
+      // Draw BWIM logo
+      if (bwimBase64) {
+        pdf.addImage(bwimBase64, 'PNG', bwimX, bwimY, bwimWidth, bwimHeight);
+      }
+
+      // Draw copyright and date
+      if (project && project.creation_date) {
+        const copyrightText = `© BWIM, ${project.creation_date}`;
+        const copyrightFontSize = Math.round(8 * scaleFactor);
+        pdf.setFontSize(copyrightFontSize);
+        pdf.setFont('helvetica', 'normal');
+        const textX = pageWidth - 35 * scaleFactor;
+        const textY = bwimY + 18 * scaleFactor; // Below BWIM logo
+        pdf.text(copyrightText, textX, textY);
+      }
+    } catch (error) {
+      console.warn('Could not load legend or BWIM logo:', error);
+    }
+  }
+
+  private async loadImageAsBase64(url: string): Promise<string> {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.warn(`Could not load image: ${url}`, error);
+      return '';
+    }
+  }
+
+  private getFilename(project: any): string {
+    const now = new Date();
+    const formattedDate = now.toISOString().split('T')[0];
+    const formattedTime = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+    const sanitizedProjectName = project.project_name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    return `${formattedDate}_${formattedTime}_${sanitizedProjectName}.pdf`;
+  }
+
+  private zoomToScale(zoom: number): number {
+    zoom = Math.ceil(zoom);
+    switch (zoom) {
+      case 1:
+        return 279541132.014;
+      case 2:
+        return 139770566.007;
+      case 3:
+        return 69885283.0036;
+      case 4:
+        return 34942641.5018;
+      case 5:
+        return 17471320.7509;
+      case 6:
+        return 8735660.37545;
+      case 7:
+        return 4367830.18772;
+      case 8:
+        return 2183915.09386;
+      case 9:
+        return 1091957.54693;
+      case 10:
+        return 545978.773466;
+      case 11:
+        return 272989.386733;
+      case 12:
+        return 136494.693366;
+      case 13:
+        return 68247.3466832;
+      case 14:
+        return 34123.6733416;
+      case 15:
+        return 17061.8366708;
+      case 16:
+        return 8530.9183354;
+      case 17:
+        return 4265.4591677;
+      case 18:
+        return 2132.72958385;
+      default:
+        return 2000000;
+    }
+  }
+
+  async exportToPDF(options: PdfExportOptions): Promise<void> {
+    try {
+      // Get project info
+      const projectInfo = await new Promise((resolve, reject) => {
+        this.projectsService.getExportInfo().subscribe({
+          next: (project) => resolve(project),
+          error: (error) => {
+            console.error('Fehler beim Laden der Projektdetails:', error);
+            reject(error);
+          }
+        });
+      });
+
+      // Get paper dimensions in mm
+      const [mmWidth, mmHeight] = options.orientation === 'landscape' 
+        ? [this.paperSizes[options.paperSize][1], this.paperSizes[options.paperSize][0]]
+        : [this.paperSizes[options.paperSize][0], this.paperSizes[options.paperSize][1]];
+
+      const margin = 0;
+      const mapWidth = mmWidth - 2 * margin;
+      const mapHeight = mmHeight - 2 * margin;
+
+
+      let size = [this.paperSizes[options.paperSize][0], this.paperSizes[options.paperSize][1], "mm"]
+      if (options.orientation === 'landscape') {
+        size = [size[1], size[0], "mm"];
+      }
+      const center = this.mapService.getMap()?.getCenter();
+      const zoom = this.mapService.getMap()?.getZoom();
+      let scale = 2000000;
+      if (zoom) {
+        scale = this.zoomToScale(zoom);
+      }
+      const geodataSource = this.mapService.getMap()?.getStyle().sources['geodata'];
+      let mapURL = '';
+      if (geodataSource && 'tiles' in geodataSource && geodataSource.tiles) {
+        mapURL = geodataSource.tiles[0];
+      } else {
+        console.warn('Geodata source or tiles not available');
+      }
+      
+      if (!this.mapService.currentProject) {
+        throw new Error('No current project selected');
+      }
+      
+      let geojson: any;
+      try {
+        geojson = await this.mapService.getGeojson();
+        console.log('Geojson:', geojson);
+
+        if (!geojson) {
+          throw new Error('Failed to fetch geojson data');
+        }
+      } catch (error) {
+        console.error('Error fetching geojson:', error);
+        throw new Error(`Failed to fetch geojson data: ${error}`);
+      }
+
+      const geoStylerStyle = this.createGeoStylerStyle();
+
+      const specValue = {
+        "layers": [
+          {
+            "type": "XYZ",
+            "url": "https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+            "attribution": "© OpenStreetMap contributors"
+          },
+          {
+            "type": "GeoJSON",
+            "geojson": geojson,
+            "attribution": "© bwim",
+            "opacity": 1.0,
+            "style": geoStylerStyle
+          }
+        ],
+        "size": size,
+        "center": [center?.lng, center?.lat],
+        "dpi": options.resolution,
+        "scale": scale,
+        "scaleBar": false,
+        "projection": "EPSG:3857",
+        "northArrow": false,
+        "attributions": false
+      };
+
+      // Generate map image using inkmap
+      console.log('Generating map image with inkmap...');
+      const blob = await print(specValue);
+      console.log('Blob:', blob);
+
+      // Create PDF
+      const pdf = new jsPDF({
+        orientation: mmWidth > mmHeight ? 'l' : 'p',
+        unit: 'mm',
+        format: [mmWidth, mmHeight],
+        compress: true
+      });
+
+      // Create an Object URL from the map image blob and add it to the PDF
+      const imgUrl = URL.createObjectURL(blob);
+      pdf.addImage(imgUrl, 'JPEG', margin, margin, mapWidth, mapHeight);
+
+      // Add project details (overlay on top)
+      this.addProjectDetails(pdf, projectInfo, mmWidth, mmHeight);
+      
+      // Add logo (overlay on top)
+      await this.addLogo(pdf, mmWidth, mmHeight);
+      
+      // Add legend and BWIM logo (overlay on top)
+      await this.addLegendAndBWIMLogo(pdf, mmWidth, mmHeight, projectInfo);
+
+      // Save the PDF
+      console.log('Saving PDF');
+      pdf.save(this.getFilename(projectInfo));
+
+      // Clean up the object URL
+      URL.revokeObjectURL(imgUrl);
+
+      console.log('Inkmap-based export completed successfully');
+
+    } catch (error) {
+      console.error(`Fehler beim Generieren des PDFs:`, error);
+      throw error;
+    }
+  }
+}

@@ -12,7 +12,7 @@ import { StatisticsComponent } from './statistics/statistics.component';
 import { KeyboardShortcutsService, ShortcutAction } from './map-v2/keyboard-shortcuts.service';
 import { Subscription } from 'rxjs';
 import { HostListener } from '@angular/core';
-import { PdfExportDialogComponent } from './map-v2/pdf-export-dialog/pdf-export-dialog.component';
+import { ExportMapComponent } from './map-v2/export-map/export-map.component';
 import { TutorialComponent } from './tutorial/tutorial.component';
 
 @Component({
@@ -27,7 +27,7 @@ import { TutorialComponent } from './tutorial/tutorial.component';
     AnalyzeComponent, 
     CreditsComponent, 
     StatisticsComponent,
-    PdfExportDialogComponent,
+    ExportMapComponent,
     TutorialComponent
   ],
   templateUrl: './app.component.html',
@@ -56,7 +56,7 @@ export class AppComponent implements OnDestroy {
             break;
           case ShortcutAction.EXPORT_PDF_PORTRAIT:
           case ShortcutAction.EXPORT_PDF_LANDSCAPE:
-            // These actions are now handled by the PDF export dialog
+            // These actions are now handled by the export map component
             break;
           case ShortcutAction.CREATE_SHARE:
             // These actions are handled by their respective services

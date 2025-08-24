@@ -4,7 +4,7 @@ import { StatisticsService } from '../statistics/statistics.service';
 
 import { ShareService } from '../share/share.service';
 import { Subject } from 'rxjs';
-import { PdfExportService } from './pdf-export-dialog/pdf-export.service';
+import { ExportMapService } from './export-map/export-map.service';
 
 export enum ShortcutAction {
   ZOOM_TO_FEATURES = 'ZOOM_TO_FEATURES',
@@ -29,7 +29,7 @@ export class KeyboardShortcutsService {
   constructor(
     private statisticsService: StatisticsService,
     private shareService: ShareService,
-    private pdfExportService: PdfExportService
+    private exportMapService: ExportMapService
   ) {}
 
   setProjectInfo(info: any) {
@@ -69,7 +69,7 @@ export class KeyboardShortcutsService {
         this.shortcutSubject.next(ShortcutAction.SHOW_STATISTICS);
         break;
       case 'e':
-        this.pdfExportService.showDialog();
+        this.exportMapService.showDialog();
         this.shortcutSubject.next(ShortcutAction.EXPORT_PDF_PORTRAIT);
         break;
       case 'h':

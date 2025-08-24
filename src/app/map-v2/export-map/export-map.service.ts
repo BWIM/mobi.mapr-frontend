@@ -1,19 +1,14 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { PdfExportOptions } from './pdf-generation.service';
+import { PdfExportOptions } from './export-map.component';
+import { Map } from 'maplibre-gl';
 
 @Injectable({
   providedIn: 'root'
 })
-export class PdfExportService {
+export class ExportMapService {
   private dialogVisible = new BehaviorSubject<boolean>(false);
-  private defaultOptions: PdfExportOptions = {
-    orientation: 'portrait',
-    paperSize: 'a4',
-    resolution: 300,
-    mapExtent: 'current'
-  };
-
+  private exportMapSubject = new BehaviorSubject<Map | null>(null);
   dialogVisible$ = this.dialogVisible.asObservable();
 
   showDialog() {
@@ -24,7 +19,11 @@ export class PdfExportService {
     this.dialogVisible.next(false);
   }
 
-  getDefaultOptions(): PdfExportOptions {
-    return { ...this.defaultOptions };
+  setMap(map: Map | null) {
+    this.exportMapSubject.next(map);
   }
-} 
+
+  getMap(): Map | null {
+    return this.exportMapSubject.getValue();
+  }
+}

@@ -1,0 +1,40 @@
+.export-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 400px;
+}
+
+.pdf-options-panel {
+  flex: 1;
+  padding: 1rem;
+}
+
+.pdf-export-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.pdf-export-fields .field {
+  width: 100%;
+}
+
+.export-info {
+  border: 1px solid var(--surface-border);
+}
+
+.map-info {
+  border: 1px solid var(--surface-border);
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .export-layout {
+    gap: 1rem;
+  }
+  
+  .pdf-options-panel {
+    padding: 0.5rem;
+  }
+}

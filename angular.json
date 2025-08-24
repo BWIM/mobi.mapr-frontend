@@ -30,6 +30,11 @@
                 "glob": "**/*",
                 "input": "src/assets",
                 "output": "assets"
+              },
+              {
+                "glob": "inkmap-worker.js",
+                "input": "src/assets",
+                "output": "/"
               }
             ],
             "styles": [
