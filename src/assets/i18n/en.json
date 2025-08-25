@@ -198,13 +198,15 @@
       "SELECT_MID_ACTIVITIES": "Please select at least one MID activity.",
       "SELECT_NON_MID_ACTIVITY": "Please select a non-MID activity.",
       "SELECT_PERSONAS": "Please select at least one persona.",
-      "SELECT_MODES": "Please select at least one mode."
+      "SELECT_MODES": "Please select at least one mode.",
+      "SELECT_OSM_ACTIVITY": "Please select an activity"
     },
     "ACTIVITIES": {
       "MID": "Activities",
       "NON_MID": "Standard Activities",
       "TOGGLE_TOOLTIP": "toggle",
-      "NO_MID_ACTIVITIES": "Error with the Activities. Please reload the page"
+      "NO_MID_ACTIVITIES": "Error with the Activities. Please reload the page",
+      "OSM": "Switch activities"
     },
     "PROJECT_NAME_TOOLTIP": "project name",
     "DESCRIPTION_TOOLTIP": "Project description",
@@ -226,7 +228,8 @@
       "PROJECT_INFO": "Project Information"
     },
     "START_ACTIVITY": "Start activity",
-    "START_ACTIVITY_TOOLTIP": "Only calculates the score for a hexagon that has said activity"
+    "START_ACTIVITY_TOOLTIP": "Only calculates the score for a hexagon that has said activity",
+    "OSM_ACTIVITIES": "OpenStreetMap Activities"
   },
   "SIDEBAR": {
     "TITLE": "Details",

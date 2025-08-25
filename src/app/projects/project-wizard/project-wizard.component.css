@@ -16,6 +16,24 @@
     color: var(--primary-color-text);
 }
 
+/* Activities panel styling */
+.activities-panel {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+/* Modes panel styling */
+.modes-panel {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
 .animate-fadeIn {
     animation: fadeIn 0.3s ease-in-out;
 }
@@ -51,7 +69,17 @@
         margin: 0;
         margin-bottom: 0.5rem;
     }
-} 
+
+    .activities-panel {
+        padding: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .modes-panel {
+        padding: 1rem;
+        margin-top: 0.5rem;
+    }
+}
 
 #map {
     width: 100%;
