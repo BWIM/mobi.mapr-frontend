@@ -4,7 +4,6 @@ import jsPDF from 'jspdf';
 import { print, downloadBlob } from '@camptocamp/inkmap';
 import { ExportMapService } from './export-map.service';
 import { MapV2Service } from '../map-v2.service';
-import { style } from '@angular/animations';
 
 export type PaperSize = 'a4' | 'a3' | 'a2' | 'a1' | 'a0';
 export type Orientation = 'portrait' | 'landscape';
@@ -55,7 +54,7 @@ export class PdfGenerationService {
       rules: [
         {
           name: 'Score 0 - No Data',
-          filter: ['<=', 'score', 0],
+          filter: ['<=', 'index', 0],
           symbolizers: [{
             kind: 'Fill',
             color: '#808080',
@@ -67,7 +66,7 @@ export class PdfGenerationService {
         },
         {
           name: 'Score 0-0.35 - Very Low',
-          filter: ['&&', ['>', 'score', 0], ['<=', 'score', 0.35]],
+          filter: ['&&', ['>', 'index', 0], ['<=', 'index', 0.35]],
           symbolizers: [{
             kind: 'Fill',
             color: '#32612D',
@@ -79,7 +78,7 @@ export class PdfGenerationService {
         },
         {
           name: 'Score 0.35-0.5 - Low',
-          filter: ['&&', ['>', 'score', 0.35], ['<=', 'score', 0.5]],
+          filter: ['&&', ['>', 'index', 0.35], ['<=', 'index', 0.5]],
           symbolizers: [{
             kind: 'Fill',
             color: '#3CB043',
@@ -91,7 +90,7 @@ export class PdfGenerationService {
         },
         {
           name: 'Score 0.5-0.71 - Medium',
-          filter: ['&&', ['>', 'score', 0.5], ['<=', 'score', 0.71]],
+          filter: ['&&', ['>', 'index', 0.5], ['<=', 'index', 0.71]],
           symbolizers: [{
             kind: 'Fill',
             color: '#EED202',
@@ -103,7 +102,7 @@ export class PdfGenerationService {
         },
         {
           name: 'Score 0.71-1.0 - High',
-          filter: ['&&', ['>', 'score', 0.71], ['<=', 'score', 1.0]],
+          filter: ['&&', ['>', 'index', 0.71], ['<=', 'index', 1.0]],
           symbolizers: [{
             kind: 'Fill',
             color: '#ed7014',
@@ -115,7 +114,7 @@ export class PdfGenerationService {
         },
         {
           name: 'Score 1.0-1.41 - Very High',
-          filter: ['&&', ['>', 'score', 1.0], ['<=', 'score', 1.41]],
+          filter: ['&&', ['>', 'index', 1.0], ['<=', 'index', 1.41]],
           symbolizers: [{
             kind: 'Fill',
             color: '#C21807',
@@ -127,7 +126,7 @@ export class PdfGenerationService {
         },
         {
           name: 'Score > 1.41 - Critical',
-          filter: ['>', 'score', 1.41],
+          filter: ['>', 'index', 1.41],
           symbolizers: [{
             kind: 'Fill',
             color: '#9656A2',
