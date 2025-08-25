@@ -13,7 +13,7 @@ import { GeocodingService } from '../services/geocoding.service';
 import { firstValueFrom } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { MessageService } from 'primeng/api';
-import { ScoringService } from '../services/scoring.service';
+import { IndexService } from '../services/index.service';
 
 @Component({
   selector: 'app-statistics',
@@ -77,7 +77,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     private translate: TranslateService,
     private geocodingService: GeocodingService,
     private messageService: MessageService,
-    private scoringService: ScoringService
+    private indexService: IndexService
   ) {
     this.updateScoreTypeOptions();
     this.updateProjectVersionValidity();
@@ -457,13 +457,20 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   }
 
 
-
-  getScoreName(score: number): string {
-    return this.scoringService.getScoreName(score);
+  getIndexName(score: ScoreEntry): string {
+    if (this.scoreType === 'pop') {
+      return this.indexService.getIndexName(score.index_pop);
+    } else {
+      return this.indexService.getIndexName(score.index_avg);
+    }
   }
 
-  getScoreColor(score: number): string {
-    return this.scoringService.getScoreColor(score);
+  getIndexColor(score: ScoreEntry): string {
+    if (this.scoreType === 'pop') {
+      return this.indexService.getIndexColor(score.index_pop);
+    } else {
+      return this.indexService.getIndexColor(score.index_avg);
+    }
   }
 
   get filteredCountyCount(): number {
