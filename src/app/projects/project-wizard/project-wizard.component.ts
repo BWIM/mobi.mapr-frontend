@@ -110,7 +110,6 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
 
   selectedProfiles: { [key: number]: number } = {};
   profileControls: { [modeId: number]: FormControl } = {};
-  nonMidActivities: Activity[] = []; // For OSM activity dropdown
 
   constructor(
     private fb: FormBuilder,
@@ -134,7 +133,6 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
           this.loadAreas();
           this.loadLands();
           this.loadActivities();
-          this.loadOSMActivities();
           this.loadPersonas();
           this.loadModes();
         }
@@ -304,40 +302,29 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
   private loadActivities() {
     this.activitiesService.getActivities().subscribe({
       next: (response) => {
-        // Gruppiere alle Aktivitäten nach mid/non-mid
+        // Group activities by mid flag and then by wegezweck
         const midActivities = response.results.filter(activity => activity.mid === true);
-        const nonMidActivities = response.results.filter(activity => activity.mid === false);
+        const osmActivities = response.results.filter(activity => activity.mid === false);
 
-        // Gruppiere nach Wegezweck
+        // Group by wegezweck
         this.allGroupedActivities.mid = this.groupActivitiesByPurpose(midActivities);
-        this.allGroupedActivities.nonMid = this.groupActivitiesByPurpose(nonMidActivities);
+        this.allGroupedActivities.nonMid = this.groupActivitiesByPurpose(osmActivities);
         
-        // Setze initial die MID-Aktivitäten
+        // Set initial display to MID activities
         this.updateDisplayedActivities(true);
         setTimeout(() => {
           this.activitiesLoaded = true;
         }, 100);
       },
       error: (error) => {
-        console.error('Fehler beim Laden der Aktivitäten:', error);
-      }
-    });
-  }
-
-  private loadOSMActivities() { 
-    this.activitiesService.getOSMActivities().subscribe({
-      next: (response) => {
-        this.nonMidActivities = response.results;
-        this.nonMidActivities = this.nonMidActivities.sort((a, b) => 
-          (a.display_name || a.name).localeCompare(b.display_name || b.name)
-        );
+        console.error('Error loading activities:', error);
       }
     });
   }
 
   private groupActivitiesByPurpose(activities: Activity[]): GroupedActivities[] {
     const grouped = activities.reduce((groups: { [key: string]: Activity[] }, activity) => {
-      const wegezweckId = activity.wegezweck || 'undefined';
+      const wegezweckId = activity.wegezweck || 'Other';
       if (!groups[wegezweckId]) {
         groups[wegezweckId] = [];
       }
@@ -347,8 +334,8 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
 
     return Object.entries(grouped)
       .map(([_, activities]) => ({
-        tripPurpose: activities[0].wegezweck!,
-        activities: activities.sort((a, b) => a.display_name.localeCompare(b.display_name))
+        tripPurpose: activities[0].wegezweck || 'Other',
+        activities: activities.sort((a, b) => (a.display_name || a.name).localeCompare(b.display_name || b.name))
       }))
       .sort((a, b) => a.tripPurpose.localeCompare(b.tripPurpose));
   }
@@ -382,11 +369,11 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
 
   nextStep() {
     if (this.activeIndex < this.steps.length - 1) {
-      // Wenn wir im Aktivitäten-Schritt sind und eine Nicht-MID-Aktivität ausgewählt wurde
+      // If we're in the activities step and an OSM activity was selected
       if (this.activeIndex === 0 && !this.showMidActivities && this.projectForm.get('activities.selectedNonMidActivity')?.value) {
-        // Überspringe Personas (Index 1) und gehe direkt zu Modi (Index 2)
+        // Skip personas (Index 1) and go directly to modes (Index 2)
         this.activeIndex = 2;
-        // Setze alle Personas als ausgewählt
+        // Select all personas automatically
         this.selectAllPersonas();
       } else {
         this.activeIndex++;
@@ -404,9 +391,9 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
 
   prevStep() {
     if (this.activeIndex > 0) {
-      // Wenn wir bei Modi sind und eine Nicht-MID-Aktivität ausgewählt ist
+      // If we're at modes and an OSM activity is selected
       if (this.activeIndex === 2 && !this.showMidActivities && this.projectForm.get('activities.selectedNonMidActivity')?.value) {
-        // Springe direkt zurück zu Aktivitäten
+        // Jump directly back to activities
         this.activeIndex = 0;
       } else {
         this.activeIndex--;
@@ -424,13 +411,13 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
 
   isCurrentStepValid(): boolean {
     switch (this.activeIndex) {
-      case 0: // Aktivitäten
+      case 0: // Activities
         if (this.showMidActivities) {
           const midActivities = this.projectForm.get('activities.selectedMidActivities')?.value || [];
           return midActivities.length > 0;
         } else {
-          const nonMidActivity = this.projectForm.get('activities.selectedNonMidActivity')?.value;
-          return !!nonMidActivity;
+          const osmActivity = this.projectForm.get('activities.selectedNonMidActivity')?.value;
+          return !!osmActivity;
         }
       case 1:
         return this.projectForm.get('personas.selectedPersonas')?.value?.length > 0;
@@ -455,13 +442,13 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     
     // Check that all selected modes have valid profile selections if they have profiles
     for (const modeId of selectedModeIds) {
-      const mode = this.modes.find(m => m.id === modeId);
-      if (mode && mode.profiles && mode.profiles.length > 0) {
-        const selectedProfile = this.selectedProfiles[modeId];
-        if (!selectedProfile) {
-          return false;
+              const mode = this.modes.find(m => m.id === modeId);
+        if (mode && mode.profiles && mode.profiles.length > 0) {
+          const selectedProfile = this.selectedProfiles[modeId];
+          if (!selectedProfile) {
+            return false;
+          }
         }
-      }
     }
     
     return true;
@@ -675,17 +662,27 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  toggleMidActivities() {
+  toggleActivityType() {
+    // Toggle between MID activities and OSM activities
     this.showMidActivities = !this.showMidActivities;
     this.updateDisplayedActivities(this.showMidActivities);
   }
 
+  getOSMActivitiesList(): Activity[] {
+    // Return a flat list of all OSM activities for the dropdown
+    return this.allGroupedActivities.nonMid.flatMap(group => group.activities);
+  }
+
   private updateDisplayedActivities(showMid: boolean) {
+    // Update displayed activities based on selection (MID vs OSM)
     this.groupedActivities = showMid ? this.allGroupedActivities.mid : this.allGroupedActivities.nonMid;
+    
     if (showMid) {
+      // For MID activities, select all by default
       const allMidActivities = this.groupedActivities.flatMap(group => group.activities);
       this.projectForm.get('activities.selectedMidActivities')?.setValue(allMidActivities);
     } else {
+      // For OSM activities, clear any previous selection
       this.projectForm.get('activities.selectedNonMidActivity')?.setValue('');
     }
   }

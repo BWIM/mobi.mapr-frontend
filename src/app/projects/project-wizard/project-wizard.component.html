@@ -67,17 +67,19 @@
                             [ngModel]="showMidActivities"
                             [ngModelOptions]="{standalone: true}"
                             onLabel="{{ 'PROJECT_WIZARD.ACTIVITIES.MID' | translate }}"
-                            offLabel="{{ 'PROJECT_WIZARD.ACTIVITIES.NON_MID' | translate }}"
+                            offLabel="{{ 'PROJECT_WIZARD.ACTIVITIES.OSM' | translate }}"
                             [pTooltip]="'PROJECT_WIZARD.ACTIVITIES.TOGGLE_TOOLTIP' | translate"
-                            (onChange)="toggleMidActivities()"
+                            (onChange)="toggleActivityType()"
                             styleClass="p-button-sm"
                             [disabled]="!activitiesLoaded">
                         </p-toggleButton>
                     </div>
-                    <div class="grid w-full">
+                    
+                    <!-- Full width activities panel -->
+                    <div class="activities-panel">
                         <!-- MID Aktivitäten -->
                         <div *ngIf="showMidActivities">
-                            <div *ngFor="let group of groupedActivities" class="col-12 md:col-6 lg:col-4">
+                            <div *ngFor="let group of groupedActivities" class="mb-4">
                                 <p-panel [header]="group.tripPurpose">
                                     <ng-template pTemplate="header">
                                         <div class="right-10">
@@ -117,11 +119,11 @@
                             </div>
                         </div>
                         
-                        <!-- Nicht-MID Aktivitäten -->
-                        <div *ngIf="!showMidActivities" class="col-12">
-                            <p-panel [header]="'PROJECT_WIZARD.NON_MID_ACTIVITIES' | translate">
-                                <div class="grid">
-                                    <div *ngFor="let group of groupedActivities" class="col-12 md:col-6 lg:col-4 mb-4">
+                        <!-- OSM Aktivitäten -->
+                        <div *ngIf="!showMidActivities">
+                            <p-panel [header]="'PROJECT_WIZARD.OSM_ACTIVITIES' | translate">
+                                <div class="flex flex-col gap-4">
+                                    <div *ngFor="let group of groupedActivities" class="mb-4">
                                         <div class="font-bold mb-2">{{group.tripPurpose}}</div>
                                         <div class="ml-2">
                                             <div *ngFor="let activity of group.activities" class="flex align-items-center gap-2 mb-2">
@@ -141,13 +143,17 @@
                                 </div>
                             </p-panel>
                         </div>
+                        
+                        <!-- Error messages -->
+                        <div class="mt-4">
+                            <small class="text-red-500" *ngIf="showMidActivities && projectForm.get('activities.selectedMidActivities')?.errors?.['required'] && projectForm.get('activities.selectedMidActivities')?.touched">
+                                {{ 'PROJECT_WIZARD.ERRORS.SELECT_MID_ACTIVITIES' | translate }}
+                            </small>
+                            <small class="text-red-500" *ngIf="!showMidActivities && projectForm.get('activities.selectedNonMidActivity')?.errors?.['required'] && projectForm.get('activities.selectedNonMidActivity')?.touched">
+                                {{ 'PROJECT_WIZARD.ERRORS.SELECT_OSM_ACTIVITY' | translate }}
+                            </small>
+                        </div>
                     </div>
-                    <small class="text-red-500" *ngIf="showMidActivities && projectForm.get('activities.selectedMidActivities')?.errors?.['required'] && projectForm.get('activities.selectedMidActivities')?.touched">
-                        {{ 'PROJECT_WIZARD.ERRORS.SELECT_MID_ACTIVITIES' | translate }}
-                    </small>
-                    <small class="text-red-500" *ngIf="!showMidActivities && projectForm.get('activities.selectedNonMidActivity')?.errors?.['required'] && projectForm.get('activities.selectedNonMidActivity')?.touched">
-                        {{ 'PROJECT_WIZARD.ERRORS.SELECT_NON_MID_ACTIVITY' | translate }}
-                    </small>
                 </div>
 
                 <!-- Schritt 2: Personas -->
@@ -200,71 +206,75 @@
 
                 <!-- Schritt 3: Modi -->
                 <div *ngIf="activeIndex === 2" formGroupName="modes">
-                    <h3>{{ 'PROJECT_WIZARD.SELECT_MODES' | translate }}</h3>
-                    <div class="grid">
-                        <div class="col-12">
-                            <p-panel [header]="'PROJECT_WIZARD.AVAILABLE_MODES' | translate" styleClass="h-full">
-                                <ng-template pTemplate="header">
-                                    <div class="right-10">
-                                        <div class="flex gap-2">
-                                            <button pButton 
-                                                icon="pi pi-check-square"
-                                                [pTooltip]="'PROJECTS.WIZARD.SELECT_ALL_MODES' | translate"
-                                                class="p-button-sm p-button-rounded"
-                                                (click)="selectAllModes()">
-                                            </button>
-                                            <button pButton 
-                                                icon="pi pi-minus"
-                                                [pTooltip]="'PROJECTS.WIZARD.DESELECT_ALL_MODES' | translate"
-                                                class="p-button-sm p-button-rounded"
-                                                (click)="deselectAllModes()">
-                                            </button>
-                                        </div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3>{{ 'PROJECT_WIZARD.SELECT_MODES' | translate }}</h3>
+                    </div>
+                    
+                    <!-- Full width modes panel -->
+                    <div class="modes-panel">
+                        <p-panel [header]="'PROJECT_WIZARD.AVAILABLE_MODES' | translate">
+                            <ng-template pTemplate="header">
+                                <div class="right-10">
+                                    <div class="flex gap-2">
+                                        <button pButton 
+                                            icon="pi pi-check-square"
+                                            [pTooltip]="'PROJECTS.WIZARD.SELECT_ALL_MODES' | translate"
+                                            class="p-button-sm p-button-rounded"
+                                            (click)="selectAllModes()">
+                                        </button>
+                                        <button pButton 
+                                            icon="pi pi-minus"
+                                            [pTooltip]="'PROJECTS.WIZARD.DESELECT_ALL_MODES' | translate"
+                                            class="p-button-sm p-button-rounded"
+                                            (click)="deselectAllModes()">
+                                        </button>
                                     </div>
-                                </ng-template>
-                                <p-scrollPanel [style]="{width: '100%', height: '100%'}">
-                                    <div class="flex flex-col gap-4">
-                                        <div *ngFor="let mode of modes" class="mode-container">
-                                            <div class="flex items-center gap-2">
-                                                <p-checkbox
-                                                    [value]="mode.id"
-                                                    [name]="'modes'"
-                                                    [inputId]="'mode_' + mode.id"
-                                                    [ariaLabel]="mode.display_name || mode.name"
-                                                    [binary]="true"
-                                                    [ngModel]="selectedModeMap[mode.id]"
+                                </div>
+                            </ng-template>
+                            <div class="flex flex-col gap-4">
+                                <div *ngFor="let mode of modes" class="mode-container">
+                                    <div class="flex items-center gap-2">
+                                        <p-checkbox
+                                            [value]="mode.id"
+                                            [name]="'modes'"
+                                            [inputId]="'mode_' + mode.id"
+                                            [ariaLabel]="mode.display_name || mode.name"
+                                            [binary]="true"
+                                            [ngModel]="selectedModeMap[mode.id]"
+                                            [ngModelOptions]="{standalone: true}"
+                                            (onChange)="onModeChange(mode, $event.checked)">
+                                        </p-checkbox>
+                                        <label [for]="'mode_' + mode.id" class="font-medium">{{mode.display_name || mode.name}}</label>
+                                    </div>
+                                    
+                                    <!-- Profile selection -->
+                                    <div *ngIf="isModeSelected(mode) && mode.profiles && mode.profiles.length > 0" 
+                                         class="ml-8 mt-2">
+                                        <div class="flex flex-col gap-2">
+                                            <div *ngFor="let profile of mode.profiles" 
+                                                 class="flex items-center gap-2">
+                                                <p-radioButton
+                                                    [name]="'profile_' + mode.id"
+                                                    [value]="profile.id"
+                                                    [ngModel]="selectedProfiles[mode.id]"
                                                     [ngModelOptions]="{standalone: true}"
-                                                    (onChange)="onModeChange(mode, $event.checked)">
-                                                </p-checkbox>
-                                                <label [for]="'mode_' + mode.id" class="font-medium">{{mode.display_name || mode.name}}</label>
-                                            </div>
-                                            
-                                            <!-- Profile selection -->
-                                            <div *ngIf="isModeSelected(mode) && mode.profiles && mode.profiles.length > 0" 
-                                                 class="ml-8 mt-2">
-                                                <div class="flex flex-col gap-2">
-                                                    <div *ngFor="let profile of mode.profiles" 
-                                                         class="flex items-center gap-2">
-                                                        <p-radioButton
-                                                            [name]="'profile_' + mode.id"
-                                                            [value]="profile.id"
-                                                            [ngModel]="selectedProfiles[mode.id]"
-                                                            [ngModelOptions]="{standalone: true}"
-                                                            (onClick)="onProfileChange(mode, profile.id)">
-                                                        </p-radioButton>
-                                                        <label class="text-sm">{{profile.display_name || profile.name}}</label>
-                                                    </div>
-                                                </div>
+                                                    (onClick)="onProfileChange(mode, profile.id)">
+                                                </p-radioButton>
+                                                <label class="text-sm">{{profile.display_name || profile.name}}</label>
                                             </div>
                                         </div>
                                     </div>
-                                </p-scrollPanel>
-                            </p-panel>
+                                </div>
+                            </div>
+                        </p-panel>
+                        
+                        <!-- Error messages -->
+                        <div class="mt-4">
+                            <small class="text-red-500" *ngIf="projectForm.get('modes.selectedModes')?.errors?.['required'] && projectForm.get('modes.selectedModes')?.touched">
+                                {{ 'PROJECT_WIZARD.ERRORS.SELECT_MODES' | translate }}
+                            </small>
                         </div>
                     </div>
-                    <small class="text-red-500" *ngIf="projectForm.get('modes.selectedModes')?.errors?.['required'] && projectForm.get('modes.selectedModes')?.touched">
-                        {{ 'PROJECT_WIZARD.ERRORS.SELECT_MODES' | translate }}
-                    </small>
                 </div>
 
                 <!-- Schritt 4: Gebiet auswählen -->
@@ -351,7 +361,7 @@
                             <label for="startActivity" class="block mb-2">{{ 'PROJECT_WIZARD.START_ACTIVITY' | translate }}</label>
                             <p-dropdown 
                                 id="startActivity"
-                                [options]="nonMidActivities"
+                                [options]="getOSMActivitiesList()"
                                 formControlName="startActivity"
                                 optionLabel="display_name"
                                 [showClear]="true"

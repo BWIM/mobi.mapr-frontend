@@ -8,7 +8,7 @@ import { LoadingService } from '../services/loading.service';
 import { SearchOverlayComponent } from './search-overlay/search-overlay.component';
 import { LegendComponent } from '../legend/legend.component';	
 import { Project } from '../projects/project.interface';
-import { ScoringService } from '../services/scoring.service';
+import { IndexService } from '../services/index.service';
 
 // @ts-ignore
 import MaplibreCompare from '@maplibre/maplibre-gl-compare';
@@ -36,7 +36,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   projectName: string | null = null;
   comparisonProject: Project | null = null;
   currentProject: string | null = null;
-  constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService, private scoringService: ScoringService) {
+  constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService, private indexService: IndexService) {
     this.subscription = this.mapService.mapStyle$.subscribe(style => {
       this.mapStyle = style;
       if (this.map) {
@@ -156,7 +156,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
 
           const popupContent = `
             <div style="padding: 5px;">
-              ${name}: <strong>${this.scoringService.getScoreName(properties['score'])}</strong>
+              ${name}: <strong>${this.indexService.getIndexName(properties['index'])}</strong>
             </div>
           `;
 

@@ -7,7 +7,10 @@ import { ShareService } from '../share/share.service';
 
 export interface ScoreEntry {
   name: string;
-  score: number;
+  score_pop: number;
+  score_avg: number;
+  index_pop: number;
+  index_avg: number;
   level: 'state' | 'county' | 'municipality';
   population?: number;
   population_density?: number;
@@ -54,10 +57,14 @@ export class StatisticsService {
   }
 
   convertToScoreEntry(data: MunicipalityScore | CountyScore | StateScore, level: 'state' | 'county' | 'municipality', rank: number): ScoreEntry {
+    console.log(data)
     if ('gemeinde' in data) {
       return {
         name: data.gemeinde.name,
-        score: data.score_pop,
+        score_pop: data.score_pop,
+        score_avg: data.score_avg,
+        index_pop: data.index_pop,
+        index_avg: data.index_avg,
         population: data.gemeinde.population,
         population_density: data.gemeinde.population_density,
         level: 'municipality',
@@ -67,7 +74,10 @@ export class StatisticsService {
     } else if ('landkreis' in data) {
       return {
         name: data.landkreis.name,
-        score: data.score_pop,
+        score_pop: data.score_pop,
+        score_avg: data.score_avg,
+        index_pop: data.index_pop,
+        index_avg: data.index_avg,
         population: data.landkreis.population,
         population_density: data.landkreis.population_density,
         level: 'county',
@@ -76,7 +86,10 @@ export class StatisticsService {
     } else {
       return {
         name: data.land.name,
-        score: data.score_pop,
+        score_pop: data.score_pop,
+        score_avg: data.score_avg,
+        index_pop: data.index_pop,
+        index_avg: data.index_avg,
         population: data.land.population,
         population_density: data.land.population_density,
         level: 'state',

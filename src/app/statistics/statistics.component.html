@@ -49,8 +49,8 @@
                         <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
                             <td class="p-3">{{score.rank}}</td>
                             <td class="p-3" (click)="onFeatureClick(score)" title="{{score.name}} ({{'STATISTICS.POPULATION' | translate}}: {{(score.population) | number:'1.0-0'}})">{{score.name}}</td>
-                            <td class="p-3 font-semibold" [style.color]="getScoreColor(score.score)">
-                                {{getScoreName(score.score)}}
+                            <td class="p-3 font-semibold" [style.color]="getIndexColor(score)">
+                                {{getIndexName(score)}}
                             </td>
                         </tr>
                     </ng-template>
@@ -87,8 +87,8 @@
                         <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
                             <td class="p-3">{{score.rank}}</td>
                             <td class="p-3" (click)="onFeatureClick(score)" title="{{score.name}} ({{'STATISTICS.POPULATION' | translate}}: {{score.population | number:'1.0-0'}})">{{score.name}}</td>
-                            <td class="p-3 font-semibold" [style.color]="getScoreColor(score.score)">
-                                {{getScoreName(score.score)}}
+                            <td class="p-3 font-semibold" [style.color]="getIndexColor(score)">
+                                {{getIndexName(score)}}
                             </td>
                         </tr>
                     </ng-template>
@@ -123,8 +123,8 @@
                         <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer" [title]="score.name + ' (' + score.county + ')'">
                             <td class="p-3">{{score.rank}}</td>
                             <td class="p-3" (click)="onFeatureClick(score)" title="{{score.name}} - {{score.county}} ({{'STATISTICS.POPULATION' | translate}}: {{score.population | number:'1.0-0'}})">{{score.name}}</td>
-                            <td class="p-3 font-semibold" [style.color]="getScoreColor(score.score)">
-                                {{getScoreName(score.score)}}
+                            <td class="p-3 font-semibold" [style.color]="getIndexColor(score)">
+                                {{getIndexName(score)}}
                             </td>
                         </tr>
                     </ng-template>
