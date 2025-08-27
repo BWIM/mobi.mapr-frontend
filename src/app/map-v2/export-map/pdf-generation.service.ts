@@ -29,16 +29,16 @@ export class PdfGenerationService {
   };
 
   private readonly modeIcons: {[key in string]: string} = {
-    'Fahrrad': '🚴',
-    'Auto': '🚗',
-    'Fußgänger': '🚶',
-    'ÖPNV': '🚋',
+    'Fahrrad': 'assets/icons/bicycle.png',
+    'Auto': 'assets/icons/car.png',
+    'Fußgänger': 'assets/icons/walk.png',
+    'ÖPNV': 'assets/icons/tram.png',
   };
 
   private readonly activityIcons: {[key in string]: string} = {
-    'Einkauf': '🛒',
-    'Erledigung': '🧹',
-    'Freizeit': '🎉',
+    'Einkauf': 'assets/icons/shopping-cart.png',
+    'Erledigung': 'assets/icons/clipboard.png',
+    'Freizeit': 'assets/icons/resting.png',
   };
 
   private readonly activityCount: {[key in string]: number} = {
@@ -146,9 +146,7 @@ export class PdfGenerationService {
     private projectsService: ProjectsService
   ) {}
 
- 
-
-  private addProjectDetails(pdf: jsPDF, project: any, pageWidth: number, pageHeight: number): void {
+  private async addProjectDetails(pdf: jsPDF, project: any, pageWidth: number, pageHeight: number): Promise<void> {
     // Calculate scaling factor based on paper size
     const baseSize = 210; // A4 width in mm
     const scaleFactor = Math.max(1, pageWidth / baseSize);
@@ -170,17 +168,36 @@ export class PdfGenerationService {
     let detailsY = y + fontSize/2;
     let textX = x + 20 * scaleFactor;
     
-    // Modes
+    // Modes with icons
     if (project.profile_modes && Array.isArray(project.profile_modes)) {
       const label = 'Modi:';
       pdf.setFontSize(detailsFontSize);
       pdf.setFont('helvetica', 'bold');
       pdf.text(label, x, detailsY);
       
-      const modesText = project.profile_modes.join(', ');
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(` ${modesText}`, textX, detailsY);
-      detailsY += detailsFontSize/2;
+      // Display modes with icons
+      let currentX = textX;
+      for (const mode of project.profile_modes) {
+        const iconPath = this.modeIcons[mode];
+        if (iconPath) {
+          try {
+            const iconBase64 = await this.loadImageAsBase64(iconPath);
+            if (iconBase64) {
+              const iconSize = 4 * scaleFactor; // 4mm icon size
+              pdf.addImage(iconBase64, 'PNG', currentX, detailsY - iconSize/2, iconSize, iconSize);
+              currentX += iconSize + 2 * scaleFactor; // Add spacing between icons
+            }
+          } catch (error) {
+            console.warn(`Could not load mode icon for ${mode}:`, error);
+          }
+        }
+      }
+      
+      // // Add mode names below icons
+      // const modeNamesText = project.profile_modes.join(', ');
+      // pdf.setFont('helvetica', 'normal');
+      // pdf.text(modeNamesText, textX, detailsY + 6 * scaleFactor);
+      detailsY += detailsFontSize; // Extra space for icons
     }
 
     // Personas
@@ -196,25 +213,48 @@ export class PdfGenerationService {
       detailsY += detailsFontSize/2;
     }
 
-    // Activities
-    if (project.activities && Array.isArray(project.activities)) {
-      const activityCounts: {[key in string]: number} = {};
-      project.activities.forEach((act: string) => {
-        activityCounts[act] = (activityCounts[act] || 0) + 1;
-      });
-      
-      const label = 'Aktivitäten:';
-      pdf.setFontSize(detailsFontSize);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(label, x, detailsY);
-      
-      const activitiesText = Object.entries(activityCounts)
-        .map(([act, count]) => `${act} (${count})`)
-        .join(', ');
-      
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(` ${activitiesText}`, textX, detailsY);
-    }
+          // Activities with icons
+      if (project.activities && Array.isArray(project.activities)) {
+        const activityCounts: {[key in string]: number} = {};
+        project.activities.forEach((act: string) => {
+          activityCounts[act] = (activityCounts[act] || 0) + 1;
+        });
+        
+        const label = 'Aktivitäten:';
+        pdf.setFontSize(detailsFontSize);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(label, x, detailsY);
+        
+        // Display activities with icons in front of text
+        let currentY = detailsY
+        for (const [act, count] of Object.entries(activityCounts)) {
+          const iconPath = this.activityIcons[act];
+          if (iconPath) {
+            try {
+              const iconBase64 = await this.loadImageAsBase64(iconPath);
+              if (iconBase64) {
+                const iconSize = 4 * scaleFactor; // 4mm icon size
+                // Place icon to the left of the text
+                pdf.addImage(iconBase64, 'PNG', textX, currentY - iconSize/2, iconSize, iconSize);
+                
+                // Add activity name and count to the right of the icon
+                const activityText = `${act} (${count})`;
+                pdf.setFont('helvetica', 'normal');
+                pdf.text(activityText, textX + iconSize + 2 * scaleFactor, currentY);
+                
+                currentY += detailsFontSize/2 + 2 * scaleFactor; // Move to next line
+              }
+            } catch (error) {
+              console.warn(`Could not load activity icon for ${act}:`, error);
+              // Still add text even if icon fails to load
+              const activityText = `${act} (${count})`;
+              pdf.setFont('helvetica', 'normal');
+              pdf.text(activityText, textX, currentY);
+              currentY += detailsFontSize/2 + 2 * scaleFactor;
+            }
+          }
+        }
+      }
   }
 
   private async addLogo(pdf: jsPDF, pageWidth: number, pageHeight: number): Promise<void> {
@@ -457,7 +497,7 @@ export class PdfGenerationService {
       pdf.addImage(imgUrl, 'JPEG', margin, margin, mapWidth, mapHeight);
 
       // Add project details (overlay on top)
-      this.addProjectDetails(pdf, projectInfo, mmWidth, mmHeight);
+      await this.addProjectDetails(pdf, projectInfo, mmWidth, mmHeight);
       
       // Add logo (overlay on top)
       await this.addLogo(pdf, mmWidth, mmHeight);

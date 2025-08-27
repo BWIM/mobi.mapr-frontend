@@ -14,7 +14,9 @@ export enum ShortcutAction {
   EXPORT_PDF_LANDSCAPE = 'EXPORT_PDF_LANDSCAPE',
   CREATE_SHARE = 'CREATE_SHARE',
   TOGGLE_HEXAGON_VIEW = 'TOGGLE_HEXAGON_VIEW',
-  TOGGLE_SCORE_DISPLAY = 'TOGGLE_SCORE_DISPLAY'
+  TOGGLE_SCORE_DISPLAY = 'TOGGLE_SCORE_DISPLAY',
+  TOGGLE_GEMEINDE_VIEW = 'TOGGLE_GEMEINDE_VIEW',
+  TOGGLE_LANDKREIS_VIEW = 'TOGGLE_LANDKREIS_VIEW'
 }
 
 @Injectable({
@@ -77,6 +79,12 @@ export class KeyboardShortcutsService {
         break;
       case 'f':
         this.shortcutSubject.next(ShortcutAction.TOGGLE_SCORE_DISPLAY);
+        break;
+      case 'g':
+        this.shortcutSubject.next(ShortcutAction.TOGGLE_GEMEINDE_VIEW);
+        break;
+      case 'l':
+        this.shortcutSubject.next(ShortcutAction.TOGGLE_LANDKREIS_VIEW);
         break;
     }
   }

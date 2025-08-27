@@ -33,6 +33,8 @@ export class MapV2Service {
   private shareKey: string | null = null;
   private shortcutSubscription: Subscription;
   private hexagonView: boolean = false;
+  private gemeindeView: boolean = false;
+  private landkreisView: boolean = false;
   private selectedFeatureId: string | null = null;
   private scoreShown: boolean = false;
   private temporaryFeatures: any[] = [];
@@ -73,9 +75,20 @@ export class MapV2Service {
           break;
         case ShortcutAction.TOGGLE_HEXAGON_VIEW:
           this.hexagonView = !this.hexagonView;
-          const updatedStyle = this.getProjectMapStyle(this.currentProject!);
           this.analyzeService.setHexagonView(this.hexagonView);
-          this.mapStyleSubject.next(updatedStyle);
+          this.mapStyleSubject.next(this.getProjectMapStyle(this.currentProject!));
+          break;
+        case ShortcutAction.TOGGLE_GEMEINDE_VIEW:
+          this.gemeindeView = !this.gemeindeView;
+          this.analyzeService.setMapType('municipality');
+          this.mapType = 'municipality';
+          this.mapStyleSubject.next(this.getProjectMapStyle(this.currentProject!));
+          break;
+        case ShortcutAction.TOGGLE_LANDKREIS_VIEW:
+          this.landkreisView = !this.landkreisView;
+          this.analyzeService.setMapType('county');
+          this.mapType = 'county';
+          this.mapStyleSubject.next(this.getProjectMapStyle(this.currentProject!));
           break;
         case ShortcutAction.TOGGLE_SCORE_DISPLAY:
           if (this.analyzeService.getMapType() !== "hexagon") {
@@ -282,6 +295,14 @@ export class MapV2Service {
       this.analyzeService.setMapType('hexagon');
       this.mapType = 'hexagon';
       return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}&resolution=9${authParam}`;
+    } else if (this.gemeindeView) {
+      this.analyzeService.setMapType('municipality');
+      this.mapType = 'municipality';
+      return `${environment.apiUrl}/tiles/gemeinden/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
+    } else if (this.landkreisView) {
+      this.analyzeService.setMapType('county');
+      this.mapType = 'county';
+      return `${environment.apiUrl}/tiles/landkreise/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
     }
     
     // Define zoom level thresholds for normal view
