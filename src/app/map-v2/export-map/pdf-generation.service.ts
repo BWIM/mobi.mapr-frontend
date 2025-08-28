@@ -73,7 +73,7 @@ export class PdfGenerationService {
             opacity: 0.6,
             outlineColor: '#32612D',
             outlineOpacity: 0.8,
-            outlineWidth: 0.5
+            outlineWidth: 0.1
           }]
         },
         {
@@ -85,7 +85,7 @@ export class PdfGenerationService {
             opacity: 0.6,
             outlineColor: '#3CB043',
             outlineOpacity: 0.8,
-            outlineWidth: 0.5
+            outlineWidth: 0.1
           }]
         },
         {
@@ -97,7 +97,7 @@ export class PdfGenerationService {
             opacity: 0.6,
             outlineColor: '#EED202',
             outlineOpacity: 0.8,
-            outlineWidth: 0.5
+            outlineWidth: 0.1
           }]
         },
         {
@@ -109,7 +109,7 @@ export class PdfGenerationService {
             opacity: 0.6,
             outlineColor: '#ed7014',
             outlineOpacity: 0.8,
-            outlineWidth: 0.5
+            outlineWidth: 0.1
           }]
         },
         {
@@ -121,7 +121,7 @@ export class PdfGenerationService {
             opacity: 0.6,
             outlineColor: '#C21807',
             outlineOpacity: 0.8,
-            outlineWidth: 0.5
+            outlineWidth: 0.1
           }]
         },
         {
@@ -133,7 +133,7 @@ export class PdfGenerationService {
             opacity: 0.6,
             outlineColor: '#9656A2',
             outlineOpacity: 0.8,
-            outlineWidth: 0.5
+            outlineWidth: 0.1
           }]
         }
       ]
@@ -350,48 +350,16 @@ export class PdfGenerationService {
     return `${formattedDate}_${formattedTime}_${sanitizedProjectName}.pdf`;
   }
 
-  private zoomToScale(zoom: number): number {
-    zoom = Math.ceil(zoom);
-    switch (zoom) {
-      case 1:
-        return 279541132.014;
-      case 2:
-        return 139770566.007;
-      case 3:
-        return 69885283.0036;
-      case 4:
-        return 34942641.5018;
-      case 5:
-        return 17471320.7509;
-      case 6:
-        return 8735660.37545;
-      case 7:
-        return 4367830.18772;
-      case 8:
-        return 2183915.09386;
-      case 9:
-        return 1091957.54693;
-      case 10:
-        return 545978.773466;
-      case 11:
-        return 272989.386733;
-      case 12:
-        return 136494.693366;
-      case 13:
-        return 68247.3466832;
-      case 14:
-        return 34123.6733416;
-      case 15:
-        return 17061.8366708;
-      case 16:
-        return 8530.9183354;
-      case 17:
-        return 4265.4591677;
-      case 18:
-        return 2132.72958385;
-      default:
-        return 2000000;
-    }
+  private zoomToScale(zoom: number, dpi: number, latitude: number = 0): number {
+    // meters per pixel at given zoom & latitude
+    const resolution = 156543.033928 * Math.cos(latitude * Math.PI / 180) / Math.pow(2, zoom);
+  
+    // convert resolution (m/px) to scale denominator
+    // scale = (ground_resolution * dpi) / meters_per_inch
+    const metersPerInch = 0.0254;
+    const scaleDenominator = resolution * dpi / metersPerInch;
+  
+    return scaleDenominator;
   }
 
   async exportToPDF(options: PdfExportOptions): Promise<void> {
@@ -425,12 +393,13 @@ export class PdfGenerationService {
       const zoom = this.mapService.getMap()?.getZoom();
       let scale = 2000000;
       if (zoom) {
-        scale = this.zoomToScale(zoom);
+        scale = this.zoomToScale(zoom, options.resolution, center?.lat);
       }
       const geodataSource = this.mapService.getMap()?.getStyle().sources['geodata'];
       let mapURL = '';
       if (geodataSource && 'tiles' in geodataSource && geodataSource.tiles) {
         mapURL = geodataSource.tiles[0];
+        console.log('Map URL:', mapURL);
       } else {
         console.warn('Geodata source or tiles not available');
       }
