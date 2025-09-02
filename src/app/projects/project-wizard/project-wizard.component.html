@@ -158,50 +158,56 @@
 
                 <!-- Schritt 2: Personas -->
                 <div *ngIf="activeIndex === 1" formGroupName="personas">
-                    <h3>{{ 'PROJECT_WIZARD.SELECT_PERSONAS' | translate }}</h3>
-                    <div class="grid">
-                        <div class="col-12">
-                            <p-panel [header]="'PROJECT_WIZARD.AVAILABLE_PERSONAS' | translate">
-                                <ng-template pTemplate="header">
-                                    <div class="right-10">
-                                        <div class="flex gap-2">
-                                            <button pButton 
-                                                icon="pi pi-check-square"
-                                                [pTooltip]="'PROJECTS.WIZARD.SELECT_ALL_PERSONAS' | translate"
-                                                class="p-button-sm p-button-rounded"
-                                                (click)="selectAllPersonas()">
-                                            </button>
-                                            <button pButton 
-                                                icon="pi pi-minus"
-                                                [pTooltip]="'PROJECTS.WIZARD.DESELECT_ALL_PERSONAS' | translate"
-                                                class="p-button-sm p-button-rounded"
-                                                (click)="deselectAllPersonas()">
-                                            </button>
-                                        </div>
-                                    </div>
-                                </ng-template>
-                                <div class="flex flex-wrap gap-3" *ngFor="let persona of personas" >
-                                    <div class="flex align-items-center gap-2">
-                                        <p-checkbox
-                                            [value]="persona"
-                                            [name]="'personas'"
-                                            [inputId]="'persona_' + persona.id"
-                                            [ariaLabel]="persona.display_name || persona.name"
-                                            formControlName="selectedPersonas">
-                                            {{persona.display_name || persona.name}}
-                                        </p-checkbox>
-                                        <label [for]="'persona_' + persona.id"> {{persona.display_name || persona.name}}</label>
-                                        <!-- <p-tooltip *ngIf="persona.description" [target]="'persona_' + persona.id">
-                                            {{persona.description}}
-                                        </p-tooltip> -->
+                    <div class="flex justify-between items-center mb-4">
+                        <h3>{{ 'PROJECT_WIZARD.SELECT_PERSONAS' | translate }}</h3>
+                    </div>
+                    
+                    <!-- Full width personas panel -->
+                    <div class="personas-panel">
+                        <p-panel [header]="'PROJECT_WIZARD.AVAILABLE_PERSONAS' | translate">
+                            <ng-template pTemplate="header">
+                                <div class="right-10">
+                                    <div class="flex gap-2">
+                                        <button pButton 
+                                            icon="pi pi-check-square"
+                                            [pTooltip]="'PROJECTS.WIZARD.SELECT_ALL_PERSONAS' | translate"
+                                            class="p-button-sm p-button-rounded"
+                                            (click)="selectAllPersonas()">
+                                        </button>
+                                        <button pButton 
+                                            icon="pi pi-minus"
+                                            [pTooltip]="'PROJECTS.WIZARD.DESELECT_ALL_PERSONAS' | translate"
+                                            class="p-button-sm p-button-rounded"
+                                            (click)="deselectAllPersonas()">
+                                        </button>
                                     </div>
                                 </div>
-                            </p-panel>
+                            </ng-template>
+                            <div class="flex flex-wrap gap-3" *ngFor="let persona of personas" >
+                                <div class="flex align-items-center gap-2">
+                                    <p-checkbox
+                                        [value]="persona"
+                                        [name]="'personas'"
+                                        [inputId]="'persona_' + persona.id"
+                                        [ariaLabel]="persona.display_name || persona.name"
+                                        formControlName="selectedPersonas">
+                                        {{persona.display_name || persona.name}}
+                                    </p-checkbox>
+                                    <label [for]="'persona_' + persona.id"> {{persona.display_name || persona.name}}</label>
+                                    <!-- <p-tooltip *ngIf="persona.description" [target]="'persona_' + persona.id">
+                                        {{persona.description}}
+                                    </p-tooltip> -->
+                                </div>
+                            </div>
+                        </p-panel>
+                        
+                        <!-- Error messages -->
+                        <div class="mt-4">
+                            <small class="text-red-500" *ngIf="projectForm.get('personas.selectedPersonas')?.errors?.['required'] && projectForm.get('personas.selectedPersonas')?.touched">
+                                {{ 'PROJECT_WIZARD.ERRORS.SELECT_PERSONAS' | translate }}
+                            </small>
                         </div>
                     </div>
-                    <small class="text-red-500" *ngIf="projectForm.get('personas.selectedPersonas')?.errors?.['required'] && projectForm.get('personas.selectedPersonas')?.touched">
-                        {{ 'PROJECT_WIZARD.ERRORS.SELECT_PERSONAS' | translate }}
-                    </small>
                 </div>
 
                 <!-- Schritt 3: Modi -->
@@ -248,7 +254,7 @@
                                     </div>
                                     
                                     <!-- Profile selection -->
-                                    <div *ngIf="isModeSelected(mode) && mode.profiles && mode.profiles.length > 0" 
+                                        <div *ngIf="isModeSelected(mode) && mode.profiles && mode.profiles.length > 0" 
                                          class="ml-8 mt-2">
                                         <div class="flex flex-col gap-2">
                                             <div *ngFor="let profile of mode.profiles" 

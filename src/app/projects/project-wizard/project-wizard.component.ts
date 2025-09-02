@@ -492,8 +492,12 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       
       // Initialize profile selection with first profile ID if available
       if (mode.profiles && mode.profiles.length > 0) {
-        const firstProfile = mode.profiles[0];
-        this.selectedProfiles[mode.id] = firstProfile.id;
+        const relevantProfile = mode.profiles.find(profile => profile.mode_default);
+        if (relevantProfile) {
+          this.selectedProfiles[mode.id] = relevantProfile.id;
+        } else {
+          this.selectedProfiles[mode.id] = mode.profiles[0].id;
+        }
       }
     });
 
@@ -516,8 +520,12 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     if (checked) {
       // When selecting a mode, ensure its first profile is selected
       if (mode.profiles && mode.profiles.length > 0) {
-        const firstProfile = mode.profiles[0];
-        this.selectedProfiles[mode.id] = firstProfile.id;
+        const relevantProfile = mode.profiles.find(profile => profile.mode_default);
+        if (relevantProfile) {
+          this.selectedProfiles[mode.id] = relevantProfile.id;
+        } else {
+          this.selectedProfiles[mode.id] = mode.profiles[0].id;
+        }
       }
     } else {
       // When deselecting a mode, remove its profile selection
@@ -537,8 +545,13 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
 
   getProfileFormControl(mode: Mode): FormControl {
     if (!this.profileControls[mode.id] && mode.profiles && mode.profiles.length > 0) {
-      const firstProfile = mode.profiles[0];
-      const profileControl = new FormControl(firstProfile.id);
+      const relevantProfile = mode.profiles.find(profile => profile.mode_default);
+      let profileControl;
+      if (relevantProfile) {
+        profileControl = new FormControl(relevantProfile.id);
+      } else {
+        profileControl = new FormControl(mode.profiles[0].id);
+      }
       this.profileControls[mode.id] = profileControl;
       
       const profilesGroup = this.projectForm.get('modes.selectedProfiles') as FormGroup;

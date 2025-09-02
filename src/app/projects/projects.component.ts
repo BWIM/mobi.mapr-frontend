@@ -346,7 +346,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
     wsSubject.subscribe({
       next: (result: WebsocketResult) => {
-        if (result.result.geojson) {
+        if (result.result && result.result.geojson) {
           this.mapv2Service.addSingleFeature(result.result.geojson);
         }
         
