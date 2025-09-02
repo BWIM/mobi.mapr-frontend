@@ -346,11 +346,13 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
     wsSubject.subscribe({
       next: (result: WebsocketResult) => {
-        if (result.result.geojson) {
+        if (!result.result) return;
+        if (result.result && result.result.geojson) {
           this.mapv2Service.addSingleFeature(result.result.geojson);
         }
         
         const projectToUpdate = this.findProjectById(result.result.project);
+        if (!projectToUpdate) return;
         if (projectToUpdate) {
           projectToUpdate.calculated = result.result.calculated;
           projectToUpdate.areas = result.result.total;
@@ -358,6 +360,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         }
 
         if (result.result.finished) {
+          if (!result.result.project) return;
           const finishedProjectId = result.result.project;
           this.closeWebsocketConnection(finishedProjectId);
           // this.mapv2Service.emptyMap();

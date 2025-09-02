@@ -25,6 +25,15 @@
     margin-top: 1rem;
 }
 
+/* Personas panel styling */
+.personas-panel {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
 /* Modes panel styling */
 .modes-panel {
     background: white;
@@ -71,6 +80,11 @@
     }
 
     .activities-panel {
+        padding: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .personas-panel {
         padding: 1rem;
         margin-top: 0.5rem;
     }

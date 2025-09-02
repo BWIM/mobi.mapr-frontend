@@ -46,6 +46,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   sortBy: 'score' | 'weight' = 'weight';
   showPersona: boolean = true;
   activeTab: string = 'activities';
+  personaChartZoomed: boolean = false;
   showActivityOverlay: boolean = false;
   selectedCategory: number | null = null;
   selectedCategoryName: string = '';
@@ -73,6 +74,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   subactivitiesChartData: any;
   noPlaces: boolean = false;
   disablePlaces: boolean = false;
+  profileLegendData: any[] = [];
 
   // Map properties
   private map?: OlMap;
@@ -307,6 +309,20 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     return '#9656a2';                     // Lila (F)
   };
 
+  private getProfileColor = (profileId: string): string => {
+    const profileColors: { [key: string]: string } = {
+      2: '#1D3A6E',      // Navy Blue
+      4: '#4A90E2',      // Sky Blue
+      5: '#A7C7F2',         // Light Blue
+      7: '#007C7C',        // Teal
+      9: '#1EB7B2',         // Turquoise
+      10: '#A0E0DE',       // Soft Aqua
+      12: '#5A5A5A',                  // Slate Gray
+      16: '#4B0082'               // Indigo
+    };
+    return profileColors[profileId] || '#666666'; // Default gray if not found
+  };
+
   private initializeActivitiesChart(): void {
     if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0) return;
 
@@ -386,7 +402,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
             label: (context: any) => {
               const index = context.dataIndex;
               return [
-                `Score: ${scoreNames[index]}`,
+                `Note: ${scoreNames[index]}`,
                 `Weight: ${weights[index]}`
               ];
             }
@@ -670,7 +686,8 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     labels: string[], 
     data: number[], 
     scoreNames: string[], 
-    datasetLabel: string
+    datasetLabel: string,
+    isZoomed: boolean = false
   ): { chartData: any, chartOptions: any } {
     const borderColors = data.map(value => this.getColorForValue(value * 100));
 
@@ -679,7 +696,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       {
         label: '',
         data: labels.map(() => 1.41), // Fills from 1.41 to 2.0
-        backgroundColor: 'rgba(150, 86, 162, 0.2)',
+        backgroundColor: 'rgba(150, 86, 162, 0.1)',
         borderWidth: 0,
         pointRadius: 0,
         pointHoverRadius: 0,
@@ -688,7 +705,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       {
         label: '',
         data: labels.map(() => 1.0), // Fills from 1.0 to 1.41
-        backgroundColor: 'rgba(194, 24, 7, 0.2)',
+        backgroundColor: 'rgba(194, 24, 7, 0.1)',
         borderWidth: 0,
         pointRadius: 0,
         pointHoverRadius: 0,
@@ -697,7 +714,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       {
         label: '',
         data: labels.map(() => 0.72), // Fills from 0.72 to 1.0
-        backgroundColor: 'rgba(237, 112, 20, 0.2)',
+        backgroundColor: 'rgba(237, 112, 20, 0.1)',
         borderWidth: 0,
         pointRadius: 0,
         pointHoverRadius: 0,
@@ -706,7 +723,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       {
         label: '',
         data: labels.map(() => 0.5), // Fills from 0.51 to 0.72
-        backgroundColor: 'rgba(238, 210, 2, 0.2)',
+        backgroundColor: 'rgba(238, 210, 2, 0.1)',
         borderWidth: 0,
         pointRadius: 0,
         pointHoverRadius: 0,
@@ -715,7 +732,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       {
         label: '',
         data: labels.map(() => 0.35), // Fills from 0.35 to 0.51
-        backgroundColor: 'rgba(60, 176, 67, 0.2)',
+        backgroundColor: 'rgba(60, 176, 67, 0.1)',
         borderWidth: 0,
         pointRadius: 0,
         pointHoverRadius: 0,
@@ -724,7 +741,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       {
         label: '',
         data: labels.map(() => 0.35), // Fills from 0 to 0.35
-        backgroundColor: 'rgba(50, 97, 45, 0.2)',
+        backgroundColor: 'rgba(50, 97, 45, 0.1)',
         borderWidth: 0,
         pointRadius: 0,
         pointHoverRadius: 0,
@@ -741,15 +758,69 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           data: data,
           backgroundColor: 'rgba(0, 0, 0, 0.0)',
           borderColor: borderColors,
-          borderWidth: 2,
+          borderWidth: isZoomed ? 3 : 2,
           pointBackgroundColor: borderColors,
           pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: isZoomed ? 6 : 4,
+          pointHoverRadius: isZoomed ? 8 : 6,
           pointHoverBackgroundColor: '#fff',
           pointHoverBorderColor: borderColors,
+          pointHoverBorderWidth: 3,
           fill: false
         }
       ]
     };
+
+    // Calculate dynamic scale for zoomed view
+    let scaleConfig: any;
+    if (isZoomed && data.length > 0) {
+      const minValue = Math.min(...data);
+      const maxValue = Math.max(...data);
+      const range = maxValue - minValue;
+      const padding = Math.max(range * 0.1, 0.05); // 10% padding or minimum 0.05
+      
+      scaleConfig = {
+        beginAtZero: false,
+        min: Math.max(0, minValue - padding),
+        max: Math.min(1.41, maxValue + padding),
+        ticks: {
+          stepSize: Math.max(0.05, range / 8), // Adaptive step size
+          color: '#495057',
+          callback: function(value: number) {
+            return value.toFixed(2);
+          }
+        },
+        grid: {
+          color: '#ebedef'
+        },
+        pointLabels: {
+          color: '#495057',
+          font: {
+            size: 12
+          }
+        }
+      };
+    } else {
+      scaleConfig = {
+        beginAtZero: true,
+        max: 1.41,
+        min: 0,
+        ticks: {
+          stepSize: 0.2,
+          color: '#495057'
+        },
+        grid: {
+          color: '#ebedef'
+        },
+        pointLabels: {
+          color: '#495057',
+          font: {
+            size: 12
+          }
+        }
+      };
+    }
 
     const chartOptions = {
       responsive: true,
@@ -763,7 +834,10 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
               // Only show tooltip for datasets that have a label (actual data points)
               if (context.dataset.label) {
                 const index = context.dataIndex;
-                return `Score: ${scoreNames[index]}`;
+                return [
+                  `Score: ${scoreNames[index]}`,
+                  `Value: ${data[index].toFixed(3)}`
+                ];
               }
               return null; // Hide background datasets from tooltip
             }
@@ -776,27 +850,35 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
             usePointStyle: false,
             padding: 15
           }
+        },
+        // Custom plugin to add value labels on data points
+        afterDraw: (chart: any) => {
+          const ctx = chart.ctx;
+          const meta = chart.getDatasetMeta(chart.data.datasets.length - 1); // Get the main data dataset
+          
+          if (meta && meta.data) {
+            meta.data.forEach((element: any, index: number) => {
+              if (element && element.x !== undefined && element.y !== undefined) {
+                const value = data[index];
+                const label = value.toFixed(2);
+                
+                ctx.save();
+                ctx.fillStyle = '#333333';
+                ctx.font = 'bold 10px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                
+                // Position label above the point
+                const labelY = element.y - 15;
+                ctx.fillText(label, element.x, labelY);
+                ctx.restore();
+              }
+            });
+          }
         }
       },
       scales: {
-        r: {
-          beginAtZero: true,
-          max: 1.41,
-          min: 0,
-          ticks: {
-            stepSize: 0.2,
-            color: '#495057'
-          },
-          grid: {
-            color: '#ebedef'
-          },
-          pointLabels: {
-            color: '#495057',
-            font: {
-              size: 12
-            }
-          }
-        }
+        r: scaleConfig
       }
     };
 
@@ -841,7 +923,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const data = sortedPersonas.map(persona => persona.score);
     const scoreNames = sortedPersonas.map(persona => this.indexService.getIndexName(persona.score));
 
-    const { chartData, chartOptions } = this.createRadarChartData(labels, data, scoreNames, 'Persona-Werte');
+    const { chartData, chartOptions } = this.createRadarChartData(labels, data, scoreNames, 'Persona-Werte', this.personaChartZoomed);
     this.personaChartData = chartData;
     this.radarChartOptions = chartOptions;
   }
@@ -884,95 +966,228 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const data = sortedProfiles.map(profile => profile.score);
     const scoreNames = sortedProfiles.map(profile => this.indexService.getIndexName(profile.score));
 
-    // Check if we have multiple profiles for radar chart
-    if (sortedProfiles.length >= 3) {
-      const { chartData, chartOptions } = this.createRadarChartData(labels, data, scoreNames, 'Profile-Werte');
-      this.profilesChartData = chartData;
-      this.radarChartOptionsProfiles = chartOptions;
-    } else {
-      // Single profile - use bar chart
-      const scoreColors = data.map(value => this.getColorForValue(value * 100));
+    // Create combo chart with exponential function and horizontal bars
+    this.createProfilesComboChart(sortedProfiles, profileMap, scoreNames);
+  }
 
-      // Invert the data for bar height: lower scores (better) should be taller bars
-      // Assuming the maximum possible score is 1.41 (141/100), we'll use (1.41 - score) as the bar height
-      const maxScore = 1.41;
-      const invertedData = data.map(score => maxScore - score);
+  private createProfilesComboChart(profiles: any[], profileMap: Map<number, string>, scoreNames: string[]): void {
+    // Define the 18 grade levels from A+ to F-
+    const gradeLevels = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'E+', 'E', 'E-', 'F+', 'F', 'F-'];
+    
+    // Define grade ranges and their corresponding colors
+    const gradeRanges = [
+      { name: 'A', min: 0, max: 0.35, color: '#32612d' },      // Dark Green
+      { name: 'B', min: 0.35, max: 0.51, color: '#3cb043' },   // Light Green
+      { name: 'C', min: 0.51, max: 0.72, color: '#eed202' },   // Yellow
+      { name: 'D', min: 0.72, max: 1.0, color: '#ed7014' },    // Orange
+      { name: 'E', min: 1.0, max: 1.41, color: '#c21807' },    // Red
+      { name: 'F', min: 1.41, max: 2.0, color: '#9656a2' }     // Purple
+    ];
 
-      this.profilesChartData = {
-        labels: labels,
-        datasets: [
-          {
-            label: 'Profile',
-            data: invertedData,
-            backgroundColor: scoreColors,
-            borderColor: scoreColors,
-            borderWidth: 1,
-            yAxisID: 'y',
-            barPercentage: 0.8
-          }
-        ]
+    // Generate exponential function data: h(x) = 0.2511169 * 1.122178^x for x = 1 to 18
+    const exponentialData: number[] = [];
+    const xValues: number[] = [];
+    for (let x = 1; x <= 18; x++) {
+      const y = 0.2511169 * Math.pow(1.122178, x);
+      exponentialData.push(y);
+      xValues.push(x);
+    }
+
+    // Create datasets for the combo chart
+    const datasets: any[] = [];
+
+         // Create a single continuous exponential line with colored segments
+     // We'll create multiple overlapping line segments to achieve the colored effect
+     gradeRanges.forEach((grade, index) => {
+       const segmentData = [...exponentialData]; // Copy all exponential data
+       
+       // Find the range of x-values that should be included for this grade
+       let startX = -1;
+       let endX = -1;
+       
+       // Find the first x where y >= grade.min
+       if (index === 0) {
+         // For the first grade (A), start from x=0
+         startX = 0;
+       } else {
+         for (let x = 1; x <= 18; x++) {
+           const y = 0.2511169 * Math.pow(1.122178, x);
+           if (y >= grade.min) {
+             startX = x;
+             break;
+           }
+         }
+       }
+       
+       // Find the last x where y < grade.max (or include all remaining for last grade)
+       if (index === gradeRanges.length - 1) {
+         // For the last grade (F), include all remaining points
+         endX = 18;
+       } else {
+         for (let x = startX; x <= 18; x++) {
+           const y = 0.2511169 * Math.pow(1.122178, x);
+           if (y >= grade.max) {
+             endX = x; // Include this point to connect to next segment
+             break;
+           }
+         }
+         if (endX === -1) endX = 18; // Fallback
+       }
+       
+       // Set points outside the calculated range to null
+       segmentData.forEach((yValue, xIndex) => {
+         const x = xIndex + 1;
+         if (x < startX || x > endX) {
+           (segmentData as any[])[xIndex] = null;
+         }
+       });
+       
+       datasets.push({
+         type: 'line',
+         label: `Grade ${grade.name}`,
+         borderColor: grade.color,
+         borderWidth: 2,
+         fill: false,
+         tension: 0.4,
+         data: segmentData,
+         pointRadius: 0,
+         pointHoverRadius: 0
+       });
+     });
+
+    // Add horizontal bars for each profile
+    profiles.forEach((profile, index) => {
+      const profileName = profileMap.get(profile.profile) || `Profile ${profile.profile}`;
+      const profileColor = this.getProfileColor(profile.profile);
+      
+      // Create a dataset for this profile's horizontal bar
+      const profileData = new Array(18).fill(null);
+      
+      // Map score to x-position using inverse exponential function
+      // Find the x-value that produces the closest exponential function value to the profile score
+      let xPosition = 1; // Default to A+
+      let minDifference = Infinity;
+      
+      // Search through all 18 positions to find the one with exponential value closest to profile score
+      for (let x = 1; x <= 18; x++) {
+        const exponentialValue = 0.2511169 * Math.pow(1.122178, x);
+        const difference = Math.abs(exponentialValue - profile.score);
+        
+        if (difference < minDifference) {
+          minDifference = difference;
+          xPosition = x;
+        }
+      }
+      
+      // Get the exponential function value at this x-position
+      const exponentialValue = exponentialData[xPosition - 1];
+      
+      // Set the bar height to the exponential function value at this position
+      profileData[xPosition - 1] = exponentialValue;
+
+      datasets.push({
+        type: 'bar',
+        label: profileName,
+        backgroundColor: profileColor,
+        data: profileData,
+        borderColor: 'white',
+        borderWidth: 2
+      });
+    });
+
+    this.profilesChartData = {
+      labels: xValues.map(x => gradeLevels[x - 1]),
+      datasets: datasets
+    };
+
+    // Create legend data for profiles
+    this.profileLegendData = profiles.map(profile => {
+      const profileName = profileMap.get(profile.profile) || `Profile ${profile.profile}`;
+      return {
+        name: profileName,
+        color: this.getProfileColor(profile.profile)
       };
+    });
 
-      // Create bar chart options for single profile
-      this.profilesBarChartOptions = {
-        indexAxis: 'x',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          tooltip: {
-            mode: 'index',
-            intersect: false,
-            callbacks: {
-              label: (context: any) => {
-                const index = context.dataIndex;
-                return `Score: ${scoreNames[index]}`;
+    // Create combo chart options
+    this.profilesBarChartOptions = {
+      maintainAspectRatio: false,
+      aspectRatio: 0.6,
+      plugins: {
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            label: (context: any) => {
+              const dataset = context.dataset;
+              const index = context.dataIndex;
+              
+              // Only show tooltip for bar charts (profiles), hide grade line tooltips
+              if (dataset.type === 'bar' && dataset.data[index] !== null) {
+                return dataset.label;
               }
-            }
-          },
-          legend: {
-            position: 'bottom',
-            labels: {
-              generateLabels: this.generateLabels,
-              usePointStyle: false,
-              padding: 15
+              return null;
             }
           }
         },
-        scales: {
-          x: {
-            ticks: {
-              color: '#495057'
-            },
-            grid: {
-              color: '#ebedef'
-            }
+        legend: {
+          display: false
+        },
+        // Custom plugin to draw profile names
+        afterDraw: (chart: any) => {
+          const ctx = chart.ctx;
+          const profiles = chart.data.datasets.filter((dataset: any) => dataset.type === 'bar');
+          
+          profiles.forEach((dataset: any) => {
+            const meta = chart.getDatasetMeta(chart.data.datasets.indexOf(dataset));
+            
+            meta.data.forEach((element: any, index: number) => {
+              if (dataset.data[index] !== null) {
+                const x = element.x;
+                const y = element.y - 10; // Position above the bar
+                
+                ctx.save();
+                ctx.fillStyle = '#333333';
+                ctx.font = 'bold 10px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(dataset.label, x, y);
+                ctx.restore();
+              }
+            });
+          });
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#495057',
+            maxRotation: 45,
+            minRotation: 45
           },
-          y: {
-            type: 'linear',
-            display: true,
-            beginAtZero: true,
-            max: 1.41,
-            ticks: {
-              color: '#495057',
-              callback: function(value: number) {
-                // Map numeric values to grade labels
-                if (value >= 1.41) return 'A';
-                if (value >= 1.0) return 'B';
-                if (value >= 0.72) return 'C';
-                if (value >= 0.51) return 'D';
-                if (value >= 0.35) return 'E';
-                if (value >= 0) return 'F';
-                return '';
-              },
-              stepSize: 0.2
-            },
-            grid: {
-              color: '#ebedef'
-            }
+          grid: {
+            color: '#ebedef'
+          }
+        },
+        y: {
+          min: 0,
+          max: 2,
+          ticks: {
+            display: false
+          },
+          grid: {
+            color: '#ebedef'
           }
         }
-      };
-    }
+      },
+      // Add bar configuration to improve centering
+      datasets: {
+        bar: {
+          barPercentage: 0.8,
+          categoryPercentage: 0.8
+        }
+      }
+    };
   }
 
 
@@ -1130,6 +1345,14 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     if (this.showSubactivitiesPie && this.hoveredCategoryId) {
       this.generateSubactivitiesPieData(this.hoveredCategoryId);
     }
+    setTimeout(() => {
+      this.resizeCharts();
+    }, 100);
+  }
+
+  togglePersonaChartZoom(): void {
+    this.personaChartZoomed = !this.personaChartZoomed;
+    this.initializePersonaChart();
     setTimeout(() => {
       this.resizeCharts();
     }, 100);
