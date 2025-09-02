@@ -156,7 +156,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
 
           const popupContent = `
             <div style="padding: 5px;">
-              ${name}: <strong>${this.indexService.getIndexName(properties['index'])}}</strong>
+              ${name}: <strong>${this.indexService.getIndexName(properties['index'])}</strong>
             </div>
           `;
 
