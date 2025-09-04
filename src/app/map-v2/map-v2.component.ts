@@ -103,6 +103,9 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   private setupMapEvents(map: Map, projectId?: string): void {
     // Add panning event listeners to adjust layer opacity
     map.on('dragstart', () => {
+      if (this.mapService.getMapType() === 'hexagon') {
+        return;
+      }
       if (map?.getLayer('geodata-fill')) {
         const currentOpacity = map.getPaintProperty('geodata-fill', 'fill-opacity');
         if (Array.isArray(currentOpacity)) {
@@ -114,6 +117,9 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     });
 
     map.on('dragend', () => {
+      if (this.mapService.getMapType() === 'hexagon') {
+        return;
+      }
       if (map?.getLayer('geodata-fill')) {
         const currentOpacity = map.getPaintProperty('geodata-fill', 'fill-opacity');
         if (Array.isArray(currentOpacity)) {
