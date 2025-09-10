@@ -696,7 +696,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       {
         label: '',
         data: labels.map(() => 1.41), // Fills from 1.41 to 2.0
-        backgroundColor: 'rgba(150, 86, 162, 0.1)',
+        backgroundColor: 'rgba(150, 86, 162, 0.5)',
         borderWidth: 0,
         pointRadius: 0,
         pointHoverRadius: 0,
@@ -705,7 +705,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       {
         label: '',
         data: labels.map(() => 1.0), // Fills from 1.0 to 1.41
-        backgroundColor: 'rgba(194, 24, 7, 0.1)',
+        backgroundColor: 'rgba(194, 24, 7, 0.5)',
         borderWidth: 0,
         pointRadius: 0,
         pointHoverRadius: 0,
@@ -714,7 +714,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       {
         label: '',
         data: labels.map(() => 0.72), // Fills from 0.72 to 1.0
-        backgroundColor: 'rgba(237, 112, 20, 0.1)',
+        backgroundColor: 'rgba(237, 112, 20, 0.5)',
         borderWidth: 0,
         pointRadius: 0,
         pointHoverRadius: 0,
@@ -723,7 +723,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       {
         label: '',
         data: labels.map(() => 0.5), // Fills from 0.51 to 0.72
-        backgroundColor: 'rgba(238, 210, 2, 0.1)',
+        backgroundColor: 'rgba(238, 210, 2, 0.5)',
         borderWidth: 0,
         pointRadius: 0,
         pointHoverRadius: 0,
@@ -732,7 +732,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       {
         label: '',
         data: labels.map(() => 0.35), // Fills from 0.35 to 0.51
-        backgroundColor: 'rgba(60, 176, 67, 0.1)',
+        backgroundColor: 'rgba(60, 176, 67, 0.5)',
         borderWidth: 0,
         pointRadius: 0,
         pointHoverRadius: 0,
@@ -741,7 +741,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       {
         label: '',
         data: labels.map(() => 0.35), // Fills from 0 to 0.35
-        backgroundColor: 'rgba(50, 97, 45, 0.1)',
+        backgroundColor: 'rgba(50, 97, 45, 0.5)',
         borderWidth: 0,
         pointRadius: 0,
         pointHoverRadius: 0,
@@ -752,13 +752,12 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const chartData = {
       labels: labels,
       datasets: [
-        ...baseDatasets.reverse(),
         {
           label: datasetLabel,
           data: data,
           backgroundColor: 'rgba(0, 0, 0, 0.0)',
-          borderColor: borderColors,
-          borderWidth: isZoomed ? 3 : 2,
+          borderColor: "#ffffff",
+          borderWidth: isZoomed ? 4 : 3,
           pointBackgroundColor: borderColors,
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
@@ -768,7 +767,8 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           pointHoverBorderColor: borderColors,
           pointHoverBorderWidth: 3,
           fill: false
-        }
+        },
+        ...baseDatasets.reverse()
       ]
     };
 
@@ -1044,23 +1044,24 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
        
        datasets.push({
          type: 'line',
-         label: `Grade ${grade.name}`,
+         label: '', // Hide grade line labels
          borderColor: grade.color,
          borderWidth: 2,
          fill: false,
          tension: 0.4,
-         data: segmentData,
+         data: segmentData.map((value, index) => ({ x: index + 1, y: value })),
          pointRadius: 0,
-         pointHoverRadius: 0
+         pointHoverRadius: 0,
+         spanGaps: false
        });
      });
 
-    // Add horizontal bars for each profile
+    // Add points for each profile on the exponential line
     profiles.forEach((profile, index) => {
       const profileName = profileMap.get(profile.profile) || `Profile ${profile.profile}`;
       const profileColor = this.getProfileColor(profile.profile);
       
-      // Create a dataset for this profile's horizontal bar
+      // Create a dataset for this profile's point
       const profileData = new Array(18).fill(null);
       
       // Map score to x-position using inverse exponential function
@@ -1082,16 +1083,21 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       // Get the exponential function value at this x-position
       const exponentialValue = exponentialData[xPosition - 1];
       
-      // Set the bar height to the exponential function value at this position
+      // Set the point at the exponential function value at this position
       profileData[xPosition - 1] = exponentialValue;
 
       datasets.push({
-        type: 'bar',
+        type: 'scatter',
         label: profileName,
         backgroundColor: profileColor,
-        data: profileData,
-        borderColor: 'white',
-        borderWidth: 2
+        borderColor: profileColor,
+        data: profileData.map((value, index) => value !== null ? { x: index + 1, y: value } : null).filter(point => point !== null),
+        pointRadius: 8,
+        pointHoverRadius: 10,
+        pointBorderWidth: 2,
+        pointStyle: 'rectRounded',
+        pointBorderColor: 'white',
+        showLine: false
       });
     });
 
@@ -1115,16 +1121,29 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       aspectRatio: 0.6,
       plugins: {
         tooltip: {
-          mode: 'index',
-          intersect: false,
+          mode: 'point',
+          intersect: true,
           callbacks: {
+            title: (context: any) => {
+              const dataset = context[0].dataset;
+              
+              // Only show title for scatter plots (profiles), hide grade line tooltips
+              if (dataset.type === 'scatter' && dataset.label) {
+                return dataset.label; // Show profile name as title
+              }
+              return null;
+            },
             label: (context: any) => {
               const dataset = context.dataset;
-              const index = context.dataIndex;
               
-              // Only show tooltip for bar charts (profiles), hide grade line tooltips
-              if (dataset.type === 'bar' && dataset.data[index] !== null) {
-                return dataset.label;
+              // Only show tooltip for scatter plots (profiles), hide grade line tooltips
+              if (dataset.type === 'scatter' && dataset.label) {
+                // Get the x-position of the point to determine the correct grade
+                const xPosition = Math.round(context.parsed.x);
+                const gradeIndex = xPosition - 1;
+                const gradeLevel = gradeIndex >= 0 && gradeIndex < gradeLevels.length ? gradeLevels[gradeIndex] : '';
+                
+                return gradeLevel; // Show only the grade level as value
               }
               return null;
             }
@@ -1136,15 +1155,15 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         // Custom plugin to draw profile names
         afterDraw: (chart: any) => {
           const ctx = chart.ctx;
-          const profiles = chart.data.datasets.filter((dataset: any) => dataset.type === 'bar');
+          const profiles = chart.data.datasets.filter((dataset: any) => dataset.type === 'scatter');
           
           profiles.forEach((dataset: any) => {
             const meta = chart.getDatasetMeta(chart.data.datasets.indexOf(dataset));
             
             meta.data.forEach((element: any, index: number) => {
-              if (dataset.data[index] !== null) {
+              if (element && element.x !== undefined && element.y !== undefined) {
                 const x = element.x;
-                const y = element.y - 10; // Position above the bar
+                const y = element.y - 15; // Position above the point
                 
                 ctx.save();
                 ctx.fillStyle = '#333333';
@@ -1160,10 +1179,16 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       },
       scales: {
         x: {
+          type: 'linear',
+          min: 0.5,
+          max: 18.5,
           ticks: {
             color: '#495057',
-            maxRotation: 45,
-            minRotation: 45
+            stepSize: 1,
+            callback: function(value: number) {
+              const gradeIndex = Math.round(value) - 1;
+              return gradeIndex >= 0 && gradeIndex < gradeLevels.length ? gradeLevels[gradeIndex] : '';
+            }
           },
           grid: {
             color: '#ebedef'
@@ -1173,19 +1198,31 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           min: 0,
           max: 2,
           ticks: {
-            display: false
+            display: true,
+            color: '#495057',
+            stepSize: 0.2,
+            callback: function(value: number) {
+              return (value * 100).toFixed(0) + '%';
+            }
           },
           grid: {
             color: '#ebedef'
+          },
+          title: {
+            display: true,
+            text: 'Index in %',
+            color: '#495057',
+            font: {
+              size: 12,
+              weight: 'bold'
+            }
           }
         }
       },
-      // Add bar configuration to improve centering
-      datasets: {
-        bar: {
-          barPercentage: 0.8,
-          categoryPercentage: 0.8
-        }
+      // Configure interaction modes for mixed chart types
+      interaction: {
+        mode: 'point',
+        intersect: true
       }
     };
   }
