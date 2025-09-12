@@ -395,6 +395,7 @@
     "POPULATION_WEIGHTED": "Population weighted",
     "AREA_WEIGHTED": "Area weighted",
     "FILTER_BY_CITY_SIZE": "Filter by population",
+    "SHOW_BEZIRKE": "Show districts (Bezirke)",
     "LOADING_MORE_DATA": "Loading more data in background...",
     "PROJECT_VERSION_INVALID": "The version of the project is too low. Please recreate it, to also show statistics.",
     "POPULATION": "Population"

@@ -6,6 +6,7 @@ import { ScrollPanelModule } from 'primeng/scrollpanel';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { LoadingService } from '../services/loading.service';
+import { FormsModule } from '@angular/forms';
 
 import { MapV2Service } from '../map-v2/map-v2.service';
 import { PaginatorModule } from 'primeng/paginator';
@@ -23,7 +24,8 @@ import { IndexService } from '../services/index.service';
     ScrollPanelModule,
     ButtonModule,
     ProgressSpinnerModule,
-    PaginatorModule
+    PaginatorModule,
+    FormsModule
   ],
   templateUrl: './statistics.component.html'
 })
@@ -36,9 +38,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   
   // AbortController for cancelling API requests
   private abortController: AbortController | null = null;
-  
-  // Cache for project version validity
-  private _isProjectVersionValid: boolean = false;
   
   stateScores: ScoreEntry[] = [];
   countyScores: ScoreEntry[] = [];
@@ -58,6 +57,9 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   // Score type
   scoreType: 'pop' | 'avg' = 'pop';
   scoreTypeOptions: any[] = [];
+
+  // Bezirk filter
+  showBezirke: boolean = true;
 
   populationCategories = [
     { label: 'Landgemeinden (0-5.000)', value: 'small', min: 0, max: 5000, displayText: '0-5K' },
@@ -80,25 +82,14 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     private indexService: IndexService
   ) {
     this.updateScoreTypeOptions();
-    this.updateProjectVersionValidity();
-    
+
     this.subscription.add(
       this.statisticsService.visible$.subscribe(visible => {
         const projectId = this.mapService.getCurrentProject();
         if (projectId) {
           this.visible = visible;
           if (visible) {
-            this.updateProjectVersionValidity();
-            if (this._isProjectVersionValid) {
-              this.loadAllData();
-            } else {
-              this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Statistics are not available for this project.',
-                life: 5000
-              });
-            }
+            this.loadAllData();
           } else {
             this.resetUI();
             // Cancel all ongoing requests when dialog is closed
@@ -114,14 +105,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
         this.updateScoreTypeOptions();
       })
     );
-  }
-
-  private updateProjectVersionValidity(): void {
-    this._isProjectVersionValid = this.mapService.getProjectVersion() >= 0.7;
-  }
-
-  get isProjectVersionValid(): boolean {
-    return this._isProjectVersionValid;
   }
 
   ngOnInit() {}
@@ -409,16 +392,26 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     this.currentMunicipalityPage = 1;
   }
 
+  onBezirkToggleChange(): void {
+    this.applyPopulationFilter();
+    
+    // Reset pagination when filter changes
+    this.currentStatePage = 1;
+    this.currentCountyPage = 1;
+    this.currentMunicipalityPage = 1;
+  }
+
   getPopulationSizeText(category: any): string {
     return category.displayText;
   }
 
   private applyPopulationFilter(): void {
-    if (this.selectedCategories.length === 0) {
-      this.filteredMunicipalityScores = this.municipalityScores;
-      this.filteredCountyScores = this.countyScores;
-    } else {
-      this.filteredMunicipalityScores = this.municipalityScores.filter(score => {
+    let filteredMunicipalities = this.municipalityScores;
+    let filteredCounties = this.countyScores;
+
+    // Apply population category filter
+    if (this.selectedCategories.length > 0) {
+      filteredMunicipalities = this.municipalityScores.filter(score => {
         if (!score.population) return false;
         return this.selectedCategories.some(category => {
           const { min, max } = category;
@@ -426,7 +419,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
         });
       });
 
-      this.filteredCountyScores = this.countyScores.filter(score => {
+      filteredCounties = this.countyScores.filter(score => {
         if (!score.population) return false;
         return this.selectedCategories.some(category => {
           const { min, max } = category;
@@ -434,6 +427,14 @@ export class StatisticsComponent implements OnInit, OnDestroy {
         });
       });
     }
+
+    // Apply bezirk filter for municipalities
+    if (!this.showBezirke) {
+      filteredMunicipalities = filteredMunicipalities.filter(score => !score.bezirk);
+    }
+
+    this.filteredMunicipalityScores = filteredMunicipalities;
+    this.filteredCountyScores = filteredCounties;
 
     // Reset page counters when filtering
     this.currentStatePage = 1;
