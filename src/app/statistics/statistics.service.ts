@@ -16,6 +16,7 @@ export interface ScoreEntry {
   population_density?: number;
   county?: string;
   rank?: number;
+  bezirk?: boolean;
 }
 
 @Injectable({
@@ -69,7 +70,8 @@ export class StatisticsService {
         population_density: data.gemeinde.population_density,
         level: 'municipality',
         county: data.landkreis,
-        rank: rank
+        rank: rank,
+        bezirk: data.gemeinde.bezirk
       };
     } else if ('landkreis' in data) {
       return {

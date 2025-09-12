@@ -11,6 +11,7 @@ export interface PaginatedResponse<T> {
       name: string;
       population: number;
       population_density: number;
+      bezirk: boolean;
     };
     score_avg: number;
     score_pop: number;
