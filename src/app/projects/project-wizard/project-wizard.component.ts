@@ -160,7 +160,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     if (this.langSubscription) {
       this.langSubscription.unsubscribe();
     }
-    
+
     // Clean up map resources
     if (this.map) {
       if (this.overlay) {
@@ -247,29 +247,29 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
   private resetWizard() {
     // Formular zurücksetzen
     this.projectForm.reset();
-    
+
     // Aktivitäten-Auswahl zurücksetzen
     this.showMidActivities = true;
     if (this.allGroupedActivities.mid.length > 0) {
       this.updateDisplayedActivities(true);
     }
-    
+
     // Ausgewählte Gebiete zurücksetzen
     this.selectedAreaIds = [];
     this.selectedFeatures.clear();
-    
+
     // Reset land check status
     this.lands.forEach(land => {
       land.checked = false;
     });
-    
+
     // Reset mode and profile selections
     this.selectedModeMap = {};
     this.selectedProfiles = {};
-    
+
     // Wizard zum ersten Schritt zurücksetzen
     this.activeIndex = 0;
-    
+
     // Standard-Werte für die Zusammenfassung setzen
     this.projectForm.patchValue({
       summary: {
@@ -287,7 +287,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     if (this.modes.length > 0) {
       this.selectAllModes();
     }
-    
+
     // Reset the map if it exists
     if (this.map) {
       if (this.overlay) {
@@ -309,7 +309,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
         // Group by wegezweck
         this.allGroupedActivities.mid = this.groupActivitiesByPurpose(midActivities);
         this.allGroupedActivities.nonMid = this.groupActivitiesByPurpose(osmActivities);
-        
+
         // Set initial display to MID activities
         this.updateDisplayedActivities(true);
         setTimeout(() => {
@@ -343,7 +343,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
   private loadPersonas() {
     this.personasService.getPersonas().subscribe({
       next: (personas) => {
-        this.personas = personas.results.sort((a, b) => 
+        this.personas = personas.results.sort((a, b) =>
           (a.display_name || a.name).localeCompare(b.display_name || b.name)
         );
         // Alle Personas automatisch auswählen
@@ -378,7 +378,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       } else {
         this.activeIndex++;
       }
-      
+
       // If we're moving to step 4 (area selection), initialize the map
       if (this.activeIndex === 3) {
         setTimeout(() => {
@@ -398,7 +398,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       } else {
         this.activeIndex--;
       }
-      
+
       // If we're moving back to the area selection step, initialize the map
       if (this.activeIndex === 3) {
         setTimeout(() => {
@@ -435,22 +435,22 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
   // Method to validate that modes and profiles are properly selected
   private areModesAndProfilesValid(): boolean {
     const selectedModeIds = this.projectForm.get('modes.selectedModes')?.value || [];
-    
+
     if (selectedModeIds.length === 0) {
       return false;
     }
-    
+
     // Check that all selected modes have valid profile selections if they have profiles
     for (const modeId of selectedModeIds) {
-              const mode = this.modes.find(m => m.id === modeId);
-        if (mode && mode.profiles && mode.profiles.length > 0) {
-          const selectedProfile = this.selectedProfiles[modeId];
-          if (!selectedProfile) {
-            return false;
-          }
+      const mode = this.modes.find(m => m.id === modeId);
+      if (mode && mode.profiles && mode.profiles.length > 0) {
+        const selectedProfile = this.selectedProfiles[modeId];
+        if (!selectedProfile) {
+          return false;
         }
+      }
     }
-    
+
     return true;
   }
 
@@ -466,7 +466,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
 
   deselectAllActivities(activities: any[]) {
     const currentSelection = this.projectForm.get('activities.selectedMidActivities')?.value || [];
-    const newSelection = currentSelection.filter((item: any) => 
+    const newSelection = currentSelection.filter((item: any) =>
       !activities.some(activity => activity.id === item.id)
     );
     this.projectForm.get('activities.selectedMidActivities')?.setValue(newSelection);
@@ -484,12 +484,12 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     // Clear existing selections
     this.selectedModeMap = {};
     this.selectedProfiles = {};
-    
+
     // Initialize modes and their profiles
     this.modes.forEach(mode => {
       // Select all modes by default
       this.selectedModeMap[mode.id] = true;
-      
+
       // Initialize profile selection with first profile ID if available
       if (mode.profiles && mode.profiles.length > 0) {
         const relevantProfile = mode.profiles.find(profile => profile.mode_default);
@@ -509,14 +509,14 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     // Clear all mode selections
     this.selectedModeMap = {};
     this.selectedProfiles = {};
-    
+
     // Update form with empty selections
     this.updateModesForm();
   }
 
   onModeChange(mode: Mode, checked: boolean) {
     this.selectedModeMap[mode.id] = checked;
-    
+
     if (checked) {
       // When selecting a mode, ensure its first profile is selected
       if (mode.profiles && mode.profiles.length > 0) {
@@ -531,14 +531,14 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       // When deselecting a mode, remove its profile selection
       delete this.selectedProfiles[mode.id];
     }
-    
+
     // Update form with current selections
     this.updateModesForm();
   }
 
   onProfileChange(mode: Mode, profileId: number) {
     this.selectedProfiles[mode.id] = profileId;
-    
+
     // Update form with current selections
     this.updateModesForm();
   }
@@ -553,7 +553,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
         profileControl = new FormControl(mode.profiles[0].id);
       }
       this.profileControls[mode.id] = profileControl;
-      
+
       const profilesGroup = this.projectForm.get('modes.selectedProfiles') as FormGroup;
       profilesGroup.setControl(mode.id.toString(), profileControl);
     }
@@ -577,7 +577,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     const selectedModeIds = this.modes
       .filter(m => this.selectedModeMap[m.id])
       .map(m => m.id);
-    
+
     this.projectForm.patchValue({
       modes: {
         selectedModes: selectedModeIds,
@@ -603,7 +603,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     if (isValid) {
       const selectedMidActivities = this.projectForm.get('activities.selectedMidActivities')?.value || [];
       const selectedNonMidActivity = this.projectForm.get('activities.selectedNonMidActivity')?.value;
-      
+
       let allSelectedActivities = [...selectedMidActivities];
       let personas = this.projectForm.get('personas.selectedPersonas')?.value.map((p: any) => p.id).join(',');
       if (selectedNonMidActivity) {
@@ -642,13 +642,18 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
             summary: this.translate.instant('COMMON.MESSAGES.SUCCESS.CREATE'),
             detail: this.translate.instant('PROJECTS.MESSAGES.CREATE_SUCCESS')
           });
-          this.reloadService.triggerReload();
+
+          // Simple retry mechanism: reload projects after a short delay
+          setTimeout(() => {
+            this.reloadService.triggerReload();
+          }, 1000);
+
           this.hide();
         },
         error: (error) => {
           console.error('Fehler beim Erstellen des Projekts:', error);
           let errorMessage = this.translate.instant('PROJECTS.MESSAGES.CREATE_ERROR');
-          
+
           if (error.error && error.error.detail) {
             errorMessage = error.error.detail;
           } else if (error.status === 400) {
@@ -689,7 +694,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
   private updateDisplayedActivities(showMid: boolean) {
     // Update displayed activities based on selection (MID vs OSM)
     this.groupedActivities = showMid ? this.allGroupedActivities.mid : this.allGroupedActivities.nonMid;
-    
+
     if (showMid) {
       // For MID activities, select all by default
       const allMidActivities = this.groupedActivities.flatMap(group => group.activities);
@@ -737,13 +742,13 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
             summary: this.translate.instant('COMMON.MESSAGES.SUCCESS.DELETE'),
             detail: this.translate.instant('PROJECTS.MESSAGES.DELETE_GROUP_SUCCESS')
           });
-          
+
           // Aktualisiere die Liste der Projektgruppen
           this.loadProjectGroups();
-          
+
           // Setze die Auswahl zurück
           this.selectedGroupToDelete = null;
-          
+
           // Wenn die gelöschte Gruppe im Formular ausgewählt war, setze sie zurück
           if (this.projectForm.get('summary.projectGroup')?.value?.id === group.id) {
             this.projectForm.get('summary.projectGroup')?.setValue(null);
@@ -791,7 +796,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       }, 0);
     }
   }
-  
+
   private loadLands() {
     this.landsService.getLands().subscribe({
       next: (lands: Land[]) => {
@@ -802,14 +807,14 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       }
     });
   }
-  
+
   // Area selection methods from area-selection component
   private initializeTooltip() {
     // Remove existing tooltip if it exists
     if (this.tooltipElement && this.tooltipElement.parentNode) {
       this.tooltipElement.parentNode.removeChild(this.tooltipElement);
     }
-    
+
     this.tooltipElement = document.createElement('div');
     this.tooltipElement.className = 'tooltip';
     this.tooltipElement.style.backgroundColor = 'white';
@@ -836,13 +841,13 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       this.map = undefined;
       this.vectorLayer = undefined;
     }
-    
+
     const mapElement = document.getElementById('create-map');
     if (!mapElement) {
       console.error("Map container not found");
       return;
     }
-    
+
     const baseLayer = new TileLayer({
       source: new XYZ({
         url: 'https://{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
@@ -904,7 +909,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       }
 
       const feature = this.map?.forEachFeatureAtPixel(event.pixel, (feature) => feature);
-      
+
       if (feature) {
         const name = feature.get('name');
         if (name) {
@@ -919,15 +924,15 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       }
     });
   }
-  
+
   private setupAreaSelection() {
     if (!this.areasGeoJson || !this.vectorLayer) return;
-    
+
     const features = this.geoJsonFormat.readFeatures(this.areasGeoJson, {
       featureProjection: 'EPSG:3857',
       dataProjection: 'EPSG:4326'
     });
-    
+
     features.forEach(feature => {
       if (!feature.getId()) {
         feature.setId(feature.get('id'));
@@ -938,7 +943,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     source?.clear();
     source?.addFeatures(features);
   }
-  
+
   private updateSelectedAreas() {
     this.selectedAreaIds = Array.from(this.selectedFeatures);
     this.projectForm.get('area.selectedArea')?.setValue(this.selectedAreaIds);
@@ -946,49 +951,49 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     // Check for completely selected lands
     const hasCompletelySelectedLands = this.lands.some(land => this.getLandSelectionState(land));
     const hasPartiallySelectedLands = this.lands.some(land => this.isLandIndeterminate(land));
-    
+
     this.hasCompletelySelectedLands = hasCompletelySelectedLands && !hasPartiallySelectedLands;
   }
-  
+
   getLandSelectionState(land: Land): boolean {
     const source = this.vectorLayer?.getSource();
     const features = source?.getFeatures() || [];
     const landFeatures = features.filter((f: any) => f.get('land') === land.id);
-    
+
     if (landFeatures.length === 0) return false;
-    
-    const selectedCount = landFeatures.filter((f: any) => 
+
+    const selectedCount = landFeatures.filter((f: any) =>
       this.selectedFeatures.has(f.getId() as string)
     ).length;
-    
+
     return selectedCount === landFeatures.length;
   }
-  
+
   isLandIndeterminate(land: Land): boolean {
     const source = this.vectorLayer?.getSource();
     const features = source?.getFeatures() || [];
     const landFeatures = features.filter((f: any) => f.get('land') === land.id);
 
-    return landFeatures.length > 0 && landFeatures.some((f: any) => 
+    return landFeatures.length > 0 && landFeatures.some((f: any) =>
       this.selectedFeatures.has(f.getId() as string)
     ) && !this.isLandSelected(land);
   }
-  
+
   isLandSelected(land: Land): boolean {
     const source = this.vectorLayer?.getSource();
     const features = source?.getFeatures() || [];
     const landFeatures = features.filter((f: any) => f.get('land') === land.id);
-    
-    return landFeatures.length > 0 && landFeatures.every((f: any) => 
+
+    return landFeatures.length > 0 && landFeatures.every((f: any) =>
       this.selectedFeatures.has(f.getId() as string)
     );
   }
-  
+
   selectLand(land: Land) {
     const source = this.vectorLayer?.getSource();
     const features = source?.getFeatures() || [];
     const landFeatures = features.filter((f: any) => f.get('land') === land.id);
-    
+
     landFeatures.forEach((f: any) => {
       if (land.checked) {
         this.selectedFeatures.add(f.getId() as string);
@@ -996,7 +1001,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
         this.selectedFeatures.delete(f.getId() as string);
       }
     });
-    
+
     this.vectorLayer?.changed();
     this.updateSelectedAreas();
   }
