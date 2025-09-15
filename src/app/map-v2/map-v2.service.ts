@@ -58,7 +58,7 @@ export class MapV2Service {
     this.shortcutSubscription = this.keyboardShortcutsService.getShortcutStream().subscribe(action => {
       if (!this.map) return;
 
-      switch(action) {
+      switch (action) {
         case ShortcutAction.ZOOM_TO_FEATURES:
           // zoom to the bounds
           const bounds = this.boundsSubject.getValue();
@@ -91,9 +91,7 @@ export class MapV2Service {
           this.mapStyleSubject.next(this.getProjectMapStyle(this.currentProject!));
           break;
         case ShortcutAction.TOGGLE_SCORE_DISPLAY:
-          if (this.analyzeService.getMapType() !== "hexagon") {
-            this.toggleScoreDisplay();
-          }
+          this.toggleScoreDisplay();
           break;
       }
     });
@@ -230,7 +228,7 @@ export class MapV2Service {
     } else if (token) {
       authParam = `&token=${token}`;
     }
-    
+
     this.http.get<Bounds>(`${environment.apiUrl}/bounds?project=${projectId}${authParam}`).subscribe(
       bounds => {
         this.boundsSubject.next(bounds);
@@ -281,7 +279,7 @@ export class MapV2Service {
 
   private getTileUrl(projectID: string): string {
     if (!projectID) return '';
-    
+
     const token = this.authService.getAuthorizationHeaders().get('Authorization')?.split(' ')[1];
     let authParam = '';
     if (this.shareKey) {
@@ -289,7 +287,7 @@ export class MapV2Service {
     } else if (token) {
       authParam = `&token=${token}`;
     }
-    
+
     // If hexagon view is enabled, always use the smallest hexagon layer
     if (this.hexagonView) {
       this.analyzeService.setMapType('hexagon');
@@ -304,7 +302,7 @@ export class MapV2Service {
       this.mapType = 'county';
       return `${environment.apiUrl}/tiles/landkreise/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
     }
-    
+
     // Define zoom level thresholds for normal view
     if (this.currentZoom < 7) {
       // State level
@@ -346,10 +344,10 @@ export class MapV2Service {
 
   private getProjectMapStyle(projectID: string): StyleSpecification {
     const baseStyle = this.getBaseMapStyle();
-    
+
     if (projectID) {
       const tileUrl = this.getTileUrl(projectID);
-      
+
       baseStyle.sources['geodata'] = {
         type: 'vector',
         tiles: [tileUrl],
@@ -416,8 +414,8 @@ export class MapV2Service {
         }
       } as LayerSpecification);
 
-      // Add score labels layer if scoreShown is true
-      if (this.scoreShown) {
+      // Add score labels layer if scoreShown is true and not in hexagon mode
+      if (this.scoreShown && this.analyzeService.getMapType() !== "hexagon") {
         baseStyle.layers.push({
           id: 'geodata-scores',
           type: 'symbol',
