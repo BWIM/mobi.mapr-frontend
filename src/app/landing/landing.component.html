@@ -1,0 +1,136 @@
+<div class="landing-container min-h-screen bg-white">
+    <div class="max-w-4xl mx-auto px-6 py-16">
+        <!-- Header Section -->
+        <div class="text-center mb-16">
+            <!-- Language Switcher -->
+            <div class="flex justify-end mb-8">
+                <div class="flex space-x-1">
+                    <button *ngFor="let lang of availableLangs"
+                        (click)="switchLanguage(lang.code)"
+                        [class]="currentLang === lang.code ? 'text-gray-900 border-b-2 border-gray-900' : 'text-gray-500 hover:text-gray-700'"
+                        class="px-3 py-2 text-sm font-medium transition-colors border-b border-transparent">
+                        {{ lang.name }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Logos -->
+            <div class="flex justify-center items-center space-x-8 mb-8">
+                <img src="assets/images/logo.png" alt="Mobi.Mapr Logo"
+                    class="h-16 w-auto">
+                <div class="w-px h-12 bg-gray-300"></div>
+                <img src="assets/images/BWIM.png" alt="BWIM Logo"
+                    class="h-12 w-auto">
+            </div>
+
+            <h1 class="text-4xl font-light text-gray-900 mb-6">{{
+                'LANDING.TITLE' | translate }}</h1>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                {{ 'LANDING.SUBTITLE' | translate }}
+            </p>
+        </div>
+
+        <!-- Navigation List -->
+        <div class="space-y-1 mb-16">
+            <!-- Project Main Site -->
+            <a (click)="openExternalLink(externalLinks.projectMainSite)"
+                class="group flex items-center justify-between p-6 border-2 border-blue-200 bg-blue-50 hover:border-blue-300 hover:bg-blue-100 transition-all duration-200 cursor-pointer shadow-sm">
+                <div class="flex items-center space-x-4">
+                    <div
+                        class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center group-hover:bg-blue-300 transition-colors shadow-sm">
+                        <i class="pi pi-globe text-blue-700 text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2 mb-1">
+                            <h3 class="text-lg font-medium text-gray-900">{{
+                                'LANDING.CARDS.PROJECT_MAIN_SITE.TITLE' |
+                                translate
+                                }}</h3>
+                            <span
+                                class="px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">Main</span>
+                        </div>
+                        <p class="text-sm text-gray-500">{{
+                            'LANDING.CARDS.PROJECT_MAIN_SITE.DESCRIPTION' |
+                            translate }}</p>
+                    </div>
+                </div>
+                <i
+                    class="pi pi-external-link text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+            </a>
+
+            <!-- FAQ -->
+            <a (click)="openExternalLink(externalLinks.faq)"
+                class="group flex items-center justify-between p-6 border border-gray-200 hover:border-orange-200 hover:bg-orange-50 transition-all duration-200 cursor-pointer">
+                <div class="flex items-center space-x-4">
+                    <div
+                        class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                        <i class="pi pi-question-circle text-orange-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">{{
+                            'LANDING.CARDS.FAQ.TITLE' | translate }}</h3>
+                        <p class="text-sm text-gray-500">{{
+                            'LANDING.CARDS.FAQ.DESCRIPTION' | translate }}</p>
+                    </div>
+                </div>
+                <i
+                    class="pi pi-external-link text-gray-400 group-hover:text-orange-600 transition-colors"></i>
+            </a>
+
+            <!-- Technical Documentation -->
+            <a (click)="openExternalLink(externalLinks.technicalDocs)"
+                class="group flex items-center justify-between p-6 border border-gray-200 hover:border-purple-200 hover:bg-purple-50 transition-all duration-200 cursor-pointer">
+                <div class="flex items-center space-x-4">
+                    <div
+                        class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                        <i class="pi pi-book text-purple-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">{{
+                            'LANDING.CARDS.TECHNICAL_DOCS.TITLE' | translate }}
+                        </h3>
+                        <p class="text-sm text-gray-500">{{
+                            'LANDING.CARDS.TECHNICAL_DOCS.DESCRIPTION' |
+                            translate }}</p>
+                    </div>
+                </div>
+                <i
+                    class="pi pi-external-link text-gray-400 group-hover:text-purple-600 transition-colors"></i>
+            </a>
+
+            <!-- Contact -->
+            <a (click)="openExternalLink(externalLinks.contact)"
+                class="group flex items-center justify-between p-6 border border-gray-200 hover:border-green-200 hover:bg-green-50 transition-all duration-200 cursor-pointer">
+                <div class="flex items-center space-x-4">
+                    <div
+                        class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                        <i class="pi pi-envelope text-green-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">{{
+                            'LANDING.CARDS.CONTACT.TITLE' | translate }}</h3>
+                        <p class="text-sm text-gray-500">{{
+                            'LANDING.CARDS.CONTACT.DESCRIPTION' | translate }}
+                        </p>
+                    </div>
+                </div>
+                <i
+                    class="pi pi-external-link text-gray-400 group-hover:text-green-600 transition-colors"></i>
+            </a>
+        </div>
+
+        <!-- Login Section -->
+        <div class="text-center">
+            <a (click)="goToLogin()"
+                class="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors cursor-pointer">
+                <i class="pi pi-sign-in mr-2"></i>
+                {{ 'LANDING.CARDS.LOGIN.BUTTON' | translate }}
+            </a>
+        </div>
+
+        <!-- Footer Section -->
+        <div class="text-center text-gray-400 text-sm mt-16">
+            <p>{{ 'LANDING.FOOTER' | translate }}</p>
+        </div>
+    </div>
+</div>

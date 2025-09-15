@@ -418,6 +418,43 @@
   "SEARCH_OVERLAY": {
     "SEARCH_PLACEHOLDER": "Orte suchen"
   },
+  "LANDING": {
+    "TITLE": "Willkommen beim mobi.mapr",
+    "SUBTITLE": "Ihre umfassende Mobilitätskartierungs- und Analyseplattform. Greifen Sie auf alle Tools und Ressourcen von einem zentralen Ort aus zu.",
+    "CARDS": {
+      "PROJECT_MAIN_SITE": {
+        "TITLE": "Projektseite",
+        "DESCRIPTION": "Auf unserer Hauptseite finden Sie alles zum mobi.mapr. Dort finden Sie aktelle Projekte und weitere spannende Informationen.",
+        "BUTTON": "Hauptseite besuchen"
+      },
+      "CONTACT": {
+        "TITLE": "Kontakt",
+        "DESCRIPTION": "Bei Fragen oder Problemen kontaktieren Sie uns!",
+        "BUTTON": "Projekt öffnen"
+      },
+      "TECHNICAL_DOCS": {
+        "TITLE": "Technische Dokumentation",
+        "DESCRIPTION": "Umfassende technische Dokumentation, die den mobi.mapr genauer beschreibt.",
+        "BUTTON": "Dokumentation anzeigen"
+      },
+      "FAQ": {
+        "TITLE": "FAQ",
+        "DESCRIPTION": "Finden Sie Antworten auf häufig gestellte Fragen rund um das Projekt.",
+        "BUTTON": "FAQ anzeigen"
+      },
+      "LOGIN": {
+        "TITLE": "Anmelden",
+        "DESCRIPTION": "Zugriff auf das Anwendungsdashboard und alle verfügbaren Funktionen.",
+        "BUTTON": "In App anmelden"
+      },
+      "DASHBOARD": {
+        "TITLE": "Dashboard",
+        "DESCRIPTION": "Zugriff auf das Hauptanwendungsdashboard mit allen Kartierungs- und Analysetools.",
+        "BUTTON": "Zum Dashboard"
+      }
+    },
+    "FOOTER": "© 2025 bwim. Alle Rechte vorbehalten."
+  },
   "TUTORIAL": {
     "STEP": "Schritt",
     "OF": "von",

@@ -1,0 +1,144 @@
+/* Modern minimalist landing page styles */
+.landing-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+}
+
+/* Smooth transitions for all interactive elements */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Hover effects for list items */
+.group:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Language switcher styling */
+button {
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+/* Logo styling */
+img {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Enhanced list item styling */
+.group {
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.group:hover {
+    border-radius: 12px;
+}
+
+/* Color-specific hover effects */
+.group:hover.border-blue-200 {
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+/* Special styling for the highlighted project main site */
+.group.border-blue-200 {
+    position: relative;
+    overflow: hidden;
+}
+
+.group.border-blue-200::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.group.border-blue-200:hover::before {
+    left: 100%;
+}
+
+.group:hover.border-green-200 {
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+}
+
+.group:hover.border-purple-200 {
+    box-shadow: 0 4px 12px rgba(147, 51, 234, 0.15);
+}
+
+.group:hover.border-orange-200 {
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.15);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .landing-container h1 {
+        font-size: 2rem;
+    }
+
+    .landing-container p {
+        font-size: 1rem;
+    }
+
+    .space-y-1>*+* {
+        margin-top: 0.25rem;
+    }
+
+    /* Mobile logo adjustments */
+    .flex.space-x-8 {
+        flex-direction: column;
+        space-x: 0;
+        gap: 1rem;
+    }
+
+    .w-px.h-12 {
+        display: none;
+    }
+}
+
+/* Focus states for accessibility */
+button:focus,
+a:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Subtle animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.landing-container>div {
+    animation: fadeIn 0.6s ease-out;
+}
+
+/* Staggered animation for list items */
+.space-y-1>*:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.space-y-1>*:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.space-y-1>*:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.space-y-1>*:nth-child(4) {
+    animation-delay: 0.4s;
+}
