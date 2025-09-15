@@ -417,6 +417,43 @@
   "SEARCH_OVERLAY": {
     "SEARCH_PLACEHOLDER": "Search locations"
   },
+  "LANDING": {
+    "TITLE": "Welcome to mobi.mapr",
+    "SUBTITLE": "Your comprehensive mobility mapping and analysis platform. Access all tools and resources from one central location.",
+    "CARDS": {
+      "PROJECT_MAIN_SITE": {
+        "TITLE": "Homepage",
+        "DESCRIPTION": "On our main site you can find everything about mobi.mapr. There you can find current projects and other exciting information.",
+        "BUTTON": "Visit Main Site"
+      },
+      "CONTACT": {
+        "TITLE": "Contact",
+        "DESCRIPTION": "If you have any questions or problems, please contact us!",
+        "BUTTON": "Open Project"
+      },
+      "TECHNICAL_DOCS": {
+        "TITLE": "Technical Documentation",
+        "DESCRIPTION": "Comprehensive technical documentation, which describes the mobi.mapr in more detail.",
+        "BUTTON": "View Docs"
+      },
+      "FAQ": {
+        "TITLE": "FAQ",
+        "DESCRIPTION": "Find answers to frequently asked questions about the project.",
+        "BUTTON": "View FAQ"
+      },
+      "LOGIN": {
+        "TITLE": "Login",
+        "DESCRIPTION": "Access the application dashboard and all available features.",
+        "BUTTON": "Login to App"
+      },
+      "DASHBOARD": {
+        "TITLE": "Dashboard",
+        "DESCRIPTION": "Access the main application dashboard with all mapping and analysis tools.",
+        "BUTTON": "Go to Dashboard"
+      }
+    },
+    "FOOTER": "© 2025 bwim. All rights reserved."
+  },
   "TUTORIAL": {
     "STEP": "Step",
     "OF": "of",

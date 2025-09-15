@@ -1,6 +1,10 @@
-<p-speedDial [model]="items" direction="up" buttonClassName="p-button-info" [showIcon]="'pi pi-info'" [hideIcon]="'pi pi-times'" [tooltipOptions]="{ tooltipPosition: 'left' }" id="credits-sidebar"></p-speedDial>
+<p-speedDial [model]="items" direction="up" buttonClassName="p-button-info"
+    [showIcon]="'pi pi-info'" [hideIcon]="'pi pi-times'"
+    [tooltipOptions]="{ tooltipPosition: 'left' }"
+    id="credits-sidebar"></p-speedDial>
 
-<p-dialog [(visible)]="showCreditsDialog" [modal]="true" styleClass="credits-dialog" header="mobi.mapr">
+<p-dialog [(visible)]="showCreditsDialog" [modal]="true"
+    styleClass="credits-dialog" header="mobi.mapr">
     <div class="grid">
         <!-- Projekt Info -->
         <div class="col-12">
@@ -8,8 +12,13 @@
                 <div class="flex flex-column gap-3">
                     <div class="text-center mb-4">
                         <h2 class="text-4xl font-bold mb-3">BWIM mobi.mapr</h2>
-                        <p class="text-xl line-height-3">Dies ist ein Projekt des Baden-Württemberg Instituts für nachhaltige Mobilität</p>
-                        <p-button label="bw-im.de besuchen" styleClass="p-button-link" [pTooltip]="'CREDITS.VISIT_WEBSITE' | translate" (onClick)="openLink('https://bw-im.de')"></p-button>
+                        <p class="text-xl line-height-3">Dies ist ein Projekt
+                            des Baden-Württemberg Instituts für Nachhaltige
+                            Mobilität</p>
+                        <p-button label="bw-im.de besuchen"
+                            styleClass="p-button-link"
+                            [pTooltip]="'CREDITS.VISIT_WEBSITE' | translate"
+                            (onClick)="openLink('https://bw-im.de')"></p-button>
                     </div>
                 </div>
             </p-card>
@@ -17,14 +26,21 @@
 
         <!-- Visualisierung -->
         <div class="col-12 md:col-6 lg:col-3">
-            <p-card header="Visualisierung" [pTooltip]="'CREDITS.VISUALIZATION_SECTION_TOOLTIP' | translate">
+            <p-card header="Visualisierung"
+                [pTooltip]="'CREDITS.VISUALIZATION_SECTION_TOOLTIP' | translate">
                 <div class="flex flex-column gap-3">
-                    <div class="component-item" *ngFor="let item of visualComponents">
+                    <div class="component-item"
+                        *ngFor="let item of visualComponents">
                         <div class="flex align-items-center gap-2">
-                            <i [class]="item.icon + ' text-xl'" [pTooltip]="item.name"></i>
+                            <i [class]="item.icon + ' text-xl'"
+                                [pTooltip]="item.name"></i>
                             <div>
                                 <h3 class="m-0 text-lg">{{item.name}}</h3>
-                                <p-button *ngIf="item.url" [label]="item.name + ' Website'" styleClass="p-button-link p-0" [pTooltip]="'CREDITS.VISIT_COMPONENT_WEBSITE' | translate: { name: item.name }" (onClick)="openLink(item.url)"></p-button>
+                                <p-button *ngIf="item.url"
+                                    [label]="item.name + ' Website'"
+                                    styleClass="p-button-link p-0"
+                                    [pTooltip]="'CREDITS.VISIT_COMPONENT_WEBSITE' | translate: { name: item.name }"
+                                    (onClick)="openLink(item.url)"></p-button>
                             </div>
                         </div>
                     </div>
@@ -34,14 +50,21 @@
 
         <!-- Daten -->
         <div class="col-12 md:col-6 lg:col-3">
-            <p-card header="Daten" [pTooltip]="'CREDITS.DATA_SECTION_TOOLTIP' | translate">
+            <p-card header="Daten"
+                [pTooltip]="'CREDITS.DATA_SECTION_TOOLTIP' | translate">
                 <div class="flex flex-column gap-3">
-                    <div class="component-item" *ngFor="let item of dataComponents">
+                    <div class="component-item"
+                        *ngFor="let item of dataComponents">
                         <div class="flex align-items-center gap-2">
-                            <i [class]="item.icon + ' text-xl'" [pTooltip]="item.name"></i>
+                            <i [class]="item.icon + ' text-xl'"
+                                [pTooltip]="item.name"></i>
                             <div>
                                 <h3 class="m-0 text-lg">{{item.name}}</h3>
-                                <p-button *ngIf="item.url" [label]="item.name + ' Website'" styleClass="p-button-link p-0" [pTooltip]="'CREDITS.VISIT_COMPONENT_WEBSITE' | translate: { name: item.name }" (onClick)="openLink(item.url)"></p-button>
+                                <p-button *ngIf="item.url"
+                                    [label]="item.name + ' Website'"
+                                    styleClass="p-button-link p-0"
+                                    [pTooltip]="'CREDITS.VISIT_COMPONENT_WEBSITE' | translate: { name: item.name }"
+                                    (onClick)="openLink(item.url)"></p-button>
                             </div>
                         </div>
                     </div>
@@ -51,14 +74,21 @@
 
         <!-- Backend -->
         <div class="col-12 md:col-6 lg:col-3">
-            <p-card header="Backend" [pTooltip]="'CREDITS.BACKEND_SECTION_TOOLTIP' | translate">
+            <p-card header="Backend"
+                [pTooltip]="'CREDITS.BACKEND_SECTION_TOOLTIP' | translate">
                 <div class="flex flex-column gap-3">
-                    <div class="component-item" *ngFor="let item of backendComponents">
+                    <div class="component-item"
+                        *ngFor="let item of backendComponents">
                         <div class="flex align-items-center gap-2">
-                            <i [class]="item.icon + ' text-xl'" [pTooltip]="item.name"></i>
+                            <i [class]="item.icon + ' text-xl'"
+                                [pTooltip]="item.name"></i>
                             <div>
                                 <h3 class="m-0 text-lg">{{item.name}}</h3>
-                                <p-button *ngIf="item.url" [label]="item.name + ' Website'" styleClass="p-button-link p-0" [pTooltip]="'CREDITS.VISIT_COMPONENT_WEBSITE' | translate: { name: item.name }" (onClick)="openLink(item.url)"></p-button>
+                                <p-button *ngIf="item.url"
+                                    [label]="item.name + ' Website'"
+                                    styleClass="p-button-link p-0"
+                                    [pTooltip]="'CREDITS.VISIT_COMPONENT_WEBSITE' | translate: { name: item.name }"
+                                    (onClick)="openLink(item.url)"></p-button>
                             </div>
                         </div>
                     </div>
@@ -68,14 +98,21 @@
 
         <!-- Routing -->
         <div class="col-12 md:col-6 lg:col-3">
-            <p-card header="Routing" [pTooltip]="'CREDITS.ROUTING_SECTION_TOOLTIP' | translate">
+            <p-card header="Routing"
+                [pTooltip]="'CREDITS.ROUTING_SECTION_TOOLTIP' | translate">
                 <div class="flex flex-column gap-3">
-                    <div class="component-item" *ngFor="let item of routingComponents">
+                    <div class="component-item"
+                        *ngFor="let item of routingComponents">
                         <div class="flex align-items-center gap-2">
-                            <i [class]="item.icon + ' text-xl'" [pTooltip]="item.name"></i>
+                            <i [class]="item.icon + ' text-xl'"
+                                [pTooltip]="item.name"></i>
                             <div>
                                 <h3 class="m-0 text-lg">{{item.name}}</h3>
-                                <p-button *ngIf="item.url" [label]="item.name + ' Website'" styleClass="p-button-link p-0" [pTooltip]="'CREDITS.VISIT_COMPONENT_WEBSITE' | translate: { name: item.name }" (onClick)="openLink(item.url)"></p-button>
+                                <p-button *ngIf="item.url"
+                                    [label]="item.name + ' Website'"
+                                    styleClass="p-button-link p-0"
+                                    [pTooltip]="'CREDITS.VISIT_COMPONENT_WEBSITE' | translate: { name: item.name }"
+                                    (onClick)="openLink(item.url)"></p-button>
                             </div>
                         </div>
                     </div>
@@ -88,24 +125,31 @@
             <p-card>
                 <div class="text-center">
                     <h2 class="text-2xl mb-3">Danksagung</h2>
-                    <p class="line-height-3">Ein großer Dank gilt an alle Komponenten, die wir für dieses Projekt nutzen konnten.</p>
+                    <p class="line-height-3">Ein großer Dank gilt an alle
+                        Komponenten, die wir für dieses Projekt nutzen konnten.
+                    </p>
                 </div>
             </p-card>
         </div>
     </div>
 </p-dialog>
 
-<p-dialog [(visible)]="showHelpDialog" [modal]="true" [maximizable]="true" header="Hilfe">
+<p-dialog [(visible)]="showHelpDialog" [modal]="true" [maximizable]="true"
+    header="Hilfe">
     <div class="grid">
         <div class="col-12">
             <p-accordion>
-                <p-accordion-panel header="Erste Schritte" [pTooltip]="'HELP.GETTING_STARTED_TOOLTIP' | translate">
-                    <p>Hier finden Sie eine kurze Einführung in die wichtigsten Funktionen der Anwendung.</p>
+                <p-accordion-panel header="Erste Schritte"
+                    [pTooltip]="'HELP.GETTING_STARTED_TOOLTIP' | translate">
+                    <p>Hier finden Sie eine kurze Einführung in die wichtigsten
+                        Funktionen der Anwendung.</p>
                 </p-accordion-panel>
-                <p-accordion-panel header="Häufig gestellte Fragen" [pTooltip]="'HELP.FAQ_TOOLTIP' | translate">
+                <p-accordion-panel header="Häufig gestellte Fragen"
+                    [pTooltip]="'HELP.FAQ_TOOLTIP' | translate">
                     <p>Antworten auf die am häufigsten gestellten Fragen.</p>
                 </p-accordion-panel>
-                <p-accordion-panel header="Kontakt & Support" [pTooltip]="'HELP.CONTACT_TOOLTIP' | translate">
+                <p-accordion-panel header="Kontakt & Support"
+                    [pTooltip]="'HELP.CONTACT_TOOLTIP' | translate">
                     <p>Bei weiteren Fragen erreichen Sie uns unter:</p>
                     <p><i class="pi pi-envelope"></i> bw-im.de/kontakt</p>
                 </p-accordion-panel>
@@ -114,25 +158,19 @@
     </div>
 </p-dialog>
 
-<p-dialog [(visible)]="showLanguageDialog" [modal]="true" [style]="{width: '350px'}" header="Sprache wählen">
+<p-dialog [(visible)]="showLanguageDialog" [modal]="true"
+    [style]="{width: '350px'}" header="Sprache wählen">
     <div class="flex flex-column gap-3">
-        <p-button *ngFor="let lang of languages" 
-                 [label]="lang.name" 
-                 [icon]="currentLang === lang.code ? lang.icon : ''"
-                 [styleClass]="currentLang === lang.code ? 'p-button-outlined' : ''"
-                 (onClick)="switchLanguage(lang.code)"
-                 class="w-full">
+        <p-button *ngFor="let lang of languages" [label]="lang.name"
+            [icon]="currentLang === lang.code ? lang.icon : ''"
+            [styleClass]="currentLang === lang.code ? 'p-button-outlined' : ''"
+            (onClick)="switchLanguage(lang.code)" class="w-full">
         </p-button>
     </div>
 </p-dialog>
 
-<p-dialog 
-    [(visible)]="showShortcutsDialog" 
-    [modal]="true" 
-    header="Tastenkürzel" 
-    [style]="{width: '50vw'}"
-    [draggable]="false" 
-    [resizable]="false">
+<p-dialog [(visible)]="showShortcutsDialog" [modal]="true" header="Tastenkürzel"
+    [style]="{width: '50vw'}" [draggable]="false" [resizable]="false">
     <div class="shortcuts-container">
         <div class="shortcut-item" *ngFor="let shortcut of shortcuts">
             <span class="shortcut-key">{{shortcut.key}}</span>
