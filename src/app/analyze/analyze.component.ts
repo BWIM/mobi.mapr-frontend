@@ -117,13 +117,13 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   hasModeData(): boolean {
-    return this.projectDetails?.hexagons?.some(hexagon => 
+    return this.projectDetails?.hexagons?.some(hexagon =>
       hexagon.profile_scores && hexagon.profile_scores.length > 0
     ) || false;
   }
 
   hasProfileData(): boolean {
-    return this.projectDetails?.hexagons?.some(hexagon => 
+    return this.projectDetails?.hexagons?.some(hexagon =>
       hexagon.profile_scores && hexagon.profile_scores.length > 0
     ) || false;
   }
@@ -160,12 +160,12 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
                     }
                     this.projectDetails = details;
                     this.initializeChartData();
-                      setTimeout(() => {
-                        this.resizeCharts();
-                      }, 100);
-                    
+                    setTimeout(() => {
+                      this.resizeCharts();
+                    }, 100);
+
                   },
-                  error: (error) => { 
+                  error: (error) => {
                     console.error('Error loading project details:', error);
                     this.loading = false;
                   }
@@ -637,55 +637,66 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       const subactivityData = this.subactivitiesChartData.labels[index];
       // Get the activity ID from the pie chart data
       const activityId = this.subactivitiesPieData.activityIds[index];
-      
+
       // Set loading state and show map dialog
       this.mapLoaded = false;
       this.showSubactivitiesMap = true;
       this.hoveredSubactivityName = subactivityData;
-      
+
       // Wait for dialog to be rendered before initializing map
       setTimeout(() => {
-        this.initializeMapWithRetry();
+        this.initializeMapWithRetry().then(() => {
+          // Only fetch and add places after map is fully initialized
+          this.analyzeService.getPlaces(activityId).subscribe((res: Place[]) => {
+            this.disablePlaces = res.length === 0;
+            this.addPlacesToMap(res);
+            this.zoomToPlaces(res);
+            this.mapLoaded = true;
+          });
+        }).catch((error) => {
+          console.error("Failed to initialize map:", error);
+          this.mapLoaded = true; // Set to true to hide loading indicator
+        });
       }, 200);
-      
-      this.analyzeService.getPlaces(activityId).subscribe((res: Place[]) => {
-        this.disablePlaces = res.length === 0;
-        this.addPlacesToMap(res);
-        this.zoomToPlaces(res);
-        this.mapLoaded = true;
-      });
     }
   }
 
-  private initializeMapWithRetry(maxRetries: number = 5, retryDelay: number = 100): void {
-    let retryCount = 0;
-    
-    const tryInitializeMap = () => {
-      const mapElement = document.getElementById('places-map');
-      if (mapElement) {
-        this.initializeMap();
-      } else if (retryCount < maxRetries) {
-        retryCount++;
-        console.log(`Map element not found, retrying in ${retryDelay}ms (attempt ${retryCount}/${maxRetries})`);
-        setTimeout(tryInitializeMap, retryDelay);
-      } else {
-        console.error("Map container not found after maximum retries");
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to initialize map. Please try again.',
-          life: 5000
-        });
-      }
-    };
-    
-    tryInitializeMap();
+  private initializeMapWithRetry(maxRetries: number = 5, retryDelay: number = 100): Promise<void> {
+    return new Promise((resolve, reject) => {
+      let retryCount = 0;
+
+      const tryInitializeMap = () => {
+        const mapElement = document.getElementById('places-map');
+        if (mapElement) {
+          this.initializeMap();
+          // Wait a bit more to ensure map is fully rendered
+          setTimeout(() => {
+            resolve();
+          }, 100);
+        } else if (retryCount < maxRetries) {
+          retryCount++;
+          console.log(`Map element not found, retrying in ${retryDelay}ms (attempt ${retryCount}/${maxRetries})`);
+          setTimeout(tryInitializeMap, retryDelay);
+        } else {
+          console.error("Map container not found after maximum retries");
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to initialize map. Please try again.',
+            life: 5000
+          });
+          reject(new Error("Map container not found after maximum retries"));
+        }
+      };
+
+      tryInitializeMap();
+    });
   }
 
   private createRadarChartData(
-    labels: string[], 
-    data: number[], 
-    scoreNames: string[], 
+    labels: string[],
+    data: number[],
+    scoreNames: string[],
     datasetLabel: string,
     isZoomed: boolean = false
   ): { chartData: any, chartOptions: any } {
@@ -779,7 +790,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       const maxValue = Math.max(...data);
       const range = maxValue - minValue;
       const padding = Math.max(range * 0.1, 0.05); // 10% padding or minimum 0.05
-      
+
       scaleConfig = {
         beginAtZero: false,
         min: Math.max(0, minValue - padding),
@@ -787,7 +798,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         ticks: {
           stepSize: Math.max(0.05, range / 8), // Adaptive step size
           color: '#495057',
-          callback: function(value: number) {
+          callback: function (value: number) {
             return value.toFixed(2);
           }
         },
@@ -855,19 +866,19 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         afterDraw: (chart: any) => {
           const ctx = chart.ctx;
           const meta = chart.getDatasetMeta(chart.data.datasets.length - 1); // Get the main data dataset
-          
+
           if (meta && meta.data) {
             meta.data.forEach((element: any, index: number) => {
               if (element && element.x !== undefined && element.y !== undefined) {
                 const value = data[index];
                 const label = value.toFixed(2);
-                
+
                 ctx.save();
                 ctx.fillStyle = '#333333';
                 ctx.font = 'bold 10px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'bottom';
-                
+
                 // Position label above the point
                 const labelY = element.y - 15;
                 ctx.fillText(label, element.x, labelY);
@@ -895,9 +906,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     this.projectDetails.hexagons.forEach(hexagon => {
       const weight = this.weightingType === 'population' ? hexagon.population : 1;
       if (hexagon.persona_scores) {
-      hexagon.persona_scores.forEach(personaScore => {
-        const current = personaScores.get(personaScore.persona) || { totalWeightedScore: 0, totalWeight: 0 };
-        current.totalWeightedScore += personaScore.score * weight;
+        hexagon.persona_scores.forEach(personaScore => {
+          const current = personaScores.get(personaScore.persona) || { totalWeightedScore: 0, totalWeight: 0 };
+          current.totalWeightedScore += personaScore.score * weight;
           current.totalWeight += weight;
           personaScores.set(personaScore.persona, current);
         });
@@ -973,7 +984,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   private createProfilesComboChart(profiles: any[], profileMap: Map<number, string>, scoreNames: string[]): void {
     // Define the 18 grade levels from A+ to F-
     const gradeLevels = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'E+', 'E', 'E-', 'F+', 'F', 'F-'];
-    
+
     // Define grade ranges and their corresponding colors
     const gradeRanges = [
       { name: 'A', min: 0, max: 0.35, color: '#32612d' },      // Dark Green
@@ -996,93 +1007,93 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     // Create datasets for the combo chart
     const datasets: any[] = [];
 
-         // Create a single continuous exponential line with colored segments
-     // We'll create multiple overlapping line segments to achieve the colored effect
-     gradeRanges.forEach((grade, index) => {
-       const segmentData = [...exponentialData]; // Copy all exponential data
-       
-       // Find the range of x-values that should be included for this grade
-       let startX = -1;
-       let endX = -1;
-       
-       // Find the first x where y >= grade.min
-       if (index === 0) {
-         // For the first grade (A), start from x=0
-         startX = 0;
-       } else {
-         for (let x = 1; x <= 18; x++) {
-           const y = 0.2511169 * Math.pow(1.122178, x);
-           if (y >= grade.min) {
-             startX = x;
-             break;
-           }
-         }
-       }
-       
-       // Find the last x where y < grade.max (or include all remaining for last grade)
-       if (index === gradeRanges.length - 1) {
-         // For the last grade (F), include all remaining points
-         endX = 18;
-       } else {
-         for (let x = startX; x <= 18; x++) {
-           const y = 0.2511169 * Math.pow(1.122178, x);
-           if (y >= grade.max) {
-             endX = x; // Include this point to connect to next segment
-             break;
-           }
-         }
-         if (endX === -1) endX = 18; // Fallback
-       }
-       
-       // Set points outside the calculated range to null
-       segmentData.forEach((yValue, xIndex) => {
-         const x = xIndex + 1;
-         if (x < startX || x > endX) {
-           (segmentData as any[])[xIndex] = null;
-         }
-       });
-       
-       datasets.push({
-         type: 'line',
-         label: '', // Hide grade line labels
-         borderColor: grade.color,
-         borderWidth: 2,
-         fill: false,
-         tension: 0.4,
-         data: segmentData.map((value, index) => ({ x: index + 1, y: value })),
-         pointRadius: 0,
-         pointHoverRadius: 0,
-         spanGaps: false
-       });
-     });
+    // Create a single continuous exponential line with colored segments
+    // We'll create multiple overlapping line segments to achieve the colored effect
+    gradeRanges.forEach((grade, index) => {
+      const segmentData = [...exponentialData]; // Copy all exponential data
+
+      // Find the range of x-values that should be included for this grade
+      let startX = -1;
+      let endX = -1;
+
+      // Find the first x where y >= grade.min
+      if (index === 0) {
+        // For the first grade (A), start from x=0
+        startX = 0;
+      } else {
+        for (let x = 1; x <= 18; x++) {
+          const y = 0.2511169 * Math.pow(1.122178, x);
+          if (y >= grade.min) {
+            startX = x;
+            break;
+          }
+        }
+      }
+
+      // Find the last x where y < grade.max (or include all remaining for last grade)
+      if (index === gradeRanges.length - 1) {
+        // For the last grade (F), include all remaining points
+        endX = 18;
+      } else {
+        for (let x = startX; x <= 18; x++) {
+          const y = 0.2511169 * Math.pow(1.122178, x);
+          if (y >= grade.max) {
+            endX = x; // Include this point to connect to next segment
+            break;
+          }
+        }
+        if (endX === -1) endX = 18; // Fallback
+      }
+
+      // Set points outside the calculated range to null
+      segmentData.forEach((yValue, xIndex) => {
+        const x = xIndex + 1;
+        if (x < startX || x > endX) {
+          (segmentData as any[])[xIndex] = null;
+        }
+      });
+
+      datasets.push({
+        type: 'line',
+        label: '', // Hide grade line labels
+        borderColor: grade.color,
+        borderWidth: 2,
+        fill: false,
+        tension: 0.4,
+        data: segmentData.map((value, index) => ({ x: index + 1, y: value })),
+        pointRadius: 0,
+        pointHoverRadius: 0,
+        spanGaps: false
+      });
+    });
 
     // Add points for each profile on the exponential line
     profiles.forEach((profile, index) => {
       const profileName = profileMap.get(profile.profile) || `Profile ${profile.profile}`;
       const profileColor = this.getProfileColor(profile.profile);
-      
+
       // Create a dataset for this profile's point
       const profileData = new Array(18).fill(null);
-      
+
       // Map score to x-position using inverse exponential function
       // Find the x-value that produces the closest exponential function value to the profile score
       let xPosition = 1; // Default to A+
       let minDifference = Infinity;
-      
+
       // Search through all 18 positions to find the one with exponential value closest to profile score
       for (let x = 1; x <= 18; x++) {
         const exponentialValue = 0.2511169 * Math.pow(1.122178, x);
         const difference = Math.abs(exponentialValue - profile.score);
-        
+
         if (difference < minDifference) {
           minDifference = difference;
           xPosition = x;
         }
       }
-      
+
       // Get the exponential function value at this x-position
       const exponentialValue = exponentialData[xPosition - 1];
-      
+
       // Set the point at the exponential function value at this position
       profileData[xPosition - 1] = exponentialValue;
 
@@ -1126,7 +1137,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           callbacks: {
             title: (context: any) => {
               const dataset = context[0].dataset;
-              
+
               // Only show title for scatter plots (profiles), hide grade line tooltips
               if (dataset.type === 'scatter' && dataset.label) {
                 return dataset.label; // Show profile name as title
@@ -1135,14 +1146,14 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
             },
             label: (context: any) => {
               const dataset = context.dataset;
-              
+
               // Only show tooltip for scatter plots (profiles), hide grade line tooltips
               if (dataset.type === 'scatter' && dataset.label) {
                 // Get the x-position of the point to determine the correct grade
                 const xPosition = Math.round(context.parsed.x);
                 const gradeIndex = xPosition - 1;
                 const gradeLevel = gradeIndex >= 0 && gradeIndex < gradeLevels.length ? gradeLevels[gradeIndex] : '';
-                
+
                 return gradeLevel; // Show only the grade level as value
               }
               return null;
@@ -1156,15 +1167,15 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         afterDraw: (chart: any) => {
           const ctx = chart.ctx;
           const profiles = chart.data.datasets.filter((dataset: any) => dataset.type === 'scatter');
-          
+
           profiles.forEach((dataset: any) => {
             const meta = chart.getDatasetMeta(chart.data.datasets.indexOf(dataset));
-            
+
             meta.data.forEach((element: any, index: number) => {
               if (element && element.x !== undefined && element.y !== undefined) {
                 const x = element.x;
                 const y = element.y - 15; // Position above the point
-                
+
                 ctx.save();
                 ctx.fillStyle = '#333333';
                 ctx.font = 'bold 10px Arial';
@@ -1185,7 +1196,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           ticks: {
             color: '#495057',
             stepSize: 1,
-            callback: function(value: number) {
+            callback: function (value: number) {
               const gradeIndex = Math.round(value) - 1;
               return gradeIndex >= 0 && gradeIndex < gradeLevels.length ? gradeLevels[gradeIndex] : '';
             }
@@ -1201,7 +1212,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
             display: true,
             color: '#495057',
             stepSize: 0.2,
-            callback: function(value: number) {
+            callback: function (value: number) {
               return (value * 100).toFixed(0) + '%';
             }
           },
@@ -1238,7 +1249,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   onSubactivityLeave(): void {
     this.showSubactivitiesMap = false;
     this.hoveredSubactivityName = '';
-    
+
     // Clean up map when dialog is closed
     if (this.map) {
       try {
@@ -1569,7 +1580,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         }),
         overlays: [this.tooltipOverlay]
       });
-      
+
       const coordinates = this.analyzeService.getCoordinates();
       if (coordinates) {
         this.map.getView().setCenter(fromLonLat([coordinates![0], coordinates![1]]));
@@ -1587,7 +1598,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
         // Check for features in both places and center layers
         let foundFeature: any = null;
-        
+
         // Use forEachFeatureAtPixel to find any feature at the pixel
         this.map?.forEachFeatureAtPixel(event.pixel, (feature) => {
           foundFeature = feature;
@@ -1598,7 +1609,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           const name = foundFeature.get('name');
           const rating = foundFeature.get('rating');
           const activity = foundFeature.get('activity');
-          
+
           if (name) {
             this.tooltipElement!.style.display = '';
             this.tooltipElement!.innerHTML = `
@@ -1617,7 +1628,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       this.map.on('click', (event) => {
         // Check for features in places layer only (not center layer)
         let clickedFeature: any = null;
-        
+
         this.map?.forEachFeatureAtPixel(event.pixel, (feature) => {
           // Only handle clicks on places (not center point)
           if (feature.get('id') !== 'center') {
@@ -1651,7 +1662,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
     const featureId = this.feature.properties?.['id'];
     const resolution = this.analyzeService.getCurrentState().mapType;
-    
+
     if (!featureId || !resolution) {
       console.warn('Missing feature ID or resolution for shape loading');
       return;
@@ -1718,13 +1729,13 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
     // Get center coordinates
     const coordinates = this.analyzeService.getCoordinates();
-    
+
     // Create extent from place coordinates and center point
     const placeCoordinates = places.map(place => fromLonLat([place.lon, place.lat]));
     const centerCoordinate = coordinates ? fromLonLat([coordinates[0], coordinates[1]]) : null;
-    
+
     // Combine all coordinates for extent calculation
-    const allCoordinates = centerCoordinate 
+    const allCoordinates = centerCoordinate
       ? [...placeCoordinates, centerCoordinate]
       : placeCoordinates;
   }
