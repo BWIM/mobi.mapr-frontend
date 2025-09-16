@@ -538,7 +538,7 @@
       },
       "STEP3": {
         "TITLE": "Die Legende",
-        "CONTENT": "Unten links siehst du die Legende. Mit einem Klick erfährst du, was die einzelnen Farben bedeuten.",
+        "CONTENT": "Unten links siehst du die Legende. Mit einem Klick darauf, öffnet sich die Beschreibung.",
         "NEXT_HINT": "Klicke irgendwo auf die Legende."
       },
       "STEP3-1": {
