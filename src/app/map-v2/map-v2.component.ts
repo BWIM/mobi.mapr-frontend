@@ -1,12 +1,12 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { MapV2Service } from './map-v2.service';
 import { Subscription } from 'rxjs';
-import { LngLatBounds, Map, Popup,  NavigationControl, ScaleControl } from 'maplibre-gl';
+import { LngLatBounds, Map, Popup, NavigationControl, ScaleControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { LoadingService } from '../services/loading.service';
 import { SearchOverlayComponent } from './search-overlay/search-overlay.component';
-import { LegendComponent } from '../legend/legend.component';	
+import { LegendComponent } from '../legend/legend.component';
 import { Project } from '../projects/project.interface';
 import { IndexService } from '../services/index.service';
 
@@ -84,16 +84,15 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
         style: this.mapStyle,
         center: this.center,
         zoom: this.zoom,
-        dragRotate: false,
-        touchZoomRotate: false
+        dragRotate: false
       });
       this.mapService.setMap(this.map);
 
       // Add navigation control
-      this.map.addControl(new NavigationControl({showCompass: false}), 'top-left');
+      this.map.addControl(new NavigationControl({ showCompass: false }), 'top-left');
       this.map.addControl(new ScaleControl(), 'bottom-left');
       this.map.dragRotate.disable();
-      this.map.touchZoomRotate.disable();
+      this.map.touchZoomRotate.disableRotation();
 
       // Setup map events (no projectId for main map - it uses the service subscription)
       this.setupMapEvents(this.map);
@@ -138,7 +137,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
 
     map.on('zoomend', () => {
       this.mapService.updateZoom(map.getZoom());
-      
+
       // If this is a compare map (projectId is provided), update its style manually
       if (projectId) {
         const style = this.mapService['getProjectMapStyle'](projectId);
@@ -218,7 +217,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     this.mapService.setProject(projectId);
   }
 
-  onLocationSelected(location: {lng: number, lat: number}) {
+  onLocationSelected(location: { lng: number, lat: number }) {
     if (this.map) {
       this.map.flyTo({
         center: [location.lng, location.lat],
@@ -236,22 +235,22 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
 
   private setupCompareMap() {
     this.isComparison = true;
-    
+
     // Get bounds for proper zoom calculation
     const bounds = this.mapService.getDataBounds();
     let initialCenter = this.center;
     let initialZoom = this.zoom;
-    
+
     if (bounds) {
       const mapBounds = new LngLatBounds(
         [bounds.minLng, bounds.minLat],
         [bounds.maxLng, bounds.maxLat]
       );
-      
+
       // Calculate center and zoom based on bounds
       const center = mapBounds.getCenter();
       initialCenter = [center.lng, center.lat];
-      
+
       // Calculate appropriate zoom level for the bounds
       const latDiff = bounds.maxLat - bounds.minLat;
       const lngDiff = bounds.maxLng - bounds.minLng;
@@ -268,15 +267,14 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       style: this.mapStyle,
       center: initialCenter,
       zoom: initialZoom,
-      dragRotate: false,
-      touchZoomRotate: false
+      dragRotate: false
     });
 
     // Add navigation controls to before map
-    beforeMap.addControl(new NavigationControl({showCompass: false}), 'top-left');
+    beforeMap.addControl(new NavigationControl({ showCompass: false }), 'top-left');
     beforeMap.addControl(new ScaleControl(), 'bottom-left');
     beforeMap.dragRotate.disable();
-    beforeMap.touchZoomRotate.disable();
+    beforeMap.touchZoomRotate.disableRotation();
 
     // Get the correct style for after map based on current zoom
     let afterStyle = this.mapStyle;
@@ -289,20 +287,19 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       style: afterStyle,
       center: initialCenter,
       zoom: initialZoom,
-      dragRotate: false,
-      touchZoomRotate: false
+      dragRotate: false
     });
 
     // Add navigation controls to after map
-    afterMap.addControl(new NavigationControl({showCompass: false}), 'top-left');
+    afterMap.addControl(new NavigationControl({ showCompass: false }), 'top-left');
     afterMap.addControl(new ScaleControl(), 'bottom-left');
     afterMap.dragRotate.disable();
-    afterMap.touchZoomRotate.disable();
+    afterMap.touchZoomRotate.disableRotation();
 
     // Wait for both maps to load, then zoom to bounds and setup events
     let mapsLoaded = 0;
     const totalMaps = 2;
-    
+
     const setupMaps = () => {
       mapsLoaded++;
       if (mapsLoaded === totalMaps) {
@@ -312,18 +309,18 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
             [bounds.minLng, bounds.minLat],
             [bounds.maxLng, bounds.maxLat]
           );
-          
+
           beforeMap.fitBounds(mapBounds, {
             padding: 50,
             duration: 0 // No animation for comparison setup
           });
-          
+
           afterMap.fitBounds(mapBounds, {
             padding: 50,
             duration: 0 // No animation for comparison setup
           });
         }
-        
+
         // Setup events after zoom is complete
         setTimeout(() => {
           this.setupMapEvents(beforeMap, this.mapService.getCurrentProject() || undefined);
