@@ -1563,7 +1563,8 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         layers: [baseLayer, this.shapeLayer, this.placesLayer, this.centerLayer],
         view: new View({
           center: fromLonLat([49.320099, 9.2156505]),
-          zoom: 10
+          zoom: 10,
+          enableRotation: false
         }),
         overlays: [this.tooltipOverlay]
       });
