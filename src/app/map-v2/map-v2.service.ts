@@ -48,7 +48,6 @@ export class MapV2Service {
   private stopComparisonSubject = new BehaviorSubject<boolean>(false);
   stopComparison$ = this.stopComparisonSubject.asObservable();
 
-
   private styleUpdateThrottle: any = null;
   private lastStyleUpdate: number = 0;
   private readonly STYLE_UPDATE_COOLDOWN = 100; // ms
@@ -60,7 +59,6 @@ export class MapV2Service {
     private analyzeService: AnalyzeService,
     private keyboardShortcutsService: KeyboardShortcutsService
   ) {
-
     this.shortcutSubscription = this.keyboardShortcutsService.getShortcutStream().subscribe(action => {
       if (!this.map) return;
 
@@ -380,7 +378,7 @@ export class MapV2Service {
         tiles: [tileUrl],
         minzoom: 0,
         maxzoom: 14,
-        tileSize: 512
+        tileSize: 512 // Use smaller tiles on mobile for better performance
       } as SourceSpecification;
 
       baseStyle.layers.push({

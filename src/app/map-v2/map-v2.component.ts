@@ -37,12 +37,10 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   comparisonProject: Project | null = null;
   currentProject: string | null = null;
 
-
   private dragThrottleTimeout: any = null;
   private isDragging: boolean = false;
   private originalOpacity: any = null;
   constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService, private indexService: IndexService) {
-
 
     this.subscription = this.mapService.mapStyle$.subscribe(style => {
       this.mapStyle = style;
