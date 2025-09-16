@@ -48,6 +48,12 @@ export class MapV2Service {
   private stopComparisonSubject = new BehaviorSubject<boolean>(false);
   stopComparison$ = this.stopComparisonSubject.asObservable();
 
+  // Mobile optimization properties
+  private isMobile: boolean = false;
+  private styleUpdateThrottle: any = null;
+  private lastStyleUpdate: number = 0;
+  private readonly STYLE_UPDATE_COOLDOWN = 100; // ms
+
   constructor(
     private loadingService: LoadingService,
     private http: HttpClient,
@@ -55,6 +61,10 @@ export class MapV2Service {
     private analyzeService: AnalyzeService,
     private keyboardShortcutsService: KeyboardShortcutsService
   ) {
+    // Detect mobile device
+    this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      (window.innerWidth <= 768) ||
+      ('ontouchstart' in window);
     this.shortcutSubscription = this.keyboardShortcutsService.getShortcutStream().subscribe(action => {
       if (!this.map) return;
 
@@ -99,6 +109,27 @@ export class MapV2Service {
 
   setMap(map: Map): void {
     this.map = map;
+  }
+
+  private throttledStyleUpdate(style: StyleSpecification): void {
+    const now = Date.now();
+
+    // Clear any existing throttle timeout
+    if (this.styleUpdateThrottle) {
+      clearTimeout(this.styleUpdateThrottle);
+    }
+
+    // If enough time has passed since last update, update immediately
+    if (now - this.lastStyleUpdate >= this.STYLE_UPDATE_COOLDOWN) {
+      this.mapStyleSubject.next(style);
+      this.lastStyleUpdate = now;
+    } else {
+      // Otherwise, throttle the update
+      this.styleUpdateThrottle = setTimeout(() => {
+        this.mapStyleSubject.next(style);
+        this.lastStyleUpdate = Date.now();
+      }, this.STYLE_UPDATE_COOLDOWN - (now - this.lastStyleUpdate));
+    }
   }
 
   getMap(): Map | null {
@@ -184,7 +215,7 @@ export class MapV2Service {
               'rgba(194, 24, 7, 0.7)',
               'rgba(150, 86, 162, 0.7)'
             ],
-            'fill-opacity': [
+            'fill-opacity': this.isMobile ? 0.6 : [
               'interpolate',
               ['cubic-bezier', 0.26, 0.38, 0.82, 0.36],
               ['get', 'population_density'],
@@ -265,7 +296,7 @@ export class MapV2Service {
     this.averageType = averageType;
     if (this.currentProject) {
       const updatedStyle = this.getProjectMapStyle(this.currentProject);
-      this.mapStyleSubject.next(updatedStyle);
+      this.throttledStyleUpdate(updatedStyle);
     }
   }
 
@@ -273,7 +304,7 @@ export class MapV2Service {
     this.currentZoom = zoom;
     if (this.currentProject) {
       const updatedStyle = this.getProjectMapStyle(this.currentProject);
-      this.mapStyleSubject.next(updatedStyle);
+      this.throttledStyleUpdate(updatedStyle);
     }
   }
 
@@ -353,7 +384,7 @@ export class MapV2Service {
         tiles: [tileUrl],
         minzoom: 0,
         maxzoom: 14,
-        tileSize: 512
+        tileSize: this.isMobile ? 256 : 512 // Use smaller tiles on mobile for better performance
       } as SourceSpecification;
 
       baseStyle.layers.push({
@@ -507,6 +538,9 @@ export class MapV2Service {
   ngOnDestroy() {
     if (this.shortcutSubscription) {
       this.shortcutSubscription.unsubscribe();
+    }
+    if (this.styleUpdateThrottle) {
+      clearTimeout(this.styleUpdateThrottle);
     }
   }
 
