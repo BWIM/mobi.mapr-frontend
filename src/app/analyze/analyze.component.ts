@@ -1726,5 +1726,40 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const allCoordinates = centerCoordinate
       ? [...placeCoordinates, centerCoordinate]
       : placeCoordinates;
+
+    if (allCoordinates.length > 0) {
+      // Calculate the extent that includes all coordinates
+      let extent: [number, number, number, number] | null = null;
+
+      for (const coord of allCoordinates) {
+        if (!extent) {
+          extent = [coord[0], coord[1], coord[0], coord[1]];
+        } else {
+          extent = [
+            Math.min(extent[0], coord[0]),
+            Math.min(extent[1], coord[1]),
+            Math.max(extent[2], coord[0]),
+            Math.max(extent[3], coord[1])
+          ];
+        }
+      }
+
+      if (extent) {
+        // Add some padding to the extent
+        const padding = 0.01; // Adjust this value to control the padding
+        const paddedExtent: [number, number, number, number] = [
+          extent[0] - padding,
+          extent[1] - padding,
+          extent[2] + padding,
+          extent[3] + padding
+        ];
+
+        // Fit the map view to the extent
+        this.map.getView().fit(paddedExtent, {
+          duration: 1000, // Animation duration in milliseconds
+          padding: [20, 20, 20, 20] // Additional padding in pixels
+        });
+      }
+    }
   }
 }
