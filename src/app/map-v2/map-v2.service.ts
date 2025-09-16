@@ -48,6 +48,11 @@ export class MapV2Service {
   private stopComparisonSubject = new BehaviorSubject<boolean>(false);
   stopComparison$ = this.stopComparisonSubject.asObservable();
 
+
+  private styleUpdateThrottle: any = null;
+  private lastStyleUpdate: number = 0;
+  private readonly STYLE_UPDATE_COOLDOWN = 100; // ms
+
   constructor(
     private loadingService: LoadingService,
     private http: HttpClient,
@@ -55,6 +60,7 @@ export class MapV2Service {
     private analyzeService: AnalyzeService,
     private keyboardShortcutsService: KeyboardShortcutsService
   ) {
+
     this.shortcutSubscription = this.keyboardShortcutsService.getShortcutStream().subscribe(action => {
       if (!this.map) return;
 
@@ -99,6 +105,27 @@ export class MapV2Service {
 
   setMap(map: Map): void {
     this.map = map;
+  }
+
+  private throttledStyleUpdate(style: StyleSpecification): void {
+    const now = Date.now();
+
+    // Clear any existing throttle timeout
+    if (this.styleUpdateThrottle) {
+      clearTimeout(this.styleUpdateThrottle);
+    }
+
+    // If enough time has passed since last update, update immediately
+    if (now - this.lastStyleUpdate >= this.STYLE_UPDATE_COOLDOWN) {
+      this.mapStyleSubject.next(style);
+      this.lastStyleUpdate = now;
+    } else {
+      // Otherwise, throttle the update
+      this.styleUpdateThrottle = setTimeout(() => {
+        this.mapStyleSubject.next(style);
+        this.lastStyleUpdate = Date.now();
+      }, this.STYLE_UPDATE_COOLDOWN - (now - this.lastStyleUpdate));
+    }
   }
 
   getMap(): Map | null {
@@ -265,7 +292,7 @@ export class MapV2Service {
     this.averageType = averageType;
     if (this.currentProject) {
       const updatedStyle = this.getProjectMapStyle(this.currentProject);
-      this.mapStyleSubject.next(updatedStyle);
+      this.throttledStyleUpdate(updatedStyle);
     }
   }
 
@@ -273,7 +300,7 @@ export class MapV2Service {
     this.currentZoom = zoom;
     if (this.currentProject) {
       const updatedStyle = this.getProjectMapStyle(this.currentProject);
-      this.mapStyleSubject.next(updatedStyle);
+      this.throttledStyleUpdate(updatedStyle);
     }
   }
 
@@ -507,6 +534,9 @@ export class MapV2Service {
   ngOnDestroy() {
     if (this.shortcutSubscription) {
       this.shortcutSubscription.unsubscribe();
+    }
+    if (this.styleUpdateThrottle) {
+      clearTimeout(this.styleUpdateThrottle);
     }
   }
 

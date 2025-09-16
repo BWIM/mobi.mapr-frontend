@@ -36,7 +36,14 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   projectName: string | null = null;
   comparisonProject: Project | null = null;
   currentProject: string | null = null;
+
+
+  private dragThrottleTimeout: any = null;
+  private isDragging: boolean = false;
+  private originalOpacity: any = null;
   constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService, private indexService: IndexService) {
+
+
     this.subscription = this.mapService.mapStyle$.subscribe(style => {
       this.mapStyle = style;
       if (this.map) {
@@ -79,13 +86,21 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
 
   ngAfterViewInit() {
     if (this.mapContainer) {
-      this.map = new Map({
+      // Mobile-optimized map configuration
+      const mapOptions: any = {
         container: this.mapContainer.nativeElement,
         style: this.mapStyle,
         center: this.center,
         zoom: this.zoom,
-        dragRotate: false
-      });
+        dragRotate: false,
+        // Mobile optimizations
+        renderWorldCopies: false,
+        maxTileCacheSize: 100,
+        localIdeographFontFamily: false
+      };
+
+
+      this.map = new Map(mapOptions);
       this.mapService.setMap(this.map);
 
       // Add navigation control
@@ -100,33 +115,37 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private setupMapEvents(map: Map, projectId?: string): void {
-    // Add panning event listeners to adjust layer opacity
+    // Store original opacity for restoration
+    if (!this.originalOpacity && map?.getLayer('geodata-fill')) {
+      this.originalOpacity = map.getPaintProperty('geodata-fill', 'fill-opacity');
+    }
+
+    // Mobile-optimized panning event listeners
     map.on('dragstart', () => {
       if (this.mapService.getMapType() === 'hexagon') {
         return;
       }
-      if (map?.getLayer('geodata-fill')) {
-        const currentOpacity = map.getPaintProperty('geodata-fill', 'fill-opacity');
-        if (Array.isArray(currentOpacity)) {
-          // Create a new expression that multiplies the result by 0.5
-          const newOpacity = ['*', currentOpacity, 0.25];
-          map.setPaintProperty('geodata-fill', 'fill-opacity', newOpacity);
-        }
+
+
+      if (!this.isDragging) {
+        this.isDragging = true;
+        this.handleDragStart(map);
       }
     });
+
+
 
     map.on('dragend', () => {
       if (this.mapService.getMapType() === 'hexagon') {
         return;
       }
-      if (map?.getLayer('geodata-fill')) {
-        const currentOpacity = map.getPaintProperty('geodata-fill', 'fill-opacity');
-        if (Array.isArray(currentOpacity)) {
-          // Create a new expression that multiplies the result by 2
-          const newOpacity = ['*', currentOpacity, 4];
-          map.setPaintProperty('geodata-fill', 'fill-opacity', newOpacity);
-        }
+
+      if (this.dragThrottleTimeout) {
+        clearTimeout(this.dragThrottleTimeout);
       }
+
+      this.isDragging = false;
+      this.handleDragEnd(map);
     });
 
     // Create popup for this map instance
@@ -195,6 +214,31 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  private handleDragStart(map: Map): void {
+    if (map?.getLayer('geodata-fill')) {
+      // Store original opacity if not already stored
+      if (!this.originalOpacity) {
+        this.originalOpacity = map.getPaintProperty('geodata-fill', 'fill-opacity');
+      }
+
+      // Reduce opacity for better performance during drag
+      const reducedOpacity = ['*', this.originalOpacity, 0.3];
+      map.setPaintProperty('geodata-fill', 'fill-opacity', reducedOpacity);
+    }
+  }
+
+  private handleDragUpdate(map: Map): void {
+    // On mobile, we can skip frequent updates during drag for better performance
+    // The opacity is already reduced in handleDragStart
+  }
+
+  private handleDragEnd(map: Map): void {
+    if (map?.getLayer('geodata-fill') && this.originalOpacity) {
+      // Restore original opacity
+      map.setPaintProperty('geodata-fill', 'fill-opacity', this.originalOpacity);
+    }
+  }
+
   ngOnDestroy() {
     if (this.map) {
       this.map.remove();
@@ -210,6 +254,9 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     }
     if (this.stopComparisonSubscription) {
       this.stopComparisonSubscription.unsubscribe();
+    }
+    if (this.dragThrottleTimeout) {
+      clearTimeout(this.dragThrottleTimeout);
     }
   }
 
