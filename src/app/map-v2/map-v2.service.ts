@@ -376,8 +376,8 @@ export class MapV2Service {
       baseStyle.sources['geodata'] = {
         type: 'vector',
         tiles: [tileUrl],
-        minzoom: 0,
-        maxzoom: 14,
+        minzoom: 6,
+        maxzoom: 10,
         tileSize: 512 // Use smaller tiles on mobile for better performance
       } as SourceSpecification;
 
