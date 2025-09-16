@@ -1072,37 +1072,29 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       const profileName = profileMap.get(profile.profile) || `Profile ${profile.profile}`;
       const profileColor = this.getProfileColor(profile.profile);
 
-      // Create a dataset for this profile's point
-      const profileData = new Array(18).fill(null);
-
       // Map score to x-position using inverse exponential function
-      // Find the x-value that produces the closest exponential function value to the profile score
-      let xPosition = 1; // Default to A+
-      let minDifference = Infinity;
+      // Solve for x in the equation: profile.score = 0.2511169 * 1.122178^x
+      // x = log(profile.score / 0.2511169) / log(1.122178)
+      let xPosition: number;
 
-      // Search through all 18 positions to find the one with exponential value closest to profile score
-      for (let x = 1; x <= 18; x++) {
-        const exponentialValue = 0.2511169 * Math.pow(1.122178, x);
-        const difference = Math.abs(exponentialValue - profile.score);
+      if (profile.score <= 0) {
+        xPosition = 1; // Default to A+ for invalid scores
+      } else {
+        xPosition = Math.log(profile.score / 0.2511169) / Math.log(1.122178);
 
-        if (difference < minDifference) {
-          minDifference = difference;
-          xPosition = x;
-        }
+        // Clamp xPosition to valid range [1, 18]
+        xPosition = Math.max(1, Math.min(18, xPosition));
       }
 
-      // Get the exponential function value at this x-position
-      const exponentialValue = exponentialData[xPosition - 1];
-
-      // Set the point at the exponential function value at this position
-      profileData[xPosition - 1] = exponentialValue;
+      // Create the data point using the calculated xPosition and the actual profile score
+      const profilePoint = { x: xPosition, y: profile.score };
 
       datasets.push({
         type: 'scatter',
         label: profileName,
         backgroundColor: profileColor,
         borderColor: profileColor,
-        data: profileData.map((value, index) => value !== null ? { x: index + 1, y: value } : null).filter(point => point !== null),
+        data: [profilePoint],
         pointRadius: 8,
         pointHoverRadius: 10,
         pointBorderWidth: 2,
@@ -1149,12 +1141,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
               // Only show tooltip for scatter plots (profiles), hide grade line tooltips
               if (dataset.type === 'scatter' && dataset.label) {
-                // Get the x-position of the point to determine the correct grade
-                const xPosition = Math.round(context.parsed.x);
-                const gradeIndex = xPosition - 1;
-                const gradeLevel = gradeIndex >= 0 && gradeIndex < gradeLevels.length ? gradeLevels[gradeIndex] : '';
-
-                return gradeLevel; // Show only the grade level as value
+                return dataset.label; // Show only the profile name
               }
               return null;
             }
