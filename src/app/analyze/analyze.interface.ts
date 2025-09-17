@@ -19,3 +19,29 @@ export interface Place {
     rating: number;
     activity: number;
 }
+
+export interface Profile {
+    id: number;
+    name: string;
+    index: number;
+}
+
+export interface Persona {
+    id: number;
+    name: string;
+    index: number;
+}
+
+export interface Category {
+    id: number;
+    name: string;
+    weight: number;
+    index: number;
+}
+
+export interface Activity {
+    id: number;
+    name: string;
+    index: number;
+    weight: number;
+}

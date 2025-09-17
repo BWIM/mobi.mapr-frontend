@@ -49,7 +49,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   @Output() projectAction = new EventEmitter<void>();
   @Output() projectSelected = new EventEmitter<boolean>();
   @ViewChild('unusedGroupsOverlay') unusedGroupsOverlay!: any;
-  
+
   projectGroups: ProjectGroup[] = [];
   groupedProjects: GroupedProjects[] = [];
   ungroupedProjects: Project[] = [];
@@ -98,7 +98,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     private tutorialService: TutorialService
   ) {
     this.initializeMapActions();
-    
+
     // Übersetzungen neu laden, wenn sich die Sprache ändert
     this.translate.onLangChange.subscribe(() => {
       this.initializeMapActions();
@@ -153,7 +153,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.loadingService.startLoading();
     this.menuItemsCache.clear();
-    
+
     this.projectsService.getProjectGroups()
       .pipe(finalize(() => this.loadingService.stopLoading()))
       .subscribe({
@@ -175,13 +175,13 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
   private loadProjects(): void {
     this.loadingService.startLoading();
-    
+
     this.projectsService.getProjects()
       .pipe(finalize(() => this.loadingService.stopLoading()))
       .subscribe({
         next: (response) => {
           const projects = response.results;
-          
+
           // Erstelle Default-Gruppe falls Default-Projekte existieren
           const defaultProjects = projects.filter(p => p.default);
           if (defaultProjects.length > 0) {
@@ -191,7 +191,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
               user: '',
               default: true
             };
-            
+
             this.groupedProjects = [{
               group: defaultGroup,
               projects: defaultProjects
@@ -270,15 +270,15 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   showResults(project: Project | undefined): void {
     try {
       if (!project) return;
-      
+
       // Mark tutorial step as completed if this is an interactive step
       if (this.tutorialService.isCurrentStepInteractive()) {
         this.tutorialService.markStepCompleted();
       }
-      
+
       this.loadingService.startLoading();
       this.analyzeService.setCurrentProject(project.id.toString());
-      
+
       // Projektinformationen laden
       this.projectsService.getProjectInfo(project.id).subscribe({
         next: (info) => {
@@ -291,8 +291,8 @@ export class ProjectsComponent implements OnInit, OnDestroy {
       });
 
       this.mapv2Service.setProjectVersion(project.version);
-      
-      this.mapv2Service.setProject(project.id.toString(),undefined, project.display_name);
+
+      this.mapv2Service.setProject(project.id.toString(), undefined, project.display_name);
       this.loadingService.stopLoading();
     }
     catch (error) {
@@ -302,42 +302,14 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   }
 
   showProjectWizard(): void {
-    this.loadingService.startLoading();
-    this.projectsService.checkAllFinished().pipe(
-      finalize(() => this.loadingService.stopLoading())
-    ).subscribe({
-      next: (status) => {
-        if (!status.all_finished) {
-          const unfinishedProjectNames = status.unfinished_projects
-            .map(p => p.display_name)
-            .join(', ');
-          
-          this.messageService.add({
-            severity: 'warn',
-            summary: this.translate.instant('PROJECTS.MESSAGES.UNFINISHED_PROJECTS'),
-            detail: this.translate.instant('PROJECTS.MESSAGES.UNFINISHED_PROJECTS_DETAIL', { projects: unfinishedProjectNames }),
-            life: 5000
-          });
-        } else {
-          this.wizardService.show();
-        }
-      },
-      error: (error) => {
-        console.error('Fehler beim Prüfen der Projekte:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
-          detail: this.translate.instant('PROJECTS.MESSAGES.CHECK_PROJECTS_ERROR')
-        });
-      }
-    });
+    this.wizardService.show();
   }
 
   private setupWebsocketForProject(project: Project): void {
     if (project.finished) return;
-    
+
     if (this.websocketConnections.has(project.id)) return;
-    
+
     const wsSubject = this.websocketService.connect<WebsocketResult>(
       `${environment.wsURL}/projects/?project=${project.id}`
     );
@@ -350,7 +322,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         if (result.result && result.result.geojson) {
           this.mapv2Service.addSingleFeature(result.result.geojson);
         }
-        
+
         const projectToUpdate = this.findProjectById(result.result.project);
         if (!projectToUpdate) return;
         if (projectToUpdate) {
@@ -426,7 +398,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     if (!this.projectToEdit) return;
 
     this.loadingService.startLoading();
-    
+
     this.projectsService.updateProject(this.projectToEdit.id, {
       display_name: this.projectToEdit.display_name,
       description: this.projectToEdit.description,
@@ -571,7 +543,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
 
   deleteProjectGroup(group: ProjectGroup): void {
     this.loadingService.startLoading();
-    
+
     this.projectsService.deleteProjectGroup(group.id)
       .pipe(finalize(() => this.loadingService.stopLoading()))
       .subscribe({
@@ -602,7 +574,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         .filter(gp => !gp.group.default) // Ignoriere die Default-Gruppe
         .map(gp => gp.group.id)
     );
-    
+
     this.unusedGroups = this.projectGroups.filter(
       group => !usedGroupIds.has(group.id) && !group.default
     );
@@ -617,7 +589,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     if (!this.selectedUnusedGroups?.length) return;
 
     const groupNames = this.selectedUnusedGroups.map(g => g.name).join(', ');
-    
+
     this.confirmationService.confirm({
       message: this.translate.instant('PROJECT_GROUPS.MESSAGES.CONFIRM_DELETE_MULTIPLE', { groups: groupNames }),
       header: this.translate.instant('COMMON.MESSAGES.CONFIRM_DELETE'),
@@ -632,7 +604,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     if (!this.selectedUnusedGroups?.length) return;
 
     this.loadingService.startLoading();
-    
+
     // Erstelle ein Array von Observables für jede Löschoperation
     const deleteObservables = this.selectedUnusedGroups.map(group =>
       this.projectsService.deleteProjectGroup(group.id)

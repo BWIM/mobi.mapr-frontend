@@ -2,7 +2,8 @@
     [resizable]="false" [dismissableMask]="true" [maximizable]="true"
     [style]="{width: '80vw', height: '80vh'}"
     [style.backgroundColor]="getScore().color" styleClass="analyze-dialog"
-    [header]="properties?.name" (onShow)="onDialogShow()">
+    [header]="properties?.name" (onShow)="onDialogShow()"
+    (onHide)="onDialogHide()">
     <p-scrollPanel [style]="{width: '100%', height: '100%'}">
 
         <!-- Loading Spinner -->
@@ -44,7 +45,7 @@
                                     styleClass="p-button-text p-button-sm">
                                 </p-button>
                             </div>
-                            <div *ngIf="hasActivityData()"
+                            <div *ngIf="categories.length > 0"
                                 class="h-full relative">
                                 <p-chart #activitiesChart type="bar"
                                     [data]="activitiesChartData"
@@ -75,27 +76,43 @@
                                         [header]="hoveredSubactivityName"
                                         (onHide)="onSubactivityLeave()">
                                         <div class="relative h-full w-full">
-                                            <div id="places-map" class="h-full w-full rounded-lg" ></div>
-                                            <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75" *ngIf="noPlaces">
-                                                <p class="text-gray-500 text-center">{{ 'ANALYZE.ACTIVITIES.NO_PLACES' | translate }}</p>
+                                            <div id="places-map"
+                                                class="h-full w-full rounded-lg">
                                             </div>
-                                            <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75" *ngIf="disablePlaces">
-                                                <p class="text-gray-500 text-center">{{ 'ANALYZE.ACTIVITIES.DISABLE_PLACES' | translate }}</p>
+                                            <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75"
+                                                *ngIf="noPlaces">
+                                                <p
+                                                    class="text-gray-500 text-center">
+                                                    {{
+                                                    'ANALYZE.ACTIVITIES.NO_PLACES'
+                                                    | translate }}</p>
                                             </div>
-                                            <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75" *ngIf="!mapLoaded">
-                                                <div class="flex flex-col items-center">
-                                                    <p-progressSpinner 
-                                                    [style]="{width: '50px', height: '50px'}"
-                                                    strokeWidth="4"
-                                                    animationDuration=".5s"></p-progressSpinner>
-                                                    <p class="text-center text-sm text-gray-500 mt-2">Loading map...</p>
+                                            <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75"
+                                                *ngIf="disablePlaces">
+                                                <p
+                                                    class="text-gray-500 text-center">
+                                                    {{
+                                                    'ANALYZE.ACTIVITIES.DISABLE_PLACES'
+                                                    | translate }}</p>
+                                            </div>
+                                            <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75"
+                                                *ngIf="!mapLoaded">
+                                                <div
+                                                    class="flex flex-col items-center">
+                                                    <p-progressSpinner
+                                                        [style]="{width: '50px', height: '50px'}"
+                                                        strokeWidth="4"
+                                                        animationDuration=".5s"></p-progressSpinner>
+                                                    <p
+                                                        class="text-center text-sm text-gray-500 mt-2">
+                                                        Loading map...</p>
                                                 </div>
                                             </div>
                                         </div>
                                     </p-dialog>
                                 </p-dialog>
                             </div>
-                            <div *ngIf="!hasActivityData()"
+                            <div *ngIf="categories.length === 0"
                                 class="flex-1 flex items-center justify-center">
                                 <p class="text-gray-500 text-center">{{
                                     'ANALYZE.ACTIVITIES.NO_DATA' | translate }}
@@ -114,29 +131,31 @@
                         <div *ngIf="showPersona" class="flex flex-col h-[50vh]">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-lg font-semibold text-gray-700">
-                                    {{ 'ANALYZE.PERSONA.TITLE' | translate }}</h3>
-                                <div *ngIf="hasPersonaData()" class="flex items-center gap-2">
+                                    {{ 'ANALYZE.PERSONA.TITLE' | translate }}
+                                </h3>
+                                <div *ngIf="personas.length > 0"
+                                    class="flex items-center gap-2">
                                     <span class="text-sm text-gray-600">
-                                        {{ personaChartZoomed ? 'Zoomed View' : 'Full Scale' }}
+                                        {{ personaChartZoomed ? 'Zoomed View' :
+                                        'Full Scale' }}
                                     </span>
-                                    <p-button 
+                                    <p-button
                                         [icon]="personaChartZoomed ? 'pi pi-search-minus' : 'pi pi-search-plus'"
-                                        [text]="true"
-                                        [rounded]="true"
+                                        [text]="true" [rounded]="true"
                                         size="small"
                                         (onClick)="togglePersonaChartZoom()"
                                         [title]="personaChartZoomed ? 'Show full scale' : 'Zoom to data range'">
                                     </p-button>
                                 </div>
                             </div>
-                            <div *ngIf="hasPersonaData()" class="h-full">
+                            <div *ngIf="personas.length > 0" class="h-full">
                                 <p-chart #personaChart type="radar"
                                     [data]="personaChartData"
                                     [options]="radarChartOptions"
                                     [width]="'100%'" [height]="'100%'">
                                 </p-chart>
                             </div>
-                            <div *ngIf="!hasPersonaData()"
+                            <div *ngIf="personas.length === 0"
                                 class="flex-1 flex items-center justify-center">
                                 <p class="text-gray-500 text-center">{{
                                     'ANALYZE.PERSONA.NO_DATA' | translate }}</p>
@@ -156,7 +175,8 @@
 
                     <!-- Profiles Tab -->
                     <p-tabpanel [value]="'profiles'" class="h-full">
-                        <div *ngIf="hasProfileData()" class="flex flex-col h-[50vh]">
+                        <div *ngIf="profiles.length > 0"
+                            class="flex flex-col h-[50vh]">
                             <h3
                                 class="text-lg font-semibold text-gray-700 mb-4">
                                 {{ 'ANALYZE.PROFILES.TITLE' | translate }}</h3>
@@ -168,21 +188,26 @@
                                         [width]="'100%'" [height]="'100%'">
                                     </p-chart>
                                 </div>
-                                
+
                                 <!-- Custom Profile Legend -->
-                                <div *ngIf="profileLegendData.length > 0" class="mt-4 flex-shrink-0">
-                                    <div class="flex flex-wrap gap-4 justify-center">
-                                        <div *ngFor="let item of profileLegendData" 
-                                             class="flex items-center gap-2">
-                                            <div class="w-4 h-4 rounded" 
-                                                 [style.background-color]="item.color"></div>
-                                            <span class="text-sm text-gray-700">{{ item.name }}</span>
+                                <div *ngIf="profileLegendData.length > 0"
+                                    class="mt-4 flex-shrink-0">
+                                    <div
+                                        class="flex flex-wrap gap-4 justify-center">
+                                        <div *ngFor="let item of profileLegendData"
+                                            class="flex items-center gap-2">
+                                            <div class="w-4 h-4 rounded"
+                                                [style.background-color]="item.color">
+                                            </div>
+                                            <span
+                                                class="text-sm text-gray-700">{{
+                                                item.name }}</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div *ngIf="!hasProfileData()"
+                        <div *ngIf="profiles.length === 0"
                             class="flex-1 flex items-center justify-center">
                             <p class="text-gray-500 text-center">{{
                                 'ANALYZE.PROFILES.NO_DATA' | translate }}</p>

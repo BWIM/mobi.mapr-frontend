@@ -3,98 +3,118 @@ import { BehaviorSubject, Observable, of } from "rxjs";
 import { MapGeoJSONFeature } from "maplibre-gl";
 import { environment } from "../../environments/environment";
 import { HttpClient } from "@angular/common/http";
-import { Place } from "./analyze.interface";
+import { Activity, Category, Persona, Place, Profile } from "./analyze.interface";
 import { ShareService } from "../share/share.service";
 
 @Injectable({
-    providedIn: 'root'
-  })
-  export class AnalyzeService {
-    private visibleSubject = new BehaviorSubject<boolean>(false);
-    visible$ = this.visibleSubject.asObservable();
+  providedIn: 'root'
+})
+export class AnalyzeService {
+  private visibleSubject = new BehaviorSubject<boolean>(false);
+  visible$ = this.visibleSubject.asObservable();
 
-    constructor(private http: HttpClient, private shareService: ShareService) {}
-  
-    private currentProjectId: string | null = null;
-    private currentMapType: string | null = null;
-    private selectedFeature: MapGeoJSONFeature | null = null;
-    private featureId: string | null = null;
-    private resolution: string | null = null;
-    private coordinates: number[] | null = null;
-    private hexagonView: boolean = false;
-    private disablePlaces: boolean = false;
-  
-    show() {
-      this.visibleSubject.next(true);
-    }
-  
-    hide() {
-      this.visibleSubject.next(false);
-    }
-  
-    setCurrentProject(projectId: string) {
-      this.currentProjectId = projectId;
-    }
+  constructor(private http: HttpClient, private shareService: ShareService) { }
 
-    getCoordinates(): number[] | null {
-      return this.coordinates;
-    }
+  private currentProjectId: string | null = null;
+  private currentMapType: string | null = null;
+  private selectedFeature: MapGeoJSONFeature | null = null;
+  private featureId: string | null = null;
+  private resolution: string | null = null;
+  private coordinates: number[] | null = null;
+  private hexagonView: boolean = false;
+  private disablePlaces: boolean = false;
 
-  
-    setMapType(mapType: string) {
-      this.currentMapType = mapType;
-    }
+  show() {
+    this.visibleSubject.next(true);
+  }
 
-    getMapType(): string | null {
-      return this.currentMapType;
-    }
+  hide() {
+    this.visibleSubject.next(false);
+  }
 
-    setHexagonView(hexagonView: boolean) {
-      this.hexagonView = hexagonView;
-    }
-  
-    setSelectedFeature(feature: MapGeoJSONFeature, resolution: string, coordinates: number[]) {
-      this.selectedFeature = feature;
-      this.featureId = feature['properties']['id'];
-      this.coordinates = coordinates;
-      this.resolution = resolution;
-      this.show(); // Automatisch das Analyse-Panel öffnen, wenn ein Feature ausgewählt wurde
-    }
-  
-    getCurrentState() {
-      return {
-        projectId: this.currentProjectId,
-        mapType: this.currentMapType,
-        feature: this.selectedFeature
-      };
-    }
-    getPlaces(activityId: number): Observable<Place[]> {
-      let type = this.resolution;
-      const featureId = this.featureId;
+  setCurrentProject(projectId: string) {
+    this.currentProjectId = projectId;
+  }
 
-      if (this.hexagonView) {
-        type = "hexagon"
-      }
+  getCoordinates(): number[] | null {
+    return this.coordinates;
+  }
 
-      if (this.currentMapType === "state" || this.resolution === "county") {
-        this.disablePlaces = true;
-        return of([]);
-      } else {
-        this.disablePlaces = false;
-      }
 
-      if (this.shareService.getIsShare()) {
-        const shareKey = this.shareService.getShareKey();
-        const url = `${environment.apiUrl}/share-place?activity=${activityId}&type=${type}&feature=${featureId}&project=${this.currentProjectId}&key=${shareKey}`;
-        return this.http.get<Place[]>(url);
-      } else {
-        const url = `${environment.apiUrl}/places/details?activity=${activityId}&type=${type}&feature=${featureId}&project=${this.currentProjectId}`;
-        return this.http.get<Place[]>(url);
-      }
+  setMapType(mapType: string) {
+    this.currentMapType = mapType;
+  }
+
+  getMapType(): string | null {
+    return this.currentMapType;
+  }
+
+  setHexagonView(hexagonView: boolean) {
+    this.hexagonView = hexagonView;
+  }
+
+  setSelectedFeature(feature: MapGeoJSONFeature, resolution: string, coordinates: number[]) {
+    this.selectedFeature = feature;
+    this.featureId = feature['properties']['id'];
+    this.coordinates = coordinates;
+    this.resolution = resolution;
+    this.show(); // Automatisch das Analyse-Panel öffnen, wenn ein Feature ausgewählt wurde
+  }
+
+  getCurrentState() {
+    return {
+      projectId: this.currentProjectId,
+      mapType: this.currentMapType,
+      feature: this.selectedFeature
+    };
+  }
+  getPlaces(activityId: number): Observable<Place[]> {
+    let type = this.resolution;
+    const featureId = this.featureId;
+
+    if (this.hexagonView) {
+      type = "hexagon"
     }
 
-    getShape(featureId: string, type: string) {
-      const url = `${environment.apiUrl}/shapes?feature=${featureId}&type=${type}`;
-      return this.http.get<any>(url);
+    if (this.currentMapType === "state" || this.resolution === "county") {
+      this.disablePlaces = true;
+      return of([]);
+    } else {
+      this.disablePlaces = false;
+    }
+
+    if (this.shareService.getIsShare()) {
+      const shareKey = this.shareService.getShareKey();
+      const url = `${environment.apiUrl}/share-place?activity=${activityId}&type=${type}&feature=${featureId}&project=${this.currentProjectId}&key=${shareKey}`;
+      return this.http.get<Place[]>(url);
+    } else {
+      const url = `${environment.apiUrl}/places/details?activity=${activityId}&type=${type}&feature=${featureId}&project=${this.currentProjectId}`;
+      return this.http.get<Place[]>(url);
     }
   }
+
+  getShape(featureId: string, type: string) {
+    const url = `${environment.apiUrl}/shapes?feature=${featureId}&type=${type}`;
+    return this.http.get<any>(url);
+  }
+
+  getProfiles() {
+    const url = `${environment.apiUrl}/analyze/profiles?featureId=${this.featureId}&mapType=${this.currentMapType}&project=${this.currentProjectId}`;
+    return this.http.get<Profile[]>(url);
+  }
+
+  getPersonas() {
+    const url = `${environment.apiUrl}/analyze/personas?featureId=${this.featureId}&mapType=${this.currentMapType}&project=${this.currentProjectId}`;
+    return this.http.get<Persona[]>(url);
+  }
+
+  getCategories() {
+    const url = `${environment.apiUrl}/analyze/categories?featureId=${this.featureId}&mapType=${this.currentMapType}&project=${this.currentProjectId}`;
+    return this.http.get<Category[]>(url);
+  }
+
+  getActivities(categoryId: number) {
+    const url = `${environment.apiUrl}/analyze/activities?featureId=${this.featureId}&mapType=${this.currentMapType}&project=${this.currentProjectId}&categoryId=${categoryId}`;
+    return this.http.get<Activity[]>(url);
+  }
+}
