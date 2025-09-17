@@ -121,19 +121,34 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
               this.loading = true;
               this.analyzeService.getProfiles().subscribe({
                 next: (profiles) => {
-                  this.profiles = profiles;
+                  this.profiles = profiles || [];
+                  this.initializeChartData();
+                },
+                error: (error) => {
+                  console.error('Error loading profiles:', error);
+                  this.profiles = [];
                   this.initializeChartData();
                 }
               });
               this.analyzeService.getPersonas().subscribe({
                 next: (personas) => {
-                  this.personas = personas;
+                  this.personas = personas || [];
+                  this.initializeChartData();
+                },
+                error: (error) => {
+                  console.error('Error loading personas:', error);
+                  this.personas = [];
                   this.initializeChartData();
                 }
               });
               this.analyzeService.getCategories().subscribe({
                 next: (categories) => {
-                  this.categories = categories;
+                  this.categories = categories || [];
+                  this.initializeChartData();
+                },
+                error: (error) => {
+                  console.error('Error loading categories:', error);
+                  this.categories = [];
                   this.initializeChartData();
                 }
               });
@@ -291,7 +306,22 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   };
 
   private initializeActivitiesChart(): void {
-    if (!this.categories || this.categories.length === 0) return;
+    if (!this.categories || this.categories.length === 0) {
+      // Set empty chart data when no categories
+      this.activitiesChartData = {
+        labels: [],
+        datasets: [{
+          label: 'Aktivitäten',
+          data: [],
+          backgroundColor: [],
+          borderColor: [],
+          borderWidth: 1,
+          yAxisID: 'y',
+          barPercentage: 0.8
+        }]
+      };
+      return;
+    }
 
     // Sort categories based on current sort type
     const sortedData = [...this.categories].sort((a, b) => {
@@ -382,7 +412,21 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private initializeSubActivitiesChart(categoryId?: number): void {
-    if (!categoryId) return;
+    if (!categoryId) {
+      this.subactivitiesChartData = {
+        labels: [],
+        datasets: [{
+          label: 'Subaktivitäten',
+          data: [],
+          backgroundColor: [],
+          borderColor: [],
+          borderWidth: 1,
+          yAxisID: 'y',
+          barPercentage: 0.8
+        }]
+      };
+      return;
+    }
 
     // Get activities for the selected category
     this.analyzeService.getActivities(categoryId).subscribe({
@@ -409,7 +453,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         // Normalize weights to percentages
         const rawWeights = sortedActivities.map(item => item.weight);
         const totalWeight = rawWeights.reduce((sum, weight) => sum + weight, 0);
-        const normalizedWeights = rawWeights.map(weight => (weight / totalWeight) * 100);
+        const normalizedWeights = totalWeight > 0 ? rawWeights.map(weight => (weight / totalWeight) * 100) : [];
 
         // Extract data
         const labels = sortedActivities.map(item => item.name);
@@ -594,6 +638,32 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     datasetLabel: string,
     isZoomed: boolean = false
   ): { chartData: any, chartOptions: any } {
+    // Handle empty arrays
+    if (!data || data.length === 0 || !labels || labels.length === 0) {
+      return {
+        chartData: {
+          labels: [],
+          datasets: [{
+            label: datasetLabel,
+            data: [],
+            backgroundColor: 'rgba(0, 0, 0, 0.0)',
+            borderColor: "#ffffff",
+            borderWidth: 3,
+            pointBackgroundColor: [],
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: [],
+            pointHoverBorderWidth: 3,
+            fill: false
+          }]
+        },
+        chartOptions: this.radarChartOptions
+      };
+    }
+
     const borderColors = data.map(value => this.getColorForValue(value * 100));
 
     // Basis-Datensatz für die Hintergrundfarben (inverted)
@@ -793,6 +863,26 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   private initializePersonaChart(): void {
     if (!this.personas || this.personas.length === 0) {
       this.showPersona = false;
+      // Set empty chart data when no personas
+      this.personaChartData = {
+        labels: [],
+        datasets: [{
+          label: 'Persona-Werte',
+          data: [],
+          backgroundColor: 'rgba(0, 0, 0, 0.0)',
+          borderColor: "#ffffff",
+          borderWidth: 3,
+          pointBackgroundColor: [],
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: [],
+          pointHoverBorderWidth: 3,
+          fill: false
+        }]
+      };
       return;
     }
 
@@ -812,7 +902,15 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private initializeProfilesChart(): void {
-    if (!this.profiles || this.profiles.length === 0) return;
+    if (!this.profiles || this.profiles.length === 0) {
+      // Set empty chart data when no profiles
+      this.profilesChartData = {
+        labels: [],
+        datasets: []
+      };
+      this.profileLegendData = [];
+      return;
+    }
 
     // Sort profiles by their index scores (descending)
     const sortedProfiles = [...this.profiles].sort((a, b) => b.index - a.index);
@@ -827,6 +925,16 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private createProfilesComboChart(profiles: any[], profileMap: Map<number, string>, scoreNames: string[]): void {
+    // Handle empty profiles array
+    if (!profiles || profiles.length === 0) {
+      this.profilesChartData = {
+        labels: [],
+        datasets: []
+      };
+      this.profileLegendData = [];
+      return;
+    }
+
     // Define the 18 grade levels from A+ to F-
     const gradeLevels = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'E+', 'E', 'E-', 'F+', 'F', 'F-'];
 
@@ -1110,6 +1218,15 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       next: (activities) => {
         if (!activities || activities.length === 0) {
           this.showSubactivitiesPie = false;
+          this.subactivitiesPieData = {
+            labels: [],
+            datasets: [{
+              data: [],
+              backgroundColor: [],
+              borderColor: '#ffffff',
+              borderWidth: 2,
+            }]
+          };
           return;
         }
 
@@ -1119,7 +1236,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         // Normalize weights to percentages
         const rawWeights = sortedActivities.map(item => item.weight);
         const totalWeight = rawWeights.reduce((sum, weight) => sum + weight, 0);
-        const normalizedWeights = rawWeights.map(weight => (weight / totalWeight) * 100);
+        const normalizedWeights = totalWeight > 0 ? rawWeights.map(weight => (weight / totalWeight) * 100) : [];
 
         // Create labels with activity name
         const labels = sortedActivities.map(item => item.name);
@@ -1532,6 +1649,11 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     this.placesLayer.getSource()?.clear();
     this.centerLayer.getSource()?.clear();
 
+    // Handle empty places array
+    if (!places || places.length === 0) {
+      return;
+    }
+
     // Add new features to the places layer
     places.forEach(place => {
       const feature = new Feature({
@@ -1547,8 +1669,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private zoomToPlaces(places: Place[]) {
-    if (places.length === 0) {
+    if (!places || places.length === 0) {
       this.noPlaces = true;
+      return;
     } else {
       this.noPlaces = false;
     }

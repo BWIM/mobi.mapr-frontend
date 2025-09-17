@@ -316,7 +316,8 @@
     },
     "LOADING": {
       "HINT": "Hinweis: Umso mehr Fläche, die angeklickte Verwaltungseinheit hat, desto länger dauert der Ladevorgang!"
-    }
+    },
+    "POPULATION_WEIGHTING_HINT": "Hinweis: Die angezeigten Werte sind immer nach Bevölkerung gewichtet, nicht nach Fläche"
   },
   "EXPORT": {
     "IS_EXPORTING": "Export läuft...",
