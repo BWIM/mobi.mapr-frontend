@@ -312,7 +312,8 @@
     },
     "LOADING": {
       "HINT": "Ufbasse! Je größer d'Flächi isch, wo de druff klickt hesch, desto länger brucht's zum Lade!"
-    }
+    },
+    "POPULATION_WEIGHTING_HINT": "Ufbasse: D'Wert send immer noch Bevölkerig gwichtet, nit noch Flächi"
   },
   "STATISTICS": {
     "TITLE": "Schtatistige",

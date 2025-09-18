@@ -1,12 +1,12 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { MapV2Service } from './map-v2.service';
 import { Subscription } from 'rxjs';
-import { LngLatBounds, Map, Popup,  NavigationControl, ScaleControl } from 'maplibre-gl';
+import { LngLatBounds, Map, Popup, NavigationControl, ScaleControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { LoadingService } from '../services/loading.service';
 import { SearchOverlayComponent } from './search-overlay/search-overlay.component';
-import { LegendComponent } from '../legend/legend.component';	
+import { LegendComponent } from '../legend/legend.component';
 import { Project } from '../projects/project.interface';
 import { IndexService } from '../services/index.service';
 
@@ -36,7 +36,12 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   projectName: string | null = null;
   comparisonProject: Project | null = null;
   currentProject: string | null = null;
+
+  private dragThrottleTimeout: any = null;
+  private isDragging: boolean = false;
+  private originalOpacity: any = null;
   constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService, private indexService: IndexService) {
+
     this.subscription = this.mapService.mapStyle$.subscribe(style => {
       this.mapStyle = style;
       if (this.map) {
@@ -79,21 +84,28 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
 
   ngAfterViewInit() {
     if (this.mapContainer) {
-      this.map = new Map({
+      // Mobile-optimized map configuration
+      const mapOptions: any = {
         container: this.mapContainer.nativeElement,
         style: this.mapStyle,
         center: this.center,
         zoom: this.zoom,
         dragRotate: false,
-        touchZoomRotate: false
-      });
+        // Mobile optimizations
+        renderWorldCopies: false,
+        maxTileCacheSize: 100,
+        localIdeographFontFamily: false
+      };
+
+
+      this.map = new Map(mapOptions);
       this.mapService.setMap(this.map);
 
       // Add navigation control
-      this.map.addControl(new NavigationControl({showCompass: false}), 'top-left');
+      this.map.addControl(new NavigationControl({ showCompass: false }), 'top-left');
       this.map.addControl(new ScaleControl(), 'bottom-left');
       this.map.dragRotate.disable();
-      this.map.touchZoomRotate.disable();
+      this.map.touchZoomRotate.disableRotation();
 
       // Setup map events (no projectId for main map - it uses the service subscription)
       this.setupMapEvents(this.map);
@@ -101,33 +113,37 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private setupMapEvents(map: Map, projectId?: string): void {
-    // Add panning event listeners to adjust layer opacity
+    // Store original opacity for restoration
+    if (!this.originalOpacity && map?.getLayer('geodata-fill')) {
+      this.originalOpacity = map.getPaintProperty('geodata-fill', 'fill-opacity');
+    }
+
+    // Mobile-optimized panning event listeners
     map.on('dragstart', () => {
       if (this.mapService.getMapType() === 'hexagon') {
         return;
       }
-      if (map?.getLayer('geodata-fill')) {
-        const currentOpacity = map.getPaintProperty('geodata-fill', 'fill-opacity');
-        if (Array.isArray(currentOpacity)) {
-          // Create a new expression that multiplies the result by 0.5
-          const newOpacity = ['*', currentOpacity, 0.25];
-          map.setPaintProperty('geodata-fill', 'fill-opacity', newOpacity);
-        }
+
+
+      if (!this.isDragging) {
+        this.isDragging = true;
+        this.handleDragStart(map);
       }
     });
+
+
 
     map.on('dragend', () => {
       if (this.mapService.getMapType() === 'hexagon') {
         return;
       }
-      if (map?.getLayer('geodata-fill')) {
-        const currentOpacity = map.getPaintProperty('geodata-fill', 'fill-opacity');
-        if (Array.isArray(currentOpacity)) {
-          // Create a new expression that multiplies the result by 2
-          const newOpacity = ['*', currentOpacity, 4];
-          map.setPaintProperty('geodata-fill', 'fill-opacity', newOpacity);
-        }
+
+      if (this.dragThrottleTimeout) {
+        clearTimeout(this.dragThrottleTimeout);
       }
+
+      this.isDragging = false;
+      this.handleDragEnd(map);
     });
 
     // Create popup for this map instance
@@ -138,7 +154,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
 
     map.on('zoomend', () => {
       this.mapService.updateZoom(map.getZoom());
-      
+
       // If this is a compare map (projectId is provided), update its style manually
       if (projectId) {
         const style = this.mapService['getProjectMapStyle'](projectId);
@@ -196,6 +212,31 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  private handleDragStart(map: Map): void {
+    if (map?.getLayer('geodata-fill')) {
+      // Store original opacity if not already stored
+      if (!this.originalOpacity) {
+        this.originalOpacity = map.getPaintProperty('geodata-fill', 'fill-opacity');
+      }
+
+      // Reduce opacity for better performance during drag
+      const reducedOpacity = ['*', this.originalOpacity, 0.3];
+      map.setPaintProperty('geodata-fill', 'fill-opacity', reducedOpacity);
+    }
+  }
+
+  private handleDragUpdate(map: Map): void {
+    // On mobile, we can skip frequent updates during drag for better performance
+    // The opacity is already reduced in handleDragStart
+  }
+
+  private handleDragEnd(map: Map): void {
+    if (map?.getLayer('geodata-fill') && this.originalOpacity) {
+      // Restore original opacity
+      map.setPaintProperty('geodata-fill', 'fill-opacity', this.originalOpacity);
+    }
+  }
+
   ngOnDestroy() {
     if (this.map) {
       this.map.remove();
@@ -212,13 +253,16 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     if (this.stopComparisonSubscription) {
       this.stopComparisonSubscription.unsubscribe();
     }
+    if (this.dragThrottleTimeout) {
+      clearTimeout(this.dragThrottleTimeout);
+    }
   }
 
   setProject(projectId: string) {
     this.mapService.setProject(projectId);
   }
 
-  onLocationSelected(location: {lng: number, lat: number}) {
+  onLocationSelected(location: { lng: number, lat: number }) {
     if (this.map) {
       this.map.flyTo({
         center: [location.lng, location.lat],
@@ -236,22 +280,22 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
 
   private setupCompareMap() {
     this.isComparison = true;
-    
+
     // Get bounds for proper zoom calculation
     const bounds = this.mapService.getDataBounds();
     let initialCenter = this.center;
     let initialZoom = this.zoom;
-    
+
     if (bounds) {
       const mapBounds = new LngLatBounds(
         [bounds.minLng, bounds.minLat],
         [bounds.maxLng, bounds.maxLat]
       );
-      
+
       // Calculate center and zoom based on bounds
       const center = mapBounds.getCenter();
       initialCenter = [center.lng, center.lat];
-      
+
       // Calculate appropriate zoom level for the bounds
       const latDiff = bounds.maxLat - bounds.minLat;
       const lngDiff = bounds.maxLng - bounds.minLng;
@@ -268,15 +312,14 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       style: this.mapStyle,
       center: initialCenter,
       zoom: initialZoom,
-      dragRotate: false,
-      touchZoomRotate: false
+      dragRotate: false
     });
 
     // Add navigation controls to before map
-    beforeMap.addControl(new NavigationControl({showCompass: false}), 'top-left');
+    beforeMap.addControl(new NavigationControl({ showCompass: false }), 'top-left');
     beforeMap.addControl(new ScaleControl(), 'bottom-left');
     beforeMap.dragRotate.disable();
-    beforeMap.touchZoomRotate.disable();
+    beforeMap.touchZoomRotate.disableRotation();
 
     // Get the correct style for after map based on current zoom
     let afterStyle = this.mapStyle;
@@ -289,20 +332,19 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       style: afterStyle,
       center: initialCenter,
       zoom: initialZoom,
-      dragRotate: false,
-      touchZoomRotate: false
+      dragRotate: false
     });
 
     // Add navigation controls to after map
-    afterMap.addControl(new NavigationControl({showCompass: false}), 'top-left');
+    afterMap.addControl(new NavigationControl({ showCompass: false }), 'top-left');
     afterMap.addControl(new ScaleControl(), 'bottom-left');
     afterMap.dragRotate.disable();
-    afterMap.touchZoomRotate.disable();
+    afterMap.touchZoomRotate.disableRotation();
 
     // Wait for both maps to load, then zoom to bounds and setup events
     let mapsLoaded = 0;
     const totalMaps = 2;
-    
+
     const setupMaps = () => {
       mapsLoaded++;
       if (mapsLoaded === totalMaps) {
@@ -312,18 +354,18 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
             [bounds.minLng, bounds.minLat],
             [bounds.maxLng, bounds.maxLat]
           );
-          
+
           beforeMap.fitBounds(mapBounds, {
             padding: 50,
             duration: 0 // No animation for comparison setup
           });
-          
+
           afterMap.fitBounds(mapBounds, {
             padding: 50,
             duration: 0 // No animation for comparison setup
           });
         }
-        
+
         // Setup events after zoom is complete
         setTimeout(() => {
           this.setupMapEvents(beforeMap, this.mapService.getCurrentProject() || undefined);

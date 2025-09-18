@@ -1,10 +1,8 @@
 import { Component, OnDestroy, ChangeDetectorRef, AfterViewInit, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { SharedModule } from '../shared/shared.module';
 import { Subscription } from 'rxjs';
-import { ProjectsService } from '../projects/projects.service';
 import { AnalyzeService } from './analyze.service';
-import { Place, Properties } from './analyze.interface';
-import { ProjectDetails } from '../projects/project.interface';
+import { Category, Activity, Place, Properties, Profile, Persona } from './analyze.interface';
 import { MapGeoJSONFeature } from 'maplibre-gl';
 import { UIChart } from 'primeng/chart';
 import { MessageService } from 'primeng/api';
@@ -34,22 +32,21 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   visible: boolean = false;
   loading: boolean = false;
   private subscriptions: Subscription[] = [];
-  projectDetails: ProjectDetails | undefined;
+
+  profiles: Profile[] = [];
+  personas: Persona[] = [];
+  categories: Category[] = [];
+
   feature: MapGeoJSONFeature | undefined;
   properties: Properties | undefined;
   averageType: 'mean' | 'median' = 'mean';
   populationArea: 'pop' | 'area' = 'pop';
   currentScore: number = 0;
   currentScoreColor: string = '';
-  weightingType: 'population' | 'area' = 'population';
-  isAreaWeighting: boolean = false;
   sortBy: 'score' | 'weight' = 'weight';
   showPersona: boolean = true;
   activeTab: string = 'activities';
   personaChartZoomed: boolean = false;
-  showActivityOverlay: boolean = false;
-  selectedCategory: number | null = null;
-  selectedCategoryName: string = '';
   showSubactivitiesMap: boolean = false;
   hoveredSubactivityName: string = '';
   mapLoaded: boolean = false;
@@ -104,33 +101,8 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     return { score: this.currentScore, color: this.currentScoreColor };
   }
 
-  hasPersonaData(): boolean {
-    if (!this.projectDetails) return false;
-    if (!this.projectDetails.hexagons || this.projectDetails.hexagons.length === 0) return false;
-    return true;
-  }
-
-  hasActivityData(): boolean {
-    if (!this.projectDetails) return false;
-    if (!this.projectDetails.hexagons || this.projectDetails.hexagons.length === 0) return false;
-    return true;
-  }
-
-  hasModeData(): boolean {
-    return this.projectDetails?.hexagons?.some(hexagon =>
-      hexagon.profile_scores && hexagon.profile_scores.length > 0
-    ) || false;
-  }
-
-  hasProfileData(): boolean {
-    return this.projectDetails?.hexagons?.some(hexagon =>
-      hexagon.profile_scores && hexagon.profile_scores.length > 0
-    ) || false;
-  }
-
   constructor(
     private analyzeService: AnalyzeService,
-    private projectsService: ProjectsService,
     private cdr: ChangeDetectorRef,
     private messageService: MessageService,
     private indexService: IndexService
@@ -147,29 +119,39 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
             }
             if (state.projectId && state.mapType && state.feature) {
               this.loading = true;
-              this.projectsService.getProjectDetails(state.projectId, state.mapType, state.feature.properties['id'])
-                .subscribe({
-                  next: (details) => {
-                    if (details.error) {
-                      this.messageService.add({
-                        severity: 'error',
-                        summary: 'Error',
-                        detail: details.error,
-                        life: 5000
-                      });
-                    }
-                    this.projectDetails = details;
-                    this.initializeChartData();
-                    setTimeout(() => {
-                      this.resizeCharts();
-                    }, 100);
-
-                  },
-                  error: (error) => {
-                    console.error('Error loading project details:', error);
-                    this.loading = false;
-                  }
-                });
+              this.analyzeService.getProfiles().subscribe({
+                next: (profiles) => {
+                  this.profiles = profiles || [];
+                  this.initializeChartData();
+                },
+                error: (error) => {
+                  console.error('Error loading profiles:', error);
+                  this.profiles = [];
+                  this.initializeChartData();
+                }
+              });
+              this.analyzeService.getPersonas().subscribe({
+                next: (personas) => {
+                  this.personas = personas || [];
+                  this.initializeChartData();
+                },
+                error: (error) => {
+                  console.error('Error loading personas:', error);
+                  this.personas = [];
+                  this.initializeChartData();
+                }
+              });
+              this.analyzeService.getCategories().subscribe({
+                next: (categories) => {
+                  this.categories = categories || [];
+                  this.initializeChartData();
+                },
+                error: (error) => {
+                  console.error('Error loading categories:', error);
+                  this.categories = [];
+                  this.initializeChartData();
+                }
+              });
             } else {
               console.warn('Nicht alle erforderlichen Parameter sind verfügbar:', state);
             }
@@ -324,54 +306,42 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   };
 
   private initializeActivitiesChart(): void {
-    if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0) return;
+    if (!this.categories || this.categories.length === 0) {
+      // Set empty chart data when no categories
+      this.activitiesChartData = {
+        labels: [],
+        datasets: [{
+          label: 'Aktivitäten',
+          data: [],
+          backgroundColor: [],
+          borderColor: [],
+          borderWidth: 1,
+          yAxisID: 'y',
+          barPercentage: 0.8
+        }]
+      };
+      return;
+    }
 
-    // Calculate weighted averages for each category
-    const categoryScores = new Map<number, { totalWeightedScore: number, totalWeight: number, id: number }>();
-
-    // Sum up weighted scores and weights for each category
-    this.projectDetails.hexagons.forEach(hexagon => {
-      const weight = this.weightingType === 'population' ? hexagon.population : 1;
-      hexagon.category_scores.forEach(categoryScore => {
-        const current = categoryScores.get(categoryScore.category) || { totalWeightedScore: 0, totalWeight: 0, id: categoryScore.category };
-        current.totalWeightedScore += categoryScore.score * weight;
-        current.totalWeight += weight;
-        categoryScores.set(categoryScore.category, current);
-      });
-    });
-
-    // Calculate final weighted averages
-    const weightedCategoryScores = Array.from(categoryScores.entries()).map(([category, data]) => ({
-      category,
-      score: data.totalWeightedScore / data.totalWeight
-    }));
-
-    // Get category names and weights from formatted_categories
-    const categoryMap = new Map(this.projectDetails.categories.map(cat => [cat.id, { name: cat.name, weight: cat.weight }]));
-
-    // Create array with all necessary data
-    const categoryData = weightedCategoryScores
-      .map(category => ({
-        name: categoryMap.get(category.category)?.name || `${category.category}`,
-        score: category.score,
-        weight: categoryMap.get(category.category)?.weight || 1
-      }));
-
-    // Sort based on current sort type
-    const sortedData = [...categoryData].sort((a, b) => {
+    // Sort categories based on current sort type
+    const sortedData = [...this.categories].sort((a, b) => {
       if (this.sortBy === 'weight') {
         return b.weight - a.weight;  // Sort by weight in descending order
       } else {
-        return b.score - a.score;    // Sort by score in descending order
+        return b.index - a.index;    // Sort by score in descending order
       }
     });
 
+    let labels: string[] = [];
     // Extract sorted arrays
-    const labels = sortedData.map(item => item.name);
-    const scores = sortedData.map(item => item.score * 100);
+    if (localStorage.getItem('mobi.mapr.language') === 'en') {
+      labels = sortedData.map(item => item.name_en);
+    } else {
+      labels = sortedData.map(item => item.name_de);
+    }
+    const scores = sortedData.map(item => item.index * 100);
     const weights = sortedData.map(item => item.weight);
-    const scoreNames = sortedData.map(item => this.indexService.getIndexName(item.score));
-
+    const scoreNames = sortedData.map(item => this.indexService.getIndexName(item.index));
 
     const scoreColors = scores.map(value => this.getColorForValue(value));
 
@@ -447,9 +417,6 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private initializeSubActivitiesChart(categoryId?: number): void {
-    if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0) return;
-
-    // If no categoryId is provided, don't show any data
     if (!categoryId) {
       this.subactivitiesChartData = {
         labels: [],
@@ -466,96 +433,76 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       return;
     }
 
-    // Calculate weighted averages for subactivities of the specific category
-    const subactivityScores = new Map<number, {
-      name: string,
-      id: number,
-      totalWeightedScore: number,
-      totalWeight: number,
-      totalWeightedWeight: number
-    }>();
-
-    // Sum up weighted scores and weights for each subactivity in the specific category
-    this.projectDetails.hexagons.forEach(hexagon => {
-      const weight = this.weightingType === 'population' ? hexagon.population : 1;
-
-      // Find the category score for this specific category
-      const categoryScore = hexagon.category_scores.find(cs => cs.category === categoryId);
-      if (categoryScore && categoryScore.activities) {
-        categoryScore.activities.forEach(activity => {
-          const current = subactivityScores.get(activity.activity) || {
-            name: activity.activity_name,
-            id: activity.activity,
-            totalWeightedScore: 0,
-            totalWeight: 0,
-            totalWeightedWeight: 0
+    // Get activities for the selected category
+    this.analyzeService.getActivities(categoryId).subscribe({
+      next: (activities) => {
+        if (!activities || activities.length === 0) {
+          this.subactivitiesChartData = {
+            labels: [],
+            datasets: [{
+              label: 'Subaktivitäten',
+              data: [],
+              backgroundColor: [],
+              borderColor: [],
+              borderWidth: 1,
+              yAxisID: 'y',
+              barPercentage: 0.8
+            }]
           };
-          current.totalWeightedScore += activity.score * weight;
-          current.totalWeightedWeight += activity.weight * weight;
-          current.totalWeight += weight;
-          subactivityScores.set(activity.activity, current);
-        });
+          return;
+        }
+
+        // Sort activities by weight descending
+        const sortedActivities = [...activities].sort((a, b) => b.weight - a.weight);
+
+        // Normalize weights to percentages
+        const rawWeights = sortedActivities.map(item => item.weight);
+        const totalWeight = rawWeights.reduce((sum, weight) => sum + weight, 0);
+        const normalizedWeights = totalWeight > 0 ? rawWeights.map(weight => (weight / totalWeight) * 100) : [];
+
+        // Extract data
+        let labels: string[] = [];
+        if (localStorage.getItem('mobi.mapr.language') === 'en') {
+          labels = sortedActivities.map(item => item.name_en);
+        } else {
+          labels = sortedActivities.map(item => item.name_de);
+        }
+        const scores = sortedActivities.map(item => item.index * 100);
+        const scoreNames = sortedActivities.map(item => this.indexService.getIndexName(item.index));
+        const scoreColors = scores.map(value => this.getColorForValue(value));
+
+        // Create chart data
+        this.subactivitiesChartData = {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Subaktivitäten',
+              data: normalizedWeights,
+              backgroundColor: scoreColors,
+              borderColor: scoreColors,
+              borderWidth: 1,
+              yAxisID: 'y',
+              barPercentage: 0.8
+            }
+          ]
+        };
+      },
+      error: (error) => {
+        console.error('Error loading activities:', error);
+        this.subactivitiesChartData = {
+          labels: [],
+          datasets: [{
+            label: 'Subaktivitäten',
+            data: [],
+            backgroundColor: [],
+            borderColor: [],
+            borderWidth: 1,
+            yAxisID: 'y',
+            barPercentage: 0.8
+          }]
+        };
       }
     });
-
-    // Calculate final weighted averages
-    const weightedSubactivityScores = Array.from(subactivityScores.entries())
-      .map(([activityId, data]) => ({
-        id: activityId,
-        name: data.name,
-        score: data.totalWeightedScore / data.totalWeight,
-        weight: data.totalWeightedWeight / data.totalWeight
-      }))
-      .sort((a, b) => b.weight - a.weight); // Sort by weight descending
-
-    if (weightedSubactivityScores.length === 0) {
-      this.subactivitiesChartData = {
-        labels: [],
-        datasets: [{
-          label: 'Subaktivitäten',
-          data: [],
-          backgroundColor: [],
-          borderColor: [],
-          borderWidth: 1,
-          yAxisID: 'y',
-          barPercentage: 0.8
-        }]
-      };
-      return;
-    }
-
-    // Normalize weights to percentages
-    const rawWeights = weightedSubactivityScores.map(item => item.weight);
-    const totalWeight = rawWeights.reduce((sum, weight) => sum + weight, 0);
-    const normalizedWeights = rawWeights.map(weight => (weight / totalWeight) * 100);
-
-    // Extract sorted arrays
-    const scores = weightedSubactivityScores.map(item => item.score);
-    const weights = normalizedWeights;
-
-    // Create labels with activity name and percentage
-    const labelsWithPercentages = weightedSubactivityScores.map((item, index) =>
-      `${item.name}`
-    );
-
-    const scoreNames = weightedSubactivityScores.map(item => this.indexService.getIndexName(item.score));
-    const scoreColors = scores.map(value => this.getColorForValue(value));
-
-    // Create chart data
-    this.subactivitiesChartData = {
-      labels: labelsWithPercentages,
-      datasets: [
-        {
-          label: 'Subaktivitäten',
-          data: weights,
-          backgroundColor: scoreColors,
-          borderColor: scoreColors,
-          borderWidth: 1,
-          yAxisID: 'y',
-          barPercentage: 0.8
-        }
-      ]
-    };
 
     this.subBarChartOptions = {
       indexAxis: 'x',
@@ -568,9 +515,10 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           callbacks: {
             label: (context: any) => {
               const index = context.dataIndex;
+              const dataset = context.dataset;
+              const data = dataset.data;
               return [
-                `Score: ${scoreNames[index]}`,
-                `Weight: ${weights[index].toFixed(1)}%`
+                `Weight: ${data[index].toFixed(1)}%`
               ];
             }
           }
@@ -619,7 +567,12 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     if (index !== undefined && index >= 0) {
       const categoryData = this.activitiesChartData.labels[index];
       // Find the category ID from the category name
-      const category = this.projectDetails?.categories.find(cat => cat.name === categoryData);
+      let category: Category | undefined;
+      if (localStorage.getItem('mobi.mapr.language') === 'en') {
+        category = this.categories.find(cat => cat.name_en === categoryData);
+      } else {
+        category = this.categories.find(cat => cat.name_de === categoryData);
+      }
       if (!category) return;
 
       this.hoveredCategoryId = category.id;
@@ -700,6 +653,32 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     datasetLabel: string,
     isZoomed: boolean = false
   ): { chartData: any, chartOptions: any } {
+    // Handle empty arrays
+    if (!data || data.length === 0 || !labels || labels.length === 0) {
+      return {
+        chartData: {
+          labels: [],
+          datasets: [{
+            label: datasetLabel,
+            data: [],
+            backgroundColor: 'rgba(0, 0, 0, 0.0)',
+            borderColor: "#ffffff",
+            borderWidth: 3,
+            pointBackgroundColor: [],
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: [],
+            pointHoverBorderWidth: 3,
+            fill: false
+          }]
+        },
+        chartOptions: this.radarChartOptions
+      };
+    }
+
     const borderColors = data.map(value => this.getColorForValue(value * 100));
 
     // Basis-Datensatz für die Hintergrundfarben (inverted)
@@ -897,42 +876,45 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private initializePersonaChart(): void {
-    if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0 || !this.projectDetails.personas) return;
-
-    // Calculate weighted averages for each persona
-    const personaScores = new Map<number, { totalWeightedScore: number, totalWeight: number }>();
-
-    // Sum up weighted scores and weights for each persona
-    this.projectDetails.hexagons.forEach(hexagon => {
-      const weight = this.weightingType === 'population' ? hexagon.population : 1;
-      if (hexagon.persona_scores) {
-        hexagon.persona_scores.forEach(personaScore => {
-          const current = personaScores.get(personaScore.persona) || { totalWeightedScore: 0, totalWeight: 0 };
-          current.totalWeightedScore += personaScore.score * weight;
-          current.totalWeight += weight;
-          personaScores.set(personaScore.persona, current);
-        });
-      }
-    });
-    if (personaScores.size === 0) {
+    if (!this.personas || this.personas.length === 0) {
       this.showPersona = false;
-    } else {
-      this.showPersona = true;
+      // Set empty chart data when no personas
+      this.personaChartData = {
+        labels: [],
+        datasets: [{
+          label: 'Persona-Werte',
+          data: [],
+          backgroundColor: 'rgba(0, 0, 0, 0.0)',
+          borderColor: "#ffffff",
+          borderWidth: 3,
+          pointBackgroundColor: [],
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: [],
+          pointHoverBorderWidth: 3,
+          fill: false
+        }]
+      };
+      return;
     }
-    // Calculate final weighted averages
-    const weightedPersonaScores = Array.from(personaScores.entries()).map(([persona, data]) => ({
-      persona,
-      score: data.totalWeightedScore / data.totalWeight
-    }));
 
-    // Sort personas by their weighted scores (descending)
-    const sortedPersonas = weightedPersonaScores.sort((a, b) => b.score - a.score);
+    this.showPersona = true;
 
-    // Get persona names from formatted_personas
-    const personaMap = new Map(this.projectDetails.personas.map(p => [p.id, p.name]));
-    const labels = sortedPersonas.map(persona => personaMap.get(persona.persona) || `${persona.persona}`);
-    const data = sortedPersonas.map(persona => persona.score);
-    const scoreNames = sortedPersonas.map(persona => this.indexService.getIndexName(persona.score));
+    // Sort personas by their index scores (descending)
+    const sortedPersonas = [...this.personas].sort((a, b) => b.index - a.index);
+
+    // Extract data
+    let labels: string[] = [];
+    if (localStorage.getItem('mobi.mapr.language') === 'en') {
+      labels = sortedPersonas.map(persona => persona.name_en);
+    } else {
+      labels = sortedPersonas.map(persona => persona.name_de);
+    }
+    const data = sortedPersonas.map(persona => persona.index);
+    const scoreNames = sortedPersonas.map(persona => this.indexService.getIndexName(persona.index));
 
     const { chartData, chartOptions } = this.createRadarChartData(labels, data, scoreNames, 'Persona-Werte', this.personaChartZoomed);
     this.personaChartData = chartData;
@@ -940,48 +922,48 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private initializeProfilesChart(): void {
-    if (!this.projectDetails?.hexagons || this.projectDetails.hexagons.length === 0 || !this.projectDetails.profiles) return;
-
-    // Calculate weighted averages for each profile
-    const profileScores = new Map<number, { totalWeightedScore: number, totalWeight: number }>();
-
-    // Sum up weighted scores and weights for each profile
-    this.projectDetails.hexagons.forEach(hexagon => {
-      const weight = this.weightingType === 'population' ? hexagon.population : 1;
-      if (hexagon.profile_scores) {
-        hexagon.profile_scores.forEach(profileScore => {
-          const current = profileScores.get(profileScore.profile) || { totalWeightedScore: 0, totalWeight: 0 };
-          current.totalWeightedScore += profileScore.score * weight;
-          current.totalWeight += weight;
-          profileScores.set(profileScore.profile, current);
-        });
-      }
-    });
-
-    if (profileScores.size === 0) {
+    if (!this.profiles || this.profiles.length === 0) {
+      // Set empty chart data when no profiles
+      this.profilesChartData = {
+        labels: [],
+        datasets: []
+      };
+      this.profileLegendData = [];
       return;
     }
 
-    // Calculate final weighted averages
-    const weightedProfileScores = Array.from(profileScores.entries()).map(([profile, data]) => ({
-      profile,
-      score: data.totalWeightedScore / data.totalWeight
-    }));
+    // Sort profiles by their index scores (descending)
+    const sortedProfiles = [...this.profiles].sort((a, b) => b.index - a.index);
 
-    // Sort profiles by their weighted scores (descending)
-    const sortedProfiles = weightedProfileScores.sort((a, b) => b.score - a.score);
-
-    // Get profile names from formatted_profiles
-    const profileMap = new Map(this.projectDetails.profiles.map(p => [p.id, p.name]));
-    const labels = sortedProfiles.map(profile => profileMap.get(profile.profile) || `${profile.profile}`);
-    const data = sortedProfiles.map(profile => profile.score);
-    const scoreNames = sortedProfiles.map(profile => this.indexService.getIndexName(profile.score));
+    // Extract data
+    let labels: string[] = [];
+    if (localStorage.getItem('mobi.mapr.language') === 'en') {
+      labels = sortedProfiles.map(profile => profile.name_en);
+    } else {
+      labels = sortedProfiles.map(profile => profile.name_de);
+    }
+    const data = sortedProfiles.map(profile => profile.index);
+    const scoreNames = sortedProfiles.map(profile => this.indexService.getIndexName(profile.index));
 
     // Create combo chart with exponential function and horizontal bars
-    this.createProfilesComboChart(sortedProfiles, profileMap, scoreNames);
+    if (localStorage.getItem('mobi.mapr.language') === 'en') {
+      this.createProfilesComboChart(sortedProfiles, new Map(this.profiles.map(p => [p.id, p.name_en])), scoreNames);
+    } else {
+      this.createProfilesComboChart(sortedProfiles, new Map(this.profiles.map(p => [p.id, p.name_de])), scoreNames);
+    }
   }
 
   private createProfilesComboChart(profiles: any[], profileMap: Map<number, string>, scoreNames: string[]): void {
+    // Handle empty profiles array
+    if (!profiles || profiles.length === 0) {
+      this.profilesChartData = {
+        labels: [],
+        datasets: []
+      };
+      this.profileLegendData = [];
+      return;
+    }
+
     // Define the 18 grade levels from A+ to F-
     const gradeLevels = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'E+', 'E', 'E-', 'F+', 'F', 'F-'];
 
@@ -1069,25 +1051,25 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
     // Add points for each profile on the exponential line
     profiles.forEach((profile, index) => {
-      const profileName = profileMap.get(profile.profile) || `Profile ${profile.profile}`;
-      const profileColor = this.getProfileColor(profile.profile);
+      const profileName = profileMap.get(profile.id) || `Profile ${profile.id}`;
+      const profileColor = this.getProfileColor(profile.id);
 
       // Map score to x-position using inverse exponential function
       // Solve for x in the equation: profile.score = 0.2511169 * 1.122178^x
       // x = log(profile.score / 0.2511169) / log(1.122178)
       let xPosition: number;
 
-      if (profile.score <= 0) {
+      if (profile.index <= 0) {
         xPosition = 1; // Default to A+ for invalid scores
       } else {
-        xPosition = Math.log(profile.score / 0.2511169) / Math.log(1.122178);
+        xPosition = Math.log(profile.index / 0.2511169) / Math.log(1.122178);
 
         // Clamp xPosition to valid range [1, 18]
         xPosition = Math.max(1, Math.min(18, xPosition));
       }
 
       // Create the data point using the calculated xPosition and the actual profile score
-      const profilePoint = { x: xPosition, y: profile.score };
+      const profilePoint = { x: xPosition, y: profile.index };
 
       datasets.push({
         type: 'scatter',
@@ -1111,10 +1093,10 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
     // Create legend data for profiles
     this.profileLegendData = profiles.map(profile => {
-      const profileName = profileMap.get(profile.profile) || `Profile ${profile.profile}`;
+      const profileName = profileMap.get(profile.id) || `Profile ${profile.id}`;
       return {
         name: profileName,
-        color: this.getProfileColor(profile.profile)
+        color: this.getProfileColor(profile.id)
       };
     });
 
@@ -1260,76 +1242,57 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private generateSubactivitiesPieData(categoryId: number): void {
-    if (!this.projectDetails?.hexagons) return;
-
-    // Collect all activities for this category across all hexagons
-    const activityScores = new Map<number, {
-      name: string,
-      id: number,
-      totalWeightedScore: number,
-      totalWeight: number,
-      totalWeightedWeight: number
-    }>();
-
-    this.projectDetails.hexagons.forEach(hexagon => {
-      const weight = this.weightingType === 'population' ? hexagon.population : 1;
-
-      // Find the category score for this category
-      const categoryScore = hexagon.category_scores.find(cs => cs.category === categoryId);
-      if (categoryScore && categoryScore.activities) {
-        categoryScore.activities.forEach(activity => {
-          const current = activityScores.get(activity.activity) || {
-            name: activity.activity_name,
-            id: activity.activity,
-            totalWeightedScore: 0,
-            totalWeight: 0,
-            totalWeightedWeight: 0
+    // Get activities for the selected category
+    this.analyzeService.getActivities(categoryId).subscribe({
+      next: (activities) => {
+        if (!activities || activities.length === 0) {
+          this.showSubactivitiesPie = false;
+          this.subactivitiesPieData = {
+            labels: [],
+            datasets: [{
+              data: [],
+              backgroundColor: [],
+              borderColor: '#ffffff',
+              borderWidth: 2,
+            }]
           };
-          current.totalWeightedScore += activity.score * weight;
-          current.totalWeightedWeight += activity.weight * weight;
-          current.totalWeight += weight;
-          activityScores.set(activity.activity, current);
-        });
+          return;
+        }
+
+        // Sort activities by weight descending
+        const sortedActivities = [...activities].sort((a, b) => b.weight - a.weight);
+
+        // Normalize weights to percentages
+        const rawWeights = sortedActivities.map(item => item.weight);
+        const totalWeight = rawWeights.reduce((sum, weight) => sum + weight, 0);
+        const normalizedWeights = totalWeight > 0 ? rawWeights.map(weight => (weight / totalWeight) * 100) : [];
+
+        // Create labels with activity name
+        let labels: string[] = [];
+        if (localStorage.getItem('mobi.mapr.language') === 'en') {
+          labels = sortedActivities.map(item => item.name_en);
+        } else {
+          labels = sortedActivities.map(item => item.name_de);
+        }
+
+        this.subactivitiesPieData = {
+          labels: labels,
+          datasets: [{
+            data: normalizedWeights,
+            backgroundColor: sortedActivities.map(item => this.getColorForValue(item.index * 100)),
+            borderColor: '#ffffff',
+            borderWidth: 2,
+          }]
+        };
+
+        // Store the pie data with IDs for later use
+        this.subactivitiesPieData.activityIds = sortedActivities.map(item => item.id);
+      },
+      error: (error) => {
+        console.error('Error loading activities for pie chart:', error);
+        this.showSubactivitiesPie = false;
       }
     });
-
-    // Calculate weighted averages and prepare pie chart data
-    const pieData = Array.from(activityScores.entries())
-      .map(([activityId, data]) => ({
-        name: data.name,
-        id: data.id,
-        score: data.totalWeightedScore / data.totalWeight,
-        weight: data.totalWeightedWeight / data.totalWeight
-      }))
-      .sort((a, b) => b.weight - a.weight); // Sort by weight descending
-
-    if (pieData.length === 0) {
-      this.showSubactivitiesPie = false;
-      return;
-    }
-
-    // Normalize weights to percentages
-    const rawWeights = pieData.map(item => item.weight);
-    const totalWeight = rawWeights.reduce((sum, weight) => sum + weight, 0);
-    const normalizedWeights = rawWeights.map(weight => (weight / totalWeight) * 100);
-
-    // Create labels with activity name and score
-    const labels = pieData.map(item => {
-      return item.name;
-    });
-
-    this.subactivitiesPieData = {
-      labels: labels,
-      datasets: [{
-        data: normalizedWeights, // Use only normalized weights as data
-        backgroundColor: pieData.map(item => this.getColorForValue(item.score * 100)),
-        borderColor: '#ffffff',
-        borderWidth: 2,
-      }]
-    };
-
-    // Store the pie data with IDs for later use
-    this.subactivitiesPieData.activityIds = pieData.map(item => item.id);
   }
 
   ngOnDestroy() {
@@ -1348,6 +1311,46 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     this.analyzeService.hide();
   }
 
+  onDialogHide(): void {
+    this.resetScores();
+  }
+
+  private resetScores(): void {
+    // Reset all score-related data
+    this.profiles = [];
+    this.personas = [];
+    this.categories = [];
+
+    // Reset chart data
+    this.personaChartData = null;
+    this.activitiesChartData = null;
+    this.profilesChartData = null;
+    this.subactivitiesChartData = null;
+    this.subactivitiesPieData = null;
+
+    // Reset UI state
+    this.showPersona = true;
+    this.activeTab = 'activities';
+    this.personaChartZoomed = false;
+    this.showSubactivitiesMap = false;
+    this.showSubactivitiesPie = false;
+    this.hoveredSubactivityName = '';
+    this.hoveredCategoryId = null;
+    this.hoveredCategoryName = '';
+    this.mapLoaded = false;
+    this.noPlaces = false;
+    this.disablePlaces = false;
+    this.profileLegendData = [];
+
+    // Reset current score
+    this.currentScore = 0;
+    this.currentScoreColor = '';
+
+    // Reset feature and properties
+    this.feature = undefined;
+    this.properties = undefined;
+  }
+
   onDialogShow(): void {
     // Resize charts when dialog becomes visible
     setTimeout(() => {
@@ -1355,16 +1358,6 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     }, 200);
   }
 
-  onWeightingChange(event: any): void {
-    this.isAreaWeighting = event.checked;
-    this.weightingType = this.isAreaWeighting ? 'area' : 'population';
-    this.initializeChartData();
-    // Regenerate subactivities pie chart if currently showing
-    if (this.showSubactivitiesPie && this.hoveredCategoryId) {
-      this.generateSubactivitiesPieData(this.hoveredCategoryId);
-    }
-    // No need for an additional trigger here as initializeChartData already has one
-  }
 
   toggleActivitiesChartType(): void {
     this.initializeActivitiesChart();
@@ -1563,7 +1556,8 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         layers: [baseLayer, this.shapeLayer, this.placesLayer, this.centerLayer],
         view: new View({
           center: fromLonLat([49.320099, 9.2156505]),
-          zoom: 10
+          zoom: 10,
+          enableRotation: false
         }),
         overlays: [this.tooltipOverlay]
       });
@@ -1689,6 +1683,11 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     this.placesLayer.getSource()?.clear();
     this.centerLayer.getSource()?.clear();
 
+    // Handle empty places array
+    if (!places || places.length === 0) {
+      return;
+    }
+
     // Add new features to the places layer
     places.forEach(place => {
       const feature = new Feature({
@@ -1704,8 +1703,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private zoomToPlaces(places: Place[]) {
-    if (places.length === 0) {
+    if (!places || places.length === 0) {
       this.noPlaces = true;
+      return;
     } else {
       this.noPlaces = false;
     }
@@ -1725,5 +1725,40 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const allCoordinates = centerCoordinate
       ? [...placeCoordinates, centerCoordinate]
       : placeCoordinates;
+
+    if (allCoordinates.length > 0) {
+      // Calculate the extent that includes all coordinates
+      let extent: [number, number, number, number] | null = null;
+
+      for (const coord of allCoordinates) {
+        if (!extent) {
+          extent = [coord[0], coord[1], coord[0], coord[1]];
+        } else {
+          extent = [
+            Math.min(extent[0], coord[0]),
+            Math.min(extent[1], coord[1]),
+            Math.max(extent[2], coord[0]),
+            Math.max(extent[3], coord[1])
+          ];
+        }
+      }
+
+      if (extent) {
+        // Add some padding to the extent
+        const padding = 0.01; // Adjust this value to control the padding
+        const paddedExtent: [number, number, number, number] = [
+          extent[0] - padding,
+          extent[1] - padding,
+          extent[2] + padding,
+          extent[3] + padding
+        ];
+
+        // Fit the map view to the extent
+        this.map.getView().fit(paddedExtent, {
+          duration: 1000, // Animation duration in milliseconds
+          padding: [20, 20, 20, 20] // Additional padding in pixels
+        });
+      }
+    }
   }
 }

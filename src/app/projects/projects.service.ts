@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { 
-  Project, 
-  ProjectGroup, 
-  PaginatedResponse, 
+import {
+  Project,
+  ProjectGroup,
+  PaginatedResponse,
   ProjectCreateUpdate,
-  ProjectGroupCreateUpdate, 
+  ProjectGroupCreateUpdate,
   ProjectInfo,
   ExportProject,
   ProjectsFinishedStatus,
@@ -33,7 +33,7 @@ export class ProjectsService {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('page_size', pageSize.toString());
-    
+
     return this.http.get<PaginatedResponse<Project>>(`${this.apiUrl}/projects/`, { params });
   }
 
@@ -64,7 +64,7 @@ export class ProjectsService {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('page_size', pageSize.toString());
-    
+
     return this.http.get<PaginatedResponse<ProjectGroup>>(`${this.apiUrl}/projectgroups/`, { params });
   }
 
@@ -88,24 +88,6 @@ export class ProjectsService {
     return this.http.get(`${this.apiUrl}/projects/${projectId}/map/`);
   }
 
-  getProjectDetails(project: string, maptype: string, featureId: string): Observable<ProjectDetails> {
-    if (this.shareService.getIsShare()) {
-      const params = new HttpParams()
-        .set('key', this.shareService.getShareKey()!)
-        .set('project', project)
-        .set('maptype', maptype)
-        .set('featureId', featureId);
-      return this.http.get<ProjectDetails>(`${this.apiUrl}/share-analyze/`, { params });
-    } else {
-
-      const params = new HttpParams()
-      .set('project', project)
-      .set('maptype', maptype)
-      .set('featureId', featureId);
-      return this.http.get<ProjectDetails>(`${this.apiUrl}/projects/details/`, { params });
-    }
-  }
-
   getProjectInfo(projectId: number): Observable<ProjectInfo> {
     return this.http.get<ProjectInfo>(`${this.apiUrl}/projects/${projectId}/info`);
   }
@@ -120,10 +102,6 @@ export class ProjectsService {
       throw new Error('Kein Projekt ausgewählt');
     }
     return this.http.get<ExportProject>(`${this.apiUrl}/projects/${currentProject.id}/export-info`);
-  }
-
-  checkAllFinished(): Observable<ProjectsFinishedStatus> {
-    return this.http.get<ProjectsFinishedStatus>(`${this.apiUrl}/projects/check-all-finished/`);
   }
 
   compareProjects(projectId: number): Observable<any> {

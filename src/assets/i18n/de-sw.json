@@ -312,7 +312,8 @@
     },
     "LOADING": {
       "HINT": "Obacht! Je größer d'Fläche isch, wo du druff klickt hosch, desto länger brauchts zum Lada!"
-    }
+    },
+    "POPULATION_WEIGHTING_HINT": "Obacht: D'Wert send immer noch Bevölkerig gwichta, nit noch Flächi"
   },
   "STATISTICS": {
     "TITLE": "Schtadistige",

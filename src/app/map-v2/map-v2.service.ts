@@ -48,6 +48,10 @@ export class MapV2Service {
   private stopComparisonSubject = new BehaviorSubject<boolean>(false);
   stopComparison$ = this.stopComparisonSubject.asObservable();
 
+  private styleUpdateThrottle: any = null;
+  private lastStyleUpdate: number = 0;
+  private readonly STYLE_UPDATE_COOLDOWN = 100; // ms
+
   constructor(
     private loadingService: LoadingService,
     private http: HttpClient,
@@ -99,6 +103,27 @@ export class MapV2Service {
 
   setMap(map: Map): void {
     this.map = map;
+  }
+
+  private throttledStyleUpdate(style: StyleSpecification): void {
+    const now = Date.now();
+
+    // Clear any existing throttle timeout
+    if (this.styleUpdateThrottle) {
+      clearTimeout(this.styleUpdateThrottle);
+    }
+
+    // If enough time has passed since last update, update immediately
+    if (now - this.lastStyleUpdate >= this.STYLE_UPDATE_COOLDOWN) {
+      this.mapStyleSubject.next(style);
+      this.lastStyleUpdate = now;
+    } else {
+      // Otherwise, throttle the update
+      this.styleUpdateThrottle = setTimeout(() => {
+        this.mapStyleSubject.next(style);
+        this.lastStyleUpdate = Date.now();
+      }, this.STYLE_UPDATE_COOLDOWN - (now - this.lastStyleUpdate));
+    }
   }
 
   getMap(): Map | null {
@@ -265,7 +290,7 @@ export class MapV2Service {
     this.averageType = averageType;
     if (this.currentProject) {
       const updatedStyle = this.getProjectMapStyle(this.currentProject);
-      this.mapStyleSubject.next(updatedStyle);
+      this.throttledStyleUpdate(updatedStyle);
     }
   }
 
@@ -273,7 +298,7 @@ export class MapV2Service {
     this.currentZoom = zoom;
     if (this.currentProject) {
       const updatedStyle = this.getProjectMapStyle(this.currentProject);
-      this.mapStyleSubject.next(updatedStyle);
+      this.throttledStyleUpdate(updatedStyle);
     }
   }
 
@@ -351,9 +376,9 @@ export class MapV2Service {
       baseStyle.sources['geodata'] = {
         type: 'vector',
         tiles: [tileUrl],
-        minzoom: 0,
-        maxzoom: 14,
-        tileSize: 512
+        minzoom: 6,
+        maxzoom: 10,
+        tileSize: 512 // Use smaller tiles on mobile for better performance
       } as SourceSpecification;
 
       baseStyle.layers.push({
@@ -399,16 +424,16 @@ export class MapV2Service {
               ['<=', ['get', 'index'], 0],
               'rgba(128, 128, 128, 0)',
               ['<=', ['get', 'index'], 0.35],
-              'rgba(50, 97, 45, 0.3)',
+              'rgba(50, 97, 45, 0.7)',
               ['<=', ['get', 'index'], 0.5],
-              'rgba(60, 176, 67, 0.3)',
+              'rgba(60, 176, 67, 0.7)',
               ['<=', ['get', 'index'], 0.71],
-              'rgba(238, 210, 2, 0.3)',
+              'rgba(238, 210, 2, 0.7)',
               ['<=', ['get', 'index'], 1],
-              'rgba(237, 112, 20, 0.3)',
+              'rgba(237, 112, 20, 0.7)',
               ['<=', ['get', 'index'], 1.41],
-              'rgba(194, 24, 7, 0.3)',
-              'rgba(150, 86, 162, 0.3)'
+              'rgba(194, 24, 7, 0.7)',
+              'rgba(150, 86, 162, 0.7)'
             ]
           ]
         }
@@ -507,6 +532,9 @@ export class MapV2Service {
   ngOnDestroy() {
     if (this.shortcutSubscription) {
       this.shortcutSubscription.unsubscribe();
+    }
+    if (this.styleUpdateThrottle) {
+      clearTimeout(this.styleUpdateThrottle);
     }
   }
 

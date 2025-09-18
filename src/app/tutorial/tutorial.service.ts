@@ -160,7 +160,7 @@ export class TutorialService {
       id: 'share',
       name: 'TUTORIAL.SHARE.NAME',
       description: 'TUTORIAL.SHARE.DESCRIPTION',
-      steps: [ {
+      steps: [{
         id: 'share-1',
         title: 'TUTORIAL.SHARE.STEP1.TITLE',
         content: 'TUTORIAL.SHARE.STEP1.CONTENT',
@@ -209,15 +209,6 @@ export class TutorialService {
         nextHint: 'TUTORIAL.SHARE.STEP5.NEXT_HINT'
       },
       {
-        id: 'share-6',
-        title: 'TUTORIAL.SHARE.STEP6.TITLE',
-        content: 'TUTORIAL.SHARE.STEP6.CONTENT',
-        type: 'informative',
-        targetSelector: '.analyze-dialog .p-dialog-close-button',
-        offset: { x: 0, y: 0 },
-        position: 'bottom',
-        nextHint: 'TUTORIAL.SHARE.STEP6.NEXT_HINT'
-      },{
         id: 'share-7',
         title: 'TUTORIAL.SHARE.STEP7.TITLE',
         content: 'TUTORIAL.SHARE.STEP7.CONTENT',
@@ -235,11 +226,11 @@ export class TutorialService {
         type: 'informative',
         nextHint: 'TUTORIAL.SHARE.STEP8.NEXT_HINT'
       }
-    ]
+      ]
     }
   ];
 
-  constructor(private http: HttpClient, private shareService: ShareService) {}
+  constructor(private http: HttpClient, private shareService: ShareService) { }
 
   get config$(): Observable<TutorialConfig> {
     return this.configSubject.asObservable();
@@ -273,7 +264,7 @@ export class TutorialService {
   nextStep(): void {
     const currentConfig = this.config;
     const currentSet = this.getTutorialSet(currentConfig.currentSetId!);
-    
+
     if (currentSet && currentConfig.currentStepIndex < currentSet.steps.length - 1) {
       this.configSubject.next({
         ...currentConfig,
@@ -322,7 +313,7 @@ export class TutorialService {
   getCurrentStep(): TutorialStep | null {
     const currentConfig = this.config;
     const currentSet = this.getTutorialSet(currentConfig.currentSetId!);
-    
+
     if (currentSet && currentConfig.currentStepIndex < currentSet.steps.length) {
       return currentSet.steps[currentConfig.currentStepIndex];
     }
@@ -348,11 +339,11 @@ export class TutorialService {
     console.log('markStepCompleted');
     const currentConfig = this.config;
     const currentStep = this.getCurrentStep();
-    
+
     // For interactive steps, automatically advance to next step
     if (currentStep?.interactive) {
       const currentSet = this.getTutorialSet(currentConfig.currentSetId!);
-      
+
       if (currentSet && currentConfig.currentStepIndex < currentSet.steps.length - 1) {
         this.configSubject.next({
           ...currentConfig,
