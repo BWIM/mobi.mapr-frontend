@@ -159,13 +159,17 @@
 </p-dialog>
 
 <p-dialog [(visible)]="showLanguageDialog" [modal]="true"
-    [style]="{width: '350px'}" header="Sprache wählen">
-    <div class="flex flex-column gap-3">
-        <p-button *ngFor="let lang of languages" [label]="lang.name"
-            [icon]="currentLang === lang.code ? lang.icon : ''"
-            [styleClass]="currentLang === lang.code ? 'p-button-outlined' : ''"
-            (onClick)="switchLanguage(lang.code)" class="w-full">
-        </p-button>
+    [style]="{width: '300px'}" header="Sprache wählen">
+    <div class="language-list">
+        <div *ngFor="let lang of languages" class="language-item"
+            [class.selected]="currentLang === lang.code"
+            (click)="switchLanguage(lang.code)">
+            <div class="language-content">
+                <i class="pi pi-check" *ngIf="currentLang === lang.code"></i>
+                <i class="pi pi-circle" *ngIf="currentLang !== lang.code"></i>
+                <span class="language-name">{{ lang.name }}</span>
+            </div>
+        </div>
     </div>
 </p-dialog>
 

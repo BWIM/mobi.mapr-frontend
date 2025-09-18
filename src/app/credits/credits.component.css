@@ -31,3 +31,47 @@
     flex: 1;
 }
 
+.language-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.language-item {
+    padding: 0.75rem 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: #ffffff;
+}
+
+.language-item:hover {
+    background-color: #f8f9fa;
+    border-color: #d0d0d0;
+}
+
+.language-item.selected {
+    background-color: #e3f2fd;
+    border-color: #2196f3;
+}
+
+.language-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.language-content i {
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.language-item.selected .language-content i.pi-check {
+    color: #2196f3;
+}
+
+.language-name {
+    font-weight: 500;
+    color: #333;
+}
