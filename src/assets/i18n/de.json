@@ -47,7 +47,6 @@
     },
     "READ_ONLY": "Nur Lesen",
     "SHARED": "Geteilt",
-    "UNGROUPED": "Nicht gruppiert",
     "TYPE": {
       "DEFAULT": "Standard",
       "PERSONAL": "Persönlich"
@@ -299,7 +298,8 @@
       "NO_DATA": "Keine Daten verfügbar",
       "SWITCH_TO_DOUGHNUT": "Ansicht wechseln",
       "EXPLANATION": "Die Aktivitäten gewichtet nach lokaler Relevanz",
-      "HINT": "Hinweis: Klicke auf einen Balken im Diagramm, um mehr Infos zu erhalten!",
+      "HINT": "💡 Klicke auf einen Balken im Diagramm, um mehr Infos zu erhalten!",
+      "SUBACTIVITIES_HINT": "💡 Klicke auf einen Balken im Diagramm, um Orte auf der Karte anzuzeigen!",
       "NO_PLACES": "Keine Orte gefunden",
       "DISABLE_PLACES": "Die Orts-Ansicht ist nur für Gemeinde-Ebene oder Hexagone aktiviert. Um mehr Details zu bekommen, zoome in die Karte hinein!"
     },
