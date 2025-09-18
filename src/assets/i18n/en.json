@@ -40,6 +40,14 @@
       "TITLE": "Edit Project"
     },
     "UNGROUPED": "Ungrouped Projects",
+    "TABS": {
+      "PERSONAL": "Personal",
+      "SHARED": "Shared",
+      "PUBLIC": "Public"
+    },
+    "READ_ONLY": "Read Only",
+    "SHARED": "Shared",
+    "UNGROUPED": "Ungrouped",
     "TYPE": {
       "DEFAULT": "Standard",
       "PERSONAL": "Personal"

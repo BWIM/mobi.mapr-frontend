@@ -18,9 +18,13 @@ import { forkJoin } from 'rxjs';
 import { MapV2Service } from '../map-v2/map-v2.service';
 import { TutorialService } from '../tutorial/tutorial.service';
 
-interface GroupedProjects {
-  group: ProjectGroup;
+interface ProjectTab {
+  label: string;
+  icon: string;
   projects: Project[];
+  groupedProjects: { [groupId: string]: Project[] };
+  ungroupedProjects: Project[];
+  loading: boolean;
 }
 
 interface WebsocketResult {
@@ -51,8 +55,6 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   @ViewChild('unusedGroupsOverlay') unusedGroupsOverlay!: any;
 
   projectGroups: ProjectGroup[] = [];
-  groupedProjects: GroupedProjects[] = [];
-  ungroupedProjects: Project[] = [];
   items: MenuItem[] = [];
   selectedProject?: Project;
   selectedTableProject?: Project;
@@ -62,12 +64,41 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   projectToEdit: Project | null = null;
   progress: number = 0;
   loading: boolean = false;
-  // Neue Properties für Projektgruppen
+  // Project group management
   projectGroupDialogVisible = false;
   projectGroupToEdit: ProjectGroup | null = null;
   newProjectGroup: ProjectGroup = { name: '', id: '', user: '', default: false };
   unusedGroups: ProjectGroup[] = [];
   selectedUnusedGroups: ProjectGroup[] = [];
+
+  // Tabbed interface properties
+  activeTabIndex: number = 0;
+  projectTabs: ProjectTab[] = [
+    {
+      label: 'PROJECTS.TABS.PERSONAL',
+      icon: 'pi pi-user',
+      projects: [],
+      groupedProjects: {},
+      ungroupedProjects: [],
+      loading: false
+    },
+    {
+      label: 'PROJECTS.TABS.SHARED',
+      icon: 'pi pi-users',
+      projects: [],
+      groupedProjects: {},
+      ungroupedProjects: [],
+      loading: false
+    },
+    {
+      label: 'PROJECTS.TABS.PUBLIC',
+      icon: 'pi pi-globe',
+      projects: [],
+      groupedProjects: {},
+      ungroupedProjects: [],
+      loading: false
+    }
+  ];
 
   private menuItemsCache: Map<number, MenuItem[]> = new Map();
 
@@ -160,7 +191,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         next: (response) => {
           this.projectGroups = response.results;
           this.updateUnusedGroups();
-          this.loadProjects();
+          this.loadAllTabProjects();
         },
         error: () => {
           this.messageService.add({
@@ -173,61 +204,70 @@ export class ProjectsComponent implements OnInit, OnDestroy {
       });
   }
 
-  private loadProjects(): void {
-    this.loadingService.startLoading();
+  private loadAllTabProjects(): void {
+    // Load projects for all tabs in parallel
+    const personalProjects$ = this.projectsService.getPersonalProjects();
+    const sharedProjects$ = this.projectsService.getSharedProjects();
+    const publicProjects$ = this.projectsService.getPublicProjects();
 
-    this.projectsService.getProjects()
-      .pipe(finalize(() => this.loadingService.stopLoading()))
-      .subscribe({
-        next: (response) => {
-          const projects = response.results;
+    // Set loading state for all tabs
+    this.projectTabs.forEach(tab => tab.loading = true);
 
-          // Erstelle Default-Gruppe falls Default-Projekte existieren
-          const defaultProjects = projects.filter(p => p.default);
-          if (defaultProjects.length > 0) {
-            const defaultGroup: ProjectGroup = {
-              id: 'default',
-              name: this.translate.instant('PROJECTS.DEFAULT_GROUP'),
-              user: '',
-              default: true
-            };
+    forkJoin({
+      personal: personalProjects$,
+      shared: sharedProjects$,
+      public: publicProjects$
+    }).subscribe({
+      next: (responses) => {
+        // Process personal projects
+        this.processTabProjects(responses.personal.results, 0);
 
-            this.groupedProjects = [{
-              group: defaultGroup,
-              projects: defaultProjects
-            }];
-          } else {
-            this.groupedProjects = [];
-          }
+        // Process shared projects
+        this.processTabProjects(responses.shared.results, 1);
 
-          // Füge die restlichen Projekte zu ihren Gruppen hinzu
-          const nonDefaultProjects = projects.filter(p => !p.default);
-          const groupedNonDefault = this.projectGroups.map(group => ({
-            group,
-            projects: nonDefaultProjects.filter(p => p.projectgroup?.id === group.id)
-          })).filter(g => g.projects.length > 0);
+        // Process public projects
+        this.processTabProjects(responses.public.results, 2);
 
-          this.groupedProjects = [...this.groupedProjects, ...groupedNonDefault];
+        // Setup websockets for all projects
+        this.setupWebsocketsForAllTabProjects();
 
-          // Nicht gruppierte Projekte (nur nicht-Default Projekte)
-          this.ungroupedProjects = nonDefaultProjects.filter(p => !p.projectgroup);
-
-          // Websockets für unvollständige Projekte einrichten
-          this.setupWebsocketsForAllProjects();
-        },
-        error: () => {
-          this.messageService.add({
-            severity: 'error',
-            summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
-            detail: this.translate.instant('PROJECTS.LIST.NO_PROJECTS')
-          });
-          this.loading = false;
-        },
-        complete: () => {
-          this.loading = false;
-        }
-      });
+        this.loading = false;
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: this.translate.instant('COMMON.MESSAGES.ERROR.LOAD'),
+          detail: this.translate.instant('PROJECTS.LIST.NO_PROJECTS')
+        });
+        this.projectTabs.forEach(tab => tab.loading = false);
+        this.loading = false;
+      }
+    });
   }
+
+  private processTabProjects(projects: Project[], tabIndex: number): void {
+    const tab = this.projectTabs[tabIndex];
+    tab.projects = projects;
+
+    // Group projects
+    tab.groupedProjects = {};
+    tab.ungroupedProjects = [];
+
+    projects.forEach(project => {
+      if (project.projectgroup) {
+        const groupId = project.projectgroup.id;
+        if (!tab.groupedProjects[groupId]) {
+          tab.groupedProjects[groupId] = [];
+        }
+        tab.groupedProjects[groupId].push(project);
+      } else {
+        tab.ungroupedProjects.push(project);
+      }
+    });
+
+    tab.loading = false;
+  }
+
 
   confirmDelete(project: Project): void {
     this.confirmationService.confirm({
@@ -306,7 +346,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   }
 
   private setupWebsocketForProject(project: Project): void {
-    if (project.finished) return;
+    if (project.status !== 'finished') return;
 
     if (this.websocketConnections.has(project.id)) return;
 
@@ -328,7 +368,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
         if (projectToUpdate) {
           projectToUpdate.calculated = result.result.calculated;
           projectToUpdate.areas = result.result.total;
-          projectToUpdate.finished = result.result.finished;
+          projectToUpdate.status = result.result.finished ? "finished" : "calculating";
         }
 
         if (result.result.finished) {
@@ -356,11 +396,13 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   }
 
   private findProjectById(projectId: number): Project | undefined {
-    for (const group of this.groupedProjects) {
-      const project = group.projects.find(p => p.id === projectId);
+    // Search in tab projects
+    for (const tab of this.projectTabs) {
+      const project = tab.projects.find(p => p.id === projectId);
       if (project) return project;
     }
-    return this.ungroupedProjects.find(p => p.id === projectId);
+
+    return undefined;
   }
 
   private closeWebsocketConnection(projectId: number): void {
@@ -371,9 +413,11 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private setupWebsocketsForAllProjects(): void {
-    [...this.groupedProjects.flatMap(g => g.projects), ...this.ungroupedProjects]
-      .forEach(project => this.setupWebsocketForProject(project));
+
+  private setupWebsocketsForAllTabProjects(): void {
+    this.projectTabs.forEach(tab => {
+      tab.projects.forEach(project => this.setupWebsocketForProject(project));
+    });
   }
 
   ngOnDestroy(): void {
@@ -567,16 +611,44 @@ export class ProjectsComponent implements OnInit, OnDestroy {
       });
   }
 
+  getCurrentTab(): ProjectTab {
+    return this.projectTabs[this.activeTabIndex];
+  }
+
+  getProjectGroupsForTab(tabIndex: number): ProjectGroup[] {
+    // Only return groups that have projects in this tab
+    const tab = this.projectTabs[tabIndex];
+    return this.projectGroups.filter(group => {
+      const projectsInGroup = tab.groupedProjects[group.id] || [];
+      return projectsInGroup.length > 0;
+    });
+  }
+
+  getGroupedProjectsForTab(tabIndex: number): { [groupId: string]: Project[] } {
+    return this.projectTabs[tabIndex].groupedProjects;
+  }
+
+  getUngroupedProjectsForTab(tabIndex: number): Project[] {
+    return this.projectTabs[tabIndex].ungroupedProjects;
+  }
+
+  onTabChange(event: any): void {
+    this.activeTabIndex = event.value;
+  }
+
   private updateUnusedGroups(): void {
-    // Finde alle Gruppen, die keinem nicht-Default Projekt zugewiesen sind
-    const usedGroupIds = new Set(
-      this.groupedProjects
-        .filter(gp => !gp.group.default) // Ignoriere die Default-Gruppe
-        .map(gp => gp.group.id)
-    );
+    // Find all groups that are not assigned to any project
+    const usedGroupIds = new Set();
+
+    // Check tab projects
+    this.projectTabs.forEach(tab => {
+      tab.projects
+        .filter(p => p.projectgroup)
+        .forEach(p => usedGroupIds.add(p.projectgroup!.id));
+    });
 
     this.unusedGroups = this.projectGroups.filter(
-      group => !usedGroupIds.has(group.id) && !group.default
+      group => !usedGroupIds.has(group.id)
     );
   }
 

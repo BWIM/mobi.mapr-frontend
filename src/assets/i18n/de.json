@@ -40,6 +40,14 @@
       "TITLE": "Projekt bearbeiten"
     },
     "UNGROUPED": "Nicht gruppierte Projekte",
+    "TABS": {
+      "PERSONAL": "Persönlich",
+      "SHARED": "Geteilt",
+      "PUBLIC": "Öffentlich"
+    },
+    "READ_ONLY": "Nur Lesen",
+    "SHARED": "Geteilt",
+    "UNGROUPED": "Nicht gruppiert",
     "TYPE": {
       "DEFAULT": "Standard",
       "PERSONAL": "Persönlich"

@@ -40,6 +40,14 @@
       "TITLE": "Projäkkd bearbeite"
     },
     "UNGROUPED": "Nit gruppierti Projäkkd",
+    "TABS": {
+      "PERSONAL": "Persönlich",
+      "SHARED": "Teilt",
+      "PUBLIC": "Öffentlich"
+    },
+    "READ_ONLY": "Nur Lese",
+    "SHARED": "Teilt",
+    "UNGROUPED": "Nit gruppiert",
     "TYPE": {
       "DEFAULT": "Standard",
       "PERSONAL": "Persönlich"

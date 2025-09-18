@@ -37,6 +37,32 @@ export class ProjectsService {
     return this.http.get<PaginatedResponse<Project>>(`${this.apiUrl}/projects/`, { params });
   }
 
+  // Get projects by visibility type
+  getPersonalProjects(page: number = 1, pageSize: number = 10): Observable<PaginatedResponse<Project>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('page_size', pageSize.toString())
+      .set('visibility', 'personal');
+
+    return this.http.get<PaginatedResponse<Project>>(`${this.apiUrl}/personal-projects/`, { params });
+  }
+
+  getSharedProjects(page: number = 1, pageSize: number = 10): Observable<PaginatedResponse<Project>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('page_size', pageSize.toString());
+
+    return this.http.get<PaginatedResponse<Project>>(`${this.apiUrl}/shared-projects/`, { params });
+  }
+
+  getPublicProjects(page: number = 1, pageSize: number = 10): Observable<PaginatedResponse<Project>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('page_size', pageSize.toString());
+
+    return this.http.get<PaginatedResponse<Project>>(`${this.apiUrl}/public-projects/`, { params });
+  }
+
   getProject(id: string): Observable<Project> {
     return this.http.get<Project>(`${this.apiUrl}/projects/${id}/`);
   }
