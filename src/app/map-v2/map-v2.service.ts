@@ -65,17 +65,7 @@ export class MapV2Service {
       switch (action) {
         case ShortcutAction.ZOOM_TO_FEATURES:
           // zoom to the bounds
-          const bounds = this.boundsSubject.getValue();
-          if (bounds && this.map) {
-            const mapBounds = new LngLatBounds(
-              [bounds.minLng, bounds.minLat],
-              [bounds.maxLng, bounds.maxLat]
-            );
-            this.map.fitBounds(mapBounds, {
-              padding: 50,
-              duration: 2000
-            });
-          }
+          this.zoomToFeatures();
           break;
         case ShortcutAction.TOGGLE_HEXAGON_VIEW:
           this.hexagonView = !this.hexagonView;
@@ -123,6 +113,20 @@ export class MapV2Service {
         this.mapStyleSubject.next(style);
         this.lastStyleUpdate = Date.now();
       }, this.STYLE_UPDATE_COOLDOWN - (now - this.lastStyleUpdate));
+    }
+  }
+
+  zoomToFeatures(): void {
+    const bounds = this.boundsSubject.getValue();
+    if (bounds && this.map) {
+      const mapBounds = new LngLatBounds(
+        [bounds.minLng, bounds.minLat],
+        [bounds.maxLng, bounds.maxLat]
+      );
+      this.map.fitBounds(mapBounds, {
+        padding: 50,
+        duration: 2000
+      });
     }
   }
 
@@ -217,7 +221,24 @@ export class MapV2Service {
               100, 0.5,
               1000, 0.8,
               5000, 0.9
-            ]
+            ],
+
+            'fill-outline-color': [
+              'case',
+              ['<=', ['get', 'index'], 0],
+              'rgba(128, 128, 128, 0)',
+              ['<=', ['get', 'index'], 0.35],
+              'rgba(50, 97, 45, 0.7)',
+              ['<=', ['get', 'index'], 0.5],
+              'rgba(60, 176, 67, 0.7)',
+              ['<=', ['get', 'index'], 0.71],
+              'rgba(238, 210, 2, 0.7)',
+              ['<=', ['get', 'index'], 1],
+              'rgba(237, 112, 20, 0.7)',
+              ['<=', ['get', 'index'], 1.41],
+              'rgba(194, 24, 7, 0.7)',
+              'rgba(150, 86, 162, 0.7)'
+            ],
           },
           layout: {
             visibility: 'visible'

@@ -19,8 +19,8 @@
     --warning-color: #FFC107;
     --success-color: #4CAF50;
     --border-radius: 4px;
-    --shadow-1: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12);
-    --shadow-2: 0 3px 3px -2px rgba(0,0,0,.2), 0 3px 4px 0 rgba(0,0,0,.14), 0 1px 8px 0 rgba(0,0,0,.12);
+    --shadow-1: 0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12);
+    --shadow-2: 0 3px 3px -2px rgba(0, 0, 0, .2), 0 3px 4px 0 rgba(0, 0, 0, .14), 0 1px 8px 0 rgba(0, 0, 0, .12);
     font-family: Arial, sans-serif;
 
     /* PrimeNG Theme Überschreibungen */
@@ -35,11 +35,11 @@
     --surface-700: var(--background-color);
     --surface-800: var(--background-color);
     --surface-900: var(--background-color);
-    
+
     /* Text Colors */
     --text-color: var(--text-color);
     --text-color-secondary: var(--secondary-text-color);
-    
+
     /* Primary Colors */
     --primary-50: var(--primary-color);
     --primary-100: var(--primary-color);
@@ -51,11 +51,11 @@
     --primary-700: var(--primary-color);
     --primary-800: var(--primary-color);
     --primary-900: var(--primary-color);
-    
+
     /* Highlight Colors */
     --highlight-bg: var(--highlight-color);
     --highlight-text-color: var(--text-color);
-    
+
     /* Error, Warning, Success Colors */
     --red-500: var(--error-color);
     --yellow-500: var(--warning-color);
@@ -64,7 +64,7 @@
     /* PrimeNG specific variables */
     --primary-color: #ffcc00;
     --secondary-color: #c2a540;
-    
+
     /* PrimeNG Button variables */
     --primary-button-bg: var(--primary-color);
     --primary-button-text: var(--text-color);
@@ -87,8 +87,8 @@
     --highlight-color: #916260;
     --title-color: #ffffff;
     --surface-color: var(--second-background-color);
-    --shadow-1: 0 2px 1px -1px rgba(255,255,255,.2), 0 1px 1px 0 rgba(255,255,255,.14), 0 1px 3px 0 rgba(255,255,255,.12);
-    --shadow-2: 0 3px 3px -2px rgba(255,255,255,.2), 0 3px 4px 0 rgba(255,255,255,.14), 0 1px 8px 0 rgba(255,255,255,.12);
+    --shadow-1: 0 2px 1px -1px rgba(255, 255, 255, .2), 0 1px 1px 0 rgba(255, 255, 255, .14), 0 1px 3px 0 rgba(255, 255, 255, .12);
+    --shadow-2: 0 3px 3px -2px rgba(255, 255, 255, .2), 0 3px 4px 0 rgba(255, 255, 255, .14), 0 1px 8px 0 rgba(255, 255, 255, .12);
 
     /* PrimeNG Button variables */
     --primary-button-bg: var(--primary-color);
@@ -106,6 +106,10 @@ body {
     background-color: var(--background-color);
     transition: background-color 0.3s ease, color 0.3s ease;
     height: 100vh;
+    height: 100dvh;
+    /* Use dynamic viewport height for mobile */
+    overflow-x: hidden;
+    /* Prevent horizontal scrolling */
 }
 
 .p-component {
@@ -162,55 +166,55 @@ body {
     :root {
         --border-radius: 2px;
     }
-    
+
     /* Mobile-optimized typography */
     body {
         font-size: 14px;
         line-height: 1.4;
     }
-    
+
     /* Better touch targets for mobile */
     .p-button {
         min-width: 1.5rem;
         min-height: 1.5rem;
     }
-    
+
     /* Mobile-optimized dialogs */
     .p-dialog {
         margin: 0 !important;
         border-radius: 0 !important;
     }
-    
+
     .p-dialog .p-dialog-content {
         padding: 1rem !important;
     }
-    
+
     /* Mobile-optimized tables */
-    .p-datatable .p-datatable-thead > tr > th,
-    .p-datatable .p-datatable-tbody > tr > td {
+    .p-datatable .p-datatable-thead>tr>th,
+    .p-datatable .p-datatable-tbody>tr>td {
         padding: 0.75rem 0.5rem;
     }
-    
+
     /* Mobile-optimized panels */
     .p-panel .p-panel-content {
         padding: 1rem;
     }
-    
+
     /* Mobile-optimized fieldsets */
     .p-fieldset .p-fieldset-content {
         padding: 1rem;
     }
-    
+
     /* Mobile-optimized scroll panels */
     .p-scrollpanel {
         border-radius: 0;
     }
-    
+
     /* Better mobile navigation */
     .p-menubar {
         padding: 0.5rem;
     }
-    
+
     .p-menubar .p-menuitem-link {
         padding: 0.75rem;
     }
@@ -221,7 +225,7 @@ body {
     body {
         font-size: 15px;
     }
-    
+
     .p-button {
         min-width: 1.25rem;
         min-height: 1.25rem;
@@ -234,28 +238,28 @@ body {
         min-width: 1.5rem;
         min-height: 1.5rem;
     }
-    
+
     .p-button.p-button-text {
         min-width: 1.5rem;
         min-height: 1.5rem;
     }
-    
+
     /* Improve table row touch targets */
-    .p-datatable .p-datatable-tbody > tr {
+    .p-datatable .p-datatable-tbody>tr {
         min-height: 3.5rem;
     }
-    
-    .p-datatable .p-datatable-tbody > tr > td {
+
+    .p-datatable .p-datatable-tbody>tr>td {
         padding: 1rem 0.75rem;
     }
-    
+
     /* Better link touch targets */
     a {
         min-height: 2.5rem;
         display: inline-flex;
         align-items: center;
     }
-    
+
     button {
         min-height: 2.5rem;
         display: inline-flex;
@@ -264,11 +268,12 @@ body {
 }
 
 /* High DPI display optimizations */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
     .p-card {
         border-width: 0.5px;
     }
-    
+
     .p-fieldset {
         border-width: 0.5px;
     }

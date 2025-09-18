@@ -339,9 +339,21 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     } else {
       labels = sortedData.map(item => item.name_de);
     }
+
+    // Truncate labels longer than 30 characters
+    labels = labels.map(label => {
+      if (label && label.length > 30) {
+        return label.substring(0, 27) + '...';
+      }
+      return label;
+    });
     const scores = sortedData.map(item => item.index * 100);
-    const weights = sortedData.map(item => item.weight);
+    const rawWeights = sortedData.map(item => item.weight);
     const scoreNames = sortedData.map(item => this.indexService.getIndexName(item.index));
+
+    // Normalize weights to percentages
+    const totalWeight = rawWeights.reduce((sum, weight) => sum + weight, 0);
+    const normalizedWeights = totalWeight > 0 ? rawWeights.map(weight => (weight / totalWeight) * 100) : [];
 
     const scoreColors = scores.map(value => this.getColorForValue(value));
 
@@ -350,7 +362,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       datasets: [
         {
           label: 'Aktivitäten',
-          data: weights,
+          data: normalizedWeights,
           backgroundColor: scoreColors,
           borderColor: scoreColors,
           borderWidth: 1,
@@ -373,7 +385,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
               const index = context.dataIndex;
               return [
                 `Note: ${scoreNames[index]}`,
-                `Weight: ${weights[index]}`
+                `Relevanz: ${normalizedWeights[index].toFixed(1)}%`
               ];
             }
           }
@@ -390,7 +402,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       scales: {
         x: {
           ticks: {
-            color: '#495057'
+            color: '#495057',
+            maxRotation: 45,
+            minRotation: 45
           },
           grid: {
             color: '#ebedef'
@@ -409,7 +423,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           },
           title: {
             display: true,
-            text: 'Gewichtung'
+            text: 'Relevanz (%)'
           }
         }
       }
@@ -535,7 +549,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       scales: {
         x: {
           ticks: {
-            color: '#495057'
+            color: '#495057',
+            maxRotation: 45,
+            minRotation: 45
           },
           grid: {
             color: '#ebedef'
@@ -1274,6 +1290,14 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         } else {
           labels = sortedActivities.map(item => item.name_de);
         }
+
+        // Truncate labels longer than 30 characters
+        labels = labels.map(label => {
+          if (label && label.length > 30) {
+            return label.substring(0, 27) + '...';
+          }
+          return label;
+        });
 
         this.subactivitiesPieData = {
           labels: labels,

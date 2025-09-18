@@ -4,6 +4,7 @@ $tertiaryColor: #eed202;
 $quaternaryColor: #ed7014;
 $quinaryColor: #c21807;
 $sixthColor: #9656a2;
+
 :host {
   position: relative;
 
@@ -56,7 +57,7 @@ $sixthColor: #9656a2;
         clip-path: none;
         transform: none;
         padding-right: 15px;
-        
+
         &::after {
           opacity: 0;
         }
@@ -130,6 +131,8 @@ $sixthColor: #9656a2;
 @media (max-width: 768px) {
   .legend {
     padding: 5px !important; // Reduced padding for compactness
+    bottom: 80px !important; // Move legend up to avoid mobile navigation bar
+    left: 1% !important; // Adjust left positioning
 
     .legend-item {
       margin: 2px 0; // Reduced margin for compactness
