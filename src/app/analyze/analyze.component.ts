@@ -1544,7 +1544,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           image: new CircleStyle({
             radius: 6,
             fill: new Fill({
-              color: '#ff5722'
+              color: '#482683'  // CI primary purple
             }),
             stroke: new Stroke({
               color: '#ffffff',

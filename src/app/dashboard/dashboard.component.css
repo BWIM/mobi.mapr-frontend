@@ -100,12 +100,12 @@
 
 :host ::ng-deep .p-button.p-button-text .p-button-icon {
     font-size: 1.2rem;
-    color: #333;
+    color: var(--text-color);
 }
 
 /* Sidebar Styling */
 :host ::ng-deep .projects-sidebar {
-    background-color: rgba(255, 255, 255, 0.95);
+    background-color: var(--surface-color);
     backdrop-filter: blur(10px);
     border: none;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -155,7 +155,7 @@
 }
 
 ::ng-deep .p-splitter-gutter {
-    background: #e9ecef;
+    background: var(--highlight-color);
 }
 
 :host ::ng-deep .p-dialog-content {
@@ -255,7 +255,7 @@
         left: 50%;
         transform: translateX(-50%);
         z-index: 1000;
-        background: white;
+        background: var(--surface-color);
         border-radius: 2rem;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         padding: 0.5rem;

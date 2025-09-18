@@ -52,6 +52,7 @@
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -104,14 +105,47 @@
 }
 
 .ol-control button {
-    background-color: #319FD3;
+    background-color: var(--primary-color);
 }
 
 .ol-control button:hover {
-    background-color: #2386b8;
+    background-color: var(--secondary-color);
 }
 
 ::ng-deep .p-chip {
-    background-color: #e3f2fd;
-    color: #1976d2;
+    background-color: var(--highlight-color);
+    color: var(--primary-color);
+}
+
+/* PrimeNG Checkbox CSS Custom Properties for Project Wizard */
+:host {
+    --p-checkbox-border-color: var(--primary-color);
+    --p-checkbox-hover-border-color: var(--primary-color);
+    --p-checkbox-focus-border-color: var(--primary-color);
+    --p-checkbox-checked-border-color: var(--primary-color);
+    --p-checkbox-checked-hover-border-color: var(--secondary-color);
+    --p-checkbox-checked-focus-border-color: var(--primary-color);
+    --p-checkbox-background: transparent;
+    --p-checkbox-checked-background: var(--primary-color);
+    --p-checkbox-checked-hover-background: var(--secondary-color);
+    --p-checkbox-icon-color: var(--primary-color);
+    --p-checkbox-icon-checked-color: #ffffff;
+    --p-checkbox-icon-checked-hover-color: #ffffff;
+    --p-checkbox-focus-ring-color: var(--accent-color);
+}
+
+/* PrimeNG RadioButton CSS Custom Properties for Project Wizard - Inverted colors */
+:host {
+    --p-radiobutton-border-color: var(--primary-color);
+    --p-radiobutton-hover-border-color: var(--primary-color);
+    --p-radiobutton-focus-border-color: var(--primary-color);
+    --p-radiobutton-checked-border-color: var(--primary-color);
+    --p-radiobutton-checked-hover-border-color: var(--secondary-color);
+    --p-radiobutton-checked-focus-border-color: var(--primary-color);
+    --p-radiobutton-background: transparent;
+    --p-radiobutton-checked-background: #ffffff;
+    --p-radiobutton-checked-hover-background: #ffffff;
+    --p-radiobutton-icon-checked-color: var(--primary-color);
+    --p-radiobutton-icon-checked-hover-color: var(--secondary-color);
+    --p-radiobutton-focus-ring-color: var(--accent-color);
 }

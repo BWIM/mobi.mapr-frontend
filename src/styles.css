@@ -5,18 +5,33 @@
 
 /* Default theme (light theme) */
 :root {
-    --primary-color: #ffcc00;
-    --secondary-color: #c2a540;
-    --accent-color: #902660;
-    --background-color: #dbe7eb;
-    --second-background-color: #fff;
-    --text-color: #433143;
-    --secondary-text-color: #000;
-    --highlight-color: #88b1be;
-    --title-color: #1a1a1a;
+    /* New CI Color Palette */
+    --accent-color: #ffed00;
+    /* Akzentfarbe - Yellow accent */
+    --primary-color: #482683;
+    /* Hauptfarbe - Main dark purple */
+    --secondary-color: #d0bbdb;
+    /* Hauptfarbe - Main light purple */
+    --background-color: #f0ecec;
+    /* Hintergrundfarbe - Light background */
+    --second-background-color: #ffffff;
+    /* Hintergrundfarbe - White background */
+    --dark-background-color: #2c104c;
+    /* Hintergrundfarbe - Dark background */
+    --light-accent-background: #ffed99;
+    /* Hintergrundfarbe - Light yellow background */
+    --text-color: #000000;
+    /* Text - Black text */
+    --secondary-text-color: #ffffff;
+    /* Text - White text */
+    --highlight-color: #d0bbdb;
+    /* Using secondary color for highlights */
+    --title-color: #000000;
+    /* Text - Black for titles */
     --surface-color: var(--second-background-color);
     --error-color: #F44336;
-    --warning-color: #FFC107;
+    --warning-color: #ffed00;
+    /* Using accent color for warnings */
     --success-color: #4CAF50;
     --border-radius: 4px;
     --shadow-1: 0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12);
@@ -62,40 +77,52 @@
     --green-500: var(--success-color);
 
     /* PrimeNG specific variables */
-    --primary-color: #ffcc00;
-    --secondary-color: #c2a540;
+    --primary-color: #482683;
+    --secondary-color: #d0bbdb;
+    --primary-color-text: #ffffff;
 
     /* PrimeNG Button variables */
     --primary-button-bg: var(--primary-color);
-    --primary-button-text: var(--text-color);
+    --primary-button-text: #ffffff;
     --primary-button-border: var(--primary-color);
     --primary-button-hover-bg: var(--secondary-color);
-    --primary-button-hover-text: var(--text-color);
+    --primary-button-hover-text: #ffffff;
     --primary-button-hover-border: var(--secondary-color);
-    --primary-button-focus-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--primary-color);
+    --primary-button-focus-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--accent-color);
 }
 
 /* Dark theme */
 [data-theme="dark"] {
-    --primary-color: #c2a540;
-    --secondary-color: #ffcc00;
-    --accent-color: #88b1be;
-    --background-color: #2a2a2a;
+    --primary-color: #d0bbdb;
+    /* Light purple for dark theme primary */
+    --secondary-color: #482683;
+    /* Dark purple for dark theme secondary */
+    --primary-color-text: #ffffff;
+    /* White text for primary elements */
+    --accent-color: #ffed00;
+    /* Yellow accent remains the same */
+    --background-color: #2c104c;
+    /* Dark background from CI */
     --second-background-color: #1a1a1a;
-    --text-color: #dbe7eb;
-    --secondary-text-color: #fff;
-    --highlight-color: #916260;
+    /* Even darker background */
+    --text-color: #ffffff;
+    /* White text for dark theme */
+    --secondary-text-color: #000000;
+    /* Black text for contrast */
+    --highlight-color: #482683;
+    /* Dark purple for highlights */
     --title-color: #ffffff;
+    /* White titles */
     --surface-color: var(--second-background-color);
     --shadow-1: 0 2px 1px -1px rgba(255, 255, 255, .2), 0 1px 1px 0 rgba(255, 255, 255, .14), 0 1px 3px 0 rgba(255, 255, 255, .12);
     --shadow-2: 0 3px 3px -2px rgba(255, 255, 255, .2), 0 3px 4px 0 rgba(255, 255, 255, .14), 0 1px 8px 0 rgba(255, 255, 255, .12);
 
     /* PrimeNG Button variables */
     --primary-button-bg: var(--primary-color);
-    --primary-button-text: var(--text-color);
+    --primary-button-text: #ffffff;
     --primary-button-border: var(--primary-color);
     --primary-button-hover-bg: var(--secondary-color);
-    --primary-button-hover-text: var(--text-color);
+    --primary-button-hover-text: #ffffff;
     --primary-button-hover-border: var(--secondary-color);
 }
 
@@ -146,6 +173,85 @@ body {
     box-shadow: var(--primary-button-focus-shadow) !important;
 }
 
+/* Ensure all buttons with primary colors have white text */
+button[class*="p-button"] {
+    color: #ffffff !important;
+}
+
+button[class*="p-button"]:hover {
+    color: #ffffff !important;
+}
+
+/* Custom button styling for purple buttons */
+button[style*="background-color: #482683"],
+button[style*="background-color: #d0bbdb"] {
+    color: #ffffff !important;
+}
+
+/* PrimeNG Checkbox CSS Custom Properties - Using correct tokens from documentation */
+:root {
+    --p-checkbox-border-color: var(--primary-color);
+    --p-checkbox-hover-border-color: var(--primary-color);
+    --p-checkbox-focus-border-color: var(--primary-color);
+    --p-checkbox-checked-border-color: var(--primary-color);
+    --p-checkbox-checked-hover-border-color: var(--secondary-color);
+    --p-checkbox-checked-focus-border-color: var(--primary-color);
+    --p-checkbox-background: transparent;
+    --p-checkbox-checked-background: var(--primary-color);
+    --p-checkbox-checked-hover-background: var(--secondary-color);
+    --p-checkbox-icon-color: var(--primary-color);
+    --p-checkbox-icon-checked-color: #ffffff;
+    --p-checkbox-icon-checked-hover-color: #ffffff;
+    --p-checkbox-focus-ring-color: var(--accent-color);
+}
+
+[data-theme="dark"] {
+    --p-checkbox-border-color: var(--primary-color);
+    --p-checkbox-hover-border-color: var(--primary-color);
+    --p-checkbox-focus-border-color: var(--primary-color);
+    --p-checkbox-checked-border-color: var(--primary-color);
+    --p-checkbox-checked-hover-border-color: var(--secondary-color);
+    --p-checkbox-checked-focus-border-color: var(--primary-color);
+    --p-checkbox-background: transparent;
+    --p-checkbox-checked-background: var(--primary-color);
+    --p-checkbox-checked-hover-background: var(--secondary-color);
+    --p-checkbox-icon-color: var(--primary-color);
+    --p-checkbox-icon-checked-color: #ffffff;
+    --p-checkbox-icon-checked-hover-color: #ffffff;
+    --p-checkbox-focus-ring-color: var(--accent-color);
+}
+
+/* PrimeNG RadioButton CSS Custom Properties - Inverted colors for white background with purple dot */
+:root {
+    --p-radiobutton-border-color: var(--primary-color);
+    --p-radiobutton-hover-border-color: var(--primary-color);
+    --p-radiobutton-focus-border-color: var(--primary-color);
+    --p-radiobutton-checked-border-color: var(--primary-color);
+    --p-radiobutton-checked-hover-border-color: var(--secondary-color);
+    --p-radiobutton-checked-focus-border-color: var(--primary-color);
+    --p-radiobutton-background: transparent;
+    --p-radiobutton-checked-background: #ffffff;
+    --p-radiobutton-checked-hover-background: #ffffff;
+    --p-radiobutton-icon-checked-color: var(--primary-color);
+    --p-radiobutton-icon-checked-hover-color: var(--secondary-color);
+    --p-radiobutton-focus-ring-color: var(--accent-color);
+}
+
+[data-theme="dark"] {
+    --p-radiobutton-border-color: var(--primary-color);
+    --p-radiobutton-hover-border-color: var(--primary-color);
+    --p-radiobutton-focus-border-color: var(--primary-color);
+    --p-radiobutton-checked-border-color: var(--primary-color);
+    --p-radiobutton-checked-hover-border-color: var(--secondary-color);
+    --p-radiobutton-checked-focus-border-color: var(--primary-color);
+    --p-radiobutton-background: transparent;
+    --p-radiobutton-checked-background: #ffffff;
+    --p-radiobutton-checked-hover-background: #ffffff;
+    --p-radiobutton-icon-checked-color: var(--primary-color);
+    --p-radiobutton-icon-checked-hover-color: var(--secondary-color);
+    --p-radiobutton-focus-ring-color: var(--accent-color);
+}
+
 /* Menubar-Styling */
 .p-menubar {
     background: var(--surface-color);
@@ -159,6 +265,23 @@ body {
 
 .p-menubar .p-menuitem-link:hover {
     background-color: var(--highlight-color);
+}
+
+.p-steps-item-active .p-steps-item-label {
+    color: var(--text-color) !important;
+}
+
+.p-steps-item-active .p-steps-item-number {
+    color: var(--text-color) !important;
+}
+
+.p-tab-active {
+    color: var(--text-color) !important;
+
+}
+
+.p-tablist-active-bar {
+    background-color: var(--primary-color) !important;
 }
 
 /* Responsive Anpassungen */
