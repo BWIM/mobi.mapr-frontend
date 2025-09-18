@@ -346,7 +346,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   }
 
   private setupWebsocketForProject(project: Project): void {
-    if (project.status !== 'finished') return;
+    if (project.status === 'finished') return;
 
     if (this.websocketConnections.has(project.id)) return;
 
