@@ -65,17 +65,7 @@ export class MapV2Service {
       switch (action) {
         case ShortcutAction.ZOOM_TO_FEATURES:
           // zoom to the bounds
-          const bounds = this.boundsSubject.getValue();
-          if (bounds && this.map) {
-            const mapBounds = new LngLatBounds(
-              [bounds.minLng, bounds.minLat],
-              [bounds.maxLng, bounds.maxLat]
-            );
-            this.map.fitBounds(mapBounds, {
-              padding: 50,
-              duration: 2000
-            });
-          }
+          this.zoomToFeatures();
           break;
         case ShortcutAction.TOGGLE_HEXAGON_VIEW:
           this.hexagonView = !this.hexagonView;
@@ -123,6 +113,20 @@ export class MapV2Service {
         this.mapStyleSubject.next(style);
         this.lastStyleUpdate = Date.now();
       }, this.STYLE_UPDATE_COOLDOWN - (now - this.lastStyleUpdate));
+    }
+  }
+
+  zoomToFeatures(): void {
+    const bounds = this.boundsSubject.getValue();
+    if (bounds && this.map) {
+      const mapBounds = new LngLatBounds(
+        [bounds.minLng, bounds.minLat],
+        [bounds.maxLng, bounds.maxLat]
+      );
+      this.map.fitBounds(mapBounds, {
+        padding: 50,
+        duration: 2000
+      });
     }
   }
 

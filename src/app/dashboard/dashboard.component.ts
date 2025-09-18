@@ -6,6 +6,7 @@ import { LoadingSpinnerComponent } from '../shared/loading-spinner/loading-spinn
 import { MapV2Component } from '../map-v2/map-v2.component';
 import { TutorialService } from '../tutorial/tutorial.service';
 import { DashboardService } from './dashboard.service';
+import { MapV2Service } from '../map-v2/map-v2.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -29,7 +30,7 @@ export class DashboardComponent implements OnInit {
   rightSidebarExpanded: boolean = false;
   isMobile: boolean = false;
 
-  constructor(private tutorialService: TutorialService, private dashboardService: DashboardService) {
+  constructor(private tutorialService: TutorialService, private dashboardService: DashboardService, private mapService: MapV2Service) {
     this.checkMobile();
   }
 
@@ -51,7 +52,7 @@ export class DashboardComponent implements OnInit {
 
   private checkMobile(): void {
     this.isMobile = window.innerWidth < 768;
-    
+
     // Auto-close sidebars on mobile when switching to desktop
     if (!this.isMobile) {
       if (!this.leftSidebarExpanded) {
@@ -73,6 +74,10 @@ export class DashboardComponent implements OnInit {
 
   toggleSidebar() {
     this.dashboardService.toggleRightSidebarExpanded();
+  }
+
+  zoomToFeatures() {
+    this.mapService.zoomToFeatures();
   }
 
 }
