@@ -3,7 +3,7 @@
     "TITLE": "Projects",
     "LIST": {
       "TITLE": "Projects",
-      "NO_PROJECTS": "Please reload the page",
+      "NO_PROJECTS": "No projects available",
       "DELETED": "All information about the project got successfully deleted"
     },
     "DETAILS": {
@@ -39,7 +39,6 @@
     "EDIT": {
       "TITLE": "Edit Project"
     },
-    "UNGROUPED": "Ungrouped Projects",
     "TABS": {
       "PERSONAL": "Personal",
       "SHARED": "Shared",

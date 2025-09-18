@@ -3,7 +3,7 @@
     "TITLE": "Projekte",
     "LIST": {
       "TITLE": "Projekte",
-      "NO_PROJECTS": "Bitte lade die Seite neu",
+      "NO_PROJECTS": "Es sind keine Projekte verfügbar",
       "DELETED": "Alle Informationen zum Projekt erfolgreich gelöscht"
     },
     "DETAILS": {
