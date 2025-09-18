@@ -7,11 +7,12 @@ import { BehaviorSubject, Observable } from 'rxjs';
 export class DashboardService {
   private legendExpandedSubject = new BehaviorSubject<boolean>(false);
   private rightSidebarExpandedSubject = new BehaviorSubject<boolean>(false);
-
+  private leftSidebarExpandedSubject = new BehaviorSubject<boolean>(false);
   public legendExpanded$ = this.legendExpandedSubject.asObservable();
   public rightSidebarExpanded$ = this.rightSidebarExpandedSubject.asObservable();
+  public leftSidebarExpanded$ = this.leftSidebarExpandedSubject.asObservable();
 
-  constructor() {}
+  constructor() { }
 
   toggleLegendExpanded(): void {
     this.legendExpandedSubject.next(!this.legendExpandedSubject.value);
@@ -40,5 +41,17 @@ export class DashboardService {
 
   toggleRightSidebarExpanded(): void {
     this.rightSidebarExpandedSubject.next(!this.rightSidebarExpandedSubject.value);
+  }
+
+  toggleLeftSidebarExpanded(): void {
+    this.leftSidebarExpandedSubject.next(!this.leftSidebarExpandedSubject.value);
+  }
+
+  getLeftSidebarExpanded(): boolean {
+    return this.leftSidebarExpandedSubject.value;
+  }
+
+  setLeftSidebarExpanded(expanded: boolean): void {
+    this.leftSidebarExpandedSubject.next(expanded);
   }
 } 

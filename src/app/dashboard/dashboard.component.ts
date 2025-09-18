@@ -43,6 +43,9 @@ export class DashboardComponent implements OnInit {
     this.dashboardService.rightSidebarExpanded$.subscribe((expanded) => {
       this.rightSidebarExpanded = expanded;
     });
+    this.dashboardService.leftSidebarExpanded$.subscribe((expanded) => {
+      this.leftSidebarExpanded = expanded;
+    });
   }
 
   // @HostListener('window:resize', ['$event'])

@@ -28,7 +28,11 @@ export class LandingComponent implements OnInit {
     ngOnInit(): void {
         // Check if user is already logged in and redirect to dashboard
         if (this.authService.isLoggedIn()) {
-            this.router.navigate(['/dashboard']);
+            if (this.router.url.includes('redirect=false')) {
+
+            } else {
+                this.router.navigate(['/dashboard']);
+            }
         }
     }
 

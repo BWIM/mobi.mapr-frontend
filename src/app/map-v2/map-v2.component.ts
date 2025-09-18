@@ -312,7 +312,8 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       style: this.mapStyle,
       center: initialCenter,
       zoom: initialZoom,
-      dragRotate: false
+      dragRotate: false,
+      attributionControl: false
     });
 
     // Add navigation controls to before map
@@ -332,7 +333,8 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       style: afterStyle,
       center: initialCenter,
       zoom: initialZoom,
-      dragRotate: false
+      dragRotate: false,
+      attributionControl: false
     });
 
     // Add navigation controls to after map
