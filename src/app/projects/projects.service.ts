@@ -11,7 +11,8 @@ import {
   ProjectInfo,
   ExportProject,
   ProjectsFinishedStatus,
-  ProjectDetails
+  ProjectDetails,
+  PublicSharedProjectsResponse
 } from './project.interface';
 import { MapV2Service } from '../map-v2/map-v2.service';
 import { ShareService } from '../share/share.service';
@@ -61,6 +62,14 @@ export class ProjectsService {
       .set('page_size', pageSize.toString());
 
     return this.http.get<PaginatedResponse<Project>>(`${this.apiUrl}/public-projects/`, { params });
+  }
+
+  getPublicSharedProjects(page: number = 1, pageSize: number = 10): Observable<PublicSharedProjectsResponse> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('page_size', pageSize.toString());
+
+    return this.http.get<PublicSharedProjectsResponse>(`${this.apiUrl}/public-shared-projects/`, { params });
   }
 
   getProject(id: string): Observable<Project> {

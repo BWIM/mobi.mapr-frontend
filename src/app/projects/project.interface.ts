@@ -140,3 +140,28 @@ export interface ProjectDetails {
   profiles: FormattedProfile[];
   hexagons: HexagonScore[];
 }
+
+export interface PublicSharedProject {
+  id: number;
+  display_name: string;
+  description: string;
+  calculated: number;
+  projectgroup: {
+    id: number;
+    name: string;
+    user: number;
+    description: string;
+    default: boolean;
+  };
+  version: string;
+  project_type: string;
+  finished: boolean;
+  share_key: string;
+}
+
+export interface PublicSharedProjectsResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: PublicSharedProject[];
+}

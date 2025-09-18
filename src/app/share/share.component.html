@@ -5,43 +5,66 @@
 
         <!-- Header with logo -->
         <div class="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
-            <img src="assets/images/logo.png" alt="Logo" class="w-auto h-auto max-h-25 md:max-h-25 max-h-16">
+            <img src="assets/images/logo.png" alt="Logo"
+                class="w-auto h-auto max-h-25 md:max-h-25 max-h-16">
         </div>
     </div>
+
+    <!-- Projectbar Tab - Left side -->
+    <div class="projectbar-tab absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-r-lg z-20 cursor-pointer hover:bg-gray-50 transition-all duration-200 md:p-3 p-2"
+        (click)="toggleProjectbar()">
+        <div class="flex flex-col items-center gap-3">
+            <i class="pi pi-angle-right text-gray-800 md:text-xl text-lg"
+                [class.rotate-180]="leftSidebarExpanded"></i>
+            <span
+                class="rotate-text text-gray-800 font-semibold md:text-base text-sm hidden sm:block">Projects</span>
+        </div>
+    </div>
+
+    <!-- Projectbar Dialog - Left side modal -->
+    <p-dialog [(visible)]="leftSidebarExpanded" position="left"
+        [closable]="true" [draggable]="false" class="h-full"
+        [maximizable]="true" [resizable]="true" styleClass="share-projectbar"
+        [style]="{'width': isMobile ? '100vw' : '400px'}"
+        (onHide)="leftSidebarExpanded = false">
+        <div class="p-3 h-full">
+            <app-share-projectbar></app-share-projectbar>
+        </div>
+    </p-dialog>
 
     <!-- Details Tab - Mobile optimized -->
     <div class="sidebar-tab absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow-lg rounded-l-lg z-20 cursor-pointer hover:bg-gray-50 transition-all duration-200 md:p-3 p-2"
         (click)="toggleSidebar()">
         <div class="flex flex-col items-center gap-3">
-            <i class="pi pi-angle-left text-gray-800 md:text-xl text-lg" [class.rotate-180]="rightSidebarExpanded"></i>
-            <span class="rotate-text text-gray-800 font-semibold md:text-base text-sm hidden sm:block">Details</span>
+            <i class="pi pi-angle-left text-gray-800 md:text-xl text-lg"
+                [class.rotate-180]="rightSidebarExpanded"></i>
+            <span
+                class="rotate-text text-gray-800 font-semibold md:text-base text-sm hidden sm:block">Details</span>
         </div>
     </div>
 
     <!-- Details Dialog - Mobile responsive -->
-    <p-dialog 
-        [(visible)]="rightSidebarExpanded"
-        position="right"
-        [closable]="true"
-        [draggable]="false"
-        class="h-full"
-        [maximizable]="true"
-        [resizable]="true"
-        styleClass="share-sidebar"
+    <p-dialog [(visible)]="rightSidebarExpanded" position="right"
+        [closable]="true" [draggable]="false" class="h-full"
+        [maximizable]="true" [resizable]="true" styleClass="share-sidebar"
         [style]="{'width': isMobile ? '100vw' : '400px'}"
         (onHide)="isRightPinned = false">
-        <div class="p-3 h-full" >
-                <app-share-sidebar [sharedProject]="sharedProject"></app-share-sidebar>
+        <div class="p-3 h-full">
+            <app-share-sidebar
+                [sharedProject]="sharedProject"></app-share-sidebar>
         </div>
     </p-dialog>
 
     <!-- Mobile Navigation Bar (only visible on mobile) -->
-    <div class="md:hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 z-30" *ngIf="isMobile">
+    <div class="md:hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 z-30"
+        *ngIf="isMobile">
         <div class="flex gap-2 bg-white rounded-full shadow-lg p-2">
-            <p-button 
-                styleClass="p-button-secondary p-button-rounded"
-                (click)="toggleSidebar()"
-                title="Details">
+            <p-button styleClass="p-button-secondary p-button-rounded"
+                (click)="toggleProjectbar()" title="Projects">
+                <i class="pi pi-globe text-lg"></i>
+            </p-button>
+            <p-button styleClass="p-button-secondary p-button-rounded"
+                (click)="toggleSidebar()" title="Details">
                 <i class="pi pi-info-circle text-lg"></i>
             </p-button>
         </div>

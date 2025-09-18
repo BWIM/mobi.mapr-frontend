@@ -1,0 +1,44 @@
+/* Projectbar Content Styles */
+
+/* Project List Styles */
+.selected-row {
+    background-color: #e3f2fd !important;
+    border-color: #2196f3 !important;
+}
+
+.project-item {
+    transition: all 0.2s ease;
+}
+
+.project-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Group Headers */
+.group-header {
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+
+
+/* Custom scrollbar for webkit browsers */
+:host ::ng-deep .p-scrollpanel .p-scrollpanel-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+:host ::ng-deep .p-scrollpanel .p-scrollpanel-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+:host ::ng-deep .p-scrollpanel .p-scrollpanel-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+:host ::ng-deep .p-scrollpanel .p-scrollpanel-content::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}

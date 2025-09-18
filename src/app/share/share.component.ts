@@ -4,6 +4,7 @@ import { SharedModule } from '../shared/shared.module';
 import { ShareService } from './share.service';
 import { ActivatedRoute } from '@angular/router';
 import { ShareSidebarComponent } from './share-sidebar/share-sidebar.component';
+import { ShareProjectbarComponent } from './share-projectbar/share-projectbar.component';
 import { ShareProject } from './share.interface';
 import { LoadingService } from '../services/loading.service';
 import { MapV2Component } from '../map-v2/map-v2.component';
@@ -14,7 +15,7 @@ import { AnalyzeService } from '../analyze/analyze.service';
 @Component({
   selector: 'app-share',
   standalone: true,
-  imports: [SharedModule, LoadingSpinnerComponent, ShareSidebarComponent, MapV2Component],
+  imports: [SharedModule, LoadingSpinnerComponent, ShareSidebarComponent, ShareProjectbarComponent, MapV2Component],
   templateUrl: './share.component.html',
   styleUrl: './share.component.css'
 })
@@ -25,11 +26,12 @@ export class ShareComponent implements OnInit {
   project: any = null;
   sharedProject: ShareProject | null = null;
   rightSidebarExpanded: boolean = false;
+  leftSidebarExpanded: boolean = false;
   isMobile: boolean = false;
 
   constructor(
-    private shareService: ShareService, 
-    private route: ActivatedRoute, 
+    private shareService: ShareService,
+    private route: ActivatedRoute,
     private loadingService: LoadingService,
     private mapService: MapV2Service,
     private analyzeService: AnalyzeService,
@@ -47,12 +49,12 @@ export class ShareComponent implements OnInit {
     if (!localStorage.getItem('tutorialStatus') || localStorage.getItem('tutorialStatus') === 'false') {
       this.tutorialService.startTutorial('share');
     }
-    
+
     // Subscribe to the sidebar expansion state
     this.shareService.isRightSidebarExpanded$.subscribe(expanded => {
       this.rightSidebarExpanded = expanded;
     });
-    
+
     this.shareService.getProject(this.projectKey).subscribe(project => {
       this.project = project;
       if (project && project.id) {
@@ -76,7 +78,7 @@ export class ShareComponent implements OnInit {
 
   private checkMobile(): void {
     this.isMobile = window.innerWidth < 768;
-    
+
     // Auto-close sidebar on mobile when switching to desktop
     if (!this.isMobile && this.rightSidebarExpanded) {
       this.rightSidebarExpanded = false;
@@ -85,5 +87,9 @@ export class ShareComponent implements OnInit {
 
   toggleSidebar() {
     this.shareService.toggleRightSidebarExpanded();
+  }
+
+  toggleProjectbar() {
+    this.leftSidebarExpanded = !this.leftSidebarExpanded;
   }
 }

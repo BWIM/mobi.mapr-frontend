@@ -1,0 +1,109 @@
+<!-- Toast for messages -->
+<p-toast></p-toast>
+
+<!-- Projectbar Content -->
+<div class="h-full flex flex-col">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-800">
+            {{ 'PROJECTS.TABS.PUBLIC' | translate }}
+        </h2>
+    </div>
+
+    <div class="flex-1 overflow-hidden">
+        <p-scrollPanel [style]="{width: '100%', height: '100%'}">
+            <div class="space-y-4 w-full max-w-full">
+                <!-- Loading Spinner -->
+                <p-progress-spinner *ngIf="getCurrentTab().loading"
+                    styleClass="w-full h-full"></p-progress-spinner>
+
+                <!-- Grouped Projects -->
+                <div *ngFor="let group of getProjectGroupsForTab(0)"
+                    class="space-y-2">
+                    <div class="flex items-center gap-2 mb-2 w-full">
+                        <h4 class="text-sm font-medium text-gray-700">
+                            {{ group.name }}
+                        </h4>
+                        <span class="text-xs text-gray-500">
+                            ({{ (getGroupedProjectsForTab(0)[group.id] ||
+                            []).length }})
+                        </span>
+                    </div>
+                    <div class="space-y-2">
+                        <div *ngFor="let project of (getGroupedProjectsForTab(0)[group.id] || [])"
+                            class="p-2 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                            [ngClass]="{'selected-row': selectedProject?.id === project.id}"
+                            (click)="selectedProject = project">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1 min-w-0 mr-2">
+                                    <div class="flex items-center gap-1 mb-1">
+                                        <h3
+                                            class="font-medium text-gray-900 truncate text-sm">
+                                            {{ project.display_name }}
+                                        </h3>
+                                        <span class="text-xs text-gray-500">v{{
+                                            project.version }}</span>
+                                    </div>
+                                </div>
+                                <p-button icon="pi pi-map"
+                                    (onClick)="showResults(project)"
+                                    [disabled]="!project.finished"
+                                    [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate"
+                                    size="small">
+                                </p-button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ungrouped Projects -->
+                <div *ngIf="getUngroupedProjectsForTab(0).length > 0"
+                    class="space-y-2">
+                    <div class="flex items-center gap-2 mb-2 w-full">
+                        <h4 class="text-sm font-medium text-gray-700">
+                            {{ 'PROJECTS.UNGROUPED' | translate }}
+                        </h4>
+                        <span class="text-xs text-gray-500">
+                            ({{ getUngroupedProjectsForTab(0).length }})
+                        </span>
+                    </div>
+                    <div class="space-y-2">
+                        <div *ngFor="let project of getUngroupedProjectsForTab(0)"
+                            class="p-2 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                            [ngClass]="{'selected-row': selectedProject?.id === project.id}"
+                            (click)="selectedProject = project">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1 min-w-0 mr-2">
+                                    <div class="flex items-center gap-1 mb-1">
+                                        <h3
+                                            class="font-medium text-gray-900 truncate text-sm">
+                                            {{ project.display_name }}
+                                        </h3>
+                                        <span class="text-xs text-gray-500">v{{
+                                            project.version }}</span>
+                                    </div>
+                                    <span
+                                        class="px-1.5 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">
+                                        {{ 'PROJECTS.READ_ONLY' | translate }}
+                                    </span>
+                                </div>
+                                <p-button icon="pi pi-map"
+                                    (onClick)="showResults(project)"
+                                    [disabled]="!project.finished"
+                                    [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate"
+                                    size="small">
+                                </p-button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- No Projects Message -->
+                <p-message
+                    *ngIf="!getCurrentTab().loading && getCurrentTab().projects.length === 0"
+                    severity="info"
+                    text="{{ 'PROJECTS.LIST.NO_PROJECTS' | translate }}">
+                </p-message>
+            </div>
+        </p-scrollPanel>
+    </div>
+</div>
