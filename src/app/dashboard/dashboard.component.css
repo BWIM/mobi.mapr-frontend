@@ -40,8 +40,8 @@
     border-radius: 6px;
     overflow: hidden;
     box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2),
-                0 1px 1px 0 rgba(0, 0, 0, 0.14),
-                0 1px 3px 0 rgba(0, 0, 0, 0.12);
+        0 1px 1px 0 rgba(0, 0, 0, 0.14),
+        0 1px 3px 0 rgba(0, 0, 0, 0.12);
 }
 
 /* OpenLayers Karte benötigt eine definierte Größe */
@@ -221,27 +221,33 @@
 
 /* Mobile-specific styles */
 @media screen and (max-width: 768px) {
+
     /* Hide sidebar tabs on mobile */
     .sidebar-tab {
         display: none;
     }
-    
+
     /* Full-screen dialogs on mobile */
     :host ::ng-deep .projects-sidebar.p-dialog,
     :host ::ng-deep .details-sidebar.p-dialog {
         width: 100vw !important;
         height: 100vh !important;
+        height: 100dvh !important;
+        /* Use dynamic viewport height for mobile */
         margin: 0 !important;
         transform: none !important;
         border-radius: 0 !important;
     }
-    
+
     :host ::ng-deep .projects-sidebar .p-dialog-content,
     :host ::ng-deep .details-sidebar .p-dialog-content {
         height: 100vh !important;
+        height: 100dvh !important;
+        /* Use dynamic viewport height for mobile */
         padding: 0 !important;
+        overflow: hidden !important;
     }
-    
+
     /* Mobile navigation bar */
     .mobile-nav {
         position: fixed;
@@ -253,8 +259,10 @@
         border-radius: 2rem;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         padding: 0.5rem;
+        /* Ensure it doesn't interfere with content */
+        margin-bottom: env(safe-area-inset-bottom, 0);
     }
-    
+
     .mobile-nav button {
         min-width: 3rem;
         min-height: 3rem;
@@ -266,17 +274,17 @@
         justify-content: center;
         transition: all 0.2s ease;
     }
-    
+
     .mobile-nav button:active {
         transform: scale(0.95);
     }
-    
+
     /* Improve touch targets */
     .sidebar-tab {
         min-width: 3rem;
         min-height: 3rem;
     }
-    
+
     /* Mobile logo adjustments */
     .logo {
         max-height: 3rem !important;
@@ -288,7 +296,7 @@
     .sidebar-tab {
         padding: 0.75rem !important;
     }
-    
+
     .rotate-text {
         font-size: 0.875rem;
     }
@@ -299,7 +307,7 @@
     .sidebar-tab {
         padding: 1rem !important;
     }
-    
+
     .rotate-text {
         font-size: 1rem;
     }
@@ -311,11 +319,11 @@
         min-width: 3.5rem;
         min-height: 3.5rem;
     }
-    
+
     .sidebar-tab:hover {
         background-color: rgba(255, 255, 255, 0.9);
     }
-    
+
     :host ::ng-deep .p-button.p-button-text {
         min-width: 3rem;
         min-height: 3rem;
@@ -323,7 +331,8 @@
 }
 
 /* High DPI display optimizations */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
     .sidebar-tab {
         border: 0.5px solid rgba(0, 0, 0, 0.1);
     }
