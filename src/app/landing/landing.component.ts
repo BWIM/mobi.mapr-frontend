@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { AuthService } from '../auth/auth.service';
 
 @Component({
     selector: 'app-landing',
@@ -10,18 +11,25 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     templateUrl: './landing.component.html',
     styleUrl: './landing.component.css'
 })
-export class LandingComponent {
+export class LandingComponent implements OnInit {
     currentLang: string = 'de';
     availableLangs = [
         { code: 'de', name: 'Deutsch' },
         { code: 'en', name: 'English' }
     ];
 
-    constructor(public router: Router, public translate: TranslateService) {
+    constructor(public router: Router, public translate: TranslateService, private authService: AuthService) {
         // Get saved language preference or default to German
         const savedLang = localStorage.getItem('language') || 'de';
         this.currentLang = savedLang;
         this.translate.use(savedLang);
+    }
+
+    ngOnInit(): void {
+        // Check if user is already logged in and redirect to dashboard
+        if (this.authService.isLoggedIn()) {
+            this.router.navigate(['/dashboard']);
+        }
     }
 
     // External links - you can update these URLs as needed
