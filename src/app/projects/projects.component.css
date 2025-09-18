@@ -5,25 +5,109 @@
     color: var(--primary-color) !important;
 }
 
+/* Custom tab styling */
+:host ::ng-deep .custom-tabview .p-tabview-nav {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+:host ::ng-deep .custom-tabview .p-tabview-nav li {
+    margin-right: 0.5rem;
+}
+
+:host ::ng-deep .custom-tabview .p-tabview-nav li .p-tabview-nav-link {
+    background: var(--surface-100);
+    border: 1px solid var(--surface-300);
+    border-radius: 0.5rem 0.5rem 0 0;
+    padding: 0.75rem 1rem;
+    color: var(--text-color);
+    transition: all 0.2s ease;
+}
+
+:host ::ng-deep .custom-tabview .p-tabview-nav li .p-tabview-nav-link:hover {
+    background: var(--surface-200);
+    border-color: var(--surface-400);
+}
+
+:host ::ng-deep .custom-tabview .p-tabview-nav li.p-tabview-ink-bar {
+    background: var(--primary-color);
+}
+
+:host ::ng-deep .custom-tabview .p-tabview-nav li.p-tabview-ink-bar .p-tabview-nav-link {
+    background: var(--primary-color);
+    color: var(--primary-color-text);
+    border-color: var(--primary-color);
+}
+
+:host ::ng-deep .custom-tabview .p-tabview-panels {
+    background: var(--surface-0);
+    border: 1px solid var(--surface-300);
+    border-top: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+    padding: 1rem;
+}
+
+:host ::ng-deep .custom-tabview .p-tabview-nav-link .p-tabview-title {
+    font-weight: 500;
+}
+
+/* Tab content spacing */
+:host ::ng-deep .custom-tabview .p-tabview-panel {
+    padding: 0;
+}
+
 /* Mobile-responsive styles for projects component */
 @media screen and (max-width: 768px) {
+
+    /* Tab styling for mobile */
+    :host ::ng-deep .custom-tabview .p-tabview-nav {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    :host ::ng-deep .custom-tabview .p-tabview-nav li {
+        margin-right: 0;
+        flex: 1;
+        min-width: 0;
+    }
+
+    :host ::ng-deep .custom-tabview .p-tabview-nav li .p-tabview-nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    :host ::ng-deep .custom-tabview .p-tabview-nav-link .p-tabview-title {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    :host ::ng-deep .custom-tabview .p-tabview-nav-link i {
+        font-size: 0.75rem;
+    }
+
     /* Improve table layout for mobile */
-    :host ::ng-deep .p-datatable .p-datatable-thead > tr > th,
-    :host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+    :host ::ng-deep .p-datatable .p-datatable-thead>tr>th,
+    :host ::ng-deep .p-datatable .p-datatable-tbody>tr>td {
         padding: 0.75rem 0.5rem;
     }
-    
+
     /* Make buttons larger for touch */
     :host ::ng-deep .p-button {
         min-width: 2.5rem;
         min-height: 2.5rem;
     }
-    
+
     /* Improve panel spacing */
     :host ::ng-deep .p-panel .p-panel-content {
         padding: 0.75rem;
     }
-    
+
     /* Better text overflow handling */
     .text-overflow-ellipsis {
         max-width: 150px;
@@ -31,23 +115,23 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    
+
     /* Improve toggle switch touch target */
     :host ::ng-deep .p-togglebutton {
         min-width: 3rem;
         min-height: 2rem;
     }
-    
+
     /* Better spacing for mobile */
-    .space-y-4 > * + * {
+    .space-y-4>*+* {
         margin-top: 1rem;
     }
-    
+
     /* Improve scroll panel for mobile */
     :host ::ng-deep .p-scrollpanel {
         border-radius: 0;
     }
-    
+
     /* Better button spacing in action columns */
     .flex.gap-2 {
         gap: 0.5rem;
@@ -59,7 +143,7 @@
     .text-overflow-ellipsis {
         max-width: 200px;
     }
-    
+
     :host ::ng-deep .p-button {
         min-width: 2.25rem;
         min-height: 2.25rem;
@@ -72,18 +156,18 @@
         min-width: 3rem;
         min-height: 3rem;
     }
-    
+
     :host ::ng-deep .p-button.p-button-text {
         min-width: 3rem;
         min-height: 3rem;
     }
-    
+
     /* Improve table row touch targets */
-    :host ::ng-deep .p-datatable .p-datatable-tbody > tr {
+    :host ::ng-deep .p-datatable .p-datatable-tbody>tr {
         min-height: 3.5rem;
     }
-    
-    :host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+
+    :host ::ng-deep .p-datatable .p-datatable-tbody>tr>td {
         padding: 1rem 0.75rem;
     }
 }

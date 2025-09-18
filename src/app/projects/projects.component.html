@@ -3,168 +3,477 @@
 
     <div class="h-full overflow-hidden min-w-0">
         <p-scrollPanel [style]="{width: '100%', height: '100%'}">
-            <!-- Gruppierte Projekte -->
-            <div class="space-y-4 px-3 min-w-0">
-                <div class="mb-4 min-w-0 overflow-hidden" *ngFor="let group of groupedProjects">
-                    <p-panel [toggleable]="true" styleClass="overflow-hidden">
-                        <ng-template pTemplate="header">
-                            <div class="flex items-center">
-                                <span><b>{{group.group.name}}</b></span>
-                                <button pButton 
-                                    *ngIf="!group.group.default"
-                                    class="p-button-text p-button-rounded ml-2" 
-                                    icon="pi pi-pencil"
-                                    (click)="editProjectGroup(group.group)"
-                                    pTooltip="{{'PROJECTS.ACTIONS.EDIT_GROUP' | translate}}">
-                                </button>
+            <div class="px-3 min-w-0">
+                <!-- Simple Tabbed Interface -->
+                <p-tabs [value]="activeTabIndex"
+                    (onChange)="onTabChange($event)"
+                    styleClass="custom-tabview">
+
+                    <p-tablist class="border-b border-gray-200 mb-4">
+                        <p-tab [value]="0" class="px-4 py-2">
+                            <div class="flex items-center gap-2">
+                                <i class="pi pi-user"></i>
+                                <span>{{ 'PROJECTS.TABS.PERSONAL' | translate
+                                    }}</span>
                             </div>
-                        </ng-template>
-                        <p-table 
-                            [value]="group.projects"
-                            styleClass="p-datatable-sm"
-                            [(selection)]="selectedTableProject"
-                            selectionMode="single">
-                            <ng-template pTemplate="header">
-                                <tr>
-                                    <th>{{ 'PROJECTS.FIELDS.NAME' | translate }} </th>
-                                    <th></th>
-                                </tr>
-                            </ng-template>
-                            <ng-template pTemplate="body" let-project>
-                                <tr>
-                                    <td>
-                                        <div class="flex flex-col">
-                                            <div class="flex items-center" [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
-                                                <span class="text-overflow-ellipsis overflow-hidden break-words"
-                                                      [pTooltip]="project.display_name + '. (Version: ' + project.version + ')'">
-                                                    {{ project.display_name }}
-                                                    <span style="font-size: 0.8em; color: #888;">v{{ project.version }}</span>
-                                                </span>
-                                            </div>
-                                            <div *ngIf="!project.finished" class="w-full mt-1">
-                                                <p-progressBar
-                                                    [value]="getProgress(project)" 
-                                                    [showValue]="true"
-                                                    styleClass="h-1"
-                                                    [pTooltip]="progress + '%'"
-                                                    color="var(--primary-color)">
-                                                </p-progressBar>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="flex gap-2 justify-end relative">
-                                            <p-button 
-                                                icon="pi pi-map"
-                                                (onClick)="showResults(project)"
-                                                [disabled]="!project.finished"
-                                                [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate"
-                                                data-tutorial-target="show-results-btn">
-                                            </p-button>
-                                            <p-button 
-                                                icon="pi pi-ellipsis-v"
-                                                (click)="menu.toggle($event)"
-                                                [disabled]="project.default"
-                                                [pTooltip]="'PROJECTS.ACTIONS.MORE_OPTIONS' | translate"
-                                                styleClass="p-button-text p-button-rounded">
-                                            </p-button>
-                                            <p-menu #menu 
-                                                [model]="getSpeedDialItems(project)" 
-                                                [popup]="true"
-                                                appendTo="body">
-                                            </p-menu>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </ng-template>
-                        </p-table>
-                    </p-panel>
-                </div>
+                        </p-tab>
+                        <p-tab [value]="1" class="px-4 py-2">
+                            <div class="flex items-center gap-2">
+                                <i class="pi pi-users"></i>
+                                <span>{{ 'PROJECTS.TABS.SHARED' | translate
+                                    }}</span>
+                            </div>
+                        </p-tab>
+                        <p-tab [value]="2" class="px-4 py-2">
+                            <div class="flex items-center gap-2">
+                                <i class="pi pi-globe"></i>
+                                <span>{{ 'PROJECTS.TABS.PUBLIC' | translate
+                                    }}</span>
+                            </div>
+                        </p-tab>
+                    </p-tablist>
 
-                <!-- Nicht gruppierte Projekte -->
-                <div class="mb-4 min-w-0 overflow-hidden" *ngIf="ungroupedProjects.length > 0">
-                    <p-panel header="{{ 'PROJECTS.UNGROUPED' | translate }}" [toggleable]="true" styleClass="overflow-hidden">
-                        <p-table 
-                            [value]="ungroupedProjects"
-                            styleClass="p-datatable-sm"
-                            [(selection)]="selectedTableProject"
-                            selectionMode="single">
-                            <ng-template pTemplate="header">
-                                <tr>
-                                    <th>{{ 'PROJECTS.FIELDS.NAME' | translate }}</th>
-                                    <th></th>
-                                </tr>
-                            </ng-template>
-                            <ng-template pTemplate="body" let-project>
-                                <tr>
-                                    <td>
-                                        <div class="flex flex-col">
-                                            <div class="flex items-center" [ngClass]="{'selected-row': selectedTableProject?.id === project.id}">
-                                                
-                                                <span class="text-overflow-ellipsis overflow-hidden break-words"
-                                                      [pTooltip]="project.display_name + '. (Version: ' + project.version + ')'">
-                                                    {{ project.display_name }}
-                                                    <br>
-                                                    <span style="font-size: 0.8em; color: #888;">v{{ project.version }}</span>
-                                                </span>
-                                            </div>
-                                            <div *ngIf="!project.finished" class="w-full mt-1">
-                                                <p-progressBar
-                                                    [value]="getProgress(project)" 
-                                                    [showValue]="true"
-                                                    styleClass="h-2"
-                                                    [pTooltip]="progress + '%'"
-                                                    color="var(--primary-color)">
-                                                </p-progressBar>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="flex gap-2 justify-end relative">
-                                            <p-button 
-                                                icon="pi pi-map"
-                                                (onClick)="showResults(project)"
-                                                [disabled]="!project.finished"
-                                                [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate">
-                                            </p-button>
-                                            <p-button 
-                                                icon="pi pi-ellipsis-v"
-                                                (click)="menu.toggle($event)"
-                                                [disabled]="project.default"
-                                                [pTooltip]="'PROJECTS.ACTIONS.MORE_OPTIONS' | translate"
-                                                styleClass="p-button-text p-button-rounded">
-                                            </p-button>
-                                            <p-menu #menu 
-                                                [model]="getSpeedDialItems(project)" 
-                                                [popup]="true"
-                                                appendTo="body">
-                                            </p-menu>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </ng-template>
-                        </p-table>
-                    </p-panel>
-                </div>
+                    <!-- Personal Projects Tab -->
+                    <p-tabpanel [value]="0" class="h-full">
 
-                <!-- Keine Projekte -->
-                <p-progress-spinner *ngIf="loading" styleClass="w-full h-full"></p-progress-spinner>
-                <p-message *ngIf="!loading && groupedProjects.length === 0 && ungroupedProjects.length === 0"
-                    severity="info"
-                    text="{{ 'PROJECTS.LIST.NO_PROJECTS' | translate }}">
-                </p-message>
+                        <div class="space-y-4 min-w-0">
+                            <!-- Loading Spinner -->
+                            <p-progress-spinner *ngIf="getCurrentTab().loading"
+                                styleClass="w-full h-full"></p-progress-spinner>
+
+                            <!-- Grouped Projects -->
+                            <div *ngFor="let group of getProjectGroupsForTab(0)"
+                                class="space-y-2">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <h4
+                                        class="text-sm font-medium text-gray-700">
+                                        {{ group.name }}</h4>
+                                    <span class="text-xs text-gray-500">({{
+                                        (getGroupedProjectsForTab(0)[group.id]
+                                        || []).length
+                                        }})</span>
+                                </div>
+                                <div class="space-y-2 ml-4">
+                                    <div *ngFor="let project of (getGroupedProjectsForTab(0)[group.id] || [])"
+                                        class="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                                        [ngClass]="{'selected-row': selectedTableProject?.id === project.id}"
+                                        (click)="selectedTableProject = project">
+                                        <div
+                                            class="flex justify-between items-start">
+                                            <div class="flex-1 min-w-0">
+                                                <h3
+                                                    class="font-medium text-gray-900 truncate">
+                                                    {{ project.display_name }}
+                                                    <span
+                                                        class="text-sm text-gray-500 ml-2">v{{
+                                                        project.version
+                                                        }}</span>
+                                                </h3>
+                                                <p *ngIf="project.description"
+                                                    class="text-sm text-gray-600 mt-1">
+                                                    {{ project.description }}
+                                                </p>
+                                                <div *ngIf="project.status !== 'finished'"
+                                                    class="mt-2">
+                                                    <p-progressBar
+                                                        [value]="getProgress(project)"
+                                                        [showValue]="true"
+                                                        styleClass="h-2"
+                                                        color="var(--primary-color)">
+                                                    </p-progressBar>
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-2 ml-4">
+                                                <p-button icon="pi pi-map"
+                                                    (onClick)="showResults(project)"
+                                                    [disabled]="project.status !== 'finished'"
+                                                    [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate"
+                                                    size="small">
+                                                </p-button>
+                                                <p-button
+                                                    icon="pi pi-ellipsis-v"
+                                                    (click)="menu.toggle($event)"
+                                                    [disabled]="project.status === 'finished'"
+                                                    [pTooltip]="'PROJECTS.ACTIONS.MORE_OPTIONS' | translate"
+                                                    styleClass="p-button-text p-button-sm">
+                                                </p-button>
+                                                <p-menu #menu
+                                                    [model]="getSpeedDialItems(project)"
+                                                    [popup]="true"
+                                                    appendTo="body">
+                                                </p-menu>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ungrouped Projects -->
+                            <div *ngIf="getUngroupedProjectsForTab(0).length > 0"
+                                class="space-y-2">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <h4
+                                        class="text-sm font-medium text-gray-700">
+                                        {{ 'PROJECTS.UNGROUPED' | translate }}
+                                    </h4>
+                                    <span class="text-xs text-gray-500">({{
+                                        getUngroupedProjectsForTab(0).length
+                                        }})</span>
+                                </div>
+                                <div class="space-y-2">
+                                    <div *ngFor="let project of getUngroupedProjectsForTab(0)"
+                                        class="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                                        [ngClass]="{'selected-row': selectedTableProject?.id === project.id}"
+                                        (click)="selectedTableProject = project">
+                                        <div
+                                            class="flex justify-between items-start">
+                                            <div class="flex-1 min-w-0">
+                                                <h3
+                                                    class="font-medium text-gray-900 truncate">
+                                                    {{ project.display_name }}
+                                                    <span
+                                                        class="text-sm text-gray-500 ml-2">v{{
+                                                        project.version
+                                                        }}</span>
+                                                </h3>
+                                                <p *ngIf="project.description"
+                                                    class="text-sm text-gray-600 mt-1">
+                                                    {{ project.description }}
+                                                </p>
+                                                <div *ngIf="project.status !== 'finished'"
+                                                    class="mt-2">
+                                                    <p-progressBar
+                                                        [value]="getProgress(project)"
+                                                        [showValue]="true"
+                                                        styleClass="h-2"
+                                                        color="var(--primary-color)">
+                                                    </p-progressBar>
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-2 ml-4">
+                                                <p-button icon="pi pi-map"
+                                                    (onClick)="showResults(project)"
+                                                    [disabled]="project.status !== 'finished'"
+                                                    [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate"
+                                                    size="small">
+                                                </p-button>
+                                                <p-button
+                                                    icon="pi pi-ellipsis-v"
+                                                    (click)="menu.toggle($event)"
+                                                    [pTooltip]="'PROJECTS.ACTIONS.MORE_OPTIONS' | translate"
+                                                    styleClass="p-button-text p-button-sm">
+                                                </p-button>
+                                                <p-menu #menu
+                                                    [model]="getSpeedDialItems(project)"
+                                                    [popup]="true"
+                                                    appendTo="body">
+                                                </p-menu>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- No Projects Message -->
+                            <p-message
+                                *ngIf="!getCurrentTab().loading && getCurrentTab().projects.length === 0"
+                                severity="info"
+                                text="{{ 'PROJECTS.LIST.NO_PROJECTS' | translate }}">
+                            </p-message>
+                        </div>
+                    </p-tabpanel>
+
+                    <!-- Shared Projects Tab -->
+                    <p-tabpanel [value]="1" class="h-full">
+
+                        <div class="space-y-4 min-w-0">
+                            <!-- Loading Spinner -->
+                            <p-progress-spinner *ngIf="getCurrentTab().loading"
+                                styleClass="w-full h-full"></p-progress-spinner>
+
+                            <!-- Grouped Projects -->
+                            <div *ngFor="let group of getProjectGroupsForTab(1)"
+                                class="space-y-2">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <h4
+                                        class="text-sm font-medium text-gray-700">
+                                        {{ group.name }}</h4>
+                                    <span class="text-xs text-gray-500">({{
+                                        (getGroupedProjectsForTab(1)[group.id]
+                                        || []).length
+                                        }})</span>
+                                </div>
+                                <div class="space-y-2 ml-4">
+                                    <div *ngFor="let project of (getGroupedProjectsForTab(1)[group.id] || [])"
+                                        class="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                                        [ngClass]="{'selected-row': selectedTableProject?.id === project.id}"
+                                        (click)="selectedTableProject = project">
+                                        <div
+                                            class="flex justify-between items-start">
+                                            <div class="flex-1 min-w-0">
+                                                <h3
+                                                    class="font-medium text-gray-900 truncate">
+                                                    {{ project.display_name }}
+                                                    <span
+                                                        class="text-sm text-gray-500 ml-2">v{{
+                                                        project.version
+                                                        }}</span>
+                                                    <span
+                                                        class="ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                                                        {{ 'PROJECTS.SHARED' |
+                                                        translate }}
+                                                    </span>
+                                                </h3>
+                                                <p *ngIf="project.description"
+                                                    class="text-sm text-gray-600 mt-1">
+                                                    {{ project.description }}
+                                                </p>
+                                                <div *ngIf="project.status !== 'finished'"
+                                                    class="mt-2">
+                                                    <p-progressBar
+                                                        [value]="getProgress(project)"
+                                                        [showValue]="true"
+                                                        styleClass="h-2"
+                                                        color="var(--primary-color)">
+                                                    </p-progressBar>
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-2 ml-4">
+                                                <p-button icon="pi pi-map"
+                                                    (onClick)="showResults(project)"
+                                                    [disabled]="project.status !== 'finished'"
+                                                    [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate"
+                                                    size="small">
+                                                </p-button>
+                                                <!-- No edit/delete actions for shared projects -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ungrouped Projects -->
+                            <div *ngIf="getUngroupedProjectsForTab(1).length > 0"
+                                class="space-y-2">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <h4
+                                        class="text-sm font-medium text-gray-700">
+                                        {{ 'PROJECTS.UNGROUPED' | translate }}
+                                    </h4>
+                                    <span class="text-xs text-gray-500">({{
+                                        getUngroupedProjectsForTab(1).length
+                                        }})</span>
+                                </div>
+                                <div class="space-y-2">
+                                    <div *ngFor="let project of getUngroupedProjectsForTab(1)"
+                                        class="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                                        [ngClass]="{'selected-row': selectedTableProject?.id === project.id}"
+                                        (click)="selectedTableProject = project">
+                                        <div
+                                            class="flex justify-between items-start">
+                                            <div class="flex-1 min-w-0">
+                                                <h3
+                                                    class="font-medium text-gray-900 truncate">
+                                                    {{ project.display_name }}
+                                                    <span
+                                                        class="text-sm text-gray-500 ml-2">v{{
+                                                        project.version
+                                                        }}</span>
+                                                    <span
+                                                        class="ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                                                        {{ 'PROJECTS.SHARED' |
+                                                        translate }}
+                                                    </span>
+                                                </h3>
+                                                <p *ngIf="project.description"
+                                                    class="text-sm text-gray-600 mt-1">
+                                                    {{ project.description }}
+                                                </p>
+                                                <div *ngIf="project.status !== 'finished'"
+                                                    class="mt-2">
+                                                    <p-progressBar
+                                                        [value]="getProgress(project)"
+                                                        [showValue]="true"
+                                                        styleClass="h-2"
+                                                        color="var(--primary-color)">
+                                                    </p-progressBar>
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-2 ml-4">
+                                                <p-button icon="pi pi-map"
+                                                    (onClick)="showResults(project)"
+                                                    [disabled]="project.status !== 'finished'"
+                                                    [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate"
+                                                    size="small">
+                                                </p-button>
+                                                <!-- No edit/delete actions for shared projects -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- No Projects Message -->
+                            <p-message
+                                *ngIf="!getCurrentTab().loading && getCurrentTab().projects.length === 0"
+                                severity="info"
+                                text="{{ 'PROJECTS.LIST.NO_PROJECTS' | translate }}">
+                            </p-message>
+                        </div>
+                    </p-tabpanel>
+
+                    <!-- Public Projects Tab -->
+                    <p-tabpanel [value]="2" class="h-full">
+
+                        <div class="space-y-4 min-w-0">
+                            <!-- Loading Spinner -->
+                            <p-progress-spinner *ngIf="getCurrentTab().loading"
+                                styleClass="w-full h-full"></p-progress-spinner>
+
+                            <!-- Grouped Projects -->
+                            <div *ngFor="let group of getProjectGroupsForTab(2)"
+                                class="space-y-2">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <h4
+                                        class="text-sm font-medium text-gray-700">
+                                        {{ group.name }}</h4>
+                                    <span class="text-xs text-gray-500">({{
+                                        (getGroupedProjectsForTab(2)[group.id]
+                                        || []).length
+                                        }})</span>
+                                </div>
+                                <div class="space-y-2 ml-4">
+                                    <div *ngFor="let project of (getGroupedProjectsForTab(2)[group.id] || [])"
+                                        class="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                                        [ngClass]="{'selected-row': selectedTableProject?.id === project.id}"
+                                        (click)="selectedTableProject = project">
+                                        <div
+                                            class="flex justify-between items-start">
+                                            <div class="flex-1 min-w-0">
+                                                <h3
+                                                    class="font-medium text-gray-900 truncate">
+                                                    {{ project.display_name }}
+                                                    <span
+                                                        class="text-sm text-gray-500 ml-2">v{{
+                                                        project.version
+                                                        }}</span>
+                                                    <span
+                                                        class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                                                        {{ 'PROJECTS.READ_ONLY'
+                                                        | translate }}
+                                                    </span>
+                                                </h3>
+                                                <p *ngIf="project.description"
+                                                    class="text-sm text-gray-600 mt-1">
+                                                    {{ project.description }}
+                                                </p>
+                                                <div *ngIf="project.status !== 'finished'"
+                                                    class="mt-2">
+                                                    <p-progressBar
+                                                        [value]="getProgress(project)"
+                                                        [showValue]="true"
+                                                        styleClass="h-2"
+                                                        color="var(--primary-color)">
+                                                    </p-progressBar>
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-2 ml-4">
+                                                <p-button icon="pi pi-map"
+                                                    (onClick)="showResults(project)"
+                                                    [disabled]="project.status !== 'finished'"
+                                                    [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate"
+                                                    size="small">
+                                                </p-button>
+                                                <!-- No edit/delete actions for public projects -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ungrouped Projects -->
+                            <div *ngIf="getUngroupedProjectsForTab(2).length > 0"
+                                class="space-y-2">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <h4
+                                        class="text-sm font-medium text-gray-700">
+                                        {{ 'PROJECTS.UNGROUPED' | translate }}
+                                    </h4>
+                                    <span class="text-xs text-gray-500">({{
+                                        getUngroupedProjectsForTab(2).length
+                                        }})</span>
+                                </div>
+                                <div class="space-y-2">
+                                    <div *ngFor="let project of getUngroupedProjectsForTab(2)"
+                                        class="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                                        [ngClass]="{'selected-row': selectedTableProject?.id === project.id}"
+                                        (click)="selectedTableProject = project">
+                                        <div
+                                            class="flex justify-between items-start">
+                                            <div class="flex-1 min-w-0">
+                                                <h3
+                                                    class="font-medium text-gray-900 truncate">
+                                                    {{ project.display_name }}
+                                                    <span
+                                                        class="text-sm text-gray-500 ml-2">v{{
+                                                        project.version
+                                                        }}</span>
+                                                    <span
+                                                        class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                                                        {{ 'PROJECTS.READ_ONLY'
+                                                        | translate }}
+                                                    </span>
+                                                </h3>
+                                                <p *ngIf="project.description"
+                                                    class="text-sm text-gray-600 mt-1">
+                                                    {{ project.description }}
+                                                </p>
+                                                <div *ngIf="project.status !== 'finished'"
+                                                    class="mt-2">
+                                                    <p-progressBar
+                                                        [value]="getProgress(project)"
+                                                        [showValue]="true"
+                                                        styleClass="h-2"
+                                                        color="var(--primary-color)">
+                                                    </p-progressBar>
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-2 ml-4">
+                                                <p-button icon="pi pi-map"
+                                                    (onClick)="showResults(project)"
+                                                    [disabled]="project.status !== 'finished'"
+                                                    [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate"
+                                                    size="small">
+                                                </p-button>
+                                                <!-- No edit/delete actions for public projects -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- No Projects Message -->
+                            <p-message
+                                *ngIf="!getCurrentTab().loading && getCurrentTab().projects.length === 0"
+                                severity="info"
+                                text="{{ 'PROJECTS.LIST.NO_PROJECTS' | translate }}">
+                            </p-message>
+                        </div>
+                    </p-tabpanel>
+                </p-tabs>
 
                 <!-- Button für nicht zugewiesene Gruppen -->
                 <div class="mt-4 p-2" *ngIf="!loading">
-                    <button pButton
-                        icon="pi pi-trash"
+                    <button pButton icon="pi pi-trash"
                         [label]="'PROJECT_GROUPS.MANAGE_UNUSED' | translate"
                         class="p-button-secondary p-button-sm"
                         (click)="showUnusedGroupsOverlay($event)">
                     </button>
                     <div class="flex items-center gap-2 p-2">
-                        <p-toggleSwitch [(ngModel)]="autoCloseSidebar"></p-toggleSwitch>
-                        <label>{{ 'PROJECTS.AUTO_CLOSE_SIDEBAR' | translate }}</label>
+                        <p-toggleSwitch
+                            [(ngModel)]="autoCloseSidebar"></p-toggleSwitch>
+                        <label>{{ 'PROJECTS.AUTO_CLOSE_SIDEBAR' | translate
+                            }}</label>
                     </div>
                 </div>
             </div>
@@ -176,26 +485,22 @@
         <ng-template pTemplate>
             <div class="flex flex-column gap-3" style="min-width: 300px">
                 <h3>{{ 'PROJECT_GROUPS.UNUSED_GROUPS' | translate }}</h3>
-                
-                <p-message 
-                    *ngIf="unusedGroups.length === 0" 
-                    severity="info" 
+
+                <p-message *ngIf="unusedGroups.length === 0" severity="info"
                     [text]="'PROJECT_GROUPS.NO_UNUSED_GROUPS' | translate">
                 </p-message>
 
-                <div *ngIf="unusedGroups.length > 0" class="flex flex-column gap-3">
-                    <p-listbox 
-                        [options]="unusedGroups"
-                        [(ngModel)]="selectedUnusedGroups"
-                        [multiple]="true"
-                        optionLabel="name"
-                        [style]="{'max-height': '200px'}"
+                <div *ngIf="unusedGroups.length > 0"
+                    class="flex flex-column gap-3">
+                    <p-listbox [options]="unusedGroups"
+                        [(ngModel)]="selectedUnusedGroups" [multiple]="true"
+                        optionLabel="name" [style]="{'max-height': '200px'}"
                         [listStyle]="{'max-height': '200px'}">
                     </p-listbox>
 
-                    <div class="flex justify-content-between align-items-center">
-                        <p-button 
-                            icon="pi pi-trash" 
+                    <div
+                        class="flex justify-content-between align-items-center">
+                        <p-button icon="pi pi-trash"
                             [label]="'PROJECT_GROUPS.DELETE_SELECTED' | translate"
                             styleClass="p-button-danger p-button-sm"
                             [disabled]="!selectedUnusedGroups.length"
@@ -208,77 +513,68 @@
     </p-popover>
 
     <!-- Action Buttons am unteren Rand -->
-    <div class="p-3 bg-surface-ground border-t grid grid-cols-2 gap-2" *ngIf="!loading">
-        <p-button 
-            icon="pi pi-users" 
+    <div class="p-3 bg-surface-ground border-t grid grid-cols-2 gap-2"
+        *ngIf="!loading">
+        <p-button icon="pi pi-users"
             label="{{ 'PROJECTS.ACTIONS.CREATE_GROUP' | translate }}"
             [pTooltip]="'PROJECTS.ACTIONS.CREATE_GROUP_TOOLTIP' | translate"
             styleClass="p-button-secondary w-full"
             (onClick)="showProjectGroupDialog()">
         </p-button>
-        <p-button 
-            icon="pi pi-plus" 
+        <p-button icon="pi pi-plus"
             label="{{ 'PROJECTS.ACTIONS.CREATE' | translate }}"
             [pTooltip]="'PROJECTS.ACTIONS.CREATE_TOOLTIP' | translate"
-            styleClass="p-button-info w-full"
-            (onClick)="showProjectWizard()">
+            styleClass="p-button-info w-full" (onClick)="showProjectWizard()">
         </p-button>
     </div>
 
     <!-- Edit Project Dialog -->
-    <p-dialog 
-        [(visible)]="editDialogVisible" 
-        [header]="'PROJECTS.EDIT.TITLE' | translate"
-        [modal]="true"
-        [style]="{width: '450px'}"
-        [appendTo]="'body'"
-        [draggable]="false"
+    <p-dialog [(visible)]="editDialogVisible"
+        [header]="'PROJECTS.EDIT.TITLE' | translate" [modal]="true"
+        [style]="{width: '450px'}" [appendTo]="'body'" [draggable]="false"
         [resizable]="false">
         <div class="flex flex-col gap-4" *ngIf="projectToEdit">
             <div class="field">
-                <label for="projectName" class="block mb-2">{{ 'PROJECTS.FIELDS.NAME' | translate }}</label>
-                <input id="projectName" type="text" pInputText [(ngModel)]="projectToEdit.display_name" class="w-full border p-2 border rounded-md">
-            </div>
-            
-            <div class="field">
-                <label for="projectDescription" class="block mb-2">{{ 'PROJECTS.FIELDS.DESCRIPTION' | translate }}</label>
-                <textarea id="projectDescription" pInputTextarea [(ngModel)]="projectToEdit.description" class="w-full p-2 border rounded-md" rows="3"></textarea>
+                <label for="projectName" class="block mb-2">{{
+                    'PROJECTS.FIELDS.NAME' | translate }}</label>
+                <input id="projectName" type="text" pInputText
+                    [(ngModel)]="projectToEdit.display_name"
+                    class="w-full border p-2 border rounded-md">
             </div>
 
             <div class="field">
-                <label for="projectGroup" class="block mb-2">{{ 'PROJECTS.FIELDS.GROUP' | translate }}</label>
-                <p-dropdown 
-                    id="projectGroup"
-                    [options]="projectGroups"
-                    [(ngModel)]="projectToEdit.projectgroup"
-                    optionLabel="name"
-                    [showClear]="true"
-                    [appendTo]="'body'"
+                <label for="projectDescription" class="block mb-2">{{
+                    'PROJECTS.FIELDS.DESCRIPTION' | translate }}</label>
+                <textarea id="projectDescription" pInputTextarea
+                    [(ngModel)]="projectToEdit.description"
+                    class="w-full p-2 border rounded-md" rows="3"></textarea>
+            </div>
+
+            <div class="field">
+                <label for="projectGroup" class="block mb-2">{{
+                    'PROJECTS.FIELDS.GROUP' | translate }}</label>
+                <p-dropdown id="projectGroup" [options]="projectGroups"
+                    [(ngModel)]="projectToEdit.projectgroup" optionLabel="name"
+                    [showClear]="true" [appendTo]="'body'"
                     placeholder="{{ 'PROJECTS.FIELDS.SELECT_GROUP' | translate }}"
                     class="w-full">
                 </p-dropdown>
             </div>
         </div>
         <ng-template pTemplate="footer">
-            <p-button 
-                icon="pi pi-times" 
-                (onClick)="closeEditDialog()" 
+            <p-button icon="pi pi-times" (onClick)="closeEditDialog()"
                 label="{{ 'COMMON.ACTIONS.CANCEL' | translate }}"
                 [pTooltip]="'COMMON.ACTIONS.CANCEL_TOOLTIP' | translate"
                 styleClass="p-button-text">
             </p-button>
-            <p-button 
-                icon="pi pi-check" 
-                (onClick)="saveProject()" 
+            <p-button icon="pi pi-check" (onClick)="saveProject()"
                 label="{{ 'COMMON.ACTIONS.SAVE' | translate }}"
                 [pTooltip]="'COMMON.ACTIONS.SAVE_TOOLTIP' | translate">
             </p-button>
         </ng-template>
     </p-dialog>
 
-    <p-confirmDialog 
-        [style]="{width: '450px'}" 
-        [appendTo]="'body'"
+    <p-confirmDialog [style]="{width: '450px'}" [appendTo]="'body'"
         [header]="'PROJECTS.DELETE.TITLE' | translate"
         [message]="'PROJECTS.DELETE.CONFIRMATION' | translate"
         [icon]="'pi pi-exclamation-triangle'"
@@ -288,29 +584,25 @@
     </p-confirmDialog>
 
     <!-- Projektgruppen Dialog -->
-    <p-dialog 
-        [(visible)]="projectGroupDialogVisible" 
+    <p-dialog [(visible)]="projectGroupDialogVisible"
         [header]="projectGroupToEdit ? ('PROJECT_GROUPS.EDIT.TITLE' | translate) : ('PROJECT_GROUPS.CREATE.TITLE' | translate)"
-        [modal]="true"
-        [style]="{width: '450px'}"
-        [appendTo]="'body'"
-        [draggable]="false"
-        [resizable]="false">
+        [modal]="true" [style]="{width: '450px'}" [appendTo]="'body'"
+        [draggable]="false" [resizable]="false">
         <div class="flex flex-col gap-4">
             <div class="field">
-                <label for="groupName" class="block mb-2">{{ 'PROJECT_GROUPS.FIELDS.NAME' | translate }}</label>
-                <input id="groupName" 
-                    type="text" 
-                    pInputText 
-                    [(ngModel)]="groupName" 
+                <label for="groupName" class="block mb-2">{{
+                    'PROJECT_GROUPS.FIELDS.NAME' | translate }}</label>
+                <input id="groupName" type="text" pInputText
+                    [(ngModel)]="groupName"
                     class="w-full border p-2 border rounded-md">
             </div>
 
             <!-- Lösch-Button für existierende Gruppen -->
             <div class="field" *ngIf="projectGroupToEdit">
-                <p-message severity="warn" [text]="'PROJECT_GROUPS.DELETE_WARNING' | translate" styleClass="w-full mb-3"></p-message>
-                <button pButton 
-                    icon="pi pi-trash" 
+                <p-message severity="warn"
+                    [text]="'PROJECT_GROUPS.DELETE_WARNING' | translate"
+                    styleClass="w-full mb-3"></p-message>
+                <button pButton icon="pi pi-trash"
                     [label]="'PROJECT_GROUPS.DELETE' | translate"
                     class="p-button-danger w-full"
                     [pTooltip]="'PROJECT_GROUPS.DELETE_TOOLTIP' | translate"
@@ -319,15 +611,11 @@
             </div>
         </div>
         <ng-template pTemplate="footer">
-            <p-button 
-                icon="pi pi-times" 
-                (onClick)="closeProjectGroupDialog()" 
+            <p-button icon="pi pi-times" (onClick)="closeProjectGroupDialog()"
                 label="{{ 'COMMON.ACTIONS.CANCEL' | translate }}"
                 styleClass="p-button-text">
             </p-button>
-            <p-button 
-                icon="pi pi-check" 
-                (onClick)="saveProjectGroup()" 
+            <p-button icon="pi pi-check" (onClick)="saveProjectGroup()"
                 label="{{ 'COMMON.ACTIONS.SAVE' | translate }}">
             </p-button>
         </ng-template>

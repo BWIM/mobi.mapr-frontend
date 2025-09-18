@@ -84,7 +84,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
     InputSwitchModule,
     ProgressSpinnerModule,
     SelectModule,
-    InputNumberModule
+    InputNumberModule,
   ],
   exports: [
     CommonModule,
@@ -127,7 +127,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
     InputSwitchModule,
     ProgressSpinnerModule,
     SelectModule,
-    InputNumberModule
+    InputNumberModule,
   ],
   providers: [MessageService]
 })

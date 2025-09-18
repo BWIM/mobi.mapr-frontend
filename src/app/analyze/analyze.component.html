@@ -68,6 +68,17 @@
                                         style="cursor: pointer;"
                                         (onDataSelect)="onSelectSubactivity($event)">
                                     </p-chart>
+                                    <div
+                                        class="flex justify-center items-center mt-4">
+                                        <div
+                                            class="bg-green-50 border border-green-200 rounded-lg p-3 max-w-md">
+                                            <p
+                                                class="text-green-800 text-center font-medium text-sm">
+                                                {{
+                                                'ANALYZE.ACTIVITIES.SUBACTIVITIES_HINT'
+                                                | translate }}</p>
+                                        </div>
+                                    </div>
                                     <p-dialog [(visible)]="showSubactivitiesMap"
                                         [modal]="true" [draggable]="false"
                                         [resizable]="false"
@@ -120,8 +131,14 @@
                             </div>
                             <div
                                 class="flex justify-center items-center mb-4 pt-4">
-                                <p class="text-gray-500 text-center">{{
-                                    'ANALYZE.ACTIVITIES.HINT' | translate }}</p>
+                                <div
+                                    class="bg-blue-50 border border-blue-200 rounded-lg p-3 max-w-md">
+                                    <p
+                                        class="text-blue-800 text-center font-medium text-sm">
+                                        {{
+                                        'ANALYZE.ACTIVITIES.HINT' | translate }}
+                                    </p>
+                                </div>
                             </div>
                             <div
                                 class="flex justify-center items-center mb-4 pt-2">

@@ -403,8 +403,6 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         x: {
           ticks: {
             color: '#495057',
-            maxRotation: 45,
-            minRotation: 45
           },
           grid: {
             color: '#ebedef'
@@ -550,8 +548,6 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         x: {
           ticks: {
             color: '#495057',
-            maxRotation: 45,
-            minRotation: 45
           },
           grid: {
             color: '#ebedef'

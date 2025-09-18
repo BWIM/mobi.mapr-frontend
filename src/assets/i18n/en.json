@@ -3,7 +3,7 @@
     "TITLE": "Projects",
     "LIST": {
       "TITLE": "Projects",
-      "NO_PROJECTS": "Please reload the page",
+      "NO_PROJECTS": "No projects available",
       "DELETED": "All information about the project got successfully deleted"
     },
     "DETAILS": {
@@ -39,7 +39,14 @@
     "EDIT": {
       "TITLE": "Edit Project"
     },
-    "UNGROUPED": "Ungrouped Projects",
+    "TABS": {
+      "PERSONAL": "Personal",
+      "SHARED": "Shared",
+      "PUBLIC": "Public"
+    },
+    "READ_ONLY": "Read Only",
+    "SHARED": "Shared",
+    "UNGROUPED": "Ungrouped",
     "TYPE": {
       "DEFAULT": "Standard",
       "PERSONAL": "Personal"
@@ -290,7 +297,8 @@
       "NO_DATA": "No data available",
       "SWITCH_TO_DOUGHNUT": "Change view",
       "EXPLANATION": "The activities weighted by their local relevance",
-      "HINT": "Hint: Click on a bar in the diagram to get more information!",
+      "HINT": "💡 Click on a bar in the diagram to get more information!",
+      "SUBACTIVITIES_HINT": "💡 Click on a bar in the diagram to view places on the map!",
       "NO_PLACES": "No places available",
       "DISABLE_PLACES": "The places are only available for hexagons or municipalities. Please zoom into the map to get more details!"
     },

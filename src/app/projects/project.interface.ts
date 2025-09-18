@@ -1,68 +1,69 @@
 export interface ProjectGroup {
-    id: string;
-    user: string;  // User ID
-    name: string;
-    description?: string;
-    default: boolean;
+  id: string;
+  user: string;  // User ID
+  name: string;
+  description?: string;
+  default: boolean;
 }
 
 export interface Project {
-    id: number;
-    display_name?: string;
-    description?: string;
-    calculated: number;
-    areas: number;
-    
-    type?: string;
-    default: boolean;
-    created: Date;
-    
-    finished: boolean;
-    projectgroup?: ProjectGroup;  // ProjectGroup ID
-    build_hexagons?: boolean;
+  id: number;
+  display_name?: string;
+  description?: string;
+  calculated: number;
+  areas: number;
 
-    version: number;
+  type?: string;
+  created: Date;
+  status: string;
+
+  projectgroup?: ProjectGroup;  // ProjectGroup ID
+  build_hexagons?: boolean;
+
+  version: number;
+  project_type?: 'personal' | 'shared' | 'public';  // New property for project visibility
+  is_shared?: boolean;  // Legacy property for backward compatibility
 }
 
 export interface PaginatedResponse<T> {
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: T[];
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
 }
 
 export interface ProjectCreateUpdate {
-    display_name?: string;
-    description?: string;
-    type?: string;
-    default?: boolean;
-    projectgroup?: string;
+  display_name?: string;
+  description?: string;
+  type?: string;
+  status?: string;
+  projectgroup?: string;
 }
 
 export interface ProjectGroupCreateUpdate {
-    name: string;
-    description?: string;
-    default?: boolean;
-} 
+  name: string;
+  description?: string;
+  status?: string;
+}
 
 export interface ProjectInfo {
-    id: number;
-    display_name: string;
-    description: string;
-    activities: string[];
-    profiles: string[];
-    personas: string[];
-    type: string;
-  }
+  id: number;
+  display_name: string;
+  description: string;
+  activities: string[];
+  profiles: string[];
+  personas: string[];
+  type: string;
+}
 
-  export interface ExportProject {
-    project_name: string;
-    project_description: string;
-    creation_date: string;
-    persona_abbreviations: string[];
-    profile_modes: string[];
-    activity_abbreviations: string[];
-  }
+export interface ExportProject {
+  project_name: string;
+  project_description: string;
+  creation_date: string;
+  persona_abbreviations: string[];
+  profile_modes: string[];
+  activity_abbreviations: string[];
+}
 
 export interface UnfinishedProject {
   id: number;
@@ -138,4 +139,29 @@ export interface ProjectDetails {
   categories: FormattedCategory[];
   profiles: FormattedProfile[];
   hexagons: HexagonScore[];
+}
+
+export interface PublicSharedProject {
+  id: number;
+  display_name: string;
+  description: string;
+  calculated: number;
+  projectgroup: {
+    id: number;
+    name: string;
+    user: number;
+    description: string;
+    default: boolean;
+  };
+  version: string;
+  project_type: string;
+  finished: boolean;
+  share_key: string;
+}
+
+export interface PublicSharedProjectsResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: PublicSharedProject[];
 }

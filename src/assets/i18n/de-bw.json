@@ -3,7 +3,7 @@
     "TITLE": "Projäkt",
     "LIST": {
       "TITLE": "Projäkt",
-      "NO_PROJECTS": "Bitte lad d'Sait neu",
+      "NO_PROJECTS": "S git kei Projäkt verfüegbar",
       "DELETED": "Alli Informatione zum Projäkt sin glöscht worre"
     },
     "DETAILS": {
@@ -40,6 +40,13 @@
       "TITLE": "Projäkt bearbeite"
     },
     "UNGROUPED": "Nit gruppierti Projäkt",
+    "TABS": {
+      "PERSONAL": "Persönlich",
+      "SHARED": "Teilt",
+      "PUBLIC": "Öffentlich"
+    },
+    "READ_ONLY": "Nur Lese",
+    "SHARED": "Teilt",
     "TYPE": {
       "DEFAULT": "Standard",
       "PERSONAL": "Persönlich"
@@ -287,7 +294,8 @@
       "NO_DATA": "Kei Date verfüegbar",
       "SWITCH_TO_DOUGHNUT": "Aasicht wechsle",
       "EXPLANATION": "D Aktivitäte gwichtet nach lokaler Relevanz",
-      "HINT": "Obacht: Dabb uff de balge, um mehr infos zu b'komme",
+      "HINT": "💡 Obacht: Dabb uff de balge, um mehr infos zu b'komme",
+      "SUBACTIVITIES_HINT": "💡 Obacht: Dabb uff de balge, um Orte auf der Karte z'zeige",
       "NO_PLACES": "Kei Ort gefunne",
       "DISABLE_PLACES": "Orte gibts nur für Gmeinde oder drunner"
     },
