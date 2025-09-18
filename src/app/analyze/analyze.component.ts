@@ -332,8 +332,13 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       }
     });
 
+    let labels: string[] = [];
     // Extract sorted arrays
-    const labels = sortedData.map(item => item.name);
+    if (localStorage.getItem('mobi.mapr.language') === 'en') {
+      labels = sortedData.map(item => item.name_en);
+    } else {
+      labels = sortedData.map(item => item.name_de);
+    }
     const scores = sortedData.map(item => item.index * 100);
     const weights = sortedData.map(item => item.weight);
     const scoreNames = sortedData.map(item => this.indexService.getIndexName(item.index));
@@ -456,7 +461,12 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         const normalizedWeights = totalWeight > 0 ? rawWeights.map(weight => (weight / totalWeight) * 100) : [];
 
         // Extract data
-        const labels = sortedActivities.map(item => item.name);
+        let labels: string[] = [];
+        if (localStorage.getItem('mobi.mapr.language') === 'en') {
+          labels = sortedActivities.map(item => item.name_en);
+        } else {
+          labels = sortedActivities.map(item => item.name_de);
+        }
         const scores = sortedActivities.map(item => item.index * 100);
         const scoreNames = sortedActivities.map(item => this.indexService.getIndexName(item.index));
         const scoreColors = scores.map(value => this.getColorForValue(value));
@@ -557,7 +567,12 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     if (index !== undefined && index >= 0) {
       const categoryData = this.activitiesChartData.labels[index];
       // Find the category ID from the category name
-      const category = this.categories.find(cat => cat.name === categoryData);
+      let category: Category | undefined;
+      if (localStorage.getItem('mobi.mapr.language') === 'en') {
+        category = this.categories.find(cat => cat.name_en === categoryData);
+      } else {
+        category = this.categories.find(cat => cat.name_de === categoryData);
+      }
       if (!category) return;
 
       this.hoveredCategoryId = category.id;
@@ -892,7 +907,12 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const sortedPersonas = [...this.personas].sort((a, b) => b.index - a.index);
 
     // Extract data
-    const labels = sortedPersonas.map(persona => persona.name);
+    let labels: string[] = [];
+    if (localStorage.getItem('mobi.mapr.language') === 'en') {
+      labels = sortedPersonas.map(persona => persona.name_en);
+    } else {
+      labels = sortedPersonas.map(persona => persona.name_de);
+    }
     const data = sortedPersonas.map(persona => persona.index);
     const scoreNames = sortedPersonas.map(persona => this.indexService.getIndexName(persona.index));
 
@@ -916,12 +936,21 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const sortedProfiles = [...this.profiles].sort((a, b) => b.index - a.index);
 
     // Extract data
-    const labels = sortedProfiles.map(profile => profile.name);
+    let labels: string[] = [];
+    if (localStorage.getItem('mobi.mapr.language') === 'en') {
+      labels = sortedProfiles.map(profile => profile.name_en);
+    } else {
+      labels = sortedProfiles.map(profile => profile.name_de);
+    }
     const data = sortedProfiles.map(profile => profile.index);
     const scoreNames = sortedProfiles.map(profile => this.indexService.getIndexName(profile.index));
 
     // Create combo chart with exponential function and horizontal bars
-    this.createProfilesComboChart(sortedProfiles, new Map(this.profiles.map(p => [p.id, p.name])), scoreNames);
+    if (localStorage.getItem('mobi.mapr.language') === 'en') {
+      this.createProfilesComboChart(sortedProfiles, new Map(this.profiles.map(p => [p.id, p.name_en])), scoreNames);
+    } else {
+      this.createProfilesComboChart(sortedProfiles, new Map(this.profiles.map(p => [p.id, p.name_de])), scoreNames);
+    }
   }
 
   private createProfilesComboChart(profiles: any[], profileMap: Map<number, string>, scoreNames: string[]): void {
@@ -1239,7 +1268,12 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         const normalizedWeights = totalWeight > 0 ? rawWeights.map(weight => (weight / totalWeight) * 100) : [];
 
         // Create labels with activity name
-        const labels = sortedActivities.map(item => item.name);
+        let labels: string[] = [];
+        if (localStorage.getItem('mobi.mapr.language') === 'en') {
+          labels = sortedActivities.map(item => item.name_en);
+        } else {
+          labels = sortedActivities.map(item => item.name_de);
+        }
 
         this.subactivitiesPieData = {
           labels: labels,
