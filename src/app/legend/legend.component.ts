@@ -1,13 +1,14 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {TranslateService} from '@ngx-translate/core';
-import {Subscription} from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 import { SharedModule } from '../shared/shared.module';
 import { LegendService } from './legend.service';
 
 type ScoreLevel = {
-  name: string; 
-  description: string; 
-  min: number; 
+  name: string;
+  description: string;
+  descriptionMobile: string;
+  min: number;
   max: number;
 };
 
@@ -23,8 +24,9 @@ export class LegendComponent implements OnInit, OnDestroy {
   private langChangeSubscription!: Subscription;
   isPinned: boolean = false;
   isExpanded: boolean = false;
+  isMobileVisible: boolean = false;
 
-  constructor(private translate: TranslateService, private legendService: LegendService) {}
+  constructor(private translate: TranslateService, private legendService: LegendService) { }
 
   scoreLevel?: ScoreLevel;
   sliderElementId: string = 'slider';
@@ -40,6 +42,10 @@ export class LegendComponent implements OnInit, OnDestroy {
     this.legendService.toggleExpand();
   }
 
+  toggleMobileVisibility() {
+    this.legendService.toggleMobileVisibility();
+  }
+
   ngOnInit() {
     this.initializeScoreLevels();
 
@@ -52,8 +58,12 @@ export class LegendComponent implements OnInit, OnDestroy {
       this.isPinned = pinned;
     });
 
-    this.legendService.isExpanded$.subscribe((expanded) => {  
+    this.legendService.isExpanded$.subscribe((expanded) => {
       this.isExpanded = expanded;
+    });
+
+    this.legendService.isMobileVisible$.subscribe((visible) => {
+      this.isMobileVisible = visible;
     });
   }
 
@@ -72,36 +82,42 @@ export class LegendComponent implements OnInit, OnDestroy {
         {
           name: 'A',
           description: translations['LEGEND.LVLA'],
+          descriptionMobile: "<35%",
           min: defaultValues[4],
           max: 100
         },
         {
           name: 'B',
           description: translations['LEGEND.LVLB'],
+          descriptionMobile: "35-50%",
           min: defaultValues[3],
           max: defaultValues[4]
         },
         {
           name: 'C',
           description: translations['LEGEND.LVLC'],
+          descriptionMobile: "51-71%",
           min: defaultValues[2],
           max: defaultValues[3]
         },
         {
           name: 'D',
           description: translations['LEGEND.LVLD'],
+          descriptionMobile: "72-100%",
           min: defaultValues[1],
           max: defaultValues[2]
         },
         {
           name: 'E',
           description: translations['LEGEND.LVLE'],
+          descriptionMobile: "101-140%",
           min: defaultValues[0],
           max: defaultValues[1]
         },
         {
           name: 'F',
           description: translations['LEGEND.LVLF'],
+          descriptionMobile: ">141%",
           min: 0,
           max: defaultValues[0]
         }

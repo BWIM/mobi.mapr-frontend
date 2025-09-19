@@ -40,6 +40,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   private dragThrottleTimeout: any = null;
   private isDragging: boolean = false;
   private originalOpacity: any = null;
+  private isMobile: boolean = false;
   constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService, private indexService: IndexService) {
 
     this.subscription = this.mapService.mapStyle$.subscribe(style => {
@@ -83,6 +84,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
+    this.isMobile = window.innerWidth < 768;
     if (this.mapContainer) {
       // Mobile-optimized map configuration
       const mapOptions: any = {
@@ -94,7 +96,8 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
         // Mobile optimizations
         renderWorldCopies: false,
         maxTileCacheSize: 100,
-        localIdeographFontFamily: false
+        localIdeographFontFamily: false,
+        attributionControl: false
       };
 
 
@@ -102,7 +105,9 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       this.mapService.setMap(this.map);
 
       // Add navigation control
-      this.map.addControl(new NavigationControl({ showCompass: false }), 'top-left');
+      if (!this.isMobile) {
+        this.map.addControl(new NavigationControl({ showCompass: false }), 'top-left');
+      }
       this.map.addControl(new ScaleControl(), 'bottom-left');
       this.map.dragRotate.disable();
       this.map.touchZoomRotate.disableRotation();
@@ -317,7 +322,9 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     });
 
     // Add navigation controls to before map
-    beforeMap.addControl(new NavigationControl({ showCompass: false }), 'top-left');
+    if (!this.isMobile) {
+      beforeMap.addControl(new NavigationControl({ showCompass: false }), 'top-left');
+    }
     beforeMap.addControl(new ScaleControl(), 'bottom-left');
     beforeMap.dragRotate.disable();
     beforeMap.touchZoomRotate.disableRotation();
@@ -338,7 +345,9 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     });
 
     // Add navigation controls to after map
-    afterMap.addControl(new NavigationControl({ showCompass: false }), 'top-left');
+    if (!this.isMobile) {
+      afterMap.addControl(new NavigationControl({ showCompass: false }), 'top-left');
+    }
     afterMap.addControl(new ScaleControl(), 'bottom-left');
     afterMap.dragRotate.disable();
     afterMap.touchZoomRotate.disableRotation();

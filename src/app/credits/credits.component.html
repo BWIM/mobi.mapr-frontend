@@ -3,178 +3,159 @@
     [tooltipOptions]="{ tooltipPosition: 'left' }"
     id="credits-sidebar"></p-speedDial>
 
-<p-dialog [(visible)]="showCreditsDialog" [modal]="true"
-    styleClass="credits-dialog" [closable]="true" [draggable]="false"
-    [resizable]="false"
-    [style]="{width: '90vw', maxWidth: '1200px', height: '90vh'}"
-    [contentStyle]="{'padding': '0', 'overflow': 'hidden'}">
+<!-- Credits Dialog - Mobile First with PrimeNG -->
+<p-dialog [(visible)]="showCreditsDialog" [modal]="true" [closable]="true"
+    [draggable]="false" [resizable]="false" [maximizable]="isMobile"
+    [style]="isMobile ? {width: '100vw', height: '100dvh'} : {width: '95vw', maxWidth: '1400px', height: '95vh'}"
+    [contentStyle]="{'padding': '0', 'overflow': 'hidden'}"
+    styleClass="credits-dialog">
 
-    <div class="credits-container">
-        <!-- Header Section -->
+    <ng-template pTemplate="header">
         <div class="credits-header">
             <div class="header-content">
                 <div class="logo-section">
-                    <div class="logo-icon">
-                        <i class="pi pi-map"></i>
-                    </div>
                     <div class="logo-text">
-                        <h1 class="app-title">mobi.mapr</h1>
-                        <p class="app-subtitle">Baden-Württemberg Institut für
-                            Nachhaltige Mobilität</p>
+                        <h1 class="app-title"
+                            (onClick)="openLink('https://bw-im.de')">mobi.mapr
+                        </h1>
                     </div>
                 </div>
-                <p-button label="bw-im.de besuchen" icon="pi pi-external-link"
-                    styleClass="p-button-outlined p-button-sm visit-button"
-                    [pTooltip]="'CREDITS.VISIT_WEBSITE' | translate"
-                    (onClick)="openLink('https://bw-im.de')">
-                </p-button>
             </div>
         </div>
+    </ng-template>
 
-        <!-- Main Content -->
-        <div class="credits-content">
-            <div class="components-grid">
-                <!-- Visualisierung -->
-                <div class="component-category">
-                    <div class="category-header">
-                        <div class="category-icon">
-                            <i class="pi pi-eye"></i>
-                        </div>
-                        <h2 class="category-title">Visualisierung</h2>
+    <div class="credits-content"
+        style="height: calc(100% - 4rem); overflow-y: auto;">
+
+        <!-- Components Grid - Modern Card Layout -->
+        <div class="components-container">
+            <!-- Visualisierung Section -->
+            <div class="component-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="pi pi-eye"></i>
                     </div>
-                    <div class="components-list">
-                        <div class="component-card"
-                            *ngFor="let item of visualComponents"
-                            [pTooltip]="item.name"
-                            (click)="item.url ? openLink(item.url) : null"
-                            [class.clickable]="!!item.url">
-                            <div class="component-icon">
-                                <i [class]="item.icon"></i>
-                            </div>
-                            <div class="component-info">
-                                <h3 class="component-name">{{item.name}}</h3>
-                            </div>
-                            <div class="component-action" *ngIf="item.url">
-                                <i class="pi pi-external-link"></i>
-                            </div>
+                    <h2 class="section-title">Visualisierung</h2>
+                </div>
+                <div class="components-grid">
+                    <div class="component-card"
+                        *ngFor="let item of visualComponents"
+                        [class.clickable]="!!item.url"
+                        (click)="item.url ? openLink(item.url) : null">
+                        <div class="component-icon">
+                            <i [class]="item.icon"></i>
+                        </div>
+                        <div class="component-info">
+                            <h3 class="component-name">{{item.name}}</h3>
+                        </div>
+                        <div class="component-action" *ngIf="item.url">
+                            <i class="pi pi-external-link"></i>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Daten -->
-                <div class="component-category">
-                    <div class="category-header">
-                        <div class="category-icon">
-                            <i class="pi pi-database"></i>
-                        </div>
-                        <h2 class="category-title">Daten</h2>
+            <!-- Daten Section -->
+            <div class="component-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="pi pi-database"></i>
                     </div>
-                    <div class="components-list">
-                        <div class="component-card"
-                            *ngFor="let item of dataComponents"
-                            [pTooltip]="item.name"
-                            (click)="item.url ? openLink(item.url) : null"
-                            [class.clickable]="!!item.url">
-                            <div class="component-icon">
-                                <i [class]="item.icon"></i>
-                            </div>
-                            <div class="component-info">
-                                <h3 class="component-name">{{item.name}}</h3>
-                            </div>
-                            <div class="component-action" *ngIf="item.url">
-                                <i class="pi pi-external-link"></i>
-                            </div>
+                    <h2 class="section-title">Daten</h2>
+                </div>
+                <div class="components-grid">
+                    <div class="component-card"
+                        *ngFor="let item of dataComponents"
+                        [class.clickable]="!!item.url"
+                        (click)="item.url ? openLink(item.url) : null">
+                        <div class="component-icon">
+                            <i [class]="item.icon"></i>
+                        </div>
+                        <div class="component-info">
+                            <h3 class="component-name">{{item.name}}</h3>
+                        </div>
+                        <div class="component-action" *ngIf="item.url">
+                            <i class="pi pi-external-link"></i>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Backend -->
-                <div class="component-category">
-                    <div class="category-header">
-                        <div class="category-icon">
-                            <i class="pi pi-server"></i>
-                        </div>
-                        <h2 class="category-title">Backend</h2>
+            <!-- Backend Section -->
+            <div class="component-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="pi pi-server"></i>
                     </div>
-                    <div class="components-list">
-                        <div class="component-card"
-                            *ngFor="let item of backendComponents"
-                            [pTooltip]="item.name"
-                            (click)="item.url ? openLink(item.url) : null"
-                            [class.clickable]="!!item.url">
-                            <div class="component-icon">
-                                <i [class]="item.icon"></i>
-                            </div>
-                            <div class="component-info">
-                                <h3 class="component-name">{{item.name}}</h3>
-                            </div>
-                            <div class="component-action" *ngIf="item.url">
-                                <i class="pi pi-external-link"></i>
-                            </div>
+                    <h2 class="section-title">Backend</h2>
+                </div>
+                <div class="components-grid">
+                    <div class="component-card"
+                        *ngFor="let item of backendComponents"
+                        [class.clickable]="!!item.url"
+                        (click)="item.url ? openLink(item.url) : null">
+                        <div class="component-icon">
+                            <i [class]="item.icon"></i>
+                        </div>
+                        <div class="component-info">
+                            <h3 class="component-name">{{item.name}}</h3>
+                        </div>
+                        <div class="component-action" *ngIf="item.url">
+                            <i class="pi pi-external-link"></i>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Routing -->
-                <div class="component-category">
-                    <div class="category-header">
-                        <div class="category-icon">
-                            <i class="pi pi-directions"></i>
-                        </div>
-                        <h2 class="category-title">Routing</h2>
+            <!-- Routing Section -->
+            <div class="component-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="pi pi-directions"></i>
                     </div>
-                    <div class="components-list">
-                        <div class="component-card"
-                            *ngFor="let item of routingComponents"
-                            [pTooltip]="item.name"
-                            (click)="item.url ? openLink(item.url) : null"
-                            [class.clickable]="!!item.url">
-                            <div class="component-icon">
-                                <i [class]="item.icon"></i>
-                            </div>
-                            <div class="component-info">
-                                <h3 class="component-name">{{item.name}}</h3>
-                            </div>
-                            <div class="component-action" *ngIf="item.url">
-                                <i class="pi pi-external-link"></i>
-                            </div>
+                    <h2 class="section-title">Routing</h2>
+                </div>
+                <div class="components-grid">
+                    <div class="component-card"
+                        *ngFor="let item of routingComponents"
+                        [class.clickable]="!!item.url"
+                        (click)="item.url ? openLink(item.url) : null">
+                        <div class="component-icon">
+                            <i [class]="item.icon"></i>
+                        </div>
+                        <div class="component-info">
+                            <h3 class="component-name">{{item.name}}</h3>
+                        </div>
+                        <div class="component-action" *ngIf="item.url">
+                            <i class="pi pi-external-link"></i>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Cities & Open Data -->
-                <div class="component-category">
-                    <div class="category-header">
-                        <div class="category-icon">
-                            <i class="pi pi-building"></i>
-                        </div>
-                        <h2 class="category-title">Stadtteil und Bezirksdaten
-                        </h2>
+            <!-- Stadtteil und Bezirksdaten Section -->
+            <div class="component-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="pi pi-building"></i>
                     </div>
-                    <div class="components-list">
-                        <div class="component-card"
-                            *ngFor="let item of citiesComponents"
-                            [pTooltip]="item.name"
-                            (click)="item.url ? openLink(item.url) : null"
-                            [class.clickable]="!!item.url">
-                            <div class="component-icon">
-                                <i [class]="item.icon"></i>
-                            </div>
-                            <div class="component-info">
-                                <h3 class="component-name">{{item.name}}</h3>
-                            </div>
-                            <div class="component-action" *ngIf="item.url">
-                                <i class="pi pi-external-link"></i>
-                            </div>
+                    <h2 class="section-title">Stadtteil und Bezirksdaten</h2>
+                </div>
+                <div class="cities-grid">
+                    <div class="city-card"
+                        *ngFor="let item of citiesComponents">
+                        <div class="city-icon">
+                            <i [class]="item.icon"></i>
                         </div>
+                        <h4 class="city-name">{{item.name}}</h4>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Footer -->
-        <div class="credits-footer">
-            <div class="acknowledgment">
+        <!-- Danksagung Section -->
+        <div class="acknowledgment-section">
+            <div class="acknowledgment-content">
                 <div class="acknowledgment-icon">
                     <i class="pi pi-heart"></i>
                 </div>
@@ -188,27 +169,33 @@
     </div>
 </p-dialog>
 
+<!-- Language Selection Dialog -->
 <p-dialog [(visible)]="showLanguageDialog" [modal]="true"
     [style]="{width: '300px'}" header="Sprache wählen">
-    <div class="language-list">
-        <div *ngFor="let lang of languages" class="language-item"
-            [class.selected]="currentLang === lang.code"
+    <div class="flex flex-column gap-2">
+        <div *ngFor="let lang of languages"
+            class="p-3 border-round cursor-pointer transition-colors transition-duration-150"
+            [class.bg-primary-50]="currentLang === lang.code"
+            [class.border-primary]="currentLang === lang.code"
             (click)="switchLanguage(lang.code)">
-            <div class="language-content">
-                <i class="pi pi-check" *ngIf="currentLang === lang.code"></i>
-                <i class="pi pi-circle" *ngIf="currentLang !== lang.code"></i>
-                <span class="language-name">{{ lang.name }}</span>
+            <div class="flex align-items-center gap-3">
+                <i
+                    [class]="currentLang === lang.code ? 'pi pi-check text-primary' : 'pi pi-circle text-400'"></i>
+                <span class="font-medium">{{ lang.name }}</span>
             </div>
         </div>
     </div>
 </p-dialog>
 
+<!-- Shortcuts Dialog -->
 <p-dialog [(visible)]="showShortcutsDialog" [modal]="true" header="Tastenkürzel"
-    [style]="{width: '50vw'}" [draggable]="false" [resizable]="false">
-    <div class="shortcuts-container">
-        <div class="shortcut-item" *ngFor="let shortcut of shortcuts">
-            <span class="shortcut-key">{{shortcut.key}}</span>
-            <span class="shortcut-description">{{shortcut.description}}</span>
+    [style]="{width: isMobile ? '95vw' : '60vw', maxWidth: '800px'}"
+    [draggable]="false" [resizable]="false">
+    <div class="flex flex-column gap-3">
+        <div *ngFor="let shortcut of shortcuts"
+            class="flex align-items-center justify-content-between p-3 border-round surface-100">
+            <span class="font-medium">{{shortcut.description}}</span>
+            <p-tag [value]="shortcut.key" severity="secondary"></p-tag>
         </div>
     </div>
 </p-dialog>
