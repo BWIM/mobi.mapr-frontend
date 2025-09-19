@@ -13,8 +13,8 @@ export class IndexService {
     bad: 'rgb(194, 24, 7)',
     worst: 'rgb(150, 86, 162)'
   };
-  
-  constructor() {}
+
+  constructor() { }
 
   getIndexName(index: number): string {
     if (index <= 0) return "Error";

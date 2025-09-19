@@ -13,6 +13,10 @@ import { Router } from '@angular/router';
 import { TutorialService } from '../tutorial/tutorial.service';
 import { ShareService } from '../share/share.service';
 import { CreditsService } from './credits.service';
+import { DashboardService } from '../dashboard/dashboard.service';
+import { LegendService } from '../legend/legend.service';
+import { StatisticsService } from '../statistics/statistics.service';
+import { AnalyzeService } from '../analyze/analyze.service';
 
 interface InfoComponent {
   name: string;
@@ -68,7 +72,18 @@ export class CreditsComponent implements OnInit {
 
   showShortcutsDialog = false;
 
-  constructor(private translate: TranslateService, private authService: AuthService, private router: Router, private tutorialService: TutorialService, private shareService: ShareService, private creditsService: CreditsService) {}
+  constructor(
+    private translate: TranslateService,
+    private authService: AuthService,
+    private router: Router,
+    private tutorialService: TutorialService,
+    private shareService: ShareService,
+    private creditsService: CreditsService,
+    private dashboardService: DashboardService,
+    private legendService: LegendService,
+    private statisticsService: StatisticsService,
+    private analyzeService: AnalyzeService
+  ) { }
 
   ngOnInit() {
     // Load saved language preference
@@ -113,13 +128,13 @@ export class CreditsComponent implements OnInit {
     this.items = [];
     if (!this.shareService.getIsShare()) {
       this.items.push(
-      {
-        icon: 'pi pi-sign-out',
-        label: this.translate.instant('CREDITS.LOGOUT'),
-        command: () => {
-          this.logout();
-        }
-      });
+        {
+          icon: 'pi pi-sign-out',
+          label: this.translate.instant('CREDITS.LOGOUT'),
+          command: () => {
+            this.logout();
+          }
+        });
     }
     this.items.push(
       {
@@ -177,13 +192,13 @@ export class CreditsComponent implements OnInit {
     { name: 'MID', icon: 'pi pi-car', url: 'https://www.mobilitaet-in-deutschland.de' },
     { name: 'OpenStreetMap', icon: 'pi pi-map', url: 'https://www.openstreetmap.org' },
     { name: 'OpenDataSoft', icon: 'pi pi-database', url: 'https://www.opendatasoft.com' },
-    { name: 'GeoJsonUtilities', icon: 'pi pi-map-marker', url: 'https://geodata.bw-im.de' },
-    { name: 'PDF-LIB', icon: 'pi pi-file', url: 'https://pdf-lib.js.org' }
+    { name: 'GeoJsonUtilities', icon: 'pi pi-map-marker', url: 'https://geodata.bw-im.de' }
   ];
 
   backendComponents: InfoComponent[] = [
     { name: 'Django', icon: 'pi pi-server', url: 'https://www.djangoproject.com' },
-    { name: 'PostGIS', icon: 'pi pi-database', url: 'https://postgis.net' }
+    { name: 'PostGIS', icon: 'pi pi-database', url: 'https://postgis.net' },
+    { name: 'pgBouncer', icon: 'pi pi-database', url: 'https://pgbouncer.org' }
   ];
 
   routingComponents: InfoComponent[] = [
@@ -192,14 +207,63 @@ export class CreditsComponent implements OnInit {
     { name: 'OpenRouteService', icon: 'pi pi-directions', url: 'https://openrouteservice.org' }
   ];
 
+  citiesComponents: InfoComponent[] = [
+    { name: 'Karlsruhe', icon: 'pi pi-building', url: '' },
+    { name: 'Mannheim', icon: 'pi pi-building', url: '' },
+    { name: 'Stuttgart', icon: 'pi pi-building', url: '' },
+    { name: 'München', icon: 'pi pi-building', url: '' },
+    { name: 'Nürnberg', icon: 'pi pi-building', url: '' },
+    { name: 'Berlin', icon: 'pi pi-building', url: '' },
+    { name: 'Bremen', icon: 'pi pi-building', url: '' },
+    { name: 'Hamburg', icon: 'pi pi-building', url: '' },
+    { name: 'Köln', icon: 'pi pi-building', url: '' },
+    { name: 'Duisburg', icon: 'pi pi-building', url: '' },
+    { name: 'Münster', icon: 'pi pi-building', url: '' },
+    { name: 'Düsseldorf', icon: 'pi pi-building', url: '' },
+    { name: 'Essen', icon: 'pi pi-building', url: '' },
+    { name: 'Bochum', icon: 'pi pi-building', url: '' },
+    { name: 'Dresden', icon: 'pi pi-building', url: '' },
+    { name: 'Leipzig', icon: 'pi pi-building', url: '' },
+    { name: 'Wuppertal', icon: 'pi pi-building', url: '' },
+    { name: 'Bonn', icon: 'pi pi-building', url: '' },
+    { name: 'Bielefeld', icon: 'pi pi-building', url: '' },
+    { name: 'Augsburg', icon: 'pi pi-building', url: '' },
+    { name: 'Frankfurt', icon: 'pi pi-building', url: '' }
+  ];
+
   items: MenuItem[] = [];
 
   showCredits() {
+    this.closeAllSidebars();
     this.creditsService.showCredits();
   }
 
+  private closeAllSidebars() {
+    // Close dashboard right sidebar
+    this.dashboardService.setRightSidebarExpanded(false);
+    this.dashboardService.setLeftSidebarExpanded(false);
+
+    // Close share right sidebar
+    this.shareService.toggleRightSidebarExpanded();
+    if (this.shareService.getIsShare()) {
+      // If it was open, close it again to ensure it's closed
+      this.shareService.toggleRightSidebarExpanded();
+    }
+
+    // Close legend
+    if (this.legendService.getIsExpanded()) {
+      this.legendService.toggleExpand();
+    }
+
+    // Close statistics
+    this.statisticsService.visible = false;
+
+    // Close analyze
+    this.analyzeService.hide();
+  }
+
   showHelp() {
-    this.showHelpDialog = true;
+    this.router.navigate(['/landing'], { queryParams: { redirect: 'false' } });
   }
 
   openLink(url: string) {

@@ -863,10 +863,10 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
         return new Style({
           zIndex: isSelected ? 1000 : 1,
           fill: new Fill({
-            color: isSelected ? 'rgba(49, 159, 211, 0.5)' : 'rgba(255, 255, 255, 0.5)'
+            color: isSelected ? 'rgba(72, 38, 131, 0.5)' : 'rgba(255, 255, 255, 0.5)'
           }),
           stroke: new Stroke({
-            color: '#319FD3',
+            color: '#482683',
             width: isSelected ? 2 : 1
           })
         });
