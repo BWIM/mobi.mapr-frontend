@@ -15,6 +15,36 @@ $sixthColor: #9656a2;
     padding: 20px;
     position: relative;
 
+    .mobile-legend-toggle {
+      position: absolute;
+      bottom: 20px;
+      left: 2%;
+      width: 50px;
+      height: 50px;
+      background: darkgreen;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 1001;
+
+      .toggle-icon {
+        font-size: 20px;
+        color: white;
+      }
+
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.2);
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+    }
+
     .legend {
       position: absolute;
       bottom: 10px;
@@ -36,7 +66,7 @@ $sixthColor: #9656a2;
         right: 15px;
         top: 50%;
         transform: translateY(-50%);
-        color: var(--text-color);
+        color: var(--secondary-text-color);
         font-size: 20px;
         opacity: 0;
         transition: all 0.3s ease;
@@ -67,6 +97,10 @@ $sixthColor: #9656a2;
         display: block;
       }
 
+      &.expanded .legend-item .desktop-description {
+        display: block;
+      }
+
       .legend-item {
         display: flex;
         align-items: center;
@@ -93,10 +127,18 @@ $sixthColor: #9656a2;
           display: none;
           width: 100%;
           margin-left: 10px;
-          color: var(--secondary-text-color);
+          color: var(--text-color);
           background-color: transparent;
           font-size: 14px;
           white-space: nowrap;
+        }
+
+        .desktop-description {
+          display: none;
+        }
+
+        .mobile-description {
+          display: none;
         }
       }
 
@@ -127,26 +169,213 @@ $sixthColor: #9656a2;
   }
 }
 
-/* Media Query for Phone */
+/* Mobile Styles - Hide legend by default, show toggle button */
 @media (max-width: 768px) {
-  .legend {
-    padding: 5px !important; // Reduced padding for compactness
-    bottom: 80px !important; // Move legend up to avoid mobile navigation bar
-    left: 1% !important; // Adjust left positioning
+  .container {
+    .mobile-legend-toggle {
+      display: flex !important;
+      bottom: 20px !important;
+      left: 2% !important;
+      width: 45px !important;
+      height: 45px !important;
+      z-index: 1001 !important;
 
-    .legend-item {
-      margin: 2px 0; // Reduced margin for compactness
-      padding: 2px; // Reduced padding for compactness
+      .toggle-icon {
+        font-size: 18px !important;
+      }
+    }
 
-      span {
-        width: 20px !important; // Smaller circles on mobile
-        height: 20px !important; // Smaller circles on mobile
-        line-height: 20px !important;
-        font-size: 12px;
+    .legend {
+      display: none !important; // Hidden by default on mobile
+      transform: translateX(-100%) !important;
+      transition: all 0.3s ease !important;
+
+      &.mobile-visible {
+        display: flex !important;
+        transform: translateX(0) !important;
+        bottom: 20px !important;
+        left: 2% !important;
+        max-width: 200px !important;
+        min-width: 180px !important;
+        padding: 10px !important;
+        z-index: 1000 !important;
+        box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.2) !important;
+
+        // Keep regular vertical layout when visible
+        flex-direction: column !important;
+        gap: 0 !important;
+        justify-content: flex-start !important;
+
+        .legend-item {
+          margin: 3px 0 !important;
+          padding: 4px !important;
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          text-align: left !important;
+
+          span {
+            width: 22px !important;
+            height: 22px !important;
+            line-height: 22px !important;
+            font-size: 11px !important;
+            margin-bottom: 0 !important;
+            flex-shrink: 0 !important;
+          }
+
+          .description {
+            display: block !important;
+            font-size: 11px !important;
+            margin-left: 8px !important;
+            text-align: left !important;
+            white-space: nowrap !important;
+            line-height: 1.2 !important;
+            max-width: none !important;
+            flex: 1 !important;
+          }
+
+          .desktop-description {
+            display: none !important;
+          }
+
+          .mobile-description {
+            display: block !important;
+          }
+        }
+
+        // Remove hover effects on mobile
+        &:hover {
+          clip-path: none !important;
+          padding-right: 10px !important;
+          transform: translateX(0) !important;
+
+          &::after {
+            opacity: 0 !important;
+            transform: none !important;
+          }
+        }
+
+        &::after {
+          display: none !important;
+        }
+      }
+    }
+  }
+}
+
+/* Small Mobile Adjustments */
+@media (max-width: 480px) {
+  .container {
+    .mobile-legend-toggle {
+      width: 40px !important;
+      height: 40px !important;
+      bottom: 15px !important;
+
+      .toggle-icon {
+        font-size: 16px !important;
+      }
+    }
+
+    .legend.mobile-visible {
+      max-width: 180px !important;
+      min-width: 160px !important;
+      padding: 8px !important;
+
+      .legend-item {
+        margin: 2px 0 !important;
+        padding: 3px !important;
+
+        span {
+          width: 20px !important;
+          height: 20px !important;
+          line-height: 20px !important;
+          font-size: 10px !important;
+        }
+
+        .description {
+          font-size: 10px !important;
+          margin-left: 6px !important;
+        }
+
+        .desktop-description {
+          display: none !important;
+        }
+
+        .mobile-description {
+          display: block !important;
+        }
+      }
+    }
+  }
+}
+
+/* Landscape Mobile - Different layout */
+@media (max-width: 768px) and (orientation: landscape) {
+  .container {
+    .mobile-legend-toggle {
+      bottom: 10px !important;
+      left: 1% !important;
+    }
+
+    .legend.mobile-visible {
+      bottom: 10px !important;
+      left: 1% !important;
+      max-width: 250px !important;
+      min-width: 220px !important;
+      padding: 10px !important;
+
+      .legend-item {
+        margin: 3px 0 !important;
+        padding: 4px !important;
+
+        span {
+          width: 24px !important;
+          height: 24px !important;
+          line-height: 24px !important;
+          font-size: 12px !important;
+        }
+
+        .description {
+          font-size: 12px !important;
+          margin-left: 10px !important;
+        }
+
+        .desktop-description {
+          display: none !important;
+        }
+
+        .mobile-description {
+          display: block !important;
+        }
+      }
+    }
+  }
+}
+
+/* Desktop - Hide mobile toggle, show legend normally */
+@media (min-width: 769px) {
+  .container {
+    .mobile-legend-toggle {
+      display: none !important;
+    }
+
+    .legend {
+      display: flex !important;
+      transform: none !important;
+
+      .legend-item {
+        .desktop-description {
+          display: none;
+        }
+
+        .mobile-description {
+          display: none !important;
+        }
       }
 
-      .description {
-        font-size: 10px; // Smaller description font size
+      &.expanded .legend-item .desktop-description {
+        display: block !important;
       }
     }
   }

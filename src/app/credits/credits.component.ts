@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { SharedModule } from '../shared/shared.module';
 import { MenuItem } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
@@ -7,6 +7,10 @@ import { ButtonModule } from 'primeng/button';
 import { AccordionModule } from 'primeng/accordion';
 import { SpeedDialModule } from 'primeng/speeddial';
 import { TooltipModule } from 'primeng/tooltip';
+import { PanelModule } from 'primeng/panel';
+import { DividerModule } from 'primeng/divider';
+import { ChipModule } from 'primeng/chip';
+import { TagModule } from 'primeng/tag';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../auth/auth.service';
 import { Router } from '@angular/router';
@@ -39,7 +43,11 @@ interface Shortcut {
     ButtonModule,
     AccordionModule,
     SpeedDialModule,
-    TooltipModule
+    TooltipModule,
+    PanelModule,
+    DividerModule,
+    ChipModule,
+    TagModule
   ],
   templateUrl: './credits.component.html',
   styleUrl: './credits.component.css'
@@ -50,6 +58,7 @@ export class CreditsComponent implements OnInit {
   showLanguageDialog = false;
   isDarkMode = false;
   currentLang = 'de';
+  isMobile = false;
 
   private readonly LANGUAGE_KEY = 'mobi.mapr.language';
 
@@ -86,6 +95,9 @@ export class CreditsComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    // Detect mobile device
+    this.checkMobile();
+
     // Load saved language preference
     const savedLang = localStorage.getItem(this.LANGUAGE_KEY);
     if (savedLang) {
@@ -305,5 +317,14 @@ export class CreditsComponent implements OnInit {
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.checkMobile();
+  }
+
+  private checkMobile() {
+    this.isMobile = window.innerWidth <= 768;
   }
 }

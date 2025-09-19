@@ -1,9 +1,19 @@
 <div class="container">
+  <!-- Mobile Toggle Button -->
+  <div class="mobile-legend-toggle" (click)="toggleMobileVisibility()">
+    <span class="toggle-icon">A</span>
+  </div>
+
   <!-- Legend -->
-  <div class="legend" id="legend" (click)="toggleExpand()" [class.expanded]="isExpanded">
-    <div *ngFor="let level of scoreLevels" class="legend-item" [class]="level.name.toLowerCase()" id="legend-full">
+  <div class="legend" id="legend" (click)="toggleExpand()"
+    [class.expanded]="isExpanded" [class.mobile-visible]="isMobileVisible">
+    <div *ngFor="let level of scoreLevels" class="legend-item"
+      [class]="level.name.toLowerCase()" id="legend-full">
       <span>{{ level.name }}</span>
-      <div class="description">{{ level.description }}</div>
+      <div class="description desktop-description">{{
+        level.description }}</div>
+      <div class="description mobile-description">{{
+        level.descriptionMobile }}</div>
     </div>
   </div>
 </div>

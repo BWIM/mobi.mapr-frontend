@@ -133,7 +133,9 @@
 /* Responsive Anpassungen */
 @media screen and (max-width: 768px) {
     .logo {
-        height: 40px;
+        max-height: 3rem !important;
+        height: auto;
+        width: auto;
     }
 
     :host ::ng-deep .p-button.p-button-text {
@@ -288,6 +290,8 @@
     /* Mobile logo adjustments */
     .logo {
         max-height: 3rem !important;
+        height: auto;
+        width: auto;
     }
 }
 
