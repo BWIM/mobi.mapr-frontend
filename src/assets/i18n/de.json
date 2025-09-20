@@ -34,8 +34,10 @@
     },
     "STATUS": {
       "FINISHED": "Abgeschlossen",
-      "IN_PROGRESS": "In Bearbeitung"
+      "IN_PROGRESS": "In Bearbeitung",
+      "QUEUED": "Warteschlange"
     },
+    "QUEUED_MESSAGE": "Projekt ist in der Warteschlange für die Verarbeitung...",
     "EDIT": {
       "TITLE": "Projekt bearbeiten"
     },
@@ -408,7 +410,8 @@
     "SHOW_BEZIRKE": "Bezirke anzeigen",
     "LOADING_MORE_DATA": "Lade weitere Daten im Hintergrund...",
     "PROJECT_VERSION_INVALID": "Die Version des Projektes ist zu alt. Erstelle es neu, um Statistiken angezeigt zu bekommen!",
-    "POPULATION": "Bevölkerung"
+    "POPULATION": "Bevölkerung",
+    "MUNICIPALITY_SUBDIVISION_HINT": "Hinweis: Gemeinden, die allein den jeweiligen Stadt- oder Landkreis bilden, werden nicht noch einmal unter 'Gemeinden' aufgeführt, sondern nur unter 'Stadt- bzw. Landkreise'."
   },
   "PDF_EXPORT": {
     "TITLE": "PDF Export",

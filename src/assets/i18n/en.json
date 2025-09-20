@@ -34,8 +34,10 @@
     },
     "STATUS": {
       "FINISHED": "Completed",
-      "IN_PROGRESS": "In Progress"
+      "IN_PROGRESS": "In Progress",
+      "QUEUED": "Queued"
     },
+    "QUEUED_MESSAGE": "Project is queued for processing...",
     "EDIT": {
       "TITLE": "Edit Project"
     },
@@ -407,7 +409,8 @@
     "SHOW_BEZIRKE": "Show districts (Bezirke)",
     "LOADING_MORE_DATA": "Loading more data in background...",
     "PROJECT_VERSION_INVALID": "The version of the project is too low. Please recreate it, to also show statistics.",
-    "POPULATION": "Population"
+    "POPULATION": "Population",
+    "MUNICIPALITY_SUBDIVISION_HINT": "Note: Municipalities that alone form the respective city or county district are not listed again under 'Municipalities', but only under 'Counties'."
   },
   "PDF_EXPORT": {
     "FULL_MAP": "Full map",
