@@ -340,7 +340,8 @@
     "SHOW_BEZIRKE": "Bezirke zeige",
     "LOADING_MORE_DATA": "Lad wyteri Date im Hindergrund...",
     "PROJECT_VERSION_INVALID": "Des Projäkt isch zu alt. Machs neu, um die Schtadistige zu sehe.",
-    "POPULATION": "Bevölkerig"
+    "POPULATION": "Bevölkerig",
+    "MUNICIPALITY_SUBDIVISION_HINT": "Hinweis: Gmeinde, wo allei de jewilige Stadt- oder Landkreis bilde, werre nit no emol unter 'Gmeinde' ufgführt, sondern nur unter 'Stadt- bzw. Landkreise'."
   },
   "CREDITS": {
     "SHORTCUTS": {

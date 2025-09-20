@@ -16,7 +16,6 @@ export interface ScoreEntry {
   population_density?: number;
   county?: string;
   rank?: number;
-  bezirk?: boolean;
 }
 
 @Injectable({
@@ -26,7 +25,7 @@ export class StatisticsService {
   private _visible = new BehaviorSubject<boolean>(false);
   visible$ = this._visible.asObservable();
 
-  constructor(private http: HttpClient, private shareService: ShareService) {}
+  constructor(private http: HttpClient, private shareService: ShareService) { }
 
   get visible(): boolean {
     return this._visible.value;
@@ -58,7 +57,6 @@ export class StatisticsService {
   }
 
   convertToScoreEntry(data: MunicipalityScore | CountyScore | StateScore, level: 'state' | 'county' | 'municipality', rank: number): ScoreEntry {
-    console.log(data)
     if ('gemeinde' in data) {
       return {
         name: data.gemeinde.name,
@@ -71,7 +69,6 @@ export class StatisticsService {
         level: 'municipality',
         county: data.landkreis,
         rank: rank,
-        bezirk: data.gemeinde.bezirk
       };
     } else if ('landkreis' in data) {
       return {

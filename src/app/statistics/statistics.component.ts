@@ -35,16 +35,16 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   private dataLoadingSubscriptions: Subscription[] = [];
   loading: boolean = false;
   backgroundLoading: boolean = false;
-  
+
   // AbortController for cancelling API requests
   private abortController: AbortController | null = null;
-  
+
   stateScores: ScoreEntry[] = [];
   countyScores: ScoreEntry[] = [];
   municipalityScores: ScoreEntry[] = [];
   filteredMunicipalityScores: ScoreEntry[] = [];
   filteredCountyScores: ScoreEntry[] = [];
-  
+
   // Pagination
   stateTotalRecords: number = 0;
   countyTotalRecords: number = 0;
@@ -57,9 +57,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   // Score type
   scoreType: 'pop' | 'avg' = 'pop';
   scoreTypeOptions: any[] = [];
-
-  // Bezirk filter
-  showBezirke: boolean = true;
 
   populationCategories = [
     { label: 'Landgemeinden (0-5.000)', value: 'small', min: 0, max: 5000, displayText: '0-5K' },
@@ -107,7 +104,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
@@ -159,7 +156,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
           next: (response) => {
             if (response) {
               this.stateTotalRecords = response.count;
-              this.stateScores = response.results.map((score, index) => 
+              this.stateScores = response.results.map((score, index) =>
                 this.statisticsService.convertToScoreEntry(score, 'state', index + 1)
               );
             }
@@ -168,7 +165,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
             console.error('Error loading state scores:', error);
           }
         });
-      
+
       this.dataLoadingSubscriptions.push(subscription);
     } catch (error) {
       console.error('Error loading state scores:', error);
@@ -183,14 +180,14 @@ export class StatisticsComponent implements OnInit, OnDestroy {
           next: (firstResponse) => {
             if (firstResponse && firstResponse.results.length > 0) {
               // Display first batch immediately
-              this.countyScores = firstResponse.results.map((score, index) => 
+              this.countyScores = firstResponse.results.map((score, index) =>
                 this.statisticsService.convertToScoreEntry(score, 'county', index + 1)
               );
               this.countyTotalRecords = firstResponse.count;
-              
+
               // Apply filter to first batch
               this.applyPopulationFilter();
-              
+
               // Load remaining data in background
               this.loadRemainingCounties(projectId, 200);
             }
@@ -199,7 +196,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
             console.error('Error loading county scores:', error);
           }
         });
-      
+
       this.dataLoadingSubscriptions.push(subscription);
     } catch (error) {
       console.error('Error loading county scores:', error);
@@ -211,7 +208,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       this.backgroundLoading = true;
       let currentOffset = startOffset;
       let hasMoreData = true;
-      
+
       while (hasMoreData) {
         const subscription = this.statisticsService.getCountyScores(projectId, currentOffset, 200, this.scoreType)
           .subscribe({
@@ -222,12 +219,12 @@ export class StatisticsComponent implements OnInit, OnDestroy {
                   this.statisticsService.convertToScoreEntry(score, 'county', this.countyScores.length + index + 1)
                 );
                 this.countyScores = this.countyScores.concat(newScores);
-                
+
                 // Reapply filter to include new data
                 this.applyPopulationFilter();
-                
+
                 currentOffset += 200;
-                
+
                 // Check if we've reached the end
                 if (response.results.length < 200) { // API limit is 200
                   hasMoreData = false;
@@ -241,9 +238,9 @@ export class StatisticsComponent implements OnInit, OnDestroy {
               hasMoreData = false;
             }
           });
-        
+
         this.dataLoadingSubscriptions.push(subscription);
-        
+
         // Wait for this request to complete before continuing
         await new Promise<void>((resolve) => {
           subscription.add(() => resolve());
@@ -268,10 +265,10 @@ export class StatisticsComponent implements OnInit, OnDestroy {
                 this.statisticsService.convertToScoreEntry(score, 'municipality', index + 1)
               );
               this.municipalityTotalRecords = firstResponse.count;
-              
+
               // Apply filter to first batch
               this.applyPopulationFilter();
-              
+
               // Load remaining data in background
               this.loadRemainingMunicipalities(projectId, 200);
             }
@@ -280,7 +277,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
             console.error('Error loading municipality scores:', error);
           }
         });
-      
+
       this.dataLoadingSubscriptions.push(subscription);
     } catch (error) {
       console.error('Error loading municipality scores:', error);
@@ -292,7 +289,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       this.backgroundLoading = true;
       let currentOffset = startOffset;
       let hasMoreData = true;
-      
+
       while (hasMoreData) {
         const subscription = this.statisticsService.getMunicipalityScores(projectId, currentOffset, 200, this.scoreType)
           .subscribe({
@@ -303,12 +300,12 @@ export class StatisticsComponent implements OnInit, OnDestroy {
                   this.statisticsService.convertToScoreEntry(score, 'municipality', this.municipalityScores.length + index + 1)
                 );
                 this.municipalityScores = this.municipalityScores.concat(newScores);
-                
+
                 // Reapply filter to include new data
                 this.applyPopulationFilter();
-                
+
                 currentOffset += 200;
-                
+
                 // Check if we've reached the end
                 if (response.results.length < 200) { // API limit is 200
                   hasMoreData = false;
@@ -322,9 +319,9 @@ export class StatisticsComponent implements OnInit, OnDestroy {
               hasMoreData = false;
             }
           });
-        
+
         this.dataLoadingSubscriptions.push(subscription);
-        
+
         // Wait for this request to complete before continuing
         await new Promise<void>((resolve) => {
           subscription.add(() => resolve());
@@ -345,7 +342,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
   onCountyPageChange(event: any): void {
     this.currentCountyPage = event.page + 1;
-    
+
     const maxPages = Math.ceil(this.filteredCountyScores.length / this.rowsPerPage);
     if (this.currentCountyPage > maxPages) {
       this.currentCountyPage = maxPages;
@@ -378,23 +375,14 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
   toggleCategory(category: any): void {
     if (this.isCategorySelected(category)) {
-      this.selectedCategories = this.selectedCategories.filter(selected => 
+      this.selectedCategories = this.selectedCategories.filter(selected =>
         !(selected.min === category.min && selected.max === category.max)
       );
     } else {
       this.selectedCategories.push(category);
     }
     this.applyPopulationFilter();
-    
-    // Reset pagination when filter changes
-    this.currentStatePage = 1;
-    this.currentCountyPage = 1;
-    this.currentMunicipalityPage = 1;
-  }
 
-  onBezirkToggleChange(): void {
-    this.applyPopulationFilter();
-    
     // Reset pagination when filter changes
     this.currentStatePage = 1;
     this.currentCountyPage = 1;
@@ -428,11 +416,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       });
     }
 
-    // Apply bezirk filter for municipalities
-    if (!this.showBezirke) {
-      filteredMunicipalities = filteredMunicipalities.filter(score => !score.bezirk);
-    }
-
     this.filteredMunicipalityScores = filteredMunicipalities;
     this.filteredCountyScores = filteredCounties;
 
@@ -448,7 +431,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   private adjustPaginationAfterFilter(): void {
     const maxCountyPages = Math.ceil(this.filteredCountyScores.length / this.rowsPerPage);
     const maxMunicipalityPages = Math.ceil(this.filteredMunicipalityScores.length / this.rowsPerPage);
-    
+
     if (this.currentCountyPage > maxCountyPages && maxCountyPages > 0) {
       this.currentCountyPage = maxCountyPages;
     }
@@ -518,17 +501,17 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
       // Use geocoding to find the location
       let searchQuery = entry.name;
-      
+
       // Add county information for municipalities
       if (entry.level === 'municipality' && entry.county) {
         searchQuery = `${entry.name}, ${entry.county}`;
       }
-      
+
       // Always add Germany to the query
       searchQuery += ', Germany';
-      
+
       const results = await firstValueFrom(this.geocodingService.search(searchQuery));
-      
+
       if (results.length > 0) {
         const bestMatch = results[0];
         map.flyTo({

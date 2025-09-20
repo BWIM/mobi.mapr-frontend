@@ -47,6 +47,22 @@
                             </div>
                             <div *ngIf="categories.length > 0"
                                 class="flex-1 relative min-h-0">
+                                <!-- Loading indicator for activities chart -->
+                                <div *ngIf="activitiesLoading"
+                                    class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75 z-10">
+                                    <div class="flex flex-col items-center">
+                                        <p-progressSpinner
+                                            [style]="{width: '40px', height: '40px'}"
+                                            strokeWidth="4"
+                                            animationDuration=".5s">
+                                        </p-progressSpinner>
+                                        <p
+                                            class="text-center text-sm text-gray-500 mt-2">
+                                            Loading activities...
+                                        </p>
+                                    </div>
+                                </div>
+
                                 <p-chart #activitiesChart type="bar"
                                     [data]="activitiesChartData"
                                     [options]="barChartOptions" [width]="'100%'"
@@ -62,7 +78,24 @@
                                     [header]="hoveredCategoryName"
                                     (onHide)="onCategoryLeave()">
                                     <div class="flex flex-col h-full">
-                                        <div class="flex-1 min-h-0">
+                                        <div class="flex-1 min-h-0 relative">
+                                            <!-- Loading indicator for subactivities chart -->
+                                            <div *ngIf="subactivitiesLoading"
+                                                class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75 z-10">
+                                                <div
+                                                    class="flex flex-col items-center">
+                                                    <p-progressSpinner
+                                                        [style]="{width: '40px', height: '40px'}"
+                                                        strokeWidth="4"
+                                                        animationDuration=".5s">
+                                                    </p-progressSpinner>
+                                                    <p
+                                                        class="text-center text-sm text-gray-500 mt-2">
+                                                        Loading subactivities...
+                                                    </p>
+                                                </div>
+                                            </div>
+
                                             <p-chart #subactivitiesPieChart
                                                 type="bar"
                                                 [data]="subactivitiesPieData"
@@ -188,6 +221,22 @@
                             <div *ngIf="personas.length > 0"
                                 class="flex-1 min-h-0"
                                 style="min-height: 400px;">
+                                <!-- Loading indicator for persona chart -->
+                                <div *ngIf="personaLoading"
+                                    class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75 z-10">
+                                    <div class="flex flex-col items-center">
+                                        <p-progressSpinner
+                                            [style]="{width: '40px', height: '40px'}"
+                                            strokeWidth="4"
+                                            animationDuration=".5s">
+                                        </p-progressSpinner>
+                                        <p
+                                            class="text-center text-sm text-gray-500 mt-2">
+                                            Loading persona data...
+                                        </p>
+                                    </div>
+                                </div>
+
                                 <p-chart #personaChart type="radar"
                                     [data]="personaChartData"
                                     [options]="radarChartOptions"
@@ -238,7 +287,23 @@
                                 class="text-lg font-semibold text-gray-700 mb-4">
                                 {{ 'ANALYZE.PROFILES.TITLE' | translate }}</h3>
                             <div class="flex-1 flex flex-col">
-                                <div class="flex-1">
+                                <div class="flex-1 relative">
+                                    <!-- Loading indicator for profiles chart -->
+                                    <div *ngIf="profilesLoading"
+                                        class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75 z-10">
+                                        <div class="flex flex-col items-center">
+                                            <p-progressSpinner
+                                                [style]="{width: '40px', height: '40px'}"
+                                                strokeWidth="4"
+                                                animationDuration=".5s">
+                                            </p-progressSpinner>
+                                            <p
+                                                class="text-center text-sm text-gray-500 mt-2">
+                                                Loading profiles...
+                                            </p>
+                                        </div>
+                                    </div>
+
                                     <p-chart #profilesChart type="line"
                                         [data]="profilesChartData"
                                         [options]="profilesBarChartOptions"

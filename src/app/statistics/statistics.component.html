@@ -1,67 +1,67 @@
-<p-dialog 
-    [(visible)]="visible"
-    [modal]="true"
-    [style]="{width: '80vw', maxWidth: '1200px'}"
-    [draggable]="false"
-    [resizable]="false"
-    [maximizable]="true"
-    [dismissableMask]="true"
-    [header]="'STATISTICS.TITLE' | translate"
-    class="statistics-dialog">
+<p-dialog [(visible)]="visible" [modal]="true"
+    [style]="{width: '80vw', maxWidth: '1200px'}" [draggable]="false"
+    [resizable]="false" [maximizable]="true" [dismissableMask]="true"
+    [header]="'STATISTICS.TITLE' | translate" class="statistics-dialog">
 
     <div *ngIf="loading">
-        <p-progress-spinner strokeWidth="8" fill="transparent" animationDuration=".5s" [style]="{ width: '50px', height: '50px' }" class="center"/>
+        <p-progress-spinner strokeWidth="8" fill="transparent"
+            animationDuration=".5s" [style]="{ width: '50px', height: '50px' }"
+            class="center" />
     </div>
 
     <!-- Population Filter Chips -->
     <div class="mb-6 p-4 bg-gray-50 rounded-lg" *ngIf="!loading">
-        <h3 class="text-sm font-medium text-gray-700 mb-3">{{ 'STATISTICS.FILTER_BY_CITY_SIZE' | translate }}</h3>
+        <h3 class="text-sm font-medium text-gray-700 mb-3">{{
+            'STATISTICS.FILTER_BY_CITY_SIZE' | translate }}</h3>
         <div class="flex flex-wrap gap-2">
-            <span *ngFor="let category of populationCategories" 
-                  class="px-3 py-2 rounded-full text-sm font-medium cursor-pointer transition-all duration-200 select-none"
-                  [class]="isCategorySelected(category) ? 'bg-primary shadow-md' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-300 line-through'"
-                  [title]="category.label"
-                  (click)="toggleCategory(category)">
+            <span *ngFor="let category of populationCategories"
+                class="px-3 py-2 rounded-full text-sm font-medium cursor-pointer transition-all duration-200 select-none"
+                [class]="isCategorySelected(category) ? 'bg-primary shadow-md' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-300 line-through'"
+                [title]="category.label" (click)="toggleCategory(category)">
                 {{ getPopulationSizeText(category) }}
             </span>
         </div>
-        
-        <!-- Bezirk Toggle -->
-        <div class="mt-4 flex items-center">
-            <input type="checkbox" 
-                   id="bezirkToggle" 
-                   [(ngModel)]="showBezirke" 
-                   (ngModelChange)="onBezirkToggleChange()"
-                   class="mr-2 h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
-            <label for="bezirkToggle" class="text-sm font-medium text-gray-700 cursor-pointer">
-                {{ 'STATISTICS.SHOW_BEZIRKE' | translate }}
-            </label>
-        </div>
-        
+
         <!-- Background Loading Indicator -->
-        <div *ngIf="backgroundLoading" class="mt-3 flex items-center text-sm text-gray-600">
-            <p-progress-spinner strokeWidth="4" fill="transparent" animationDuration="1s" [style]="{ width: '20px', height: '20px' }" class="mr-2"/>
+        <div *ngIf="backgroundLoading"
+            class="mt-3 flex items-center text-sm text-gray-600">
+            <p-progress-spinner strokeWidth="4" fill="transparent"
+                animationDuration="1s"
+                [style]="{ width: '20px', height: '20px' }" class="mr-2" />
             <span>{{ 'STATISTICS.LOADING_MORE_DATA' | translate }}</span>
         </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6" *ngIf="!loading">
-        <div *ngIf="stateScores.length > 0" class="bg-white rounded-lg shadow-md overflow-hidden">
-            <h2 class="text-xl font-bold p-4 border-b-2 border-primary text-gray-800">{{ 'STATISTICS.STATES' | translate }}</h2>
+        <div *ngIf="stateScores.length > 0"
+            class="bg-white rounded-lg shadow-md overflow-hidden">
+            <h2
+                class="text-xl font-bold p-4 border-b-2 border-primary text-gray-800">
+                {{ 'STATISTICS.STATES' | translate }}</h2>
             <p-scrollPanel [style]="{ height: '400px' }">
                 <p-table [value]="paginatedStateScores" styleClass="text-sm">
                     <ng-template pTemplate="header">
                         <tr class="bg-gray-100">
-                            <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.RANK' | translate }}</th>
-                            <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.NAME' | translate }}</th>
-                            <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.GRADE' | translate }}</th>
+                            <th
+                                class="p-3 text-left font-semibold text-gray-700">
+                                {{ 'STATISTICS.RANK' | translate }}</th>
+                            <th
+                                class="p-3 text-left font-semibold text-gray-700">
+                                {{ 'STATISTICS.NAME' | translate }}</th>
+                            <th
+                                class="p-3 text-left font-semibold text-gray-700">
+                                {{ 'STATISTICS.GRADE' | translate }}</th>
                         </tr>
                     </ng-template>
                     <ng-template pTemplate="body" let-score let-i="rowIndex">
-                        <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
+                        <tr
+                            class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
                             <td class="p-3">{{score.rank}}</td>
-                            <td class="p-3" (click)="onFeatureClick(score)" title="{{score.name}} ({{'STATISTICS.POPULATION' | translate}}: {{(score.population) | number:'1.0-0'}})">{{score.name}}</td>
-                            <td class="p-3 font-semibold" [style.color]="getIndexColor(score)">
+                            <td class="p-3" (click)="onFeatureClick(score)"
+                                title="{{score.name}} ({{'STATISTICS.POPULATION' | translate}}: {{(score.population) | number:'1.0-0'}})">
+                                {{score.name}}</td>
+                            <td class="p-3 font-semibold"
+                                [style.color]="getIndexColor(score)">
                                 {{getIndexName(score)}}
                             </td>
                         </tr>
@@ -69,14 +69,11 @@
                 </p-table>
             </p-scrollPanel>
             <div class="p-4 border-t border-gray-100">
-                <p-paginator 
-                    [rows]="rowsPerPage" 
+                <p-paginator [rows]="rowsPerPage"
                     [totalRecords]="stateScores.length"
                     (onPageChange)="onStatePageChange($event)"
-                    [showPageLinks]="false"
-                    [showFirstLastIcon]="true"
-                    [alwaysShow]="false"
-                    [showJumpToPageDropdown]="false"
+                    [showPageLinks]="false" [showFirstLastIcon]="true"
+                    [alwaysShow]="false" [showJumpToPageDropdown]="false"
                     [first]="(currentStatePage - 1) * rowsPerPage"
                     [showCurrentPageReport]="true"
                     currentPageReportTemplate="{currentPage} / {totalPages}">
@@ -85,21 +82,33 @@
         </div>
 
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <h2 class="text-xl font-bold p-4 border-b-2 border-primary text-gray-800">{{ 'STATISTICS.COUNTIES' | translate }}</h2>
+            <h2
+                class="text-xl font-bold p-4 border-b-2 border-primary text-gray-800">
+                {{ 'STATISTICS.COUNTIES' | translate }}</h2>
             <p-scrollPanel [style]="{ height: '400px' }">
                 <p-table [value]="paginatedCountyScores" styleClass="text-sm">
                     <ng-template pTemplate="header">
                         <tr class="bg-gray-100">
-                            <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.RANK' | translate }}</th>
-                            <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.NAME' | translate }}</th>
-                            <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.GRADE' | translate }}</th>
+                            <th
+                                class="p-3 text-left font-semibold text-gray-700">
+                                {{ 'STATISTICS.RANK' | translate }}</th>
+                            <th
+                                class="p-3 text-left font-semibold text-gray-700">
+                                {{ 'STATISTICS.NAME' | translate }}</th>
+                            <th
+                                class="p-3 text-left font-semibold text-gray-700">
+                                {{ 'STATISTICS.GRADE' | translate }}</th>
                         </tr>
                     </ng-template>
                     <ng-template pTemplate="body" let-score let-i="rowIndex">
-                        <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
+                        <tr
+                            class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
                             <td class="p-3">{{score.rank}}</td>
-                            <td class="p-3" (click)="onFeatureClick(score)" title="{{score.name}} ({{'STATISTICS.POPULATION' | translate}}: {{score.population | number:'1.0-0'}})">{{score.name}}</td>
-                            <td class="p-3 font-semibold" [style.color]="getIndexColor(score)">
+                            <td class="p-3" (click)="onFeatureClick(score)"
+                                title="{{score.name}} ({{'STATISTICS.POPULATION' | translate}}: {{score.population | number:'1.0-0'}})">
+                                {{score.name}}</td>
+                            <td class="p-3 font-semibold"
+                                [style.color]="getIndexColor(score)">
                                 {{getIndexName(score)}}
                             </td>
                         </tr>
@@ -107,35 +116,45 @@
                 </p-table>
             </p-scrollPanel>
             <div class="p-4 border-t border-gray-100">
-                <p-paginator 
-                    [rows]="rowsPerPage" 
+                <p-paginator [rows]="rowsPerPage"
                     [totalRecords]="filteredCountyCount"
                     (onPageChange)="onCountyPageChange($event)"
-                    [showPageLinks]="false"
-                    [showFirstLastIcon]="true"
-                    [alwaysShow]="false"
-                    [showJumpToPageDropdown]="false"
+                    [showPageLinks]="false" [showFirstLastIcon]="true"
+                    [alwaysShow]="false" [showJumpToPageDropdown]="false"
                     [first]="(currentCountyPage - 1) * rowsPerPage">
                 </p-paginator>
             </div>
         </div>
 
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <h2 class="text-xl font-bold p-4 border-b-2 border-primary text-gray-800">{{ 'STATISTICS.MUNICIPALITIES' | translate }}</h2>
+            <h2
+                class="text-xl font-bold p-4 border-b-2 border-primary text-gray-800">
+                {{ 'STATISTICS.MUNICIPALITIES' | translate }}</h2>
             <p-scrollPanel [style]="{ height: '400px' }">
-                <p-table [value]="paginatedMunicipalityScores" styleClass="text-sm">
+                <p-table [value]="paginatedMunicipalityScores"
+                    styleClass="text-sm">
                     <ng-template pTemplate="header">
                         <tr class="bg-gray-100">
-                            <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.RANK' | translate }}</th>
-                            <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.NAME' | translate }}</th>
-                            <th class="p-3 text-left font-semibold text-gray-700">{{ 'STATISTICS.GRADE' | translate }}</th>
+                            <th
+                                class="p-3 text-left font-semibold text-gray-700">
+                                {{ 'STATISTICS.RANK' | translate }}</th>
+                            <th
+                                class="p-3 text-left font-semibold text-gray-700">
+                                {{ 'STATISTICS.NAME' | translate }}</th>
+                            <th
+                                class="p-3 text-left font-semibold text-gray-700">
+                                {{ 'STATISTICS.GRADE' | translate }}</th>
                         </tr>
                     </ng-template>
                     <ng-template pTemplate="body" let-score let-i="rowIndex">
-                        <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer" [title]="score.name + ' (' + score.county + ')'">
+                        <tr class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer"
+                            [title]="score.name + ' (' + score.county + ')'">
                             <td class="p-3">{{score.rank}}</td>
-                            <td class="p-3" (click)="onFeatureClick(score)" title="{{score.name}} - {{score.county}} ({{'STATISTICS.POPULATION' | translate}}: {{score.population | number:'1.0-0'}})">{{score.name}}</td>
-                            <td class="p-3 font-semibold" [style.color]="getIndexColor(score)">
+                            <td class="p-3" (click)="onFeatureClick(score)"
+                                title="{{score.name}} - {{score.county}} ({{'STATISTICS.POPULATION' | translate}}: {{score.population | number:'1.0-0'}})">
+                                {{score.name}}</td>
+                            <td class="p-3 font-semibold"
+                                [style.color]="getIndexColor(score)">
                                 {{getIndexName(score)}}
                             </td>
                         </tr>
@@ -143,19 +162,26 @@
                 </p-table>
             </p-scrollPanel>
             <div class="p-4 border-t border-gray-100">
-                <p-paginator 
-                    [rows]="rowsPerPage" 
+                <p-paginator [rows]="rowsPerPage"
                     [totalRecords]="filteredMunicipalityCount"
                     (onPageChange)="onMunicipalityPageChange($event)"
-                    [showPageLinks]="false"
-                    [showFirstLastIcon]="true"
-                    [alwaysShow]="false"
-                    [showJumpToPageDropdown]="false"
+                    [showPageLinks]="false" [showFirstLastIcon]="true"
+                    [alwaysShow]="false" [showJumpToPageDropdown]="false"
                     [showCurrentPageReport]="true"
                     currentPageReportTemplate="{currentPage} / {totalPages}"
                     [first]="(currentMunicipalityPage - 1) * rowsPerPage">
                 </p-paginator>
             </div>
+        </div>
+    </div>
+
+    <!-- Hint about municipality subdivision -->
+    <div class="mt-6 flex justify-center items-center" *ngIf="!loading">
+        <div
+            class="bg-purple-50 border border-purple-200 rounded-lg p-3 max-w-2xl">
+            <p class="text-purple-800 text-center font-medium text-sm">
+                {{ 'STATISTICS.MUNICIPALITY_SUBDIVISION_HINT' | translate }}
+            </p>
         </div>
     </div>
 

@@ -31,6 +31,9 @@ import { IndexService } from '../services/index.service';
 export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   visible: boolean = false;
   loading: boolean = false;
+  activitiesLoading: boolean = false;
+  personaLoading: boolean = false;
+  profilesLoading: boolean = false;
   private subscriptions: Subscription[] = [];
 
   profiles: Profile[] = [];
@@ -57,6 +60,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   subactivitiesPieOptions: any;
   hoveredCategoryId: number | null = null;
   hoveredCategoryName: string = '';
+  subactivitiesLoading: boolean = false;
   generateLabels: any;
 
   // Diagrammdaten
@@ -269,6 +273,11 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private initializeChartData(): void {
+    // Set loading states for all charts
+    this.activitiesLoading = true;
+    this.personaLoading = true;
+    this.profilesLoading = true;
+
     this.initializeProfilesChart();
     this.initializeActivitiesChart();
     this.initializePersonaChart();
@@ -320,6 +329,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           barPercentage: 0.8
         }]
       };
+      this.activitiesLoading = false;
       return;
     }
 
@@ -426,6 +436,8 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         }
       }
     };
+
+    this.activitiesLoading = false; // Clear loading state when chart is ready
   }
 
   private initializeSubActivitiesChart(categoryId?: number): void {
@@ -442,12 +454,14 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           barPercentage: 0.8
         }]
       };
+      this.subactivitiesLoading = false;
       return;
     }
 
     // Get activities for the selected category
     this.analyzeService.getActivities(categoryId).subscribe({
       next: (activities) => {
+        this.subactivitiesLoading = false; // Clear loading state when data is received
         if (!activities || activities.length === 0) {
           this.subactivitiesChartData = {
             labels: [],
@@ -501,6 +515,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       },
       error: (error) => {
         console.error('Error loading activities:', error);
+        this.subactivitiesLoading = false; // Clear loading state on error
         this.subactivitiesChartData = {
           labels: [],
           datasets: [{
@@ -578,17 +593,41 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const index = event.element.index;
     if (index !== undefined && index >= 0) {
       const categoryData = this.activitiesChartData.labels[index];
-      // Find the category ID from the category name
-      let category: Category | undefined;
-      if (localStorage.getItem('mobi.mapr.language') === 'en') {
-        category = this.categories.find(cat => cat.name_en === categoryData);
-      } else {
-        category = this.categories.find(cat => cat.name_de === categoryData);
-      }
+
+      // Get the sorted categories (same order as chart data)
+      const sortedData = [...this.categories].sort((a, b) => {
+        if (this.sortBy === 'weight') {
+          return b.weight - a.weight;  // Sort by weight in descending order
+        } else {
+          return b.index - a.index;    // Sort by score in descending order
+        }
+      });
+
+      // Use the index to get the correct category from the sorted array
+      const category = sortedData[index];
       if (!category) return;
 
       this.hoveredCategoryId = category.id;
-      this.hoveredCategoryName = categoryData;
+      // Use the full category name for the dialog header
+      this.hoveredCategoryName = localStorage.getItem('mobi.mapr.language') === 'en'
+        ? category.name_en
+        : category.name_de;
+
+      // Set loading state and immediately clear subactivities chart data to prevent showing old values
+      this.subactivitiesLoading = true;
+      this.subactivitiesChartData = {
+        labels: [],
+        datasets: [{
+          label: 'Subaktivitäten',
+          data: [],
+          backgroundColor: [],
+          borderColor: [],
+          borderWidth: 1,
+          yAxisID: 'y',
+          barPercentage: 0.8
+        }]
+      };
+
       this.generateSubactivitiesPieData(category.id);
       this.showSubactivitiesPie = true;
       this.initializeSubActivitiesChart(category.id); // Update subactivities chart for the hovered category
@@ -606,7 +645,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       // Set loading state and show map dialog
       this.mapLoaded = false;
       this.showSubactivitiesMap = true;
-      this.hoveredSubactivityName = subactivityData;
+      // Use the full activity name from the stored data
+      this.hoveredSubactivityName = this.subactivitiesPieData.fullNames ?
+        this.subactivitiesPieData.fullNames[index] : subactivityData;
 
       // Wait for dialog to be rendered before initializing map
       setTimeout(() => {
@@ -910,6 +951,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           fill: false
         }]
       };
+      this.personaLoading = false;
       return;
     }
 
@@ -931,6 +973,8 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     const { chartData, chartOptions } = this.createRadarChartData(labels, data, scoreNames, 'Persona-Werte', this.personaChartZoomed);
     this.personaChartData = chartData;
     this.radarChartOptions = chartOptions;
+
+    this.personaLoading = false; // Clear loading state when chart is ready
   }
 
   private initializeProfilesChart(): void {
@@ -941,6 +985,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         datasets: []
       };
       this.profileLegendData = [];
+      this.profilesLoading = false;
       return;
     }
 
@@ -963,6 +1008,8 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     } else {
       this.createProfilesComboChart(sortedProfiles, new Map(this.profiles.map(p => [p.id, p.name_de])), scoreNames);
     }
+
+    this.profilesLoading = false; // Clear loading state when chart is ready
   }
 
   private createProfilesComboChart(profiles: any[], profileMap: Map<number, string>, scoreNames: string[]): void {
@@ -1224,6 +1271,22 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     this.showSubactivitiesPie = false;
     this.hoveredCategoryId = null;
     this.hoveredCategoryName = '';
+    this.subactivitiesLoading = false; // Clear loading state
+
+    // Immediately clear subactivities chart data
+    this.subactivitiesChartData = {
+      labels: [],
+      datasets: [{
+        label: 'Subaktivitäten',
+        data: [],
+        backgroundColor: [],
+        borderColor: [],
+        borderWidth: 1,
+        yAxisID: 'y',
+        barPercentage: 0.8
+      }]
+    };
+
     this.initializeSubActivitiesChart(); // Reset subactivities chart when leaving
   }
 
@@ -1266,7 +1329,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
               backgroundColor: [],
               borderColor: '#ffffff',
               borderWidth: 2,
-            }]
+            }],
+            activityIds: [],
+            fullNames: []
           };
           return;
         }
@@ -1305,8 +1370,11 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           }]
         };
 
-        // Store the pie data with IDs for later use
+        // Store the pie data with IDs and full names for later use
         this.subactivitiesPieData.activityIds = sortedActivities.map(item => item.id);
+        this.subactivitiesPieData.fullNames = sortedActivities.map(item =>
+          localStorage.getItem('mobi.mapr.language') === 'en' ? item.name_en : item.name_de
+        );
       },
       error: (error) => {
         console.error('Error loading activities for pie chart:', error);
@@ -1357,6 +1425,10 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     this.hoveredSubactivityName = '';
     this.hoveredCategoryId = null;
     this.hoveredCategoryName = '';
+    this.activitiesLoading = false;
+    this.personaLoading = false;
+    this.profilesLoading = false;
+    this.subactivitiesLoading = false;
     this.mapLoaded = false;
     this.noPlaces = false;
     this.disablePlaces = false;
@@ -1380,6 +1452,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
 
   toggleActivitiesChartType(): void {
+    this.activitiesLoading = true;
     this.initializeActivitiesChart();
     setTimeout(() => {
       this.resizeCharts();
@@ -1388,6 +1461,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
   toggleSort(): void {
     this.sortBy = this.sortBy === 'score' ? 'weight' : 'score';
+    this.activitiesLoading = true;
     this.initializeActivitiesChart();
     // Regenerate subactivities pie chart if currently showing
     if (this.showSubactivitiesPie && this.hoveredCategoryId) {
@@ -1400,6 +1474,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
   togglePersonaChartZoom(): void {
     this.personaChartZoomed = !this.personaChartZoomed;
+    this.personaLoading = true;
     this.initializePersonaChart();
     setTimeout(() => {
       this.resizeCharts();
