@@ -34,8 +34,10 @@
     },
     "STATUS": {
       "FINISHED": "Abgeschlossen",
-      "IN_PROGRESS": "In Bearbeitung"
+      "IN_PROGRESS": "In Bearbeitung",
+      "QUEUED": "Warteschlange"
     },
+    "QUEUED_MESSAGE": "Projekt ist in der Warteschlange für die Verarbeitung...",
     "EDIT": {
       "TITLE": "Projekt bearbeiten"
     },

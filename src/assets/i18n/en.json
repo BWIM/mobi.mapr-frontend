@@ -34,8 +34,10 @@
     },
     "STATUS": {
       "FINISHED": "Completed",
-      "IN_PROGRESS": "In Progress"
+      "IN_PROGRESS": "In Progress",
+      "QUEUED": "Queued"
     },
+    "QUEUED_MESSAGE": "Project is queued for processing...",
     "EDIT": {
       "TITLE": "Edit Project"
     },

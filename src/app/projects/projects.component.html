@@ -68,12 +68,26 @@
                                                         class="text-sm text-gray-500 ml-2">v{{
                                                         project.version
                                                         }}</span>
+                                                    <span
+                                                        *ngIf="project.status === 'queued'"
+                                                        class="ml-2 px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                                                        {{
+                                                        'PROJECTS.STATUS.QUEUED'
+                                                        | translate }}
+                                                    </span>
+                                                    <span
+                                                        *ngIf="project.status === 'calculating'"
+                                                        class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                                                        {{
+                                                        'PROJECTS.STATUS.IN_PROGRESS'
+                                                        | translate }}
+                                                    </span>
                                                 </h3>
                                                 <p *ngIf="project.description"
                                                     class="text-sm text-gray-600 mt-1">
                                                     {{ project.description }}
                                                 </p>
-                                                <div *ngIf="project.status !== 'finished'"
+                                                <div *ngIf="project.status !== 'finished' && project.status !== 'queued'"
                                                     class="mt-2">
                                                     <p-progressBar
                                                         [value]="getProgress(project)"
@@ -81,6 +95,15 @@
                                                         styleClass="h-2"
                                                         color="var(--primary-color)">
                                                     </p-progressBar>
+                                                </div>
+                                                <div *ngIf="project.status === 'queued'"
+                                                    class="mt-2">
+                                                    <p
+                                                        class="text-sm text-yellow-600">
+                                                        {{
+                                                        'PROJECTS.QUEUED_MESSAGE'
+                                                        | translate }}
+                                                    </p>
                                                 </div>
                                             </div>
                                             <div class="flex gap-2 ml-4">
@@ -135,12 +158,26 @@
                                                         class="text-sm text-gray-500 ml-2">v{{
                                                         project.version
                                                         }}</span>
+                                                    <span
+                                                        *ngIf="project.status === 'queued'"
+                                                        class="ml-2 px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                                                        {{
+                                                        'PROJECTS.STATUS.QUEUED'
+                                                        | translate }}
+                                                    </span>
+                                                    <span
+                                                        *ngIf="project.status === 'calculating'"
+                                                        class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                                                        {{
+                                                        'PROJECTS.STATUS.IN_PROGRESS'
+                                                        | translate }}
+                                                    </span>
                                                 </h3>
                                                 <p *ngIf="project.description"
                                                     class="text-sm text-gray-600 mt-1">
                                                     {{ project.description }}
                                                 </p>
-                                                <div *ngIf="project.status !== 'finished'"
+                                                <div *ngIf="project.status !== 'finished' && project.status !== 'queued'"
                                                     class="mt-2">
                                                     <p-progressBar
                                                         [value]="getProgress(project)"
@@ -148,6 +185,15 @@
                                                         styleClass="h-2"
                                                         color="var(--primary-color)">
                                                     </p-progressBar>
+                                                </div>
+                                                <div *ngIf="project.status === 'queued'"
+                                                    class="mt-2">
+                                                    <p
+                                                        class="text-sm text-yellow-600">
+                                                        {{
+                                                        'PROJECTS.QUEUED_MESSAGE'
+                                                        | translate }}
+                                                    </p>
                                                 </div>
                                             </div>
                                             <div class="flex gap-2 ml-4">
@@ -223,12 +269,26 @@
                                                         {{ 'PROJECTS.SHARED' |
                                                         translate }}
                                                     </span>
+                                                    <span
+                                                        *ngIf="project.status === 'queued'"
+                                                        class="ml-2 px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                                                        {{
+                                                        'PROJECTS.STATUS.QUEUED'
+                                                        | translate }}
+                                                    </span>
+                                                    <span
+                                                        *ngIf="project.status === 'calculating'"
+                                                        class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                                                        {{
+                                                        'PROJECTS.STATUS.IN_PROGRESS'
+                                                        | translate }}
+                                                    </span>
                                                 </h3>
                                                 <p *ngIf="project.description"
                                                     class="text-sm text-gray-600 mt-1">
                                                     {{ project.description }}
                                                 </p>
-                                                <div *ngIf="project.status !== 'finished'"
+                                                <div *ngIf="project.status !== 'finished' && project.status !== 'queued'"
                                                     class="mt-2">
                                                     <p-progressBar
                                                         [value]="getProgress(project)"
@@ -236,6 +296,15 @@
                                                         styleClass="h-2"
                                                         color="var(--primary-color)">
                                                     </p-progressBar>
+                                                </div>
+                                                <div *ngIf="project.status === 'queued'"
+                                                    class="mt-2">
+                                                    <p
+                                                        class="text-sm text-yellow-600">
+                                                        {{
+                                                        'PROJECTS.QUEUED_MESSAGE'
+                                                        | translate }}
+                                                    </p>
                                                 </div>
                                             </div>
                                             <div class="flex gap-2 ml-4">
@@ -284,12 +353,26 @@
                                                         {{ 'PROJECTS.SHARED' |
                                                         translate }}
                                                     </span>
+                                                    <span
+                                                        *ngIf="project.status === 'queued'"
+                                                        class="ml-2 px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                                                        {{
+                                                        'PROJECTS.STATUS.QUEUED'
+                                                        | translate }}
+                                                    </span>
+                                                    <span
+                                                        *ngIf="project.status === 'calculating'"
+                                                        class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                                                        {{
+                                                        'PROJECTS.STATUS.IN_PROGRESS'
+                                                        | translate }}
+                                                    </span>
                                                 </h3>
                                                 <p *ngIf="project.description"
                                                     class="text-sm text-gray-600 mt-1">
                                                     {{ project.description }}
                                                 </p>
-                                                <div *ngIf="project.status !== 'finished'"
+                                                <div *ngIf="project.status !== 'finished' && project.status !== 'queued'"
                                                     class="mt-2">
                                                     <p-progressBar
                                                         [value]="getProgress(project)"
@@ -297,6 +380,15 @@
                                                         styleClass="h-2"
                                                         color="var(--primary-color)">
                                                     </p-progressBar>
+                                                </div>
+                                                <div *ngIf="project.status === 'queued'"
+                                                    class="mt-2">
+                                                    <p
+                                                        class="text-sm text-yellow-600">
+                                                        {{
+                                                        'PROJECTS.QUEUED_MESSAGE'
+                                                        | translate }}
+                                                    </p>
                                                 </div>
                                             </div>
                                             <div class="flex gap-2 ml-4">
@@ -362,12 +454,26 @@
                                                         {{ 'PROJECTS.READ_ONLY'
                                                         | translate }}
                                                     </span>
+                                                    <span
+                                                        *ngIf="project.status === 'queued'"
+                                                        class="ml-2 px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                                                        {{
+                                                        'PROJECTS.STATUS.QUEUED'
+                                                        | translate }}
+                                                    </span>
+                                                    <span
+                                                        *ngIf="project.status === 'calculating'"
+                                                        class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                                                        {{
+                                                        'PROJECTS.STATUS.IN_PROGRESS'
+                                                        | translate }}
+                                                    </span>
                                                 </h3>
                                                 <p *ngIf="project.description"
                                                     class="text-sm text-gray-600 mt-1">
                                                     {{ project.description }}
                                                 </p>
-                                                <div *ngIf="project.status !== 'finished'"
+                                                <div *ngIf="project.status !== 'finished' && project.status !== 'queued'"
                                                     class="mt-2">
                                                     <p-progressBar
                                                         [value]="getProgress(project)"
@@ -375,6 +481,15 @@
                                                         styleClass="h-2"
                                                         color="var(--primary-color)">
                                                     </p-progressBar>
+                                                </div>
+                                                <div *ngIf="project.status === 'queued'"
+                                                    class="mt-2">
+                                                    <p
+                                                        class="text-sm text-yellow-600">
+                                                        {{
+                                                        'PROJECTS.QUEUED_MESSAGE'
+                                                        | translate }}
+                                                    </p>
                                                 </div>
                                             </div>
                                             <div class="flex gap-2 ml-4">
@@ -423,12 +538,26 @@
                                                         {{ 'PROJECTS.READ_ONLY'
                                                         | translate }}
                                                     </span>
+                                                    <span
+                                                        *ngIf="project.status === 'queued'"
+                                                        class="ml-2 px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">
+                                                        {{
+                                                        'PROJECTS.STATUS.QUEUED'
+                                                        | translate }}
+                                                    </span>
+                                                    <span
+                                                        *ngIf="project.status === 'calculating'"
+                                                        class="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                                                        {{
+                                                        'PROJECTS.STATUS.IN_PROGRESS'
+                                                        | translate }}
+                                                    </span>
                                                 </h3>
                                                 <p *ngIf="project.description"
                                                     class="text-sm text-gray-600 mt-1">
                                                     {{ project.description }}
                                                 </p>
-                                                <div *ngIf="project.status !== 'finished'"
+                                                <div *ngIf="project.status !== 'finished' && project.status !== 'queued'"
                                                     class="mt-2">
                                                     <p-progressBar
                                                         [value]="getProgress(project)"
@@ -436,6 +565,15 @@
                                                         styleClass="h-2"
                                                         color="var(--primary-color)">
                                                     </p-progressBar>
+                                                </div>
+                                                <div *ngIf="project.status === 'queued'"
+                                                    class="mt-2">
+                                                    <p
+                                                        class="text-sm text-yellow-600">
+                                                        {{
+                                                        'PROJECTS.QUEUED_MESSAGE'
+                                                        | translate }}
+                                                    </p>
                                                 </div>
                                             </div>
                                             <div class="flex gap-2 ml-4">
