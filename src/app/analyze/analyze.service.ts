@@ -119,22 +119,22 @@ export class AnalyzeService {
   }
 
   getCategoriesSimple() {
-    const url = `${environment.apiUrl}/categories/simple`;
+    const url = `${environment.apiUrl}/public-simple/categories`;
     return this.http.get<DisplayNameItem[]>(url);
   }
 
   getActivitiesSimple() {
-    const url = `${environment.apiUrl}/activities/simple`;
+    const url = `${environment.apiUrl}/public-simple/activities`;
     return this.http.get<DisplayNameItem[]>(url);
   }
 
   getPersonasSimple() {
-    const url = `${environment.apiUrl}/personas/simple`;
+    const url = `${environment.apiUrl}/public-simple/personas`;
     return this.http.get<DisplayNameItem[]>(url);
   }
 
   getProfilesSimple() {
-    const url = `${environment.apiUrl}/profiles/simple`;
+    const url = `${environment.apiUrl}/public-simple/profiles`;
     return this.http.get<DisplayNameItem[]>(url);
   }
 }
