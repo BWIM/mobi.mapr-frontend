@@ -47,7 +47,7 @@ export class ShareComponent implements OnInit {
     this.loadingService.startLoading();
     this.shareService.setIsShare(true);
     if (!localStorage.getItem('tutorialStatus') || localStorage.getItem('tutorialStatus') === 'false') {
-      this.tutorialService.startTutorial('share');
+      // this.tutorialService.startTutorial('share');
     }
 
     // Subscribe to the sidebar expansion state

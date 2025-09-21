@@ -58,7 +58,8 @@
                                         </p-progressSpinner>
                                         <p
                                             class="text-center text-sm text-gray-500 mt-2">
-                                            Loading activities...
+                                            {{ 'ANALYZE.ACTIVITIES.LOADING' |
+                                            translate }}
                                         </p>
                                     </div>
                                 </div>
@@ -91,7 +92,9 @@
                                                     </p-progressSpinner>
                                                     <p
                                                         class="text-center text-sm text-gray-500 mt-2">
-                                                        Loading subactivities...
+                                                        {{
+                                                        'ANALYZE.ACTIVITIES.LOADING_SUBACTIVITIES'
+                                                        | translate }}
                                                     </p>
                                                 </div>
                                             </div>
@@ -111,7 +114,7 @@
                                             <div
                                                 class="bg-purple-50 border border-purple-200 rounded-lg p-2 max-w-md">
                                                 <p
-                                                    class="text-purple-800 text-center font-medium text-xs">
+                                                    class="text-black-800 text-center font-medium text-xs">
                                                     {{
                                                     'ANALYZE.ACTIVITIES.SUBACTIVITIES_HINT'
                                                     | translate }}</p>
@@ -155,7 +158,9 @@
                                                         animationDuration=".5s"></p-progressSpinner>
                                                     <p
                                                         class="text-center text-sm text-gray-500 mt-2">
-                                                        Loading map...</p>
+                                                        {{
+                                                        'ANALYZE.ACTIVITIES.LOADING_MAP'
+                                                        | translate }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -168,12 +173,12 @@
                                     'ANALYZE.ACTIVITIES.NO_DATA' | translate }}
                                 </p>
                             </div>
-                            <div class="flex flex-col gap-2 mt-2">
+                            <div class="flex flex-col gap-2 mt-2 mb-4">
                                 <div class="flex justify-center items-center">
                                     <div
                                         class="bg-purple-50 border border-purple-200 rounded-lg p-2 max-w-md">
                                         <p
-                                            class="text-purple-800 text-center font-medium text-xs">
+                                            class="text-black-800 text-center font-medium text-xs">
                                             {{
                                             'ANALYZE.ACTIVITIES.HINT' |
                                             translate }}
@@ -184,7 +189,7 @@
                                     <div
                                         class="bg-purple-50 border border-purple-200 rounded-lg p-2 max-w-md">
                                         <p
-                                            class="text-purple-800 text-center font-medium text-xs">
+                                            class="text-black-800 text-center font-medium text-xs">
                                             {{
                                             'ANALYZE.POPULATION_WEIGHTING_HINT'
                                             |
@@ -232,7 +237,8 @@
                                         </p-progressSpinner>
                                         <p
                                             class="text-center text-sm text-gray-500 mt-2">
-                                            Loading persona data...
+                                            {{ 'ANALYZE.PERSONA.LOADING' |
+                                            translate }}
                                         </p>
                                     </div>
                                 </div>
@@ -248,7 +254,7 @@
                                 <p class="text-gray-700 text-center">{{
                                     'ANALYZE.PERSONA.NO_DATA' | translate }}</p>
                             </div>
-                            <div class="flex flex-col gap-2 mt-2">
+                            <div class="flex flex-col gap-2 mt-2 mb-4">
                                 <div class="flex justify-center items-center">
                                     <p
                                         class="text-gray-700 text-center text-xs">
@@ -260,7 +266,7 @@
                                     <div
                                         class="bg-purple-50 border border-purple-200 rounded-lg p-2 max-w-md">
                                         <p
-                                            class="text-purple-800 text-center font-medium text-xs">
+                                            class="text-black-800 text-center font-medium text-xs">
                                             {{
                                             'ANALYZE.POPULATION_WEIGHTING_HINT'
                                             |
@@ -299,7 +305,8 @@
                                             </p-progressSpinner>
                                             <p
                                                 class="text-center text-sm text-gray-500 mt-2">
-                                                Loading profiles...
+                                                {{ 'ANALYZE.PROFILES.LOADING' |
+                                                translate }}
                                             </p>
                                         </div>
                                     </div>
@@ -334,11 +341,11 @@
                             <p class="text-gray-700 text-center">{{
                                 'ANALYZE.PROFILES.NO_DATA' | translate }}</p>
                         </div>
-                        <div class="flex justify-center items-center mb-4 pt-4">
+                        <div class="flex justify-center items-center mb-6 pt-4">
                             <div
                                 class="bg-purple-50 border border-purple-200 rounded-lg p-3 max-w-md">
                                 <p
-                                    class="text-purple-800 text-center font-medium text-sm">
+                                    class="text-black-800 text-center font-medium text-sm">
                                     {{
                                     'ANALYZE.POPULATION_WEIGHTING_HINT' |
                                     translate

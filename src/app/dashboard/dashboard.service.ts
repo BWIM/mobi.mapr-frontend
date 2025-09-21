@@ -7,7 +7,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 export class DashboardService {
   private legendExpandedSubject = new BehaviorSubject<boolean>(false);
   private rightSidebarExpandedSubject = new BehaviorSubject<boolean>(false);
-  private leftSidebarExpandedSubject = new BehaviorSubject<boolean>(false);
+  private leftSidebarExpandedSubject = new BehaviorSubject<boolean>(true);
   public legendExpanded$ = this.legendExpandedSubject.asObservable();
   public rightSidebarExpanded$ = this.rightSidebarExpandedSubject.asObservable();
   public leftSidebarExpanded$ = this.leftSidebarExpandedSubject.asObservable();

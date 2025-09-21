@@ -293,7 +293,8 @@
     "PERSONA": {
       "TITLE": "Persona",
       "NO_DATA": "Keine Daten verfügbar",
-      "HINT": "Hinweis: Die Werte der Persona können bei einer limitieren Anzahl an Modi sehr ähnlich sein."
+      "HINT": "Hinweis: Die Werte der Persona können bei einer limitieren Anzahl an Modi sehr ähnlich sein.",
+      "LOADING": "Lade Persona-Daten..."
     },
     "ACTIVITIES": {
       "TITLE": "Aktivitäten",
@@ -303,16 +304,21 @@
       "HINT": "💡 Klicke auf einen Balken im Diagramm, um mehr Infos zu erhalten!",
       "SUBACTIVITIES_HINT": "💡 Klicke auf einen Balken im Diagramm, um Orte auf der Karte anzuzeigen!",
       "NO_PLACES": "Keine Orte gefunden",
-      "DISABLE_PLACES": "Die Orts-Ansicht ist nur für Gemeinde-Ebene oder Hexagone aktiviert. Um mehr Details zu bekommen, zoome in die Karte hinein!"
+      "DISABLE_PLACES": "Die Orts-Ansicht ist nur für Gemeinde-Ebene oder Hexagone aktiviert. Um mehr Details zu bekommen, zoome in die Karte hinein!",
+      "LOADING": "Lade Aktivitäten...",
+      "LOADING_SUBACTIVITIES": "Lade Unteraktivitäten...",
+      "LOADING_MAP": "Lade Karte..."
     },
     "MODES": {
       "TITLE": "Modi",
-      "NO_DATA": "Keine Daten verfügbar"
+      "NO_DATA": "Keine Daten verfügbar",
+      "LOADING": "Lade Modi..."
     },
     "PROFILES": {
       "TITLE": "Modi",
       "NO_DATA": "Keine Daten verfügbar",
-      "HINT": "Hinweis: Die Werte der Modi können bei einer limitieren Anzahl an Personas sehr ähnlich sein."
+      "HINT": "Hinweis: Die Werte der Modi können bei einer limitieren Anzahl an Personas sehr ähnlich sein.",
+      "LOADING": "Lade Profile..."
     },
     "TITLE": "Details",
     "START": "Start",
