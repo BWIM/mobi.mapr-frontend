@@ -29,6 +29,7 @@ export class DashboardComponent implements OnInit {
   isRightPinned: boolean = false;
   rightSidebarExpanded: boolean = false;
   isMobile: boolean = false;
+  isSmallMobile: boolean = false;
 
   constructor(private tutorialService: TutorialService, private dashboardService: DashboardService, private mapService: MapV2Service) {
     this.checkMobile();
@@ -48,13 +49,14 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  // @HostListener('window:resize', ['$event'])
-  // onResize() {
-  //   this.checkMobile();
-  // }
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.checkMobile();
+  }
 
   private checkMobile(): void {
     this.isMobile = window.innerWidth < 768;
+    this.isSmallMobile = window.innerWidth <= 480;
 
     // Auto-close sidebars on mobile when switching to desktop
     if (!this.isMobile) {
