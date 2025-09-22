@@ -6,6 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ShareSidebarComponent } from './share-sidebar/share-sidebar.component';
 import { ShareProjectbarComponent } from './share-projectbar/share-projectbar.component';
 import { ShareProject } from './share.interface';
+import { Project } from '../projects/project.interface';
 import { LoadingService } from '../services/loading.service';
 import { MapV2Component } from '../map-v2/map-v2.component';
 import { MapV2Service } from '../map-v2/map-v2.service';
@@ -58,6 +59,18 @@ export class ShareComponent implements OnInit {
     this.shareService.getProject(this.projectKey).subscribe(project => {
       this.project = project;
       if (project && project.id) {
+        // For shared projects, we don't have full project data with creation date
+        // So we'll create a minimal project object for the copyright display
+        const minimalProject = {
+          id: project.id,
+          display_name: 'Shared Project',
+          created: new Date(), // Use current date as fallback
+          calculated: 0,
+          areas: 0,
+          status: 'shared',
+          version: 1
+        } as Project;
+        this.mapService.setProjectData(minimalProject);
         // Set the project in the map service with the share key
         this.mapService.setProject(project.id.toString(), this.projectKey, project.id as unknown as string);
         this.analyzeService.setCurrentProject(project.id.toString());

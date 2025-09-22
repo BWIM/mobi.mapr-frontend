@@ -23,9 +23,12 @@ interface Bounds {
 export class MapV2Service {
   projectName: string | null = null;
   currentProject: string | null = null;
+  currentProjectData: Project | null = null;
   private currentZoom: number = 7;
   private mapStyleSubject = new BehaviorSubject<StyleSpecification>(this.getBaseMapStyle());
   mapStyle$ = this.mapStyleSubject.asObservable();
+  private projectDataSubject = new BehaviorSubject<Project | null>(null);
+  getCurrentProjectData$ = this.projectDataSubject.asObservable();
   averageType: 'avg' | 'pop' = 'pop';
   private boundsSubject = new BehaviorSubject<Bounds | null>(null);
   bounds$ = this.boundsSubject.asObservable();
@@ -146,6 +149,15 @@ export class MapV2Service {
     return this.currentProject;
   }
 
+  setProjectData(project: Project): void {
+    this.currentProjectData = project;
+    this.projectDataSubject.next(project);
+  }
+
+  getCurrentProjectData(): Project | null {
+    return this.currentProjectData;
+  }
+
   getMapType(): 'hexagon' | 'county' | 'municipality' | 'state' {
     return this.mapType;
   }
@@ -254,6 +266,8 @@ export class MapV2Service {
     this.map = null;
     this.shareKey = null;
     this.currentProject = null;
+    this.currentProjectData = null;
+    this.projectDataSubject.next(null);
     this.mapStyleSubject.next(this.getBaseMapStyle());
     this.removeSingleFeatures();
   }

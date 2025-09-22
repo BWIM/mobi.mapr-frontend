@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { MapV2Service } from './map-v2.service';
 import { Subscription } from 'rxjs';
 import { LngLatBounds, Map, Popup, NavigationControl, ScaleControl } from 'maplibre-gl';
@@ -17,7 +18,7 @@ import MaplibreCompare from '@maplibre/maplibre-gl-compare';
   selector: 'app-map-v2',
   templateUrl: './map-v2.component.html',
   styleUrl: './map-v2.component.css',
-  imports: [SearchOverlayComponent, LegendComponent],
+  imports: [CommonModule, SearchOverlayComponent, LegendComponent],
   standalone: true
 })
 export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
@@ -32,10 +33,12 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   private boundsSubscription: Subscription;
   private comparisonSubscription: Subscription;
   private stopComparisonSubscription: Subscription;
+  private projectDataSubscription: Subscription;
   private isComparison: boolean = false;
   projectName: string | null = null;
   comparisonProject: Project | null = null;
   currentProject: string | null = null;
+  currentProjectData: Project | null = null;
 
   private dragThrottleTimeout: any = null;
   private isDragging: boolean = false;
@@ -76,6 +79,11 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       if (stop) {
         this.stopComparison();
       }
+    });
+
+    // Subscribe to project data changes
+    this.projectDataSubscription = this.mapService.getCurrentProjectData$.subscribe(projectData => {
+      this.currentProjectData = projectData;
     });
   }
 
@@ -258,6 +266,9 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     if (this.stopComparisonSubscription) {
       this.stopComparisonSubscription.unsubscribe();
     }
+    if (this.projectDataSubscription) {
+      this.projectDataSubscription.unsubscribe();
+    }
     if (this.dragThrottleTimeout) {
       clearTimeout(this.dragThrottleTimeout);
     }
@@ -400,5 +411,15 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     this.isComparison = false;
     this.mapContainer!.nativeElement.style.display = "block";
     this.comparisonContainer!.nativeElement.style.display = "none";
+  }
+
+  formatCreationDate(date: Date | undefined): string {
+    if (!date) return '';
+    const creationDate = new Date(date);
+    return `${creationDate.toLocaleDateString('de-DE', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })}`;
   }
 }
