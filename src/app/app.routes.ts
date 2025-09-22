@@ -4,6 +4,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { AuthGuard } from './auth/auth.guard';
 import { ShareComponent } from './share/share.component';
 import { LandingComponent } from './landing/landing.component';
+import { RateLimitExceededComponent } from './auth/rate-limit-exceeded/rate-limit-exceeded.component';
 
 export const routes: Routes = [
   {
@@ -13,6 +14,7 @@ export const routes: Routes = [
   },
   { path: 'landing', component: LandingComponent },
   { path: 'login', component: LoginComponent },
+  { path: 'rate-limit-exceeded', component: RateLimitExceededComponent },
   {
     path: 'dashboard',
     component: DashboardComponent,

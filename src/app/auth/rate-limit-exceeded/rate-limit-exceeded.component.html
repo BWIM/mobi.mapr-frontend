@@ -1,0 +1,113 @@
+<div
+    class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+    <p-card styleClass="w-full max-w-2xl">
+        <ng-template pTemplate="header">
+            <div class="flex justify-center mb-4">
+                <img src="assets/images/logo.png" alt="Logo" class="h-20">
+            </div>
+            <h1
+                class="text-3xl font-bold text-center text-gray-800 dark:text-white py-4">
+                {{ 'RATE_LIMIT.TITLE' | translate }}
+            </h1>
+        </ng-template>
+
+        <div class="space-y-6">
+            <!-- Main Message -->
+            <div class="text-center">
+                <div class="mb-4">
+                    <i class="pi pi-users text-6xl text-red-500 mb-4"></i>
+                </div>
+                <h2
+                    class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    {{ 'RATE_LIMIT.MESSAGE' | translate }}
+                </h2>
+                <p class="text-gray-600 dark:text-gray-400">
+                    {{ 'RATE_LIMIT.DESCRIPTION' | translate }}
+                </p>
+            </div>
+
+            <!-- Rate Limit Information -->
+            <div *ngIf="rateLimitInfo"
+                class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                <h3
+                    class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                    {{ 'RATE_LIMIT.CURRENT_STATUS' | translate }}
+                </h3>
+
+                <div class="text-center mb-4">
+                    <div
+                        class="text-2xl font-bold text-red-600 dark:text-red-400 mb-2">
+                        {{ 'RATE_LIMIT.CAPACITY_REACHED' | translate }}
+                    </div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                        {{ 'RATE_LIMIT.CAPACITY_MESSAGE' | translate }}
+                    </div>
+                </div>
+
+                <!-- Simple Status Indicator -->
+                <div class="text-center">
+                    <div
+                        class="inline-flex items-center px-4 py-2 rounded-full bg-red-100 dark:bg-red-900/20">
+                        <div
+                            class="w-3 h-3 bg-red-500 rounded-full mr-2 animate-pulse">
+                        </div>
+                        <span
+                            class="text-sm font-medium text-red-800 dark:text-red-300">
+                            {{ 'RATE_LIMIT.SYSTEM_BUSY' | translate }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Countdown Timer -->
+            <div
+                class="text-center bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
+                <h3
+                    class="text-lg font-semibold text-red-800 dark:text-red-300 mb-2">
+                    {{ 'RATE_LIMIT.NEXT_CHECK' | translate }}
+                </h3>
+                <div
+                    class="text-4xl font-mono font-bold text-red-600 dark:text-red-400 mb-2">
+                    {{ formatTime(countdown) }}
+                </div>
+                <p class="text-sm text-red-700 dark:text-red-300">
+                    {{ 'RATE_LIMIT.AUTO_RETRY' | translate }}
+                </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <p-button label="{{ 'RATE_LIMIT.RETRY_NOW' | translate }}"
+                    icon="pi pi-refresh" (onClick)="onRetryNow()"
+                    [disabled]="countdown > 0" styleClass="flex-1 sm:flex-none">
+                </p-button>
+                <p-button label="{{ 'RATE_LIMIT.GO_TO_LANDING' | translate }}"
+                    icon="pi pi-home" (onClick)="onGoToLanding()"
+                    styleClass="p-button-outlined flex-1 sm:flex-none">
+                </p-button>
+                <p-button label="{{ 'RATE_LIMIT.TO_PROJECT_PAGE' | translate }}"
+                    icon="pi pi-arrow-right" (onClick)="onGoBackToProjectPage()"
+                    styleClass="p-button-outlined flex-1 sm:flex-none">
+                </p-button>
+            </div>
+
+            <!-- Help Text -->
+            <div class="text-center text-sm text-gray-600 dark:text-gray-400">
+                <p>{{ 'RATE_LIMIT.HELP_TEXT' | translate }}</p>
+            </div>
+        </div>
+
+        <!-- Language Selector -->
+        <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-center space-x-2">
+                <i class="pi pi-globe text-gray-600 dark:text-gray-400"></i>
+                <p-dropdown [options]="languages" [(ngModel)]="currentLang"
+                    optionLabel="name" optionValue="code"
+                    placeholder="Sprache wählen"
+                    (onChange)="onLanguageChange($event)" styleClass="w-32"
+                    [showClear]="false">
+                </p-dropdown>
+            </div>
+        </div>
+    </p-card>
+</div>

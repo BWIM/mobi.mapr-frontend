@@ -367,6 +367,22 @@
       "LOGIN": "Anmelden"
     }
   },
+  "RATE_LIMIT": {
+    "TITLE": "Zu viele Benutzer",
+    "MESSAGE": "Die maximale Anzahl gleichzeitiger Benutzer wurde erreicht",
+    "DESCRIPTION": "Leider sind derzeit zu viele Benutzer gleichzeitig auf der Plattform. Bitte versuche es später erneut.",
+    "CURRENT_STATUS": "Aktueller Status",
+    "CAPACITY_REACHED": "Kapazität erreicht",
+    "CAPACITY_MESSAGE": "Die Plattform ist derzeit voll ausgelastet",
+    "SYSTEM_BUSY": "System ausgelastet",
+    "NEXT_CHECK": "Nächste Überprüfung in",
+    "AUTO_RETRY": "Die Seite wird automatisch überprüft und du wirst weitergeleitet, sobald ein Platz verfügbar ist.",
+    "RETRY_NOW": "Jetzt erneut versuchen",
+    "BACK_TO_SHARE": "Zurück zum geteilten Projekt",
+    "GO_TO_LANDING": "Zur Startseite",
+    "HELP_TEXT": "Bitte habe Verständnis, dass wir die Qualität des Services für alle Benutzer sicherstellen möchten. Bei dauerhaften Problemen kannst du uns per E-Mail an mobimapr@bw-im.de kontaktieren.",
+    "TO_PROJECT_PAGE": "Zur Projektseite"
+  },
   "CREDITS": {
     "VISIT_WEBSITE": "Besuche unsere Website",
     "INFO_BUTTON_TOOLTIP": "Informationen und Hilfe",
