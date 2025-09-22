@@ -473,6 +473,12 @@
     },
     "FOOTER": "© 2025 bwim. Alle Rechte vorbehalten."
   },
+  "ADVERTISING": {
+    "TITLE": "Entdecke Weitere Projekte",
+    "DESCRIPTION": "Erkunde alle unsere Mobilitätskartierungsprojekte und bleibe über die neuesten Entwicklungen informiert.",
+    "VISIT_MAIN_SITE": "Hauptseite besuchen",
+    "NEWSLETTER_TEXT": "Abonniere unseren Newsletter für Projektupdates und neue Funktionen!"
+  },
   "TUTORIAL": {
     "STEP": "Schritt",
     "OF": "von",

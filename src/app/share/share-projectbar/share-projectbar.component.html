@@ -103,6 +103,35 @@
                     severity="info"
                     text="{{ 'PROJECTS.LIST.NO_PROJECTS' | translate }}">
                 </p-message>
+
+                <!-- Advertisement Section -->
+                <div
+                    class="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                    <div class="text-center">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">
+                            {{ 'ADVERTISING.TITLE' | translate }}
+                        </h3>
+                        <p class="text-sm text-gray-600 mb-4">
+                            {{ 'ADVERTISING.DESCRIPTION' | translate }}
+                        </p>
+                        <div class="space-y-3">
+                            <a href="https://bw-im.de/mobimapr" target="_blank"
+                                rel="noopener noreferrer"
+                                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors duration-200">
+                                <i class="pi pi-external-link mr-2"></i>
+                                {{ 'ADVERTISING.VISIT_MAIN_SITE' | translate }}
+                            </a>
+                            <div class="text-xs text-gray-500">
+                                <a href="https://bw-im.de/newsletter"
+                                    target="_blank" rel="noopener noreferrer"
+                                    class="text-blue-600 hover:text-blue-700">
+                                    {{ 'ADVERTISING.NEWSLETTER_TEXT' | translate
+                                    }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </p-scrollPanel>
     </div>

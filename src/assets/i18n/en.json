@@ -472,6 +472,12 @@
     },
     "FOOTER": "© 2025 bwim. All rights reserved."
   },
+  "ADVERTISING": {
+    "TITLE": "Discover More Projects",
+    "DESCRIPTION": "Explore all our mobility mapping projects and stay updated with the latest developments.",
+    "VISIT_MAIN_SITE": "Visit Main Site",
+    "NEWSLETTER_TEXT": "Subscribe to our newsletter for project updates and new features!"
+  },
   "TUTORIAL": {
     "STEP": "Step",
     "OF": "of",
