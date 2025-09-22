@@ -56,7 +56,7 @@
     "MESSAGES": {
       "UPDATE_SUCCESS": "Projekt erfolgreich aktualisiert",
       "UPDATE_ERROR": "Fehler beim Aktualisieren des Projekts",
-      "CONFIRM_DELETE": "Möchten Sie dieses Projekt wirklich löschen?",
+      "CONFIRM_DELETE": "Möchtest du dieses Projekt wirklich löschen?",
       "UNFINISHED_PROJECTS": "Es gibt noch nicht abgeschlossene Projekte",
       "UNFINISHED_PROJECTS_DETAIL": "Die folgenden Projekte müssen noch abgeschlossen werden: {projects}",
       "CHECK_PROJECTS_ERROR": "Fehler beim Überprüfen der Projekte",
@@ -67,14 +67,14 @@
       "PERMISSION_DENIED": "Keine Berechtigung",
       "SERVER_ERROR": "Es gab einen Fehler im Backend",
       "LOAD_GROUPS_ERROR": "Gruppen konnten nicht geladen werden",
-      "CONFIRM_DELETE_GROUP": "Wollen Sie die Gruppe wirklich löschen?",
+      "CONFIRM_DELETE_GROUP": "Willst du die Gruppe wirklich löschen?",
       "DELETE_GROUP_SUCCESS": "Gruppe erfolgreich gelöscht",
       "DELETE_GROUP_ERROR": "Gruppe kann nicht gelöscht werden",
       "LOAD_AREAS_ERROR": "Gebiete können nicht geladen werden"
     },
     "DELETE": {
       "TITLE": "Projekt löschen",
-      "CONFIRMATION": "Sind Sie sicher, dass Sie dieses Projekt löschen möchten?"
+      "CONFIRMATION": "Bist du sicher, dass du dieses Projekt löschen möchtest?"
     },
     "PROGRESS_TOOLTIP": "Fortschritt",
     "WIZARD": {
@@ -108,7 +108,7 @@
     "MESSAGES": {
       "UPDATE_SUCCESS": "Projektgruppe erfolgreich aktualisiert",
       "UPDATE_ERROR": "Fehler beim Aktualisieren der Projektgruppe",
-      "CONFIRM_DELETE": "Sind Sie sicher, dass Sie diese Projektgruppe löschen möchten?",
+      "CONFIRM_DELETE": "Bist du sicher, dass du diese Projektgruppe löschen möchtest?",
       "CREATE_SUCCESS": "Das Erstellen einer neuen Gruppe war erfolgreich",
       "CREATE_ERROR": "Fehler beim erstellen einer neuen Gruppe",
       "CONFIRM_DELETE_MULTIPLE": "Alle ausgewählten Gruppen löschen?",
@@ -151,8 +151,8 @@
         "CREATE": "Erfolgreich erstellt",
         "UPDATE": "Aktualisiert"
       },
-      "CONFIRM_DELETE": "Sind Sie sicher, dass Sie dieses Projekt löschen möchten?",
-      "CONFIRM_DELETE_GROUP": "Sind Sie sicher, dass Sie diese Projektgruppe löschen möchten?"
+      "CONFIRM_DELETE": "Bist du sicher, dass du dieses Projekt löschen möchtest?",
+      "CONFIRM_DELETE_GROUP": "Bist du sicher, dass du diese Projektgruppe löschen möchtest?"
     },
     "CANCEL": "Abbrechen",
     "EXPORT": "Export"
@@ -205,10 +205,10 @@
     "FINISH": "Fertigstellen",
     "ERRORS": {
       "NAME_REQUIRED": "Bitte einen Projektnamen eingeben.",
-      "SELECT_MID_ACTIVITIES": "Bitte wählen Sie mindestens eine MID-Aktivität aus.",
-      "SELECT_NON_MID_ACTIVITY": "Bitte wählen Sie eine Nicht-MID-Aktivität aus.",
-      "SELECT_PERSONAS": "Bitte wählen Sie mindestens eine Persona aus.",
-      "SELECT_MODES": "Bitte wählen Sie mindestens einen Modus aus.",
+      "SELECT_MID_ACTIVITIES": "Bitte wähle mindestens eine MID-Aktivität aus.",
+      "SELECT_NON_MID_ACTIVITY": "Bitte wähle eine Nicht-MID-Aktivität aus.",
+      "SELECT_PERSONAS": "Bitte wähle mindestens eine Persona aus.",
+      "SELECT_MODES": "Bitte wähle mindestens einen Modus aus.",
       "SELECT_OSM_ACTIVITY": "Wähle eine Aktivität aus"
     },
     "ACTIVITIES": {
@@ -246,7 +246,7 @@
     "DESCRIPTION": "Beschreibung",
     "STATUS": "Status",
     "NO_SELECTION": "Keine Auswahl",
-    "CLICK_HINT": "Klicken Sie auf eine Karte, um Details anzuzeigen",
+    "CLICK_HINT": "Klicke auf eine Karte, um Details anzuzeigen",
     "PROJECT_INFO": "Projektinformationen",
     "ACTIVITIES": "Aktivitäten",
     "MODES": "Modi",
@@ -255,7 +255,7 @@
     "EXPORT_PDF_LANDSCAPE": "PDF im Querformat exportieren",
     "EXPORT_PDF_PORTRAIT": "PDF im Hochformat exportieren",
     "SHARE_LINK": "Link teilen",
-    "SHARE_LINK_DESCRIPTION": "Teilen Sie diesen Link, damit andere das Projekt ohne Konto anzeigen können.",
+    "SHARE_LINK_DESCRIPTION": "Teile diesen Link, damit andere das Projekt ohne Konto anzeigen können.",
     "SHARE": "Teilen",
     "COPY_LINK": "Link kopieren",
     "COPY_LINK_SUCCESS": "Link erfolgreich kopiert",
@@ -293,7 +293,8 @@
     "PERSONA": {
       "TITLE": "Persona",
       "NO_DATA": "Keine Daten verfügbar",
-      "HINT": "Hinweis: Die Werte der Persona können bei einer limitieren Anzahl an Modi sehr ähnlich sein."
+      "HINT": "Hinweis: Die Werte der Persona können bei einer limitieren Anzahl an Modi sehr ähnlich sein.",
+      "LOADING": "Lade Persona-Daten..."
     },
     "ACTIVITIES": {
       "TITLE": "Aktivitäten",
@@ -303,16 +304,21 @@
       "HINT": "💡 Klicke auf einen Balken im Diagramm, um mehr Infos zu erhalten!",
       "SUBACTIVITIES_HINT": "💡 Klicke auf einen Balken im Diagramm, um Orte auf der Karte anzuzeigen!",
       "NO_PLACES": "Keine Orte gefunden",
-      "DISABLE_PLACES": "Die Orts-Ansicht ist nur für Gemeinde-Ebene oder Hexagone aktiviert. Um mehr Details zu bekommen, zoome in die Karte hinein!"
+      "DISABLE_PLACES": "Die Orts-Ansicht ist nur für Gemeinde-Ebene oder Hexagone aktiviert. Um mehr Details zu bekommen, zoome in die Karte hinein!",
+      "LOADING": "Lade Aktivitäten...",
+      "LOADING_SUBACTIVITIES": "Lade Unteraktivitäten...",
+      "LOADING_MAP": "Lade Karte..."
     },
     "MODES": {
       "TITLE": "Modi",
-      "NO_DATA": "Keine Daten verfügbar"
+      "NO_DATA": "Keine Daten verfügbar",
+      "LOADING": "Lade Modi..."
     },
     "PROFILES": {
       "TITLE": "Modi",
       "NO_DATA": "Keine Daten verfügbar",
-      "HINT": "Hinweis: Die Werte der Modi können bei einer limitieren Anzahl an Personas sehr ähnlich sein."
+      "HINT": "Hinweis: Die Werte der Modi können bei einer limitieren Anzahl an Personas sehr ähnlich sein.",
+      "LOADING": "Lade Profile..."
     },
     "TITLE": "Details",
     "START": "Start",
@@ -432,16 +438,16 @@
   },
   "LANDING": {
     "TITLE": "Willkommen beim mobi.mapr",
-    "SUBTITLE": "Ihre umfassende Mobilitätskartierungs- und Analyseplattform. Greifen Sie auf alle Tools und Ressourcen von einem zentralen Ort aus zu.",
+    "SUBTITLE": "Deine umfassende Mobilitätskartierungs- und Analyseplattform. Greife auf alle Tools und Ressourcen von einem zentralen Ort aus zu.",
     "CARDS": {
       "PROJECT_MAIN_SITE": {
         "TITLE": "Projektseite",
-        "DESCRIPTION": "Auf unserer Hauptseite finden Sie alles zum mobi.mapr. Dort finden Sie aktelle Projekte und weitere spannende Informationen.",
+        "DESCRIPTION": "Auf unserer Hauptseite findest du alles zum mobi.mapr. Dort findest du aktelle Projekte und weitere spannende Informationen.",
         "BUTTON": "Hauptseite besuchen"
       },
       "CONTACT": {
         "TITLE": "Kontakt",
-        "DESCRIPTION": "Bei Fragen oder Problemen kontaktieren Sie uns!",
+        "DESCRIPTION": "Bei Fragen oder Problemen kontaktiere uns!",
         "BUTTON": "Projekt öffnen"
       },
       "TECHNICAL_DOCS": {
@@ -451,7 +457,7 @@
       },
       "FAQ": {
         "TITLE": "FAQ",
-        "DESCRIPTION": "Finden Sie Antworten auf häufig gestellte Fragen rund um das Projekt.",
+        "DESCRIPTION": "Finde Antworten auf häufig gestellte Fragen rund um das Projekt.",
         "BUTTON": "FAQ anzeigen"
       },
       "LOGIN": {

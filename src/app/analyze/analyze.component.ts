@@ -1,8 +1,8 @@
 import { Component, OnDestroy, ChangeDetectorRef, AfterViewInit, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { SharedModule } from '../shared/shared.module';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin } from 'rxjs';
 import { AnalyzeService } from './analyze.service';
-import { Category, Activity, Place, Properties, Profile, Persona } from './analyze.interface';
+import { Category, Activity, Place, Properties, Profile, Persona, DisplayNameItem, CategoryWithDisplayName, ActivityWithDisplayName, PersonaWithDisplayName, ProfileWithDisplayName } from './analyze.interface';
 import { MapGeoJSONFeature } from 'maplibre-gl';
 import { UIChart } from 'primeng/chart';
 import { MessageService } from 'primeng/api';
@@ -39,6 +39,12 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   profiles: Profile[] = [];
   personas: Persona[] = [];
   categories: Category[] = [];
+
+  // Display name lookup maps
+  categoriesDisplayNames: Map<number, string> = new Map();
+  activitiesDisplayNames: Map<number, string> = new Map();
+  personasDisplayNames: Map<number, string> = new Map();
+  profilesDisplayNames: Map<number, string> = new Map();
 
   feature: MapGeoJSONFeature | undefined;
   properties: Properties | undefined;
@@ -123,39 +129,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
             }
             if (state.projectId && state.mapType && state.feature) {
               this.loading = true;
-              this.analyzeService.getProfiles().subscribe({
-                next: (profiles) => {
-                  this.profiles = profiles || [];
-                  this.initializeChartData();
-                },
-                error: (error) => {
-                  console.error('Error loading profiles:', error);
-                  this.profiles = [];
-                  this.initializeChartData();
-                }
-              });
-              this.analyzeService.getPersonas().subscribe({
-                next: (personas) => {
-                  this.personas = personas || [];
-                  this.initializeChartData();
-                },
-                error: (error) => {
-                  console.error('Error loading personas:', error);
-                  this.personas = [];
-                  this.initializeChartData();
-                }
-              });
-              this.analyzeService.getCategories().subscribe({
-                next: (categories) => {
-                  this.categories = categories || [];
-                  this.initializeChartData();
-                },
-                error: (error) => {
-                  console.error('Error loading categories:', error);
-                  this.categories = [];
-                  this.initializeChartData();
-                }
-              });
+              this.loadDisplayNamesAndData();
             } else {
               console.warn('Nicht alle erforderlichen Parameter sind verfügbar:', state);
             }
@@ -272,6 +246,71 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     }
   }
 
+  private loadDisplayNamesAndData(): void {
+    // Load all display names first, then load the actual data
+    const displayNameRequests = [
+      this.analyzeService.getCategoriesSimple(),
+      this.analyzeService.getActivitiesSimple(),
+      this.analyzeService.getPersonasSimple(),
+      this.analyzeService.getProfilesSimple()
+    ];
+
+    // Use forkJoin to wait for all display name requests to complete
+    forkJoin(displayNameRequests).subscribe({
+      next: ([categoriesNames, activitiesNames, personasNames, profilesNames]) => {
+        // Store display names in maps
+        this.categoriesDisplayNames = new Map(categoriesNames.map(item => [item.id, item.display_name]));
+        this.activitiesDisplayNames = new Map(activitiesNames.map(item => [item.id, item.display_name]));
+        this.personasDisplayNames = new Map(personasNames.map(item => [item.id, item.display_name]));
+        this.profilesDisplayNames = new Map(profilesNames.map(item => [item.id, item.display_name]));
+
+        // Now load the actual data
+        this.loadAnalyzeData();
+      },
+      error: (error) => {
+        console.error('Error loading display names:', error);
+        // Still try to load data even if display names fail
+        this.loadAnalyzeData();
+      }
+    });
+  }
+
+  private loadAnalyzeData(): void {
+    this.analyzeService.getProfiles().subscribe({
+      next: (profiles) => {
+        this.profiles = profiles || [];
+        this.initializeChartData();
+      },
+      error: (error) => {
+        console.error('Error loading profiles:', error);
+        this.profiles = [];
+        this.initializeChartData();
+      }
+    });
+    this.analyzeService.getPersonas().subscribe({
+      next: (personas) => {
+        this.personas = personas || [];
+        this.initializeChartData();
+      },
+      error: (error) => {
+        console.error('Error loading personas:', error);
+        this.personas = [];
+        this.initializeChartData();
+      }
+    });
+    this.analyzeService.getCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories || [];
+        this.initializeChartData();
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.categories = [];
+        this.initializeChartData();
+      }
+    });
+  }
+
   private initializeChartData(): void {
     // Set loading states for all charts
     this.activitiesLoading = true;
@@ -343,12 +382,8 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     });
 
     let labels: string[] = [];
-    // Extract sorted arrays
-    if (localStorage.getItem('mobi.mapr.language') === 'en') {
-      labels = sortedData.map(item => item.name_en);
-    } else {
-      labels = sortedData.map(item => item.name_de);
-    }
+    // Extract sorted arrays using display names from lookup map
+    labels = sortedData.map(item => this.categoriesDisplayNames.get(item.id) || `Category ${item.id}`);
 
     // Truncate labels longer than 30 characters
     labels = labels.map(label => {
@@ -486,13 +521,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         const totalWeight = rawWeights.reduce((sum, weight) => sum + weight, 0);
         const normalizedWeights = totalWeight > 0 ? rawWeights.map(weight => (weight / totalWeight) * 100) : [];
 
-        // Extract data
+        // Extract data using display names from lookup map
         let labels: string[] = [];
-        if (localStorage.getItem('mobi.mapr.language') === 'en') {
-          labels = sortedActivities.map(item => item.name_en);
-        } else {
-          labels = sortedActivities.map(item => item.name_de);
-        }
+        labels = sortedActivities.map(item => this.activitiesDisplayNames.get(item.id) || `Activity ${item.id}`);
         const scores = sortedActivities.map(item => item.index * 100);
         const scoreNames = sortedActivities.map(item => this.indexService.getIndexName(item.index));
         const scoreColors = scores.map(value => this.getColorForValue(value));
@@ -609,9 +640,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
       this.hoveredCategoryId = category.id;
       // Use the full category name for the dialog header
-      this.hoveredCategoryName = localStorage.getItem('mobi.mapr.language') === 'en'
-        ? category.name_en
-        : category.name_de;
+      this.hoveredCategoryName = this.categoriesDisplayNames.get(category.id) || `Category ${category.id}`;
 
       // Set loading state and immediately clear subactivities chart data to prevent showing old values
       this.subactivitiesLoading = true;
@@ -960,13 +989,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     // Sort personas by their index scores (descending)
     const sortedPersonas = [...this.personas].sort((a, b) => b.index - a.index);
 
-    // Extract data
+    // Extract data using display names from lookup map
     let labels: string[] = [];
-    if (localStorage.getItem('mobi.mapr.language') === 'en') {
-      labels = sortedPersonas.map(persona => persona.name_en);
-    } else {
-      labels = sortedPersonas.map(persona => persona.name_de);
-    }
+    labels = sortedPersonas.map(persona => this.personasDisplayNames.get(persona.id) || `Persona ${persona.id}`);
     const data = sortedPersonas.map(persona => persona.index);
     const scoreNames = sortedPersonas.map(persona => this.indexService.getIndexName(persona.index));
 
@@ -992,22 +1017,15 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     // Sort profiles by their index scores (descending)
     const sortedProfiles = [...this.profiles].sort((a, b) => b.index - a.index);
 
-    // Extract data
+    // Extract data using display names from lookup map
     let labels: string[] = [];
-    if (localStorage.getItem('mobi.mapr.language') === 'en') {
-      labels = sortedProfiles.map(profile => profile.name_en);
-    } else {
-      labels = sortedProfiles.map(profile => profile.name_de);
-    }
+    labels = sortedProfiles.map(profile => this.profilesDisplayNames.get(profile.id) || `Profile ${profile.id}`);
     const data = sortedProfiles.map(profile => profile.index);
     const scoreNames = sortedProfiles.map(profile => this.indexService.getIndexName(profile.index));
 
     // Create combo chart with exponential function and horizontal bars
-    if (localStorage.getItem('mobi.mapr.language') === 'en') {
-      this.createProfilesComboChart(sortedProfiles, new Map(this.profiles.map(p => [p.id, p.name_en])), scoreNames);
-    } else {
-      this.createProfilesComboChart(sortedProfiles, new Map(this.profiles.map(p => [p.id, p.name_de])), scoreNames);
-    }
+    const profileMap = new Map(this.profiles.map(p => [p.id, this.profilesDisplayNames.get(p.id) || `Profile ${p.id}`]));
+    this.createProfilesComboChart(sortedProfiles, profileMap, scoreNames);
 
     this.profilesLoading = false; // Clear loading state when chart is ready
   }
@@ -1344,13 +1362,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         const totalWeight = rawWeights.reduce((sum, weight) => sum + weight, 0);
         const normalizedWeights = totalWeight > 0 ? rawWeights.map(weight => (weight / totalWeight) * 100) : [];
 
-        // Create labels with activity name
+        // Create labels with activity name using display names from lookup map
         let labels: string[] = [];
-        if (localStorage.getItem('mobi.mapr.language') === 'en') {
-          labels = sortedActivities.map(item => item.name_en);
-        } else {
-          labels = sortedActivities.map(item => item.name_de);
-        }
+        labels = sortedActivities.map(item => this.activitiesDisplayNames.get(item.id) || `Activity ${item.id}`);
 
         // Truncate labels longer than 30 characters
         labels = labels.map(label => {
@@ -1373,7 +1387,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         // Store the pie data with IDs and full names for later use
         this.subactivitiesPieData.activityIds = sortedActivities.map(item => item.id);
         this.subactivitiesPieData.fullNames = sortedActivities.map(item =>
-          localStorage.getItem('mobi.mapr.language') === 'en' ? item.name_en : item.name_de
+          this.activitiesDisplayNames.get(item.id) || `Activity ${item.id}`
         );
       },
       error: (error) => {
@@ -1408,6 +1422,12 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     this.profiles = [];
     this.personas = [];
     this.categories = [];
+
+    // Reset display name maps
+    this.categoriesDisplayNames.clear();
+    this.activitiesDisplayNames.clear();
+    this.personasDisplayNames.clear();
+    this.profilesDisplayNames.clear();
 
     // Reset chart data
     this.personaChartData = null;

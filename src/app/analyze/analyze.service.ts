@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable, of } from "rxjs";
 import { MapGeoJSONFeature } from "maplibre-gl";
 import { environment } from "../../environments/environment";
 import { HttpClient } from "@angular/common/http";
-import { Activity, Category, Persona, Place, Profile } from "./analyze.interface";
+import { Activity, Category, Persona, Place, Profile, DisplayNameItem } from "./analyze.interface";
 import { ShareService } from "../share/share.service";
 
 @Injectable({
@@ -116,5 +116,25 @@ export class AnalyzeService {
   getActivities(categoryId: number) {
     const url = `${environment.apiUrl}/analyze/activities?featureId=${this.featureId}&mapType=${this.currentMapType}&project=${this.currentProjectId}&categoryId=${categoryId}`;
     return this.http.get<Activity[]>(url);
+  }
+
+  getCategoriesSimple() {
+    const url = `${environment.apiUrl}/public-simple/categories`;
+    return this.http.get<DisplayNameItem[]>(url);
+  }
+
+  getActivitiesSimple() {
+    const url = `${environment.apiUrl}/public-simple/activities`;
+    return this.http.get<DisplayNameItem[]>(url);
+  }
+
+  getPersonasSimple() {
+    const url = `${environment.apiUrl}/public-simple/personas`;
+    return this.http.get<DisplayNameItem[]>(url);
+  }
+
+  getProfilesSimple() {
+    const url = `${environment.apiUrl}/public-simple/profiles`;
+    return this.http.get<DisplayNameItem[]>(url);
   }
 }

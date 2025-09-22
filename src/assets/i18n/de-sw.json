@@ -289,7 +289,8 @@
     "PERSONA": {
       "TITLE": "Persona",
       "NO_DATA": "Kei Date verfüegbar",
-      "HINT": "Obacht: Die Werte der Persona können bei einer limitieren Anzahl an Modi sehr ähnlich sei."
+      "HINT": "Obacht: Die Werte der Persona können bei einer limitieren Anzahl an Modi sehr ähnlich sei.",
+      "LOADING": "Lade Persona-Daten..."
     },
     "ACTIVITIES": {
       "TITLE": "Aktivitäte",
@@ -299,16 +300,21 @@
       "HINT": "💡 Uffbasse: Dabscht uff de Balke um mähr Infos z'krije",
       "SUBACTIVITIES_HINT": "💡 Uffbasse: Dabscht uff de Balke um Orte auf der Karte z'zeige",
       "NO_PLACES": "Koi plätzle gefunne",
-      "DISABLE_PLACES": "Die Orte gibbets nur uff Gemeinde-Ebene oder runner"
+      "DISABLE_PLACES": "Die Orte gibbets nur uff Gemeinde-Ebene oder runner",
+      "LOADING": "Lade Aktivitäten...",
+      "LOADING_SUBACTIVITIES": "Lade Unteraktivitäten...",
+      "LOADING_MAP": "Lade Karte..."
     },
     "MODES": {
       "TITLE": "Modi",
-      "NO_DATA": "Keine Daten verfügbar"
+      "NO_DATA": "Keine Daten verfügbar",
+      "LOADING": "Lade Modi..."
     },
     "PROFILES": {
       "TITLE": "Modi",
       "NO_DATA": "Keine Daten verfügbar",
-      "HINT": "Hinweis: Die Werte der Modi können bei einer limitieren Anzahl an Personas sehr ähnlich sein."
+      "HINT": "Hinweis: Die Werte der Modi können bei einer limitieren Anzahl an Personas sehr ähnlich sein.",
+      "LOADING": "Lade Profile..."
     },
     "TITLE": "Details",
     "START": "Start",
