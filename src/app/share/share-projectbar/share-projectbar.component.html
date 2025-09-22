@@ -103,6 +103,43 @@
                     severity="info"
                     text="{{ 'PROJECTS.LIST.NO_PROJECTS' | translate }}">
                 </p-message>
+
+                <!-- Advertisement Section -->
+                <div class="mt-6 p-4 rounded-lg border"
+                    style="background: linear-gradient(135deg, var(--light-accent-background), var(--secondary-color)); border-color: var(--accent-color);">
+                    <div class="text-center">
+                        <h3 class="text-lg font-semibold mb-2"
+                            style="color: var(--primary-color);">
+                            {{ 'ADVERTISING.TITLE' | translate }}
+                        </h3>
+                        <p class="text-sm mb-4"
+                            style="color: var(--text-color);">
+                            {{ 'ADVERTISING.DESCRIPTION' | translate }}
+                        </p>
+                        <div class="space-y-3">
+                            <a href="https://bw-im.de/mobimapr" target="_blank"
+                                rel="noopener noreferrer"
+                                class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200"
+                                style="background-color: var(--primary-color); color: var(--secondary-text-color);"
+                                onmouseover="this.style.backgroundColor='var(--secondary-color)'"
+                                onmouseout="this.style.backgroundColor='var(--primary-color)'">
+                                <i class="pi pi-external-link mr-2"></i>
+                                {{ 'ADVERTISING.VISIT_MAIN_SITE' | translate }}
+                            </a>
+                            <div class="text-xs"
+                                style="color: var(--text-color);">
+                                <a href="https://bw-im.de/newsletter"
+                                    target="_blank" rel="noopener noreferrer"
+                                    style="color: var(--primary-color);"
+                                    onmouseover="this.style.color='var(--secondary-color)'"
+                                    onmouseout="this.style.color='var(--primary-color)'">
+                                    {{ 'ADVERTISING.NEWSLETTER_TEXT' | translate
+                                    }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </p-scrollPanel>
     </div>

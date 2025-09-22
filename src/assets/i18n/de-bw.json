@@ -420,6 +420,12 @@
   "SEARCH_OVERLAY": {
     "SEARCH_PLACEHOLDER": "Gugge gehn"
   },
+  "ADVERTISING": {
+    "TITLE": "Entdeck Wyteri Projäkt",
+    "DESCRIPTION": "Gugg dir alli unsere Mobilitätskartierungsprojäkt aa un bleib über d'neueste Entwicklige informiert.",
+    "VISIT_MAIN_SITE": "Hauptseit besuche",
+    "NEWSLETTER_TEXT": "Abonnier üsere Newsletter für Projäktupdates un neui Funktiona!"
+  },
   "TUTORIAL": {
     "STEP": "Schrittle",
     "OF": "vun",
