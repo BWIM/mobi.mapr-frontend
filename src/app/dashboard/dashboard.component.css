@@ -222,9 +222,9 @@
 }
 
 /* Mobile-specific styles */
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 480px) {
 
-    /* Hide sidebar tabs on mobile */
+    /* Hide sidebar tabs on small mobile devices only */
     .sidebar-tab {
         display: none;
     }
@@ -295,10 +295,27 @@
     }
 }
 
-/* Tablet-specific adjustments */
+/* Small tablet adjustments (481px - 768px) */
+@media screen and (min-width: 481px) and (max-width: 768px) {
+    .sidebar-tab {
+        padding: 0.5rem !important;
+        display: block !important;
+        /* Ensure tabs are visible on small tablets */
+        z-index: 20;
+    }
+
+    .rotate-text {
+        font-size: 0.75rem;
+    }
+}
+
+/* Tablet-specific adjustments (769px - 1024px) */
 @media screen and (min-width: 769px) and (max-width: 1024px) {
     .sidebar-tab {
         padding: 0.75rem !important;
+        display: block !important;
+        /* Ensure tabs are visible on tablets */
+        z-index: 20;
     }
 
     .rotate-text {

@@ -59,9 +59,9 @@
         </div>
     </p-dialog>
 
-    <!-- Mobile Navigation Bar (only visible on mobile) -->
-    <div class="md:hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 z-30"
-        *ngIf="isMobile">
+    <!-- Mobile Navigation Bar (only visible on small mobile) -->
+    <div class="sm:hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 z-30"
+        *ngIf="isSmallMobile">
         <div class="flex gap-2 bg-white rounded-full shadow-lg p-2">
             <p-button styleClass="p-button-secondary p-button-rounded"
                 (click)="showLeftSidebar()" title="Projekte">
