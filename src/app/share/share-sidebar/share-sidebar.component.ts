@@ -5,6 +5,7 @@ import { PanelModule } from 'primeng/panel';
 import { DialogModule } from 'primeng/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { ShareProject } from '../share.interface';
+import { StatisticsService } from '../../statistics/statistics.service';
 
 @Component({
   selector: 'app-share-sidebar',
@@ -21,5 +22,12 @@ import { ShareProject } from '../share.interface';
 export class ShareSidebarComponent {
   @Input() sharedProject: ShareProject | null = null;
 
-  constructor(private translate: TranslateService) {}
+  constructor(
+    private translate: TranslateService,
+    private statisticsService: StatisticsService
+  ) { }
+
+  toggleStatistics(): void {
+    this.statisticsService.visible = true;
+  }
 }
