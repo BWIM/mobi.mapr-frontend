@@ -67,7 +67,8 @@ export class ProjectsService {
   getPublicSharedProjects(page: number = 1, pageSize: number = 10): Observable<PublicSharedProjectsResponse> {
     const params = new HttpParams()
       .set('page', page.toString())
-      .set('page_size', pageSize.toString());
+      .set('page_size', pageSize.toString())
+      .set('key', this.shareService.getShareKey() || '');
 
     return this.http.get<PublicSharedProjectsResponse>(`${this.apiUrl}/public-shared-projects/`, { params });
   }
