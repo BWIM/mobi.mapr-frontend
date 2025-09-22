@@ -335,18 +335,20 @@ export class MapV2Service {
     }
 
     // If hexagon view is enabled, always use the smallest hexagon layer
-    if (this.hexagonView) {
-      this.analyzeService.setMapType('hexagon');
-      this.mapType = 'hexagon';
-      return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}&resolution=9${authParam}`;
-    } else if (this.gemeindeView) {
-      this.analyzeService.setMapType('municipality');
-      this.mapType = 'municipality';
-      return `${environment.apiUrl}/tiles/gemeinden/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
-    } else if (this.landkreisView) {
-      this.analyzeService.setMapType('county');
-      this.mapType = 'county';
-      return `${environment.apiUrl}/tiles/landkreise/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
+    if (!this.shareKey) {  // only allow for logged in users
+      if (this.hexagonView) {
+        this.analyzeService.setMapType('hexagon');
+        this.mapType = 'hexagon';
+        return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}&resolution=9${authParam}`;
+      } else if (this.gemeindeView) {
+        this.analyzeService.setMapType('municipality');
+        this.mapType = 'municipality';
+        return `${environment.apiUrl}/tiles/gemeinden/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
+      } else if (this.landkreisView) {
+        this.analyzeService.setMapType('county');
+        this.mapType = 'county';
+        return `${environment.apiUrl}/tiles/landkreise/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
+      }
     }
 
     // Define zoom level thresholds for normal view

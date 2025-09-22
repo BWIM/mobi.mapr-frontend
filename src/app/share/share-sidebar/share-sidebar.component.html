@@ -1,64 +1,93 @@
 <div class="h-full" id="share-sidebar">
     <p-scrollPanel [style]="{width: '100%', height: '100%'}">
         <div>
-            <div *ngIf="!sharedProject" class="flex items-center justify-center">
-                <p class="text-gray-500">{{ 'SHARE.NO_PROJECT_SELECTED' | translate }}</p>
+            <div *ngIf="!sharedProject"
+                class="flex items-center justify-center">
+                <p class="text-gray-500">{{ 'SHARE.NO_PROJECT_SELECTED' |
+                    translate }}</p>
             </div>
 
             <div *ngIf="sharedProject" class="flex flex-col gap-4">
                 <!-- Projekt Header -->
                 <div class="bg-white rounded-lg shadow p-4">
-                    <h2 class="text-xl font-bold mb-2">{{ sharedProject.project_name }}</h2>
-                    <p class="text-gray-600 text-sm mb-2">{{ 'SHARE.CREATED_BY' | translate }}: {{ sharedProject.user_name }}</p>
-                    <p class="text-gray-500 text-sm">{{ 'SHARE.EXPIRES' | translate }}: {{ sharedProject.expires }}</p>
+                    <h2 class="text-xl font-bold mb-2">{{
+                        sharedProject.project_name }}</h2>
+                    <p class="text-gray-600 text-sm mb-2">{{ 'SHARE.CREATED_BY'
+                        | translate }}: {{ sharedProject.user_name }}</p>
+                    <p class="text-gray-500 text-sm">{{ 'SHARE.EXPIRES' |
+                        translate }}: {{ sharedProject.expires }}</p>
                 </div>
 
                 <!-- Projekt Beschreibung -->
-                <p-panel [header]="'SHARE.DESCRIPTION' | translate" [toggleable]="true">
-                    <p class="text-gray-700">{{ sharedProject.project_description || 'SHARE.NO_DESCRIPTION' | translate }}</p>
+                <p-panel [header]="'SHARE.DESCRIPTION' | translate"
+                    [toggleable]="true">
+                    <p class="text-gray-700">{{
+                        sharedProject.project_description ||
+                        'SHARE.NO_DESCRIPTION' | translate }}</p>
                 </p-panel>
 
                 <!-- Aktivitäten -->
-                <p-panel [header]="'SHARE.ACTIVITIES' | translate" [toggleable]="true" [collapsed]="false">
+                <p-panel [header]="'SHARE.ACTIVITIES' | translate"
+                    [toggleable]="true" [collapsed]="false">
                     <div class="flex flex-wrap gap-2">
                         <ul class="list-disc pl-4 space-y-1">
-                            <li *ngFor="let activity of sharedProject.categories" class="text-gray-700">
+                            <li *ngFor="let activity of sharedProject.categories"
+                                class="text-gray-700">
                                 {{ activity }}
                             </li>
                         </ul>
-                        <p *ngIf="!sharedProject.categories?.length" class="text-gray-500">
+                        <p *ngIf="!sharedProject.categories?.length"
+                            class="text-gray-500">
                             {{ 'SHARE.NO_ACTIVITIES' | translate }}
                         </p>
                     </div>
                 </p-panel>
 
                 <!-- Personas -->
-                <p-panel *ngIf="sharedProject.personas" [header]="'SHARE.PERSONAS' | translate" [toggleable]="true" [collapsed]="false">
+                <p-panel *ngIf="sharedProject.personas"
+                    [header]="'SHARE.PERSONAS' | translate" [toggleable]="true"
+                    [collapsed]="false">
                     <div class="flex flex-wrap gap-2">
                         <ul class="list-disc pl-4 space-y-1">
-                            <li *ngFor="let persona of sharedProject.personas" class="text-gray-700">
+                            <li *ngFor="let persona of sharedProject.personas"
+                                class="text-gray-700">
                                 {{ persona }}
                             </li>
                         </ul>
-                        <p *ngIf="!sharedProject.personas?.length" class="text-gray-500">
+                        <p *ngIf="!sharedProject.personas?.length"
+                            class="text-gray-500">
                             {{ 'SHARE.NO_PERSONAS' | translate }}
                         </p>
                     </div>
                 </p-panel>
 
                 <!-- Profile -->
-                <p-panel *ngIf="sharedProject.profiles" [header]="'SHARE.MODES' | translate" [toggleable]="true" [collapsed]="false">
+                <p-panel *ngIf="sharedProject.profiles"
+                    [header]="'SHARE.MODES' | translate" [toggleable]="true"
+                    [collapsed]="false">
                     <div class="flex flex-wrap gap-2">
                         <ul class="list-disc pl-4 space-y-1">
-                            <li *ngFor="let mode of sharedProject.modes; let i = index" class="text-gray-700">
+                            <li *ngFor="let mode of sharedProject.modes; let i = index"
+                                class="text-gray-700">
                                 {{ mode }} - {{ sharedProject.profiles[i] }}
                             </li>
                         </ul>
-                        <p *ngIf="!sharedProject.profiles?.length" class="text-gray-500">
+                        <p *ngIf="!sharedProject.profiles?.length"
+                            class="text-gray-500">
                             {{ 'SHARE.NO_PROFILES' | translate }}
                         </p>
                     </div>
                 </p-panel>
+
+                <!-- Statistics Button -->
+                <div class="mt-6 flex justify-center">
+                    <p-button (onClick)="toggleStatistics()"
+                        icon="pi pi-chart-bar"
+                        [label]="'STATISTICS.TITLE' | translate"
+                        [pTooltip]="'STATISTICS.SHOW_STATISTICS_TOOLTIP' | translate"
+                        styleClass="p-button-secondary">
+                    </p-button>
+                </div>
             </div>
         </div>
     </p-scrollPanel>
