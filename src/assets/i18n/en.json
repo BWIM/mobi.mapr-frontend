@@ -366,6 +366,22 @@
       "LOGIN": "login"
     }
   },
+  "RATE_LIMIT": {
+    "TITLE": "Too Many Users",
+    "MESSAGE": "Maximum number of concurrent users reached",
+    "DESCRIPTION": "Unfortunately, too many users are currently on the platform at the same time. Please try again later.",
+    "CURRENT_STATUS": "Current Status",
+    "CAPACITY_REACHED": "Capacity Reached",
+    "CAPACITY_MESSAGE": "The platform is currently at full capacity",
+    "SYSTEM_BUSY": "System Busy",
+    "NEXT_CHECK": "Next check in",
+    "AUTO_RETRY": "The page will automatically check and redirect you as soon as a spot becomes available.",
+    "RETRY_NOW": "Retry Now",
+    "BACK_TO_SHARE": "Back to Shared Project",
+    "GO_TO_LANDING": "Go to Landing",
+    "HELP_TEXT": "Please understand that we want to ensure the quality of service for all users.",
+    "TO_PROJECT_PAGE": "Go to the project page"
+  },
   "CREDITS": {
     "VISIT_WEBSITE": "Visit website",
     "INFO_BUTTON_TOOLTIP": "Information and Help",

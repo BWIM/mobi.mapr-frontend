@@ -13,12 +13,17 @@ function isPublicRoute(router: Router): boolean {
   return router.routerState.snapshot.root.firstChild?.data?.['public'] === true;
 }
 
+function isShareRoute(router: Router): boolean {
+  const url = router.routerState.snapshot.url;
+  return url.startsWith('/share/');
+}
+
 function isPublicAsset(url: string): boolean {
   const publicAssetPatterns = [
     '/assets/i18n/',     // Allow language files
     '/assets/images/'    // Allow public images
   ];
-  
+
   return publicAssetPatterns.some(pattern => url.includes(pattern));
 }
 
@@ -35,16 +40,16 @@ export const AuthInterceptor: HttpInterceptorFn = (
   const router = inject(Router);
   const sessionService = inject(SessionService);
 
-  // Check if it's a token request, public route or explicitly allowed public asset
-  if (req.url.includes('/token/') || isPublicRoute(router) || isPublicAsset(req.url)) {
+  // Check if it's a token request, public route, share route or explicitly allowed public asset
+  if (req.url.includes('/token/') || isPublicRoute(router) || isShareRoute(router) || isPublicAsset(req.url)) {
     const url = addSessionParameters(req.url, sessionService);
     return next(req.clone({ url }));
   }
 
   const headers = authService.getAuthorizationHeaders();
   const url = addSessionParameters(req.url, sessionService);
-  
-  const authReq = req.clone({ 
+
+  const authReq = req.clone({
     headers,
     url
   });
@@ -54,6 +59,11 @@ export const AuthInterceptor: HttpInterceptorFn = (
       if (error.status === 401) {
         authService.logout();
         router.navigate(['/login']);
+        return throwError(() => error);
+      }
+      if (error.status === 429) {
+        authService.setRateLimitExceeded(true);
+        router.navigate(['/rate-limit-exceeded']);
         return throwError(() => error);
       }
       return throwError(() => error);

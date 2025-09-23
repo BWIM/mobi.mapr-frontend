@@ -56,6 +56,7 @@ export class LoginComponent {
     this.loadLanguagePreference();
   }
 
+
   private loadLanguagePreference(): void {
     const savedLang = localStorage.getItem(this.LANGUAGE_KEY);
     if (savedLang) {
@@ -90,7 +91,7 @@ export class LoginComponent {
     if (this.loginForm.valid && !this.isLoading) {
       this.isLoading = true;
       this.error = '';
-      
+
       const { username, password } = this.loginForm.value;
       this.authService.login(username, password).pipe(
         finalize(() => this.isLoading = false)
@@ -120,9 +121,8 @@ export class LoginComponent {
         return `${fieldName === 'username' ? 'Benutzername' : 'Passwort'} ist erforderlich`;
       }
       if (control.errors['minlength']) {
-        return `${fieldName === 'username' ? 'Benutzername' : 'Passwort'} muss mindestens ${
-          fieldName === 'username' ? '3' : '6'
-        } Zeichen lang sein`;
+        return `${fieldName === 'username' ? 'Benutzername' : 'Passwort'} muss mindestens ${fieldName === 'username' ? '3' : '6'
+          } Zeichen lang sein`;
       }
     }
     return '';

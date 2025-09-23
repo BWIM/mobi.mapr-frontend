@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError, map } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { RateLimitService, RateLimitInfo, RateLimitCheckResponse } from './rate-limit-exceeded/rate-limit.service';
 
 interface User {
   username: string;
@@ -22,8 +23,10 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
   private refreshTokenTimeout?: any;
+  private rateLimitExceededSubject = new BehaviorSubject<boolean>(false);
+  public rateLimitExceeded$ = this.rateLimitExceededSubject.asObservable();
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private rateLimitService: RateLimitService) {
     // Beim Start prüfen, ob ein Token im localStorage existiert
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
@@ -45,10 +48,16 @@ export class AuthService {
           localStorage.setItem('refreshToken', response.refresh);
           this.currentUserSubject.next(user);
           this.startRefreshTokenTimer();
+          this.rateLimitExceededSubject.next(false);
           return user;
         }),
         catchError(error => {
           console.error('Login error:', error);
+          // Check if it's a rate limit error (429)
+          if (error.status === 429) {
+            this.rateLimitExceededSubject.next(true);
+            return throwError(() => new Error('RATE_LIMIT_EXCEEDED'));
+          }
           return throwError(() => new Error('Anmeldung fehlgeschlagen'));
         })
       );
@@ -80,7 +89,7 @@ export class AuthService {
   private startRefreshTokenTimer(): void {
     // Zuerst den alten Timer stoppen, falls einer existiert
     this.stopRefreshTokenTimer();
-    
+
     // Token alle 4 Minuten erneuern (bei 5 Minuten Gültigkeit)
     this.refreshTokenTimeout = setInterval(() => {
       this.refreshToken().subscribe();
@@ -105,5 +114,17 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!this.currentUserSubject.value;
+  }
+
+  checkRateLimitBeforeLogin(): Observable<RateLimitCheckResponse> {
+    return this.rateLimitService.checkRateLimitStatus();
+  }
+
+  setRateLimitExceeded(exceeded: boolean): void {
+    this.rateLimitExceededSubject.next(exceeded);
+  }
+
+  isRateLimitExceeded(): boolean {
+    return this.rateLimitExceededSubject.value;
   }
 }

@@ -541,5 +541,8 @@
         "NEXT_HINT": "Du kasch unte s Tutorial beenda!"
       }
     }
+  },
+  "RATE_LIMIT": {
+    "TO_PROJECT_PAGE": "Gangets zur Projektseit"
   }
 }

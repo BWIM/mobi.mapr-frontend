@@ -1,8 +1,8 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { LoadingSpinnerComponent } from '../shared/loading-spinner/loading-spinner.component';
 import { SharedModule } from '../shared/shared.module';
 import { ShareService } from './share.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ShareSidebarComponent } from './share-sidebar/share-sidebar.component';
 import { ShareProjectbarComponent } from './share-projectbar/share-projectbar.component';
 import { ShareProject } from './share.interface';
@@ -12,6 +12,9 @@ import { MapV2Component } from '../map-v2/map-v2.component';
 import { MapV2Service } from '../map-v2/map-v2.service';
 import { TutorialService } from '../tutorial/tutorial.service';
 import { AnalyzeService } from '../analyze/analyze.service';
+import { RateLimitService } from '../auth/rate-limit-exceeded/rate-limit.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-share',
@@ -20,7 +23,7 @@ import { AnalyzeService } from '../analyze/analyze.service';
   templateUrl: './share.component.html',
   styleUrl: './share.component.css'
 })
-export class ShareComponent implements OnInit {
+export class ShareComponent implements OnInit, OnDestroy {
   detailsVisible: boolean = false;
   isRightPinned: boolean = false;
   projectKey: string = '';
@@ -29,6 +32,7 @@ export class ShareComponent implements OnInit {
   rightSidebarExpanded: boolean = false;
   leftSidebarExpanded: boolean = false;
   isMobile: boolean = false;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private shareService: ShareService,
@@ -36,7 +40,9 @@ export class ShareComponent implements OnInit {
     private loadingService: LoadingService,
     private mapService: MapV2Service,
     private analyzeService: AnalyzeService,
-    private tutorialService: TutorialService
+    private tutorialService: TutorialService,
+    private rateLimitService: RateLimitService,
+    private router: Router
   ) {
     this.checkMobile();
     this.route.params.subscribe(params => {
@@ -47,16 +53,58 @@ export class ShareComponent implements OnInit {
   ngOnInit() {
     this.loadingService.startLoading();
     this.shareService.setIsShare(true);
+
+    // Store the share key in sessionStorage for persistence across redirects
+    if (this.projectKey) {
+      sessionStorage.setItem('pendingShareKey', this.projectKey);
+    }
+
+    // Check rate limit before loading the shared project
+    this.checkRateLimitAndLoadProject();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private checkRateLimitAndLoadProject(): void {
+    this.rateLimitService.checkRateLimitStatus().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (rateLimitResponse) => {
+        if (!rateLimitResponse.can_proceed) {
+          this.loadingService.stopLoading();
+          this.router.navigate(['/rate-limit-exceeded']);
+          return;
+        }
+
+        // Rate limit allows, proceed with loading the project
+        this.loadSharedProject();
+      },
+      error: (error) => {
+        console.error('Rate limit check failed:', error);
+        // If rate limit check fails, proceed anyway to avoid blocking users
+        this.loadSharedProject();
+      }
+    });
+  }
+
+  private loadSharedProject(): void {
     if (!localStorage.getItem('tutorialStatus') || localStorage.getItem('tutorialStatus') === 'false') {
       // this.tutorialService.startTutorial('share');
     }
 
     // Subscribe to the sidebar expansion state
-    this.shareService.isRightSidebarExpanded$.subscribe(expanded => {
+    this.shareService.isRightSidebarExpanded$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(expanded => {
       this.rightSidebarExpanded = expanded;
     });
 
-    this.shareService.getProject(this.projectKey).subscribe(project => {
+    this.shareService.getProject(this.projectKey).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(project => {
       this.project = project;
       if (project && project.id) {
         // For shared projects, we don't have full project data with creation date
@@ -75,12 +123,19 @@ export class ShareComponent implements OnInit {
         this.mapService.setProject(project.id.toString(), this.projectKey, project.id as unknown as string);
         this.analyzeService.setCurrentProject(project.id.toString());
       }
+
+      // Clear the pending share key once successfully loaded
+      sessionStorage.removeItem('pendingShareKey');
     });
-    this.shareService.getProjectDetails(this.projectKey).subscribe(project => {
+
+    this.shareService.getProjectDetails(this.projectKey).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(project => {
       this.sharedProject = project;
       this.isRightPinned = true;
       this.toggleSidebar();
     });
+
     this.loadingService.stopLoading();
   }
 
