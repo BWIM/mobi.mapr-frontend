@@ -6,17 +6,14 @@ export interface PaginatedResponse<T> {
 }
 
 export interface MunicipalityScore {
-  gemeinde: {
-    id: number;
-    name: string;
-    population: number;
-    population_density: number;
-  };
-  score_avg: number;
-  score_pop: number;
-  landkreis: string;
-  index_avg: number;
+  gemeinde_id: number;
+  name: string;
+  landkreis_name: string;
   index_pop: number;
+  index_avg?: number;
+  score_pop?: number;
+  score_avg?: number;
+  rank: number;
 }
 
 export interface CountyScore {
@@ -30,6 +27,7 @@ export interface CountyScore {
   score_pop: number;
   index_avg: number;
   index_pop: number;
+  rank: number;
 }
 
 export interface StateScore {
@@ -43,4 +41,5 @@ export interface StateScore {
   score_pop: number;
   index_avg: number;
   index_pop: number;
+  rank: number;
 }

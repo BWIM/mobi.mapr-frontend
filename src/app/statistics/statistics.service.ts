@@ -35,18 +35,40 @@ export class StatisticsService {
     this._visible.next(value);
   }
 
-  getMunicipalityScores(projectId: string, offset: number = 0, limit: number = 200, type: 'avg' | 'pop' = 'pop'): Observable<PaginatedResponse<MunicipalityScore>> {
+  getMunicipalityScores(projectId: string, type: 'avg' | 'pop' = 'pop', populationFilters?: { min: number, max: number }[], gemeindeId?: number): Observable<any> {
+    let url = `${environment.apiUrl}/gemeinden-stats?project=${projectId}&type=${type}`;
+
+    // Add population filters only if provided (meaning filters are active)
+    if (populationFilters && populationFilters.length > 0) {
+      const filterParams = populationFilters.map(filter =>
+        `population_min=${filter.min}&population_max=${filter.max}`
+      ).join('&');
+      url += `&${filterParams}`;
+    }
+
+    // Add gemeinde ID filter if provided
+    if (gemeindeId) {
+      url += `&gemeinde_id=${gemeindeId}`;
+    }
+
     if (this.shareService.getIsShare()) {
       const shareKey = this.shareService.getShareKey();
-      return this.http.get<PaginatedResponse<MunicipalityScore>>(
-        `${environment.apiUrl}/gemeinden-stats?project=${projectId}&offset=${offset}&limit=${limit}&type=${type}&key=${shareKey}`
-      );
-    } else {
-      return this.http.get<PaginatedResponse<MunicipalityScore>>(
-        `${environment.apiUrl}/gemeinden-stats?project=${projectId}&offset=${offset}&limit=${limit}&type=${type}`
-      );
-
+      url += `&key=${shareKey}`;
     }
+
+    console.log('API URL for municipality scores:', url);
+    return this.http.get<any>(url);
+  }
+
+  getGemeindeNames(projectId: string): Observable<{ [key: string]: number }> {
+    let url = `${environment.apiUrl}/gemeinde-names?project=${projectId}`;
+
+    if (this.shareService.getIsShare()) {
+      const shareKey = this.shareService.getShareKey();
+      url += `&key=${shareKey}`;
+    }
+
+    return this.http.get<{ [key: string]: number }>(url);
   }
 
   getCountyScores(projectId: string, offset: number = 0, limit: number = 200, type: 'avg' | 'pop' = 'pop'): Observable<PaginatedResponse<CountyScore>> {
@@ -75,19 +97,23 @@ export class StatisticsService {
     }
   }
 
-  convertToScoreEntry(data: MunicipalityScore | CountyScore | StateScore, level: 'state' | 'county' | 'municipality', rank: number): ScoreEntry {
-    if ('gemeinde' in data) {
+  convertToScoreEntry(data: MunicipalityScore | CountyScore | StateScore, level: 'state' | 'county' | 'municipality', rank?: number): ScoreEntry {
+    // Use API-provided rank if available, otherwise use the passed rank parameter
+    const finalRank = data.rank || rank || 1;
+
+    if ('gemeinde_id' in data) {
+      // New structure for MunicipalityScore
       return {
-        name: data.gemeinde.name,
-        score_pop: data.score_pop,
-        score_avg: data.score_avg,
+        name: data.name,
+        score_pop: data.score_pop || 0,
+        score_avg: data.score_avg || 0,
         index_pop: data.index_pop,
-        index_avg: data.index_avg,
-        population: data.gemeinde.population,
-        population_density: data.gemeinde.population_density,
+        index_avg: data.index_avg || 0,
+        population: 0, // Not available in new structure
+        population_density: 0, // Not available in new structure
         level: 'municipality',
-        county: data.landkreis,
-        rank: rank,
+        county: data.landkreis_name,
+        rank: finalRank,
       };
     } else if ('landkreis' in data) {
       return {
@@ -99,7 +125,7 @@ export class StatisticsService {
         population: data.landkreis.population,
         population_density: data.landkreis.population_density,
         level: 'county',
-        rank: rank
+        rank: finalRank
       };
     } else {
       return {
@@ -111,7 +137,7 @@ export class StatisticsService {
         population: data.land.population,
         population_density: data.land.population_density,
         level: 'state',
-        rank: rank
+        rank: finalRank
       };
     }
   }
