@@ -7,6 +7,7 @@ import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { LoadingService } from '../services/loading.service';
 import { FormsModule } from '@angular/forms';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 
 import { MapV2Service } from '../map-v2/map-v2.service';
 import { PaginatorModule } from 'primeng/paginator';
@@ -25,7 +26,8 @@ import { IndexService } from '../services/index.service';
     ButtonModule,
     ProgressSpinnerModule,
     PaginatorModule,
-    FormsModule
+    FormsModule,
+    AutoCompleteModule
   ],
   templateUrl: './statistics.component.html'
 })
@@ -42,21 +44,25 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   stateScores: ScoreEntry[] = [];
   countyScores: ScoreEntry[] = [];
   municipalityScores: ScoreEntry[] = [];
-  filteredMunicipalityScores: ScoreEntry[] = [];
   filteredCountyScores: ScoreEntry[] = [];
 
   // Pagination
   stateTotalRecords: number = 0;
   countyTotalRecords: number = 0;
-  municipalityTotalRecords: number = 0;
   currentStatePage: number = 1;
   currentCountyPage: number = 1;
-  currentMunicipalityPage: number = 1;
   rowsPerPage: number = 50;
 
   // Score type
   scoreType: 'pop' | 'avg' = 'pop';
   scoreTypeOptions: any[] = [];
+
+  // Gemeinde filter for municipalities
+  selectedGemeinde: any = null;
+  selectedGemeindeName: string = '';
+  gemeindeNames: { [key: string]: number } = {};
+  filteredGemeinden: any[] = [];
+  noMunicipalityResults: boolean = false;
 
   populationCategories = [
     { label: 'Landgemeinden (0-5.000)', value: 'small', min: 0, max: 5000, displayText: '0-5K' },
@@ -133,7 +139,8 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     Promise.all([
       this.loadStateScores(projectId),
       this.loadCountyScores(projectId),
-      this.loadMunicipalityScores(projectId)
+      this.loadMunicipalityScores(projectId),
+      this.loadGemeindeNames()
     ]).finally(() => {
       this.loading = false;
       this.loadingService.stopLoading();
@@ -144,9 +151,12 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     this.stateScores = [];
     this.countyScores = [];
     this.municipalityScores = [];
-    this.filteredMunicipalityScores = [];
     this.filteredCountyScores = [];
     this.selectedCategories = this.populationCategories;
+    this.selectedGemeinde = null;
+    this.selectedGemeindeName = '';
+    this.filteredGemeinden = [];
+    this.noMunicipalityResults = false;
   }
 
   private async loadStateScores(projectId: string): Promise<void> {
@@ -156,8 +166,8 @@ export class StatisticsComponent implements OnInit, OnDestroy {
           next: (response) => {
             if (response) {
               this.stateTotalRecords = response.count;
-              this.stateScores = response.results.map((score, index) =>
-                this.statisticsService.convertToScoreEntry(score, 'state', index + 1)
+              this.stateScores = response.results.map((score) =>
+                this.statisticsService.convertToScoreEntry(score, 'state')
               );
             }
           },
@@ -180,8 +190,8 @@ export class StatisticsComponent implements OnInit, OnDestroy {
           next: (firstResponse) => {
             if (firstResponse && firstResponse.results.length > 0) {
               // Display first batch immediately
-              this.countyScores = firstResponse.results.map((score, index) =>
-                this.statisticsService.convertToScoreEntry(score, 'county', index + 1)
+              this.countyScores = firstResponse.results.map((score) =>
+                this.statisticsService.convertToScoreEntry(score, 'county')
               );
               this.countyTotalRecords = firstResponse.count;
 
@@ -215,8 +225,8 @@ export class StatisticsComponent implements OnInit, OnDestroy {
             next: (response) => {
               if (response && response.results.length > 0) {
                 // Add new results to existing array
-                const newScores = response.results.map((score, index) =>
-                  this.statisticsService.convertToScoreEntry(score, 'county', this.countyScores.length + index + 1)
+                const newScores = response.results.map((score) =>
+                  this.statisticsService.convertToScoreEntry(score, 'county')
                 );
                 this.countyScores = this.countyScores.concat(newScores);
 
@@ -255,26 +265,36 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
   private async loadMunicipalityScores(projectId: string): Promise<void> {
     try {
-      // Load first batch immediately for better UX
-      const subscription = this.statisticsService.getMunicipalityScores(projectId, 0, 200, this.scoreType)
+      // Only add population filters if not all categories are selected (meaning filters are active)
+      const allCategoriesSelected = this.selectedCategories.length === this.populationCategories.length;
+      const populationFilters = allCategoriesSelected ? undefined : this.selectedCategories.map(category => ({
+        min: category.min,
+        max: category.max
+      }));
+
+      // Get gemeinde ID from selected gemeinde
+      const gemeindeId = this.selectedGemeinde ? this.selectedGemeinde.id : undefined;
+      console.log('Loading municipality scores with gemeindeId:', gemeindeId);
+
+      const subscription = this.statisticsService.getMunicipalityScores(projectId, this.scoreType, populationFilters, gemeindeId)
         .subscribe({
-          next: (firstResponse) => {
-            if (firstResponse && firstResponse.results.length > 0) {
-              // Display first batch immediately
-              this.municipalityScores = firstResponse.results.map((score, index) =>
-                this.statisticsService.convertToScoreEntry(score, 'municipality', index + 1)
+          next: (response) => {
+            if (response && response.length > 0) {
+              // Convert all results to ScoreEntry format, using API-provided rank
+              this.municipalityScores = response.map((score: any) =>
+                this.statisticsService.convertToScoreEntry(score, 'municipality', score.rank)
               );
-              this.municipalityTotalRecords = firstResponse.count;
-
-              // Apply filter to first batch
-              this.applyPopulationFilter();
-
-              // Load remaining data in background
-              this.loadRemainingMunicipalities(projectId, 200);
+              this.noMunicipalityResults = false;
+            } else {
+              // No results found
+              this.municipalityScores = [];
+              this.noMunicipalityResults = true;
             }
           },
           error: (error) => {
             console.error('Error loading municipality scores:', error);
+            this.municipalityScores = [];
+            this.noMunicipalityResults = true;
           }
         });
 
@@ -284,55 +304,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     }
   }
 
-  private async loadRemainingMunicipalities(projectId: string, startOffset: number): Promise<void> {
-    try {
-      this.backgroundLoading = true;
-      let currentOffset = startOffset;
-      let hasMoreData = true;
-
-      while (hasMoreData) {
-        const subscription = this.statisticsService.getMunicipalityScores(projectId, currentOffset, 200, this.scoreType)
-          .subscribe({
-            next: (response) => {
-              if (response && response.results.length > 0) {
-                // Add new results to existing array
-                const newScores = response.results.map((score, index) =>
-                  this.statisticsService.convertToScoreEntry(score, 'municipality', this.municipalityScores.length + index + 1)
-                );
-                this.municipalityScores = this.municipalityScores.concat(newScores);
-
-                // Reapply filter to include new data
-                this.applyPopulationFilter();
-
-                currentOffset += 200;
-
-                // Check if we've reached the end
-                if (response.results.length < 200) { // API limit is 200
-                  hasMoreData = false;
-                }
-              } else {
-                hasMoreData = false;
-              }
-            },
-            error: (error) => {
-              console.error('Error loading remaining municipalities:', error);
-              hasMoreData = false;
-            }
-          });
-
-        this.dataLoadingSubscriptions.push(subscription);
-
-        // Wait for this request to complete before continuing
-        await new Promise<void>((resolve) => {
-          subscription.add(() => resolve());
-        });
-      }
-    } catch (error) {
-      console.error('Error loading remaining municipalities:', error);
-    } finally {
-      this.backgroundLoading = false;
-    }
-  }
 
   onStatePageChange(event: any): void {
     this.currentStatePage = event.page + 1;
@@ -349,15 +320,6 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     }
   }
 
-  onMunicipalityPageChange(event: any): void {
-    console.log('onMunicipalityPageChange', event);
-    this.currentMunicipalityPage = event.page + 1;
-
-    const maxPages = Math.ceil(this.filteredMunicipalityScores.length / this.rowsPerPage);
-    if (this.currentMunicipalityPage > maxPages) {
-      this.currentMunicipalityPage = maxPages;
-    }
-  }
 
   onScoreTypeChange(type: 'pop' | 'avg'): void {
     this.scoreType = type;
@@ -381,12 +343,77 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     } else {
       this.selectedCategories.push(category);
     }
+
+    // Apply filter to counties (frontend filtering)
     this.applyPopulationFilter();
+
+    // Reload municipality data with new filters (backend filtering)
+    this.reloadMunicipalityData();
 
     // Reset pagination when filter changes
     this.currentStatePage = 1;
     this.currentCountyPage = 1;
-    this.currentMunicipalityPage = 1;
+  }
+
+
+  private reloadMunicipalityData(): void {
+    const projectId = this.mapService.getCurrentProject();
+    if (projectId) {
+      this.loadMunicipalityScores(projectId);
+    }
+  }
+
+  private async loadGemeindeNames(): Promise<void> {
+    try {
+      const projectId = this.mapService.getCurrentProject();
+      if (!projectId) {
+        console.error('No project ID available');
+        return;
+      }
+
+      const subscription = this.statisticsService.getGemeindeNames(projectId)
+        .subscribe({
+          next: (response) => {
+            this.gemeindeNames = response;
+            // Convert to array format for autocomplete
+            this.filteredGemeinden = Object.keys(response).map(name => ({
+              name: name,
+              id: response[name]
+            }));
+          },
+          error: (error) => {
+            console.error('Error loading gemeinde names:', error);
+          }
+        });
+
+      this.dataLoadingSubscriptions.push(subscription);
+    } catch (error) {
+      console.error('Error loading gemeinde names:', error);
+    }
+  }
+
+  filterGemeinden(event: any): void {
+    const query = event.query.toLowerCase();
+    this.filteredGemeinden = Object.keys(this.gemeindeNames)
+      .filter(name => name.toLowerCase().includes(query))
+      .map(name => ({
+        name: name,
+        id: this.gemeindeNames[name]
+      }))
+      .slice(0, 50); // Limit to 50 results for performance
+  }
+
+  onGemeindeSelect(event: any): void {
+    console.log('Gemeinde selected:', event);
+    this.selectedGemeinde = event.value;
+    this.selectedGemeindeName = event.value.name;
+    this.reloadMunicipalityData();
+  }
+
+  onGemeindeClear(): void {
+    this.selectedGemeinde = null;
+    this.selectedGemeindeName = '';
+    this.reloadMunicipalityData();
   }
 
   getPopulationSizeText(category: any): string {
@@ -394,19 +421,10 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   }
 
   private applyPopulationFilter(): void {
-    let filteredMunicipalities = this.municipalityScores;
     let filteredCounties = this.countyScores;
 
-    // Apply population category filter
+    // Apply population category filter to counties only (municipalities are filtered on backend)
     if (this.selectedCategories.length > 0) {
-      filteredMunicipalities = this.municipalityScores.filter(score => {
-        if (!score.population) return false;
-        return this.selectedCategories.some(category => {
-          const { min, max } = category;
-          return score.population && score.population > min && score.population <= max;
-        });
-      });
-
       filteredCounties = this.countyScores.filter(score => {
         if (!score.population) return false;
         return this.selectedCategories.some(category => {
@@ -416,13 +434,11 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       });
     }
 
-    this.filteredMunicipalityScores = filteredMunicipalities;
     this.filteredCountyScores = filteredCounties;
 
     // Reset page counters when filtering
     this.currentStatePage = 1;
     this.currentCountyPage = 1;
-    this.currentMunicipalityPage = 1;
 
     // Ensure current pages are valid after filtering
     this.adjustPaginationAfterFilter();
@@ -430,13 +446,9 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
   private adjustPaginationAfterFilter(): void {
     const maxCountyPages = Math.ceil(this.filteredCountyScores.length / this.rowsPerPage);
-    const maxMunicipalityPages = Math.ceil(this.filteredMunicipalityScores.length / this.rowsPerPage);
 
     if (this.currentCountyPage > maxCountyPages && maxCountyPages > 0) {
       this.currentCountyPage = maxCountyPages;
-    }
-    if (this.currentMunicipalityPage > maxMunicipalityPages && maxMunicipalityPages > 0) {
-      this.currentMunicipalityPage = maxMunicipalityPages;
     }
   }
 
@@ -461,20 +473,14 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     return this.filteredCountyScores.length;
   }
 
-  get filteredMunicipalityCount(): number {
-    return this.filteredMunicipalityScores.length;
+  get municipalityCount(): number {
+    return this.municipalityScores.length;
   }
 
   get paginatedCountyScores(): ScoreEntry[] {
     const startIndex = (this.currentCountyPage - 1) * this.rowsPerPage;
     const endIndex = startIndex + this.rowsPerPage;
     return this.filteredCountyScores.slice(startIndex, endIndex);
-  }
-
-  get paginatedMunicipalityScores(): ScoreEntry[] {
-    const startIndex = (this.currentMunicipalityPage - 1) * this.rowsPerPage;
-    const endIndex = startIndex + this.rowsPerPage;
-    return this.filteredMunicipalityScores.slice(startIndex, endIndex);
   }
 
   get paginatedStateScores(): ScoreEntry[] {

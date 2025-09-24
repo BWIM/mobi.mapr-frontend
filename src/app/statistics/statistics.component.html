@@ -22,6 +22,28 @@
             </span>
         </div>
 
+        <!-- Municipality Name Filter -->
+        <div class="mt-4">
+            <h4 class="text-sm font-medium text-gray-700 mb-2">{{
+                'STATISTICS.FILTER_BY_NAME' | translate }}</h4>
+            <p-autoComplete [(ngModel)]="selectedGemeindeName"
+                [suggestions]="filteredGemeinden"
+                (completeMethod)="filterGemeinden($event)"
+                (onSelect)="onGemeindeSelect($event)"
+                (onClear)="onGemeindeClear()" [dropdown]="true"
+                [forceSelection]="false"
+                placeholder="{{ 'STATISTICS.ENTER_MUNICIPALITY_NAME' | translate }}"
+                field="name" [minLength]="2" [delay]="300" styleClass="w-full">
+                <ng-template let-gemeinde pTemplate="item">
+                    <div class="flex items-center">
+                        <span class="font-medium">{{gemeinde.name}}</span>
+                        <span class="ml-2 text-sm text-gray-500">(ID:
+                            {{gemeinde.id}})</span>
+                    </div>
+                </ng-template>
+            </p-autoComplete>
+        </div>
+
         <!-- Background Loading Indicator -->
         <div *ngIf="backgroundLoading"
             class="mt-3 flex items-center text-sm text-gray-600">
@@ -58,9 +80,9 @@
                             class="hover:bg-gray-50 border-b border-gray-100 cursor-pointer">
                             <td class="p-3">{{score.rank}}</td>
                             <td class="p-3" (click)="onFeatureClick(score)"
-                                title="{{score.name}} ({{'STATISTICS.POPULATION' | translate}}: {{(score.population) | number:'1.0-0'}})">
+                                title="{{score.name}}">
                                 {{score.name}}</td>
-                            <td class="p-3 font-semibold"
+                            <td class=" p-3 font-semibold"
                                 [style.color]="getIndexColor(score)">
                                 {{getIndexName(score)}}
                             </td>
@@ -129,10 +151,28 @@
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <h2
                 class="text-xl font-bold p-4 border-b-2 border-primary text-gray-800">
-                {{ 'STATISTICS.MUNICIPALITIES' | translate }}</h2>
-            <p-scrollPanel [style]="{ height: '400px' }">
-                <p-table [value]="paginatedMunicipalityScores"
-                    styleClass="text-sm">
+                {{ 'STATISTICS.MUNICIPALITIES' | translate }}
+                <span
+                    *ngIf="!noMunicipalityResults">({{municipalityCount}})</span>
+            </h2>
+
+            <!-- Empty state message -->
+            <div *ngIf="noMunicipalityResults" class="p-8 text-center">
+                <div class="text-gray-500 mb-4">
+                    <i class="pi pi-search text-4xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-700 mb-2">
+                    {{ 'STATISTICS.NO_MUNICIPALITIES_FOUND' | translate }}
+                </h3>
+                <p class="text-sm text-gray-500">
+                    {{ 'STATISTICS.NO_MUNICIPALITIES_HINT' | translate }}
+                </p>
+            </div>
+
+            <!-- Municipality table -->
+            <p-scrollPanel *ngIf="!noMunicipalityResults"
+                [style]="{ height: '400px' }">
+                <p-table [value]="municipalityScores" styleClass="text-sm">
                     <ng-template pTemplate="header">
                         <tr class="bg-gray-100">
                             <th
@@ -161,17 +201,6 @@
                     </ng-template>
                 </p-table>
             </p-scrollPanel>
-            <div class="p-4 border-t border-gray-100">
-                <p-paginator [rows]="rowsPerPage"
-                    [totalRecords]="filteredMunicipalityCount"
-                    (onPageChange)="onMunicipalityPageChange($event)"
-                    [showPageLinks]="false" [showFirstLastIcon]="true"
-                    [alwaysShow]="false" [showJumpToPageDropdown]="false"
-                    [showCurrentPageReport]="true"
-                    currentPageReportTemplate="{currentPage} / {totalPages}"
-                    [first]="(currentMunicipalityPage - 1) * rowsPerPage">
-                </p-paginator>
-            </div>
         </div>
     </div>
 

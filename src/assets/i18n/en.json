@@ -432,7 +432,11 @@
     "LOADING_MORE_DATA": "Loading more data in background...",
     "PROJECT_VERSION_INVALID": "The version of the project is too low. Please recreate it, to also show statistics.",
     "POPULATION": "Population",
-    "MUNICIPALITY_SUBDIVISION_HINT": "Note: Municipalities that alone form the respective city or county district are not listed again under 'Municipalities', but only under 'Counties'."
+    "MUNICIPALITY_SUBDIVISION_HINT": "Note: Municipalities that alone form the respective city or county district are not listed again under 'Municipalities', but only under 'Counties'.",
+    "FILTER_BY_NAME": "Filter municpalities by name",
+    "ENTER_MUNICIPALITY_NAME": "Enter municipality name",
+    "NO_MUNICIPALITIES_FOUND": "No municipalities found",
+    "NO_MUNICIPALITIES_HINT": "No municipalities match the selected criteria. Try adjusting the population filters or selecting a different municipality."
   },
   "PDF_EXPORT": {
     "FULL_MAP": "Full map",

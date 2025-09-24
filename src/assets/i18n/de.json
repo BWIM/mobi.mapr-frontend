@@ -429,11 +429,15 @@
     "POPULATION_WEIGHTED": "Bevölkerung gewichtet",
     "AREA_WEIGHTED": "Fläche gewichtet",
     "FILTER_BY_CITY_SIZE": "Nach Bevölkerung filtern",
+    "FILTER_BY_NAME": "Gemeinden nach Name filtern",
+    "ENTER_MUNICIPALITY_NAME": "Gemeindename eingeben...",
     "SHOW_BEZIRKE": "Bezirke anzeigen",
     "LOADING_MORE_DATA": "Lade weitere Daten im Hintergrund...",
     "PROJECT_VERSION_INVALID": "Die Version des Projektes ist zu alt. Erstelle es neu, um Statistiken angezeigt zu bekommen!",
     "POPULATION": "Bevölkerung",
-    "MUNICIPALITY_SUBDIVISION_HINT": "Hinweis: Gemeinden, die allein den jeweiligen Stadt- oder Landkreis bilden, werden nicht noch einmal unter 'Gemeinden' aufgeführt, sondern nur unter 'Stadt- bzw. Landkreise'."
+    "MUNICIPALITY_SUBDIVISION_HINT": "Hinweis: Gemeinden, die allein den jeweiligen Stadt- oder Landkreis bilden, werden nicht noch einmal unter 'Gemeinden' aufgeführt, sondern nur unter 'Stadt- bzw. Landkreise'.",
+    "NO_MUNICIPALITIES_FOUND": "Keine Gemeinden gefunden",
+    "NO_MUNICIPALITIES_HINT": "Keine Gemeinden entsprechen den ausgewählten Kriterien. Versuchen Sie, die Bevölkerungsfilter anzupassen oder eine andere Gemeinde auszuwählen."
   },
   "PDF_EXPORT": {
     "TITLE": "PDF Export",
