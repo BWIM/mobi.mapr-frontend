@@ -341,6 +341,14 @@ button[style*="background-color: #d0bbdb"] {
     .p-menubar .p-menuitem-link {
         padding: 0.75rem;
     }
+
+    .p-button,
+    button,
+    .clickable-tab,
+    [role="button"] {
+        touch-action: manipulation;
+    }
+
 }
 
 /* Tablet-specific adjustments */
