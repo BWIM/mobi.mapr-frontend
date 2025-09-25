@@ -66,7 +66,9 @@ export class ShareProjectbarComponent implements OnInit, OnDestroy {
         this.loading = true;
         this.loadingService.startLoading();
 
-        this.loadPublicSharedProjects();
+        setTimeout(() => {
+            this.loadPublicSharedProjects();
+        }, 1000);
     }
 
     private loadPublicSharedProjects(): void {
