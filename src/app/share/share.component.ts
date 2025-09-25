@@ -145,7 +145,12 @@ export class ShareComponent implements OnInit, OnDestroy {
   }
 
   private checkMobile(): void {
-    this.isMobile = window.innerWidth < 768;
+    // More comprehensive mobile/tablet detection
+    const width = window.innerWidth;
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+    // Consider devices with width < 1024px as mobile/tablet for better iPad support
+    this.isMobile = width < 1024 || (isTouchDevice && width < 1200);
 
     // Auto-close sidebar on mobile when switching to desktop
     if (!this.isMobile && this.rightSidebarExpanded) {
