@@ -92,6 +92,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
         if (projectId) {
           this.visible = visible;
           if (visible) {
+            this.resetUI();
             this.loadAllData();
           } else {
             this.resetUI();
@@ -166,9 +167,10 @@ export class StatisticsComponent implements OnInit, OnDestroy {
           next: (response) => {
             if (response) {
               this.stateTotalRecords = response.count;
-              this.stateScores = response.results.map((score) =>
+              const scores = response.results.map((score) =>
                 this.statisticsService.convertToScoreEntry(score, 'state')
               );
+              this.stateScores = this.calculateRankings(scores);
             }
           },
           error: (error) => {
@@ -190,9 +192,10 @@ export class StatisticsComponent implements OnInit, OnDestroy {
           next: (firstResponse) => {
             if (firstResponse && firstResponse.results.length > 0) {
               // Display first batch immediately
-              this.countyScores = firstResponse.results.map((score) =>
+              const scores = firstResponse.results.map((score) =>
                 this.statisticsService.convertToScoreEntry(score, 'county')
               );
+              this.countyScores = this.calculateRankings(scores);
               this.countyTotalRecords = firstResponse.count;
 
               // Apply filter to first batch
@@ -229,6 +232,9 @@ export class StatisticsComponent implements OnInit, OnDestroy {
                   this.statisticsService.convertToScoreEntry(score, 'county')
                 );
                 this.countyScores = this.countyScores.concat(newScores);
+
+                // Recalculate rankings for all counties
+                this.countyScores = this.calculateRankings(this.countyScores);
 
                 // Reapply filter to include new data
                 this.applyPopulationFilter();
@@ -280,10 +286,11 @@ export class StatisticsComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (response) => {
             if (response && response.length > 0) {
-              // Convert all results to ScoreEntry format, using API-provided rank
-              this.municipalityScores = response.map((score: any) =>
+              // Convert all results to ScoreEntry format
+              const scores = response.map((score: any) =>
                 this.statisticsService.convertToScoreEntry(score, 'municipality', score.rank)
               );
+              this.municipalityScores = this.calculateRankings(scores);
               this.noMunicipalityResults = false;
             } else {
               // No results found
@@ -540,5 +547,59 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       { label: this.translate.instant('STATISTICS.POPULATION_WEIGHTED'), value: 'pop' },
       { label: this.translate.instant('STATISTICS.AREA_WEIGHTED'), value: 'avg' }
     ];
+  }
+
+  /**
+   * Calculates proper rankings based on score grades.
+   * All entries with the same grade (A+, A, A-, etc.) get the same rank.
+   * Ranks start at 1 and increment only when moving to the next grade group.
+   */
+  private calculateRankings(scores: ScoreEntry[]): ScoreEntry[] {
+    if (!scores || scores.length === 0) {
+      return scores;
+    }
+
+    // Sort scores by their index value (lower is better)
+    const sortedScores = [...scores].sort((a, b) => {
+      const aIndex = this.scoreType === 'pop' ? a.index_pop : a.index_avg;
+      const bIndex = this.scoreType === 'pop' ? b.index_pop : b.index_avg;
+      return aIndex - bIndex;
+    });
+
+    // Group scores by their grade
+    const gradeGroups: { [grade: string]: ScoreEntry[] } = {};
+
+    sortedScores.forEach(score => {
+      const indexValue = this.scoreType === 'pop' ? score.index_pop : score.index_avg;
+      const grade = this.indexService.getIndexName(indexValue);
+      if (!gradeGroups[grade]) {
+        gradeGroups[grade] = [];
+      }
+      gradeGroups[grade].push(score);
+    });
+
+    // Assign ranks to each group
+    let currentRank = 1;
+    const rankedScores: ScoreEntry[] = [];
+
+    // Process groups in order of their grade (A+ is best, F- is worst)
+    const gradeOrder = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'E+', 'E', 'E-', 'F+', 'F', 'F-'];
+
+    gradeOrder.forEach(grade => {
+      if (gradeGroups[grade] && gradeGroups[grade].length > 0) {
+        // All scores in this grade group get the same rank
+        gradeGroups[grade].forEach(score => {
+          rankedScores.push({
+            ...score,
+            rank: currentRank
+          });
+        });
+
+        // Increment rank by 1 for the next grade group
+        currentRank += 1;
+      }
+    });
+
+    return rankedScores;
   }
 }
