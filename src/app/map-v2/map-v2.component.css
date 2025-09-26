@@ -89,7 +89,7 @@ app-legend {
   padding: 8px 12px;
   border-radius: 6px;
   font-size: 0.8rem;
-  z-index: 100;
+  z-index: 1;
   pointer-events: none;
   text-align: right;
   line-height: 1.2;
