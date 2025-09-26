@@ -45,22 +45,26 @@ export class ShareComponent implements OnInit, OnDestroy {
     private router: Router
   ) {
     this.checkMobile();
-    this.route.params.subscribe(params => {
-      this.projectKey = params['key'];
-    });
   }
 
   ngOnInit() {
     this.loadingService.startLoading();
     this.shareService.setIsShare(true);
 
-    // Store the share key in sessionStorage for persistence across redirects
-    if (this.projectKey) {
-      sessionStorage.setItem('pendingShareKey', this.projectKey);
-    }
+    // Subscribe to route parameter changes
+    this.route.params.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(params => {
+      this.projectKey = params['key'];
 
-    // Check rate limit before loading the shared project
-    this.checkRateLimitAndLoadProject();
+      // Store the share key in sessionStorage for persistence across redirects
+      if (this.projectKey) {
+        sessionStorage.setItem('pendingShareKey', this.projectKey);
+      }
+
+      // Check rate limit before loading the shared project
+      this.checkRateLimitAndLoadProject();
+    });
   }
 
   ngOnDestroy(): void {
@@ -94,6 +98,11 @@ export class ShareComponent implements OnInit, OnDestroy {
     if (!localStorage.getItem('tutorialStatus') || localStorage.getItem('tutorialStatus') === 'false') {
       // this.tutorialService.startTutorial('share');
     }
+
+    // Reset component state for new project
+    this.project = null;
+    this.sharedProject = null;
+    this.isRightPinned = false;
 
     // Subscribe to the sidebar expansion state
     this.shareService.isRightSidebarExpanded$.pipe(
