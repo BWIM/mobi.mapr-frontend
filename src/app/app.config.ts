@@ -6,6 +6,7 @@ import { provideRouter } from '@angular/router';
 import Material from '@primeng/themes/material';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { AuthInterceptor } from './auth/auth.interceptor';
+import { HealthCheckInterceptor } from './core/interceptors/health-check.interceptor';
 import { routes } from './app.routes';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
@@ -18,39 +19,39 @@ export function HttpLoaderFactory(http: HttpClient) {
 }
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes),
-    provideAnimationsAsync(),
-    providePrimeNG({
-        theme: {
-            preset: Material,
-            options: {
-                prefix: 'p',
-                darkModeSelector: '[data-theme="dark"]',
-                cssLayer: false,
-                ripple: true,
-                inputStyle: 'filled',
-                buttonScale: 1,
-                roundness: 4
-            }
-        },
-        ripple: true
-    }),
-    provideHttpClient(
-      withInterceptors([AuthInterceptor])
-    ),
-    importProvidersFrom(
-        HttpClientModule,
-        RouterModule.forRoot(routes),
-        TranslateModule.forRoot({
-            defaultLanguage: 'de',
-            loader: {
-                provide: TranslateLoader,
-                useFactory: HttpLoaderFactory,
-                deps: [HttpClient]
-            }
-        })
-    )
-  ]
+    providers: [
+        provideZoneChangeDetection({ eventCoalescing: true }),
+        provideRouter(routes),
+        provideAnimationsAsync(),
+        providePrimeNG({
+            theme: {
+                preset: Material,
+                options: {
+                    prefix: 'p',
+                    darkModeSelector: '[data-theme="dark"]',
+                    cssLayer: false,
+                    ripple: true,
+                    inputStyle: 'filled',
+                    buttonScale: 1,
+                    roundness: 4
+                }
+            },
+            ripple: true
+        }),
+        provideHttpClient(
+            withInterceptors([HealthCheckInterceptor, AuthInterceptor])
+        ),
+        importProvidersFrom(
+            HttpClientModule,
+            RouterModule.forRoot(routes),
+            TranslateModule.forRoot({
+                defaultLanguage: 'de',
+                loader: {
+                    provide: TranslateLoader,
+                    useFactory: HttpLoaderFactory,
+                    deps: [HttpClient]
+                }
+            })
+        )
+    ]
 };
