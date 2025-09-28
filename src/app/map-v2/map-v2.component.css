@@ -95,6 +95,13 @@ app-legend {
   line-height: 1.2;
 }
 
+.project-name {
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+  color: #fff;
+}
+
 .copyright-text {
   font-weight: bold;
   margin-bottom: 2px;
@@ -112,6 +119,11 @@ app-legend {
     right: 10px;
     padding: 6px 10px;
     font-size: 0.75rem;
+  }
+
+  .project-name {
+    font-size: 0.8rem;
+    margin-bottom: 3px;
   }
 
   .creation-date {

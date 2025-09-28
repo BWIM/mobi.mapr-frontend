@@ -84,11 +84,17 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     // Subscribe to project data changes
     this.projectDataSubscription = this.mapService.getCurrentProjectData$.subscribe(projectData => {
       this.currentProjectData = projectData;
+      // Set project name from project data if available
+      if (projectData && projectData.display_name) {
+        this.projectName = projectData.display_name;
+      }
     });
   }
 
   ngOnInit() {
     // Initial style is already set through the subscription in constructor
+    // Set project name if already available in service
+    this.projectName = this.mapService.projectName;
   }
 
   ngAfterViewInit() {

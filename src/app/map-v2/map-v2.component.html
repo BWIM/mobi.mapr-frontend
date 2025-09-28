@@ -3,6 +3,7 @@
     (locationSelected)="onLocationSelected($event)"></app-search-overlay>
   <app-legend></app-legend>
   <div class="copyright-info">
+    <div class="project-name" *ngIf="projectName">{{ projectName }}</div>
     <div class="copyright-text" *ngIf="currentProjectData">© BWIM, {{
       formatCreationDate(currentProjectData.created) }}</div>
     <div class="copyright-map">Hintergrundkarte: © CARTO, OSM</div>
