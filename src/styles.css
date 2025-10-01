@@ -130,7 +130,7 @@ body {
     margin: 0;
     font-family: var(--font-family, Arial, sans-serif);
     color: var(--text-color);
-    background-color: var(--background-color);
+    background-color: var(--background-color) !important;
     transition: background-color 0.3s ease, color 0.3s ease;
     height: 100vh;
     height: 100dvh;
@@ -139,9 +139,38 @@ body {
     /* Prevent horizontal scrolling */
 }
 
+/* Force light theme by overriding any dark theme styles */
+html:not([data-theme="dark"]) {
+    --background-color: #f0ecec !important;
+    --second-background-color: #ffffff !important;
+    --text-color: #000000 !important;
+    --title-color: #000000 !important;
+    --surface-color: #ffffff !important;
+}
+
 .p-component {
     font-family: var(--font-family, Arial, sans-serif);
     color: var(--text-color);
+}
+
+/* Force PrimeNG components to use light theme */
+.p-dialog,
+.p-card,
+.p-panel,
+.p-fieldset,
+.p-menubar,
+.p-tabview,
+.p-steps,
+.p-button {
+    background-color: var(--surface-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* Ensure modals and overlays use light theme */
+.p-dialog .p-dialog-content,
+.p-dialog .p-dialog-header {
+    background-color: var(--surface-color) !important;
+    color: var(--text-color) !important;
 }
 
 /* Card-Styling */

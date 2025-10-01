@@ -19,13 +19,13 @@ import { TutorialComponent } from './tutorial/tutorial.component';
   selector: 'app-root',
   standalone: true,
   imports: [
-    RouterOutlet, 
-    MenubarModule, 
-    ButtonModule, 
-    SharedModule, 
-    ProjectWizardComponent, 
-    AnalyzeComponent, 
-    CreditsComponent, 
+    RouterOutlet,
+    MenubarModule,
+    ButtonModule,
+    SharedModule,
+    ProjectWizardComponent,
+    AnalyzeComponent,
+    CreditsComponent,
     StatisticsComponent,
     ExportMapComponent,
     TutorialComponent
@@ -39,18 +39,22 @@ export class AppComponent implements OnDestroy {
   private subscriptions: Subscription[] = [];
 
   constructor(
-    private translate: TranslateService, 
+    private translate: TranslateService,
     private authService: AuthService,
     private keyboardShortcutsService: KeyboardShortcutsService
   ) {
     translate.setDefaultLang('de');
     translate.use('de');
     this.isLoggedIn = this.authService.isLoggedIn();
-    
+
+    // Ensure light theme is applied by default
+    document.documentElement.removeAttribute('data-theme');
+    document.documentElement.classList.remove('dark');
+
     // Subscribe to keyboard shortcuts
     this.subscriptions.push(
       this.keyboardShortcutsService.getShortcutStream().subscribe(action => {
-        switch(action) {
+        switch (action) {
           case ShortcutAction.SHOW_STATISTICS:
             // Statistics visibility is handled by the service
             break;

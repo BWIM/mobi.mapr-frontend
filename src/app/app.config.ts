@@ -28,7 +28,7 @@ export const appConfig: ApplicationConfig = {
                 preset: Material,
                 options: {
                     prefix: 'p',
-                    darkModeSelector: '[data-theme="dark"]',
+                    darkModeSelector: 'none', // Disable dark mode to force light theme
                     cssLayer: false,
                     ripple: true,
                     inputStyle: 'filled',
