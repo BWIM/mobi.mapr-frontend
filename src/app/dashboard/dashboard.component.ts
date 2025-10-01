@@ -36,11 +36,7 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.tutorialService.getTutorialStatus().subscribe((status) => {
-      if (status) {
-        this.tutorialService.startTutorial('dashboard');
-      }
-    });
+    // s
     this.dashboardService.rightSidebarExpanded$.subscribe((expanded) => {
       this.rightSidebarExpanded = expanded;
     });

@@ -95,9 +95,9 @@ export class ShareComponent implements OnInit, OnDestroy {
   }
 
   private loadSharedProject(): void {
-    if (!localStorage.getItem('tutorialStatus') || localStorage.getItem('tutorialStatus') === 'false') {
-      this.tutorialService.startTutorial('share');
-    }
+    // if (!localStorage.getItem('tutorialStatus') || localStorage.getItem('tutorialStatus') === 'false') {
+    //   this.tutorialService.startTutorial('share');
+    // }
 
     // Reset component state for new project
     this.project = null;
