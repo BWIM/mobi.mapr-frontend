@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { interval, Subscription } from 'rxjs';
@@ -27,7 +27,7 @@ interface RateLimitInfo {
         CommonModule,
         CardModule,
         ButtonModule,
-        DropdownModule,
+        SelectModule,
         FormsModule,
         TranslateModule
     ]

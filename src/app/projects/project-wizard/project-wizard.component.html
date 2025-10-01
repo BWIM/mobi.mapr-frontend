@@ -1,46 +1,48 @@
-<p-dialog 
-    [(visible)]="visible"
-    [modal]="true"
+<p-dialog [(visible)]="visible" [modal]="true"
     [style]="{'width': isMobile ? '100vw' : '80vw', 'height': isMobile ? '100vh' : '80vh'}"
-    [draggable]="false"
-    [resizable]="false"
-    [dismissableMask]="true"
-    [maximizable]="true"
-    [closeOnEscape]="false"
-    [closable]="false"
+    [draggable]="false" [resizable]="false" [dismissableMask]="true"
+    [maximizable]="true" [closeOnEscape]="false" [closable]="false"
     styleClass="project-wizard-dialog"
     [header]="'PROJECT_WIZARD.CREATE_NEW_PROJECT' | translate">
-    
+
     <div class="flex flex-col h-full">
         <!-- Stepper -->
         <div class="mb-8" *ngIf="!isMobile && activeIndex !== 3">
-            <p-steps [model]="steps" [activeIndex]="activeIndex" [readonly]="true" [pTooltip]="'PROJECT_WIZARD.STEPS_TOOLTIP' | translate"></p-steps>
+            <p-steps [model]="steps" [activeIndex]="activeIndex"
+                [readonly]="true"
+                [pTooltip]="'PROJECT_WIZARD.STEPS_TOOLTIP' | translate"></p-steps>
         </div>
 
         <!-- Mobile step indicator -->
         <div class="mb-4" *ngIf="isMobile && activeIndex !== 3">
             <div class="flex items-center justify-center">
-                <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-medium">
-                    {{ 'PROJECT_WIZARD.STEPS.STEP' | translate }} {{ activeIndex + 1 }} {{ 'PROJECT_WIZARD.STEPS.OF' | translate }} {{ steps.length }}: {{ getCurrentStepLabel() | translate }}
+                <div
+                    class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-medium">
+                    {{ 'PROJECT_WIZARD.STEPS.STEP' | translate }} {{ activeIndex
+                    + 1 }} {{ 'PROJECT_WIZARD.STEPS.OF' | translate }} {{
+                    steps.length }}: {{ getCurrentStepLabel() | translate }}
                 </div>
             </div>
         </div>
 
         <!-- Content -->
-        <div class="flex-grow overflow-auto p-4" [formGroup]="projectForm" [class.p-0]="activeIndex === 3">
+        <div class="flex-grow overflow-auto p-4" [formGroup]="projectForm"
+            [class.p-0]="activeIndex === 3">
             <!-- Map step - full height without scroll panel -->
-            <div *ngIf="activeIndex === 3" formGroupName="area" class="h-full w-full">
+            <div *ngIf="activeIndex === 3" formGroupName="area"
+                class="h-full w-full">
                 <div class="h-full w-full">
                     <div class="flex h-full w-full">
                         <div id="create-map" class="h-full w-2/3 rounded-lg">
-                        </div>      
+                        </div>
                         <div class="w-1/3 h-full pl-4">
-                            <p-scrollPanel [style]="{width: '100%', height: '100%'}" styleClass="custombar1">
+                            <p-scrollPanel
+                                [style]="{width: '100%', height: '100%'}"
+                                styleClass="custombar1">
                                 <div class="flex flex-col gap-2 p-2">
-                                    <div *ngFor="let land of lands" 
+                                    <div *ngFor="let land of lands"
                                         class="flex items-center p-3 bg-white rounded-lg shadow hover:bg-gray-50">
-                                        <p-checkbox
-                                            [binary]="true"
+                                        <p-checkbox [binary]="true"
                                             [indeterminate]="isLandIndeterminate(land)"
                                             [(ngModel)]="land.checked"
                                             [ngModelOptions]="{standalone: true}"
@@ -58,13 +60,14 @@
             </div>
 
             <!-- Other steps - with scroll panel -->
-            <p-scrollPanel *ngIf="activeIndex !== 3" [style]="{width: '100%', height: '100%'}">
+            <p-scrollPanel *ngIf="activeIndex !== 3"
+                [style]="{width: '100%', height: '100%'}">
                 <!-- Schritt 1: Aktivitätsauswahl -->
                 <div *ngIf="activeIndex === 0" formGroupName="activities">
                     <div class="flex justify-between items-center mb-4">
-                        <h3>{{ 'PROJECT_WIZARD.SELECT_ACTIVITIES' | translate }}</h3>
-                        <p-toggleButton
-                            [ngModel]="showMidActivities"
+                        <h3>{{ 'PROJECT_WIZARD.SELECT_ACTIVITIES' | translate }}
+                        </h3>
+                        <p-toggleButton [ngModel]="showMidActivities"
                             [ngModelOptions]="{standalone: true}"
                             onLabel="{{ 'PROJECT_WIZARD.ACTIVITIES.MID' | translate }}"
                             offLabel="{{ 'PROJECT_WIZARD.ACTIVITIES.OSM' | translate }}"
@@ -74,23 +77,24 @@
                             [disabled]="!activitiesLoaded">
                         </p-toggleButton>
                     </div>
-                    
+
                     <!-- Full width activities panel -->
                     <div class="activities-panel">
                         <!-- MID Aktivitäten -->
                         <div *ngIf="showMidActivities">
-                            <div *ngFor="let group of groupedActivities" class="mb-4">
+                            <div *ngFor="let group of groupedActivities"
+                                class="mb-4">
                                 <p-panel [header]="group.tripPurpose">
                                     <ng-template pTemplate="header">
                                         <div class="right-10">
                                             <div class="flex gap-2">
-                                                <button pButton 
+                                                <button pButton
                                                     icon="pi pi-check-square"
                                                     [pTooltip]="'PROJECTS.WIZARD.SELECT_ALL_ACTIVITIES' | translate"
                                                     class="p-button-sm p-button-rounded"
                                                     (click)="selectAllActivities(group.activities)">
                                                 </button>
-                                                <button pButton 
+                                                <button pButton
                                                     icon="pi pi-minus"
                                                     [pTooltip]="'PROJECTS.WIZARD.DESELECT_ALL_ACTIVITIES' | translate"
                                                     class="p-button-sm p-button-rounded"
@@ -99,43 +103,54 @@
                                             </div>
                                         </div>
                                     </ng-template>
-                                    <div class="flex flex-column gap-2" *ngFor="let activity of group.activities">
-                                        <div class="flex align-items-center gap-2">
-                                            <p-checkbox 
-                                                [value]="activity"
+                                    <div class="flex flex-column gap-2"
+                                        *ngFor="let activity of group.activities">
+                                        <div
+                                            class="flex align-items-center gap-2">
+                                            <p-checkbox [value]="activity"
                                                 [name]="'midActivities'"
                                                 [inputId]="'activity_' + activity.id"
                                                 [ariaLabel]="activity.display_name || activity.name"
                                                 [pTooltip]="activity.description || (activity.display_name || activity.name)"
                                                 formControlName="selectedMidActivities">
                                             </p-checkbox>
-                                            <label [for]="'activity_' + activity.id">{{activity.display_name || activity.name}}</label>
+                                            <label
+                                                [for]="'activity_' + activity.id">{{activity.display_name
+                                                || activity.name}}</label>
                                         </div>
                                     </div>
                                 </p-panel>
                             </div>
                             <div *ngIf="groupedActivities.length === 0">
-                                <p-progress-spinner class="center"></p-progress-spinner>
+                                <p-progress-spinner
+                                    class="center"></p-progress-spinner>
                             </div>
                         </div>
-                        
+
                         <!-- OSM Aktivitäten -->
                         <div *ngIf="!showMidActivities">
-                            <p-panel [header]="'PROJECT_WIZARD.OSM_ACTIVITIES' | translate">
+                            <p-panel
+                                [header]="'PROJECT_WIZARD.OSM_ACTIVITIES' | translate">
                                 <div class="flex flex-col gap-4">
-                                    <div *ngFor="let group of groupedActivities" class="mb-4">
-                                        <div class="font-bold mb-2">{{group.tripPurpose}}</div>
+                                    <div *ngFor="let group of groupedActivities"
+                                        class="mb-4">
+                                        <div class="font-bold mb-2">
+                                            {{group.tripPurpose}}</div>
                                         <div class="ml-2">
-                                            <div *ngFor="let activity of group.activities" class="flex align-items-center gap-2 mb-2">
-                                                <p-radioButton 
+                                            <div *ngFor="let activity of group.activities"
+                                                class="flex align-items-center gap-2 mb-2">
+                                                <p-radioButton
                                                     [value]="activity"
                                                     name="selectedNonMidActivity"
                                                     [inputId]="'activity_' + activity.id"
                                                     [pTooltip]="activity.description || (activity.display_name || activity.name)"
                                                     formControlName="selectedNonMidActivity">
                                                 </p-radioButton>
-                                                <label [for]="'activity_' + activity.id" class="cursor-pointer">
-                                                    {{activity.display_name || activity.name}}
+                                                <label
+                                                    [for]="'activity_' + activity.id"
+                                                    class="cursor-pointer">
+                                                    {{activity.display_name ||
+                                                    activity.name}}
                                                 </label>
                                             </div>
                                         </div>
@@ -143,14 +158,18 @@
                                 </div>
                             </p-panel>
                         </div>
-                        
+
                         <!-- Error messages -->
                         <div class="mt-4">
-                            <small class="text-red-500" *ngIf="showMidActivities && projectForm.get('activities.selectedMidActivities')?.errors?.['required'] && projectForm.get('activities.selectedMidActivities')?.touched">
-                                {{ 'PROJECT_WIZARD.ERRORS.SELECT_MID_ACTIVITIES' | translate }}
+                            <small class="text-red-500"
+                                *ngIf="showMidActivities && projectForm.get('activities.selectedMidActivities')?.errors?.['required'] && projectForm.get('activities.selectedMidActivities')?.touched">
+                                {{ 'PROJECT_WIZARD.ERRORS.SELECT_MID_ACTIVITIES'
+                                | translate }}
                             </small>
-                            <small class="text-red-500" *ngIf="!showMidActivities && projectForm.get('activities.selectedNonMidActivity')?.errors?.['required'] && projectForm.get('activities.selectedNonMidActivity')?.touched">
-                                {{ 'PROJECT_WIZARD.ERRORS.SELECT_OSM_ACTIVITY' | translate }}
+                            <small class="text-red-500"
+                                *ngIf="!showMidActivities && projectForm.get('activities.selectedNonMidActivity')?.errors?.['required'] && projectForm.get('activities.selectedNonMidActivity')?.touched">
+                                {{ 'PROJECT_WIZARD.ERRORS.SELECT_OSM_ACTIVITY' |
+                                translate }}
                             </small>
                         </div>
                     </div>
@@ -159,23 +178,24 @@
                 <!-- Schritt 2: Personas -->
                 <div *ngIf="activeIndex === 1" formGroupName="personas">
                     <div class="flex justify-between items-center mb-4">
-                        <h3>{{ 'PROJECT_WIZARD.SELECT_PERSONAS' | translate }}</h3>
+                        <h3>{{ 'PROJECT_WIZARD.SELECT_PERSONAS' | translate }}
+                        </h3>
                     </div>
-                    
+
                     <!-- Full width personas panel -->
                     <div class="personas-panel">
-                        <p-panel [header]="'PROJECT_WIZARD.AVAILABLE_PERSONAS' | translate">
+                        <p-panel
+                            [header]="'PROJECT_WIZARD.AVAILABLE_PERSONAS' | translate">
                             <ng-template pTemplate="header">
                                 <div class="right-10">
                                     <div class="flex gap-2">
-                                        <button pButton 
+                                        <button pButton
                                             icon="pi pi-check-square"
                                             [pTooltip]="'PROJECTS.WIZARD.SELECT_ALL_PERSONAS' | translate"
                                             class="p-button-sm p-button-rounded"
                                             (click)="selectAllPersonas()">
                                         </button>
-                                        <button pButton 
-                                            icon="pi pi-minus"
+                                        <button pButton icon="pi pi-minus"
                                             [pTooltip]="'PROJECTS.WIZARD.DESELECT_ALL_PERSONAS' | translate"
                                             class="p-button-sm p-button-rounded"
                                             (click)="deselectAllPersonas()">
@@ -183,28 +203,32 @@
                                     </div>
                                 </div>
                             </ng-template>
-                            <div class="flex flex-wrap gap-3" *ngFor="let persona of personas" >
+                            <div class="flex flex-wrap gap-3"
+                                *ngFor="let persona of personas">
                                 <div class="flex align-items-center gap-2">
-                                    <p-checkbox
-                                        [value]="persona"
+                                    <p-checkbox [value]="persona"
                                         [name]="'personas'"
                                         [inputId]="'persona_' + persona.id"
                                         [ariaLabel]="persona.display_name || persona.name"
                                         formControlName="selectedPersonas">
                                         {{persona.display_name || persona.name}}
                                     </p-checkbox>
-                                    <label [for]="'persona_' + persona.id"> {{persona.display_name || persona.name}}</label>
+                                    <label [for]="'persona_' + persona.id">
+                                        {{persona.display_name ||
+                                        persona.name}}</label>
                                     <!-- <p-tooltip *ngIf="persona.description" [target]="'persona_' + persona.id">
                                         {{persona.description}}
                                     </p-tooltip> -->
                                 </div>
                             </div>
                         </p-panel>
-                        
+
                         <!-- Error messages -->
                         <div class="mt-4">
-                            <small class="text-red-500" *ngIf="projectForm.get('personas.selectedPersonas')?.errors?.['required'] && projectForm.get('personas.selectedPersonas')?.touched">
-                                {{ 'PROJECT_WIZARD.ERRORS.SELECT_PERSONAS' | translate }}
+                            <small class="text-red-500"
+                                *ngIf="projectForm.get('personas.selectedPersonas')?.errors?.['required'] && projectForm.get('personas.selectedPersonas')?.touched">
+                                {{ 'PROJECT_WIZARD.ERRORS.SELECT_PERSONAS' |
+                                translate }}
                             </small>
                         </div>
                     </div>
@@ -215,21 +239,21 @@
                     <div class="flex justify-between items-center mb-4">
                         <h3>{{ 'PROJECT_WIZARD.SELECT_MODES' | translate }}</h3>
                     </div>
-                    
+
                     <!-- Full width modes panel -->
                     <div class="modes-panel">
-                        <p-panel [header]="'PROJECT_WIZARD.AVAILABLE_MODES' | translate">
+                        <p-panel
+                            [header]="'PROJECT_WIZARD.AVAILABLE_MODES' | translate">
                             <ng-template pTemplate="header">
                                 <div class="right-10">
                                     <div class="flex gap-2">
-                                        <button pButton 
+                                        <button pButton
                                             icon="pi pi-check-square"
                                             [pTooltip]="'PROJECTS.WIZARD.SELECT_ALL_MODES' | translate"
                                             class="p-button-sm p-button-rounded"
                                             (click)="selectAllModes()">
                                         </button>
-                                        <button pButton 
-                                            icon="pi pi-minus"
+                                        <button pButton icon="pi pi-minus"
                                             [pTooltip]="'PROJECTS.WIZARD.DESELECT_ALL_MODES' | translate"
                                             class="p-button-sm p-button-rounded"
                                             (click)="deselectAllModes()">
@@ -238,10 +262,10 @@
                                 </div>
                             </ng-template>
                             <div class="flex flex-col gap-4">
-                                <div *ngFor="let mode of modes" class="mode-container">
+                                <div *ngFor="let mode of modes"
+                                    class="mode-container">
                                     <div class="flex items-center gap-2">
-                                        <p-checkbox
-                                            [value]="mode.id"
+                                        <p-checkbox [value]="mode.id"
                                             [name]="'modes'"
                                             [inputId]="'mode_' + mode.id"
                                             [ariaLabel]="mode.display_name || mode.name"
@@ -250,15 +274,17 @@
                                             [ngModelOptions]="{standalone: true}"
                                             (onChange)="onModeChange(mode, $event.checked)">
                                         </p-checkbox>
-                                        <label [for]="'mode_' + mode.id" class="font-medium">{{mode.display_name || mode.name}}</label>
+                                        <label [for]="'mode_' + mode.id"
+                                            class="font-medium">{{mode.display_name
+                                            || mode.name}}</label>
                                     </div>
-                                    
+
                                     <!-- Profile selection -->
-                                        <div *ngIf="isModeSelected(mode) && mode.profiles && mode.profiles.length > 0" 
-                                         class="ml-8 mt-2">
+                                    <div *ngIf="isModeSelected(mode) && mode.profiles && mode.profiles.length > 0"
+                                        class="ml-8 mt-2">
                                         <div class="flex flex-col gap-2">
-                                            <div *ngFor="let profile of mode.profiles" 
-                                                 class="flex items-center gap-2">
+                                            <div *ngFor="let profile of mode.profiles"
+                                                class="flex items-center gap-2">
                                                 <p-radioButton
                                                     [name]="'profile_' + mode.id"
                                                     [value]="profile.id"
@@ -266,18 +292,22 @@
                                                     [ngModelOptions]="{standalone: true}"
                                                     (onClick)="onProfileChange(mode, profile.id)">
                                                 </p-radioButton>
-                                                <label class="text-sm">{{profile.display_name || profile.name}}</label>
+                                                <label
+                                                    class="text-sm">{{profile.display_name
+                                                    || profile.name}}</label>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </p-panel>
-                        
+
                         <!-- Error messages -->
                         <div class="mt-4">
-                            <small class="text-red-500" *ngIf="projectForm.get('modes.selectedModes')?.errors?.['required'] && projectForm.get('modes.selectedModes')?.touched">
-                                {{ 'PROJECT_WIZARD.ERRORS.SELECT_MODES' | translate }}
+                            <small class="text-red-500"
+                                *ngIf="projectForm.get('modes.selectedModes')?.errors?.['required'] && projectForm.get('modes.selectedModes')?.touched">
+                                {{ 'PROJECT_WIZARD.ERRORS.SELECT_MODES' |
+                                translate }}
                             </small>
                         </div>
                     </div>
@@ -315,95 +345,99 @@
                 </div> -->
 
                 <!-- Schritt 5: Zusammenfassung -->
-                <div *ngIf="activeIndex === 4" formGroupName="summary" class="animate-fadeIn">
-                    <h2 class="text-2xl mb-4">{{ 'PROJECT_WIZARD.CREATE_PROJECT' | translate }}</h2>
-                    
+                <div *ngIf="activeIndex === 4" formGroupName="summary"
+                    class="animate-fadeIn">
+                    <h2 class="text-2xl mb-4">{{ 'PROJECT_WIZARD.CREATE_PROJECT'
+                        | translate }}</h2>
+
                     <!-- Projektinformationen -->
                     <div class="grid grid-cols-1 gap-4 mb-8">
                         <div class="field">
-                            <label for="name" class="block mb-2">{{ 'PROJECT_WIZARD.PROJECT_NAME' | translate }} *</label>
-                            <input id="name" 
-                                   type="text" 
-                                   pInputText 
-                                   formControlName="name" 
-                                   class="w-full border rounded-md p-2" 
-                                   [pTooltip]="'PROJECT_WIZARD.PROJECT_NAME_TOOLTIP' | translate"
-                                   placeholder="Name" 
-                                   maxlength="128">
-                            <small class="text-red-500" *ngIf="projectForm.get('summary.name')?.errors?.['required'] && projectForm.get('summary.name')?.touched">
-                                {{ 'PROJECT_WIZARD.ERRORS.NAME_REQUIRED' | translate }}
+                            <label for="name" class="block mb-2">{{
+                                'PROJECT_WIZARD.PROJECT_NAME' | translate }}
+                                *</label>
+                            <input id="name" type="text" pInputText
+                                formControlName="name"
+                                class="w-full border rounded-md p-2"
+                                [pTooltip]="'PROJECT_WIZARD.PROJECT_NAME_TOOLTIP' | translate"
+                                placeholder="Name" maxlength="128">
+                            <small class="text-red-500"
+                                *ngIf="projectForm.get('summary.name')?.errors?.['required'] && projectForm.get('summary.name')?.touched">
+                                {{ 'PROJECT_WIZARD.ERRORS.NAME_REQUIRED' |
+                                translate }}
                             </small>
                         </div>
                         <div class="field">
-                            <label for="description" class="block mb-2">{{ 'PROJECT_WIZARD.DESCRIPTION' | translate }}</label>
-                            <textarea id="description" 
-                                    pInputTextarea 
-                                    formControlName="description" 
-                                    class="w-full border rounded-md p-2" 
-                                    [pTooltip]="'PROJECT_WIZARD.DESCRIPTION_TOOLTIP' | translate"
-                                    rows="4" 
-                                    maxlength="256">
+                            <label for="description" class="block mb-2">{{
+                                'PROJECT_WIZARD.DESCRIPTION' | translate
+                                }}</label>
+                            <textarea id="description" pInputTextarea
+                                formControlName="description"
+                                class="w-full border rounded-md p-2"
+                                [pTooltip]="'PROJECT_WIZARD.DESCRIPTION_TOOLTIP' | translate"
+                                rows="4" maxlength="256">
                             </textarea>
                         </div>
 
                         <!-- Projektgruppe -->
                         <div class="field">
-                            <label for="projectGroup" class="block mb-2">{{ 'PROJECTS.FIELDS.GROUP' | translate }}</label>
-                            <p-dropdown 
-                                id="projectGroup"
+                            <label for="projectGroup" class="block mb-2">{{
+                                'PROJECTS.FIELDS.GROUP' | translate }}</label>
+                            <p-select id="projectGroup"
                                 [options]="projectGroups"
                                 formControlName="projectGroup"
-                                optionLabel="name"
-                                [showClear]="true"
+                                optionLabel="name" [showClear]="true"
                                 [appendTo]="'body'"
                                 [pTooltip]="'PROJECT_WIZARD.PROJECT_GROUP_TOOLTIP' | translate"
                                 placeholder="{{ 'PROJECTS.FIELDS.SELECT_GROUP' | translate }}"
                                 class="w-full">
-                            </p-dropdown>
+                            </p-select>
                         </div>
 
                         <!-- OSM Aktivität -->
                         <div class="field">
-                            <label for="startActivity" class="block mb-2">{{ 'PROJECT_WIZARD.START_ACTIVITY' | translate }}</label>
-                            <p-dropdown 
-                                id="startActivity"
+                            <label for="startActivity" class="block mb-2">{{
+                                'PROJECT_WIZARD.START_ACTIVITY' | translate
+                                }}</label>
+                            <p-select id="startActivity"
                                 [options]="getOSMActivitiesList()"
                                 formControlName="startActivity"
-                                optionLabel="display_name"
-                                [showClear]="true"
+                                optionLabel="display_name" [showClear]="true"
                                 [appendTo]="'body'"
                                 [pTooltip]="'PROJECT_WIZARD.START_ACTIVITY_TOOLTIP' | translate"
                                 class="w-full">
-                            </p-dropdown>
+                            </p-select>
                         </div>
                     </div>
 
                     <!-- Projekteinstellungen -->
                     <div class="bg-gray-50 p-4 rounded-lg mb-8">
-                        <h3 class="font-bold mb-4">{{ 'PROJECT_WIZARD.PROJECT_SETTINGS' | translate }}</h3>
+                        <h3 class="font-bold mb-4">{{
+                            'PROJECT_WIZARD.PROJECT_SETTINGS' | translate }}
+                        </h3>
                         <div class="flex flex-col gap-3">
 
                             <div class="field-checkbox">
-                                <p-checkbox
-                                    [inputId]="'sendEmail'"
-                                    [name]="'sendEmail'"
-                                    [binary]="true"
+                                <p-checkbox [inputId]="'sendEmail'"
+                                    [name]="'sendEmail'" [binary]="true"
                                     [ariaLabel]="'PROJECT_WIZARD.SEND_EMAIL' | translate"
                                     [pTooltip]="'PROJECT_WIZARD.SEND_EMAIL_TOOLTIP' | translate"
                                     formControlName="sendEmail">
                                 </p-checkbox>
-                                <label [for]="'sendEmail'" class="ml-2">{{ 'PROJECT_WIZARD.SEND_EMAIL' | translate }}</label>
+                                <label [for]="'sendEmail'" class="ml-2">{{
+                                    'PROJECT_WIZARD.SEND_EMAIL' | translate
+                                    }}</label>
                             </div>
                             <div class="field-checkbox">
-                                <p-checkbox
-                                    [inputId]="'loadAreasOnMap'"
-                                    [name]="'loadAreasOnMap'"
-                                    [binary]="true"
+                                <p-checkbox [inputId]="'loadAreasOnMap'"
+                                    [name]="'loadAreasOnMap'" [binary]="true"
                                     [ariaLabel]="'PROJECT_WIZARD.LOAD_AREAS_ON_MAP' | translate"
                                     [pTooltip]="'PROJECT_WIZARD.LOAD_AREAS_ON_MAP_TOOLTIP' | translate"
                                     formControlName="loadAreasOnMap">
                                 </p-checkbox>
-                                <label [for]="'loadAreasOnMap'" class="ml-2">{{ 'PROJECT_WIZARD.LOAD_AREAS_ON_MAP' | translate }}</label>
+                                <label [for]="'loadAreasOnMap'" class="ml-2">{{
+                                    'PROJECT_WIZARD.LOAD_AREAS_ON_MAP' |
+                                    translate }}</label>
                             </div>
                         </div>
                     </div>
@@ -414,29 +448,26 @@
 
         <!-- Footer mit Navigation -->
         <div class="flex justify-between items-center mt-4 p-4 border-t">
-            <button pButton 
-                    [label]="'PROJECT_WIZARD.CANCEL' | translate"
-                    class="p-button-secondary" 
-                    [pTooltip]="'PROJECT_WIZARD.CANCEL_TOOLTIP' | translate"
-                    (click)="hide()">
+            <button pButton [label]="'PROJECT_WIZARD.CANCEL' | translate"
+                class="p-button-secondary"
+                [pTooltip]="'PROJECT_WIZARD.CANCEL_TOOLTIP' | translate"
+                (click)="hide()">
             </button>
-            
+
             <div class="flex gap-2">
-                <button pButton 
-                        [label]="'PROJECT_WIZARD.BACK' | translate"
-                        class="p-button-outlined"
-                        [pTooltip]="'PROJECT_WIZARD.BACK_TOOLTIP' | translate"
-                        [disabled]="activeIndex === 0"
-                        (click)="prevStep()">
+                <button pButton [label]="'PROJECT_WIZARD.BACK' | translate"
+                    class="p-button-outlined"
+                    [pTooltip]="'PROJECT_WIZARD.BACK_TOOLTIP' | translate"
+                    [disabled]="activeIndex === 0" (click)="prevStep()">
                 </button>
-                
-                <button pButton 
-                        [label]="activeIndex === steps.length - 1 ? ('PROJECT_WIZARD.FINISH' | translate) : ('PROJECT_WIZARD.NEXT' | translate)"
-                        [pTooltip]="activeIndex === steps.length - 1 ? ('PROJECT_WIZARD.FINISH_TOOLTIP' | translate) : ('PROJECT_WIZARD.NEXT_TOOLTIP' | translate)"
-                        [disabled]="!isCurrentStepValid()"
-                        (click)="activeIndex === steps.length - 1 ? onSubmit() : nextStep()">
+
+                <button pButton
+                    [label]="activeIndex === steps.length - 1 ? ('PROJECT_WIZARD.FINISH' | translate) : ('PROJECT_WIZARD.NEXT' | translate)"
+                    [pTooltip]="activeIndex === steps.length - 1 ? ('PROJECT_WIZARD.FINISH_TOOLTIP' | translate) : ('PROJECT_WIZARD.NEXT_TOOLTIP' | translate)"
+                    [disabled]="!isCurrentStepValid()"
+                    (click)="activeIndex === steps.length - 1 ? onSubmit() : nextStep()">
                 </button>
             </div>
         </div>
     </div>
-</p-dialog> 
+</p-dialog>

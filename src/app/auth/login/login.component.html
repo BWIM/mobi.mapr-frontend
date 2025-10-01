@@ -1,10 +1,12 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+<div
+  class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
   <p-card styleClass="w-full max-w-md">
     <ng-template pTemplate="header">
       <div class="flex justify-center mb-4">
         <img src="assets/images/logo.png" alt="Logo" class="h-20">
       </div>
-      <h2 class="text-2xl font-semibold text-center text-gray-800 dark:text-white py-4">
+      <h2
+        class="text-2xl font-semibold text-center text-gray-800 dark:text-white py-4">
         Anmeldung
       </h2>
     </ng-template>
@@ -12,11 +14,7 @@
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
       <div class="space-y-2">
         <span class="p-float-label w-full">
-          <input 
-            id="username" 
-            type="text" 
-            pInputText 
-            formControlName="username"
+          <input id="username" type="text" pInputText formControlName="username"
             class="w-full"
             [ngClass]="{'ng-invalid ng-dirty': isFieldInvalid('username')}">
           <label for="username">Benutzername</label>
@@ -28,12 +26,8 @@
 
       <div class="space-y-2">
         <span class="p-float-label w-full">
-          <p-password 
-            id="password" 
-            formControlName="password"
-            [feedback]="false"
-            [toggleMask]="true"
-            styleClass="w-full"
+          <p-password id="password" formControlName="password"
+            [feedback]="false" [toggleMask]="true" styleClass="w-full"
             [ngClass]="{'ng-invalid ng-dirty': isFieldInvalid('password')}">
           </p-password>
           <label for="password">Passwort</label>
@@ -43,14 +37,12 @@
         </small>
       </div>
 
-      <p-message severity="error" *ngIf="error" [text]="error" styleClass="w-full"></p-message>
+      <p-message severity="error" *ngIf="error" [text]="error"
+        styleClass="w-full"></p-message>
 
       <div class="pt-2">
-        <p-button 
-          type="submit" 
-          label="{{ 'AUTH.LOGIN.LOGIN' | translate }}"
-          [disabled]="loginForm.invalid || isLoading"
-          [loading]="isLoading"
+        <p-button type="submit" label="{{ 'AUTH.LOGIN.LOGIN' | translate }}"
+          [disabled]="loginForm.invalid || isLoading" [loading]="isLoading"
           styleClass="w-full">
         </p-button>
       </div>
@@ -60,16 +52,11 @@
     <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
       <div class="flex items-center justify-center space-x-2">
         <i class="pi pi-globe text-gray-600 dark:text-gray-400"></i>
-        <p-dropdown
-          [options]="languages"
-          [(ngModel)]="currentLang"
-          optionLabel="name"
-          optionValue="code"
-          placeholder="Sprache wählen"
-          (onChange)="onLanguageChange($event)"
-          styleClass="w-32"
+        <p-select [options]="languages" [(ngModel)]="currentLang"
+          optionLabel="name" optionValue="code" placeholder="Sprache wählen"
+          (onChange)="onLanguageChange($event)" styleClass="w-32"
           [showClear]="false">
-        </p-dropdown>
+        </p-select>
       </div>
     </div>
   </p-card>
