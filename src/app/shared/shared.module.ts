@@ -37,6 +37,7 @@ import { PopoverModule } from 'primeng/popover';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { SliderModule } from 'primeng/slider';
 import { SelectModule } from 'primeng/select';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { InputNumberModule } from 'primeng/inputnumber';
 
 @NgModule({
@@ -78,6 +79,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
     SliderModule,
     ProgressSpinnerModule,
     SelectModule,
+    MultiSelectModule,
     InputNumberModule,
   ],
   exports: [
@@ -118,6 +120,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
     SliderModule,
     ProgressSpinnerModule,
     SelectModule,
+    MultiSelectModule,
     InputNumberModule,
   ],
   providers: [MessageService]

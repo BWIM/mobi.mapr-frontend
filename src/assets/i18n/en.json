@@ -238,7 +238,10 @@
     },
     "START_ACTIVITY": "Start activity",
     "START_ACTIVITY_TOOLTIP": "Only calculates the score for a hexagon that has said activity",
-    "OSM_ACTIVITIES": "OpenStreetMap Activities"
+    "OSM_ACTIVITIES": "OpenStreetMap Activities",
+    "REGIOSTAR": "RegioStar",
+    "REGIOSTAR_TOOLTIP": "Select RegioStar categories",
+    "SELECT_REGIOSTAR": "Select RegioStar"
   },
   "SIDEBAR": {
     "TITLE": "Details",

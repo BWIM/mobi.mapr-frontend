@@ -165,3 +165,9 @@ export interface PublicSharedProjectsResponse {
   previous: string | null;
   results: PublicSharedProject[];
 }
+
+export interface RegioStar {
+  id: number;
+  name: string;
+  regiostar7: number;
+}

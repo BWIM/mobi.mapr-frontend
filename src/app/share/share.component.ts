@@ -120,7 +120,7 @@ export class ShareComponent implements OnInit, OnDestroy {
         // So we'll create a minimal project object for the copyright display
         const minimalProject = {
           id: project.id,
-          display_name: 'Shared Project',
+          display_name: '', // Will be updated when project details are loaded
           created: new Date(), // Use current date as fallback
           calculated: 0,
           areas: 0,
@@ -143,6 +143,15 @@ export class ShareComponent implements OnInit, OnDestroy {
       this.sharedProject = project;
       this.isRightPinned = true;
       this.toggleSidebar();
+
+      // Update the project data with the actual project name
+      if (project && project.project_name && this.project) {
+        const updatedProject = {
+          ...this.project,
+          display_name: project.project_name
+        } as Project;
+        this.mapService.setProjectData(updatedProject);
+      }
     });
 
     this.loadingService.stopLoading();
