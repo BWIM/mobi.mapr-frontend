@@ -827,7 +827,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
   private loadRegioStars() {
     this.regiostarService.getRegioStars().subscribe({
       next: (regiostars: RegioStar[]) => {
-        this.regiostars = regiostars.sort((a, b) => a.name.localeCompare(b.name));
+        this.regiostars = regiostars.sort((a, b) => a.regiostar7 - b.regiostar7);
         // Select all regiostars by default
         this.selectedRegioStars = [...this.regiostars];
         this.projectForm.get('summary.regiostars')?.setValue(this.selectedRegioStars);

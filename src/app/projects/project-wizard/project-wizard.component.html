@@ -418,11 +418,20 @@
                                 }}</label>
                             <p-multiSelect id="regiostars"
                                 [options]="regiostars"
-                                formControlName="regiostars" optionLabel="name"
-                                [showClear]="true" [appendTo]="'body'"
+                                formControlName="regiostars" [showClear]="true"
+                                [appendTo]="'body'"
                                 [pTooltip]="'PROJECT_WIZARD.REGIOSTAR_TOOLTIP' | translate"
                                 placeholder="{{ 'PROJECT_WIZARD.SELECT_REGIOSTAR' | translate }}"
                                 class="w-full">
+                                <ng-template pTemplate="item" let-regiostar>
+                                    {{ regiostar.name }} ({{
+                                    regiostar.regiostar7 }})
+                                </ng-template>
+                                <ng-template pTemplate="selectedItem"
+                                    let-regiostar>
+                                    {{ regiostar.name }} ({{
+                                    regiostar.regiostar7 }})
+                                </ng-template>
                             </p-multiSelect>
                         </div>
                     </div>
