@@ -4,12 +4,12 @@ import { CommonModule } from '@angular/common';
 import { GeocodingService, GeocodingResult } from '../../services/geocoding.service';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { SharedModule } from '../../shared/shared.module';
-import { OverlayPanel } from 'primeng/overlaypanel';
+import { OverlayModule } from 'primeng/overlay';
 
 @Component({
   selector: 'app-search-overlay',
   standalone: true,
-  imports: [FormsModule, CommonModule, SharedModule],
+  imports: [FormsModule, CommonModule, SharedModule, OverlayModule],
   template: `
     <div class="search-overlay">
       <p-button 
@@ -19,7 +19,7 @@ import { OverlayPanel } from 'primeng/overlaypanel';
         [style]="{'width': '40px', 'height': '40px'}"
       ></p-button>
       
-      <p-overlayPanel #op [showCloseIcon]="false" [dismissable]="true" (onHide)="onOverlayHide()">
+      <p-overlay #op [visible]="showOverlay" (onHide)="onOverlayHide()">
         <div class="search-container">
           <div class="search-input-wrapper">
             <span class="p-input-icon-right w-full">
@@ -48,7 +48,7 @@ import { OverlayPanel } from 'primeng/overlaypanel';
             </div>
           </div>
         </div>
-      </p-overlayPanel>
+      </p-overlay>
     </div>
   `,
   styles: [`
@@ -107,12 +107,13 @@ import { OverlayPanel } from 'primeng/overlaypanel';
   `]
 })
 export class SearchOverlayComponent {
-  @ViewChild('op') overlayPanel!: OverlayPanel;
-  @Output() locationSelected = new EventEmitter<{lng: number, lat: number}>();
-  
+  @ViewChild('op') overlayPanel!: any;
+  @Output() locationSelected = new EventEmitter<{ lng: number, lat: number }>();
+
   searchQuery: string = '';
   searchResults: GeocodingResult[] = [];
   showResults: boolean = false;
+  showOverlay: boolean = false;
   isLoading: boolean = false;
   private searchSubject = new Subject<string>();
 
@@ -126,10 +127,11 @@ export class SearchOverlayComponent {
   }
 
   toggleSearch(event: Event) {
-    this.overlayPanel.toggle(event);
+    this.showOverlay = !this.showOverlay;
   }
 
   onOverlayHide() {
+    this.showOverlay = false;
     this.showResults = false;
     this.searchQuery = '';
   }
@@ -161,8 +163,8 @@ export class SearchOverlayComponent {
 
   selectLocation(location: GeocodingResult) {
     this.locationSelected.emit({ lng: location.lng, lat: location.lat });
+    this.showOverlay = false;
     this.showResults = false;
     this.searchQuery = '';
-    this.overlayPanel.hide();
   }
 } 

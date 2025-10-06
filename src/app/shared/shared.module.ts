@@ -23,7 +23,6 @@ import { SplitButtonModule } from 'primeng/splitbutton';
 import { StepsModule } from 'primeng/steps';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ChipModule } from 'primeng/chip';
-import { DropdownModule } from 'primeng/dropdown';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TabsModule } from 'primeng/tabs';
 import { ToggleButtonModule } from 'primeng/togglebutton';
@@ -34,11 +33,9 @@ import { MenuModule } from 'primeng/menu';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { ListboxModule } from 'primeng/listbox';
-import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { PopoverModule } from 'primeng/popover';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { SliderModule } from 'primeng/slider';
-import { InputSwitchModule } from 'primeng/inputswitch';
 import { SelectModule } from 'primeng/select';
 import { InputNumberModule } from 'primeng/inputnumber';
 
@@ -66,7 +63,6 @@ import { InputNumberModule } from 'primeng/inputnumber';
     StepsModule,
     CheckboxModule,
     ChipModule,
-    DropdownModule,
     ConfirmDialogModule,
     TabsModule,
     ToggleButtonModule,
@@ -77,11 +73,9 @@ import { InputNumberModule } from 'primeng/inputnumber';
     RadioButtonModule,
     SelectButtonModule,
     ListboxModule,
-    OverlayPanelModule,
     PopoverModule,
     ToggleSwitchModule,
     SliderModule,
-    InputSwitchModule,
     ProgressSpinnerModule,
     SelectModule,
     InputNumberModule,
@@ -109,7 +103,6 @@ import { InputNumberModule } from 'primeng/inputnumber';
     StepsModule,
     CheckboxModule,
     ChipModule,
-    DropdownModule,
     ConfirmDialogModule,
     TabsModule,
     ToggleButtonModule,
@@ -120,11 +113,9 @@ import { InputNumberModule } from 'primeng/inputnumber';
     RadioButtonModule,
     SelectButtonModule,
     ListboxModule,
-    OverlayPanelModule,
     PopoverModule,
     ToggleSwitchModule,
     SliderModule,
-    InputSwitchModule,
     ProgressSpinnerModule,
     SelectModule,
     InputNumberModule,

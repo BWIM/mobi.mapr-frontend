@@ -75,11 +75,12 @@
                                 <p-dialog [(visible)]="showSubactivitiesPie"
                                     [modal]="true" [draggable]="false"
                                     [resizable]="false" [dismissableMask]="true"
-                                    [style]="{width: '90%', height: '90%'}"
+                                    [style]="{width: '90%', height: '80vh'}"
                                     [header]="hoveredCategoryName"
                                     (onHide)="onCategoryLeave()">
                                     <div class="flex flex-col h-full">
-                                        <div class="flex-1 min-h-0 relative">
+                                        <div class="flex-1 min-h-0 relative"
+                                            style="min-height: 400px;">
                                             <!-- Loading indicator for subactivities chart -->
                                             <div *ngIf="subactivitiesLoading"
                                                 class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75 z-10">

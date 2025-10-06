@@ -7,9 +7,8 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { CardModule } from 'primeng/card';
-import { MessagesModule } from 'primeng/messages';
 import { MessageModule } from 'primeng/message';
-import { DropdownModule } from 'primeng/dropdown';
+import { SelectModule } from 'primeng/select';
 import { finalize } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
@@ -26,9 +25,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     InputTextModule,
     PasswordModule,
     CardModule,
-    MessagesModule,
     MessageModule,
-    DropdownModule,
+    SelectModule,
     TranslateModule
   ]
 })

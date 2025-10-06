@@ -290,14 +290,14 @@ export class CreditsComponent implements OnInit {
   }
 
   startTutorial() {
-    if (this.shareService.getIsShare()) {
-      localStorage.setItem('tutorialStatus', 'false');
-      window.location.reload();
-    } else {
-      this.tutorialService.resetTutorial().subscribe(() => {
-        window.location.reload();
-      });
-    }
+    // if (this.shareService.getIsShare()) {
+    //   localStorage.setItem('tutorialStatus', 'false');
+    //   window.location.reload();
+    // } else {
+    //   this.tutorialService.resetTutorial().subscribe(() => {
+    //     window.location.reload();
+    //   });
+    // }
   }
 
   switchLanguage(lang: string) {

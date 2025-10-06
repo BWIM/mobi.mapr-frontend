@@ -697,12 +697,12 @@
             <div class="field">
                 <label for="projectGroup" class="block mb-2">{{
                     'PROJECTS.FIELDS.GROUP' | translate }}</label>
-                <p-dropdown id="projectGroup" [options]="projectGroups"
+                <p-select id="projectGroup" [options]="projectGroups"
                     [(ngModel)]="projectToEdit.projectgroup" optionLabel="name"
                     [showClear]="true" [appendTo]="'body'"
                     placeholder="{{ 'PROJECTS.FIELDS.SELECT_GROUP' | translate }}"
                     class="w-full">
-                </p-dropdown>
+                </p-select>
             </div>
         </div>
         <ng-template pTemplate="footer">

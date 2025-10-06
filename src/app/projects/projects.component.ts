@@ -311,12 +311,6 @@ export class ProjectsComponent implements OnInit, OnDestroy {
   showResults(project: Project | undefined): void {
     try {
       if (!project) return;
-
-      // Mark tutorial step as completed if this is an interactive step
-      if (this.tutorialService.isCurrentStepInteractive()) {
-        this.tutorialService.markStepCompleted();
-      }
-
       this.loadingService.startLoading();
       this.analyzeService.setCurrentProject(project.id.toString());
 
