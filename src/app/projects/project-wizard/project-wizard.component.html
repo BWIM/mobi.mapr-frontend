@@ -41,12 +41,14 @@
                                 styleClass="custombar1">
                                 <div class="flex flex-col gap-2 p-2">
                                     <div *ngFor="let land of lands"
-                                        class="flex items-center p-3 bg-white rounded-lg shadow hover:bg-gray-50">
+                                        class="flex items-center p-3 bg-white rounded-lg shadow hover:bg-gray-50 cursor-pointer"
+                                        (click)="toggleLandSelection(land, $event)">
                                         <p-checkbox [binary]="true"
                                             [indeterminate]="isLandIndeterminate(land)"
                                             [(ngModel)]="land.checked"
                                             [ngModelOptions]="{standalone: true}"
-                                            (onChange)="selectLand(land)">
+                                            (onChange)="selectLand(land)"
+                                            (click)="$event.stopPropagation()">
                                         </p-checkbox>
                                         <label class="ml-2 cursor-pointer">
                                             {{land.name}}
@@ -407,6 +409,21 @@
                                 [pTooltip]="'PROJECT_WIZARD.START_ACTIVITY_TOOLTIP' | translate"
                                 class="w-full">
                             </p-select>
+                        </div>
+
+                        <!-- RegioStar -->
+                        <div class="field">
+                            <label for="regiostars" class="block mb-2">{{
+                                'PROJECT_WIZARD.REGIOSTAR' | translate
+                                }}</label>
+                            <p-multiSelect id="regiostars"
+                                [options]="regiostars"
+                                formControlName="regiostars" optionLabel="name"
+                                [showClear]="true" [appendTo]="'body'"
+                                [pTooltip]="'PROJECT_WIZARD.REGIOSTAR_TOOLTIP' | translate"
+                                placeholder="{{ 'PROJECT_WIZARD.SELECT_REGIOSTAR' | translate }}"
+                                class="w-full">
+                            </p-multiSelect>
                         </div>
                     </div>
 

@@ -14,9 +14,10 @@ import { Mode, Profile } from '../../services/interfaces/mode.interface';
 import { TranslateService } from '@ngx-translate/core';
 import { ProjectsReloadService } from '../projects-reload.service';
 import { Activity } from '../../services/interfaces/activity.interface';
-import { ProjectGroup } from '../project.interface';
+import { ProjectGroup, RegioStar } from '../project.interface';
 import { AreasService } from '../../services/areas.service';
 import { LandsService } from '../../services/lands.service';
+import { RegioStarService } from '../../services/regiostar.service';
 import { Land } from '../../services/interfaces/land.interface';
 // OpenLayers imports
 import Map from 'ol/Map';
@@ -111,6 +112,10 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
   selectedProfiles: { [key: number]: number } = {};
   profileControls: { [modeId: number]: FormControl } = {};
 
+  // RegioStar properties
+  regiostars: RegioStar[] = [];
+  selectedRegioStars: RegioStar[] = [];
+
   constructor(
     private fb: FormBuilder,
     private projectsService: ProjectsService,
@@ -122,7 +127,8 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     private reloadService: ProjectsReloadService,
     private messageService: MessageService,
     private areasService: AreasService,
-    private landsService: LandsService
+    private landsService: LandsService,
+    private regiostarService: RegioStarService
   ) {
     this.subscription = this.wizardService.visible$.subscribe(
       visible => {
@@ -135,6 +141,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
           this.loadActivities();
           this.loadPersonas();
           this.loadModes();
+          this.loadRegioStars();
         }
       }
     );
@@ -240,6 +247,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
         loadAreasOnMap: [false],
         projectGroup: [null],
         startActivity: [null], // OSM activity selection
+        regiostars: [[]] // RegioStar selection
       })
     });
   }
@@ -266,6 +274,9 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     // Reset mode and profile selections
     this.selectedModeMap = {};
     this.selectedProfiles = {};
+
+    // Reset regiostar selections
+    this.selectedRegioStars = [];
 
     // Wizard zum ersten Schritt zurücksetzen
     this.activeIndex = 0;
@@ -614,6 +625,10 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       // Get selected profiles only
       const selectedProfiles = Object.values(this.selectedProfiles).join(',');
 
+      // Get selected regiostars
+      const selectedRegioStars = this.projectForm.get('summary.regiostars')?.value || [];
+      const regiostarValues = selectedRegioStars.map((rs: RegioStar) => rs.regiostar7).join(',');
+
       const projectData = {
         name: this.projectForm.get('summary.name')?.value,
         description: this.projectForm.get('summary.description')?.value,
@@ -625,7 +640,8 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
         landkreise: this.selectedAreaIds.join(','),
         projectgroup: this.projectForm.get('summary.projectGroup')?.value?.id || null,
         laender: this.hasCompletelySelectedLands,
-        start_activity: this.projectForm.get('summary.startActivity')?.value?.id || null
+        start_activity: this.projectForm.get('summary.startActivity')?.value?.id || null,
+        regiostar: regiostarValues
       };
       this.projectsService.createProject(projectData).subscribe({
         next: (response) => {
@@ -804,6 +820,20 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
       },
       error: (error) => {
         console.error('Fehler beim Laden der Länder:', error);
+      }
+    });
+  }
+
+  private loadRegioStars() {
+    this.regiostarService.getRegioStars().subscribe({
+      next: (regiostars: RegioStar[]) => {
+        this.regiostars = regiostars.sort((a, b) => a.name.localeCompare(b.name));
+        // Select all regiostars by default
+        this.selectedRegioStars = [...this.regiostars];
+        this.projectForm.get('summary.regiostars')?.setValue(this.selectedRegioStars);
+      },
+      error: (error) => {
+        console.error('Fehler beim Laden der RegioStars:', error);
       }
     });
   }
@@ -1004,5 +1034,12 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
 
     this.vectorLayer?.changed();
     this.updateSelectedAreas();
+  }
+
+  toggleLandSelection(land: Land, event: Event) {
+    // Toggle the checkbox state
+    land.checked = !land.checked;
+    // Call the selectLand method to update the map
+    this.selectLand(land);
   }
 } 

@@ -281,6 +281,390 @@ button[style*="background-color: #d0bbdb"] {
     --p-radiobutton-focus-ring-color: var(--accent-color);
 }
 
+/* PrimeNG MultiSelect CSS Custom Properties */
+:root {
+    --p-multiselect-border-color: var(--primary-color);
+    --p-multiselect-hover-border-color: var(--primary-color);
+    --p-multiselect-focus-border-color: var(--primary-color);
+    --p-multiselect-background: var(--surface-color);
+    --p-multiselect-text-color: var(--text-color);
+    --p-multiselect-placeholder-color: #6b7280;
+    --p-multiselect-chip-background: var(--primary-color);
+    --p-multiselect-chip-text-color: #ffffff;
+    --p-multiselect-chip-border-color: var(--primary-color);
+    --p-multiselect-overlay-background: var(--surface-color);
+    --p-multiselect-overlay-border-color: var(--primary-color);
+    --p-multiselect-overlay-shadow: var(--shadow-2);
+    --p-multiselect-option-hover-background: var(--highlight-color);
+    --p-multiselect-option-selected-background: var(--primary-color);
+    --p-multiselect-option-selected-text-color: #ffffff;
+    --p-multiselect-option-text-color: var(--text-color);
+    --p-multiselect-checkbox-border-color: var(--primary-color);
+    --p-multiselect-checkbox-checked-background: var(--primary-color);
+    --p-multiselect-checkbox-checked-border-color: var(--primary-color);
+    --p-multiselect-checkbox-icon-color: #ffffff;
+    --p-multiselect-focus-ring-color: var(--accent-color);
+}
+
+[data-theme="dark"] {
+    --p-multiselect-border-color: var(--primary-color);
+    --p-multiselect-hover-border-color: var(--primary-color);
+    --p-multiselect-focus-border-color: var(--primary-color);
+    --p-multiselect-background: var(--surface-color);
+    --p-multiselect-text-color: var(--text-color);
+    --p-multiselect-placeholder-color: #9ca3af;
+    --p-multiselect-chip-background: var(--primary-color);
+    --p-multiselect-chip-text-color: #ffffff;
+    --p-multiselect-chip-border-color: var(--primary-color);
+    --p-multiselect-overlay-background: var(--surface-color);
+    --p-multiselect-overlay-border-color: var(--primary-color);
+    --p-multiselect-overlay-shadow: var(--shadow-2);
+    --p-multiselect-option-hover-background: var(--highlight-color);
+    --p-multiselect-option-selected-background: var(--primary-color);
+    --p-multiselect-option-selected-text-color: #ffffff;
+    --p-multiselect-option-text-color: var(--text-color);
+    --p-multiselect-checkbox-border-color: var(--primary-color);
+    --p-multiselect-checkbox-checked-background: var(--primary-color);
+    --p-multiselect-checkbox-checked-border-color: var(--primary-color);
+    --p-multiselect-checkbox-icon-color: #ffffff;
+    --p-multiselect-focus-ring-color: var(--accent-color);
+}
+
+/* MultiSelect Styling - Using correct PrimeNG class names */
+.p-multiselect {
+    background: var(--p-multiselect-background) !important;
+    border-color: var(--p-multiselect-border-color) !important;
+    color: var(--p-multiselect-text-color) !important;
+    border-radius: var(--border-radius);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.p-multiselect:hover {
+    border-color: var(--p-multiselect-hover-border-color) !important;
+}
+
+.p-multiselect.p-focus {
+    border-color: var(--p-multiselect-focus-border-color) !important;
+    box-shadow: 0 0 0 2px var(--p-multiselect-focus-ring-color) !important;
+}
+
+.p-multiselect .p-multiselect-label {
+    color: var(--p-multiselect-text-color) !important;
+}
+
+.p-multiselect .p-multiselect-label.p-placeholder {
+    color: var(--p-multiselect-placeholder-color) !important;
+}
+
+/* Chip styling for selected items */
+.p-multiselect .p-multiselect-chip {
+    background: var(--p-multiselect-chip-background) !important;
+    color: var(--p-multiselect-chip-text-color) !important;
+    border-color: var(--p-multiselect-chip-border-color) !important;
+    border-radius: calc(var(--border-radius) / 2);
+}
+
+.p-multiselect .p-multiselect-chip .p-multiselect-chip-icon {
+    color: var(--p-multiselect-chip-text-color) !important;
+}
+
+.p-multiselect .p-multiselect-chip .p-multiselect-chip-icon:hover {
+    color: var(--p-multiselect-chip-text-color) !important;
+}
+
+/* Overlay/Dropdown styling */
+.p-multiselect-overlay {
+    background: var(--p-multiselect-overlay-background) !important;
+    border-color: var(--p-multiselect-overlay-border-color) !important;
+    box-shadow: var(--p-multiselect-overlay-shadow) !important;
+    border-radius: var(--border-radius);
+}
+
+.p-multiselect-overlay .p-multiselect-list {
+    padding: 0.5rem;
+}
+
+.p-multiselect-overlay .p-multiselect-option {
+    color: var(--p-multiselect-option-text-color) !important;
+    border-radius: calc(var(--border-radius) / 2);
+    margin: 0.125rem 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.p-multiselect-overlay .p-multiselect-option:hover {
+    background: var(--p-multiselect-option-hover-background) !important;
+    color: var(--p-multiselect-option-text-color) !important;
+}
+
+.p-multiselect-overlay .p-multiselect-option.p-highlight {
+    background: var(--p-multiselect-option-selected-background) !important;
+    color: var(--p-multiselect-option-selected-text-color) !important;
+}
+
+.p-multiselect-overlay .p-multiselect-option .p-checkbox {
+    margin-right: 0.5rem;
+}
+
+.p-multiselect-overlay .p-multiselect-option .p-checkbox .p-checkbox-box {
+    border-color: var(--p-multiselect-checkbox-border-color) !important;
+    background: transparent;
+    border-radius: calc(var(--border-radius) / 4);
+}
+
+.p-multiselect-overlay .p-multiselect-option .p-checkbox .p-checkbox-box.p-highlight {
+    background: var(--p-multiselect-checkbox-checked-background) !important;
+    border-color: var(--p-multiselect-checkbox-checked-border-color) !important;
+}
+
+.p-multiselect-overlay .p-multiselect-option .p-checkbox .p-checkbox-box .p-checkbox-icon {
+    color: var(--p-multiselect-checkbox-icon-color) !important;
+}
+
+.p-multiselect-overlay .p-multiselect-filter-container {
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--p-multiselect-overlay-border-color);
+}
+
+.p-multiselect-overlay .p-multiselect-filter-container .p-inputtext {
+    background: var(--p-multiselect-overlay-background) !important;
+    border-color: var(--p-multiselect-overlay-border-color) !important;
+    color: var(--p-multiselect-text-color) !important;
+    border-radius: calc(var(--border-radius) / 2);
+}
+
+.p-multiselect-overlay .p-multiselect-filter-container .p-inputtext:focus {
+    border-color: var(--p-multiselect-focus-border-color) !important;
+    box-shadow: 0 0 0 2px var(--p-multiselect-focus-ring-color) !important;
+}
+
+/* Additional MultiSelect styling for better coverage */
+.p-multiselect .p-multiselect-chip-item {
+    background: var(--p-multiselect-chip-background) !important;
+    color: var(--p-multiselect-chip-text-color) !important;
+    border-color: var(--p-multiselect-chip-border-color) !important;
+    border-radius: calc(var(--border-radius) / 2);
+}
+
+.p-multiselect .p-multiselect-chip-item .p-multiselect-chip-icon {
+    color: var(--p-multiselect-chip-text-color) !important;
+}
+
+.p-multiselect .p-multiselect-chip-item .p-multiselect-chip-icon:hover {
+    color: var(--p-multiselect-chip-text-color) !important;
+}
+
+/* Ensure dropdown icon uses correct colors */
+.p-multiselect .p-multiselect-dropdown-icon {
+    color: var(--p-multiselect-text-color) !important;
+}
+
+.p-multiselect .p-multiselect-dropdown-icon:hover {
+    color: var(--p-multiselect-text-color) !important;
+}
+
+/* Clear icon styling */
+.p-multiselect .p-autocomplete-clear-icon {
+    color: var(--p-multiselect-text-color) !important;
+}
+
+.p-multiselect .p-autocomplete-clear-icon:hover {
+    color: var(--p-multiselect-text-color) !important;
+}
+
+/* PrimeNG Select CSS Custom Properties */
+:root {
+    --p-select-border-color: var(--primary-color);
+    --p-select-hover-border-color: var(--primary-color);
+    --p-select-focus-border-color: var(--primary-color);
+    --p-select-background: var(--surface-color);
+    --p-select-text-color: var(--text-color);
+    --p-select-placeholder-color: #6b7280;
+    --p-select-dropdown-background: var(--surface-color);
+    --p-select-dropdown-border-color: var(--primary-color);
+    --p-select-dropdown-shadow: var(--shadow-2);
+    --p-select-option-hover-background: var(--highlight-color);
+    --p-select-option-selected-background: var(--primary-color);
+    --p-select-option-selected-text-color: #ffffff;
+    --p-select-option-text-color: var(--text-color);
+    --p-select-focus-ring-color: var(--accent-color);
+}
+
+[data-theme="dark"] {
+    --p-select-border-color: var(--primary-color);
+    --p-select-hover-border-color: var(--primary-color);
+    --p-select-focus-border-color: var(--primary-color);
+    --p-select-background: var(--surface-color);
+    --p-select-text-color: var(--text-color);
+    --p-select-placeholder-color: #9ca3af;
+    --p-select-dropdown-background: var(--surface-color);
+    --p-select-dropdown-border-color: var(--primary-color);
+    --p-select-dropdown-shadow: var(--shadow-2);
+    --p-select-option-hover-background: var(--highlight-color);
+    --p-select-option-selected-background: var(--primary-color);
+    --p-select-option-selected-text-color: #ffffff;
+    --p-select-option-text-color: var(--text-color);
+    --p-select-focus-ring-color: var(--accent-color);
+}
+
+/* Select Styling */
+.p-select {
+    background: var(--p-select-background) !important;
+    border-color: var(--p-select-border-color) !important;
+    color: var(--p-select-text-color) !important;
+    border-radius: var(--border-radius);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.p-select:hover {
+    border-color: var(--p-select-hover-border-color) !important;
+}
+
+.p-select.p-focus {
+    border-color: var(--p-select-focus-border-color) !important;
+    box-shadow: 0 0 0 2px var(--p-select-focus-ring-color) !important;
+}
+
+.p-select .p-select-label {
+    color: var(--p-select-text-color) !important;
+}
+
+.p-select .p-select-label.p-placeholder {
+    color: var(--p-select-placeholder-color) !important;
+}
+
+.p-select .p-select-dropdown-icon {
+    color: var(--p-select-text-color) !important;
+}
+
+.p-select .p-select-dropdown-icon:hover {
+    color: var(--p-select-text-color) !important;
+}
+
+.p-select-overlay {
+    background: var(--p-select-dropdown-background) !important;
+    border-color: var(--p-select-dropdown-border-color) !important;
+    box-shadow: var(--p-select-dropdown-shadow) !important;
+    border-radius: var(--border-radius);
+}
+
+.p-select-overlay .p-select-option {
+    color: var(--p-select-option-text-color) !important;
+    border-radius: calc(var(--border-radius) / 2);
+    margin: 0.125rem 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.p-select-overlay .p-select-option:hover {
+    background: var(--p-select-option-hover-background) !important;
+    color: var(--p-select-option-text-color) !important;
+}
+
+.p-select-overlay .p-select-option.p-highlight {
+    background: var(--p-select-option-selected-background) !important;
+    color: var(--p-select-option-selected-text-color) !important;
+}
+
+/* PrimeNG InputText CSS Custom Properties */
+:root {
+    --p-inputtext-border-color: var(--primary-color);
+    --p-inputtext-hover-border-color: var(--primary-color);
+    --p-inputtext-focus-border-color: var(--primary-color);
+    --p-inputtext-background: var(--surface-color);
+    --p-inputtext-text-color: var(--text-color);
+    --p-inputtext-placeholder-color: #6b7280;
+    --p-inputtext-focus-ring-color: var(--accent-color);
+}
+
+[data-theme="dark"] {
+    --p-inputtext-border-color: var(--primary-color);
+    --p-inputtext-hover-border-color: var(--primary-color);
+    --p-inputtext-focus-border-color: var(--primary-color);
+    --p-inputtext-background: var(--surface-color);
+    --p-inputtext-text-color: var(--text-color);
+    --p-inputtext-placeholder-color: #9ca3af;
+    --p-inputtext-focus-ring-color: var(--accent-color);
+}
+
+/* InputText Styling */
+.p-inputtext {
+    background: var(--p-inputtext-background) !important;
+    border-color: var(--p-inputtext-border-color) !important;
+    color: var(--p-inputtext-text-color) !important;
+    border-radius: var(--border-radius);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.p-inputtext:hover {
+    border-color: var(--p-inputtext-hover-border-color) !important;
+}
+
+.p-inputtext:focus {
+    border-color: var(--p-inputtext-focus-border-color) !important;
+    box-shadow: 0 0 0 2px var(--p-inputtext-focus-ring-color) !important;
+}
+
+.p-inputtext::placeholder {
+    color: var(--p-inputtext-placeholder-color) !important;
+}
+
+/* Password Styling */
+.p-password {
+    background: var(--p-inputtext-background) !important;
+    border-color: var(--p-inputtext-border-color) !important;
+    color: var(--p-inputtext-text-color) !important;
+    border-radius: var(--border-radius);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.p-password:hover {
+    border-color: var(--p-inputtext-hover-border-color) !important;
+}
+
+.p-password.p-focus {
+    border-color: var(--p-inputtext-focus-border-color) !important;
+    box-shadow: 0 0 0 2px var(--p-inputtext-focus-ring-color) !important;
+}
+
+.p-password .p-password-input {
+    background: transparent !important;
+    border: none !important;
+    color: var(--p-inputtext-text-color) !important;
+}
+
+.p-password .p-password-input::placeholder {
+    color: var(--p-inputtext-placeholder-color) !important;
+}
+
+.p-password .p-password-toggle-icon {
+    color: var(--p-inputtext-text-color) !important;
+}
+
+.p-password .p-password-toggle-icon:hover {
+    color: var(--p-inputtext-text-color) !important;
+}
+
+/* Textarea Styling */
+.p-inputtextarea {
+    background: var(--p-inputtext-background) !important;
+    border-color: var(--p-inputtext-border-color) !important;
+    color: var(--p-inputtext-text-color) !important;
+    border-radius: var(--border-radius);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.p-inputtextarea:hover {
+    border-color: var(--p-inputtext-hover-border-color) !important;
+}
+
+.p-inputtextarea:focus {
+    border-color: var(--p-inputtext-focus-border-color) !important;
+    box-shadow: 0 0 0 2px var(--p-inputtext-focus-ring-color) !important;
+}
+
+.p-inputtextarea::placeholder {
+    color: var(--p-inputtext-placeholder-color) !important;
+}
+
 /* Menubar-Styling */
 .p-menubar {
     background: var(--surface-color);
@@ -371,6 +755,35 @@ button[style*="background-color: #d0bbdb"] {
         padding: 0.75rem;
     }
 
+    /* Mobile MultiSelect optimizations */
+    .p-multiselect {
+        min-height: 2.5rem;
+        font-size: 16px;
+        /* Prevent zoom on iOS */
+    }
+
+    .p-multiselect .p-multiselect-chip {
+        min-height: 1.5rem;
+        padding: 0.25rem 0.5rem;
+        margin: 0.125rem;
+    }
+
+    .p-multiselect-overlay {
+        max-height: 50vh;
+        z-index: 1000;
+    }
+
+    .p-multiselect-overlay .p-multiselect-option {
+        min-height: 2.5rem;
+        padding: 0.75rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .p-multiselect-overlay .p-multiselect-option .p-checkbox {
+        margin-right: 0.75rem;
+    }
+
     .p-button,
     button,
     .clickable-tab,
@@ -424,6 +837,23 @@ button[style*="background-color: #d0bbdb"] {
         min-height: 2.5rem;
         display: inline-flex;
         align-items: center;
+    }
+
+    /* Touch-friendly MultiSelect improvements */
+    .p-multiselect {
+        min-height: 2.5rem;
+        touch-action: manipulation;
+    }
+
+    .p-multiselect .p-multiselect-chip {
+        min-height: 2rem;
+        padding: 0.5rem;
+        margin: 0.25rem;
+    }
+
+    .p-multiselect-overlay .p-multiselect-option {
+        min-height: 3rem;
+        padding: 1rem;
     }
 }
 

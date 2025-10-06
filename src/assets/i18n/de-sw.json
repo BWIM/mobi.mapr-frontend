@@ -235,7 +235,10 @@
       "PROJECT_INFO": "Projäkkdinformatione"
     },
     "START_ACTIVITY": "Start Aktivität",
-    "START_ACTIVITY_TOOLTIP": "Wilscht du ä bsondere Start filter sätze?"
+    "START_ACTIVITY_TOOLTIP": "Wilscht du ä bsondere Start filter sätze?",
+    "REGIOSTAR": "RegioStar",
+    "REGIOSTAR_TOOLTIP": "RegioStar-Kategorie uswähle",
+    "SELECT_REGIOSTAR": "RegioStar uswähle"
   },
   "SIDEBAR": {
     "TITLE": "Details",

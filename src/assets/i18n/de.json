@@ -239,7 +239,10 @@
     },
     "START_ACTIVITY": "Start Aktivität",
     "START_ACTIVITY_TOOLTIP": "Berechnet den score nur für Hexagone, in denen ein Ort dieser Aktivität ist",
-    "OSM_ACTIVITIES": "Openstreetmap Aktivitäten"
+    "OSM_ACTIVITIES": "Openstreetmap Aktivitäten",
+    "REGIOSTAR": "RegioStar",
+    "REGIOSTAR_TOOLTIP": "RegioStar-Kategorien auswählen",
+    "SELECT_REGIOSTAR": "RegioStar auswählen"
   },
   "SIDEBAR": {
     "TITLE": "Details",
