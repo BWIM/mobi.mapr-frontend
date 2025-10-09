@@ -75,11 +75,12 @@
                                 <p-dialog [(visible)]="showSubactivitiesPie"
                                     [modal]="true" [draggable]="false"
                                     [resizable]="false" [dismissableMask]="true"
-                                    [style]="{width: '90%', height: '80vh'}"
+                                    [style]="{width: '90%', height: '100%'}"
                                     [header]="hoveredCategoryName"
-                                    (onHide)="onCategoryLeave()">
+                                    (onHide)="onCategoryLeave()"
+                                    styleClass="analyze-subdialog">
                                     <div class="flex flex-col h-full">
-                                        <div class="flex-1 min-h-0 relative"
+                                        <div class="flex-1 min-h-0 relative h-full"
                                             style="min-height: 400px;">
                                             <!-- Loading indicator for subactivities chart -->
                                             <div *ngIf="subactivitiesLoading"
@@ -128,7 +129,8 @@
                                         [dismissableMask]="true"
                                         [style]="{width: '90%', height: '90%'}"
                                         [header]="hoveredSubactivityName"
-                                        (onHide)="onSubactivityLeave()">
+                                        (onHide)="onSubactivityLeave()"
+                                        styleClass="analyze-map-dialog">
                                         <div class="relative h-full w-full">
                                             <div id="places-map"
                                                 class="h-full w-full rounded-lg">
