@@ -1,0 +1,53 @@
+/* Main analyze dialog styles */
+.analyze-dialog .p-dialog-content {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.analyze-dialog .p-scrollpanel {
+    height: 100% !important;
+}
+
+.analyze-dialog .p-scrollpanel .p-scrollpanel-content {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Subactivities dialog styles */
+.analyze-subdialog .p-dialog-content {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.analyze-subdialog .p-dialog-content>div {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Map dialog styles */
+.analyze-map-dialog .p-dialog-content {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.analyze-map-dialog .p-dialog-content>div {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Ensure chart containers take full height */
+.p-chart {
+    height: 100% !important;
+}
+
+/* Ensure map container takes full height */
+#places-map {
+    height: 100% !important;
+    min-height: 400px;
+}
