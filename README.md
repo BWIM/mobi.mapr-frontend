@@ -1,59 +1,20 @@
-# MobiMapr
+# mobi.mapr Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.1.7.
+This is the frontend of the mobility analysation tool *mobi.mapr* by BWIM.
 
-## Development server
+It is hosted on the site https://mapr.mobi as main system, as well as on https://stage.mapr.mobi as staging systems.
+Commits on the Main branch are automatically build and pushed to the :latest tag. Every other tag results in an image with the tag :stage-latest.
 
-To start a local development server, run:
+## Contribute
+I am happy about any pull request or issue, that you run into. Please be aware, that this project is solely maintained by @pfennig42.
 
-```bash
-ng serve
-```
+## Selfhost
+The backend is currently proprietary. A publication of it is planned. There is a semi API-Documentation of it. You can host a docker image yourself and just use the API of the backend.
+Please be aware, that every part of the back and frontend can have breaking changes.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Documentation
+This project is currently not very well documented. Neither the API of the backend, nor the code itself. I am glad, if you help improving it. A wiki is planned.
+For generel topics, please advise the main site of the mobi.mapr: bw-im.de/mobimapr.
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Funding
+This project is fully developed by the Baden-Württemberg Institut für nachhaltige Mobilität (BWIM).

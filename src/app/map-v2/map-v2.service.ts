@@ -418,6 +418,8 @@ export class MapV2Service {
         tileSize: 512 // Use smaller tiles on mobile for better performance
       } as SourceSpecification;
 
+      // print the geodata
+
       baseStyle.layers.push({
         id: 'geodata-fill',
         type: 'fill',
