@@ -185,7 +185,12 @@ export class MapV2Service {
       sources: {
         'carto-light': {
           type: 'raster',
-          tiles: ['https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'],
+          tiles: ['https://basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png'],
+          tileSize: 256,
+        } as SourceSpecification,
+        'carto-labels': {
+          type: 'raster',
+          tiles: ['https://basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png'],
           tileSize: 256,
         } as SourceSpecification,
         'temporary-geojson': {
@@ -255,6 +260,13 @@ export class MapV2Service {
           layout: {
             visibility: 'visible'
           }
+        } as LayerSpecification,
+        {
+          id: 'carto-labels-layer',
+          type: 'raster',
+          source: 'carto-labels',
+          minzoom: 0,
+          maxzoom: 19
         } as LayerSpecification
       ],
       glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf'
@@ -519,6 +531,21 @@ export class MapV2Service {
           }
         } as LayerSpecification);
       }
+
+      // Remove existing labels layer if it exists, then add it on top of everything
+      const existingLabelsIndex = baseStyle.layers.findIndex(layer => layer.id === 'carto-labels-layer');
+      if (existingLabelsIndex !== -1) {
+        baseStyle.layers.splice(existingLabelsIndex, 1);
+      }
+
+      // Add labels layer on top of everything
+      baseStyle.layers.push({
+        id: 'carto-labels-layer',
+        type: 'raster',
+        source: 'carto-labels',
+        minzoom: 0,
+        maxzoom: 19
+      } as LayerSpecification);
     }
 
     return baseStyle;
