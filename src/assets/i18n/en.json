@@ -241,7 +241,10 @@
     "OSM_ACTIVITIES": "OpenStreetMap Activities",
     "REGIOSTAR": "RegioStar",
     "REGIOSTAR_TOOLTIP": "Select RegioStar categories",
-    "SELECT_REGIOSTAR": "Select RegioStar"
+    "SELECT_REGIOSTAR": "Select RegioStar",
+    "PERSONA_GROUP": "Persona Group",
+    "PERSONA_GROUP_TOOLTIP": "Select persona group to filter personas",
+    "SELECT_PERSONA_GROUP": "Select Persona Group"
   },
   "SIDEBAR": {
     "TITLE": "Details",

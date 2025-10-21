@@ -238,7 +238,10 @@
     "START_ACTIVITY_TOOLTIP": "Wilsch du n bsondere Filter setze?",
     "REGIOSTAR": "RegioStar",
     "REGIOSTAR_TOOLTIP": "RegioStar-Kategorie uswähle",
-    "SELECT_REGIOSTAR": "RegioStar uswähle"
+    "SELECT_REGIOSTAR": "RegioStar uswähle",
+    "PERSONA_GROUP": "Persona-Gruppe",
+    "PERSONA_GROUP_TOOLTIP": "Persona-Gruppe uswähle, um Personas z filtere",
+    "SELECT_PERSONA_GROUP": "Persona-Gruppe uswähle"
   },
   "SIDEBAR": {
     "TITLE": "Details",
