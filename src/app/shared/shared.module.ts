@@ -39,6 +39,7 @@ import { SliderModule } from 'primeng/slider';
 import { SelectModule } from 'primeng/select';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { AccordionModule } from 'primeng/accordion';
 
 @NgModule({
   imports: [
@@ -81,6 +82,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
     SelectModule,
     MultiSelectModule,
     InputNumberModule,
+    AccordionModule,
   ],
   exports: [
     CommonModule,
@@ -122,6 +124,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
     SelectModule,
     MultiSelectModule,
     InputNumberModule,
+    AccordionModule,
   ],
   providers: [MessageService]
 })

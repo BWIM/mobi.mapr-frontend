@@ -44,16 +44,23 @@
                             <!-- Grouped Projects -->
                             <div *ngFor="let group of getProjectGroupsForTab(0)"
                                 class="space-y-2">
-                                <div class="flex items-center gap-2 mb-2">
+                                <div class="flex items-center gap-2 mb-2 cursor-pointer hover:bg-gray-50 p-2 rounded-lg"
+                                    (click)="toggleGroupCollapse(group.id)">
+                                    <i class="pi"
+                                        [ngClass]="isGroupCollapsed(group.id) ? 'pi-chevron-right' : 'pi-chevron-down'">
+                                    </i>
                                     <h4
-                                        class="text-sm font-medium text-gray-700">
-                                        {{ group.name }}</h4>
-                                    <span class="text-xs text-gray-500">({{
+                                        class="text-sm font-medium text-gray-700 flex-1">
+                                        {{ group.name }}
+                                    </h4>
+                                    <span class="text-xs text-gray-500">
+                                        ({{
                                         (getGroupedProjectsForTab(0)[group.id]
-                                        || []).length
-                                        }})</span>
+                                        || []).length }})
+                                    </span>
                                 </div>
-                                <div class="space-y-2 ml-4">
+                                <div *ngIf="!isGroupCollapsed(group.id)"
+                                    class="space-y-2 ml-6">
                                     <div *ngFor="let project of (getGroupedProjectsForTab(0)[group.id] || [])"
                                         class="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
                                         [ngClass]="{'selected-row': selectedTableProject?.id === project.id}"
@@ -242,16 +249,23 @@
                             <!-- Grouped Projects -->
                             <div *ngFor="let group of getProjectGroupsForTab(1)"
                                 class="space-y-2">
-                                <div class="flex items-center gap-2 mb-2">
+                                <div class="flex items-center gap-2 mb-2 cursor-pointer hover:bg-gray-50 p-2 rounded-lg"
+                                    (click)="toggleGroupCollapse(group.id)">
+                                    <i class="pi"
+                                        [ngClass]="isGroupCollapsed(group.id) ? 'pi-chevron-right' : 'pi-chevron-down'">
+                                    </i>
                                     <h4
-                                        class="text-sm font-medium text-gray-700">
-                                        {{ group.name }}</h4>
-                                    <span class="text-xs text-gray-500">({{
+                                        class="text-sm font-medium text-gray-700 flex-1">
+                                        {{ group.name }}
+                                    </h4>
+                                    <span class="text-xs text-gray-500">
+                                        ({{
                                         (getGroupedProjectsForTab(1)[group.id]
-                                        || []).length
-                                        }})</span>
+                                        || []).length }})
+                                    </span>
                                 </div>
-                                <div class="space-y-2 ml-4">
+                                <div *ngIf="!isGroupCollapsed(group.id)"
+                                    class="space-y-2 ml-6">
                                     <div *ngFor="let project of (getGroupedProjectsForTab(1)[group.id] || [])"
                                         class="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
                                         [ngClass]="{'selected-row': selectedTableProject?.id === project.id}"
@@ -429,16 +443,23 @@
                             <!-- Grouped Projects -->
                             <div *ngFor="let group of getProjectGroupsForTab(2)"
                                 class="space-y-2">
-                                <div class="flex items-center gap-2 mb-2">
+                                <div class="flex items-center gap-2 mb-2 cursor-pointer hover:bg-gray-50 p-2 rounded-lg"
+                                    (click)="toggleGroupCollapse(group.id)">
+                                    <i class="pi"
+                                        [ngClass]="isGroupCollapsed(group.id) ? 'pi-chevron-right' : 'pi-chevron-down'">
+                                    </i>
                                     <h4
-                                        class="text-sm font-medium text-gray-700">
-                                        {{ group.name }}</h4>
-                                    <span class="text-xs text-gray-500">({{
+                                        class="text-sm font-medium text-gray-700 flex-1">
+                                        {{ group.name }}
+                                    </h4>
+                                    <span class="text-xs text-gray-500">
+                                        ({{
                                         (getGroupedProjectsForTab(2)[group.id]
-                                        || []).length
-                                        }})</span>
+                                        || []).length }})
+                                    </span>
                                 </div>
-                                <div class="space-y-2 ml-4">
+                                <div *ngIf="!isGroupCollapsed(group.id)"
+                                    class="space-y-2 ml-6">
                                     <div *ngFor="let project of (getGroupedProjectsForTab(2)[group.id] || [])"
                                         class="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
                                         [ngClass]="{'selected-row': selectedTableProject?.id === project.id}"

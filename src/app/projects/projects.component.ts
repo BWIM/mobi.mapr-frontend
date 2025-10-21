@@ -100,6 +100,9 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     }
   ];
 
+  // Collapse/expand state for project groups
+  collapsedGroups: Set<string> = new Set();
+
   private menuItemsCache: Map<number, MenuItem[]> = new Map();
 
   get groupName(): string {
@@ -190,6 +193,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.projectGroups = response.results;
+          this.initializeGroupStates(); // Initialize all groups as collapsed
           this.updateUnusedGroups();
           this.loadAllTabProjects();
         },
@@ -705,5 +709,25 @@ export class ProjectsComponent implements OnInit, OnDestroy {
           });
         }
       });
+  }
+
+  // Group collapse/expand methods
+  isGroupCollapsed(groupId: string): boolean {
+    return this.collapsedGroups.has(groupId);
+  }
+
+  toggleGroupCollapse(groupId: string): void {
+    if (this.collapsedGroups.has(groupId)) {
+      this.collapsedGroups.delete(groupId);
+    } else {
+      this.collapsedGroups.add(groupId);
+    }
+  }
+
+  // Initialize all groups as collapsed by default
+  private initializeGroupStates(): void {
+    this.projectGroups.forEach(group => {
+      this.collapsedGroups.add(group.id);
+    });
   }
 }
