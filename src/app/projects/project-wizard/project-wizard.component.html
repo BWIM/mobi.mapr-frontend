@@ -184,6 +184,22 @@
                         </h3>
                     </div>
 
+                    <!-- Persona Group Selection -->
+                    <div class="mb-4" *ngIf="personaGroups.length > 1">
+                        <label for="personaGroup" class="block mb-2">
+                            {{ 'PROJECT_WIZARD.PERSONA_GROUP' | translate }}
+                        </label>
+                        <p-select id="personaGroup" [options]="personaGroups"
+                            [(ngModel)]="selectedPersonaGroup"
+                            [ngModelOptions]="{standalone: true}"
+                            (onChange)="onPersonaGroupChange()"
+                            [appendTo]="'body'"
+                            [pTooltip]="'PROJECT_WIZARD.PERSONA_GROUP_TOOLTIP' | translate"
+                            placeholder="{{ 'PROJECT_WIZARD.SELECT_PERSONA_GROUP' | translate }}"
+                            class="w-full">
+                        </p-select>
+                    </div>
+
                     <!-- Full width personas panel -->
                     <div class="personas-panel">
                         <p-panel

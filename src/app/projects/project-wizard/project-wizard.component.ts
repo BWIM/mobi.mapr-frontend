@@ -83,6 +83,8 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
   visible: boolean = false;
   groupedActivities: GroupedActivities[] = [];
   personas: Persona[] = [];
+  personaGroups: string[] = [];
+  selectedPersonaGroup: string = 'mid';
   modes: Mode[] = [];
   selectedModeMap: { [key: number]: boolean } = {};
   projectGroups: ProjectGroup[] = [];
@@ -352,18 +354,36 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
   }
 
   private loadPersonas() {
-    this.personasService.getPersonas().subscribe({
-      next: (personas) => {
-        this.personas = personas.results.sort((a, b) =>
-          (a.display_name || a.name).localeCompare(b.display_name || b.name)
-        );
-        // Alle Personas automatisch auswählen
-        this.projectForm.get('personas.selectedPersonas')?.setValue(this.personas);
+    // Load all personas once and work with them internally
+    this.personasService.getAllPersonas().subscribe({
+      next: (allPersonas) => {
+        // Extract unique persona groups
+        this.personaGroups = [...new Set(allPersonas
+          .map(persona => persona.persona_group)
+          .filter(group => group !== undefined && group !== null)
+        )].sort();
+
+        // Load personas for the default group (mid)
+        this.loadPersonasByGroup(this.selectedPersonaGroup);
       },
       error: (error) => {
         console.error('Fehler beim Laden der Personas:', error);
       }
     });
+  }
+
+  private loadPersonasByGroup(group: string) {
+    // Filter personas internally from the already loaded data
+    this.personas = this.personasService.getCachedPersonas()
+      .filter(persona => persona.persona_group === group)
+      .sort((a, b) => (a.display_name || a.name).localeCompare(b.display_name || b.name));
+
+    // Alle Personas automatisch auswählen
+    this.projectForm.get('personas.selectedPersonas')?.setValue(this.personas);
+  }
+
+  onPersonaGroupChange() {
+    this.loadPersonasByGroup(this.selectedPersonaGroup);
   }
 
   private loadModes() {

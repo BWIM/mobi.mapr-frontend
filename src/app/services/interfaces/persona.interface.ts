@@ -4,4 +4,5 @@ export interface Persona {
     display_name?: string;
     description?: string;
     abbreviation?: string;
+    persona_group?: string;
 } 
