@@ -301,7 +301,7 @@ export class MapV2Service {
       authParam = `&token=${token}`;
     }
 
-    this.http.get<Bounds>(`${environment.apiUrl}/bounds/?project=${projectId}${authParam}`).subscribe(
+    this.http.get<Bounds>(`${environment.apiUrl}/bounds?project=${projectId}${authParam}`).subscribe(
       bounds => {
         this.boundsSubject.next(bounds);
         const updatedStyle = this.getProjectMapStyle(projectId);
