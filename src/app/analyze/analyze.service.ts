@@ -85,41 +85,41 @@ export class AnalyzeService {
 
     if (this.shareService.getIsShare()) {
       const shareKey = this.shareService.getShareKey();
-      const url = `${environment.apiUrl}/share-place?activity=${activityId}&type=${type}&feature=${featureId}&project=${this.currentProjectId}&key=${shareKey}`;
+      const url = `${environment.apiUrl}/share-place/?activity=${activityId}&type=${type}&feature=${featureId}&project=${this.currentProjectId}&key=${shareKey}`;
       return this.http.get<Place[]>(url);
     } else {
-      const url = `${environment.apiUrl}/places/details?activity=${activityId}&type=${type}&feature=${featureId}&project=${this.currentProjectId}`;
+      const url = `${environment.apiUrl}/places/details/?activity=${activityId}&type=${type}&feature=${featureId}&project=${this.currentProjectId}`;
       return this.http.get<Place[]>(url);
     }
   }
 
   getShape(featureId: string, type: string) {
-    const url = `${environment.apiUrl}/shapes?feature=${featureId}&type=${type}`;
+    const url = `${environment.apiUrl}/shapes/?feature=${featureId}&type=${type}`;
     return this.http.get<any>(url);
   }
 
   getProfiles() {
-    const url = `${environment.apiUrl}/analyze/profiles?featureId=${this.featureId}&mapType=${this.currentMapType}&project=${this.currentProjectId}`;
+    const url = `${environment.apiUrl}/analyze/profiles/?featureId=${this.featureId}&mapType=${this.currentMapType}&project=${this.currentProjectId}`;
     return this.http.get<Profile[]>(url);
   }
 
   getPersonas() {
-    const url = `${environment.apiUrl}/analyze/personas?featureId=${this.featureId}&mapType=${this.currentMapType}&project=${this.currentProjectId}`;
+    const url = `${environment.apiUrl}/analyze/personas/?featureId=${this.featureId}&mapType=${this.currentMapType}&project=${this.currentProjectId}`;
     return this.http.get<Persona[]>(url);
   }
 
   getCategories() {
-    const url = `${environment.apiUrl}/analyze/categories?featureId=${this.featureId}&mapType=${this.currentMapType}&project=${this.currentProjectId}`;
+    const url = `${environment.apiUrl}/analyze/categories/?featureId=${this.featureId}&mapType=${this.currentMapType}&project=${this.currentProjectId}`;
     return this.http.get<Category[]>(url);
   }
 
   getActivities(categoryId: number) {
-    const url = `${environment.apiUrl}/analyze/activities?featureId=${this.featureId}&mapType=${this.currentMapType}&project=${this.currentProjectId}&categoryId=${categoryId}`;
+    const url = `${environment.apiUrl}/analyze/activities/?featureId=${this.featureId}&mapType=${this.currentMapType}&project=${this.currentProjectId}&categoryId=${categoryId}`;
     return this.http.get<Activity[]>(url);
   }
 
   getCategoriesSimple() {
-    const url = `${environment.apiUrl}/public-simple/categories`;
+    const url = `${environment.apiUrl}/public-simple/categories/`;
     return this.http.get<DisplayNameItem[]>(url);
   }
 

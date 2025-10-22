@@ -125,7 +125,7 @@ export class ProjectsService {
   }
 
   getProjectInfo(projectId: number): Observable<ProjectInfo> {
-    return this.http.get<ProjectInfo>(`${this.apiUrl}/projects/${projectId}/info`);
+    return this.http.get<ProjectInfo>(`${this.apiUrl}/projects/${projectId}/info/`);
   }
 
   updateCurrentProjectInfo(info: ProjectInfo | null): void {
@@ -137,7 +137,7 @@ export class ProjectsService {
     if (!currentProject) {
       throw new Error('Kein Projekt ausgewählt');
     }
-    return this.http.get<ExportProject>(`${this.apiUrl}/projects/${currentProject.id}/export-info`);
+    return this.http.get<ExportProject>(`${this.apiUrl}/projects/${currentProject.id}/export-info/`);
   }
 
   compareProjects(projectId: number): Observable<any> {
