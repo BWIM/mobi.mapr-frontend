@@ -25,7 +25,7 @@ export class HealthCheckService {
     constructor(private http: HttpClient) { }
 
     checkHealth(): Observable<HealthCheckResponse> {
-        return this.http.get<HealthCheckResponse>(`${this.apiUrl}/health/`);
+        return this.http.get<HealthCheckResponse>(`${this.apiUrl}/health`);
     }
 
     isHealthy(): Observable<boolean> {
@@ -47,7 +47,7 @@ export class HealthCheckService {
         this.healthCheckInProgress = true;
         this.lastHealthCheck = now;
 
-        return this.http.get(`${this.apiUrl}/health/`, { observe: 'response' }).pipe(
+        return this.http.get(`${this.apiUrl}/health`, { observe: 'response' }).pipe(
             map(response => response.status === 200),
             tap(isHealthy => {
                 this.cachedHealthStatus = isHealthy;
