@@ -28,11 +28,11 @@ export class RateLimitService {
     constructor(private http: HttpClient) { }
 
     getRateLimitInfo(): Observable<RateLimitInfo> {
-        return this.http.get<RateLimitInfo>(`${this.apiUrl}/api/concurrent-users/`);
+        return this.http.get<RateLimitInfo>(`${this.apiUrl}/api/concurrent-users`);
     }
 
     checkRateLimitStatus(): Observable<RateLimitCheckResponse> {
-        return this.http.get<RateLimitInfo>(`${this.apiUrl}/api/concurrent-users/`).pipe(
+        return this.http.get<RateLimitInfo>(`${this.apiUrl}/api/concurrent-users`).pipe(
             map((info: RateLimitInfo) => ({
                 can_proceed: info.status === 'healthy' && info.active_users < info.max_users,
                 rate_limit_info: info
