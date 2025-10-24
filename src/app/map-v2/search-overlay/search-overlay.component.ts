@@ -19,7 +19,7 @@ import { OverlayModule } from 'primeng/overlay';
         [style]="{'width': '40px', 'height': '40px'}"
       ></p-button>
       
-      <p-overlay #op [visible]="showOverlay" (onHide)="onOverlayHide()">
+      <p-dialog #op [visible]="showOverlay" (onHide)="onOverlayHide()">
         <div class="search-container">
           <div class="search-input-wrapper">
             <span class="p-input-icon-right w-full">
@@ -48,7 +48,7 @@ import { OverlayModule } from 'primeng/overlay';
             </div>
           </div>
         </div>
-      </p-overlay>
+      </p-dialog>
     </div>
   `,
   styles: [`

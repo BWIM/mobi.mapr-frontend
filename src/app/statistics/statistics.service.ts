@@ -36,7 +36,7 @@ export class StatisticsService {
   }
 
   getMunicipalityScores(projectId: string, type: 'avg' | 'pop' = 'pop', populationFilters?: { min: number, max: number }[], gemeindeId?: number): Observable<any> {
-    let url = `${environment.apiUrl}/gemeinden-stats?project=${projectId}&type=${type}`;
+    let url = `${environment.apiUrl}/gemeinden-stats/?project=${projectId}&type=${type}`;
 
     // Add population filters only if provided (meaning filters are active)
     if (populationFilters && populationFilters.length > 0) {
@@ -61,7 +61,7 @@ export class StatisticsService {
   }
 
   getGemeindeNames(projectId: string): Observable<{ [key: string]: number }> {
-    let url = `${environment.apiUrl}/gemeinde-names?project=${projectId}`;
+    let url = `${environment.apiUrl}/gemeinde-names/?project=${projectId}`;
 
     if (this.shareService.getIsShare()) {
       const shareKey = this.shareService.getShareKey();
@@ -75,11 +75,11 @@ export class StatisticsService {
     if (this.shareService.getIsShare()) {
       const shareKey = this.shareService.getShareKey();
       return this.http.get<PaginatedResponse<CountyScore>>(
-        `${environment.apiUrl}/landkreis-stats?project=${projectId}&offset=${offset}&limit=${limit}&type=${type}&key=${shareKey}`
+        `${environment.apiUrl}/landkreis-stats/?project=${projectId}&offset=${offset}&limit=${limit}&type=${type}&key=${shareKey}`
       );
     } else {
       return this.http.get<PaginatedResponse<CountyScore>>(
-        `${environment.apiUrl}/landkreis-stats?project=${projectId}&offset=${offset}&limit=${limit}&type=${type}`
+        `${environment.apiUrl}/landkreis-stats/?project=${projectId}&offset=${offset}&limit=${limit}&type=${type}`
       );
     }
   }
@@ -88,11 +88,11 @@ export class StatisticsService {
     if (this.shareService.getIsShare()) {
       const shareKey = this.shareService.getShareKey();
       return this.http.get<PaginatedResponse<StateScore>>(
-        `${environment.apiUrl}/land-stats?project=${projectId}&offset=${offset}&limit=${limit}&type=${type}&key=${shareKey}`
+        `${environment.apiUrl}/land-stats/?project=${projectId}&offset=${offset}&limit=${limit}&type=${type}&key=${shareKey}`
       );
     } else {
       return this.http.get<PaginatedResponse<StateScore>>(
-        `${environment.apiUrl}/land-stats?project=${projectId}&offset=${offset}&limit=${limit}&type=${type}`
+        `${environment.apiUrl}/land-stats/?project=${projectId}&offset=${offset}&limit=${limit}&type=${type}`
       );
     }
   }

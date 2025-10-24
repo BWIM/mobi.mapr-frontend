@@ -53,16 +53,6 @@ export class DashboardComponent implements OnInit {
   private checkMobile(): void {
     this.isMobile = window.innerWidth < 768;
     this.isSmallMobile = window.innerWidth <= 480;
-
-    // Auto-close sidebars on mobile when switching to desktop
-    if (!this.isMobile) {
-      if (!this.leftSidebarExpanded) {
-        this.leftSidebarExpanded = true;
-      }
-      if (this.rightSidebarExpanded) {
-        this.rightSidebarExpanded = false;
-      }
-    }
   }
 
   showLeftSidebar() {
