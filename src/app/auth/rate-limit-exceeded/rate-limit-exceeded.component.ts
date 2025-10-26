@@ -10,8 +10,6 @@ import { interval, Subscription } from 'rxjs';
 import { RateLimitService } from './rate-limit.service';
 
 interface RateLimitInfo {
-    active_users: number;
-    max_users: number;
     utilization_percent: number;
     timeout_seconds: number;
     active_sessions_count: number;
@@ -88,7 +86,7 @@ export class RateLimitExceededComponent implements OnInit {
                 this.rateLimitInfo = info;
 
                 // Check if capacity is now available
-                if (info.status === 'healthy' && info.active_users < info.max_users) {
+                if (info.status === 'healthy') {
                     // Capacity is available, redirect user
                     const pendingShareKey = sessionStorage.getItem('pendingShareKey');
                     if (pendingShareKey) {
@@ -105,8 +103,6 @@ export class RateLimitExceededComponent implements OnInit {
                 console.error('Failed to load rate limit info:', error);
                 // Fallback to default values
                 this.rateLimitInfo = {
-                    active_users: 1000,
-                    max_users: 1000,
                     utilization_percent: 100,
                     timeout_seconds: 300,
                     active_sessions_count: 1000,
