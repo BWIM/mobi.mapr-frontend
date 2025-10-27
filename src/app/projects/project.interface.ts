@@ -23,6 +23,7 @@ export interface Project {
   version: number;
   project_type?: 'personal' | 'shared' | 'public';  // New property for project visibility
   is_shared?: boolean;  // Legacy property for backward compatibility
+  difference?: boolean;  // Property to identify difference maps
 }
 
 export interface PaginatedResponse<T> {

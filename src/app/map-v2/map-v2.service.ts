@@ -301,7 +301,7 @@ export class MapV2Service {
       authParam = `&token=${token}`;
     }
 
-    this.http.get<Bounds>(`${environment.apiUrl}/bounds?project=${projectId}${authParam}`).subscribe(
+    this.http.get<Bounds>(`${environment.apiUrl}/tiles/bounds/?project=${projectId}${authParam}`).subscribe(
       bounds => {
         this.boundsSubject.next(bounds);
         const updatedStyle = this.getProjectMapStyle(projectId);
@@ -416,6 +416,44 @@ export class MapV2Service {
     }
   }
 
+  private isDifferenceMap(): boolean {
+    return this.currentProjectData?.difference === true;
+  }
+
+  private getFillColorExpression(): any {
+    console.log(this.currentProjectData);
+    if (this.isDifferenceMap()) {
+      // Divergent blue-magenta color scheme for difference maps (range: -1 to 1)
+      // Using interpolate-hcl for perceptually uniform color transitions
+      return [
+        'interpolate',
+        ['linear'],
+        ['get', 'index'],
+        -1, 'rgba(60, 130, 160, 1)',      // Dark blue (negative extreme)
+        0, 'rgba(240, 240, 240, 0.7)',   // Neutral gray (zero)
+        1, 'rgba(195, 125, 95, 1)'       // Magenta (positive extreme)
+      ];
+    } else {
+      // Default color scheme for regular maps
+      return [
+        'case',
+        ['<=', ['get', 'index'], 0],
+        'rgba(128, 128, 128, 0)',
+        ['<=', ['get', 'index'], 0.35],
+        'rgba(50, 97, 45, 0.7)',
+        ['<=', ['get', 'index'], 0.5],
+        'rgba(60, 176, 67, 0.7)',
+        ['<=', ['get', 'index'], 0.71],
+        'rgba(238, 210, 2, 0.7)',
+        ['<=', ['get', 'index'], 1],
+        'rgba(237, 112, 20, 0.7)',
+        ['<=', ['get', 'index'], 1.41],
+        'rgba(194, 24, 7, 0.7)',
+        'rgba(150, 86, 162, 0.7)'
+      ];
+    }
+  }
+
   private getProjectMapStyle(projectID: string): StyleSpecification {
     const baseStyle = this.getBaseMapStyle();
 
@@ -441,22 +479,7 @@ export class MapV2Service {
           'project-id': projectID
         },
         paint: {
-          'fill-color': [
-            'case',
-            ['<=', ['get', 'index'], 0],
-            'rgba(128, 128, 128, 0)',
-            ['<=', ['get', 'index'], 0.35],
-            'rgba(50, 97, 45, 0.7)',
-            ['<=', ['get', 'index'], 0.5],
-            'rgba(60, 176, 67, 0.7)',
-            ['<=', ['get', 'index'], 0.71],
-            'rgba(238, 210, 2, 0.7)',
-            ['<=', ['get', 'index'], 1],
-            'rgba(237, 112, 20, 0.7)',
-            ['<=', ['get', 'index'], 1.41],
-            'rgba(194, 24, 7, 0.7)',
-            'rgba(150, 86, 162, 0.7)'
-          ],
+          'fill-color': this.getFillColorExpression(),
           'fill-opacity': [
             'interpolate',
             ['cubic-bezier', 0.26, 0.38, 0.82, 0.36],
@@ -466,27 +489,45 @@ export class MapV2Service {
             1000, 0.8,
             5000, 0.9
           ],
-          'fill-outline-color': [
-            'case',
-            ['==', ['get', 'id'], this.selectedFeatureId],
-            '#000000',
-            [
+          'fill-outline-color': this.isDifferenceMap()
+            ? [
               'case',
-              ['<=', ['get', 'index'], 0],
-              'rgba(128, 128, 128, 0)',
-              ['<=', ['get', 'index'], 0.35],
-              'rgba(50, 97, 45, 0.7)',
-              ['<=', ['get', 'index'], 0.5],
-              'rgba(60, 176, 67, 0.7)',
-              ['<=', ['get', 'index'], 0.71],
-              'rgba(238, 210, 2, 0.7)',
-              ['<=', ['get', 'index'], 1],
-              'rgba(237, 112, 20, 0.7)',
-              ['<=', ['get', 'index'], 1.41],
-              'rgba(194, 24, 7, 0.7)',
-              'rgba(150, 86, 162, 0.7)'
+              ['==', ['get', 'id'], this.selectedFeatureId],
+              '#000000',
+              [
+                'interpolate-hcl',
+                ['linear'],
+                ['get', 'index'],
+                -1, 'rgba(8, 48, 107, 0.7)',      // Dark blue
+                -0.5, 'rgba(66, 146, 198, 0.7)',  // Medium blue
+                -0.1, 'rgba(107, 174, 214, 0.7)', // Light blue
+                0, 'rgba(240, 240, 240, 0.7)',   // Neutral gray
+                0.1, 'rgba(253, 174, 107, 0.7)', // Light orange
+                0.5, 'rgba(253, 141, 60, 0.7)',  // Medium orange
+                1, 'rgba(166, 54, 3, 0.7)'       // Dark orange
+              ]
             ]
-          ]
+            : [
+              'case',
+              ['==', ['get', 'id'], this.selectedFeatureId],
+              '#000000',
+              [
+                'case',
+                ['<=', ['get', 'index'], 0],
+                'rgba(128, 128, 128, 0)',
+                ['<=', ['get', 'index'], 0.35],
+                'rgba(50, 97, 45, 0.7)',
+                ['<=', ['get', 'index'], 0.5],
+                'rgba(60, 176, 67, 0.7)',
+                ['<=', ['get', 'index'], 0.71],
+                'rgba(238, 210, 2, 0.7)',
+                ['<=', ['get', 'index'], 1],
+                'rgba(237, 112, 20, 0.7)',
+                ['<=', ['get', 'index'], 1.41],
+                'rgba(194, 24, 7, 0.7)',
+                'rgba(150, 86, 162, 0.7)'
+              ]
+            ]
         }
       } as LayerSpecification);
 
