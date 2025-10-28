@@ -12,8 +12,8 @@ export const routes: Routes = [
     component: ShareComponent,
     data: { public: true }
   },
-  { path: 'landing', component: LandingComponent },
-  { path: 'login', component: LoginComponent },
+  { path: 'landing', component: LandingComponent, data: { public: true } },
+  { path: 'login', component: LoginComponent, data: { public: true } },
   { path: 'rate-limit-exceeded', component: RateLimitExceededComponent, data: { public: true } },
   {
     path: 'dashboard',
