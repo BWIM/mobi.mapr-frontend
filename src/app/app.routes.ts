@@ -14,7 +14,7 @@ export const routes: Routes = [
   },
   { path: 'landing', component: LandingComponent },
   { path: 'login', component: LoginComponent },
-  { path: 'rate-limit-exceeded', component: RateLimitExceededComponent },
+  { path: 'rate-limit-exceeded', component: RateLimitExceededComponent, data: { public: true } },
   {
     path: 'dashboard',
     component: DashboardComponent,
