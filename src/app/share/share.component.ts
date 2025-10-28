@@ -81,8 +81,9 @@ export class ShareComponent implements OnInit, OnDestroy {
       next: (rateLimitResponse) => {
         if (!rateLimitResponse.can_proceed) {
           this.loadingService.stopLoading();
-          this.router.navigate(['/rate-limit-exceeded']);
-          return;
+          // this.router.navigate(['/rate-limit-exceeded']); // Disabled - allowing request to proceed
+          console.warn('Rate limit exceeded but continuing anyway');
+          // return;
         }
 
         // Rate limit allows, proceed with loading the project

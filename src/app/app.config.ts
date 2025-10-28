@@ -6,7 +6,7 @@ import { provideRouter } from '@angular/router';
 import Material from '@primeng/themes/material';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { AuthInterceptor } from './auth/auth.interceptor';
-import { HealthCheckInterceptor } from './core/interceptors/health-check.interceptor';
+// import { HealthCheckInterceptor } from './core/interceptors/health-check.interceptor';
 import { routes } from './app.routes';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
@@ -39,7 +39,7 @@ export const appConfig: ApplicationConfig = {
             ripple: true
         }),
         provideHttpClient(
-            withInterceptors([HealthCheckInterceptor, AuthInterceptor])
+            withInterceptors([/* HealthCheckInterceptor */ AuthInterceptor])
         ),
         importProvidersFrom(
             HttpClientModule,
