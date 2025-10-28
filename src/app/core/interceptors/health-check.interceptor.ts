@@ -31,7 +31,11 @@ export const HealthCheckInterceptor: HttpInterceptorFn = (
         switchMap(isHealthy => {
             if (!isHealthy) {
                 // Health check failed, redirect to rate limit page
-                router.navigate(['/rate-limit-exceeded']);
+                // Only navigate if not already on a public/rate-limit route
+                const currentUrl = router.url;
+                if (!currentUrl.includes('/rate-limit-exceeded') && !currentUrl.includes('/share/')) {
+                    router.navigate(['/rate-limit-exceeded']);
+                }
                 return throwError(() => new Error('Health check failed'));
             }
             // Health check passed, proceed with the original request
@@ -40,7 +44,10 @@ export const HealthCheckInterceptor: HttpInterceptorFn = (
         catchError((error: HttpErrorResponse) => {
             // If health check itself fails, redirect to rate limit page
             console.error('Health check failed:', error);
-            router.navigate(['/rate-limit-exceeded']);
+            const currentUrl = router.url;
+            if (!currentUrl.includes('/rate-limit-exceeded') && !currentUrl.includes('/share/')) {
+                router.navigate(['/rate-limit-exceeded']);
+            }
             return throwError(() => error);
         })
     );
