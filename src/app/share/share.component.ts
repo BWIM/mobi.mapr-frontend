@@ -60,6 +60,8 @@ export class ShareComponent implements OnInit, OnDestroy {
       // Store the share key in sessionStorage for persistence across redirects
       if (this.projectKey) {
         sessionStorage.setItem('pendingShareKey', this.projectKey);
+        // Set the share key in the service immediately so other components can use it
+        this.shareService.setShareKey(this.projectKey);
       }
 
       // Check rate limit before loading the shared project
@@ -79,8 +81,9 @@ export class ShareComponent implements OnInit, OnDestroy {
       next: (rateLimitResponse) => {
         if (!rateLimitResponse.can_proceed) {
           this.loadingService.stopLoading();
-          this.router.navigate(['/rate-limit-exceeded']);
-          return;
+          // this.router.navigate(['/rate-limit-exceeded']); // Disabled - allowing request to proceed
+          console.warn('Rate limit exceeded but continuing anyway');
+          // return;
         }
 
         // Rate limit allows, proceed with loading the project

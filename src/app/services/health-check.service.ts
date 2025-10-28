@@ -17,15 +17,20 @@ export interface HealthCheckResponse {
 export class HealthCheckService {
     private apiUrl = environment.apiUrl;
     private lastHealthCheck: number = 0;
-    private healthCheckCooldown: number = 30000; // 30 seconds in milliseconds
+    private healthCheckCooldown: number = 5000; // Reduced to 5 seconds to allow faster recovery
     private cachedHealthStatus: boolean | null = null;
     private healthCheckInProgress: boolean = false;
     private healthStatusSubject = new BehaviorSubject<boolean | null>(null);
 
     constructor(private http: HttpClient) { }
 
-    checkHealth(): Observable<HealthCheckResponse> {
-        return this.http.get<HealthCheckResponse>(`${this.apiUrl}/health`);
+    /**
+     * Clears the cached health status, forcing a fresh check on next request
+     */
+    clearCache(): void {
+        this.cachedHealthStatus = null;
+        this.lastHealthCheck = 0;
+        this.healthStatusSubject.next(null);
     }
 
     isHealthy(): Observable<boolean> {
@@ -47,7 +52,7 @@ export class HealthCheckService {
         this.healthCheckInProgress = true;
         this.lastHealthCheck = now;
 
-        return this.http.get(`${this.apiUrl}/health`, { observe: 'response' }).pipe(
+        return this.http.get(`${this.apiUrl}/health/`, { observe: 'response' }).pipe(
             map(response => response.status === 200),
             tap(isHealthy => {
                 this.cachedHealthStatus = isHealthy;

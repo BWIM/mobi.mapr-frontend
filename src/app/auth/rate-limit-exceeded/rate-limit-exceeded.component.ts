@@ -8,8 +8,11 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { interval, Subscription } from 'rxjs';
 import { RateLimitService } from './rate-limit.service';
+import { HealthCheckService } from '../../services/health-check.service';
 
 interface RateLimitInfo {
+    active_users?: number;
+    max_users?: number;
     utilization_percent: number;
     timeout_seconds: number;
     active_sessions_count: number;
@@ -48,7 +51,8 @@ export class RateLimitExceededComponent implements OnInit {
     constructor(
         private router: Router,
         private rateLimitService: RateLimitService,
-        private translate: TranslateService
+        private translate: TranslateService,
+        private healthCheckService: HealthCheckService
     ) {
         this.loadLanguagePreference();
     }
@@ -85,18 +89,20 @@ export class RateLimitExceededComponent implements OnInit {
             next: (info: RateLimitInfo) => {
                 this.rateLimitInfo = info;
 
-                // Check if capacity is now available
+                // If status is healthy, allow user to proceed via button
+                // But only redirect automatically if we're sure it's safe (not already redirecting)
                 if (info.status === 'healthy') {
-                    // Capacity is available, redirect user
-                    const pendingShareKey = sessionStorage.getItem('pendingShareKey');
-                    if (pendingShareKey) {
-                        this.router.navigate(['/share', pendingShareKey]);
-                    } else {
-                        this.router.navigate(['/landing']);
+                    // Clear the health check cache so user can proceed
+                    this.healthCheckService.clearCache();
+                    // Only stop countdown, don't auto-redirect to prevent loops
+                    if (this.countdownSubscription) {
+                        this.countdownSubscription.unsubscribe();
                     }
+                    this.countdown = 0;
+                    // Don't auto-redirect - let user click retry or "Go to Landing"
                 } else {
                     // Still at capacity, start countdown
-                    this.startCountdown(info.timeout_seconds);
+                    this.startCountdown(info.timeout_seconds || 300);
                 }
             },
             error: (error: any) => {
@@ -147,12 +153,16 @@ export class RateLimitExceededComponent implements OnInit {
     }
 
     onGoToLanding(): void {
+        // Clear the health check cache so fresh checks happen
+        this.healthCheckService.clearCache();
         // Clear the pending share key when navigating to landing
         sessionStorage.removeItem('pendingShareKey');
         this.router.navigate(['/landing']);
     }
 
     onGoBackToShare(): void {
+        // Clear the health check cache so fresh checks happen
+        this.healthCheckService.clearCache();
         // Try to get the share key from sessionStorage first
         const pendingShareKey = sessionStorage.getItem('pendingShareKey');
         if (pendingShareKey) {
@@ -188,6 +198,8 @@ export class RateLimitExceededComponent implements OnInit {
     }
 
     onGoBackToProjectPage(): void {
+        // Clear the health check cache
+        this.healthCheckService.clearCache();
         // route to https://bw-im.de/mobimapr
         this.router.navigate(['https://bw-im.de/mobimapr']);
     }
