@@ -393,11 +393,12 @@ export class MapV2Service {
       this.analyzeService.setMapType('municipality');
       this.mapType = 'municipality';
       return `${environment.apiUrl}/tiles/gemeinden/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
-    } else {
+    } else if (this.currentZoom < 11) {
       this.analyzeService.setMapType('hexagon');
       this.mapType = 'hexagon';
       return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}&resolution=9${authParam}`;
     }
+    return '';
   }
 
   setSelectedFeature(featureId: string | null): void {
@@ -460,117 +461,120 @@ export class MapV2Service {
     if (projectID) {
       const tileUrl = this.getTileUrl(projectID);
 
-      baseStyle.sources['geodata'] = {
-        type: 'vector',
-        tiles: [tileUrl],
-        minzoom: 0,
-        maxzoom: 10,
-        tileSize: 512 // Use smaller tiles on mobile for better performance
-      } as SourceSpecification;
+      // Only add geodata source and layers if tileUrl is valid
+      if (tileUrl) {
+        baseStyle.sources['geodata'] = {
+          type: 'vector',
+          tiles: [tileUrl],
+          minzoom: 0,
+          maxzoom: 10,
+          tileSize: 512 // Use smaller tiles on mobile for better performance
+        } as SourceSpecification;
 
-      // print the geodata
+        // print the geodata
 
-      baseStyle.layers.push({
-        id: 'geodata-fill',
-        type: 'fill',
-        source: 'geodata',
-        'source-layer': 'geodata',
-        metadata: {
-          'project-id': projectID
-        },
-        paint: {
-          'fill-color': this.getFillColorExpression(),
-          'fill-opacity': [
-            'interpolate',
-            ['cubic-bezier', 0.26, 0.38, 0.82, 0.36],
-            ['get', 'population_density'],
-            0, 0.2,
-            100, 0.5,
-            1000, 0.8,
-            5000, 0.9
-          ],
-          'fill-outline-color': this.isDifferenceMap()
-            ? [
-              'case',
-              ['==', ['get', 'id'], this.selectedFeatureId],
-              '#000000',
-              [
-                'interpolate-hcl',
-                ['linear'],
-                ['get', 'index'],
-                -1, 'rgba(8, 48, 107, 0.7)',      // Dark blue
-                -0.5, 'rgba(66, 146, 198, 0.7)',  // Medium blue
-                -0.1, 'rgba(107, 174, 214, 0.7)', // Light blue
-                0, 'rgba(240, 240, 240, 0.7)',   // Neutral gray
-                0.1, 'rgba(253, 174, 107, 0.7)', // Light orange
-                0.5, 'rgba(253, 141, 60, 0.7)',  // Medium orange
-                1, 'rgba(166, 54, 3, 0.7)'       // Dark orange
-              ]
-            ]
-            : [
-              'case',
-              ['==', ['get', 'id'], this.selectedFeatureId],
-              '#000000',
-              [
-                'case',
-                ['<=', ['get', 'index'], 0],
-                'rgba(128, 128, 128, 0)',
-                ['<=', ['get', 'index'], 0.35],
-                'rgba(50, 97, 45, 0.7)',
-                ['<=', ['get', 'index'], 0.5],
-                'rgba(60, 176, 67, 0.7)',
-                ['<=', ['get', 'index'], 0.71],
-                'rgba(238, 210, 2, 0.7)',
-                ['<=', ['get', 'index'], 1],
-                'rgba(237, 112, 20, 0.7)',
-                ['<=', ['get', 'index'], 1.41],
-                'rgba(194, 24, 7, 0.7)',
-                'rgba(150, 86, 162, 0.7)'
-              ]
-            ]
-        }
-      } as LayerSpecification);
-
-      // Add score labels layer if scoreShown is true and not in hexagon mode
-      if (this.scoreShown && this.analyzeService.getMapType() !== "hexagon") {
         baseStyle.layers.push({
-          id: 'geodata-scores',
-          type: 'symbol',
+          id: 'geodata-fill',
+          type: 'fill',
           source: 'geodata',
           'source-layer': 'geodata',
-          layout: {
-            'text-field': [
-              'case',
-              ['<=', ['get', 'index'], 0], 'Error',
-              ['<=', ['get', 'index'], 0.28], 'A+',
-              ['<=', ['get', 'index'], 0.32], 'A',
-              ['<=', ['get', 'index'], 0.35], 'A-',
-              ['<=', ['get', 'index'], 0.4], 'B+',
-              ['<=', ['get', 'index'], 0.45], 'B',
-              ['<=', ['get', 'index'], 0.5], 'B-',
-              ['<=', ['get', 'index'], 0.56], 'C+',
-              ['<=', ['get', 'index'], 0.63], 'C',
-              ['<=', ['get', 'index'], 0.71], 'C-',
-              ['<=', ['get', 'index'], 0.8], 'D+',
-              ['<=', ['get', 'index'], 0.9], 'D',
-              ['<=', ['get', 'index'], 1.0], 'D-',
-              ['<=', ['get', 'index'], 1.12], 'E+',
-              ['<=', ['get', 'index'], 1.26], 'E',
-              ['<=', ['get', 'index'], 1.41], 'E-',
-              ['<=', ['get', 'index'], 1.59], 'F+',
-              ['<=', ['get', 'index'], 1.78], 'F',
-              'F-'
-            ],
-            'text-size': 12,
-            'text-allow-overlap': true,
-            'text-ignore-placement': true
+          metadata: {
+            'project-id': projectID
           },
           paint: {
-            'text-color': '#000000',
-            'text-halo-color': '#ffffff',
-            'text-halo-width': 1
+            'fill-color': this.getFillColorExpression(),
+            'fill-opacity': [
+              'interpolate',
+              ['cubic-bezier', 0.26, 0.38, 0.82, 0.36],
+              ['get', 'population_density'],
+              0, 0.2,
+              100, 0.5,
+              1000, 0.8,
+              5000, 0.9
+            ],
+            'fill-outline-color': this.isDifferenceMap()
+              ? [
+                'case',
+                ['==', ['get', 'id'], this.selectedFeatureId],
+                '#000000',
+                [
+                  'interpolate-hcl',
+                  ['linear'],
+                  ['get', 'index'],
+                  -1, 'rgba(8, 48, 107, 0.7)',      // Dark blue
+                  -0.5, 'rgba(66, 146, 198, 0.7)',  // Medium blue
+                  -0.1, 'rgba(107, 174, 214, 0.7)', // Light blue
+                  0, 'rgba(240, 240, 240, 0.7)',   // Neutral gray
+                  0.1, 'rgba(253, 174, 107, 0.7)', // Light orange
+                  0.5, 'rgba(253, 141, 60, 0.7)',  // Medium orange
+                  1, 'rgba(166, 54, 3, 0.7)'       // Dark orange
+                ]
+              ]
+              : [
+                'case',
+                ['==', ['get', 'id'], this.selectedFeatureId],
+                '#000000',
+                [
+                  'case',
+                  ['<=', ['get', 'index'], 0],
+                  'rgba(128, 128, 128, 0)',
+                  ['<=', ['get', 'index'], 0.35],
+                  'rgba(50, 97, 45, 0.7)',
+                  ['<=', ['get', 'index'], 0.5],
+                  'rgba(60, 176, 67, 0.7)',
+                  ['<=', ['get', 'index'], 0.71],
+                  'rgba(238, 210, 2, 0.7)',
+                  ['<=', ['get', 'index'], 1],
+                  'rgba(237, 112, 20, 0.7)',
+                  ['<=', ['get', 'index'], 1.41],
+                  'rgba(194, 24, 7, 0.7)',
+                  'rgba(150, 86, 162, 0.7)'
+                ]
+              ]
           }
         } as LayerSpecification);
+
+        // Add score labels layer if scoreShown is true and not in hexagon mode
+        if (this.scoreShown && this.analyzeService.getMapType() !== "hexagon") {
+          baseStyle.layers.push({
+            id: 'geodata-scores',
+            type: 'symbol',
+            source: 'geodata',
+            'source-layer': 'geodata',
+            layout: {
+              'text-field': [
+                'case',
+                ['<=', ['get', 'index'], 0], 'Error',
+                ['<=', ['get', 'index'], 0.28], 'A+',
+                ['<=', ['get', 'index'], 0.32], 'A',
+                ['<=', ['get', 'index'], 0.35], 'A-',
+                ['<=', ['get', 'index'], 0.4], 'B+',
+                ['<=', ['get', 'index'], 0.45], 'B',
+                ['<=', ['get', 'index'], 0.5], 'B-',
+                ['<=', ['get', 'index'], 0.56], 'C+',
+                ['<=', ['get', 'index'], 0.63], 'C',
+                ['<=', ['get', 'index'], 0.71], 'C-',
+                ['<=', ['get', 'index'], 0.8], 'D+',
+                ['<=', ['get', 'index'], 0.9], 'D',
+                ['<=', ['get', 'index'], 1.0], 'D-',
+                ['<=', ['get', 'index'], 1.12], 'E+',
+                ['<=', ['get', 'index'], 1.26], 'E',
+                ['<=', ['get', 'index'], 1.41], 'E-',
+                ['<=', ['get', 'index'], 1.59], 'F+',
+                ['<=', ['get', 'index'], 1.78], 'F',
+                'F-'
+              ],
+              'text-size': 12,
+              'text-allow-overlap': true,
+              'text-ignore-placement': true
+            },
+            paint: {
+              'text-color': '#000000',
+              'text-halo-color': '#ffffff',
+              'text-halo-width': 1
+            }
+          } as LayerSpecification);
+        }
       }
 
       // Remove existing labels layer if it exists, then add it on top of everything
