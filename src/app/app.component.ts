@@ -1,5 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { MenubarModule } from 'primeng/menubar';
 import { ButtonModule } from 'primeng/button';
 import { TranslateService } from '@ngx-translate/core';
@@ -14,6 +14,7 @@ import { Subscription } from 'rxjs';
 import { HostListener } from '@angular/core';
 import { ExportMapComponent } from './map-v2/export-map/export-map.component';
 import { TutorialComponent } from './tutorial/tutorial.component';
+import { HealthService } from './services/health.service';
 
 @Component({
   selector: 'app-root',
@@ -41,7 +42,9 @@ export class AppComponent implements OnDestroy {
   constructor(
     private translate: TranslateService,
     private authService: AuthService,
-    private keyboardShortcutsService: KeyboardShortcutsService
+    private keyboardShortcutsService: KeyboardShortcutsService,
+    private healthService: HealthService,
+    private router: Router
   ) {
     translate.setDefaultLang('de');
     translate.use('de');
@@ -65,6 +68,12 @@ export class AppComponent implements OnDestroy {
           case ShortcutAction.CREATE_SHARE:
             // These actions are handled by their respective services
             break;
+        }
+      }),
+      this.healthService.checkHealth().subscribe(health => {
+        if (health.status !== 'healthy') {
+          console.warn('Health check failed, navigating to maintenance page');
+          this.router.navigate(['/maintenance']);
         }
       })
     );

@@ -12,7 +12,6 @@ import { MapV2Component } from '../map-v2/map-v2.component';
 import { MapV2Service } from '../map-v2/map-v2.service';
 import { TutorialService } from '../tutorial/tutorial.service';
 import { AnalyzeService } from '../analyze/analyze.service';
-import { RateLimitService } from '../auth/rate-limit-exceeded/rate-limit.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -41,7 +40,6 @@ export class ShareComponent implements OnInit, OnDestroy {
     private mapService: MapV2Service,
     private analyzeService: AnalyzeService,
     private tutorialService: TutorialService,
-    private rateLimitService: RateLimitService,
     private router: Router
   ) {
     this.checkMobile();
@@ -65,36 +63,13 @@ export class ShareComponent implements OnInit, OnDestroy {
       }
 
       // Check rate limit before loading the shared project
-      this.checkRateLimitAndLoadProject();
+      this.loadSharedProject();
     });
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  private checkRateLimitAndLoadProject(): void {
-    this.rateLimitService.checkRateLimitStatus().pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (rateLimitResponse) => {
-        if (!rateLimitResponse.can_proceed) {
-          this.loadingService.stopLoading();
-          // this.router.navigate(['/rate-limit-exceeded']); // Disabled - allowing request to proceed
-          console.warn('Rate limit exceeded but continuing anyway');
-          // return;
-        }
-
-        // Rate limit allows, proceed with loading the project
-        this.loadSharedProject();
-      },
-      error: (error) => {
-        console.error('Rate limit check failed:', error);
-        // If rate limit check fails, proceed anyway to avoid blocking users
-        this.loadSharedProject();
-      }
-    });
   }
 
   private loadSharedProject(): void {

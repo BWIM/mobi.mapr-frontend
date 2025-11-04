@@ -393,7 +393,7 @@ export class MapV2Service {
       this.analyzeService.setMapType('municipality');
       this.mapType = 'municipality';
       return `${environment.apiUrl}/tiles/gemeinden/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
-    } else if (this.currentZoom < 11) {
+    } else if (this.currentZoom >= 10) {
       this.analyzeService.setMapType('hexagon');
       this.mapType = 'hexagon';
       return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}&resolution=9${authParam}`;

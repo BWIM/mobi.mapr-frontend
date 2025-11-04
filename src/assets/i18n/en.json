@@ -622,5 +622,11 @@
         "NEXT_HINT": "You can end the tutorial at the bottom."
       }
     }
+  },
+  "MAINTENANCE": {
+    "TITLE": "Maintenance",
+    "MESSAGE": "We are currently performing maintenance. Please try again later. The page will automatically refresh once the service is available again.",
+    "CHECKING": "Checking service...",
+    "INFO": "This page will automatically refresh once the service is available again."
   }
 }
