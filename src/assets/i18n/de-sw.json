@@ -550,5 +550,11 @@
   },
   "RATE_LIMIT": {
     "TO_PROJECT_PAGE": "Gangets zur Projektseit"
+  },
+  "MAINTENANCE": {
+    "TITLE": "Wartungsarbeiten",
+    "MESSAGE": "Derzeit werden Wartungsarbeiten durchgeführt. Bitte versuchen Sie es später erneut. Die Seite wird automatisch aktualisiert, sobald der Service wieder verfügbar ist.",
+    "CHECKING": "Service wird überprüft...",
+    "INFO": "Diese Seite wird automatisch aktualisiert, sobald der Service wieder verfügbar ist."
   }
 }

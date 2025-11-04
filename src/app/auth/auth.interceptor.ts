@@ -61,13 +61,11 @@ export const AuthInterceptor: HttpInterceptorFn = (
         router.navigate(['/login']);
         return throwError(() => error);
       }
-      if (error.status === 429) {
-        authService.setRateLimitExceeded(true);
-        // router.navigate(['/rate-limit-exceeded']); // Disabled - allowing request to proceed
-        // return throwError(() => error);
-        console.warn('Rate limit exceeded but continuing anyway');
+      if (error.status === 503) {
+        router.navigate(['/maintenance']);
+        return throwError(() => error);
       }
       return throwError(() => error);
     })
   );
-}; 
+};
