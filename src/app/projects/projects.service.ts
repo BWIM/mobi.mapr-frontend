@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   Project,
@@ -64,11 +64,11 @@ export class ProjectsService {
     return this.http.get<PaginatedResponse<Project>>(`${this.apiUrl}/public-projects/`, { params });
   }
 
-  getPublicSharedProjects(page: number = 1, pageSize: number = 10): Observable<PublicSharedProjectsResponse> {
+  getPublicSharedProjects(shareKey: string, page: number = 1, pageSize: number = 10): Observable<PublicSharedProjectsResponse> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('page_size', pageSize.toString())
-      .set('key', this.shareService.getShareKey() || '');
+      .set('key', shareKey);
 
     return this.http.get<PublicSharedProjectsResponse>(`${this.apiUrl}/public-shared-projects/`, { params });
   }

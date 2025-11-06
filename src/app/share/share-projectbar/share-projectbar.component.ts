@@ -8,7 +8,8 @@ import { MapV2Service } from '../../map-v2/map-v2.service';
 import { AnalyzeService } from '../../analyze/analyze.service';
 import { finalize } from 'rxjs/operators';
 import { MessageService } from 'primeng/api';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
+import { ShareService } from '../share.service';
 
 interface ProjectTab {
     label: string;
@@ -51,7 +52,9 @@ export class ShareProjectbarComponent implements OnInit, OnDestroy {
         private mapv2Service: MapV2Service,
         private analyzeService: AnalyzeService,
         private messageService: MessageService,
-        private router: Router
+        private router: Router,
+        private route: ActivatedRoute,
+        private shareService: ShareService
     ) { }
 
     ngOnInit(): void {
@@ -63,19 +66,21 @@ export class ShareProjectbarComponent implements OnInit, OnDestroy {
     }
 
     loadData(): void {
+        // Ensure share key is set from route or sessionStorage
+        const routeKey = this.route.snapshot.params['key'];
+        const sessionKey = sessionStorage.getItem('pendingShareKey');
+        const shareKey = routeKey || sessionKey;
+
         this.loading = true;
         this.loadingService.startLoading();
-
-        setTimeout(() => {
-            this.loadPublicSharedProjects();
-        }, 1000);
+        this.loadPublicSharedProjects(shareKey);
     }
 
-    private loadPublicSharedProjects(): void {
+    private loadPublicSharedProjects(shareKey: string): void {
         const tab = this.projectTabs[0]; // Public projects tab
         tab.loading = true;
 
-        this.projectsService.getPublicSharedProjects().subscribe({
+        this.projectsService.getPublicSharedProjects(shareKey || '').subscribe({
             next: (response) => {
                 tab.projects = response.results;
                 this.processTabProjects(response.results, 0);
