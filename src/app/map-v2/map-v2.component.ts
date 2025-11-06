@@ -194,12 +194,20 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
         const properties = feature.properties;
         if (properties) {
           const name = properties['name'] || 'Unknown';
-
-          const popupContent = `
-            <div style="padding: 5px;">
-              ${name}: <strong>${this.indexService.getIndexName(properties['index'])}</strong>
-            </div>
-          `;
+          let popupContent = '';
+          if (this.mapService.isDifferenceMap()) {
+            popupContent = `
+              <div style="padding: 5px;">
+                ${name}: <strong>${(properties['index'] * 100).toFixed(1)}%</strong>
+              </div>
+            `;
+          } else {
+            popupContent = `
+              <div style="padding: 5px;">
+                ${name}: <strong>${this.indexService.getIndexName(properties['index'])}</strong>
+              </div>
+            `;
+          }
 
           popup
             .setLngLat(e.lngLat)
