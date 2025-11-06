@@ -417,7 +417,7 @@ export class MapV2Service {
     }
   }
 
-  private isDifferenceMap(): boolean {
+  isDifferenceMap(): boolean {
     return this.currentProjectData?.difference === true;
   }
 
@@ -430,9 +430,9 @@ export class MapV2Service {
         'interpolate',
         ['linear'],
         ['get', 'index'],
-        -1, 'rgba(60, 130, 160, 1)',      // Dark blue (negative extreme)
-        0, 'rgba(240, 240, 240, 0.7)',   // Neutral gray (zero)
-        1, 'rgba(195, 125, 95, 1)'       // Magenta (positive extreme)
+        -0.5, 'rgba(60, 130, 160, 1)',      // Dark blue (negative extreme)
+        0, 'rgba(240, 240, 240, 1)',   // Neutral gray (zero)
+        0.5, 'rgba(195, 125, 95, 1)'       // Magenta (positive extreme)
       ];
     } else {
       // Default color scheme for regular maps
