@@ -8,8 +8,10 @@ import { AnalyzeService } from '../analyze/analyze.service';
 import { LoadingService } from '../services/loading.service';
 import { SearchOverlayComponent } from './search-overlay/search-overlay.component';
 import { LegendComponent } from '../legend/legend.component';
-import { Project } from '../projects/project.interface';
+import { Project, ProjectInfo } from '../projects/project.interface';
 import { IndexService } from '../services/index.service';
+import { ProjectsService } from '../projects/projects.service';
+import { TranslateService } from '@ngx-translate/core';
 
 // @ts-ignore
 import MaplibreCompare from '@maplibre/maplibre-gl-compare';
@@ -34,18 +36,20 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   private comparisonSubscription: Subscription;
   private stopComparisonSubscription: Subscription;
   private projectDataSubscription: Subscription;
+  private projectInfoSubscription: Subscription;
   private isComparison: boolean = false;
   projectName: string | null = null;
   comparisonProject: Project | null = null;
   currentProject: string | null = null;
   currentProjectData: Project | null = null;
+  currentProjectInfo: ProjectInfo | null = null;
 
   private dragThrottleTimeout: any = null;
   private isDragging: boolean = false;
   private originalOpacity: any = null;
   private isMobile: boolean = false;
   private clickHandlers: Map<MapLibreMap, (e: any) => void> = new Map<MapLibreMap, (e: any) => void>();
-  constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService, private indexService: IndexService) {
+  constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService, private indexService: IndexService, private projectsService: ProjectsService, private translate: TranslateService) {
 
     this.subscription = this.mapService.mapStyle$.subscribe(style => {
       this.mapStyle = style;
@@ -95,6 +99,12 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       if (projectData && projectData.display_name) {
         this.projectName = projectData.display_name;
       }
+    });
+
+    // Subscribe to project info changes
+    this.currentProjectInfo = this.projectsService.getCurrentProjectInfo();
+    this.projectInfoSubscription = this.projectsService.currentProjectInfo$.subscribe(projectInfo => {
+      this.currentProjectInfo = projectInfo;
     });
   }
 
@@ -209,11 +219,44 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
           const name = properties['name'] || 'Unknown';
           let popupContent = '';
           if (this.mapService.isDifferenceMap()) {
-            popupContent = `
-              <div style="padding: 5px;">
-                ${name}: <strong>${(properties['index'] * 100).toFixed(1)}%</strong>
-              </div>
-            `;
+            const index = properties['index'] as number;
+            const percentage = Math.abs(index * 100);
+            const baselineName = this.currentProjectInfo?.baseline_project_name || this.translate.instant('MAP.TOOLTIP.BASELINE');
+            const comparisonName = this.currentProjectInfo?.comparison_project_name || this.translate.instant('MAP.TOOLTIP.COMPARISON');
+
+            if (index > 0) {
+              const betterText = this.translate.instant('MAP.TOOLTIP.BETTER_THAN', {
+                project1: comparisonName,
+                percentage: percentage.toFixed(0),
+                project2: baselineName
+              });
+              popupContent = `
+                <div style="padding: 5px;">
+                  <div><strong>${name}</strong></div>
+                  <div>${betterText}</div>
+                </div>
+              `;
+            } else if (index < 0) {
+              const betterText = this.translate.instant('MAP.TOOLTIP.BETTER_THAN', {
+                project1: baselineName,
+                percentage: percentage.toFixed(0),
+                project2: comparisonName
+              });
+              popupContent = `
+                <div style="padding: 5px;">
+                  <div><strong>${name}</strong></div>
+                  <div>${betterText}</div>
+                </div>
+              `;
+            } else {
+              const equalText = this.translate.instant('MAP.TOOLTIP.EQUAL');
+              popupContent = `
+                <div style="padding: 5px;">
+                  <div><strong>${name}</strong></div>
+                  <div>${equalText}</div>
+                </div>
+              `;
+            }
           } else {
             popupContent = `
               <div style="padding: 5px;">
@@ -321,6 +364,9 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     }
     if (this.projectDataSubscription) {
       this.projectDataSubscription.unsubscribe();
+    }
+    if (this.projectInfoSubscription) {
+      this.projectInfoSubscription.unsubscribe();
     }
     if (this.dragThrottleTimeout) {
       clearTimeout(this.dragThrottleTimeout);

@@ -181,6 +181,12 @@
       "MEDIAN": "Median",
       "POP": "Population",
       "AREA": "Area"
+    },
+    "TOOLTIP": {
+      "BASELINE": "Baseline",
+      "COMPARISON": "Comparison",
+      "BETTER_THAN": "{{project1}} is <strong>{{percentage}}%</strong> better than {{project2}}",
+      "EQUAL": "Both projects are equal"
     }
   },
   "PROJECT_WIZARD": {
