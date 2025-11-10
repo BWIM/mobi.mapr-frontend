@@ -342,7 +342,11 @@
     "LOADING": {
       "HINT": "Ufbasse! Je größer d'Flächi isch, wo de druff klickt hesch, desto länger brucht's zum Lade!"
     },
-    "POPULATION_WEIGHTING_HINT": "Ufbasse: D'Wert send immer noch Bevölkerig gwichtet, nit noch Flächi"
+    "POPULATION_WEIGHTING_HINT": "Ufbasse: D'Wert send immer noch Bevölkerig gwichtet, nit noch Flächi",
+    "COMPARISON_MODE": {
+      "DISABLED_TITLE": "Analyse deaktiviert",
+      "DISABLED_MESSAGE": "Die Analyse-Funktion ist für Vergleichsprojekte deaktiviert. Bitte verwenden Sie ein Standard-Projekt, um die Analyse zu nutzen."
+    }
   },
   "STATISTICS": {
     "TITLE": "Schtatistige",

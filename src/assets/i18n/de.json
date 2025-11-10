@@ -346,7 +346,11 @@
     "LOADING": {
       "HINT": "Hinweis: Umso mehr Fläche, die angeklickte Verwaltungseinheit hat, desto länger dauert der Ladevorgang!"
     },
-    "POPULATION_WEIGHTING_HINT": "Hinweis: Die angezeigten Werte sind immer nach Bevölkerung gewichtet, nicht nach Fläche"
+    "POPULATION_WEIGHTING_HINT": "Hinweis: Die angezeigten Werte sind immer nach Bevölkerung gewichtet, nicht nach Fläche",
+    "COMPARISON_MODE": {
+      "DISABLED_TITLE": "Analyse deaktiviert",
+      "DISABLED_MESSAGE": "Die Analyse-Funktion ist für Vergleichsprojekte deaktiviert. Bitte verwenden Sie ein Standard-Projekt, um die Analyse zu nutzen."
+    }
   },
   "EXPORT": {
     "IS_EXPORTING": "Export läuft...",

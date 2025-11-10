@@ -20,6 +20,7 @@ import Overlay from 'ol/Overlay';
 import { Style, Circle as CircleStyle, Fill, Stroke, Text } from 'ol/style';
 import { MultiPolygon } from 'ol/geom';
 import { IndexService } from '../services/index.service';
+import { MapV2Service } from '../map-v2/map-v2.service';
 
 @Component({
   selector: 'app-analyze',
@@ -31,6 +32,7 @@ import { IndexService } from '../services/index.service';
 export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   visible: boolean = false;
   loading: boolean = false;
+  isComparisonMode: boolean = false;
   activitiesLoading: boolean = false;
   personaLoading: boolean = false;
   profilesLoading: boolean = false;
@@ -115,7 +117,8 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     private analyzeService: AnalyzeService,
     private cdr: ChangeDetectorRef,
     private messageService: MessageService,
-    private indexService: IndexService
+    private indexService: IndexService,
+    private mapService: MapV2Service
   ) {
     this.subscriptions.push(
       this.analyzeService.visible$.subscribe(
@@ -127,7 +130,11 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
               this.feature = state.feature;
               this.properties = this.feature.properties as Properties;
             }
-            if (state.projectId && state.mapType && state.feature) {
+            // Check if we're in comparison mode (difference map)
+            this.isComparisonMode = this.mapService.isDifferenceMap();
+            if (this.isComparisonMode) {
+              this.loading = false;
+            } else if (state.projectId && state.mapType && state.feature) {
               this.loading = true;
               this.loadDisplayNamesAndData();
             } else {

@@ -345,7 +345,11 @@
     "LOADING": {
       "HINT": "Hint: The larger the size of the clicked feature, the longer is the loading time for it!"
     },
-    "POPULATION_WEIGHTING_HINT": "Hint: the seen values are always weighted by population, not by area"
+    "POPULATION_WEIGHTING_HINT": "Hint: the seen values are always weighted by population, not by area",
+    "COMPARISON_MODE": {
+      "DISABLED_TITLE": "Analysis Disabled",
+      "DISABLED_MESSAGE": "The analysis feature is disabled for comparison projects. Please use a standard project to access the analysis."
+    }
   },
   "EXPORT": {
     "IS_EXPORTING": "Export is in progress...",
