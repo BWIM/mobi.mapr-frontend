@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } fr
 import { CommonModule } from '@angular/common';
 import { MapV2Service } from './map-v2.service';
 import { Subscription } from 'rxjs';
-import { LngLatBounds, Map as MapLibreMap, Popup, NavigationControl, ScaleControl } from 'maplibre-gl';
+import { LngLatBounds, Map, Popup, NavigationControl, ScaleControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { LoadingService } from '../services/loading.service';
@@ -24,7 +24,7 @@ import MaplibreCompare from '@maplibre/maplibre-gl-compare';
   standalone: true
 })
 export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
-  private map?: MapLibreMap;
+  private map?: Map;
   private popup?: Popup;
   @ViewChild('mapContainer') mapContainer?: ElementRef;
   @ViewChild('comparisonContainer') comparisonContainer?: ElementRef;
@@ -48,19 +48,13 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   private isDragging: boolean = false;
   private originalOpacity: any = null;
   private isMobile: boolean = false;
-  private clickHandlers: Map<MapLibreMap, (e: any) => void> = new Map<MapLibreMap, (e: any) => void>();
   constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService, private indexService: IndexService, private projectsService: ProjectsService, private translate: TranslateService) {
+
 
     this.subscription = this.mapService.mapStyle$.subscribe(style => {
       this.mapStyle = style;
       if (this.map) {
-        // Remove click handler before style change
-        this.removeClickHandler(this.map);
         this.map.setStyle(style);
-        // Re-setup events after style loads
-        this.map.once('style.load', () => {
-          this.setupMapEvents(this.map!);
-        });
       }
     });
 
@@ -132,7 +126,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       };
 
 
-      this.map = new MapLibreMap(mapOptions);
+      this.map = new Map(mapOptions);
       this.mapService.setMap(this.map);
 
       // Add navigation control
@@ -148,7 +142,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  private setupMapEvents(map: MapLibreMap, projectId?: string): void {
+  private setupMapEvents(map: Map, projectId?: string): void {
     // Store original opacity for restoration
     if (!this.originalOpacity && map?.getLayer('geodata-fill')) {
       this.originalOpacity = map.getPaintProperty('geodata-fill', 'fill-opacity');
@@ -193,14 +187,8 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
 
       // If this is a compare map (projectId is provided), update its style manually
       if (projectId) {
-        // Remove click handler before style change
-        this.removeClickHandler(map);
         const style = this.mapService['getProjectMapStyle'](projectId);
         map.setStyle(style);
-        // Re-setup events after style loads
-        map.once('style.load', () => {
-          this.setupMapEvents(map, projectId);
-        });
       }
     });
 
@@ -277,42 +265,25 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       popup.remove();
     });
 
-    // Remove existing click handler if it exists
-    this.removeClickHandler(map);
-
-    // Disable click on base map if current project is a differenceMap
-    // In comparison mode, the base map is the beforeMap (when projectId matches current project)
-    // In normal mode, the base map is the main map (when projectId is undefined)
-    const currentProjectId = this.mapService.getCurrentProject();
-    const isBaseMap = !projectId || (projectId === currentProjectId);
-    const shouldDisableClick = this.mapService.isDifferenceMap() && isBaseMap;
-    console.log('shouldDisableClick', shouldDisableClick);
-
-    if (!shouldDisableClick) {
-      const clickHandler = (e: any) => {
-        if (e.features && e.features[0]) {
-          const feature = e.features[0];
-          // Use the click coordinates as the center
-          const coordinates = [e.lngLat.lng, e.lngLat.lat];
-          const metadata = feature['layer']?.['metadata'] as { 'project-id': string };
-          if (metadata) {
-            this.analyzeService.setCurrentProject(metadata['project-id']);
-          }
-
-          const resolution = map && map.getZoom() > 10 ? "hexagon" : "gemeinde";
-          // this.analyzeService.setCurrentProject(feature)
-          this.analyzeService.setSelectedFeature(feature, resolution, coordinates);
-          this.mapService.setSelectedFeature(feature.properties['id']);
+    map.on('click', 'geodata-fill', (e) => {
+      if (e.features && e.features[0]) {
+        const feature = e.features[0];
+        // Use the click coordinates as the center
+        const coordinates = [e.lngLat.lng, e.lngLat.lat];
+        const metadata = feature['layer']?.['metadata'] as { 'project-id': string };
+        if (metadata) {
+          this.analyzeService.setCurrentProject(metadata['project-id']);
         }
-      };
 
-      // Store the handler so we can remove it later
-      this.clickHandlers.set(map, clickHandler);
-      map.on('click', 'geodata-fill', clickHandler);
-    }
+        const resolution = map && map.getZoom() > 10 ? "hexagon" : "gemeinde";
+        // this.analyzeService.setCurrentProject(feature)
+        this.analyzeService.setSelectedFeature(feature, resolution, coordinates);
+        this.mapService.setSelectedFeature(feature.properties['id']);
+      }
+    });
   }
 
-  private handleDragStart(map: MapLibreMap): void {
+  private handleDragStart(map: Map): void {
     if (map?.getLayer('geodata-fill')) {
       // Store original opacity if not already stored
       if (!this.originalOpacity) {
@@ -325,28 +296,14 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  private handleDragEnd(map: MapLibreMap): void {
+  private handleDragEnd(map: Map): void {
     if (map?.getLayer('geodata-fill') && this.originalOpacity) {
       // Restore original opacity
       map.setPaintProperty('geodata-fill', 'fill-opacity', this.originalOpacity);
     }
   }
 
-  private removeClickHandler(map: MapLibreMap): void {
-    const handler = this.clickHandlers.get(map);
-    if (handler) {
-      map.off('click', 'geodata-fill', handler);
-      this.clickHandlers.delete(map);
-    }
-  }
-
   ngOnDestroy() {
-    // Remove all click handlers
-    this.clickHandlers.forEach((handler: (e: any) => void, map: MapLibreMap) => {
-      this.removeClickHandler(map);
-    });
-    this.clickHandlers.clear();
-
     if (this.map) {
       this.map.remove();
     }
@@ -364,9 +321,6 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     }
     if (this.projectDataSubscription) {
       this.projectDataSubscription.unsubscribe();
-    }
-    if (this.projectInfoSubscription) {
-      this.projectInfoSubscription.unsubscribe();
     }
     if (this.dragThrottleTimeout) {
       clearTimeout(this.dragThrottleTimeout);
@@ -422,7 +376,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     // Update the service's current zoom to match the calculated zoom
     this.mapService.updateZoom(initialZoom);
 
-    const beforeMap = new MapLibreMap({
+    const beforeMap = new Map({
       container: "before",
       style: this.mapStyle,
       center: initialCenter,
@@ -445,7 +399,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       afterStyle = this.mapService['getProjectMapStyle'](String(this.comparisonProject.id));
     }
 
-    const afterMap = new MapLibreMap({
+    const afterMap = new Map({
       container: "after",
       style: afterStyle,
       center: initialCenter,
