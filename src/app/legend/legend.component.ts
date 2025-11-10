@@ -1,8 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { SharedModule } from '../shared/shared.module';
 import { LegendService } from './legend.service';
+import { MapV2Service } from '../map-v2/map-v2.service';
+import { Project, ProjectInfo } from '../projects/project.interface';
+import { ProjectsService } from '../projects/projects.service';
 
 type ScoreLevel = {
   name: string;
@@ -17,16 +21,27 @@ type ScoreLevel = {
   templateUrl: './legend.component.html',
   styleUrls: ['./legend.component.scss'],
   standalone: true,
-  imports: [SharedModule]
+  imports: [CommonModule, SharedModule]
 })
 export class LegendComponent implements OnInit, OnDestroy {
 
   private langChangeSubscription!: Subscription;
+  private projectDataSubscription!: Subscription;
+  private projectInfoSubscription!: Subscription;
   isPinned: boolean = false;
   isExpanded: boolean = false;
   isMobileVisible: boolean = false;
+  isDifferenceMap: boolean = false;
+  currentProjectData: Project | null = null;
+  currentProjectInfo: ProjectInfo | null = null;
+  differenceHeader: string = '';
 
-  constructor(private translate: TranslateService, private legendService: LegendService) { }
+  constructor(
+    private translate: TranslateService,
+    private legendService: LegendService,
+    private mapService: MapV2Service,
+    private projectsService: ProjectsService
+  ) { }
 
   scoreLevel?: ScoreLevel;
   sliderElementId: string = 'slider';
@@ -48,10 +63,12 @@ export class LegendComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.initializeScoreLevels();
+    this.loadDifferenceHeader();
 
     // Listen for language changes and update translations
     this.langChangeSubscription = this.translate.onLangChange.subscribe(() => {
       this.initializeScoreLevels();
+      this.loadDifferenceHeader();
     });
 
     this.legendService.isPinned$.subscribe((pinned) => {
@@ -65,12 +82,31 @@ export class LegendComponent implements OnInit, OnDestroy {
     this.legendService.isMobileVisible$.subscribe((visible) => {
       this.isMobileVisible = visible;
     });
+
+    // Subscribe to project data to check if it's a difference map
+    this.projectDataSubscription = this.mapService.getCurrentProjectData$.subscribe(projectData => {
+      this.currentProjectData = projectData;
+      this.isDifferenceMap = projectData?.difference === true;
+    });
+
+    // Subscribe to project info to get project names for difference maps
+    // Get initial value immediately
+    this.currentProjectInfo = this.projectsService.getCurrentProjectInfo();
+    this.projectInfoSubscription = this.projectsService.currentProjectInfo$.subscribe(projectInfo => {
+      this.currentProjectInfo = projectInfo;
+    });
   }
 
   ngOnDestroy() {
     // Clean up the subscription when the component is destroyed
     if (this.langChangeSubscription) {
       this.langChangeSubscription.unsubscribe();
+    }
+    if (this.projectDataSubscription) {
+      this.projectDataSubscription.unsubscribe();
+    }
+    if (this.projectInfoSubscription) {
+      this.projectInfoSubscription.unsubscribe();
     }
   }
 
@@ -122,6 +158,12 @@ export class LegendComponent implements OnInit, OnDestroy {
           max: defaultValues[0]
         }
       ];
+    });
+  }
+
+  loadDifferenceHeader() {
+    this.translate.get('LEGEND.DIFFERENCE_HEADER').subscribe(translation => {
+      this.differenceHeader = translation;
     });
   }
 }

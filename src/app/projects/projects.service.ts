@@ -132,6 +132,10 @@ export class ProjectsService {
     this.currentProjectInfo.next(info);
   }
 
+  getCurrentProjectInfo(): ProjectInfo | null {
+    return this.currentProjectInfo.getValue();
+  }
+
   getExportInfo(): Observable<ExportProject> {
     const currentProject = this.currentProjectInfo.getValue();
     if (!currentProject) {

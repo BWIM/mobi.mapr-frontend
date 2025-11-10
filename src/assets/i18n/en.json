@@ -162,7 +162,8 @@
     "LVLC": "The required mobility time is between 51% and 71% of the local average.",
     "LVLD": "The required mobility time is between 72% and 100% of the local average.",
     "LVLE": "The required mobility time is between 101% and 140% of the local average.",
-    "LVLF": "The required mobility time is at least 141% of the local average."
+    "LVLF": "The required mobility time is at least 141% of the local average.",
+    "DIFFERENCE_HEADER": "Legend for difference maps"
   },
   "MAP": {
     "ACTIONS": {
@@ -180,6 +181,12 @@
       "MEDIAN": "Median",
       "POP": "Population",
       "AREA": "Area"
+    },
+    "TOOLTIP": {
+      "BASELINE": "Baseline",
+      "COMPARISON": "Comparison",
+      "BETTER_THAN": "{{project1}} is <strong>{{percentage}}%</strong> better than {{project2}}",
+      "EQUAL": "Both projects are equal"
     }
   },
   "PROJECT_WIZARD": {

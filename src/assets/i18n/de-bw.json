@@ -162,7 +162,8 @@
     "LVLC": "D erforderlichi Mobilitätszit ligt zwische 51 % und 71 % im lokale Vergliich.",
     "LVLD": "D erforderlichi Mobilitätszit ligt zwische 72 % und 100 % im lokale Vergliich.",
     "LVLE": "D erforderlichi Mobilitätszit ligt zwische 101 % und 140 % im lokale Vergliich.",
-    "LVLF": "D erforderlichi Mobilitätszit isch mindestens 141 % im lokale Vergliich."
+    "LVLF": "D erforderlichi Mobilitätszit isch mindestens 141 % im lokale Vergliich.",
+    "DIFFERENCE_HEADER": "Legend für Differenzkart"
   },
   "MAP": {
     "ACTIONS": {
@@ -180,6 +181,12 @@
       "MEDIAN": "Median",
       "POP": "Bevölkerig",
       "AREA": "Flächi"
+    },
+    "TOOLTIP": {
+      "BASELINE": "Baseline",
+      "COMPARISON": "Vergliich",
+      "BETTER_THAN": "{{project1}} isch <strong>{{percentage}}%</strong> besser als {{project2}}",
+      "EQUAL": "Beidi Projäkte sin gleich"
     }
   },
   "PROJECT_WIZARD": {

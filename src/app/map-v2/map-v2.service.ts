@@ -422,7 +422,6 @@ export class MapV2Service {
   }
 
   private getFillColorExpression(): any {
-    console.log(this.currentProjectData);
     if (this.isDifferenceMap()) {
       // Divergent blue-magenta color scheme for difference maps (range: -1 to 1)
       // Using interpolate-hcl for perceptually uniform color transitions
@@ -430,9 +429,9 @@ export class MapV2Service {
         'interpolate',
         ['linear'],
         ['get', 'index'],
-        -0.5, 'rgba(60, 130, 160, 1)',      // Dark blue (negative extreme)
+        -0.5, 'rgba(195, 125, 95, 1)',      // Dark blue (negative extreme)
         0, 'rgba(240, 240, 240, 1)',   // Neutral gray (zero)
-        0.5, 'rgba(195, 125, 95, 1)'       // Magenta (positive extreme)
+        0.5, 'rgba(60, 130, 160, 1)'       // Magenta (positive extreme)
       ];
     } else {
       // Default color scheme for regular maps

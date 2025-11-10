@@ -24,6 +24,8 @@ export interface Project {
   project_type?: 'personal' | 'shared' | 'public';  // New property for project visibility
   is_shared?: boolean;  // Legacy property for backward compatibility
   difference?: boolean;  // Property to identify difference maps
+  baseline_project_name?: string;
+  comparison_project_name?: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -55,6 +57,8 @@ export interface ProjectInfo {
   profiles: string[];
   personas: string[];
   type: string;
+  baseline_project_name?: string;
+  comparison_project_name?: string;
 }
 
 export interface ExportProject {
