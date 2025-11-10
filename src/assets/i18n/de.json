@@ -163,7 +163,8 @@
     "LVLC": "Die erforderliche Mobilitätszeit liegt zwischen 51 % und 71 % im lokalen Vergleich.",
     "LVLD": "Die erforderliche Mobilitätszeit liegt zwischen 72 % und 100 % im lokalen Vergleich.",
     "LVLE": "Die erforderliche Mobilitätszeit liegt zwischen 101 % und 140 % im lokalen Vergleich.",
-    "LVLF": "Die erforderliche Mobilitätszeit beträgt mindestens 141 % im lokalen Vergleich."
+    "LVLF": "Die erforderliche Mobilitätszeit beträgt mindestens 141 % im lokalen Vergleich.",
+    "DIFFERENCE_HEADER": "Legende für Differenzkarten"
   },
   "MAP": {
     "ACTIONS": {

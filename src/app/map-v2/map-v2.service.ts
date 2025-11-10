@@ -422,7 +422,6 @@ export class MapV2Service {
   }
 
   private getFillColorExpression(): any {
-    console.log(this.currentProjectData);
     if (this.isDifferenceMap()) {
       // Divergent blue-magenta color scheme for difference maps (range: -1 to 1)
       // Using interpolate-hcl for perceptually uniform color transitions

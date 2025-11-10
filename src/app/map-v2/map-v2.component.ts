@@ -221,22 +221,31 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       popup.remove();
     });
 
-    map.on('click', 'geodata-fill', (e) => {
-      if (e.features && e.features[0]) {
-        const feature = e.features[0];
-        // Use the click coordinates as the center
-        const coordinates = [e.lngLat.lng, e.lngLat.lat];
-        const metadata = feature['layer']?.['metadata'] as { 'project-id': string };
-        if (metadata) {
-          this.analyzeService.setCurrentProject(metadata['project-id']);
-        }
+    // Disable click on base map if current project is a differenceMap
+    // In comparison mode, the base map is the beforeMap (when projectId matches current project)
+    // In normal mode, the base map is the main map (when projectId is undefined)
+    const currentProjectId = this.mapService.getCurrentProject();
+    const isBaseMap = !projectId || (projectId === currentProjectId);
+    const shouldDisableClick = this.mapService.isDifferenceMap() && isBaseMap;
 
-        const resolution = map && map.getZoom() > 10 ? "hexagon" : "gemeinde";
-        // this.analyzeService.setCurrentProject(feature)
-        this.analyzeService.setSelectedFeature(feature, resolution, coordinates);
-        this.mapService.setSelectedFeature(feature.properties['id']);
-      }
-    });
+    if (!shouldDisableClick) {
+      map.on('click', 'geodata-fill', (e) => {
+        if (e.features && e.features[0]) {
+          const feature = e.features[0];
+          // Use the click coordinates as the center
+          const coordinates = [e.lngLat.lng, e.lngLat.lat];
+          const metadata = feature['layer']?.['metadata'] as { 'project-id': string };
+          if (metadata) {
+            this.analyzeService.setCurrentProject(metadata['project-id']);
+          }
+
+          const resolution = map && map.getZoom() > 10 ? "hexagon" : "gemeinde";
+          // this.analyzeService.setCurrentProject(feature)
+          this.analyzeService.setSelectedFeature(feature, resolution, coordinates);
+          this.mapService.setSelectedFeature(feature.properties['id']);
+        }
+      });
+    }
   }
 
   private handleDragStart(map: Map): void {
@@ -250,11 +259,6 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       const reducedOpacity = ['*', this.originalOpacity, 0.3];
       map.setPaintProperty('geodata-fill', 'fill-opacity', reducedOpacity);
     }
-  }
-
-  private handleDragUpdate(map: Map): void {
-    // On mobile, we can skip frequent updates during drag for better performance
-    // The opacity is already reduced in handleDragStart
   }
 
   private handleDragEnd(map: Map): void {

@@ -402,3 +402,143 @@ $sixthColor: #9656a2;
   border: none;
   width: 100%;
 }
+
+/* Difference Map Legend Styles */
+.difference-legend {
+  cursor: default !important;
+  /* Disable expand functionality */
+
+  &:hover {
+    clip-path: none !important;
+    padding-right: 15px !important;
+    transform: none !important;
+
+    &::after {
+      opacity: 0 !important;
+    }
+  }
+
+  &::after {
+    display: none !important;
+    /* Hide expand arrow */
+  }
+
+  .difference-legend-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 250px;
+    padding: 12px;
+
+    .difference-header {
+      margin-bottom: 4px;
+
+      h3 {
+        margin: 0;
+        padding: 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #333333;
+        text-align: center;
+        line-height: 1.4;
+      }
+    }
+
+    .gradient-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .gradient-bar {
+        width: 100%;
+        height: 35px;
+        border-radius: 5px;
+        background: linear-gradient(to right,
+            rgba(60, 130, 160, 1) 0%,
+            rgba(107, 174, 214, 1) 25%,
+            rgba(240, 240, 240, 1) 50%,
+            rgba(253, 174, 107, 1) 75%,
+            rgba(195, 125, 95, 1) 100%);
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .gradient-labels {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        font-weight: 500;
+        color: #333333;
+        /* Dark text for visibility */
+        line-height: 1.3;
+
+        .gradient-label {
+          max-width: 40%;
+          word-wrap: break-word;
+          text-align: center;
+
+          &.left {
+            text-align: left;
+            color: rgba(60, 130, 160, 1);
+            /* Blue to match gradient */
+            font-weight: 600;
+          }
+
+          &.center {
+            text-align: center;
+            flex: 1;
+            color: #666666;
+            /* Gray for neutral */
+            font-size: 11px;
+          }
+
+          &.right {
+            text-align: right;
+            color: rgba(195, 125, 95, 1);
+            /* Orange to match gradient */
+            font-weight: 600;
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Mobile styles for difference legend */
+@media (max-width: 768px) {
+  .difference-legend.mobile-visible {
+    .difference-legend-content {
+      min-width: 200px;
+      max-width: 250px;
+      gap: 6px;
+      padding: 10px;
+
+      .difference-header {
+        margin-bottom: 2px;
+
+        h3 {
+          font-size: 13px;
+        }
+      }
+
+      .gradient-container {
+        gap: 6px;
+
+        .gradient-bar {
+          height: 30px;
+        }
+
+        .gradient-labels {
+          font-size: 11px;
+
+          .gradient-label {
+            &.center {
+              font-size: 10px;
+            }
+          }
+        }
+      }
+    }
+  }
+}

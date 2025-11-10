@@ -4,9 +4,10 @@
     <span class="toggle-icon">A</span>
   </div>
 
-  <!-- Legend -->
-  <div class="legend" id="legend" (click)="toggleExpand()"
-    [class.expanded]="isExpanded" [class.mobile-visible]="isMobileVisible">
+  <!-- Regular Legend (A-F) -->
+  <div *ngIf="!isDifferenceMap" class="legend" id="legend"
+    (click)="toggleExpand()" [class.expanded]="isExpanded"
+    [class.mobile-visible]="isMobileVisible">
     <div *ngFor="let level of scoreLevels" class="legend-item"
       [class]="level.name.toLowerCase()" id="legend-full">
       <span>{{ level.name }}</span>
@@ -14,6 +15,30 @@
         level.description }}</div>
       <div class="description mobile-description">{{
         level.descriptionMobile }}</div>
+    </div>
+  </div>
+
+  <!-- Difference Map Legend -->
+  <div *ngIf="isDifferenceMap" class="legend difference-legend" id="legend"
+    [class.mobile-visible]="isMobileVisible">
+    <div class="difference-legend-content">
+      <!-- Header -->
+      <div class="difference-header">
+        <h3>{{ differenceHeader }}</h3>
+      </div>
+      <!-- Color Gradient Bar -->
+      <div class="gradient-container">
+        <div class="gradient-bar"></div>
+        <div class="gradient-labels">
+          <span class="gradient-label left">
+            {{ currentProjectInfo?.baseline_project_name || 'Baseline' }}
+          </span>
+          <span class="gradient-label center">Neutral</span>
+          <span class="gradient-label right">
+            {{ currentProjectInfo?.comparison_project_name || 'Comparison' }}
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
