@@ -360,6 +360,10 @@ export class MapV2Service {
       authParam = `&token=${token}`;
     }
 
+    // Get current zoom directly from map to avoid race conditions
+    // Fall back to cached value if map is not available
+    const currentZoom = this.map?.getZoom() ?? this.currentZoom;
+
     // If hexagon view is enabled, always use the smallest hexagon layer
     if (!this.shareKey) {  // only allow for logged in users
       if (this.hexagonView) {
@@ -378,22 +382,22 @@ export class MapV2Service {
     }
 
     // Define zoom level thresholds for normal view
-    if (this.currentZoom < 7) {
+    if (currentZoom < 7) {
       // State level
       this.analyzeService.setMapType('state');
       this.mapType = 'state';
       return `${environment.apiUrl}/tiles/laender/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
-    } else if (this.currentZoom < 9) {
+    } else if (currentZoom < 9) {
       // County level
       this.analyzeService.setMapType('county');
       this.mapType = 'county';
       return `${environment.apiUrl}/tiles/landkreise/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
-    } else if (this.currentZoom < 10) {
+    } else if (currentZoom < 10) {
       // Municipality level
       this.analyzeService.setMapType('municipality');
       this.mapType = 'municipality';
       return `${environment.apiUrl}/tiles/gemeinden/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
-    } else if (this.currentZoom >= 10) {
+    } else if (currentZoom >= 10) {
       this.analyzeService.setMapType('hexagon');
       this.mapType = 'hexagon';
       return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}&resolution=9${authParam}`;
