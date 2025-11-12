@@ -16,6 +16,7 @@ import { firstValueFrom } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { MessageService } from 'primeng/api';
 import { IndexService } from '../services/index.service';
+import { ProjectsService } from '../projects/projects.service';
 
 @Component({
   selector: 'app-statistics',
@@ -82,7 +83,8 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     private translate: TranslateService,
     private geocodingService: GeocodingService,
     private messageService: MessageService,
-    private indexService: IndexService
+    private indexService: IndexService,
+    private projectsService: ProjectsService
   ) {
     this.updateScoreTypeOptions();
 
@@ -461,19 +463,35 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
 
   getIndexName(score: ScoreEntry): string {
-    if (this.scoreType === 'pop') {
-      return this.indexService.getIndexName(score.index_pop);
+    const isCompareProject = this.isCompareProject();
+    const indexValue = this.scoreType === 'pop' ? score.index_pop : score.index_avg;
+
+    if (isCompareProject) {
+      // For compare projects, return the actual index value formatted
+      return indexValue.toFixed(2);
     } else {
-      return this.indexService.getIndexName(score.index_avg);
+      return this.indexService.getIndexName(indexValue);
     }
   }
 
   getIndexColor(score: ScoreEntry): string {
-    if (this.scoreType === 'pop') {
-      return this.indexService.getIndexColor(score.index_pop);
+    const isCompareProject = this.isCompareProject();
+
+    if (isCompareProject) {
+      // For compare projects, return no color (use default text color)
+      return '';
     } else {
-      return this.indexService.getIndexColor(score.index_avg);
+      if (this.scoreType === 'pop') {
+        return this.indexService.getIndexColor(score.index_pop);
+      } else {
+        return this.indexService.getIndexColor(score.index_avg);
+      }
     }
+  }
+
+  private isCompareProject(): boolean {
+    const projectInfo = this.projectsService.getCurrentProjectInfo();
+    return !!(projectInfo?.baseline_project_name || projectInfo?.comparison_project_name);
   }
 
   get filteredCountyCount(): number {
@@ -553,11 +571,14 @@ export class StatisticsComponent implements OnInit, OnDestroy {
    * Calculates proper rankings based on score grades.
    * All entries with the same grade (A+, A, A-, etc.) get the same rank.
    * Ranks start at 1 and increment only when moving to the next grade group.
+   * For compare projects, ranks are based on actual index values (lower is better).
    */
   private calculateRankings(scores: ScoreEntry[]): ScoreEntry[] {
     if (!scores || scores.length === 0) {
       return scores;
     }
+
+    const isCompareProject = this.isCompareProject();
 
     // Sort scores by their index value (lower is better)
     const sortedScores = [...scores].sort((a, b) => {
@@ -566,7 +587,30 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       return aIndex - bIndex;
     });
 
-    // Group scores by their grade
+    if (isCompareProject) {
+      // For compare projects, rank by actual index value
+      // Entries with the same index value get the same rank
+      let currentRank = 1;
+      let previousIndex: number | null = null;
+
+      return sortedScores.map((score) => {
+        const indexValue = this.scoreType === 'pop' ? score.index_pop : score.index_avg;
+
+        // If this index is different from the previous one, increment rank
+        if (previousIndex !== null && Math.abs(indexValue - previousIndex) > 0.0001) {
+          currentRank++;
+        }
+
+        previousIndex = indexValue;
+
+        return {
+          ...score,
+          rank: currentRank
+        };
+      });
+    }
+
+    // For regular projects, group scores by their grade
     const gradeGroups: { [grade: string]: ScoreEntry[] } = {};
 
     sortedScores.forEach(score => {
