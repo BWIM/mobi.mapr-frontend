@@ -369,15 +369,15 @@ export class MapV2Service {
       if (this.hexagonView) {
         this.analyzeService.setMapType('hexagon');
         this.mapType = 'hexagon';
-        return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}&resolution=9${authParam}`;
+        return `${environment.apiUrl}/tiles/hexagons/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}&resolution=9${authParam}&overwrite=true`;
       } else if (this.gemeindeView) {
         this.analyzeService.setMapType('municipality');
         this.mapType = 'municipality';
-        return `${environment.apiUrl}/tiles/gemeinden/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
+        return `${environment.apiUrl}/tiles/gemeinden/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}&overwrite=true`;
       } else if (this.landkreisView) {
         this.analyzeService.setMapType('county');
         this.mapType = 'county';
-        return `${environment.apiUrl}/tiles/landkreise/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}`;
+        return `${environment.apiUrl}/tiles/landkreise/{z}/{x}/{y}.pbf?aggregation=${this.averageType}&project=${projectID}${authParam}&overwrite=true`;
       }
     }
 
