@@ -15,7 +15,7 @@ import XYZ from 'ol/source/XYZ';
 import VectorSource from 'ol/source/Vector';
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
-import { fromLonLat } from 'ol/proj';
+import { fromLonLat, toLonLat } from 'ol/proj';
 import Overlay from 'ol/Overlay';
 import { Style, Circle as CircleStyle, Fill, Stroke, Text } from 'ol/style';
 import { MultiPolygon } from 'ol/geom';
@@ -1825,12 +1825,6 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private zoomToPlaces(places: Place[]) {
-    if (!places || places.length === 0) {
-      this.noPlaces = true;
-      return;
-    } else {
-      this.noPlaces = false;
-    }
     if (!this.map) {
       console.error("Map not initialized");
       return;
@@ -1838,6 +1832,20 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
     // Get center coordinates
     const coordinates = this.analyzeService.getCoordinates();
+
+    if (!places || places.length === 0) {
+      this.noPlaces = true;
+      // Still set the map view to the feature center for the OSM link
+      if (coordinates) {
+        const centerCoordinate = fromLonLat([coordinates[0], coordinates[1]]);
+        this.map.getView().setCenter(centerCoordinate);
+        // Set a reasonable zoom level (e.g., 15 for a detailed view)
+        this.map.getView().setZoom(15);
+      }
+      return;
+    } else {
+      this.noPlaces = false;
+    }
 
     // Create extent from place coordinates and center point
     const placeCoordinates = places.map(place => fromLonLat([place.lon, place.lat]));
@@ -1881,6 +1889,36 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           padding: [20, 20, 20, 20] // Additional padding in pixels
         });
       }
+    }
+  }
+
+  /**
+   * Generates an OpenStreetMap editor link with the current map view
+   * @returns OSM iD editor URL with current map center and zoom, or null if map is not available
+   */
+  getOsmLink(): string | null {
+    if (!this.map) {
+      return null;
+    }
+
+    try {
+      const view = this.map.getView();
+      const center = view.getCenter();
+      const zoom = view.getZoom();
+
+      if (!center || zoom === undefined) {
+        return null;
+      }
+
+      // Convert from OpenLayers projection (EPSG:3857) to lon/lat (EPSG:4326)
+      const [lon, lat] = toLonLat(center);
+
+      // Generate OSM iD editor link with current map view
+      // Format: https://www.openstreetmap.org/edit#map=ZOOM/LAT/LON
+      return `https://www.openstreetmap.org/edit#map=${Math.round(zoom)}/${lat.toFixed(6)}/${lon.toFixed(6)}`;
+    } catch (error) {
+      console.error('Error generating OSM link:', error);
+      return null;
     }
   }
 }

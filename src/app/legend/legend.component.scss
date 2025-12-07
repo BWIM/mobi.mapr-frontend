@@ -453,12 +453,23 @@ $sixthColor: #9656a2;
         width: 100%;
         height: 35px;
         border-radius: 5px;
+        // Logarithmic distribution matching the map scale (-2 to +2)
         background: linear-gradient(to right,
-            rgba(195, 125, 95, 1) 0%,
-            rgba(253, 174, 107, 1) 25%,
-            rgba(240, 240, 240, 1) 50%,
-            rgba(107, 174, 214, 1) 75%,
-            rgba(60, 130, 160, 1) 100%);
+            rgba(139, 0, 0, 1) 0%,
+            rgba(178, 24, 43, 1) 8%,
+            rgba(214, 96, 77, 1) 16%,
+            rgba(220, 110, 90, 1) 22%,
+            rgba(240, 140, 120, 1) 28%,
+            rgba(244, 165, 130, 1) 34%,
+            rgba(250, 200, 180, 1) 40%,
+            rgba(245, 245, 245, 1) 50%,
+            rgba(200, 240, 180, 1) 60%,
+            rgba(166, 217, 106, 1) 66%,
+            rgba(140, 200, 100, 1) 72%,
+            rgba(102, 189, 99, 1) 78%,
+            rgba(60, 160, 80, 1) 84%,
+            rgba(26, 152, 80, 1) 92%,
+            rgba(0, 100, 0, 1) 100%);
         border: 1px solid rgba(0, 0, 0, 0.15);
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
@@ -480,8 +491,8 @@ $sixthColor: #9656a2;
 
           &.left {
             text-align: left;
-            color: rgba(60, 130, 160, 1);
-            /* Blue to match gradient */
+            color: rgba(178, 24, 43, 1);
+            /* Red to match gradient - represents worse/negative */
             font-weight: 600;
           }
 
@@ -495,8 +506,8 @@ $sixthColor: #9656a2;
 
           &.right {
             text-align: right;
-            color: rgba(195, 125, 95, 1);
-            /* Orange to match gradient */
+            color: rgba(26, 152, 80, 1);
+            /* Green to match gradient - represents better/positive */
             font-weight: 600;
           }
         }

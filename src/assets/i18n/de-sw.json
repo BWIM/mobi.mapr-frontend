@@ -314,6 +314,8 @@
       "SUBACTIVITIES_HINT": "💡 Uffbasse: Dabscht uff de Balke um Orte auf der Karte z'zeige",
       "NO_PLACES": "Koi plätzle gefunne",
       "DISABLE_PLACES": "Die Orte gibbets nur uff Gemeinde-Ebene oder runner",
+      "OSM_HINT": "Fehlt e Ort? Du chasch en direkt zu OpenStreetMap hinzufüge:",
+      "OSM_LINK": "D' OpenStreetMap Editor öffne",
       "LOADING": "Lade Aktivitäten...",
       "LOADING_SUBACTIVITIES": "Lade Unteraktivitäten...",
       "LOADING_MAP": "Lade Karte..."

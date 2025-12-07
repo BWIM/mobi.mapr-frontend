@@ -427,15 +427,41 @@ export class MapV2Service {
 
   private getFillColorExpression(): any {
     if (this.isDifferenceMap()) {
-      // Divergent blue-magenta color scheme for difference maps (range: -1 to 1)
-      // Using interpolate-hcl for perceptually uniform color transitions
+      // Logarithmic divergent scale (similar to normal map) for range -2 to +2
+      // Red = worse (negative), Green = better (positive)
+      // Uses logarithmic thresholds similar to normal map (0.35, 0.5, 0.71, 1, 1.41)
       return [
-        'interpolate',
-        ['linear'],
-        ['get', 'index'],
-        -0.5, 'rgba(195, 125, 95, 1)',      // Dark blue (negative extreme)
-        0, 'rgba(240, 240, 240, 1)',   // Neutral gray (zero)
-        0.5, 'rgba(60, 130, 160, 1)'       // Magenta (positive extreme)
+        'case',
+        // Extreme negative (much worse): Very dark red
+        ['<=', ['get', 'index'], -1.41], 'rgba(139, 0, 0, 1)',
+        // Very strong negative: Dark red
+        ['<=', ['get', 'index'], -1], 'rgba(178, 24, 43, 1)',
+        // Strong negative: Medium-dark red
+        ['<=', ['get', 'index'], -0.71], 'rgba(214, 96, 77, 1)',
+        // Moderate-strong negative: Medium red
+        ['<=', ['get', 'index'], -0.5], 'rgba(220, 110, 90, 1)',
+        // Moderate negative: Light-medium red
+        ['<=', ['get', 'index'], -0.35], 'rgba(240, 140, 120, 1)',
+        // Light negative: Light red
+        ['<=', ['get', 'index'], -0.15], 'rgba(244, 165, 130, 1)',
+        // Very light negative: Very light red
+        ['<=', ['get', 'index'], -0.05], 'rgba(250, 200, 180, 1)',
+        // Neutral zone (small differences): Light gray
+        ['<=', ['get', 'index'], 0.05], 'rgba(245, 245, 245, 1)',
+        // Very light positive: Very light green
+        ['<=', ['get', 'index'], 0.15], 'rgba(200, 240, 180, 1)',
+        // Light positive: Light green
+        ['<=', ['get', 'index'], 0.35], 'rgba(166, 217, 106, 1)',
+        // Moderate positive: Medium-light green
+        ['<=', ['get', 'index'], 0.5], 'rgba(140, 200, 100, 1)',
+        // Moderate-strong positive: Medium green
+        ['<=', ['get', 'index'], 0.71], 'rgba(102, 189, 99, 1)',
+        // Strong positive: Medium-dark green
+        ['<=', ['get', 'index'], 1], 'rgba(60, 160, 80, 1)',
+        // Very strong positive: Dark green
+        ['<=', ['get', 'index'], 1.41], 'rgba(26, 152, 80, 1)',
+        // Extreme positive (much better): Very dark green
+        'rgba(0, 100, 0, 1)'
       ];
     } else {
       // Default color scheme for regular maps
@@ -501,16 +527,23 @@ export class MapV2Service {
                 ['==', ['get', 'id'], this.selectedFeatureId],
                 '#000000',
                 [
-                  'interpolate-hcl',
-                  ['linear'],
-                  ['get', 'index'],
-                  -1, 'rgba(8, 48, 107, 0.7)',      // Dark blue
-                  -0.5, 'rgba(66, 146, 198, 0.7)',  // Medium blue
-                  -0.1, 'rgba(107, 174, 214, 0.7)', // Light blue
-                  0, 'rgba(240, 240, 240, 0.7)',   // Neutral gray
-                  0.1, 'rgba(253, 174, 107, 0.7)', // Light orange
-                  0.5, 'rgba(253, 141, 60, 0.7)',  // Medium orange
-                  1, 'rgba(166, 54, 3, 0.7)'       // Dark orange
+                  'case',
+                  // Match fill colors with slightly darker outlines for definition
+                  ['<=', ['get', 'index'], -1.41], 'rgba(100, 0, 0, 1)',
+                  ['<=', ['get', 'index'], -1], 'rgba(139, 19, 34, 1)',
+                  ['<=', ['get', 'index'], -0.71], 'rgba(178, 76, 61, 1)',
+                  ['<=', ['get', 'index'], -0.5], 'rgba(200, 90, 70, 1)',
+                  ['<=', ['get', 'index'], -0.35], 'rgba(220, 120, 100, 1)',
+                  ['<=', ['get', 'index'], -0.15], 'rgba(230, 150, 120, 1)',
+                  ['<=', ['get', 'index'], -0.05], 'rgba(240, 180, 160, 1)',
+                  ['<=', ['get', 'index'], 0.05], 'rgba(220, 220, 220, 1)',
+                  ['<=', ['get', 'index'], 0.15], 'rgba(180, 220, 160, 1)',
+                  ['<=', ['get', 'index'], 0.35], 'rgba(140, 190, 90, 1)',
+                  ['<=', ['get', 'index'], 0.5], 'rgba(120, 180, 80, 1)',
+                  ['<=', ['get', 'index'], 0.71], 'rgba(80, 160, 80, 1)',
+                  ['<=', ['get', 'index'], 1], 'rgba(50, 140, 70, 1)',
+                  ['<=', ['get', 'index'], 1.41], 'rgba(20, 120, 60, 1)',
+                  'rgba(0, 80, 0, 1)'
                 ]
               ]
               : [
