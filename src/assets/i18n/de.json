@@ -318,6 +318,8 @@
       "SUBACTIVITIES_HINT": "💡 Klicke auf einen Balken im Diagramm, um Orte auf der Karte anzuzeigen!",
       "NO_PLACES": "Keine Orte gefunden",
       "DISABLE_PLACES": "Die Orts-Ansicht ist nur für Gemeinde-Ebene oder Hexagone aktiviert. Um mehr Details zu bekommen, zoome in die Karte hinein!",
+      "OSM_HINT": "Fehlt ein Ort? Du kannst ihn direkt zu OpenStreetMap hinzufügen:",
+      "OSM_LINK": "Den OpenStreetMap Editor öffnen",
       "LOADING": "Lade Aktivitäten...",
       "LOADING_SUBACTIVITIES": "Lade Unteraktivitäten...",
       "LOADING_MAP": "Lade Karte..."

@@ -314,6 +314,8 @@
       "SUBACTIVITIES_HINT": "💡 Obacht: Dabb uff de balge, um Orte auf der Karte z'zeige",
       "NO_PLACES": "Kei Ort gefunne",
       "DISABLE_PLACES": "Orte gibts nur für Gmeinde oder drunner",
+      "OSM_HINT": "Fehlt e Ort? Du chasch en direkt zu OpenStreetMap hinzufüge:",
+      "OSM_LINK": "Dä OpenStreetMap Editor öffne",
       "LOADING": "Lade Aktivitäten...",
       "LOADING_SUBACTIVITIES": "Lade Unteraktivitäten...",
       "LOADING_MAP": "Lade Karte..."

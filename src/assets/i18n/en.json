@@ -317,6 +317,8 @@
       "SUBACTIVITIES_HINT": "💡 Click on a bar in the diagram to view places on the map!",
       "NO_PLACES": "No places available",
       "DISABLE_PLACES": "The places are only available for hexagons or municipalities. Please zoom into the map to get more details!",
+      "OSM_HINT": "Missing a place? You can add it directly to OpenStreetMap:",
+      "OSM_LINK": "Open OpenStreetMap Editor",
       "LOADING": "Loading activities...",
       "LOADING_SUBACTIVITIES": "Loading subactivities...",
       "LOADING_MAP": "Loading map..."
