@@ -165,6 +165,7 @@
     "LVLF": "The required mobility time is at least 141% of the local average.",
     "DIFFERENCE_HEADER": "Legend for difference maps",
     "SCORE_HEADER": "Travel time (minutes)",
+    "SCORE": "Score",
     "MINUTES": "min"
   },
   "MAP": {

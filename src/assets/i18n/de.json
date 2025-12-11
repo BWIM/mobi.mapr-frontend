@@ -166,6 +166,7 @@
     "LVLF": "Die erforderliche Mobilitätszeit beträgt mindestens 141 % im lokalen Vergleich.",
     "DIFFERENCE_HEADER": "Legende für Differenzkarten",
     "SCORE_HEADER": "Reisezeit (Minuten)",
+    "SCORE": "Score",
     "MINUTES": "Min"
   },
   "MAP": {
