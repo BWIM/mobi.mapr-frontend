@@ -176,6 +176,27 @@
                                                     </a>
                                                 </div>
                                             </div>
+
+                                            <!-- Legend for score/index colors -->
+                                            <div
+                                                class="mt-4 flex justify-center">
+                                                <div
+                                                    class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
+                                                    <div
+                                                        class="flex flex-wrap gap-3 justify-center">
+                                                        <div *ngFor="let item of getLegendItems()"
+                                                            class="flex items-center gap-2">
+                                                            <span
+                                                                class="w-4 h-4 rounded-sm"
+                                                                [style.background-color]="item.color"></span>
+                                                            <span
+                                                                class="text-xs text-gray-700">{{
+                                                                item.label
+                                                                }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75"
                                                 *ngIf="noPlaces">
                                                 <p
@@ -210,6 +231,25 @@
                                         </div>
                                     </p-dialog>
                                 </p-dialog>
+                            </div>
+
+                            <!-- Legend for score/index colors -->
+                            <div class="mt-4 flex justify-center">
+                                <div
+                                    class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
+                                    <div
+                                        class="flex flex-wrap gap-3 justify-center">
+                                        <div *ngFor="let item of getLegendItems()"
+                                            class="flex items-center gap-2">
+                                            <span class="w-4 h-4 rounded-sm"
+                                                [style.background-color]="item.color"></span>
+                                            <span
+                                                class="text-xs text-gray-700">{{
+                                                item.label
+                                                }}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div *ngIf="categories.length === 0"
                                 class="flex-1 flex items-center justify-center">
@@ -322,6 +362,24 @@
                             </div>
                         </div>
 
+                        <!-- Legend for score/index colors -->
+                        <div class="mt-4 flex justify-center">
+                            <div
+                                class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
+                                <div
+                                    class="flex flex-wrap gap-3 justify-center">
+                                    <div *ngFor="let item of getLegendItems()"
+                                        class="flex items-center gap-2">
+                                        <span class="w-4 h-4 rounded-sm"
+                                            [style.background-color]="item.color"></span>
+                                        <span class="text-xs text-gray-700">{{
+                                            item.label
+                                            }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div *ngIf="!showPersona"
                             class="flex-1 flex items-center justify-center">
                             <p class="text-gray-700 text-center">{{
@@ -380,6 +438,24 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Legend for score/index colors -->
+                        <div class="mt-4 flex justify-center">
+                            <div
+                                class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
+                                <div
+                                    class="flex flex-wrap gap-3 justify-center">
+                                    <div *ngFor="let item of getLegendItems()"
+                                        class="flex items-center gap-2">
+                                        <span class="w-4 h-4 rounded-sm"
+                                            [style.background-color]="item.color"></span>
+                                        <span class="text-xs text-gray-700">{{
+                                            item.label
+                                            }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div *ngIf="profiles.length === 0"
                             class="flex-1 flex items-center justify-center">
                             <p class="text-gray-700 text-center">{{
@@ -400,6 +476,7 @@
                     </p-tabpanel>
                 </p-tabs>
             </div>
+
         </div>
     </p-scrollPanel>
 </p-dialog>
