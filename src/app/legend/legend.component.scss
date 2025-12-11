@@ -516,6 +516,114 @@ $sixthColor: #9656a2;
   }
 }
 
+/* Score Map Legend Styles */
+.score-legend {
+  cursor: default !important;
+  /* Disable expand functionality */
+
+  &:hover {
+    clip-path: none !important;
+    padding-right: 15px !important;
+    transform: none !important;
+
+    &::after {
+      opacity: 0 !important;
+    }
+  }
+
+  &::after {
+    display: none !important;
+    /* Hide expand arrow */
+  }
+
+  .score-legend-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 250px;
+    padding: 12px;
+
+    .score-header {
+      margin-bottom: 4px;
+
+      h3 {
+        margin: 0;
+        padding: 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #333333;
+        text-align: center;
+        line-height: 1.4;
+      }
+    }
+
+    .gradient-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .score-gradient-bar {
+        width: 100%;
+        height: 35px;
+        border-radius: 5px;
+        // Stepped palette to match score map colors (0-60 min)
+        // Stops correspond to: 0, 10, 20, 30, 40, 50, 60+ minutes
+        background: linear-gradient(to right,
+            rgb(0, 60, 0) 0%,
+            rgb(0, 60, 0) 16.7%,
+            rgb(0, 100, 0) 16.7%,
+            rgb(0, 100, 0) 33.3%,
+            rgb(0, 140, 0) 33.3%,
+            rgb(0, 140, 0) 50%,
+            rgb(133, 218, 133) 50%,
+            rgb(133, 218, 133) 66.7%,
+            rgb(238, 61, 61) 66.7%,
+            rgb(238, 61, 61) 83.3%,
+            rgb(201, 0, 0) 83.3%,
+            rgb(201, 0, 0) 100%,
+            rgb(126, 0, 0) 100%);
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .gradient-labels {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        font-weight: 500;
+        color: #333333;
+        line-height: 1.3;
+
+        .gradient-label {
+          max-width: 33%;
+          word-wrap: break-word;
+          text-align: center;
+
+          &.left {
+            text-align: left;
+            color: rgb(0, 60, 0);
+            font-weight: 600;
+          }
+
+          &.center {
+            text-align: center;
+            flex: 1;
+            color: rgb(133, 218, 133);
+            font-weight: 600;
+          }
+
+          &.right {
+            text-align: right;
+            color: rgb(126, 0, 0);
+            font-weight: 600;
+          }
+        }
+      }
+    }
+  }
+}
+
 /* Mobile styles for difference legend */
 @media (max-width: 768px) {
   .difference-legend.mobile-visible {
@@ -537,6 +645,41 @@ $sixthColor: #9656a2;
         gap: 6px;
 
         .gradient-bar {
+          height: 30px;
+        }
+
+        .gradient-labels {
+          font-size: 11px;
+
+          .gradient-label {
+            &.center {
+              font-size: 10px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .score-legend.mobile-visible {
+    .score-legend-content {
+      min-width: 200px;
+      max-width: 250px;
+      gap: 6px;
+      padding: 10px;
+
+      .score-header {
+        margin-bottom: 2px;
+
+        h3 {
+          font-size: 13px;
+        }
+      }
+
+      .gradient-container {
+        gap: 6px;
+
+        .score-gradient-bar {
           height: 30px;
         }
 

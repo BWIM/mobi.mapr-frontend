@@ -164,7 +164,9 @@
     "LVLD": "Die erforderliche Mobilitätszeit liegt zwischen 72 % und 100 % im lokalen Vergleich.",
     "LVLE": "Die erforderliche Mobilitätszeit liegt zwischen 101 % und 140 % im lokalen Vergleich.",
     "LVLF": "Die erforderliche Mobilitätszeit beträgt mindestens 141 % im lokalen Vergleich.",
-    "DIFFERENCE_HEADER": "Legende für Differenzkarten"
+    "DIFFERENCE_HEADER": "Legende für Differenzkarten",
+    "SCORE_HEADER": "Reisezeit (Minuten)",
+    "MINUTES": "Min"
   },
   "MAP": {
     "ACTIONS": {
@@ -300,7 +302,10 @@
     "CREATED": "Erstellt",
     "COMPARISON_ERROR_TITLE": "Kein Projekt verfügbar",
     "COMPARISON_DIALOG_NO_PROJECTS": "Keine ähnliche Projekte verfügbar",
-    "EXIT_COMPARISON": "Vergleich beenden"
+    "EXIT_COMPARISON": "Vergleich beenden",
+    "VISUALIZATION_TYPE": "Visualisierung",
+    "INDEX": "Index",
+    "SCORE": "Score"
   },
   "ANALYZE": {
     "PERSONA": {

@@ -57,6 +57,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   // Score type
   scoreType: 'pop' | 'avg' = 'pop';
   scoreTypeOptions: any[] = [];
+  isScoreVisualization: boolean = false;
 
   // Gemeinde filter for municipalities
   selectedGemeinde: any = null;
@@ -87,6 +88,14 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     private projectsService: ProjectsService
   ) {
     this.updateScoreTypeOptions();
+
+    // Sync with current visualization type (index/score)
+    this.isScoreVisualization = this.mapService.getVisualizationType() === 'score';
+    this.subscription.add(
+      this.mapService.visualizationType$.subscribe(type => {
+        this.isScoreVisualization = type === 'score';
+      })
+    );
 
     this.subscription.add(
       this.statisticsService.visible$.subscribe(visible => {
@@ -472,6 +481,11 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     } else {
       return this.indexService.getIndexName(indexValue);
     }
+  }
+
+  getScoreMinutes(score: ScoreEntry): string {
+    const value = this.scoreType === 'pop' ? score.score_pop : score.score_avg;
+    return (value / 60).toFixed(1);
   }
 
   getIndexColor(score: ScoreEntry): string {

@@ -70,9 +70,14 @@
                             <th
                                 class="p-3 text-left font-semibold text-gray-700">
                                 {{ 'STATISTICS.NAME' | translate }}</th>
-                            <th
+                            <th *ngIf="!isScoreVisualization"
                                 class="p-3 text-left font-semibold text-gray-700">
                                 {{ 'STATISTICS.GRADE' | translate }}</th>
+                            <th *ngIf="isScoreVisualization"
+                                class="p-3 text-left font-semibold text-gray-700">
+                                {{ 'SIDEBAR.SCORE' | translate }} ({{
+                                'LEGEND.MINUTES' | translate }})
+                            </th>
                         </tr>
                     </ng-template>
                     <ng-template pTemplate="body" let-score let-i="rowIndex">
@@ -82,9 +87,13 @@
                             <td class="p-3" (click)="onFeatureClick(score)"
                                 title="{{score.name}}">
                                 {{score.name}}</td>
-                            <td class=" p-3 font-semibold"
+                            <td *ngIf="!isScoreVisualization"
+                                class=" p-3 font-semibold"
                                 [style.color]="getIndexColor(score)">
                                 {{getIndexName(score)}}
+                            </td>
+                            <td *ngIf="isScoreVisualization" class="p-3">
+                                {{ getScoreMinutes(score) }}
                             </td>
                         </tr>
                     </ng-template>
@@ -117,9 +126,14 @@
                             <th
                                 class="p-3 text-left font-semibold text-gray-700">
                                 {{ 'STATISTICS.NAME' | translate }}</th>
-                            <th
+                            <th *ngIf="!isScoreVisualization"
                                 class="p-3 text-left font-semibold text-gray-700">
                                 {{ 'STATISTICS.GRADE' | translate }}</th>
+                            <th *ngIf="isScoreVisualization"
+                                class="p-3 text-left font-semibold text-gray-700">
+                                {{ 'SIDEBAR.SCORE' | translate }} ({{
+                                'LEGEND.MINUTES' | translate }})
+                            </th>
                         </tr>
                     </ng-template>
                     <ng-template pTemplate="body" let-score let-i="rowIndex">
@@ -129,9 +143,13 @@
                             <td class="p-3" (click)="onFeatureClick(score)"
                                 title="{{score.name}} ({{'STATISTICS.POPULATION' | translate}}: {{score.population | number:'1.0-0'}})">
                                 {{score.name}}</td>
-                            <td class="p-3 font-semibold"
+                            <td *ngIf="!isScoreVisualization"
+                                class="p-3 font-semibold"
                                 [style.color]="getIndexColor(score)">
                                 {{getIndexName(score)}}
+                            </td>
+                            <td *ngIf="isScoreVisualization" class="p-3">
+                                {{ getScoreMinutes(score) }}
                             </td>
                         </tr>
                     </ng-template>
@@ -181,9 +199,14 @@
                             <th
                                 class="p-3 text-left font-semibold text-gray-700">
                                 {{ 'STATISTICS.NAME' | translate }}</th>
-                            <th
+                            <th *ngIf="!isScoreVisualization"
                                 class="p-3 text-left font-semibold text-gray-700">
                                 {{ 'STATISTICS.GRADE' | translate }}</th>
+                            <th *ngIf="isScoreVisualization"
+                                class="p-3 text-left font-semibold text-gray-700">
+                                {{ 'SIDEBAR.SCORE' | translate }} ({{
+                                'LEGEND.MINUTES' | translate }})
+                            </th>
                         </tr>
                     </ng-template>
                     <ng-template pTemplate="body" let-score let-i="rowIndex">
@@ -193,9 +216,13 @@
                             <td class="p-3" (click)="onFeatureClick(score)"
                                 title="{{score.name}} - {{score.county}} ({{'STATISTICS.POPULATION' | translate}}: {{score.population | number:'1.0-0'}})">
                                 {{score.name}}</td>
-                            <td class="p-3 font-semibold"
+                            <td *ngIf="!isScoreVisualization"
+                                class="p-3 font-semibold"
                                 [style.color]="getIndexColor(score)">
                                 {{getIndexName(score)}}
+                            </td>
+                            <td *ngIf="isScoreVisualization" class="p-3">
+                                {{ getScoreMinutes(score) }}
                             </td>
                         </tr>
                     </ng-template>

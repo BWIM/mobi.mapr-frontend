@@ -5,9 +5,9 @@
   </div>
 
   <!-- Regular Legend (A-F) -->
-  <div *ngIf="!isDifferenceMap" class="legend" id="legend"
-    (click)="toggleExpand()" [class.expanded]="isExpanded"
-    [class.mobile-visible]="isMobileVisible">
+  <div *ngIf="!isDifferenceMap && getVisualizationType() === 'index'"
+    class="legend" id="legend" (click)="toggleExpand()"
+    [class.expanded]="isExpanded" [class.mobile-visible]="isMobileVisible">
     <div *ngFor="let level of scoreLevels" class="legend-item"
       [class]="level.name.toLowerCase()" id="legend-full">
       <span>{{ level.name }}</span>
@@ -15,6 +15,30 @@
         level.description }}</div>
       <div class="description mobile-description">{{
         level.descriptionMobile }}</div>
+    </div>
+  </div>
+
+  <!-- Score Map Legend -->
+  <div *ngIf="!isDifferenceMap && getVisualizationType() === 'score'"
+    class="legend score-legend" id="legend"
+    [class.mobile-visible]="isMobileVisible">
+    <div class="score-legend-content">
+      <!-- Header -->
+      <div class="score-header">
+        <h3>{{ scoreHeader }}</h3>
+      </div>
+      <!-- Color Gradient Bar -->
+      <div class="gradient-container">
+        <div class="gradient-bar score-gradient-bar"></div>
+        <div class="gradient-labels">
+          <span class="gradient-label left">0 {{ 'LEGEND.MINUTES' | translate
+            }}</span>
+          <span class="gradient-label center">21 {{ 'LEGEND.MINUTES' | translate
+            }}</span>
+          <span class="gradient-label right">60+ {{ 'LEGEND.MINUTES' | translate
+            }}</span>
+        </div>
+      </div>
     </div>
   </div>
 
