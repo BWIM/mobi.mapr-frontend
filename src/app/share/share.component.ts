@@ -50,6 +50,13 @@ export class ShareComponent implements OnInit, OnDestroy {
     this.shareService.setIsShare(true);
 
     // Subscribe to route parameter changes
+    this.route.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        const vizType = (params['type'] || '').toLowerCase();
+        this.mapService.setVisualizationType(vizType === 'score' ? 'score' : 'index');
+      });
+
     this.route.params.pipe(
       takeUntil(this.destroy$)
     ).subscribe(params => {

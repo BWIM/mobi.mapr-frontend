@@ -2,6 +2,7 @@ import { Component, OnDestroy, ChangeDetectorRef, AfterViewInit, ViewChild, Elem
 import { SharedModule } from '../shared/shared.module';
 import { Subscription, forkJoin } from 'rxjs';
 import { AnalyzeService } from './analyze.service';
+import { TranslateService } from '@ngx-translate/core';
 import { Category, Activity, Place, Properties, Profile, Persona, DisplayNameItem, CategoryWithDisplayName, ActivityWithDisplayName, PersonaWithDisplayName, ProfileWithDisplayName } from './analyze.interface';
 import { MapGeoJSONFeature } from 'maplibre-gl';
 import { UIChart } from 'primeng/chart';
@@ -52,6 +53,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   properties: Properties | undefined;
   averageType: 'mean' | 'median' = 'mean';
   populationArea: 'pop' | 'area' = 'pop';
+  isScoreVisualization: boolean = false;
   currentScore: number = 0;
   currentScoreColor: string = '';
   sortBy: 'score' | 'weight' = 'weight';
@@ -118,8 +120,15 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     private cdr: ChangeDetectorRef,
     private messageService: MessageService,
     private indexService: IndexService,
-    private mapService: MapV2Service
+    private mapService: MapV2Service,
+    private translate: TranslateService
   ) {
+    this.isScoreVisualization = this.mapService.getVisualizationType() === 'score';
+    this.subscriptions.push(
+      this.mapService.visualizationType$.subscribe(type => {
+        this.isScoreVisualization = type === 'score';
+      })
+    );
     this.subscriptions.push(
       this.analyzeService.visible$.subscribe(
         visible => {
@@ -337,13 +346,24 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   }
 
   private getColorForValue = (value: number): string => {
+    if (this.isScoreVisualization) {
+      // value is score in seconds
+      if (value < 600) return 'rgb(0, 60, 0)';       // <10 min
+      if (value < 1200) return 'rgb(0, 100, 0)';     // 10-20 min
+      if (value < 1800) return 'rgb(0, 140, 0)';     // 20-30 min
+      if (value < 2400) return 'rgb(133, 218, 133)'; // 30-40 min
+      if (value < 3000) return 'rgb(238, 61, 61)';   // 40-50 min
+      if (value < 3600) return 'rgb(201, 0, 0)';     // 50-60 min
+      return 'rgb(126, 0, 0)';                       // >60 min
+    }
+    // Index-based (percent)
     if (value > 141) return '#9656a2';      // Lila (F)
     if (value > 100) return '#c21807';      // Rot (E)
-    if (value > 72) return '#ed7014';      // Orange (D)
-    if (value > 51) return '#eed202';      // Gelb (C)
-    if (value > 35) return '#3cb043';      // Hellgrün (B)
-    if (value > 0) return '#32612d';       // Dunkelgrün (A)
-    return '#9656a2';                     // Lila (F)
+    if (value > 72) return '#ed7014';       // Orange (D)
+    if (value > 51) return '#eed202';       // Gelb (C)
+    if (value > 35) return '#3cb043';       // Hellgrün (B)
+    if (value > 0) return '#32612d';        // Dunkelgrün (A)
+    return '#9656a2';                       // Lila (F)
   };
 
   private getProfileColor = (profileId: string): string => {
@@ -359,6 +379,28 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     };
     return profileColors[profileId] || '#666666'; // Default gray if not found
   };
+
+  getLegendItems(): { label: string; color: string }[] {
+    if (this.isScoreVisualization) {
+      return [
+        { label: '<10 min', color: 'rgb(0, 60, 0)' },
+        { label: '10-20 min', color: 'rgb(0, 100, 0)' },
+        { label: '20-30 min', color: 'rgb(0, 140, 0)' },
+        { label: '30-40 min', color: 'rgb(133, 218, 133)' },
+        { label: '40-50 min', color: 'rgb(238, 61, 61)' },
+        { label: '50-60 min', color: 'rgb(201, 0, 0)' },
+        { label: '>60 min', color: 'rgb(126, 0, 0)' },
+      ];
+    }
+    return [
+      { label: 'A', color: '#32612d' },
+      { label: 'B', color: '#3cb043' },
+      { label: 'C', color: '#eed202' },
+      { label: 'D', color: '#ed7014' },
+      { label: 'E', color: '#c21807' },
+      { label: 'F', color: '#9656a2' },
+    ];
+  }
 
   private initializeActivitiesChart(): void {
     if (!this.categories || this.categories.length === 0) {
@@ -384,7 +426,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       if (this.sortBy === 'weight') {
         return b.weight - a.weight;  // Sort by weight in descending order
       } else {
-        return b.index - a.index;    // Sort by score in descending order
+        const aMetric = this.isScoreVisualization ? (a.score ?? 0) : a.index;
+        const bMetric = this.isScoreVisualization ? (b.score ?? 0) : b.index;
+        return bMetric - aMetric;    // Sort by metric in descending order
       }
     });
 
@@ -399,9 +443,15 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       }
       return label;
     });
-    const scores = sortedData.map(item => item.index * 100);
+    const scores = sortedData.map(item =>
+      this.isScoreVisualization ? (item.score ?? 0) : item.index * 100
+    );
     const rawWeights = sortedData.map(item => item.weight);
-    const scoreNames = sortedData.map(item => this.indexService.getIndexName(item.index));
+    const scoreNames = sortedData.map(item =>
+      this.isScoreVisualization
+        ? `${((item.score ?? 0) / 60).toFixed(1)} ${this.translate.instant('LEGEND.MINUTES')}`
+        : this.indexService.getIndexName(item.index)
+    );
 
     // Normalize weights to percentages
     const totalWeight = rawWeights.reduce((sum, weight) => sum + weight, 0);
@@ -429,6 +479,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
+        legend: {
+          display: false
+        },
         tooltip: {
           mode: 'index',
           intersect: false,
@@ -440,14 +493,6 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
                 `Relevanz: ${normalizedWeights[index].toFixed(1)}%`
               ];
             }
-          }
-        },
-        legend: {
-          position: 'bottom',
-          labels: {
-            generateLabels: this.generateLabels,
-            usePointStyle: false,
-            padding: 15
           }
         }
       },
@@ -531,8 +576,14 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         // Extract data using display names from lookup map
         let labels: string[] = [];
         labels = sortedActivities.map(item => this.activitiesDisplayNames.get(item.id) || `Activity ${item.id}`);
-        const scores = sortedActivities.map(item => item.index * 100);
-        const scoreNames = sortedActivities.map(item => this.indexService.getIndexName(item.index));
+        const scores = sortedActivities.map(item =>
+          this.isScoreVisualization ? (item.score ?? 0) : item.index * 100
+        );
+        const scoreNames = sortedActivities.map(item =>
+          this.isScoreVisualization
+            ? `${((item.score ?? 0) / 60).toFixed(1)} ${this.translate.instant('LEGEND.MINUTES')}`
+            : this.indexService.getIndexName(item.index)
+        );
         const scoreColors = scores.map(value => this.getColorForValue(value));
 
         // Create chart data
@@ -574,6 +625,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
+        legend: {
+          display: false
+        },
         tooltip: {
           mode: 'index',
           intersect: false,
@@ -586,14 +640,6 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
                 `Weight: ${data[index].toFixed(1)}%`
               ];
             }
-          }
-        },
-        legend: {
-          position: 'bottom',
-          labels: {
-            generateLabels: this.generateLabels,
-            usePointStyle: false,
-            padding: 15
           }
         }
       },
@@ -905,6 +951,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
+        legend: {
+          display: false
+        },
         tooltip: {
           mode: 'index',
           intersect: false,
@@ -920,14 +969,6 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
               }
               return null; // Hide background datasets from tooltip
             }
-          }
-        },
-        legend: {
-          position: 'bottom',
-          labels: {
-            generateLabels: this.generateLabels,
-            usePointStyle: false,
-            padding: 15
           }
         },
         // Custom plugin to add value labels on data points
@@ -1381,11 +1422,15 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           return label;
         });
 
+        const pieColors = sortedActivities.map(item =>
+          this.isScoreVisualization ? this.getColorForValue(item.score ?? 0) : this.getColorForValue(item.index * 100)
+        );
+
         this.subactivitiesPieData = {
           labels: labels,
           datasets: [{
             data: normalizedWeights,
-            backgroundColor: sortedActivities.map(item => this.getColorForValue(item.index * 100)),
+            backgroundColor: pieColors,
             borderColor: '#ffffff',
             borderWidth: 2,
           }]

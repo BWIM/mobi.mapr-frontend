@@ -38,6 +38,8 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
   selectedAverageType: 'mean' | 'median' = 'mean';
   selectedPopulationArea: string = 'pop';
   populationAreaOptions: { label: string; value: string }[] = [];
+  selectedVisualizationType: 'index' | 'score' = 'index';
+  visualizationTypeOptions: { label: string; value: string }[] = [];
   @Output() projectLoaded = new EventEmitter<void>();
   comparisonProjects: Project[] = [];
   showComparisonDialog: boolean = false;
@@ -55,7 +57,7 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     private messageService: MessageService
   ) {
     this.subscription = new Subscription();
-    
+
     this.subscription.add(
       this.projectsService.currentProjectInfo$.subscribe(
         info => {
@@ -78,11 +80,15 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
 
     // Initialize population area options with translated labels
     this.updatePopulationAreaOptions();
-    
+
+    // Initialize visualization type options with translated labels
+    this.updateVisualizationTypeOptions();
+
     // Update options when language changes
     this.subscription.add(
       this.translate.onLangChange.subscribe(() => {
         this.updatePopulationAreaOptions();
+        this.updateVisualizationTypeOptions();
       })
     );
   }
@@ -94,8 +100,19 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     ];
   }
 
+  private updateVisualizationTypeOptions(): void {
+    this.visualizationTypeOptions = [
+      { label: this.translate.instant('SIDEBAR.INDEX'), value: 'index' },
+      { label: this.translate.instant('SIDEBAR.SCORE'), value: 'score' }
+    ];
+  }
+
   onVisualizationChange(): void {
     this.mapService.setAverageType(this.selectedPopulationArea === 'area' ? 'avg' : 'pop');
+  }
+
+  onVisualizationTypeChange(): void {
+    this.mapService.setVisualizationType(this.selectedVisualizationType);
   }
 
   showPdfExportDialog() {
@@ -146,7 +163,7 @@ export class DetailsSidebarComponent implements OnInit, OnDestroy {
     this.statisticsService.visible = true;
   }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
   ngOnDestroy() {
     if (this.subscription) {

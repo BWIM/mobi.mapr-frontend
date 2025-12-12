@@ -45,6 +45,9 @@ export class MapV2Service {
   private readonly ZOOM_COOLDOWN = 3000; // 5 seconds in milliseconds
   private projectVersion: number = 0;
   private mapType: 'hexagon' | 'county' | 'municipality' | 'state' = 'hexagon';
+  private visualizationType: 'index' | 'score' = 'index';
+  private visualizationTypeSubject = new BehaviorSubject<'index' | 'score'>('index');
+  visualizationType$ = this.visualizationTypeSubject.asObservable();
   comparisonProject: Project | null = null;
   private comparisonSubject = new BehaviorSubject<boolean>(false);
   comparison$ = this.comparisonSubject.asObservable();
@@ -341,6 +344,19 @@ export class MapV2Service {
     }
   }
 
+  setVisualizationType(visualizationType: 'index' | 'score'): void {
+    this.visualizationType = visualizationType;
+    this.visualizationTypeSubject.next(visualizationType);
+    if (this.currentProject) {
+      const updatedStyle = this.getProjectMapStyle(this.currentProject);
+      this.throttledStyleUpdate(updatedStyle);
+    }
+  }
+
+  getVisualizationType(): 'index' | 'score' {
+    return this.visualizationType;
+  }
+
   updateZoom(zoom: number): void {
     this.currentZoom = zoom;
     if (this.currentProject) {
@@ -426,7 +442,20 @@ export class MapV2Service {
   }
 
   private getFillColorExpression(): any {
-    if (this.isDifferenceMap()) {
+    if (this.visualizationType === 'score') {
+      // Stepped color scale every 600 s (0-60 min): dark green -> dark red
+      return [
+        'step',
+        ['get', 'score'],
+        'rgb(0, 60, 0)',      // < 10 min (deep dark green)
+        600, 'rgb(0, 100, 0)',    // 10-20 min
+        1200, 'rgb(0, 140, 0)',   // 20-30 min
+        1800, 'rgb(133, 218, 133)', // 30-40 min (transition)
+        2400, 'rgb(238, 61, 61)', // 40-50 min
+        3000, 'rgb(201, 0, 0)',   // 50-60 min
+        3600, 'rgb(126, 0, 0)'      // > 60 min (dark red)
+      ];
+    } else if (this.isDifferenceMap()) {
       // Logarithmic divergent scale (similar to normal map) for range -2 to +2
       // Red = worse (negative), Green = better (positive)
       // Uses logarithmic thresholds similar to normal map (0.35, 0.5, 0.71, 1, 1.41)
@@ -502,6 +531,18 @@ export class MapV2Service {
 
         // print the geodata
 
+        const fillOpacityExpression = this.mapType === 'hexagon'
+          ? [
+            'interpolate',
+            ['cubic-bezier', 0.26, 0.38, 0.82, 0.36],
+            ['get', 'population_density'],
+            0, 0.2,
+            100, 0.5,
+            1000, 0.8,
+            5000, 0.9
+          ]
+          : 0.9;
+
         baseStyle.layers.push({
           id: 'geodata-fill',
           type: 'fill',
@@ -512,61 +553,71 @@ export class MapV2Service {
           },
           paint: {
             'fill-color': this.getFillColorExpression(),
-            'fill-opacity': [
-              'interpolate',
-              ['cubic-bezier', 0.26, 0.38, 0.82, 0.36],
-              ['get', 'population_density'],
-              0, 0.2,
-              100, 0.5,
-              1000, 0.8,
-              5000, 0.9
-            ],
-            'fill-outline-color': this.isDifferenceMap()
+            'fill-opacity': fillOpacityExpression,
+            'fill-outline-color': this.visualizationType === 'score'
               ? [
                 'case',
                 ['==', ['get', 'id'], this.selectedFeatureId],
                 '#000000',
+                // Step-based outline aligned with the score fill scale (slightly darker)
                 [
-                  'case',
-                  // Match fill colors with slightly darker outlines for definition
-                  ['<=', ['get', 'index'], -1.41], 'rgba(100, 0, 0, 1)',
-                  ['<=', ['get', 'index'], -1], 'rgba(139, 19, 34, 1)',
-                  ['<=', ['get', 'index'], -0.71], 'rgba(178, 76, 61, 1)',
-                  ['<=', ['get', 'index'], -0.5], 'rgba(200, 90, 70, 1)',
-                  ['<=', ['get', 'index'], -0.35], 'rgba(220, 120, 100, 1)',
-                  ['<=', ['get', 'index'], -0.15], 'rgba(230, 150, 120, 1)',
-                  ['<=', ['get', 'index'], -0.05], 'rgba(240, 180, 160, 1)',
-                  ['<=', ['get', 'index'], 0.05], 'rgba(220, 220, 220, 1)',
-                  ['<=', ['get', 'index'], 0.15], 'rgba(180, 220, 160, 1)',
-                  ['<=', ['get', 'index'], 0.35], 'rgba(140, 190, 90, 1)',
-                  ['<=', ['get', 'index'], 0.5], 'rgba(120, 180, 80, 1)',
-                  ['<=', ['get', 'index'], 0.71], 'rgba(80, 160, 80, 1)',
-                  ['<=', ['get', 'index'], 1], 'rgba(50, 140, 70, 1)',
-                  ['<=', ['get', 'index'], 1.41], 'rgba(20, 120, 60, 1)',
-                  'rgba(0, 80, 0, 1)'
+                  'step',
+                  ['get', 'score'],
+                  'rgb(0, 45, 0)',    // <10 min
+                  600, 'rgb(0, 80, 0)',   // 10-20 min
+                  1200, 'rgb(0, 110, 0)', // 20-30 min
+                  1800, 'rgb(110, 180, 110)', // 30-40 min
+                  2400, 'rgb(200, 45, 45)',   // 40-50 min
+                  3000, 'rgb(170, 0, 0)',     // 50-60 min
+                  3600, 'rgb(90, 0, 0)'       // >60 min
                 ]
               ]
-              : [
-                'case',
-                ['==', ['get', 'id'], this.selectedFeatureId],
-                '#000000',
-                [
+              : this.isDifferenceMap()
+                ? [
                   'case',
-                  ['<=', ['get', 'index'], 0],
-                  'rgba(128, 128, 128, 0)',
-                  ['<=', ['get', 'index'], 0.35],
-                  'rgba(50, 97, 45, 0.7)',
-                  ['<=', ['get', 'index'], 0.5],
-                  'rgba(60, 176, 67, 0.7)',
-                  ['<=', ['get', 'index'], 0.71],
-                  'rgba(238, 210, 2, 0.7)',
-                  ['<=', ['get', 'index'], 1],
-                  'rgba(237, 112, 20, 0.7)',
-                  ['<=', ['get', 'index'], 1.41],
-                  'rgba(194, 24, 7, 0.7)',
-                  'rgba(150, 86, 162, 0.7)'
+                  ['==', ['get', 'id'], this.selectedFeatureId],
+                  '#000000',
+                  [
+                    'case',
+                    // Match fill colors with slightly darker outlines for definition
+                    ['<=', ['get', 'index'], -1.41], 'rgba(100, 0, 0, 1)',
+                    ['<=', ['get', 'index'], -1], 'rgba(139, 19, 34, 1)',
+                    ['<=', ['get', 'index'], -0.71], 'rgba(178, 76, 61, 1)',
+                    ['<=', ['get', 'index'], -0.5], 'rgba(200, 90, 70, 1)',
+                    ['<=', ['get', 'index'], -0.35], 'rgba(220, 120, 100, 1)',
+                    ['<=', ['get', 'index'], -0.15], 'rgba(230, 150, 120, 1)',
+                    ['<=', ['get', 'index'], -0.05], 'rgba(240, 180, 160, 1)',
+                    ['<=', ['get', 'index'], 0.05], 'rgba(220, 220, 220, 1)',
+                    ['<=', ['get', 'index'], 0.15], 'rgba(180, 220, 160, 1)',
+                    ['<=', ['get', 'index'], 0.35], 'rgba(140, 190, 90, 1)',
+                    ['<=', ['get', 'index'], 0.5], 'rgba(120, 180, 80, 1)',
+                    ['<=', ['get', 'index'], 0.71], 'rgba(80, 160, 80, 1)',
+                    ['<=', ['get', 'index'], 1], 'rgba(50, 140, 70, 1)',
+                    ['<=', ['get', 'index'], 1.41], 'rgba(20, 120, 60, 1)',
+                    'rgba(0, 80, 0, 1)'
+                  ]
                 ]
-              ]
+                : [
+                  'case',
+                  ['==', ['get', 'id'], this.selectedFeatureId],
+                  '#000000',
+                  [
+                    'case',
+                    ['<=', ['get', 'index'], 0],
+                    'rgba(128, 128, 128, 0)',
+                    ['<=', ['get', 'index'], 0.35],
+                    'rgba(50, 97, 45, 0.7)',
+                    ['<=', ['get', 'index'], 0.5],
+                    'rgba(60, 176, 67, 0.7)',
+                    ['<=', ['get', 'index'], 0.71],
+                    'rgba(238, 210, 2, 0.7)',
+                    ['<=', ['get', 'index'], 1],
+                    'rgba(237, 112, 20, 0.7)',
+                    ['<=', ['get', 'index'], 1.41],
+                    'rgba(194, 24, 7, 0.7)',
+                    'rgba(150, 86, 162, 0.7)'
+                  ]
+                ]
           }
         } as LayerSpecification);
 

@@ -28,13 +28,16 @@ export class LegendComponent implements OnInit, OnDestroy {
   private langChangeSubscription!: Subscription;
   private projectDataSubscription!: Subscription;
   private projectInfoSubscription!: Subscription;
+  private visualizationTypeSubscription!: Subscription;
   isPinned: boolean = false;
   isExpanded: boolean = false;
   isMobileVisible: boolean = false;
   isDifferenceMap: boolean = false;
+  isScoreVisualization: boolean = false;
   currentProjectData: Project | null = null;
   currentProjectInfo: ProjectInfo | null = null;
   differenceHeader: string = '';
+  scoreHeader: string = '';
 
   constructor(
     private translate: TranslateService,
@@ -64,11 +67,13 @@ export class LegendComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.initializeScoreLevels();
     this.loadDifferenceHeader();
+    this.loadScoreHeader();
 
     // Listen for language changes and update translations
     this.langChangeSubscription = this.translate.onLangChange.subscribe(() => {
       this.initializeScoreLevels();
       this.loadDifferenceHeader();
+      this.loadScoreHeader();
     });
 
     this.legendService.isPinned$.subscribe((pinned) => {
@@ -89,6 +94,12 @@ export class LegendComponent implements OnInit, OnDestroy {
       this.isDifferenceMap = projectData?.difference === true;
     });
 
+    // Subscribe to visualization type changes
+    this.isScoreVisualization = this.mapService.getVisualizationType() === 'score';
+    this.visualizationTypeSubscription = this.mapService.visualizationType$.subscribe(type => {
+      this.isScoreVisualization = type === 'score';
+    });
+
     // Subscribe to project info to get project names for difference maps
     // Get initial value immediately
     this.currentProjectInfo = this.projectsService.getCurrentProjectInfo();
@@ -107,6 +118,9 @@ export class LegendComponent implements OnInit, OnDestroy {
     }
     if (this.projectInfoSubscription) {
       this.projectInfoSubscription.unsubscribe();
+    }
+    if (this.visualizationTypeSubscription) {
+      this.visualizationTypeSubscription.unsubscribe();
     }
   }
 
@@ -165,5 +179,15 @@ export class LegendComponent implements OnInit, OnDestroy {
     this.translate.get('LEGEND.DIFFERENCE_HEADER').subscribe(translation => {
       this.differenceHeader = translation;
     });
+  }
+
+  loadScoreHeader() {
+    this.translate.get('LEGEND.SCORE_HEADER').subscribe(translation => {
+      this.scoreHeader = translation;
+    });
+  }
+
+  getVisualizationType(): 'index' | 'score' {
+    return this.mapService.getVisualizationType();
   }
 }

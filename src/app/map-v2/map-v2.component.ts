@@ -246,11 +246,25 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
               `;
             }
           } else {
-            popupContent = `
-              <div style="padding: 5px;">
-                ${name}: <strong>${this.indexService.getIndexName(properties['index'])}</strong>
-              </div>
-            `;
+            // Check if score visualization is selected
+            if (this.mapService.getVisualizationType() === 'score') {
+              const score = properties['score'] as number;
+              const scoreText = score !== undefined && score !== null
+                ? `${(score / 60).toFixed(1)} ${this.translate.instant('LEGEND.MINUTES')}`
+                : 'N/A';
+              popupContent = `
+                <div style="padding: 5px;">
+                  <div><strong>${name}</strong></div>
+                  <div>${this.translate.instant('SIDEBAR.SCORE')}: ${scoreText}</div>
+                </div>
+              `;
+            } else {
+              popupContent = `
+                <div style="padding: 5px;">
+                  ${name}: <strong>${this.indexService.getIndexName(properties['index'])}</strong>
+                </div>
+              `;
+            }
           }
 
           popup

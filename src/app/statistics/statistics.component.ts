@@ -57,6 +57,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   // Score type
   scoreType: 'pop' | 'avg' = 'pop';
   scoreTypeOptions: any[] = [];
+  isScoreVisualization: boolean = false;
 
   // Gemeinde filter for municipalities
   selectedGemeinde: any = null;
@@ -87,6 +88,14 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     private projectsService: ProjectsService
   ) {
     this.updateScoreTypeOptions();
+
+    // Sync with current visualization type (index/score)
+    this.isScoreVisualization = this.mapService.getVisualizationType() === 'score';
+    this.subscription.add(
+      this.mapService.visualizationType$.subscribe(type => {
+        this.isScoreVisualization = type === 'score';
+      })
+    );
 
     this.subscription.add(
       this.statisticsService.visible$.subscribe(visible => {
@@ -474,6 +483,11 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     }
   }
 
+  getScoreMinutes(score: ScoreEntry): string {
+    const value = this.scoreType === 'pop' ? score.score_pop : score.score_avg;
+    return (value / 60).toFixed(1);
+  }
+
   getIndexColor(score: ScoreEntry): string {
     const isCompareProject = this.isCompareProject();
 
@@ -568,10 +582,11 @@ export class StatisticsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Calculates proper rankings based on score grades.
-   * All entries with the same grade (A+, A, A-, etc.) get the same rank.
-   * Ranks start at 1 and increment only when moving to the next grade group.
-   * For compare projects, ranks are based on actual index values (lower is better).
+   * Calculates proper rankings based on the project type and visualization mode.
+   * Three scenarios:
+   * 1. Regular project with index visualization: rank by grade (A+, A, A-, etc.)
+   * 2. Compare project: rank by index value (lower is better)
+   * 3. Score visualization: rank by score value (higher is better)
    */
   private calculateRankings(scores: ScoreEntry[]): ScoreEntry[] {
     if (!scores || scores.length === 0) {
@@ -580,15 +595,14 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
     const isCompareProject = this.isCompareProject();
 
-    // Sort scores by their index value (lower is better)
-    const sortedScores = [...scores].sort((a, b) => {
-      const aIndex = this.scoreType === 'pop' ? a.index_pop : a.index_avg;
-      const bIndex = this.scoreType === 'pop' ? b.index_pop : b.index_avg;
-      return aIndex - bIndex;
-    });
-
     if (isCompareProject) {
-      // For compare projects, rank by actual index value
+      // Scenario 2: Compare project - rank by index value (lower is better)
+      const sortedScores = [...scores].sort((a, b) => {
+        const aIndex = this.scoreType === 'pop' ? a.index_pop : a.index_avg;
+        const bIndex = this.scoreType === 'pop' ? b.index_pop : b.index_avg;
+        return aIndex - bIndex;
+      });
+
       // Entries with the same index value get the same rank
       let currentRank = 1;
       let previousIndex: number | null = null;
@@ -610,7 +624,43 @@ export class StatisticsComponent implements OnInit, OnDestroy {
       });
     }
 
-    // For regular projects, group scores by their grade
+    if (this.isScoreVisualization) {
+      // Scenario 3: Score visualization - rank by score value (higher is better)
+      const sortedScores = [...scores].sort((a, b) => {
+        const aScore = this.scoreType === 'pop' ? a.score_pop : a.score_avg;
+        const bScore = this.scoreType === 'pop' ? b.score_pop : b.score_avg;
+        return bScore - aScore; // Descending order (higher is better)
+      });
+
+      // Group scores by their score value
+      let currentRank = 1;
+      let previousScore: number | null = null;
+
+      return sortedScores.map((score) => {
+        const scoreValue = this.scoreType === 'pop' ? score.score_pop : score.score_avg;
+
+        // If this score is different from the previous one, increment rank
+        if (previousScore !== null && Math.abs(scoreValue - previousScore) > 0.0001) {
+          currentRank++;
+        }
+
+        previousScore = scoreValue;
+
+        return {
+          ...score,
+          rank: currentRank
+        };
+      });
+    }
+
+    // Scenario 1: Regular project with index visualization - rank by grade (A+, A, A-, etc.)
+    const sortedScores = [...scores].sort((a, b) => {
+      const aIndex = this.scoreType === 'pop' ? a.index_pop : a.index_avg;
+      const bIndex = this.scoreType === 'pop' ? b.index_pop : b.index_avg;
+      return aIndex - bIndex; // Lower index is better
+    });
+
+    // Group scores by their grade
     const gradeGroups: { [grade: string]: ScoreEntry[] } = {};
 
     sortedScores.forEach(score => {

@@ -18,6 +18,19 @@
                         translate }}: {{ sharedProject.expires }}</p>
                 </div>
 
+                <!-- Visualization Type Selector -->
+                <div class="bg-white rounded-lg shadow p-4">
+                    <label
+                        class="block text-sm font-medium text-gray-700 mb-2">{{
+                        'SIDEBAR.VISUALIZATION_TYPE' | translate }}</label>
+                    <p-selectButton [options]="visualizationTypeOptions"
+                        [(ngModel)]="selectedVisualizationType"
+                        optionLabel="label" optionValue="value"
+                        (onChange)="onVisualizationTypeChange()"
+                        [allowEmpty]="false">
+                    </p-selectButton>
+                </div>
+
                 <!-- Projekt Beschreibung -->
                 <p-panel [header]="'SHARE.DESCRIPTION' | translate"
                     [toggleable]="true">

@@ -23,22 +23,26 @@ export interface Place {
 export interface Profile {
     id: number;
     index: number;
+    score?: number;
 }
 
 export interface Persona {
     id: number;
     index: number;
+    score?: number;
 }
 
 export interface Category {
     id: number;
     weight: number;
     index: number;
+    score?: number;
 }
 
 export interface Activity {
     id: number;
     index: number;
+    score?: number;
     weight: number;
 }
 
