@@ -519,6 +519,7 @@ $sixthColor: #9656a2;
 /* Score Map Legend Styles */
 .score-legend {
   cursor: default !important;
+  position: relative;
   /* Disable expand functionality */
 
   &:hover {
@@ -534,6 +535,17 @@ $sixthColor: #9656a2;
   &::after {
     display: none !important;
     /* Hide expand arrow */
+  }
+
+  .sledge-image {
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 50px;
+    width: auto;
+    z-index: 10;
+    pointer-events: none;
   }
 
   .score-legend-content {
@@ -561,6 +573,7 @@ $sixthColor: #9656a2;
       display: flex;
       flex-direction: column;
       gap: 8px;
+      position: relative;
 
       .score-gradient-bar {
         width: 100%;
@@ -662,6 +675,11 @@ $sixthColor: #9656a2;
   }
 
   .score-legend.mobile-visible {
+    .sledge-image {
+      top: -36px;
+      height: 40px;
+    }
+
     .score-legend-content {
       min-width: 200px;
       max-width: 250px;
