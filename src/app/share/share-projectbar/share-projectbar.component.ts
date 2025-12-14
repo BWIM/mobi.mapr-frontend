@@ -31,6 +31,7 @@ export class ShareProjectbarComponent implements OnInit, OnDestroy {
     projectGroups: ProjectGroup[] = [];
     selectedProject?: PublicSharedProject;
     loading: boolean = false;
+    isScoreVisualization: boolean = false;
 
     // Tabbed interface properties
     activeTabIndex: number = 0;
@@ -59,6 +60,7 @@ export class ShareProjectbarComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.loadData();
+        this.isScoreVisualization = this.mapv2Service.getVisualizationType() === 'score';
     }
 
     ngOnDestroy(): void {
@@ -149,7 +151,12 @@ export class ShareProjectbarComponent implements OnInit, OnDestroy {
             if (!project) return;
 
             // Reload the page with the share key in the URL
-            this.router.navigate(['/share', project.share_key]);
+            if (this.isScoreVisualization) {
+                // add type=score to the query params
+                this.router.navigate(['/share', project.share_key], { queryParams: { type: 'score' } });
+            } else {
+                this.router.navigate(['/share', project.share_key]);
+            }
         }
         catch (error) {
             console.error(error);
