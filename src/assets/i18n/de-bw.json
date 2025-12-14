@@ -157,6 +157,7 @@
     "EXPORTING": "Exportiere..."
   },
   "LEGEND": {
+    "TITLE": "Legend",
     "LVLA": "D erforderlichi Mobilitätszit isch maximal 35 % im lokale Vergliich.",
     "LVLB": "D erforderlichi Mobilitätszit ligt zwische 36 % und 50 % im lokale Vergliich.",
     "LVLC": "D erforderlichi Mobilitätszit ligt zwische 51 % und 71 % im lokale Vergliich.",
@@ -302,7 +303,9 @@
     "EXIT_COMPARISON": "Naus",
     "VISUALIZATION_TYPE": "Visualisierig",
     "INDEX": "Index",
-    "SCORE": "Score"
+    "INDEX_TOOLTIP": "Zeigt die bewertete Mobilitätszeit in Relation zur jw. Regionalklasse.",
+    "SCORE": "Score",
+    "SCORE_TOOLTIP": "Zeigt die Reisezeit in Minuten, angereichert mit subjektiven Faktoren."
   },
   "ANALYZE": {
     "PERSONA": {
@@ -399,6 +402,8 @@
     "GENERATING_PDF": "PDF wird erstellt..."
   },
   "SHARE": {
+    "DETAILS": "Infos",
+    "PROJECTS": "Projäkt",
     "NO_PROJECT_SELECTED": "Kei Projäkt usgwählt",
     "CREATED_BY": "Erstellt von",
     "EXPIRES": "Lauft ab am",

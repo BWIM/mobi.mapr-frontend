@@ -158,6 +158,7 @@
     "EXPORT": "Export"
   },
   "LEGEND": {
+    "TITLE": "Legende",
     "LVLA": "Die erforderliche Mobilitätszeit beträgt maximal 35 % im lokalen Vergleich.",
     "LVLB": "Die erforderliche Mobilitätszeit liegt zwischen 36 % und 50 % im lokalen Vergleich.",
     "LVLC": "Die erforderliche Mobilitätszeit liegt zwischen 51 % und 71 % im lokalen Vergleich.",
@@ -306,7 +307,9 @@
     "EXIT_COMPARISON": "Vergleich beenden",
     "VISUALIZATION_TYPE": "Visualisierung",
     "INDEX": "Index",
-    "SCORE": "Score"
+    "INDEX_TOOLTIP": "Zeigt die bewertete Mobilitätszeit in Relation zur jw. Regionalklasse.",
+    "SCORE": "Score",
+    "SCORE_TOOLTIP": "Zeigt die Reisezeit in Minuten, angereichert mit subjektiven Faktoren."
   },
   "ANALYZE": {
     "PERSONA": {
@@ -368,6 +371,9 @@
     "NO_PROJECT_SELECTED": "Kein Projekt ausgewählt",
     "CREATED_BY": "Erstellt von",
     "EXPIRES": "Läuft ab am",
+    "DETAILS": "Infos",
+    "LINKED_MAPS": "Verknüpfte Karten",
+    "PROJECTS": "Projekte",
     "DESCRIPTION": "Beschreibung",
     "ACTIVITIES": "Aktivitäten",
     "PERSONAS": "Personas",

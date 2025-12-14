@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
@@ -7,6 +7,7 @@ import { LegendService } from './legend.service';
 import { MapV2Service } from '../map-v2/map-v2.service';
 import { Project, ProjectInfo } from '../projects/project.interface';
 import { ProjectsService } from '../projects/projects.service';
+import { ShareService } from '../share/share.service';
 
 type ScoreLevel = {
   name: string;
@@ -38,12 +39,15 @@ export class LegendComponent implements OnInit, OnDestroy {
   currentProjectInfo: ProjectInfo | null = null;
   differenceHeader: string = '';
   scoreHeader: string = '';
+  isShare: boolean = false;
+  isMobile: boolean = false;
 
   constructor(
     private translate: TranslateService,
     private legendService: LegendService,
     private mapService: MapV2Service,
-    private projectsService: ProjectsService
+    private projectsService: ProjectsService,
+    private shareService: ShareService
   ) { }
 
   scoreLevel?: ScoreLevel;
@@ -65,9 +69,16 @@ export class LegendComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.checkMobile();
     this.initializeScoreLevels();
     this.loadDifferenceHeader();
     this.loadScoreHeader();
+
+    // Check if in share mode
+    this.isShare = this.shareService.getIsShare();
+    this.shareService.isShare$.subscribe(isShare => {
+      this.isShare = isShare;
+    });
 
     // Listen for language changes and update translations
     this.langChangeSubscription = this.translate.onLangChange.subscribe(() => {
@@ -106,6 +117,15 @@ export class LegendComponent implements OnInit, OnDestroy {
     this.projectInfoSubscription = this.projectsService.currentProjectInfo$.subscribe(projectInfo => {
       this.currentProjectInfo = projectInfo;
     });
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(): void {
+    this.checkMobile();
+  }
+
+  private checkMobile(): void {
+    this.isMobile = window.innerWidth <= 768;
   }
 
   ngOnDestroy() {

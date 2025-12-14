@@ -157,6 +157,7 @@
     "EXPORTING": "Exporting..."
   },
   "LEGEND": {
+    "TITLE": "Legend",
     "LVLA": "The required mobility time is max. 35% of the local average.",
     "LVLB": "The required mobility time is between 36% and 50% of the local average.",
     "LVLC": "The required mobility time is between 51% and 71% of the local average.",
@@ -305,7 +306,9 @@
     "EXIT_COMPARISON": "Exit comparison",
     "VISUALIZATION_TYPE": "Visualization",
     "INDEX": "Index",
-    "SCORE": "Score"
+    "INDEX_TOOLTIP": "Shows the evaluated mobility time in relation to the local average.",
+    "SCORE": "Score",
+    "SCORE_TOOLTIP": "Shows travel time in minutes, enriched with subjective factors."
   },
   "ANALYZE": {
     "PERSONA": {
@@ -364,6 +367,9 @@
     "GENERATING_PDF": "Generating PDF..."
   },
   "SHARE": {
+    "DETAILS": "Details",
+    "LINKED_MAPS": "Linked Maps",
+    "PROJECTS": "Projects",
     "NO_PROJECT_SELECTED": "No project selected",
     "CREATED_BY": "Created by",
     "EXPIRES": "Expires at",

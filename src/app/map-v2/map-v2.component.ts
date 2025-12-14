@@ -6,7 +6,6 @@ import { LngLatBounds, Map, Popup, NavigationControl, ScaleControl } from 'mapli
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { LoadingService } from '../services/loading.service';
-import { SearchOverlayComponent } from './search-overlay/search-overlay.component';
 import { LegendComponent } from '../legend/legend.component';
 import { Project, ProjectInfo } from '../projects/project.interface';
 import { IndexService } from '../services/index.service';
@@ -20,7 +19,7 @@ import MaplibreCompare from '@maplibre/maplibre-gl-compare';
   selector: 'app-map-v2',
   templateUrl: './map-v2.component.html',
   styleUrl: './map-v2.component.css',
-  imports: [CommonModule, SearchOverlayComponent, LegendComponent],
+  imports: [CommonModule, LegendComponent],
   standalone: true
 })
 export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
@@ -36,6 +35,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   private comparisonSubscription: Subscription;
   private stopComparisonSubscription: Subscription;
   private projectDataSubscription: Subscription;
+  private locationSubscription: Subscription;
   private projectInfoSubscription: Subscription;
   private isComparison: boolean = false;
   projectName: string | null = null;
@@ -99,6 +99,17 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     this.currentProjectInfo = this.projectsService.getCurrentProjectInfo();
     this.projectInfoSubscription = this.projectsService.currentProjectInfo$.subscribe(projectInfo => {
       this.currentProjectInfo = projectInfo;
+    });
+
+    // Subscribe to location changes for search functionality
+    this.locationSubscription = this.mapService.location$.subscribe(location => {
+      if (location && this.map) {
+        this.map.flyTo({
+          center: [location.lng, location.lat],
+          zoom: 11,
+          duration: 2000
+        });
+      }
     });
   }
 
@@ -332,6 +343,9 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     }
     if (this.stopComparisonSubscription) {
       this.stopComparisonSubscription.unsubscribe();
+    }
+    if (this.locationSubscription) {
+      this.locationSubscription.unsubscribe();
     }
     if (this.projectDataSubscription) {
       this.projectDataSubscription.unsubscribe();

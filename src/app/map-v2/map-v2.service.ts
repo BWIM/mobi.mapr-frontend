@@ -48,6 +48,8 @@ export class MapV2Service {
   private visualizationType: 'index' | 'score' = 'index';
   private visualizationTypeSubject = new BehaviorSubject<'index' | 'score'>('index');
   visualizationType$ = this.visualizationTypeSubject.asObservable();
+  private locationSubject = new BehaviorSubject<{ lng: number, lat: number } | null>(null);
+  location$ = this.locationSubject.asObservable();
   comparisonProject: Project | null = null;
   private comparisonSubject = new BehaviorSubject<boolean>(false);
   comparison$ = this.comparisonSubject.asObservable();
@@ -146,6 +148,19 @@ export class MapV2Service {
 
   getCenter(): [number, number] {
     return this.map?.getCenter() as unknown as [number, number];
+  }
+
+  flyToLocation(lng: number, lat: number): void {
+    if (this.map) {
+      this.map.flyTo({
+        center: [lng, lat],
+        zoom: 11,
+        duration: 2000
+      });
+    } else {
+      // If map is not ready, emit location for later use
+      this.locationSubject.next({ lng, lat });
+    }
   }
 
   getCurrentProject(): string | null {

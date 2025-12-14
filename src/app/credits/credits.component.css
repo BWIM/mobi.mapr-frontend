@@ -5,6 +5,78 @@
     z-index: 100;
 }
 
+/* Mobile speeddial positioning - top right */
+@media (max-width: 768px) {
+    :host {
+        top: 1rem !important;
+        bottom: auto !important;
+    }
+
+    /* Enhanced mobile speeddial styling - elegant glassmorphism design */
+    :host ::ng-deep #credits-sidebar-mobile .mobile-speeddial-button {
+        width: 3rem !important;
+        height: 3rem !important;
+        min-width: 3rem !important;
+        min-height: 3rem !important;
+        background: color-mix(in srgb, var(--surface-color) 95%, transparent) !important;
+        backdrop-filter: blur(20px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+        border: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent) !important;
+        border-radius: 50% !important;
+        box-shadow: 0 4px 20px color-mix(in srgb, var(--primary-color) 15%, transparent),
+            0 2px 8px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 color-mix(in srgb, var(--surface-color) 60%, transparent) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        color: var(--primary-color) !important;
+    }
+
+    :host ::ng-deep #credits-sidebar-mobile .mobile-speeddial-button:hover {
+        background: var(--surface-color) !important;
+        transform: scale(1.08) translateY(-2px) !important;
+        box-shadow: 0 8px 32px color-mix(in srgb, var(--primary-color) 25%, transparent),
+            0 4px 16px rgba(0, 0, 0, 0.15),
+            inset 0 1px 0 color-mix(in srgb, var(--surface-color) 80%, transparent) !important;
+        border-color: color-mix(in srgb, var(--primary-color) 40%, transparent) !important;
+    }
+
+    :host ::ng-deep #credits-sidebar-mobile .mobile-speeddial-button:active {
+        transform: scale(0.96) translateY(0) !important;
+    }
+
+    :host ::ng-deep #credits-sidebar-mobile .mobile-speeddial-button .p-speeddial-icon {
+        color: var(--primary-color) !important;
+        font-size: 1.25rem !important;
+        font-weight: 500 !important;
+    }
+
+    :host ::ng-deep #credits-sidebar-mobile .p-speeddial-list {
+        margin-top: 0.75rem !important;
+    }
+
+    :host ::ng-deep #credits-sidebar-mobile .p-speeddial-action {
+        width: 2.75rem !important;
+        height: 2.75rem !important;
+        min-width: 2.75rem !important;
+        min-height: 2.75rem !important;
+        background: color-mix(in srgb, var(--surface-color) 95%, transparent) !important;
+        backdrop-filter: blur(20px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+        border: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent) !important;
+        border-radius: 50% !important;
+        box-shadow: 0 4px 20px color-mix(in srgb, var(--primary-color) 15%, transparent),
+            inset 0 1px 0 color-mix(in srgb, var(--surface-color) 60%, transparent) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    :host ::ng-deep #credits-sidebar-mobile .p-speeddial-action:hover {
+        background: var(--surface-color) !important;
+        transform: scale(1.15) !important;
+        box-shadow: 0 8px 32px color-mix(in srgb, var(--primary-color) 25%, transparent),
+            inset 0 1px 0 color-mix(in srgb, var(--surface-color) 80%, transparent) !important;
+        border-color: color-mix(in srgb, var(--primary-color) 40%, transparent) !important;
+    }
+}
+
 /* Modern Dialog Styles */
 :host ::ng-deep .credits-dialog.p-dialog {
     margin: 0 !important;

@@ -175,13 +175,13 @@ export class CreditsComponent implements OnInit {
           this.showShortcuts();
         }
       },
-      {
-        icon: 'pi pi-book',
-        label: this.translate.instant('CREDITS.TOGGLE_TUTORIAL'),
-        command: () => {
-          this.startTutorial();
-        }
-      }
+      // {
+      //   icon: 'pi pi-book',
+      //   label: this.translate.instant('CREDITS.TOGGLE_TUTORIAL'),
+      //   command: () => {
+      //     this.startTutorial();
+      //   }
+      // }
     );
   }
 

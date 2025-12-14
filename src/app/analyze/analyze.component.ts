@@ -1397,6 +1397,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       }]
     };
 
+    // Clear pie chart data to prevent stale data from persisting
+    this.subactivitiesPieData = null;
+
     this.initializeSubActivitiesChart(); // Reset subactivities chart when leaving
   }
 

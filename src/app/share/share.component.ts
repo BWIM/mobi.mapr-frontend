@@ -4,7 +4,6 @@ import { SharedModule } from '../shared/shared.module';
 import { ShareService } from './share.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ShareSidebarComponent } from './share-sidebar/share-sidebar.component';
-import { ShareProjectbarComponent } from './share-projectbar/share-projectbar.component';
 import { ShareProject } from './share.interface';
 import { Project } from '../projects/project.interface';
 import { LoadingService } from '../services/loading.service';
@@ -18,7 +17,7 @@ import { takeUntil } from 'rxjs/operators';
 @Component({
   selector: 'app-share',
   standalone: true,
-  imports: [SharedModule, LoadingSpinnerComponent, ShareSidebarComponent, ShareProjectbarComponent, MapV2Component],
+  imports: [SharedModule, LoadingSpinnerComponent, ShareSidebarComponent, MapV2Component],
   templateUrl: './share.component.html',
   styleUrl: './share.component.css'
 })
@@ -29,7 +28,6 @@ export class ShareComponent implements OnInit, OnDestroy {
   project: any = null;
   sharedProject: ShareProject | null = null;
   rightSidebarExpanded: boolean = false;
-  leftSidebarExpanded: boolean = false;
   isMobile: boolean = false;
   private destroy$ = new Subject<void>();
 
@@ -39,8 +37,6 @@ export class ShareComponent implements OnInit, OnDestroy {
     private loadingService: LoadingService,
     private mapService: MapV2Service,
     private analyzeService: AnalyzeService,
-    private tutorialService: TutorialService,
-    private router: Router
   ) {
     this.checkMobile();
   }
@@ -162,10 +158,14 @@ export class ShareComponent implements OnInit, OnDestroy {
   }
 
   toggleSidebar() {
+    this.rightSidebarExpanded = !this.rightSidebarExpanded;
     this.shareService.toggleRightSidebarExpanded();
   }
 
-  toggleProjectbar() {
-    this.leftSidebarExpanded = !this.leftSidebarExpanded;
+
+  onLocationSelected(location: { lng: number, lat: number }) {
+    // Forward location selection to map service
+    // The map component will handle the flyTo action
+    this.mapService.flyToLocation(location.lng, location.lat);
   }
 }
