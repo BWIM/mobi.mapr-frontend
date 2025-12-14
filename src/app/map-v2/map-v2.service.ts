@@ -205,11 +205,15 @@ export class MapV2Service {
           type: 'raster',
           tiles: ['https://basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png'],
           tileSize: 256,
+          minzoom: 0,
+          maxzoom: 14, // Reduced from 19 to limit high-zoom tile loading
         } as SourceSpecification,
         'carto-labels': {
           type: 'raster',
           tiles: ['https://basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png'],
           tileSize: 256,
+          minzoom: 0,
+          maxzoom: 14, // Reduced from 19 to limit high-zoom tile loading
         } as SourceSpecification,
         'temporary-geojson': {
           type: 'geojson',
@@ -225,7 +229,7 @@ export class MapV2Service {
           type: 'raster',
           source: 'carto-light',
           minzoom: 0,
-          maxzoom: 19
+          maxzoom: 14 // Reduced from 19 to limit high-zoom tile loading
         } as LayerSpecification,
         {
           id: 'temporary-features',
@@ -691,7 +695,7 @@ export class MapV2Service {
         type: 'raster',
         source: 'carto-labels',
         minzoom: 0,
-        maxzoom: 19
+        maxzoom: 14 // Reduced from 19 to limit high-zoom tile loading
       } as LayerSpecification);
     }
 

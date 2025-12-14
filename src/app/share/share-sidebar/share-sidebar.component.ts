@@ -89,12 +89,14 @@ export class ShareSidebarComponent implements OnInit, OnDestroy {
     private loadingService: LoadingService
   ) {
     // Setup search debouncing
-    this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged()
-    ).subscribe(query => {
-      this.performSearch(query);
-    });
+    this.subscription.add(
+      this.searchSubject.pipe(
+        debounceTime(300),
+        distinctUntilChanged()
+      ).subscribe(query => {
+        this.performSearch(query);
+      })
+    );
   }
 
   ngOnInit(): void {

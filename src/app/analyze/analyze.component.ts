@@ -1808,6 +1808,18 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           return true; // Stop iteration at first feature found
         });
 
+        // Change cursor style based on whether we're hovering over a place (not center point)
+        if (this.map) {
+          const mapViewport = this.map.getViewport();
+          if (foundFeature && foundFeature.get('id') !== 'center') {
+            // Hovering over a place - show pointer cursor
+            mapViewport.style.cursor = 'pointer';
+          } else {
+            // Not hovering over a place - show default cursor
+            mapViewport.style.cursor = '';
+          }
+        }
+
         if (foundFeature) {
           const name = foundFeature.get('name');
           const rating = foundFeature.get('rating');

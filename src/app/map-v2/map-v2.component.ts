@@ -131,7 +131,9 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
         dragRotate: false,
         // Mobile optimizations
         renderWorldCopies: false,
-        maxTileCacheSize: 100,
+        maxTileCacheSize: 50, // Reduced from 100 to limit tile cache
+        maxPitch: 0, // Prevent tilting which can cause more tiles to load
+        refreshExpiredTiles: false, // Don't reload expired tiles automatically
         localIdeographFontFamily: false,
         attributionControl: false
       };
@@ -410,7 +412,11 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       center: initialCenter,
       zoom: initialZoom,
       dragRotate: false,
-      attributionControl: false
+      attributionControl: false,
+      renderWorldCopies: false,
+      maxTileCacheSize: 50, // Reduced to limit tile cache
+      maxPitch: 0, // Prevent tilting which can cause more tiles to load
+      refreshExpiredTiles: false // Don't reload expired tiles automatically
     });
 
     // Add navigation controls to before map
@@ -433,7 +439,11 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       center: initialCenter,
       zoom: initialZoom,
       dragRotate: false,
-      attributionControl: false
+      attributionControl: false,
+      renderWorldCopies: false,
+      maxTileCacheSize: 50, // Reduced to limit tile cache
+      maxPitch: 0, // Prevent tilting which can cause more tiles to load
+      refreshExpiredTiles: false // Don't reload expired tiles automatically
     });
 
     // Add navigation controls to after map
