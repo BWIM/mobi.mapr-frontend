@@ -710,9 +710,53 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         }]
       };
 
-      this.generateSubactivitiesPieData(category.id);
-      this.showSubactivitiesPie = true;
-      this.initializeSubActivitiesChart(category.id); // Update subactivities chart for the hovered category
+      // Check if category has only one activity - if so, show map directly
+      this.analyzeService.getActivities(category.id).subscribe({
+        next: (activities) => {
+          if (activities && activities.length === 1) {
+            // Category has only one activity - show map directly
+            const activity = activities[0];
+            const activityId = activity.id;
+
+            // Set loading state and show both dialogs (parent needed for DOM structure)
+            // The parent dialog will be shown but we'll immediately show the map dialog on top
+            this.mapLoaded = false;
+            this.showSubactivitiesPie = true; // Show parent dialog so map container is in DOM
+            this.showSubactivitiesMap = true; // Show map dialog on top
+            // Use the full activity name from the stored data
+            this.hoveredSubactivityName = this.activitiesDisplayNames.get(activityId) || `Activity ${activityId}`;
+
+            // Wait for dialogs to be rendered before initializing map
+            // Need longer delay since we're rendering both parent and child dialogs
+            setTimeout(() => {
+              this.initializeMapWithRetry().then(() => {
+                // Only fetch and add places after map is fully initialized
+                this.analyzeService.getPlaces(activityId).subscribe((res: Place[]) => {
+                  this.disablePlaces = res.length === 0;
+                  this.addPlacesToMap(res);
+                  this.zoomToPlaces(res);
+                  this.mapLoaded = true;
+                });
+              }).catch((error) => {
+                console.error("Failed to initialize map:", error);
+                this.mapLoaded = true; // Set to true to hide loading indicator
+              });
+            }, 400);
+          } else {
+            // Category has multiple activities - show pie chart as before
+            this.generateSubactivitiesPieData(category.id);
+            this.showSubactivitiesPie = true;
+            this.initializeSubActivitiesChart(category.id); // Update subactivities chart for the hovered category
+          }
+        },
+        error: (error) => {
+          console.error('Error loading activities:', error);
+          // On error, fall back to showing pie chart
+          this.generateSubactivitiesPieData(category.id);
+          this.showSubactivitiesPie = true;
+          this.initializeSubActivitiesChart(category.id);
+        }
+      });
     }
   }
 
@@ -1359,6 +1403,14 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   onSubactivityLeave(): void {
     this.showSubactivitiesMap = false;
     this.hoveredSubactivityName = '';
+
+    // If pie chart data is not set, we came directly from category click (single activity)
+    // In this case, also close the parent dialog
+    if (!this.subactivitiesPieData || !this.subactivitiesPieData.labels || this.subactivitiesPieData.labels.length === 0) {
+      this.showSubactivitiesPie = false;
+      this.hoveredCategoryId = null;
+      this.hoveredCategoryName = '';
+    }
 
     // Clean up map when dialog is closed
     if (this.map) {
