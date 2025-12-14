@@ -319,7 +319,7 @@
       "NO_DATA": "No data available",
       "SWITCH_TO_DOUGHNUT": "Change view",
       "EXPLANATION": "The activities weighted by their local relevance",
-      "HINT": "💡 Click on a bar in the diagram to get more information!",
+      "HINT": "💡 Click on a bar in the diagram to view a map with the places of this activity!",
       "SUBACTIVITIES_HINT": "💡 Click on a bar in the diagram to view places on the map!",
       "NO_PLACES": "No places available",
       "DISABLE_PLACES": "The places are only available for hexagons or municipalities. Please zoom into the map to get more details!",

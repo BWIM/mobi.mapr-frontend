@@ -625,11 +625,11 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     }
 
     if (this.isScoreVisualization) {
-      // Scenario 3: Score visualization - rank by score value (higher is better)
+      // Scenario 3: Score visualization - rank by score value (lower is better, since score is in minutes)
       const sortedScores = [...scores].sort((a, b) => {
         const aScore = this.scoreType === 'pop' ? a.score_pop : a.score_avg;
         const bScore = this.scoreType === 'pop' ? b.score_pop : b.score_avg;
-        return bScore - aScore; // Descending order (higher is better)
+        return aScore - bScore; // Ascending order (lower is better)
       });
 
       // Group scores by their score value

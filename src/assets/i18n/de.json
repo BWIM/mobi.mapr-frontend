@@ -320,7 +320,7 @@
       "NO_DATA": "Keine Daten verfügbar",
       "SWITCH_TO_DOUGHNUT": "Ansicht wechseln",
       "EXPLANATION": "Die Aktivitäten gewichtet nach lokaler Relevanz",
-      "HINT": "💡 Klicke auf einen Balken im Diagramm, um mehr Infos zu erhalten!",
+      "HINT": "💡 Klicke auf einen Balken im Diagramm, um eine Karte mit den Orten dieser Aktivität anzuzeigen!",
       "SUBACTIVITIES_HINT": "💡 Klicke auf einen Balken im Diagramm, um Orte auf der Karte anzuzeigen!",
       "NO_PLACES": "Keine Orte gefunden",
       "DISABLE_PLACES": "Die Orts-Ansicht ist nur für Gemeinde-Ebene oder Hexagone aktiviert. Um mehr Details zu bekommen, zoome in die Karte hinein!",
