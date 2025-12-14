@@ -1094,8 +1094,7 @@
 
 .bwim-logo {
     height: 40px;
-    width: auto;
-    max-width: 100%;
+    width: 40px;
 }
 
 .bwim-hint {

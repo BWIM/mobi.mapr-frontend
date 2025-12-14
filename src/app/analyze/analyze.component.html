@@ -1,6 +1,6 @@
 <p-dialog [(visible)]="visible" [modal]="true" [draggable]="false"
     [resizable]="false" [dismissableMask]="true" [maximizable]="true"
-    [style]="{width: '80vw', height: '80vh'}"
+    [style]="{width: '95vw', height: '95vh'}"
     [style.backgroundColor]="getScore().color" styleClass="analyze-dialog"
     [header]="properties?.name" (onShow)="onDialogShow()"
     (onHide)="onDialogHide()">
@@ -44,7 +44,8 @@
                     <p-tablist class="border-b border-gray-200 mb-4">
                         <p-tab value="activities" class="px-4 py-2">{{
                             'ANALYZE.ACTIVITIES.TITLE' | translate }}</p-tab>
-                        <p-tab value="persona" class="px-4 py-2">{{
+                        <p-tab value="persona" class="px-4 py-2"
+                            *ngIf="personas.length > 0 && showPersona">{{
                             'ANALYZE.PERSONA.TITLE' | translate }}</p-tab>
                         <p-tab value="profiles" class="px-4 py-2">{{
                             'ANALYZE.PROFILES.TITLE' | translate }}</p-tab>
@@ -157,10 +158,11 @@
                                                 class="h-full w-full rounded-lg">
                                             </div>
                                             <!-- OSM Link - Always visible when map is loaded -->
-                                            <div class="absolute top-4 right-4 z-10"
+                                            <div class="bg-white border 
+                                            border-gray-200 rounded-lg px-4 
+                                            py-3 shadow-sm p-5"
                                                 *ngIf="mapLoaded && getOsmLink()">
-                                                <div
-                                                    class="bg-blue-50 border border-blue-200 rounded-lg p-3 shadow-md">
+                                                <div class="">
                                                     <p
                                                         class="text-sm text-gray-700 mb-2">
                                                         {{
@@ -179,25 +181,7 @@
                                             </div>
 
                                             <!-- Legend for score/index colors -->
-                                            <div
-                                                class="mt-4 flex justify-center">
-                                                <div
-                                                    class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
-                                                    <div
-                                                        class="flex flex-wrap gap-3 justify-center">
-                                                        <div *ngFor="let item of getLegendItems()"
-                                                            class="flex items-center gap-2">
-                                                            <span
-                                                                class="w-4 h-4 rounded-sm"
-                                                                [style.background-color]="item.color"></span>
-                                                            <span
-                                                                class="text-xs text-gray-700">{{
-                                                                item.label
-                                                                }}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+
                                             <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75"
                                                 *ngIf="noPlaces">
                                                 <p
@@ -236,7 +220,37 @@
 
                             <!-- Legend for score/index colors -->
                             <div class="mt-4 flex justify-center">
-                                <div
+                                <!-- Gradient bar legend for score visualization on mobile -->
+                                <div *ngIf="isScoreVisualization && isMobile"
+                                    class="score-legend-analyze">
+                                    <div class="score-legend-header">
+                                        <h4>{{ scoreHeader }}</h4>
+                                    </div>
+                                    <div class="gradient-container-analyze">
+                                        <div
+                                            class="gradient-bar-analyze score-gradient-bar-analyze">
+                                        </div>
+                                        <div class="gradient-labels-analyze">
+                                            <span
+                                                class="gradient-label-analyze">0
+                                                {{
+                                                'LEGEND.MINUTES' | translate
+                                                }}</span>
+                                            <span
+                                                class="gradient-label-analyze">21
+                                                {{
+                                                'LEGEND.MINUTES' | translate
+                                                }}</span>
+                                            <span
+                                                class="gradient-label-analyze">60+
+                                                {{
+                                                'LEGEND.MINUTES' | translate
+                                                }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Discrete legend for index visualization or desktop -->
+                                <div *ngIf="!isScoreVisualization || !isMobile"
                                     class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
                                     <div
                                         class="flex flex-wrap gap-3 justify-center">
@@ -246,7 +260,8 @@
                                                 [style.background-color]="item.color"></span>
                                             <span
                                                 class="text-xs text-gray-700">{{
-                                                item.label
+                                                (isMobile && item.labelMobile) ?
+                                                item.labelMobile : item.label
                                                 }}</span>
                                         </div>
                                     </div>
@@ -270,7 +285,7 @@
                                         </p>
                                     </div>
                                 </div>
-                                <div class="flex justify-center items-center">
+                                <!-- <div class="flex justify-center items-center">
                                     <div
                                         class="bg-purple-50 border border-purple-200 rounded-lg p-2 max-w-md">
                                         <p
@@ -281,7 +296,7 @@
                                             translate }}
                                         </p>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                     </p-tabpanel>
@@ -365,7 +380,34 @@
 
                         <!-- Legend for score/index colors -->
                         <div class="mt-4 flex justify-center">
-                            <div
+                            <!-- Gradient bar legend for score visualization on mobile -->
+                            <div *ngIf="isScoreVisualization && isMobile"
+                                class="score-legend-analyze">
+                                <div class="score-legend-header">
+                                    <h4>{{ scoreHeader }}</h4>
+                                </div>
+                                <div class="gradient-container-analyze">
+                                    <div
+                                        class="gradient-bar-analyze score-gradient-bar-analyze">
+                                    </div>
+                                    <div class="gradient-labels-analyze">
+                                        <span class="gradient-label-analyze">0
+                                            {{
+                                            'LEGEND.MINUTES' | translate
+                                            }}</span>
+                                        <span class="gradient-label-analyze">21
+                                            {{
+                                            'LEGEND.MINUTES' | translate
+                                            }}</span>
+                                        <span class="gradient-label-analyze">60+
+                                            {{
+                                            'LEGEND.MINUTES' | translate
+                                            }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Discrete legend for index visualization or desktop -->
+                            <div *ngIf="!isScoreVisualization || !isMobile"
                                 class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
                                 <div
                                     class="flex flex-wrap gap-3 justify-center">
@@ -374,7 +416,8 @@
                                         <span class="w-4 h-4 rounded-sm"
                                             [style.background-color]="item.color"></span>
                                         <span class="text-xs text-gray-700">{{
-                                            item.label
+                                            (isMobile && item.labelMobile) ?
+                                            item.labelMobile : item.label
                                             }}</span>
                                     </div>
                                 </div>
@@ -442,7 +485,34 @@
 
                         <!-- Legend for score/index colors -->
                         <div class="mt-4 flex justify-center">
-                            <div
+                            <!-- Gradient bar legend for score visualization on mobile -->
+                            <div *ngIf="isScoreVisualization && isMobile"
+                                class="score-legend-analyze">
+                                <div class="score-legend-header">
+                                    <h4>{{ scoreHeader }}</h4>
+                                </div>
+                                <div class="gradient-container-analyze">
+                                    <div
+                                        class="gradient-bar-analyze score-gradient-bar-analyze">
+                                    </div>
+                                    <div class="gradient-labels-analyze">
+                                        <span class="gradient-label-analyze">0
+                                            {{
+                                            'LEGEND.MINUTES' | translate
+                                            }}</span>
+                                        <span class="gradient-label-analyze">21
+                                            {{
+                                            'LEGEND.MINUTES' | translate
+                                            }}</span>
+                                        <span class="gradient-label-analyze">60+
+                                            {{
+                                            'LEGEND.MINUTES' | translate
+                                            }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Discrete legend for index visualization or desktop -->
+                            <div *ngIf="!isScoreVisualization || !isMobile"
                                 class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
                                 <div
                                     class="flex flex-wrap gap-3 justify-center">
@@ -451,7 +521,8 @@
                                         <span class="w-4 h-4 rounded-sm"
                                             [style.background-color]="item.color"></span>
                                         <span class="text-xs text-gray-700">{{
-                                            item.label
+                                            (isMobile && item.labelMobile) ?
+                                            item.labelMobile : item.label
                                             }}</span>
                                     </div>
                                 </div>

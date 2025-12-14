@@ -63,6 +63,8 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   showSubactivitiesMap: boolean = false;
   hoveredSubactivityName: string = '';
   mapLoaded: boolean = false;
+  isMobile: boolean = false;
+  scoreHeader: string = '';
 
   // Subactivities pie chart properties
   showSubactivitiesPie: boolean = false;
@@ -380,8 +382,20 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     return profileColors[profileId] || '#666666'; // Default gray if not found
   };
 
-  getLegendItems(): { label: string; color: string }[] {
+  getLegendItems(): { label: string; color: string; labelMobile?: string }[] {
     if (this.isScoreVisualization) {
+      if (this.isMobile) {
+        // Mobile-optimized shorter labels for score visualization
+        return [
+          { label: '<10', labelMobile: '<10', color: 'rgb(0, 60, 0)' },
+          { label: '10-20', labelMobile: '10-20', color: 'rgb(0, 100, 0)' },
+          { label: '20-30', labelMobile: '20-30', color: 'rgb(0, 140, 0)' },
+          { label: '30-40', labelMobile: '30-40', color: 'rgb(133, 218, 133)' },
+          { label: '40-50', labelMobile: '40-50', color: 'rgb(238, 61, 61)' },
+          { label: '50-60', labelMobile: '50-60', color: 'rgb(201, 0, 0)' },
+          { label: '>60', labelMobile: '>60', color: 'rgb(126, 0, 0)' },
+        ];
+      }
       return [
         { label: '<10 min', color: 'rgb(0, 60, 0)' },
         { label: '10-20 min', color: 'rgb(0, 100, 0)' },
@@ -392,6 +406,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         { label: '>60 min', color: 'rgb(126, 0, 0)' },
       ];
     }
+    // Index visualization - always show just letters (already short)
     return [
       { label: 'A', color: '#32612d' },
       { label: 'B', color: '#3cb043' },
@@ -1052,6 +1067,10 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   private initializePersonaChart(): void {
     if (!this.personas || this.personas.length === 0) {
       this.showPersona = false;
+      // Reset active tab if currently on persona tab
+      if (this.activeTab === 'persona') {
+        this.activeTab = 'activities';
+      }
       // Set empty chart data when no personas
       this.personaChartData = {
         labels: [],
@@ -1610,7 +1629,22 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
   ngAfterViewInit() {
     // isShare is now handled by subscription in constructor
+    this.checkMobile();
     this.setupResizeObserver();
+    this.loadScoreHeader();
+
+    // Subscribe to language changes to update score header
+    this.subscriptions.push(
+      this.translate.onLangChange.subscribe(() => {
+        this.loadScoreHeader();
+      })
+    );
+  }
+
+  private loadScoreHeader(): void {
+    this.translate.get('LEGEND.SCORE_HEADER').subscribe(translation => {
+      this.scoreHeader = translation;
+    });
   }
 
   private setupResizeObserver(): void {
@@ -1657,10 +1691,15 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
   @HostListener('window:resize')
   onWindowResize(): void {
+    this.checkMobile();
     // Resize charts when window is resized
     setTimeout(() => {
       this.resizeCharts();
     }, 100);
+  }
+
+  private checkMobile(): void {
+    this.isMobile = window.innerWidth <= 768;
   }
 
 

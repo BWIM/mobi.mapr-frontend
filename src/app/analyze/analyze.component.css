@@ -51,3 +51,207 @@
     height: 100% !important;
     min-height: 400px;
 }
+
+/* Mobile Optimizations - Using scale from share-sidebar */
+/* @media screen and (max-width: 768px) {
+
+    /* Dialog sizing for mobile */
+/*  :host ::ng-deep .analyze-dialog.p-dialog {
+        width: 100vw !important;
+        height: 100vh !important;
+        margin: 0 !important;
+        max-height: 100vh !important;
+    }
+
+    :host ::ng-deep .analyze-dialog .p-dialog-content {
+        padding: 1rem !important;
+    }
+
+    :host ::ng-deep .analyze-dialog .p-tablist {
+        padding: 0 1rem !important;
+    }
+
+    :host ::ng-deep .analyze-dialog .p-tab {
+        padding: 0.75rem 0.5rem !important;
+        font-size: 0.8125rem !important;
+    }
+
+    :host ::ng-deep .analyze-dialog .p-tab .p-tab-label {
+        font-size: 0.8125rem !important;
+    }
+
+    :host ::ng-deep .analyze-dialog h3 {
+        font-size: 1rem !important;
+    }
+
+    :host ::ng-deep .analyze-dialog .text-lg {
+        font-size: 1rem !important;
+    }
+
+    :host ::ng-deep .analyze-dialog .text-sm {
+        font-size: 0.8125rem !important;
+    }
+
+    :host ::ng-deep .analyze-dialog .text-xs {
+        font-size: 0.6875rem !important;
+    }
+
+
+    :host ::ng-deep .analyze-dialog .p-button {
+        min-height: 44px !important;
+        padding: 0.625rem 1rem !important;
+        font-size: 0.875rem !important;
+    }
+
+    :host ::ng-deep .analyze-dialog .p-button-sm {
+        min-height: 36px !important;
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.8125rem !important;
+    }
+
+    :host ::ng-deep .analyze-dialog .bg-purple-50 {
+        padding: 0.75rem !important;
+    }
+
+    :host ::ng-deep .analyze-subdialog.p-dialog {
+        width: 100vw !important;
+        height: 100vh !important;
+        margin: 0 !important;
+    }
+
+    :host ::ng-deep .analyze-subdialog .p-dialog-content {
+        padding: 1rem !important;
+    }
+
+
+    :host ::ng-deep .analyze-map-dialog.p-dialog {
+        width: 100vw !important;
+        height: 100vh !important;
+        margin: 0 !important;
+    }
+
+    :host ::ng-deep .analyze-map-dialog .p-dialog-content {
+        padding: 1rem !important;
+    }
+
+    :host ::ng-deep .analyze-dialog .w-4 {
+        width: 0.875rem !important;
+        height: 0.875rem !important;
+    }
+
+
+    :host ::ng-deep .analyze-dialog .p-chart {
+        min-height: 300px !important;
+    }
+
+    :host ::ng-deep .analyze-dialog .p-scrollpanel .p-scrollpanel-content {
+        padding: 0.5rem !important;
+    }
+} */
+
+/* Touch-friendly adjustments */
+@media (hover: none) and (pointer: coarse) {
+
+    :host ::ng-deep .analyze-dialog .p-button,
+    :host ::ng-deep .analyze-dialog button {
+        min-height: 44px !important;
+    }
+
+    :host ::ng-deep .analyze-dialog .p-tab {
+        min-height: 48px !important;
+    }
+}
+
+/* Score Legend Styles - Matching share-sidebar */
+.score-legend-analyze {
+    padding: 0.75rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    width: 100%;
+    max-width: 100%;
+}
+
+.score-legend-header {
+    margin-bottom: 0.5rem;
+}
+
+.score-legend-header h4 {
+    margin: 0;
+    padding: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    text-align: center;
+}
+
+.gradient-container-analyze {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.gradient-bar-analyze {
+    width: 100%;
+    height: 24px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.score-gradient-bar-analyze {
+    background: linear-gradient(to right,
+            rgb(0, 60, 0) 0%,
+            rgb(0, 60, 0) 16.7%,
+            rgb(0, 100, 0) 16.7%,
+            rgb(0, 100, 0) 33.3%,
+            rgb(0, 140, 0) 33.3%,
+            rgb(0, 140, 0) 50%,
+            rgb(133, 218, 133) 50%,
+            rgb(133, 218, 133) 66.7%,
+            rgb(238, 61, 61) 66.7%,
+            rgb(238, 61, 61) 83.3%,
+            rgb(201, 0, 0) 83.3%,
+            rgb(201, 0, 0) 100%,
+            rgb(126, 0, 0) 100%);
+}
+
+.gradient-labels-analyze {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #374151;
+    line-height: 1.3;
+}
+
+.gradient-label-analyze {
+    max-width: 33%;
+    word-wrap: break-word;
+    text-align: center;
+    font-size: 0.6875rem;
+}
+
+/* Mobile adjustments for gradient legend */
+@media screen and (max-width: 768px) {
+    .score-legend-analyze {
+        padding: 0.625rem;
+    }
+
+    .score-legend-header h4 {
+        font-size: 0.8125rem;
+    }
+
+    .gradient-bar-analyze {
+        height: 20px;
+    }
+
+    .gradient-labels-analyze {
+        font-size: 0.6875rem;
+    }
+
+    .gradient-label-analyze {
+        font-size: 0.625rem;
+    }
+}

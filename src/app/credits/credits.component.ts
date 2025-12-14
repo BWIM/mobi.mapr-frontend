@@ -192,7 +192,7 @@ export class CreditsComponent implements OnInit {
     { name: 'Carto', icon: 'pi pi-map-marker', url: 'https://carto.com' },
     { name: 'MapLibre', icon: 'pi pi-map-marker', url: 'https://maplibre.org' },
     { name: 'Nominatim', icon: 'pi pi-map-marker', url: 'https://nominatim.org' },
-    { name: 'Flaticon (Surang, fjstudio, Freepik, Kiranshastry)', icon: 'pi pi-map-marker', url: 'https://www.flaticon.com' }
+    { name: 'Flaticon', icon: 'pi pi-map-marker', url: 'https://www.flaticon.com' }
   ];
 
   dataComponents: InfoComponent[] = [
