@@ -1,9 +1,30 @@
 <div #mapContainer class="map-container" id="map-container">
-  <app-search-overlay
-    (locationSelected)="onLocationSelected($event)"></app-search-overlay>
+  <div class="map-loading-indicator" *ngIf="isTileLoading">
+    <div class="map-loading-spinner"></div>
+  </div>
+  <!-- Map Interaction Hint -->
+  <div class="map-hint-overlay" *ngIf="showZoomHint || showClickHint"
+    [@fadeInOut]>
+    <div class="map-hint-content">
+      <div class="map-hint-icon" *ngIf="showZoomHint">
+        <i class="pi pi-search-plus"></i>
+      </div>
+      <div class="map-hint-icon" *ngIf="showClickHint">
+        <i class="pi pi-hand-pointer"></i>
+      </div>
+      <div class="map-hint-text" *ngIf="showZoomHint">
+        <p class="map-hint-primary">{{ translate.instant('MAP_HINT.ZOOM') }}</p>
+      </div>
+      <div class="map-hint-text" *ngIf="showClickHint">
+        <p class="map-hint-primary">{{ translate.instant('MAP_HINT.CLICK') }}
+        </p>
+        <p class="map-hint-secondary">{{
+          translate.instant('MAP_HINT.CLICK_DETAIL') }}</p>
+      </div>
+    </div>
+  </div>
   <app-legend></app-legend>
   <div class="copyright-info">
-    <div class="project-name" *ngIf="projectName">{{ projectName }}</div>
     <div class="copyright-text" *ngIf="currentProjectData">© BWIM, {{
       formatCreationDate(currentProjectData.created) }}</div>
     <div class="copyright-map">Hintergrundkarte: © CARTO, OSM</div>
@@ -11,14 +32,10 @@
   <div #comparisonContainer id="comparison-container" style="display: none;">
     <div #beforeContainer class="map" id="before">
       <div class="comparison-label">{{ projectName }}</div>
-      <app-search-overlay
-        (locationSelected)="onLocationSelected($event)"></app-search-overlay>
       <app-legend></app-legend>
     </div>
     <div #mapContainer class="map" id="after">
       <div class="comparison-label">{{ comparisonProject?.display_name }}</div>
-      <app-search-overlay
-        (locationSelected)="onLocationSelected($event)"></app-search-overlay>
       <app-legend></app-legend>
     </div>
   </div>

@@ -13,7 +13,6 @@ import { KeyboardShortcutsService, ShortcutAction } from './map-v2/keyboard-shor
 import { Subscription } from 'rxjs';
 import { HostListener } from '@angular/core';
 import { ExportMapComponent } from './map-v2/export-map/export-map.component';
-import { TutorialComponent } from './tutorial/tutorial.component';
 import { HealthService } from './services/health.service';
 
 @Component({
@@ -29,7 +28,6 @@ import { HealthService } from './services/health.service';
     CreditsComponent,
     StatisticsComponent,
     ExportMapComponent,
-    TutorialComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'

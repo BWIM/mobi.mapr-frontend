@@ -1,12 +1,12 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit, NgZone } from '@angular/core';
+import { CommonModule, NgIf } from '@angular/common';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { MapV2Service } from './map-v2.service';
 import { Subscription } from 'rxjs';
 import { LngLatBounds, Map, Popup, NavigationControl, ScaleControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { LoadingService } from '../services/loading.service';
-import { SearchOverlayComponent } from './search-overlay/search-overlay.component';
 import { LegendComponent } from '../legend/legend.component';
 import { Project, ProjectInfo } from '../projects/project.interface';
 import { IndexService } from '../services/index.service';
@@ -20,8 +20,19 @@ import MaplibreCompare from '@maplibre/maplibre-gl-compare';
   selector: 'app-map-v2',
   templateUrl: './map-v2.component.html',
   styleUrl: './map-v2.component.css',
-  imports: [CommonModule, SearchOverlayComponent, LegendComponent],
-  standalone: true
+  imports: [CommonModule, NgIf, LegendComponent],
+  standalone: true,
+  animations: [
+    trigger('fadeInOut', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-10px)' }),
+        animate('300ms ease-in', style({ opacity: 1, transform: 'translateY(0)' }))
+      ]),
+      transition(':leave', [
+        animate('200ms ease-out', style({ opacity: 0, transform: 'translateY(-10px)' }))
+      ])
+    ])
+  ]
 })
 export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   private map?: Map;
@@ -36,6 +47,7 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   private comparisonSubscription: Subscription;
   private stopComparisonSubscription: Subscription;
   private projectDataSubscription: Subscription;
+  private locationSubscription: Subscription;
   private projectInfoSubscription: Subscription;
   private isComparison: boolean = false;
   projectName: string | null = null;
@@ -43,12 +55,19 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   currentProject: string | null = null;
   currentProjectData: Project | null = null;
   currentProjectInfo: ProjectInfo | null = null;
+  isTileLoading = false;
+  private loadingMaps = new Set<Map>();
 
   private dragThrottleTimeout: any = null;
   private isDragging: boolean = false;
   private originalOpacity: any = null;
   private isMobile: boolean = false;
-  constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService, private indexService: IndexService, private projectsService: ProjectsService, private translate: TranslateService) {
+  showZoomHint: boolean = false;
+  showClickHint: boolean = false;
+  private readonly MAP_ZOOM_HINT_KEY = 'mobi.mapr.zoomHintDismissed';
+  private readonly MAP_CLICK_HINT_KEY = 'mobi.mapr.clickHintDismissed';
+
+  constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService, private indexService: IndexService, private projectsService: ProjectsService, public translate: TranslateService, private ngZone: NgZone) {
 
 
     this.subscription = this.mapService.mapStyle$.subscribe(style => {
@@ -100,12 +119,71 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     this.projectInfoSubscription = this.projectsService.currentProjectInfo$.subscribe(projectInfo => {
       this.currentProjectInfo = projectInfo;
     });
+
+    // Subscribe to location changes for search functionality
+    this.locationSubscription = this.mapService.location$.subscribe(location => {
+      if (location && this.map) {
+        this.map.flyTo({
+          center: [location.lng, location.lat],
+          zoom: 11,
+          duration: 2000
+        });
+      }
+    });
   }
 
   ngOnInit() {
     // Initial style is already set through the subscription in constructor
     // Set project name if already available in service
     this.projectName = this.mapService.projectName;
+    // Check if hints should be shown
+    this.checkAndShowHints();
+  }
+
+  private checkAndShowHints(): void {
+    const zoomDismissed = localStorage.getItem(this.MAP_ZOOM_HINT_KEY);
+    const clickDismissed = localStorage.getItem(this.MAP_CLICK_HINT_KEY);
+
+    if (!zoomDismissed) {
+      // Show zoom hint after a short delay to let the map render
+      setTimeout(() => {
+        this.ngZone.run(() => {
+          this.showZoomHint = true;
+        });
+      }, 1200);
+      return;
+    }
+
+    if (!clickDismissed) {
+      this.queueClickHint();
+    }
+  }
+
+  private queueClickHint(): void {
+    setTimeout(() => {
+      this.ngZone.run(() => {
+        // Do not show if zoom hint is visible or already dismissed
+        if (!this.showZoomHint && !localStorage.getItem(this.MAP_CLICK_HINT_KEY)) {
+          this.showClickHint = true;
+        }
+      });
+    }, 500);
+  }
+
+  private dismissZoomHint(): void {
+    if (!this.showZoomHint) return;
+    this.showZoomHint = false;
+    localStorage.setItem(this.MAP_ZOOM_HINT_KEY, 'true');
+    // If click hint hasn't been dismissed, show it next
+    if (!localStorage.getItem(this.MAP_CLICK_HINT_KEY)) {
+      this.queueClickHint();
+    }
+  }
+
+  private dismissClickHint(): void {
+    if (!this.showClickHint) return;
+    this.showClickHint = false;
+    localStorage.setItem(this.MAP_CLICK_HINT_KEY, 'true');
   }
 
   ngAfterViewInit() {
@@ -120,7 +198,9 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
         dragRotate: false,
         // Mobile optimizations
         renderWorldCopies: false,
-        maxTileCacheSize: 100,
+        maxTileCacheSize: 50, // Reduced from 100 to limit tile cache
+        maxPitch: 0, // Prevent tilting which can cause more tiles to load
+        refreshExpiredTiles: false, // Don't reload expired tiles automatically
         localIdeographFontFamily: false,
         attributionControl: false
       };
@@ -143,6 +223,21 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private setupMapEvents(map: Map, projectId?: string): void {
+    map.on('dataloading', (event: any) => {
+      // Track tile/source requests to show a lightweight loading indicator
+      if (event?.dataType === 'tile' || event?.dataType === 'source') {
+        this.markMapAsLoading(map);
+      }
+    });
+
+    map.on('idle', () => {
+      this.markMapAsIdle(map);
+    });
+
+    map.on('error', () => {
+      this.markMapAsIdle(map);
+    });
+
     // Store original opacity for restoration
     if (!this.originalOpacity && map?.getLayer('geodata-fill')) {
       this.originalOpacity = map.getPaintProperty('geodata-fill', 'fill-opacity');
@@ -189,6 +284,11 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       if (projectId) {
         const style = this.mapService['getProjectMapStyle'](projectId);
         map.setStyle(style);
+      }
+
+      // Hide zoom hint once zoomed in sufficiently
+      if (this.showZoomHint && map.getZoom() >= 9) {
+        this.dismissZoomHint();
       }
     });
 
@@ -293,7 +393,32 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
         // this.analyzeService.setCurrentProject(feature)
         this.analyzeService.setSelectedFeature(feature, resolution, coordinates);
         this.mapService.setSelectedFeature(feature.properties['id']);
+
+        // Hide click hint after a feature interaction
+        if (this.showClickHint) {
+          this.dismissClickHint();
+        }
       }
+    });
+  }
+
+  private markMapAsLoading(map: Map): void {
+    this.loadingMaps.add(map);
+    this.setTileLoadingIndicator(true);
+  }
+
+  private markMapAsIdle(map: Map): void {
+    this.loadingMaps.delete(map);
+    this.setTileLoadingIndicator(this.loadingMaps.size > 0);
+  }
+
+  private setTileLoadingIndicator(isLoading: boolean): void {
+    if (this.isTileLoading === isLoading) {
+      return;
+    }
+    // Run inside Angular zone so the template updates
+    this.ngZone.run(() => {
+      this.isTileLoading = isLoading;
     });
   }
 
@@ -332,6 +457,9 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     }
     if (this.stopComparisonSubscription) {
       this.stopComparisonSubscription.unsubscribe();
+    }
+    if (this.locationSubscription) {
+      this.locationSubscription.unsubscribe();
     }
     if (this.projectDataSubscription) {
       this.projectDataSubscription.unsubscribe();
@@ -396,7 +524,11 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       center: initialCenter,
       zoom: initialZoom,
       dragRotate: false,
-      attributionControl: false
+      attributionControl: false,
+      renderWorldCopies: false,
+      maxTileCacheSize: 50, // Reduced to limit tile cache
+      maxPitch: 0, // Prevent tilting which can cause more tiles to load
+      refreshExpiredTiles: false // Don't reload expired tiles automatically
     });
 
     // Add navigation controls to before map
@@ -419,7 +551,11 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       center: initialCenter,
       zoom: initialZoom,
       dragRotate: false,
-      attributionControl: false
+      attributionControl: false,
+      renderWorldCopies: false,
+      maxTileCacheSize: 50, // Reduced to limit tile cache
+      maxPitch: 0, // Prevent tilting which can cause more tiles to load
+      refreshExpiredTiles: false // Don't reload expired tiles automatically
     });
 
     // Add navigation controls to after map

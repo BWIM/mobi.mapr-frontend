@@ -1,107 +1,388 @@
-<div class="h-full" id="share-sidebar">
-    <p-scrollPanel [style]="{width: '100%', height: '100%'}">
-        <div>
-            <div *ngIf="!sharedProject"
-                class="flex items-center justify-center">
-                <p class="text-gray-500">{{ 'SHARE.NO_PROJECT_SELECTED' |
-                    translate }}</p>
+<!-- Floating Project Card -->
+<div class="project-card-container" [class.expanded]="isExpanded"
+    [class.mobile]="isMobile">
+    <!-- Collapsed State - Compact Header -->
+    <div class="project-card-collapsed"
+        *ngIf="!isExpanded && (sharedProject || projects.length > 0)"
+        (click)="toggleExpand()">
+        <div class="collapsed-content">
+            <div class="collapsed-title" *ngIf="sharedProject">{{
+                sharedProject.project_name }}</div>
+            <div class="collapsed-title"
+                *ngIf="!sharedProject && projects.length > 0">
+                {{ 'PROJECTS.TABS.PUBLIC' | translate }}
             </div>
+        </div>
+        <i class="pi pi-chevron-up expand-icon"></i>
+    </div>
 
-            <div *ngIf="sharedProject" class="flex flex-col gap-4">
-                <!-- Projekt Header -->
-                <div class="bg-white rounded-lg shadow p-4">
-                    <h2 class="text-xl font-bold mb-2">{{
-                        sharedProject.project_name }}</h2>
-                    <p class="text-gray-600 text-sm mb-2">{{ 'SHARE.CREATED_BY'
-                        | translate }}: {{ sharedProject.user_name }}</p>
-                    <p class="text-gray-500 text-sm">{{ 'SHARE.EXPIRES' |
-                        translate }}: {{ sharedProject.expires }}</p>
-                </div>
+    <!-- Expanded State - Full Details -->
+    <div class="project-card-expanded" *ngIf="isExpanded">
+        <!-- Header with collapse button -->
+        <div class="expanded-header">
+            <div class="header-content">
+                <h3 class="project-title" *ngIf="sharedProject">{{
+                    sharedProject.project_name }}</h3>
+                <!-- <div class="project-meta-row" *ngIf="sharedProject">
+                    <span class="meta-item">
+                        <i class="pi pi-user"></i>
+                        {{ sharedProject.user_name }}
+                    </span>
+                    <span class="meta-item">
+                        <i class="pi pi-calendar"></i>
+                        {{ sharedProject.expires }}
+                    </span>
+                </div> -->
+            </div>
+            <button class="collapse-btn" (click)="toggleExpand()" type="button">
+                <i class="pi pi-chevron-down"></i>
+            </button>
+        </div>
 
-                <!-- Visualization Type Selector -->
-                <div class="bg-white rounded-lg shadow p-4">
-                    <label
-                        class="block text-sm font-medium text-gray-700 mb-2">{{
-                        'SIDEBAR.VISUALIZATION_TYPE' | translate }}</label>
-                    <p-selectButton [options]="visualizationTypeOptions"
-                        [(ngModel)]="selectedVisualizationType"
-                        optionLabel="label" optionValue="value"
-                        (onChange)="onVisualizationTypeChange()"
-                        [allowEmpty]="false">
-                    </p-selectButton>
-                </div>
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <button class="tab-button" [class.active]="activeView === 'details'"
+                (click)="switchView('details')" [disabled]="!sharedProject">
+                <i class="pi pi-info-circle"></i>
+                <span>{{ 'SHARE.DETAILS' | translate }}</span>
+            </button>
+            <button class="tab-button"
+                [class.active]="activeView === 'projects'"
+                (click)="switchView('projects')">
+                <i class="pi pi-list"></i>
+                <span>{{ 'SHARE.LINKED_MAPS' | translate }}</span>
+            </button>
+        </div>
 
-                <!-- Projekt Beschreibung -->
-                <p-panel [header]="'SHARE.DESCRIPTION' | translate"
-                    [toggleable]="true">
-                    <p class="text-gray-700">{{
-                        sharedProject.project_description ||
-                        'SHARE.NO_DESCRIPTION' | translate }}</p>
-                </p-panel>
+        <!-- Content -->
+        <div class="expanded-content">
+            <!-- Details View -->
+            <div *ngIf="activeView === 'details' && sharedProject"
+                class="details-view">
 
-                <!-- Aktivitäten -->
-                <p-panel [header]="'SHARE.ACTIVITIES' | translate"
-                    [toggleable]="true" [collapsed]="false">
-                    <div class="flex flex-wrap gap-2">
-                        <ul class="list-disc pl-4 space-y-1">
-                            <li *ngFor="let activity of sharedProject.categories"
-                                class="text-gray-700">
-                                {{ activity }}
-                            </li>
-                        </ul>
-                        <p *ngIf="!sharedProject.categories?.length"
-                            class="text-gray-500">
-                            {{ 'SHARE.NO_ACTIVITIES' | translate }}
-                        </p>
+
+                <!-- Visualization Toggle -->
+                <div class="section visualization-section">
+                    <div class="toggle-switch">
+                        <button type="button" class="toggle-option"
+                            [class.active]="selectedVisualizationType === 'index'"
+                            (click)="setVisualizationType('index')"
+                            [pTooltip]="'SIDEBAR.INDEX_TOOLTIP' | translate"
+                            tooltipPosition="top">
+                            {{ 'SIDEBAR.INDEX' | translate }}
+                        </button>
+                        <button type="button" class="toggle-option"
+                            [class.active]="selectedVisualizationType === 'score'"
+                            (click)="setVisualizationType('score')"
+                            [pTooltip]="'SIDEBAR.SCORE_TOOLTIP' | translate"
+                            tooltipPosition="top">
+                            {{ 'SIDEBAR.SCORE' | translate }}
+                        </button>
                     </div>
-                </p-panel>
+                </div>
+
+                <!-- Legend Section (Mobile only) -->
+                <div class="section legend-section" *ngIf="isMobile">
+                    <div class="section-label">{{ 'LEGEND.TITLE' | translate }}
+                    </div>
+                    <!-- Index Legend -->
+                    <div *ngIf="selectedVisualizationType === 'index' && !isDifferenceMap"
+                        class="sidebar-legend index-legend-horizontal">
+                        <div *ngFor="let level of legendLevels"
+                            class="sidebar-legend-item-horizontal"
+                            [class]="level.name.toLowerCase()"
+                            [pTooltip]="level.descriptionMobile"
+                            tooltipPosition="top">
+                            <span class="legend-badge">{{ level.name }}</span>
+                        </div>
+                    </div>
+                    <!-- Score Legend -->
+                    <div *ngIf="selectedVisualizationType === 'score' && !isDifferenceMap"
+                        class="sidebar-legend score-legend-sidebar">
+                        <div class="score-legend-header">
+                            <h4>{{ scoreHeader }}</h4>
+                        </div>
+                        <div class="gradient-container-sidebar">
+                            <div
+                                class="gradient-bar-sidebar score-gradient-bar-sidebar">
+                            </div>
+                            <div class="gradient-labels-sidebar">
+                                <span class="gradient-label-sidebar">0 {{
+                                    'LEGEND.MINUTES' | translate }}</span>
+                                <span class="gradient-label-sidebar">21 {{
+                                    'LEGEND.MINUTES' | translate }}</span>
+                                <span class="gradient-label-sidebar">60+ {{
+                                    'LEGEND.MINUTES' | translate }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Difference Legend -->
+                    <div *ngIf="isDifferenceMap"
+                        class="sidebar-legend difference-legend-sidebar">
+                        <div class="difference-legend-header">
+                            <h4>{{ differenceHeader }}</h4>
+                        </div>
+                        <div class="gradient-container-sidebar">
+                            <div
+                                class="gradient-bar-sidebar difference-gradient-bar-sidebar">
+                            </div>
+                            <div class="gradient-labels-sidebar">
+                                <span class="gradient-label-sidebar">{{
+                                    baselineProjectName || 'Baseline' }}</span>
+                                <span
+                                    class="gradient-label-sidebar">Neutral</span>
+                                <span class="gradient-label-sidebar">{{
+                                    comparisonProjectName || 'Comparison'
+                                    }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <!--<div class="quick-stats-row">
+                    <div class="stat-item"
+                        *ngIf="sharedProject.categories?.length">
+                        <div class="stat-number">{{
+                            sharedProject.categories.length
+                            }}</div>
+                        <div class="stat-label">{{ 'SHARE.ACTIVITIES' |
+                            translate }}
+                        </div>
+                    </div>
+                    <div class="stat-item" *ngIf="sharedProject.modes?.length">
+                        <div class="stat-number">{{ sharedProject.modes.length
+                            }}
+                        </div>
+                        <div class="stat-label">{{ 'SHARE.MODES' | translate }}
+                        </div>
+                    </div>
+                    <div class="stat-item"
+                        *ngIf="sharedProject.personas?.length">
+                        <div class="stat-number">{{
+                            sharedProject.personas.length }}
+                        </div>
+                        <div class="stat-label">{{ 'SHARE.PERSONAS' | translate
+                            }}
+                        </div>
+                    </div>
+                </div> -->
+
+                <!-- Description -->
+                <div class="section" *ngIf="sharedProject.project_description">
+                    <div class="section-label">{{ 'SHARE.DESCRIPTION' |
+                        translate }}
+                    </div>
+                    <p class="section-text">{{ sharedProject.project_description
+                        }}
+                    </p>
+                </div>
+
+                <!-- Activities -->
+                <div class="section" *ngIf="sharedProject.categories?.length">
+                    <div class="section-label">{{ 'SHARE.ACTIVITIES' | translate
+                        }}
+                    </div>
+                    <div class="chips-container">
+                        <span class="chip"
+                            *ngFor="let activity of sharedProject.categories">
+                            {{ activity }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Modes -->
+                <div class="section" *ngIf="sharedProject.modes?.length">
+                    <div class="section-label">{{ 'SHARE.MODES' | translate }}
+                    </div>
+                    <div class="modes-list">
+                        <div class="mode-row"
+                            *ngFor="let mode of sharedProject.modes; let i = index">
+                            <!-- <i [class]="getModeIcon(mode)" class="mode-icon"></i> -->
+                            <div class="mode-text">
+                                <span class="mode-name">{{ mode }}</span>
+                                <span class="mode-profile">{{
+                                    sharedProject.profiles[i] }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Personas -->
-                <p-panel *ngIf="sharedProject.personas"
-                    [header]="'SHARE.PERSONAS' | translate" [toggleable]="true"
-                    [collapsed]="false">
-                    <div class="flex flex-wrap gap-2">
-                        <ul class="list-disc pl-4 space-y-1">
-                            <li *ngFor="let persona of sharedProject.personas"
-                                class="text-gray-700">
-                                {{ persona }}
-                            </li>
-                        </ul>
-                        <p *ngIf="!sharedProject.personas?.length"
-                            class="text-gray-500">
-                            {{ 'SHARE.NO_PERSONAS' | translate }}
-                        </p>
+                <div class="section" *ngIf="sharedProject.personas?.length">
+                    <div class="section-label">{{ 'SHARE.PERSONAS' | translate
+                        }}
                     </div>
-                </p-panel>
+                    <div class="chips-container">
+                        <span class="chip persona-chip"
+                            *ngFor="let persona of sharedProject.personas">
+                            {{ persona }}
+                        </span>
+                    </div>
+                </div>
 
-                <!-- Profile -->
-                <p-panel *ngIf="sharedProject.profiles"
-                    [header]="'SHARE.MODES' | translate" [toggleable]="true"
-                    [collapsed]="false">
-                    <div class="flex flex-wrap gap-2">
-                        <ul class="list-disc pl-4 space-y-1">
-                            <li *ngFor="let mode of sharedProject.modes; let i = index"
-                                class="text-gray-700">
-                                {{ mode }} - {{ sharedProject.profiles[i] }}
-                            </li>
-                        </ul>
-                        <p *ngIf="!sharedProject.profiles?.length"
-                            class="text-gray-500">
-                            {{ 'SHARE.NO_PROFILES' | translate }}
-                        </p>
+                <!-- Search Section -->
+                <div class="section search-section">
+                    <div class="section-label">
+                        <i class="pi pi-search"></i>
+                        {{ 'SEARCH_OVERLAY.SEARCH_PLACEHOLDER' | translate }}
                     </div>
-                </p-panel>
+
+                    <div class="search-input-container">
+                        <span class="p-input-icon-right search-input-wrapper">
+                            <i class="pi pi-search"></i>
+                            <input type="text" pInputText
+                                [(ngModel)]="searchQuery"
+                                (input)="onSearchInput()"
+                                [placeholder]="'SEARCH_OVERLAY.SEARCH_PLACEHOLDER' | translate"
+                                class="search-input" />
+                            <i *ngIf="searchQuery"
+                                class="pi pi-times clear-search"
+                                (click)="clearSearch()"></i>
+                        </span>
+                        <div class="search-loading" *ngIf="isSearchLoading">
+                            <i class="pi pi-spin pi-spinner"></i>
+                        </div>
+                        <div class="search-hint">
+                            {{ 'SEARCH_OVERLAY.SEARCH_HINT' | translate }}
+                        </div>
+                    </div>
+                    <div class="search-results-container"
+                        *ngIf="showSearchResults">
+                        <div *ngFor="let result of searchResults"
+                            class="search-result-item"
+                            (click)="selectLocation(result)">
+                            <i class="pi pi-map-marker"></i>
+                            <span class="result-text">{{ result.display_name
+                                }}</span>
+                        </div>
+                        <div class="no-results"
+                            *ngIf="searchResults.length === 0 && !isSearchLoading">
+                            {{ 'SEARCH_OVERLAY.NO_RESULTS' | translate' }}
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Statistics Button -->
-                <div class="mt-6 flex justify-center">
+                <div class="section action-section">
                     <p-button (onClick)="toggleStatistics()"
                         icon="pi pi-chart-bar"
                         [label]="'STATISTICS.TITLE' | translate"
-                        [pTooltip]="'STATISTICS.SHOW_STATISTICS_TOOLTIP' | translate"
-                        styleClass="p-button-secondary">
+                        styleClass="p-button-primary stats-btn">
                     </p-button>
+                </div>
+
+                <!-- BWIM Logo Section -->
+                <div class="section bwim-section">
+                    <div class="bwim-content">
+                        <a href="https://bw-im.de/mobimapr" target="_blank"
+                            rel="noopener noreferrer" class="bwim-link">
+                            <img src="assets/images/bwim-smiley.png"
+                                alt="BWIM Logo" class="bwim-logo" />
+                        </a>
+                        <p class="bwim-hint">
+                            Der mobi.mapr ist ein Projekt des Baden-Württemberg
+                            Institut für Nachhaltige Mobilität
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projects View -->
+            <div *ngIf="activeView === 'projects'" class="projects-view">
+                <!-- Loading Spinner -->
+                <div class="loading-container" *ngIf="projectsLoading">
+                    <p-progress-spinner
+                        styleClass="w-full h-full"></p-progress-spinner>
+                </div>
+
+                <!-- Grouped Projects -->
+                <div *ngIf="!projectsLoading" class="projects-list">
+                    <div *ngFor="let group of getProjectGroups()"
+                        class="project-group">
+                        <div class="group-header">
+                            <h4 class="group-name">{{ group.name }}</h4>
+                            <span class="group-count">({{
+                                (groupedProjects[group.id] || []).length
+                                }})</span>
+                        </div>
+                        <div class="project-items">
+                            <div *ngFor="let project of (groupedProjects[group.id] || [])"
+                                class="project-item"
+                                [class.selected]="selectedProject?.id === project.id"
+                                (click)="selectedProject = project">
+                                <div class="project-item-content">
+                                    <div class="project-item-header">
+                                        <h5 class="project-item-name">{{
+                                            project.display_name }}</h5>
+                                        <span class="project-item-version">v{{
+                                            project.version }}</span>
+                                    </div>
+                                    <p-button icon="pi pi-map"
+                                        (onClick)="showProjectResults(project); $event.stopPropagation()"
+                                        [disabled]="!project.finished"
+                                        [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate"
+                                        size="small"
+                                        styleClass="p-button-text p-button-sm">
+                                    </p-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ungrouped Projects -->
+                    <div *ngIf="ungroupedProjects.length > 0"
+                        class="project-group">
+                        <div class="group-header">
+                            <h4 class="group-name">{{ 'PROJECTS.UNGROUPED' |
+                                translate }}</h4>
+                            <span class="group-count">({{
+                                ungroupedProjects.length }})</span>
+                        </div>
+                        <div class="project-items">
+                            <div *ngFor="let project of ungroupedProjects"
+                                class="project-item"
+                                [class.selected]="selectedProject?.id === project.id"
+                                (click)="selectedProject = project">
+                                <div class="project-item-content">
+                                    <div class="project-item-header">
+                                        <h5 class="project-item-name">{{
+                                            project.display_name }}</h5>
+                                        <span class="project-item-version">v{{
+                                            project.version }}</span>
+                                    </div>
+                                    <div class="project-item-badges">
+                                        <span class="read-only-badge">{{
+                                            'PROJECTS.READ_ONLY' | translate
+                                            }}</span>
+                                    </div>
+                                    <p-button icon="pi pi-map"
+                                        (onClick)="showProjectResults(project); $event.stopPropagation()"
+                                        [disabled]="!project.finished"
+                                        [pTooltip]="'PROJECTS.ACTIONS.SHOW_RESULTS' | translate"
+                                        size="small"
+                                        styleClass="p-button-text p-button-sm">
+                                    </p-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- No Projects Message -->
+                    <div *ngIf="projects.length === 0 && !projectsLoading"
+                        class="no-projects">
+                        <i class="pi pi-info-circle"></i>
+                        <p>{{ 'PROJECTS.LIST.NO_PROJECTS' | translate }}</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </p-scrollPanel>
+    </div>
+
+    <!-- Empty State - Only show when no project and no projects list -->
+    <div class="empty-state"
+        *ngIf="!sharedProject && projects.length === 0 && !projectsLoading">
+        <i class="pi pi-info-circle"></i>
+        <p>{{ 'SHARE.NO_PROJECT_SELECTED' | translate }}</p>
+    </div>
 </div>

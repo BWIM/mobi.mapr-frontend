@@ -48,6 +48,8 @@ export class MapV2Service {
   private visualizationType: 'index' | 'score' = 'index';
   private visualizationTypeSubject = new BehaviorSubject<'index' | 'score'>('index');
   visualizationType$ = this.visualizationTypeSubject.asObservable();
+  private locationSubject = new BehaviorSubject<{ lng: number, lat: number } | null>(null);
+  location$ = this.locationSubject.asObservable();
   comparisonProject: Project | null = null;
   private comparisonSubject = new BehaviorSubject<boolean>(false);
   comparison$ = this.comparisonSubject.asObservable();
@@ -148,6 +150,19 @@ export class MapV2Service {
     return this.map?.getCenter() as unknown as [number, number];
   }
 
+  flyToLocation(lng: number, lat: number): void {
+    if (this.map) {
+      this.map.flyTo({
+        center: [lng, lat],
+        zoom: 11,
+        duration: 2000
+      });
+    } else {
+      // If map is not ready, emit location for later use
+      this.locationSubject.next({ lng, lat });
+    }
+  }
+
   getCurrentProject(): string | null {
     return this.currentProject;
   }
@@ -190,11 +205,15 @@ export class MapV2Service {
           type: 'raster',
           tiles: ['https://basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png'],
           tileSize: 256,
+          minzoom: 0,
+          maxzoom: 14, // Reduced from 19 to limit high-zoom tile loading
         } as SourceSpecification,
         'carto-labels': {
           type: 'raster',
           tiles: ['https://basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png'],
           tileSize: 256,
+          minzoom: 0,
+          maxzoom: 14, // Reduced from 19 to limit high-zoom tile loading
         } as SourceSpecification,
         'temporary-geojson': {
           type: 'geojson',
@@ -210,7 +229,7 @@ export class MapV2Service {
           type: 'raster',
           source: 'carto-light',
           minzoom: 0,
-          maxzoom: 19
+          maxzoom: 14 // Reduced from 19 to limit high-zoom tile loading
         } as LayerSpecification,
         {
           id: 'temporary-features',
@@ -676,7 +695,7 @@ export class MapV2Service {
         type: 'raster',
         source: 'carto-labels',
         minzoom: 0,
-        maxzoom: 19
+        maxzoom: 14 // Reduced from 19 to limit high-zoom tile loading
       } as LayerSpecification);
     }
 

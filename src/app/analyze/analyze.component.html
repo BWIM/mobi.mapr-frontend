@@ -1,6 +1,6 @@
 <p-dialog [(visible)]="visible" [modal]="true" [draggable]="false"
     [resizable]="false" [dismissableMask]="true" [maximizable]="true"
-    [style]="{width: '80vw', height: '80vh'}"
+    [style]="{width: '95vw', height: '95vh'}"
     [style.backgroundColor]="getScore().color" styleClass="analyze-dialog"
     [header]="properties?.name" (onShow)="onDialogShow()"
     (onHide)="onDialogHide()">
@@ -28,8 +28,6 @@
         <div *ngIf="loading && !isComparisonMode"
             class="flex justify-center items-center">
             <div class="flex flex-col items-center">
-                <p class="text-center text-sm text-gray-700 mb-4">{{
-                    'ANALYZE.LOADING.HINT' | translate }}</p>
                 <p-progressSpinner></p-progressSpinner>
             </div>
         </div>
@@ -44,7 +42,8 @@
                     <p-tablist class="border-b border-gray-200 mb-4">
                         <p-tab value="activities" class="px-4 py-2">{{
                             'ANALYZE.ACTIVITIES.TITLE' | translate }}</p-tab>
-                        <p-tab value="persona" class="px-4 py-2">{{
+                        <p-tab value="persona" class="px-4 py-2"
+                            *ngIf="personas.length > 0 && showPersona">{{
                             'ANALYZE.PERSONA.TITLE' | translate }}</p-tab>
                         <p-tab value="profiles" class="px-4 py-2">{{
                             'ANALYZE.PROFILES.TITLE' | translate }}</p-tab>
@@ -99,7 +98,8 @@
                                     [header]="hoveredCategoryName"
                                     (onHide)="onCategoryLeave()"
                                     styleClass="analyze-subdialog">
-                                    <div class="flex flex-col h-full">
+                                    <div class="flex flex-col h-full"
+                                        *ngIf="!showSubactivitiesMap">
                                         <div class="flex-1 min-h-0 relative h-full"
                                             style="min-height: 400px;">
                                             <!-- Loading indicator for subactivities chart -->
@@ -151,15 +151,53 @@
                                         [header]="hoveredSubactivityName"
                                         (onHide)="onSubactivityLeave()"
                                         styleClass="analyze-map-dialog">
-                                        <div class="relative h-full w-full">
-                                            <div id="places-map"
-                                                class="h-full w-full rounded-lg">
+                                        <div
+                                            class="flex flex-col h-full w-full">
+                                            <div
+                                                class="relative flex-1 min-h-0 w-full">
+                                                <div id="places-map"
+                                                    class="h-full w-full rounded-lg">
+                                                </div>
+                                                <!-- Legend for score/index colors -->
+
+                                                <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75"
+                                                    *ngIf="noPlaces">
+                                                    <p
+                                                        class="text-gray-500 text-center">
+                                                        {{
+                                                        'ANALYZE.ACTIVITIES.NO_PLACES'
+                                                        | translate }}</p>
+                                                </div>
+                                                <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75"
+                                                    *ngIf="disablePlaces">
+                                                    <p
+                                                        class="text-gray-500 text-center">
+                                                        {{
+                                                        'ANALYZE.ACTIVITIES.DISABLE_PLACES'
+                                                        | translate }}</p>
+                                                </div>
+                                                <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75"
+                                                    *ngIf="!mapLoaded">
+                                                    <div
+                                                        class="flex flex-col items-center">
+                                                        <p-progressSpinner
+                                                            [style]="{width: '50px', height: '50px'}"
+                                                            strokeWidth="4"
+                                                            animationDuration=".5s"></p-progressSpinner>
+                                                        <p
+                                                            class="text-center text-sm text-gray-500 mt-2">
+                                                            {{
+                                                            'ANALYZE.ACTIVITIES.LOADING_MAP'
+                                                            | translate }}</p>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <!-- OSM Link - Always visible when map is loaded -->
-                                            <div class="absolute top-4 right-4 z-10"
+                                            <div class="bg-white border 
+                                            border-gray-200 rounded-lg px-4 
+                                            py-3 shadow-sm m-4 flex-shrink-0"
                                                 *ngIf="mapLoaded && getOsmLink()">
-                                                <div
-                                                    class="bg-blue-50 border border-blue-200 rounded-lg p-3 shadow-md">
+                                                <div class="">
                                                     <p
                                                         class="text-sm text-gray-700 mb-2">
                                                         {{
@@ -176,58 +214,6 @@
                                                     </a>
                                                 </div>
                                             </div>
-
-                                            <!-- Legend for score/index colors -->
-                                            <div
-                                                class="mt-4 flex justify-center">
-                                                <div
-                                                    class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
-                                                    <div
-                                                        class="flex flex-wrap gap-3 justify-center">
-                                                        <div *ngFor="let item of getLegendItems()"
-                                                            class="flex items-center gap-2">
-                                                            <span
-                                                                class="w-4 h-4 rounded-sm"
-                                                                [style.background-color]="item.color"></span>
-                                                            <span
-                                                                class="text-xs text-gray-700">{{
-                                                                item.label
-                                                                }}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75"
-                                                *ngIf="noPlaces">
-                                                <p
-                                                    class="text-gray-500 text-center">
-                                                    {{
-                                                    'ANALYZE.ACTIVITIES.NO_PLACES'
-                                                    | translate }}</p>
-                                            </div>
-                                            <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75"
-                                                *ngIf="disablePlaces">
-                                                <p
-                                                    class="text-gray-500 text-center">
-                                                    {{
-                                                    'ANALYZE.ACTIVITIES.DISABLE_PLACES'
-                                                    | translate }}</p>
-                                            </div>
-                                            <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75"
-                                                *ngIf="!mapLoaded">
-                                                <div
-                                                    class="flex flex-col items-center">
-                                                    <p-progressSpinner
-                                                        [style]="{width: '50px', height: '50px'}"
-                                                        strokeWidth="4"
-                                                        animationDuration=".5s"></p-progressSpinner>
-                                                    <p
-                                                        class="text-center text-sm text-gray-500 mt-2">
-                                                        {{
-                                                        'ANALYZE.ACTIVITIES.LOADING_MAP'
-                                                        | translate }}</p>
-                                                </div>
-                                            </div>
                                         </div>
                                     </p-dialog>
                                 </p-dialog>
@@ -235,7 +221,37 @@
 
                             <!-- Legend for score/index colors -->
                             <div class="mt-4 flex justify-center">
-                                <div
+                                <!-- Gradient bar legend for score visualization on mobile -->
+                                <div *ngIf="isScoreVisualization && isMobile"
+                                    class="score-legend-analyze">
+                                    <div class="score-legend-header">
+                                        <h4>{{ scoreHeader }}</h4>
+                                    </div>
+                                    <div class="gradient-container-analyze">
+                                        <div
+                                            class="gradient-bar-analyze score-gradient-bar-analyze">
+                                        </div>
+                                        <div class="gradient-labels-analyze">
+                                            <span
+                                                class="gradient-label-analyze">0
+                                                {{
+                                                'LEGEND.MINUTES' | translate
+                                                }}</span>
+                                            <span
+                                                class="gradient-label-analyze">21
+                                                {{
+                                                'LEGEND.MINUTES' | translate
+                                                }}</span>
+                                            <span
+                                                class="gradient-label-analyze">60+
+                                                {{
+                                                'LEGEND.MINUTES' | translate
+                                                }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Discrete legend for index visualization or desktop -->
+                                <div *ngIf="!isScoreVisualization || !isMobile"
                                     class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
                                     <div
                                         class="flex flex-wrap gap-3 justify-center">
@@ -245,7 +261,8 @@
                                                 [style.background-color]="item.color"></span>
                                             <span
                                                 class="text-xs text-gray-700">{{
-                                                item.label
+                                                (isMobile && item.labelMobile) ?
+                                                item.labelMobile : item.label
                                                 }}</span>
                                         </div>
                                     </div>
@@ -269,7 +286,7 @@
                                         </p>
                                     </div>
                                 </div>
-                                <div class="flex justify-center items-center">
+                                <!-- <div class="flex justify-center items-center">
                                     <div
                                         class="bg-purple-50 border border-purple-200 rounded-lg p-2 max-w-md">
                                         <p
@@ -280,7 +297,7 @@
                                             translate }}
                                         </p>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                     </p-tabpanel>
@@ -346,25 +363,39 @@
                                         'ANALYZE.PERSONA.HINT' | translate }}
                                     </p>
                                 </div>
-                                <div class="flex justify-center items-center">
-                                    <div
-                                        class="bg-purple-50 border border-purple-200 rounded-lg p-2 max-w-md">
-                                        <p
-                                            class="text-black-800 text-center font-medium text-xs">
-                                            {{
-                                            'ANALYZE.POPULATION_WEIGHTING_HINT'
-                                            |
-                                            translate
-                                            }}
-                                        </p>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
                         <!-- Legend for score/index colors -->
                         <div class="mt-4 flex justify-center">
-                            <div
+                            <!-- Gradient bar legend for score visualization on mobile -->
+                            <div *ngIf="isScoreVisualization && isMobile"
+                                class="score-legend-analyze">
+                                <div class="score-legend-header">
+                                    <h4>{{ scoreHeader }}</h4>
+                                </div>
+                                <div class="gradient-container-analyze">
+                                    <div
+                                        class="gradient-bar-analyze score-gradient-bar-analyze">
+                                    </div>
+                                    <div class="gradient-labels-analyze">
+                                        <span class="gradient-label-analyze">0
+                                            {{
+                                            'LEGEND.MINUTES' | translate
+                                            }}</span>
+                                        <span class="gradient-label-analyze">21
+                                            {{
+                                            'LEGEND.MINUTES' | translate
+                                            }}</span>
+                                        <span class="gradient-label-analyze">60+
+                                            {{
+                                            'LEGEND.MINUTES' | translate
+                                            }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Discrete legend for index visualization or desktop -->
+                            <div *ngIf="!isScoreVisualization || !isMobile"
                                 class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
                                 <div
                                     class="flex flex-wrap gap-3 justify-center">
@@ -373,7 +404,8 @@
                                         <span class="w-4 h-4 rounded-sm"
                                             [style.background-color]="item.color"></span>
                                         <span class="text-xs text-gray-700">{{
-                                            item.label
+                                            (isMobile && item.labelMobile) ?
+                                            item.labelMobile : item.label
                                             }}</span>
                                     </div>
                                 </div>
@@ -395,7 +427,9 @@
                                 class="text-lg font-semibold text-gray-700 mb-4">
                                 {{ 'ANALYZE.PROFILES.TITLE' | translate }}</h3>
                             <div class="flex-1 flex flex-col">
-                                <div class="flex-1 relative">
+                                <!-- Line Chart for Index Visualization -->
+                                <div *ngIf="!isScoreVisualization"
+                                    class="flex-1 relative">
                                     <!-- Loading indicator for profiles chart -->
                                     <div *ngIf="profilesLoading"
                                         class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75 z-10">
@@ -420,8 +454,36 @@
                                     </p-chart>
                                 </div>
 
+                                <!-- Bar Chart for Score Visualization -->
+                                <div *ngIf="isScoreVisualization"
+                                    class="flex-1 relative"
+                                    style="min-height: 300px;">
+                                    <!-- Loading indicator for profiles bar chart -->
+                                    <div *ngIf="profilesLoading"
+                                        class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75 z-10">
+                                        <div class="flex flex-col items-center">
+                                            <p-progressSpinner
+                                                [style]="{width: '40px', height: '40px'}"
+                                                strokeWidth="4"
+                                                animationDuration=".5s">
+                                            </p-progressSpinner>
+                                            <p
+                                                class="text-center text-sm text-gray-500 mt-2">
+                                                {{ 'ANALYZE.PROFILES.LOADING' |
+                                                translate }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <p-chart #profilesBarChart type="bar"
+                                        [data]="profilesBarChartData"
+                                        [options]="profilesBarChartOptionsForScores"
+                                        [width]="'100%'" [height]="'100%'">
+                                    </p-chart>
+                                </div>
+
                                 <!-- Custom Profile Legend -->
-                                <div *ngIf="profileLegendData.length > 0"
+                                <div *ngIf="profileLegendData.length > 0 && !isScoreVisualization"
                                     class="mt-4 flex-shrink-0">
                                     <div
                                         class="flex flex-wrap gap-4 justify-center">
@@ -436,43 +498,24 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <!-- Legend for score/index colors -->
-                        <div class="mt-4 flex justify-center">
-                            <div
-                                class="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
-                                <div
-                                    class="flex flex-wrap gap-3 justify-center">
-                                    <div *ngFor="let item of getLegendItems()"
-                                        class="flex items-center gap-2">
-                                        <span class="w-4 h-4 rounded-sm"
-                                            [style.background-color]="item.color"></span>
-                                        <span class="text-xs text-gray-700">{{
-                                            item.label
-                                            }}</span>
+                                <!-- Explanation Text -->
+                                <div class="mt-4 flex justify-center">
+                                    <div
+                                        class="bg-purple-50 border border-purple-200 rounded-lg p-2 max-w-md">
+                                        <p
+                                            class="text-black-800 text-center font-medium text-xs">
+                                            {{
+                                            'ANALYZE.PROFILES.EXPLANATION' |
+                                            translate }}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div *ngIf="profiles.length === 0"
-                            class="flex-1 flex items-center justify-center">
-                            <p class="text-gray-700 text-center">{{
-                                'ANALYZE.PROFILES.NO_DATA' | translate }}</p>
-                        </div>
-                        <div class="flex justify-center items-center mb-6 pt-4">
-                            <div
-                                class="bg-purple-50 border border-purple-200 rounded-lg p-3 max-w-md">
-                                <p
-                                    class="text-black-800 text-center font-medium text-sm">
-                                    {{
-                                    'ANALYZE.POPULATION_WEIGHTING_HINT' |
-                                    translate
-                                    }}
-                                </p>
-                            </div>
-                        </div>
+
+
+
                     </p-tabpanel>
                 </p-tabs>
             </div>

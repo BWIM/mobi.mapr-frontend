@@ -4,13 +4,11 @@ import { SharedModule } from '../shared/shared.module';
 import { ShareService } from './share.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ShareSidebarComponent } from './share-sidebar/share-sidebar.component';
-import { ShareProjectbarComponent } from './share-projectbar/share-projectbar.component';
 import { ShareProject } from './share.interface';
 import { Project } from '../projects/project.interface';
 import { LoadingService } from '../services/loading.service';
 import { MapV2Component } from '../map-v2/map-v2.component';
 import { MapV2Service } from '../map-v2/map-v2.service';
-import { TutorialService } from '../tutorial/tutorial.service';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -18,7 +16,7 @@ import { takeUntil } from 'rxjs/operators';
 @Component({
   selector: 'app-share',
   standalone: true,
-  imports: [SharedModule, LoadingSpinnerComponent, ShareSidebarComponent, ShareProjectbarComponent, MapV2Component],
+  imports: [SharedModule, LoadingSpinnerComponent, ShareSidebarComponent, MapV2Component],
   templateUrl: './share.component.html',
   styleUrl: './share.component.css'
 })
@@ -28,8 +26,6 @@ export class ShareComponent implements OnInit, OnDestroy {
   projectKey: string = '';
   project: any = null;
   sharedProject: ShareProject | null = null;
-  rightSidebarExpanded: boolean = false;
-  leftSidebarExpanded: boolean = false;
   isMobile: boolean = false;
   private destroy$ = new Subject<void>();
 
@@ -39,8 +35,6 @@ export class ShareComponent implements OnInit, OnDestroy {
     private loadingService: LoadingService,
     private mapService: MapV2Service,
     private analyzeService: AnalyzeService,
-    private tutorialService: TutorialService,
-    private router: Router
   ) {
     this.checkMobile();
   }
@@ -89,12 +83,6 @@ export class ShareComponent implements OnInit, OnDestroy {
     this.sharedProject = null;
     this.isRightPinned = false;
 
-    // Subscribe to the sidebar expansion state
-    this.shareService.isRightSidebarExpanded$.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(expanded => {
-      this.rightSidebarExpanded = expanded;
-    });
 
     this.shareService.getProject(this.projectKey).pipe(
       takeUntil(this.destroy$)
@@ -127,7 +115,6 @@ export class ShareComponent implements OnInit, OnDestroy {
     ).subscribe(project => {
       this.sharedProject = project;
       this.isRightPinned = true;
-      this.toggleSidebar();
 
       // Update the project data with the actual project name
       if (project && project.project_name && this.project) {
@@ -155,17 +142,13 @@ export class ShareComponent implements OnInit, OnDestroy {
     // Consider devices with width < 1024px as mobile/tablet for better iPad support
     this.isMobile = width < 1024 || (isTouchDevice && width < 1200);
 
-    // Auto-close sidebar on mobile when switching to desktop
-    if (!this.isMobile && this.rightSidebarExpanded) {
-      this.rightSidebarExpanded = false;
-    }
   }
 
-  toggleSidebar() {
-    this.shareService.toggleRightSidebarExpanded();
-  }
 
-  toggleProjectbar() {
-    this.leftSidebarExpanded = !this.leftSidebarExpanded;
+
+  onLocationSelected(location: { lng: number, lat: number }) {
+    // Forward location selection to map service
+    // The map component will handle the flyTo action
+    this.mapService.flyToLocation(location.lng, location.lat);
   }
 }

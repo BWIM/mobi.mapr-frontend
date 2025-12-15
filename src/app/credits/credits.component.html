@@ -1,7 +1,12 @@
 <p-speedDial [model]="items" direction="up" buttonClassName="p-button-info"
     [showIcon]="'pi pi-info'" [hideIcon]="'pi pi-times'"
-    [tooltipOptions]="{ tooltipPosition: 'left' }"
-    id="credits-sidebar"></p-speedDial>
+    [tooltipOptions]="{ tooltipPosition: 'left' }" id="credits-sidebar"
+    *ngIf="!isMobile"></p-speedDial>
+
+<p-speedDial [model]="items" direction="down"
+    buttonClassName="mobile-speeddial-button" [showIcon]="'pi pi-info'"
+    [hideIcon]="'pi pi-times'" [tooltipOptions]="{ tooltipPosition: 'left' }"
+    id="credits-sidebar-mobile" *ngIf="isMobile"></p-speedDial>
 
 <!-- Credits Dialog - Mobile First with PrimeNG -->
 <p-dialog [(visible)]="showCreditsDialog" [modal]="true" [closable]="true"

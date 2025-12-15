@@ -1,1 +1,13 @@
+/* Search field styling */
+:host ::ng-deep .p-iconfield {
+  width: 100%;
+}
 
+:host ::ng-deep .p-iconfield .p-input-icon {
+  left: 0.75rem;
+  color: rgb(156 163 175); /* text-gray-400 */
+}
+
+:host ::ng-deep .p-iconfield input {
+  padding-left: 2.5rem !important; /* Make room for icon */
+}

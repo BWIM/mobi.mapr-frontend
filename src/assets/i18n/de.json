@@ -158,6 +158,7 @@
     "EXPORT": "Export"
   },
   "LEGEND": {
+    "TITLE": "Legende",
     "LVLA": "Die erforderliche Mobilitätszeit beträgt maximal 35 % im lokalen Vergleich.",
     "LVLB": "Die erforderliche Mobilitätszeit liegt zwischen 36 % und 50 % im lokalen Vergleich.",
     "LVLC": "Die erforderliche Mobilitätszeit liegt zwischen 51 % und 71 % im lokalen Vergleich.",
@@ -306,7 +307,9 @@
     "EXIT_COMPARISON": "Vergleich beenden",
     "VISUALIZATION_TYPE": "Visualisierung",
     "INDEX": "Index",
-    "SCORE": "Score"
+    "INDEX_TOOLTIP": "Zeigt die bewertete Mobilitätszeit in Relation zur jw. Regionalklasse.",
+    "SCORE": "Score",
+    "SCORE_TOOLTIP": "Zeigt die Reisezeit in Minuten, angereichert mit subjektiven Faktoren."
   },
   "ANALYZE": {
     "PERSONA": {
@@ -320,7 +323,7 @@
       "NO_DATA": "Keine Daten verfügbar",
       "SWITCH_TO_DOUGHNUT": "Ansicht wechseln",
       "EXPLANATION": "Die Aktivitäten gewichtet nach lokaler Relevanz",
-      "HINT": "💡 Klicke auf einen Balken im Diagramm, um mehr Infos zu erhalten!",
+      "HINT": "💡 Klicke auf einen Balken im Diagramm, um eine Karte mit den Orten dieser Aktivität anzuzeigen!",
       "SUBACTIVITIES_HINT": "💡 Klicke auf einen Balken im Diagramm, um Orte auf der Karte anzuzeigen!",
       "NO_PLACES": "Keine Orte gefunden",
       "DISABLE_PLACES": "Die Orts-Ansicht ist nur für Gemeinde-Ebene oder Hexagone aktiviert. Um mehr Details zu bekommen, zoome in die Karte hinein!",
@@ -339,7 +342,8 @@
       "TITLE": "Modi",
       "NO_DATA": "Keine Daten verfügbar",
       "HINT": "Hinweis: Die Werte der Modi können bei einer limitieren Anzahl an Personas sehr ähnlich sein.",
-      "LOADING": "Lade Profile..."
+      "LOADING": "Lade Profile...",
+      "EXPLANATION": "Die Abbildung oben zeigt, wie gut jedes einzelne Verkehrsmittel performt."
     },
     "TITLE": "Details",
     "START": "Start",
@@ -368,6 +372,9 @@
     "NO_PROJECT_SELECTED": "Kein Projekt ausgewählt",
     "CREATED_BY": "Erstellt von",
     "EXPIRES": "Läuft ab am",
+    "DETAILS": "Infos",
+    "LINKED_MAPS": "Verknüpfte Karten",
+    "PROJECTS": "Projekte",
     "DESCRIPTION": "Beschreibung",
     "ACTIVITIES": "Aktivitäten",
     "PERSONAS": "Personas",
@@ -441,7 +448,7 @@
     "CONTACT_TOOLTIP": "Kontaktinformationen für Support"
   },
   "STATISTICS": {
-    "TITLE": "Statistiken",
+    "TITLE": "Rangliste",
     "SHOW_STATISTICS_TOOLTIP": "Detaillierte Statistiken für dieses Projekt anzeigen",
     "STATES": "Bundesländer",
     "COUNTIES": "Land-/ Stadtkreise",
@@ -462,7 +469,9 @@
     "POPULATION": "Bevölkerung",
     "MUNICIPALITY_SUBDIVISION_HINT": "Hinweis: Gemeinden, die allein den jeweiligen Stadt- oder Landkreis bilden, werden nicht noch einmal unter 'Gemeinden' aufgeführt, sondern nur unter 'Stadt- bzw. Landkreise'.",
     "NO_MUNICIPALITIES_FOUND": "Keine Gemeinden gefunden",
-    "NO_MUNICIPALITIES_HINT": "Keine Gemeinden entsprechen den ausgewählten Kriterien. Versuchen Sie, die Bevölkerungsfilter anzupassen oder eine andere Gemeinde auszuwählen."
+    "NO_MUNICIPALITIES_HINT": "Keine Gemeinden entsprechen den ausgewählten Kriterien. Versuchen Sie, die Bevölkerungsfilter anzupassen oder eine andere Gemeinde auszuwählen.",
+    "SEARCH_KEYWORD_STATE": "Gib zum filtern ein Bundesland ein....",
+    "SEARCH_KEYWORD_COUNTY": "Gib zum filtern eine Stadt/ Landkreis an"
   },
   "PDF_EXPORT": {
     "TITLE": "PDF Export",
@@ -479,7 +488,8 @@
     "ESTIMATED_SIZE": "Hinweis: Die Dateigröße hängt von der Kartenkomplexität und den gewählten Optionen ab"
   },
   "SEARCH_OVERLAY": {
-    "SEARCH_PLACEHOLDER": "Orte suchen"
+    "SEARCH_PLACEHOLDER": "Orte suchen",
+    "SEARCH_HINT": "Suche nach einem Ort, um ihn direkt auf der Karte anzuzeigen"
   },
   "LANDING": {
     "TITLE": "Willkommen beim mobi.mapr",
@@ -647,5 +657,11 @@
     "MESSAGE": "Derzeit werden Wartungsarbeiten durchgeführt. Bitte versuchen Sie es später erneut. Die Seite wird automatisch aktualisiert, sobald der Service wieder verfügbar ist.",
     "CHECKING": "Service wird überprüft...",
     "INFO": "Diese Seite wird automatisch aktualisiert, sobald der Service wieder verfügbar ist."
+  },
+  "MAP_HINT": {
+    "ZOOM": "Zoome in die Karte, um Details zu sehen",
+    "ZOOM_DETAIL": "Reinzoomen, bis die Karte kleinere Gebiete zeigt",
+    "CLICK": "Klicke auf ein Gebiet, um mehr Informationen zu erhalten",
+    "CLICK_DETAIL": "Tippe auf ein farbiges Gebiet, um Details zu öffnen"
   }
 }

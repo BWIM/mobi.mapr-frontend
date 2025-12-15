@@ -63,6 +63,8 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   showSubactivitiesMap: boolean = false;
   hoveredSubactivityName: string = '';
   mapLoaded: boolean = false;
+  isMobile: boolean = false;
+  scoreHeader: string = '';
 
   // Subactivities pie chart properties
   showSubactivitiesPie: boolean = false;
@@ -77,10 +79,12 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   personaChartData: any;
   activitiesChartData: any;
   profilesChartData: any;
+  profilesBarChartData: any;
   radarChartOptions: any;
   radarChartOptionsProfiles: any;
   barChartOptions: any;
   profilesBarChartOptions: any;
+  profilesBarChartOptionsForScores: any;
   subBarChartOptions: any;
   subactivitiesChartData: any;
   noPlaces: boolean = false;
@@ -100,6 +104,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   @ViewChild('activitiesChart') activitiesChart?: UIChart;
   @ViewChild('personaChart') personaChart?: UIChart;
   @ViewChild('profilesChart') profilesChart?: UIChart;
+  @ViewChild('profilesBarChart') profilesBarChart?: UIChart;
   @ViewChild('subactivitiesPieChart') subactivitiesPieChart?: UIChart;
   @ViewChild('dialogContainer') dialogContainer?: ElementRef;
 
@@ -380,8 +385,20 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     return profileColors[profileId] || '#666666'; // Default gray if not found
   };
 
-  getLegendItems(): { label: string; color: string }[] {
+  getLegendItems(): { label: string; color: string; labelMobile?: string }[] {
     if (this.isScoreVisualization) {
+      if (this.isMobile) {
+        // Mobile-optimized shorter labels for score visualization
+        return [
+          { label: '<10', labelMobile: '<10', color: 'rgb(0, 60, 0)' },
+          { label: '10-20', labelMobile: '10-20', color: 'rgb(0, 100, 0)' },
+          { label: '20-30', labelMobile: '20-30', color: 'rgb(0, 140, 0)' },
+          { label: '30-40', labelMobile: '30-40', color: 'rgb(133, 218, 133)' },
+          { label: '40-50', labelMobile: '40-50', color: 'rgb(238, 61, 61)' },
+          { label: '50-60', labelMobile: '50-60', color: 'rgb(201, 0, 0)' },
+          { label: '>60', labelMobile: '>60', color: 'rgb(126, 0, 0)' },
+        ];
+      }
       return [
         { label: '<10 min', color: 'rgb(0, 60, 0)' },
         { label: '10-20 min', color: 'rgb(0, 100, 0)' },
@@ -392,6 +409,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         { label: '>60 min', color: 'rgb(126, 0, 0)' },
       ];
     }
+    // Index visualization - always show just letters (already short)
     return [
       { label: 'A', color: '#32612d' },
       { label: 'B', color: '#3cb043' },
@@ -710,9 +728,53 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         }]
       };
 
-      this.generateSubactivitiesPieData(category.id);
-      this.showSubactivitiesPie = true;
-      this.initializeSubActivitiesChart(category.id); // Update subactivities chart for the hovered category
+      // Check if category has only one activity - if so, show map directly
+      this.analyzeService.getActivities(category.id).subscribe({
+        next: (activities) => {
+          if (activities && activities.length === 1) {
+            // Category has only one activity - show map directly
+            const activity = activities[0];
+            const activityId = activity.id;
+
+            // Set loading state and show both dialogs (parent needed for DOM structure)
+            // The parent dialog will be shown but we'll immediately show the map dialog on top
+            this.mapLoaded = false;
+            this.showSubactivitiesPie = true; // Show parent dialog so map container is in DOM
+            this.showSubactivitiesMap = true; // Show map dialog on top
+            // Use the full activity name from the stored data
+            this.hoveredSubactivityName = this.activitiesDisplayNames.get(activityId) || `Activity ${activityId}`;
+
+            // Wait for dialogs to be rendered before initializing map
+            // Need longer delay since we're rendering both parent and child dialogs
+            setTimeout(() => {
+              this.initializeMapWithRetry().then(() => {
+                // Only fetch and add places after map is fully initialized
+                this.analyzeService.getPlaces(activityId).subscribe((res: Place[]) => {
+                  this.disablePlaces = res.length === 0;
+                  this.addPlacesToMap(res);
+                  this.zoomToPlaces(res);
+                  this.mapLoaded = true;
+                });
+              }).catch((error) => {
+                console.error("Failed to initialize map:", error);
+                this.mapLoaded = true; // Set to true to hide loading indicator
+              });
+            }, 400);
+          } else {
+            // Category has multiple activities - show pie chart as before
+            this.generateSubactivitiesPieData(category.id);
+            this.showSubactivitiesPie = true;
+            this.initializeSubActivitiesChart(category.id); // Update subactivities chart for the hovered category
+          }
+        },
+        error: (error) => {
+          console.error('Error loading activities:', error);
+          // On error, fall back to showing pie chart
+          this.generateSubactivitiesPieData(category.id);
+          this.showSubactivitiesPie = true;
+          this.initializeSubActivitiesChart(category.id);
+        }
+      });
     }
   }
 
@@ -1008,6 +1070,10 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   private initializePersonaChart(): void {
     if (!this.personas || this.personas.length === 0) {
       this.showPersona = false;
+      // Reset active tab if currently on persona tab
+      if (this.activeTab === 'persona') {
+        this.activeTab = 'activities';
+      }
       // Set empty chart data when no personas
       this.personaChartData = {
         labels: [],
@@ -1057,6 +1123,10 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         labels: [],
         datasets: []
       };
+      this.profilesBarChartData = {
+        labels: [],
+        datasets: []
+      };
       this.profileLegendData = [];
       this.profilesLoading = false;
       return;
@@ -1074,6 +1144,25 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     // Create combo chart with exponential function and horizontal bars
     const profileMap = new Map(this.profiles.map(p => [p.id, this.profilesDisplayNames.get(p.id) || `Profile ${p.id}`]));
     this.createProfilesComboChart(sortedProfiles, profileMap, scoreNames);
+
+    // If in score visualization mode, also create bar chart for profile scores
+    if (this.isScoreVisualization) {
+      this.initializeProfilesBarChart(sortedProfiles, profileMap);
+    } else {
+      // Initialize empty bar chart data when not in score visualization mode
+      this.profilesBarChartData = {
+        labels: [],
+        datasets: [{
+          label: 'Score',
+          data: [],
+          backgroundColor: [],
+          borderColor: [],
+          borderWidth: 1,
+          yAxisID: 'y',
+          barPercentage: 0.8
+        }]
+      };
+    }
 
     this.profilesLoading = false; // Clear loading state when chart is ready
   }
@@ -1332,6 +1421,116 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     };
   }
 
+  private initializeProfilesBarChart(profiles: Profile[], profileMap: Map<number, string>): void {
+    // Handle empty profiles array
+    if (!profiles || profiles.length === 0) {
+      this.profilesBarChartData = {
+        labels: [],
+        datasets: [{
+          label: 'Scores',
+          data: [],
+          backgroundColor: [],
+          borderColor: [],
+          borderWidth: 1,
+          yAxisID: 'y',
+          barPercentage: 0.8
+        }]
+      };
+      return;
+    }
+
+    // Sort profiles by score (descending) for score visualization
+    const sortedProfiles = [...profiles].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+
+    // Extract labels using display names
+    let labels: string[] = [];
+    labels = sortedProfiles.map(profile => profileMap.get(profile.id) || `Profile ${profile.id}`);
+
+    // Truncate labels longer than 30 characters
+    labels = labels.map(label => {
+      if (label && label.length > 30) {
+        return label.substring(0, 27) + '...';
+      }
+      return label;
+    });
+
+    // Get scores (in seconds) and convert to minutes for display
+    const scores = sortedProfiles.map(profile => (profile.score ?? 0) / 60); // Convert to minutes
+    const scoreColors = sortedProfiles.map(profile => this.getColorForValue(profile.score ?? 0));
+
+    // Create bar chart data
+    this.profilesBarChartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Score',
+          data: scores,
+          backgroundColor: scoreColors,
+          borderColor: scoreColors,
+          borderWidth: 1,
+          yAxisID: 'y',
+          barPercentage: 0.8
+        }
+      ]
+    };
+
+    // Get translation for minutes label
+    const minutesLabel = this.translate.instant('LEGEND.MINUTES');
+
+    // Create bar chart options
+    this.profilesBarChartOptionsForScores = {
+      indexAxis: 'x',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            label: (context: any) => {
+              const index = context.dataIndex;
+              const scoreInSeconds = sortedProfiles[index].score ?? 0;
+              const scoreInMinutes = (scoreInSeconds / 60).toFixed(1);
+              return `${scoreInMinutes} ${minutesLabel}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#495057',
+          },
+          grid: {
+            color: '#ebedef'
+          }
+        },
+        y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          beginAtZero: true,
+          ticks: {
+            color: '#495057',
+            callback: (value: number) => {
+              return value.toFixed(1);
+            }
+          },
+          grid: {
+            color: '#ebedef'
+          },
+          title: {
+            display: true,
+            text: minutesLabel
+          }
+        }
+      }
+    };
+  }
+
 
   onCategoryLeave(): void {
     this.showSubactivitiesPie = false;
@@ -1353,12 +1552,23 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       }]
     };
 
+    // Clear pie chart data to prevent stale data from persisting
+    this.subactivitiesPieData = null;
+
     this.initializeSubActivitiesChart(); // Reset subactivities chart when leaving
   }
 
   onSubactivityLeave(): void {
     this.showSubactivitiesMap = false;
     this.hoveredSubactivityName = '';
+
+    // If pie chart data is not set, we came directly from category click (single activity)
+    // In this case, also close the parent dialog
+    if (!this.subactivitiesPieData || !this.subactivitiesPieData.labels || this.subactivitiesPieData.labels.length === 0) {
+      this.showSubactivitiesPie = false;
+      this.hoveredCategoryId = null;
+      this.hoveredCategoryName = '';
+    }
 
     // Clean up map when dialog is closed
     if (this.map) {
@@ -1485,6 +1695,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     this.personaChartData = null;
     this.activitiesChartData = null;
     this.profilesChartData = null;
+    this.profilesBarChartData = null;
     this.subactivitiesChartData = null;
     this.subactivitiesPieData = null;
 
@@ -1555,7 +1766,22 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
   ngAfterViewInit() {
     // isShare is now handled by subscription in constructor
+    this.checkMobile();
     this.setupResizeObserver();
+    this.loadScoreHeader();
+
+    // Subscribe to language changes to update score header
+    this.subscriptions.push(
+      this.translate.onLangChange.subscribe(() => {
+        this.loadScoreHeader();
+      })
+    );
+  }
+
+  private loadScoreHeader(): void {
+    this.translate.get('LEGEND.SCORE_HEADER').subscribe(translation => {
+      this.scoreHeader = translation;
+    });
   }
 
   private setupResizeObserver(): void {
@@ -1586,6 +1812,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       if (this.profilesChart?.chart) {
         this.profilesChart.chart.resize();
       }
+      if (this.profilesBarChart?.chart) {
+        this.profilesBarChart.chart.resize();
+      }
       if (this.subactivitiesPieChart?.chart) {
         this.subactivitiesPieChart.chart.resize();
       }
@@ -1602,10 +1831,15 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
   @HostListener('window:resize')
   onWindowResize(): void {
+    this.checkMobile();
     // Resize charts when window is resized
     setTimeout(() => {
       this.resizeCharts();
     }, 100);
+  }
+
+  private checkMobile(): void {
+    this.isMobile = window.innerWidth <= 768;
   }
 
 
@@ -1752,6 +1986,18 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
           foundFeature = feature;
           return true; // Stop iteration at first feature found
         });
+
+        // Change cursor style based on whether we're hovering over a place (not center point)
+        if (this.map) {
+          const mapViewport = this.map.getViewport();
+          if (foundFeature && foundFeature.get('id') !== 'center') {
+            // Hovering over a place - show pointer cursor
+            mapViewport.style.cursor = 'pointer';
+          } else {
+            // Not hovering over a place - show default cursor
+            mapViewport.style.cursor = '';
+          }
+        }
 
         if (foundFeature) {
           const name = foundFeature.get('name');
@@ -1920,7 +2166,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
       if (extent) {
         // Add some padding to the extent
-        const padding = 0.01; // Adjust this value to control the padding
+        const padding = 0.1; // Adjust this value to control the padding
         const paddedExtent: [number, number, number, number] = [
           extent[0] - padding,
           extent[1] - padding,

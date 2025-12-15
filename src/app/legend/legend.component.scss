@@ -183,6 +183,11 @@ $sixthColor: #9656a2;
       .toggle-icon {
         font-size: 18px !important;
       }
+
+      /* Hide toggle in share mode */
+      &:has(+ .legend) {
+        // This will be handled by *ngIf in template
+      }
     }
 
     .legend {

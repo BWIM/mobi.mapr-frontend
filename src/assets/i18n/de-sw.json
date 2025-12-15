@@ -157,6 +157,7 @@
     "EXPORTING": "Exportiere..."
   },
   "LEGEND": {
+    "TITLE": "Legend",
     "LVLA": "D erforderlichi Mobilitätszit isch maximal 35 % im lokale Vergliich.",
     "LVLB": "D erforderlichi Mobilitätszit ligt zwische 36 % und 50 % im lokale Vergliich.",
     "LVLC": "D erforderlichi Mobilitätszit ligt zwische 51 % und 71 % im lokale Vergliich.",
@@ -302,7 +303,9 @@
     "EXIT_COMPARISON": "Stops vergläiche",
     "VISUALIZATION_TYPE": "Visualisierig",
     "INDEX": "Index",
-    "SCORE": "Score"
+    "INDEX_TOOLTIP": "Zeigt die bewertete Mobilitätszeit in Relation zur jw. Regionalklasse.",
+    "SCORE": "Score",
+    "SCORE_TOOLTIP": "Zeigt die Reisezeit in Minuten, angereichert mit subjektiven Faktoren."
   },
   "ANALYZE": {
     "PERSONA": {
@@ -335,7 +338,8 @@
       "TITLE": "Modi",
       "NO_DATA": "Keine Daten verfügbar",
       "HINT": "Hinweis: Die Werte der Modi können bei einer limitieren Anzahl an Personas sehr ähnlich sein.",
-      "LOADING": "Lade Profile..."
+      "LOADING": "Lade Profile...",
+      "EXPLANATION": "Die Abbildung oben zeigt, wie gut jedes einzelne Verkehrsmittel performt."
     },
     "TITLE": "Details",
     "START": "Start",
@@ -374,7 +378,13 @@
     "LOADING_MORE_DATA": "Lad wyteri Date im Hindergrund...",
     "PROJECT_VERSION_INVALID": "S Projäkt isch zu alt. Machs neu, um d' Schdadisdige zu sähe.",
     "POPULATION": "Bevölkerung",
-    "MUNICIPALITY_SUBDIVISION_HINT": "Hinweis: Gmeinde, wo allei de jewilige Stadt- oder Landkreis bilde, werre nit no emol unter 'Gmeinde' ufgführt, sondern nur unter 'Stadt- bzw. Landkreise'."
+    "MUNICIPALITY_SUBDIVISION_HINT": "Hinweis: Gmeinde, wo allei de jewilige Stadt- oder Landkreis bilde, werre nit no emol unter 'Gmeinde' ufgführt, sondern nur unter 'Stadt- bzw. Landkreise'.",
+    "FILTER_BY_NAME": "Gmeinde noch Namme filtere",
+    "ENTER_MUNICIPALITY_NAME": "Gmeindename eigä...",
+    "NO_MUNICIPALITIES_FOUND": "Kei Gmeinde gfunde",
+    "NO_MUNICIPALITIES_HINT": "Kei Gmeinde entspräche de usgwählte Kriterie. Versuech, d Bevölkerigsfilter azpasse oder e anderi Gmeind uszwähle.",
+    "SEARCH_KEYWORD_STATE": "Gib zum filtern e Bundesland ei...",
+    "SEARCH_KEYWORD_COUNTY": "Gib zum filtern e Stadt/ Landkreis a"
   },
   "CREDITS": {
     "SHORTCUTS": {
@@ -398,6 +408,8 @@
     "GENERATING_PDF": "PDF wird erstellt..."
   },
   "SHARE": {
+    "DETAILS": "Infos",
+    "PROJECTS": "Projäkkd",
     "NO_PROJECT_SELECTED": "Koi Projäkkd ausgwählt",
     "CREATED_BY": "Erstellt von",
     "EXPIRES": "Lauft ab am",
@@ -441,7 +453,8 @@
     "ESTIMATED_SIZE": "Hinweis: D' Dateigröße hängt vo dr Kartenkomplexität ond dr gwählta Optiona ab"
   },
   "SEARCH_OVERLAY": {
-    "SEARCH_PLACEHOLDER": "Lurge gan"
+    "SEARCH_PLACEHOLDER": "Lurge gan",
+    "SEARCH_HINT": "Suche nach einem Ort, um ihn direkt auf der Karte anzuzeigen"
   },
   "ADVERTISING": {
     "TITLE": "Entdeck Wyteri Projäkkd",
@@ -575,5 +588,11 @@
     "MESSAGE": "Derzeit werden Wartungsarbeiten durchgeführt. Bitte versuchen Sie es später erneut. Die Seite wird automatisch aktualisiert, sobald der Service wieder verfügbar ist.",
     "CHECKING": "Service wird überprüft...",
     "INFO": "Diese Seite wird automatisch aktualisiert, sobald der Service wieder verfügbar ist."
+  },
+  "MAP_HINT": {
+    "ZOOM": "Zoom in s Kärtle, zum Details z' seha",
+    "ZOOM_DETAIL": "Zoom a weng nei, bis kleiner Gebietle sichtbar send",
+    "CLICK": "Drugg uff e Gebiet, zum meh Informationa z' kriega",
+    "CLICK_DETAIL": "Tippe uff a farbiges Gebietle, zum Details z' öffna"
   }
 }

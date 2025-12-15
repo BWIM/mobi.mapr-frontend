@@ -14,7 +14,6 @@ import { TagModule } from 'primeng/tag';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../auth/auth.service';
 import { Router } from '@angular/router';
-import { TutorialService } from '../tutorial/tutorial.service';
 import { ShareService } from '../share/share.service';
 import { CreditsService } from './credits.service';
 import { DashboardService } from '../dashboard/dashboard.service';
@@ -85,7 +84,6 @@ export class CreditsComponent implements OnInit {
     private translate: TranslateService,
     private authService: AuthService,
     private router: Router,
-    private tutorialService: TutorialService,
     private shareService: ShareService,
     private creditsService: CreditsService,
     private dashboardService: DashboardService,
@@ -175,13 +173,13 @@ export class CreditsComponent implements OnInit {
           this.showShortcuts();
         }
       },
-      {
-        icon: 'pi pi-book',
-        label: this.translate.instant('CREDITS.TOGGLE_TUTORIAL'),
-        command: () => {
-          this.startTutorial();
-        }
-      }
+      // {
+      //   icon: 'pi pi-book',
+      //   label: this.translate.instant('CREDITS.TOGGLE_TUTORIAL'),
+      //   command: () => {
+      //     this.startTutorial();
+      //   }
+      // }
     );
   }
 
@@ -192,7 +190,7 @@ export class CreditsComponent implements OnInit {
     { name: 'Carto', icon: 'pi pi-map-marker', url: 'https://carto.com' },
     { name: 'MapLibre', icon: 'pi pi-map-marker', url: 'https://maplibre.org' },
     { name: 'Nominatim', icon: 'pi pi-map-marker', url: 'https://nominatim.org' },
-    { name: 'Flaticon (Surang, fjstudio, Freepik, Kiranshastry)', icon: 'pi pi-map-marker', url: 'https://www.flaticon.com' }
+    { name: 'Flaticon', icon: 'pi pi-map-marker', url: 'https://www.flaticon.com' }
   ];
 
   dataComponents: InfoComponent[] = [
@@ -287,17 +285,6 @@ export class CreditsComponent implements OnInit {
     const themeItem = this.items[3];
     themeItem.icon = this.isDarkMode ? 'pi pi-sun' : 'pi pi-moon';
     themeItem.tooltip = this.isDarkMode ? 'Light Mode' : 'Dark Mode';
-  }
-
-  startTutorial() {
-    // if (this.shareService.getIsShare()) {
-    //   localStorage.setItem('tutorialStatus', 'false');
-    //   window.location.reload();
-    // } else {
-    //   this.tutorialService.resetTutorial().subscribe(() => {
-    //     window.location.reload();
-    //   });
-    // }
   }
 
   switchLanguage(lang: string) {

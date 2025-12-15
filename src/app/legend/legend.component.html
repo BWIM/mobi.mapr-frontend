@@ -1,6 +1,7 @@
 <div class="container">
-  <!-- Mobile Toggle Button -->
-  <div class="mobile-legend-toggle" (click)="toggleMobileVisibility()">
+  <!-- Mobile Toggle Button (hidden in share mode on mobile) -->
+  <div class="mobile-legend-toggle" *ngIf="!(isShare && isMobile)"
+    (click)="toggleMobileVisibility()">
     <span class="toggle-icon">A</span>
   </div>
 
