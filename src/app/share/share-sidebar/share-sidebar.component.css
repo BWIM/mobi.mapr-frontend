@@ -12,6 +12,13 @@
     max-width: 380px;
     width: 100%;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Gentle intro pulse to draw attention to the share sidebar */
+    animation: share-sidebar-pulse 1.6s ease-in-out 3;
+    animation-delay: 1s;
+}
+
+.project-card-container.expanded {
+    animation: none;
 }
 
 /* Mobile: Bottom Sheet */
@@ -23,6 +30,32 @@
     max-width: 100%;
     width: 100%;
     max-height: 60vh;
+}
+
+.project-card-container.mobile.expanded {
+    animation: none;
+}
+
+@keyframes share-sidebar-pulse {
+    0% {
+        transform: translateY(0) scale(1);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    40% {
+        transform: translateY(-4px) scale(1.03);
+        box-shadow: 0 12px 18px -4px rgba(99, 102, 241, 0.25);
+    }
+
+    70% {
+        transform: translateY(0) scale(0.995);
+        box-shadow: 0 6px 10px -3px rgba(0, 0, 0, 0.12);
+    }
+
+    100% {
+        transform: translateY(0) scale(1);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
 }
 
 /* Collapsed State */
