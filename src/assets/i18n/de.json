@@ -468,7 +468,9 @@
     "POPULATION": "Bevölkerung",
     "MUNICIPALITY_SUBDIVISION_HINT": "Hinweis: Gemeinden, die allein den jeweiligen Stadt- oder Landkreis bilden, werden nicht noch einmal unter 'Gemeinden' aufgeführt, sondern nur unter 'Stadt- bzw. Landkreise'.",
     "NO_MUNICIPALITIES_FOUND": "Keine Gemeinden gefunden",
-    "NO_MUNICIPALITIES_HINT": "Keine Gemeinden entsprechen den ausgewählten Kriterien. Versuchen Sie, die Bevölkerungsfilter anzupassen oder eine andere Gemeinde auszuwählen."
+    "NO_MUNICIPALITIES_HINT": "Keine Gemeinden entsprechen den ausgewählten Kriterien. Versuchen Sie, die Bevölkerungsfilter anzupassen oder eine andere Gemeinde auszuwählen.",
+    "SEARCH_KEYWORD_STATE": "Gib zum filtern ein Bundesland ein....",
+    "SEARCH_KEYWORD_COUNTY": "Gib zum filtern eine Stadt/ Landkreis an"
   },
   "PDF_EXPORT": {
     "TITLE": "PDF Export",

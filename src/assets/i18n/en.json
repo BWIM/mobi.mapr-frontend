@@ -467,7 +467,9 @@
     "FILTER_BY_NAME": "Filter municpalities by name",
     "ENTER_MUNICIPALITY_NAME": "Enter municipality name",
     "NO_MUNICIPALITIES_FOUND": "No municipalities found",
-    "NO_MUNICIPALITIES_HINT": "No municipalities match the selected criteria. Try adjusting the population filters or selecting a different municipality."
+    "NO_MUNICIPALITIES_HINT": "No municipalities match the selected criteria. Try adjusting the population filters or selecting a different municipality.",
+    "SEARCH_KEYWORD_STATE": "To filter, enter a state...",
+    "SEARCH_KEYWORD_COUNTY": "To filter, enter a city/county"
   },
   "PDF_EXPORT": {
     "FULL_MAP": "Full map",

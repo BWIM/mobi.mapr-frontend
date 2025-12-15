@@ -377,7 +377,13 @@
     "LOADING_MORE_DATA": "Lad wyteri Date im Hindergrund...",
     "PROJECT_VERSION_INVALID": "Des Projäkt isch zu alt. Machs neu, um die Schtadistige zu sehe.",
     "POPULATION": "Bevölkerig",
-    "MUNICIPALITY_SUBDIVISION_HINT": "Hinweis: Gmeinde, wo allei de jewilige Stadt- oder Landkreis bilde, werre nit no emol unter 'Gmeinde' ufgführt, sondern nur unter 'Stadt- bzw. Landkreise'."
+    "MUNICIPALITY_SUBDIVISION_HINT": "Hinweis: Gmeinde, wo allei de jewilige Stadt- oder Landkreis bilde, werre nit no emol unter 'Gmeinde' ufgführt, sondern nur unter 'Stadt- bzw. Landkreise'.",
+    "FILTER_BY_NAME": "Gmeinde noch Namme filtere",
+    "ENTER_MUNICIPALITY_NAME": "Gmeindename eigä...",
+    "NO_MUNICIPALITIES_FOUND": "Kei Gmeinde gfunde",
+    "NO_MUNICIPALITIES_HINT": "Kei Gmeinde entspräche de usgwählte Kriterie. Versuech, d Bevölkerigsfilter azpasse oder e anderi Gmeind uszwähle.",
+    "SEARCH_KEYWORD_STATE": "Gib zum filtern e Bundesland ei...",
+    "SEARCH_KEYWORD_COUNTY": "Gib zum filtern e Stadt/ Landkreis a"
   },
   "CREDITS": {
     "SHORTCUTS": {

@@ -17,6 +17,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { MessageService } from 'primeng/api';
 import { IndexService } from '../services/index.service';
 import { ProjectsService } from '../projects/projects.service';
+import { IconFieldModule } from 'primeng/iconfield';
 
 @Component({
   selector: 'app-statistics',
@@ -28,9 +29,11 @@ import { ProjectsService } from '../projects/projects.service';
     ProgressSpinnerModule,
     PaginatorModule,
     FormsModule,
-    AutoCompleteModule
+    AutoCompleteModule,
+    IconFieldModule
   ],
-  templateUrl: './statistics.component.html'
+  templateUrl: './statistics.component.html',
+  styleUrls: ['./statistics.component.css']
 })
 export class StatisticsComponent implements OnInit, OnDestroy {
   visible: boolean = false;
@@ -76,6 +79,7 @@ export class StatisticsComponent implements OnInit, OnDestroy {
     { label: 'Große Großstädte (>500.000)', value: 'large', min: 500001, max: Infinity, displayText: '>500K' }
   ];
   selectedCategories: any[] = this.populationCategories;
+  populationFiltersCollapsed: boolean = true; // Collapsed by default
 
   constructor(
     private statisticsService: StatisticsService,
@@ -301,7 +305,14 @@ export class StatisticsComponent implements OnInit, OnDestroy {
               const scores = response.map((score: any) =>
                 this.statisticsService.convertToScoreEntry(score, 'municipality', score.rank)
               );
-              this.municipalityScores = this.calculateRankings(scores);
+              // When filtering by gemeinde, use API rank directly; otherwise recalculate rankings
+              if (gemeindeId) {
+                // Use API rank when filtering by gemeinde
+                this.municipalityScores = scores;
+              } else {
+                // Recalculate rankings for unfiltered results
+                this.municipalityScores = this.calculateRankings(scores);
+              }
               this.noMunicipalityResults = false;
             } else {
               // No results found
