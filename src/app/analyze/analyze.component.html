@@ -151,14 +151,51 @@
                                         [header]="hoveredSubactivityName"
                                         (onHide)="onSubactivityLeave()"
                                         styleClass="analyze-map-dialog">
-                                        <div class="relative h-full w-full">
-                                            <div id="places-map"
-                                                class="h-full w-full rounded-lg">
+                                        <div
+                                            class="flex flex-col h-full w-full">
+                                            <div
+                                                class="relative flex-1 min-h-0 w-full">
+                                                <div id="places-map"
+                                                    class="h-full w-full rounded-lg">
+                                                </div>
+                                                <!-- Legend for score/index colors -->
+
+                                                <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75"
+                                                    *ngIf="noPlaces">
+                                                    <p
+                                                        class="text-gray-500 text-center">
+                                                        {{
+                                                        'ANALYZE.ACTIVITIES.NO_PLACES'
+                                                        | translate }}</p>
+                                                </div>
+                                                <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75"
+                                                    *ngIf="disablePlaces">
+                                                    <p
+                                                        class="text-gray-500 text-center">
+                                                        {{
+                                                        'ANALYZE.ACTIVITIES.DISABLE_PLACES'
+                                                        | translate }}</p>
+                                                </div>
+                                                <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75"
+                                                    *ngIf="!mapLoaded">
+                                                    <div
+                                                        class="flex flex-col items-center">
+                                                        <p-progressSpinner
+                                                            [style]="{width: '50px', height: '50px'}"
+                                                            strokeWidth="4"
+                                                            animationDuration=".5s"></p-progressSpinner>
+                                                        <p
+                                                            class="text-center text-sm text-gray-500 mt-2">
+                                                            {{
+                                                            'ANALYZE.ACTIVITIES.LOADING_MAP'
+                                                            | translate }}</p>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <!-- OSM Link - Always visible when map is loaded -->
                                             <div class="bg-white border 
                                             border-gray-200 rounded-lg px-4 
-                                            py-3 shadow-sm p-5"
+                                            py-3 shadow-sm m-4 flex-shrink-0"
                                                 *ngIf="mapLoaded && getOsmLink()">
                                                 <div class="">
                                                     <p
@@ -175,40 +212,6 @@
                                                         'ANALYZE.ACTIVITIES.OSM_LINK'
                                                         | translate }}
                                                     </a>
-                                                </div>
-                                            </div>
-
-                                            <!-- Legend for score/index colors -->
-
-                                            <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75"
-                                                *ngIf="noPlaces">
-                                                <p
-                                                    class="text-gray-500 text-center">
-                                                    {{
-                                                    'ANALYZE.ACTIVITIES.NO_PLACES'
-                                                    | translate }}</p>
-                                            </div>
-                                            <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75"
-                                                *ngIf="disablePlaces">
-                                                <p
-                                                    class="text-gray-500 text-center">
-                                                    {{
-                                                    'ANALYZE.ACTIVITIES.DISABLE_PLACES'
-                                                    | translate }}</p>
-                                            </div>
-                                            <div class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75"
-                                                *ngIf="!mapLoaded">
-                                                <div
-                                                    class="flex flex-col items-center">
-                                                    <p-progressSpinner
-                                                        [style]="{width: '50px', height: '50px'}"
-                                                        strokeWidth="4"
-                                                        animationDuration=".5s"></p-progressSpinner>
-                                                    <p
-                                                        class="text-center text-sm text-gray-500 mt-2">
-                                                        {{
-                                                        'ANALYZE.ACTIVITIES.LOADING_MAP'
-                                                        | translate }}</p>
                                                 </div>
                                             </div>
                                         </div>

@@ -20,25 +20,36 @@
     height: 100% !important;
     display: flex !important;
     flex-direction: column !important;
+    min-height: 0 !important;
 }
 
 .analyze-subdialog .p-dialog-content>div {
     height: 100% !important;
     display: flex !important;
     flex-direction: column !important;
+    min-height: 0 !important;
 }
 
 /* Map dialog styles */
-.analyze-map-dialog .p-dialog-content {
-    height: 100% !important;
+:host ::ng-deep .analyze-map-dialog.p-dialog {
     display: flex !important;
     flex-direction: column !important;
 }
 
-.analyze-map-dialog .p-dialog-content>div {
+:host ::ng-deep .analyze-map-dialog .p-dialog-content {
     height: 100% !important;
     display: flex !important;
     flex-direction: column !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+:host ::ng-deep .analyze-map-dialog .p-dialog-content>div {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0 !important;
+    min-height: 0 !important;
 }
 
 /* Ensure chart containers take full height */
@@ -47,9 +58,17 @@
 }
 
 /* Ensure map container takes full height */
-#places-map {
+:host ::ng-deep .analyze-map-dialog #places-map {
     height: 100% !important;
-    min-height: 400px;
+    width: 100% !important;
+}
+
+/* Ensure the map container parent expands properly */
+:host ::ng-deep .analyze-map-dialog .relative.flex-1 {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
 }
 
 /* Mobile Optimizations - Using scale from share-sidebar */

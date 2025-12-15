@@ -2166,7 +2166,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
 
       if (extent) {
         // Add some padding to the extent
-        const padding = 0.01; // Adjust this value to control the padding
+        const padding = 0.1; // Adjust this value to control the padding
         const paddedExtent: [number, number, number, number] = [
           extent[0] - padding,
           extent[1] - padding,
