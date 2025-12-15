@@ -338,7 +338,8 @@
       "TITLE": "Modi",
       "NO_DATA": "Keine Daten verfügbar",
       "HINT": "Hinweis: Die Werte der Modi können bei einer limitieren Anzahl an Personas sehr ähnlich sein.",
-      "LOADING": "Lade Profile..."
+      "LOADING": "Lade Profile...",
+      "EXPLANATION": "Die Abbildung oben zeigt, wie gut jedes einzelne Verkehrsmittel performt."
     },
     "TITLE": "Details",
     "START": "Start",
@@ -587,5 +588,11 @@
     "MESSAGE": "Derzeit werden Wartungsarbeiten durchgeführt. Bitte versuchen Sie es später erneut. Die Seite wird automatisch aktualisiert, sobald der Service wieder verfügbar ist.",
     "CHECKING": "Service wird überprüft...",
     "INFO": "Diese Seite wird automatisch aktualisiert, sobald der Service wieder verfügbar ist."
+  },
+  "MAP_HINT": {
+    "ZOOM": "Zoom in s Kärtle, zum Details z' seha",
+    "ZOOM_DETAIL": "Zoom a weng nei, bis kleiner Gebietle sichtbar send",
+    "CLICK": "Drugg uff e Gebiet, zum meh Informationa z' kriega",
+    "CLICK_DETAIL": "Tippe uff a farbiges Gebietle, zum Details z' öffna"
   }
 }

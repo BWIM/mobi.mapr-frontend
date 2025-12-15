@@ -42,7 +42,6 @@ type ScoreLevel = {
 })
 export class ShareSidebarComponent implements OnInit, OnDestroy {
   @Input() sharedProject: ShareProject | null = null;
-  @Input() isExpandedExternal: boolean = false;
   @Output() locationSelected = new EventEmitter<{ lng: number, lat: number }>();
   selectedVisualizationType: 'index' | 'score' = 'index';
   visualizationTypeOptions: { label: string; value: string }[] = [];
@@ -106,11 +105,6 @@ export class ShareSidebarComponent implements OnInit, OnDestroy {
     this.updateVisualizationTypeOptions();
     this.isScoreVisualization = this.mapService.getVisualizationType() === 'score';
     // Auto-expand on mobile, collapsed on desktop (unless controlled externally)
-    if (this.isExpandedExternal !== undefined) {
-      this.isExpanded = this.isExpandedExternal;
-    } else {
-      this.isExpanded = this.isMobile;
-    }
 
     // Default to details tab (info tab)
     // Only show projects tab if no shared project is available

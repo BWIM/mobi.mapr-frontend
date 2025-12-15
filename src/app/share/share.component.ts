@@ -26,7 +26,6 @@ export class ShareComponent implements OnInit, OnDestroy {
   projectKey: string = '';
   project: any = null;
   sharedProject: ShareProject | null = null;
-  rightSidebarExpanded: boolean = false;
   isMobile: boolean = false;
   private destroy$ = new Subject<void>();
 
@@ -84,12 +83,6 @@ export class ShareComponent implements OnInit, OnDestroy {
     this.sharedProject = null;
     this.isRightPinned = false;
 
-    // Subscribe to the sidebar expansion state
-    this.shareService.isRightSidebarExpanded$.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(expanded => {
-      this.rightSidebarExpanded = expanded;
-    });
 
     this.shareService.getProject(this.projectKey).pipe(
       takeUntil(this.destroy$)
@@ -122,7 +115,6 @@ export class ShareComponent implements OnInit, OnDestroy {
     ).subscribe(project => {
       this.sharedProject = project;
       this.isRightPinned = true;
-      this.toggleSidebar();
 
       // Update the project data with the actual project name
       if (project && project.project_name && this.project) {
@@ -150,16 +142,8 @@ export class ShareComponent implements OnInit, OnDestroy {
     // Consider devices with width < 1024px as mobile/tablet for better iPad support
     this.isMobile = width < 1024 || (isTouchDevice && width < 1200);
 
-    // Auto-close sidebar on mobile when switching to desktop
-    if (!this.isMobile && this.rightSidebarExpanded) {
-      this.rightSidebarExpanded = false;
-    }
   }
 
-  toggleSidebar() {
-    this.rightSidebarExpanded = !this.rightSidebarExpanded;
-    this.shareService.toggleRightSidebarExpanded();
-  }
 
 
   onLocationSelected(location: { lng: number, lat: number }) {

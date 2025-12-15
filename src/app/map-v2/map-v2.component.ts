@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit, NgZone } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { MapV2Service } from './map-v2.service';
 import { Subscription } from 'rxjs';
 import { LngLatBounds, Map, Popup, NavigationControl, ScaleControl } from 'maplibre-gl';
@@ -19,8 +20,19 @@ import MaplibreCompare from '@maplibre/maplibre-gl-compare';
   selector: 'app-map-v2',
   templateUrl: './map-v2.component.html',
   styleUrl: './map-v2.component.css',
-  imports: [CommonModule, LegendComponent],
-  standalone: true
+  imports: [CommonModule, NgIf, LegendComponent],
+  standalone: true,
+  animations: [
+    trigger('fadeInOut', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-10px)' }),
+        animate('300ms ease-in', style({ opacity: 1, transform: 'translateY(0)' }))
+      ]),
+      transition(':leave', [
+        animate('200ms ease-out', style({ opacity: 0, transform: 'translateY(-10px)' }))
+      ])
+    ])
+  ]
 })
 export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   private map?: Map;
@@ -50,7 +62,12 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   private isDragging: boolean = false;
   private originalOpacity: any = null;
   private isMobile: boolean = false;
-  constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService, private indexService: IndexService, private projectsService: ProjectsService, private translate: TranslateService, private ngZone: NgZone) {
+  showZoomHint: boolean = false;
+  showClickHint: boolean = false;
+  private readonly MAP_ZOOM_HINT_KEY = 'mobi.mapr.zoomHintDismissed';
+  private readonly MAP_CLICK_HINT_KEY = 'mobi.mapr.clickHintDismissed';
+
+  constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService, private indexService: IndexService, private projectsService: ProjectsService, public translate: TranslateService, private ngZone: NgZone) {
 
 
     this.subscription = this.mapService.mapStyle$.subscribe(style => {
@@ -119,6 +136,54 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
     // Initial style is already set through the subscription in constructor
     // Set project name if already available in service
     this.projectName = this.mapService.projectName;
+    // Check if hints should be shown
+    this.checkAndShowHints();
+  }
+
+  private checkAndShowHints(): void {
+    const zoomDismissed = localStorage.getItem(this.MAP_ZOOM_HINT_KEY);
+    const clickDismissed = localStorage.getItem(this.MAP_CLICK_HINT_KEY);
+
+    if (!zoomDismissed) {
+      // Show zoom hint after a short delay to let the map render
+      setTimeout(() => {
+        this.ngZone.run(() => {
+          this.showZoomHint = true;
+        });
+      }, 1200);
+      return;
+    }
+
+    if (!clickDismissed) {
+      this.queueClickHint();
+    }
+  }
+
+  private queueClickHint(): void {
+    setTimeout(() => {
+      this.ngZone.run(() => {
+        // Do not show if zoom hint is visible or already dismissed
+        if (!this.showZoomHint && !localStorage.getItem(this.MAP_CLICK_HINT_KEY)) {
+          this.showClickHint = true;
+        }
+      });
+    }, 500);
+  }
+
+  private dismissZoomHint(): void {
+    if (!this.showZoomHint) return;
+    this.showZoomHint = false;
+    localStorage.setItem(this.MAP_ZOOM_HINT_KEY, 'true');
+    // If click hint hasn't been dismissed, show it next
+    if (!localStorage.getItem(this.MAP_CLICK_HINT_KEY)) {
+      this.queueClickHint();
+    }
+  }
+
+  private dismissClickHint(): void {
+    if (!this.showClickHint) return;
+    this.showClickHint = false;
+    localStorage.setItem(this.MAP_CLICK_HINT_KEY, 'true');
   }
 
   ngAfterViewInit() {
@@ -219,6 +284,11 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
       if (projectId) {
         const style = this.mapService['getProjectMapStyle'](projectId);
         map.setStyle(style);
+      }
+
+      // Hide zoom hint once zoomed in sufficiently
+      if (this.showZoomHint && map.getZoom() >= 9) {
+        this.dismissZoomHint();
       }
     });
 
@@ -323,6 +393,11 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
         // this.analyzeService.setCurrentProject(feature)
         this.analyzeService.setSelectedFeature(feature, resolution, coordinates);
         this.mapService.setSelectedFeature(feature.properties['id']);
+
+        // Hide click hint after a feature interaction
+        if (this.showClickHint) {
+          this.dismissClickHint();
+        }
       }
     });
   }

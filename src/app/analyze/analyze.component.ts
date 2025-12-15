@@ -79,10 +79,12 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   personaChartData: any;
   activitiesChartData: any;
   profilesChartData: any;
+  profilesBarChartData: any;
   radarChartOptions: any;
   radarChartOptionsProfiles: any;
   barChartOptions: any;
   profilesBarChartOptions: any;
+  profilesBarChartOptionsForScores: any;
   subBarChartOptions: any;
   subactivitiesChartData: any;
   noPlaces: boolean = false;
@@ -102,6 +104,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
   @ViewChild('activitiesChart') activitiesChart?: UIChart;
   @ViewChild('personaChart') personaChart?: UIChart;
   @ViewChild('profilesChart') profilesChart?: UIChart;
+  @ViewChild('profilesBarChart') profilesBarChart?: UIChart;
   @ViewChild('subactivitiesPieChart') subactivitiesPieChart?: UIChart;
   @ViewChild('dialogContainer') dialogContainer?: ElementRef;
 
@@ -1120,6 +1123,10 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
         labels: [],
         datasets: []
       };
+      this.profilesBarChartData = {
+        labels: [],
+        datasets: []
+      };
       this.profileLegendData = [];
       this.profilesLoading = false;
       return;
@@ -1137,6 +1144,25 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     // Create combo chart with exponential function and horizontal bars
     const profileMap = new Map(this.profiles.map(p => [p.id, this.profilesDisplayNames.get(p.id) || `Profile ${p.id}`]));
     this.createProfilesComboChart(sortedProfiles, profileMap, scoreNames);
+
+    // If in score visualization mode, also create bar chart for profile scores
+    if (this.isScoreVisualization) {
+      this.initializeProfilesBarChart(sortedProfiles, profileMap);
+    } else {
+      // Initialize empty bar chart data when not in score visualization mode
+      this.profilesBarChartData = {
+        labels: [],
+        datasets: [{
+          label: 'Score',
+          data: [],
+          backgroundColor: [],
+          borderColor: [],
+          borderWidth: 1,
+          yAxisID: 'y',
+          barPercentage: 0.8
+        }]
+      };
+    }
 
     this.profilesLoading = false; // Clear loading state when chart is ready
   }
@@ -1395,6 +1421,116 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     };
   }
 
+  private initializeProfilesBarChart(profiles: Profile[], profileMap: Map<number, string>): void {
+    // Handle empty profiles array
+    if (!profiles || profiles.length === 0) {
+      this.profilesBarChartData = {
+        labels: [],
+        datasets: [{
+          label: 'Scores',
+          data: [],
+          backgroundColor: [],
+          borderColor: [],
+          borderWidth: 1,
+          yAxisID: 'y',
+          barPercentage: 0.8
+        }]
+      };
+      return;
+    }
+
+    // Sort profiles by score (descending) for score visualization
+    const sortedProfiles = [...profiles].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+
+    // Extract labels using display names
+    let labels: string[] = [];
+    labels = sortedProfiles.map(profile => profileMap.get(profile.id) || `Profile ${profile.id}`);
+
+    // Truncate labels longer than 30 characters
+    labels = labels.map(label => {
+      if (label && label.length > 30) {
+        return label.substring(0, 27) + '...';
+      }
+      return label;
+    });
+
+    // Get scores (in seconds) and convert to minutes for display
+    const scores = sortedProfiles.map(profile => (profile.score ?? 0) / 60); // Convert to minutes
+    const scoreColors = sortedProfiles.map(profile => this.getColorForValue(profile.score ?? 0));
+
+    // Create bar chart data
+    this.profilesBarChartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Score',
+          data: scores,
+          backgroundColor: scoreColors,
+          borderColor: scoreColors,
+          borderWidth: 1,
+          yAxisID: 'y',
+          barPercentage: 0.8
+        }
+      ]
+    };
+
+    // Get translation for minutes label
+    const minutesLabel = this.translate.instant('LEGEND.MINUTES');
+
+    // Create bar chart options
+    this.profilesBarChartOptionsForScores = {
+      indexAxis: 'x',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            label: (context: any) => {
+              const index = context.dataIndex;
+              const scoreInSeconds = sortedProfiles[index].score ?? 0;
+              const scoreInMinutes = (scoreInSeconds / 60).toFixed(1);
+              return `${scoreInMinutes} ${minutesLabel}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#495057',
+          },
+          grid: {
+            color: '#ebedef'
+          }
+        },
+        y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          beginAtZero: true,
+          ticks: {
+            color: '#495057',
+            callback: (value: number) => {
+              return value.toFixed(1);
+            }
+          },
+          grid: {
+            color: '#ebedef'
+          },
+          title: {
+            display: true,
+            text: minutesLabel
+          }
+        }
+      }
+    };
+  }
+
 
   onCategoryLeave(): void {
     this.showSubactivitiesPie = false;
@@ -1559,6 +1695,7 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
     this.personaChartData = null;
     this.activitiesChartData = null;
     this.profilesChartData = null;
+    this.profilesBarChartData = null;
     this.subactivitiesChartData = null;
     this.subactivitiesPieData = null;
 
@@ -1674,6 +1811,9 @@ export class AnalyzeComponent implements OnDestroy, AfterViewInit {
       }
       if (this.profilesChart?.chart) {
         this.profilesChart.chart.resize();
+      }
+      if (this.profilesBarChart?.chart) {
+        this.profilesBarChart.chart.resize();
       }
       if (this.subactivitiesPieChart?.chart) {
         this.subactivitiesPieChart.chart.resize();

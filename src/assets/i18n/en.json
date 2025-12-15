@@ -341,7 +341,8 @@
       "TITLE": "Modes",
       "NO_DATA": "No data available",
       "HINT": "Hint: The values of the modes can be very similar with a limited number of personas.",
-      "LOADING": "Loading profiles..."
+      "LOADING": "Loading profiles...",
+      "EXPLANATION": "The figure above shows how well each individual mode of transport performs."
     },
     "TITLE": "Details",
     "START": "Start",
@@ -656,5 +657,11 @@
     "MESSAGE": "We are currently performing maintenance. Please try again later. The page will automatically refresh once the service is available again.",
     "CHECKING": "Checking service...",
     "INFO": "This page will automatically refresh once the service is available again."
+  },
+  "MAP_HINT": {
+    "ZOOM": "Zoom into the map to see details",
+    "ZOOM_DETAIL": "Pinch or scroll until the map shows finer areas",
+    "CLICK": "Click on an area to get more information",
+    "CLICK_DETAIL": "Tap a colored area to open its details"
   }
 }
