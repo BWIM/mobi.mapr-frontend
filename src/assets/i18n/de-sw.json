@@ -446,7 +446,8 @@
     "ESTIMATED_SIZE": "Hinweis: D' Dateigröße hängt vo dr Kartenkomplexität ond dr gwählta Optiona ab"
   },
   "SEARCH_OVERLAY": {
-    "SEARCH_PLACEHOLDER": "Lurge gan"
+    "SEARCH_PLACEHOLDER": "Lurge gan",
+    "SEARCH_HINT": "Suche nach einem Ort, um ihn direkt auf der Karte anzuzeigen"
   },
   "ADVERTISING": {
     "TITLE": "Entdeck Wyteri Projäkkd",

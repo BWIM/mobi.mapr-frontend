@@ -447,7 +447,7 @@
     "CONTACT_TOOLTIP": "Kontaktinformationen für Support"
   },
   "STATISTICS": {
-    "TITLE": "Statistiken",
+    "TITLE": "Rangliste",
     "SHOW_STATISTICS_TOOLTIP": "Detaillierte Statistiken für dieses Projekt anzeigen",
     "STATES": "Bundesländer",
     "COUNTIES": "Land-/ Stadtkreise",
@@ -485,7 +485,8 @@
     "ESTIMATED_SIZE": "Hinweis: Die Dateigröße hängt von der Kartenkomplexität und den gewählten Optionen ab"
   },
   "SEARCH_OVERLAY": {
-    "SEARCH_PLACEHOLDER": "Orte suchen"
+    "SEARCH_PLACEHOLDER": "Orte suchen",
+    "SEARCH_HINT": "Suche nach einem Ort, um ihn direkt auf der Karte anzuzeigen"
   },
   "LANDING": {
     "TITLE": "Willkommen beim mobi.mapr",

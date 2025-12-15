@@ -446,7 +446,7 @@
     "CONTACT_TOOLTIP": "Contact information for support"
   },
   "STATISTICS": {
-    "TITLE": "Statistics",
+    "TITLE": "Rankings",
     "SHOW_STATISTICS_TOOLTIP": "View detailed statistics for this project",
     "STATES": "States",
     "COUNTIES": "Counties",
@@ -484,7 +484,8 @@
     "ESTIMATED_SIZE": "Note: File size will depend on map complexity and selected options"
   },
   "SEARCH_OVERLAY": {
-    "SEARCH_PLACEHOLDER": "Search locations"
+    "SEARCH_PLACEHOLDER": "Search locations",
+    "SEARCH_HINT": "Search for a place to show it directly on the map"
   },
   "LANDING": {
     "TITLE": "Welcome to mobi.mapr",

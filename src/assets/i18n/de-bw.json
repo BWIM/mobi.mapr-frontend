@@ -448,7 +448,8 @@
     "ESTIMATED_SIZE": "Hinweis: D' Dateigröße hängt vun dr Kartenkomplexität un dr gewählte Optione ab"
   },
   "SEARCH_OVERLAY": {
-    "SEARCH_PLACEHOLDER": "Gugge gehn"
+    "SEARCH_PLACEHOLDER": "Gugge gehn",
+    "SEARCH_HINT": "Suche nach einem Ort, um ihn direkt auf der Karte anzuzeigen"
   },
   "ADVERTISING": {
     "TITLE": "Entdeck Wyteri Projäkt",

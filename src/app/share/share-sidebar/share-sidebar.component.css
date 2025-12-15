@@ -332,6 +332,13 @@
     color: var(--primary-color, #6366f1);
 }
 
+.search-hint {
+    margin-top: 0.5rem;
+    color: #6b7280;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+}
+
 .search-results-container {
     margin-top: 0.5rem;
     max-height: 200px;

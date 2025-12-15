@@ -227,6 +227,7 @@
                         <i class="pi pi-search"></i>
                         {{ 'SEARCH_OVERLAY.SEARCH_PLACEHOLDER' | translate }}
                     </div>
+
                     <div class="search-input-container">
                         <span class="p-input-icon-right search-input-wrapper">
                             <i class="pi pi-search"></i>
@@ -241,6 +242,9 @@
                         </span>
                         <div class="search-loading" *ngIf="isSearchLoading">
                             <i class="pi pi-spin pi-spinner"></i>
+                        </div>
+                        <div class="search-hint">
+                            {{ 'SEARCH_OVERLAY.SEARCH_HINT' | translate }}
                         </div>
                     </div>
                     <div class="search-results-container"
