@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, AfterViewInit, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MapV2Service } from './map-v2.service';
 import { Subscription } from 'rxjs';
@@ -43,12 +43,14 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   currentProject: string | null = null;
   currentProjectData: Project | null = null;
   currentProjectInfo: ProjectInfo | null = null;
+  isTileLoading = false;
+  private loadingMaps = new Set<Map>();
 
   private dragThrottleTimeout: any = null;
   private isDragging: boolean = false;
   private originalOpacity: any = null;
   private isMobile: boolean = false;
-  constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService, private indexService: IndexService, private projectsService: ProjectsService, private translate: TranslateService) {
+  constructor(private mapService: MapV2Service, private analyzeService: AnalyzeService, private loadingService: LoadingService, private indexService: IndexService, private projectsService: ProjectsService, private translate: TranslateService, private ngZone: NgZone) {
 
 
     this.subscription = this.mapService.mapStyle$.subscribe(style => {
@@ -156,6 +158,21 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private setupMapEvents(map: Map, projectId?: string): void {
+    map.on('dataloading', (event: any) => {
+      // Track tile/source requests to show a lightweight loading indicator
+      if (event?.dataType === 'tile' || event?.dataType === 'source') {
+        this.markMapAsLoading(map);
+      }
+    });
+
+    map.on('idle', () => {
+      this.markMapAsIdle(map);
+    });
+
+    map.on('error', () => {
+      this.markMapAsIdle(map);
+    });
+
     // Store original opacity for restoration
     if (!this.originalOpacity && map?.getLayer('geodata-fill')) {
       this.originalOpacity = map.getPaintProperty('geodata-fill', 'fill-opacity');
@@ -307,6 +324,26 @@ export class MapV2Component implements OnInit, OnDestroy, AfterViewInit {
         this.analyzeService.setSelectedFeature(feature, resolution, coordinates);
         this.mapService.setSelectedFeature(feature.properties['id']);
       }
+    });
+  }
+
+  private markMapAsLoading(map: Map): void {
+    this.loadingMaps.add(map);
+    this.setTileLoadingIndicator(true);
+  }
+
+  private markMapAsIdle(map: Map): void {
+    this.loadingMaps.delete(map);
+    this.setTileLoadingIndicator(this.loadingMaps.size > 0);
+  }
+
+  private setTileLoadingIndicator(isLoading: boolean): void {
+    if (this.isTileLoading === isLoading) {
+      return;
+    }
+    // Run inside Angular zone so the template updates
+    this.ngZone.run(() => {
+      this.isTileLoading = isLoading;
     });
   }
 

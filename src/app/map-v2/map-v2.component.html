@@ -1,4 +1,7 @@
 <div #mapContainer class="map-container" id="map-container">
+  <div class="map-loading-indicator" *ngIf="isTileLoading">
+    <div class="map-loading-spinner"></div>
+  </div>
   <app-legend></app-legend>
   <div class="copyright-info">
     <div class="copyright-text" *ngIf="currentProjectData">© BWIM, {{

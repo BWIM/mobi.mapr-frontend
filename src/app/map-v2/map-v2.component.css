@@ -57,6 +57,33 @@ app-legend {
   position: relative;
 }
 
+.map-loading-indicator {
+  position: absolute;
+  top: 12px;
+  left: 45px;
+  z-index: 110;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.65);
+  border-radius: 9999px;
+  pointer-events: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.map-loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: map-spin 0.8s linear infinite;
+}
+
+@keyframes map-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .comparison-label {
   position: absolute;
   top: 25%;
