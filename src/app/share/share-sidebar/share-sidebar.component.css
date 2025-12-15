@@ -13,7 +13,7 @@
     width: 100%;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     /* Gentle intro pulse to draw attention to the share sidebar */
-    animation: share-sidebar-pulse 1.6s ease-in-out 3;
+    animation: share-sidebar-pulse 1.6s ease-in-out 10;
     animation-delay: 1s;
 }
 
