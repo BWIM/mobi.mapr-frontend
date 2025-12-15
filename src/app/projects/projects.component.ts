@@ -16,7 +16,6 @@ import { LoadingService } from '../services/loading.service';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { forkJoin } from 'rxjs';
 import { MapV2Service } from '../map-v2/map-v2.service';
-import { TutorialService } from '../tutorial/tutorial.service';
 
 interface ProjectTab {
   label: string;
@@ -128,8 +127,7 @@ export class ProjectsComponent implements OnInit, OnDestroy {
     private reloadService: ProjectsReloadService,
     private loadingService: LoadingService,
     private confirmationService: ConfirmationService,
-    private mapv2Service: MapV2Service,
-    private tutorialService: TutorialService
+    private mapv2Service: MapV2Service
   ) {
     this.initializeMapActions();
 

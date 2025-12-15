@@ -9,7 +9,6 @@ import { Project } from '../projects/project.interface';
 import { LoadingService } from '../services/loading.service';
 import { MapV2Component } from '../map-v2/map-v2.component';
 import { MapV2Service } from '../map-v2/map-v2.service';
-import { TutorialService } from '../tutorial/tutorial.service';
 import { AnalyzeService } from '../analyze/analyze.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';

@@ -4,7 +4,6 @@ import { ProjectsComponent } from '../projects/projects.component';
 import { DetailsSidebarComponent } from '../details-sidebar/details-sidebar.component';
 import { LoadingSpinnerComponent } from '../shared/loading-spinner/loading-spinner.component';
 import { MapV2Component } from '../map-v2/map-v2.component';
-import { TutorialService } from '../tutorial/tutorial.service';
 import { DashboardService } from './dashboard.service';
 import { MapV2Service } from '../map-v2/map-v2.service';
 
@@ -31,7 +30,7 @@ export class DashboardComponent implements OnInit {
   isMobile: boolean = false;
   isSmallMobile: boolean = false;
 
-  constructor(private tutorialService: TutorialService, private dashboardService: DashboardService, private mapService: MapV2Service) {
+  constructor(private dashboardService: DashboardService, private mapService: MapV2Service) {
     this.checkMobile();
   }
 
