@@ -757,7 +757,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize() {
     this.checkMobile();
   }

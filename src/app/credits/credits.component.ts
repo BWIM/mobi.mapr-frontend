@@ -304,8 +304,8 @@ export class CreditsComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  @HostListener('window:resize', ['$event'])
-  onResize(event: any) {
+  @HostListener('window:resize')
+  onResize() {
     this.checkMobile();
   }
 
