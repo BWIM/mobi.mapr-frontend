@@ -542,16 +542,6 @@ $sixthColor: #9656a2;
     /* Hide expand arrow */
   }
 
-  .sledge-image {
-    position: absolute;
-    top: -45px;
-    left: 50%;
-    transform: translateX(-50%);
-    height: 50px;
-    width: auto;
-    z-index: 10;
-    pointer-events: none;
-  }
 
   .score-legend-content {
     display: flex;
@@ -680,10 +670,6 @@ $sixthColor: #9656a2;
   }
 
   .score-legend.mobile-visible {
-    .sledge-image {
-      top: -36px;
-      height: 40px;
-    }
 
     .score-legend-content {
       min-width: 200px;
