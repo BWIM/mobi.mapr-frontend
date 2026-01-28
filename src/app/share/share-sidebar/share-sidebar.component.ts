@@ -159,7 +159,7 @@ export class ShareSidebarComponent implements OnInit, OnDestroy {
     );
   }
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize(): void {
     this.checkMobile();
   }

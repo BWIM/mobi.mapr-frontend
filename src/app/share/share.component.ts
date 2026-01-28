@@ -129,7 +129,7 @@ export class ShareComponent implements OnInit, OnDestroy {
     this.loadingService.stopLoading();
   }
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize() {
     this.checkMobile();
   }
