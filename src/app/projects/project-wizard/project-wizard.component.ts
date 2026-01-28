@@ -245,7 +245,7 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
         description: [''],
         isPublic: [false],
         allowSharing: [false],
-        sendEmail: [true],
+        sendEmail: [false],
         loadAreasOnMap: [false],
         projectGroup: [null],
         startActivity: [null], // OSM activity selection
@@ -1061,5 +1061,55 @@ export class ProjectWizardComponent implements AfterViewInit, OnDestroy {
     land.checked = !land.checked;
     // Call the selectLand method to update the map
     this.selectLand(land);
+  }
+
+  selectAllLands() {
+    const source = this.vectorLayer?.getSource();
+    if (!source) {
+      return;
+    }
+
+    const features = source.getFeatures() || [];
+
+    // Select all features on the map
+    features.forEach((f: any) => {
+      const id = f.getId() as string;
+      if (id) {
+        this.selectedFeatures.add(id);
+      }
+    });
+
+    // Mark all lands as checked
+    this.lands.forEach(land => {
+      land.checked = true;
+    });
+
+    this.vectorLayer?.changed();
+    this.updateSelectedAreas();
+  }
+
+  deselectAllLands() {
+    const source = this.vectorLayer?.getSource();
+    if (!source) {
+      return;
+    }
+
+    const features = source.getFeatures() || [];
+
+    // Clear all selected features on the map
+    features.forEach((f: any) => {
+      const id = f.getId() as string;
+      if (id) {
+        this.selectedFeatures.delete(id);
+      }
+    });
+
+    // Mark all lands as unchecked
+    this.lands.forEach(land => {
+      land.checked = false;
+    });
+
+    this.vectorLayer?.changed();
+    this.updateSelectedAreas();
   }
 } 
