@@ -230,7 +230,7 @@ export class CreditsComponent implements OnInit {
     { name: 'Münster', icon: 'pi pi-building', url: 'https://opendata.stadt-muenster.de/dataset/geokoordinaten-der-stadtteil-grenzen-geometriedaten-der-kleinr%C3%A4umigen-gebietsgliederung-5' , license: 'dl-by-de/2.0' },
     { name: 'Düsseldorf', icon: 'pi pi-building', url: 'https://open.nrw/dataset/stadtteilgrenzen-dusseldorf-2025-d' , license: 'Datenlizenz Deutschland – Zero – Version 2.0' },
     { name: 'Essen', icon: 'pi pi-building', url: 'https://opendata.essen.de/dataset/verwaltungsgrenzen-der-stadt-essen' , license: 'Datenlizenz Deutschland Namensnennung 2.0' },
-    { name: 'Bochum', icon: 'pi pi-building', url: 'https://bochum.opendata.ruhr/dataset/bochum-stadtgebiet_stadtbezirke' , license: '?' },
+    { name: 'Bochum', icon: 'pi pi-building', url: 'https://bochum.opendata.ruhr/dataset/bochum-stadtgebiet_stadtbezirke' , license: 'CC by Zero' },
     { name: 'Dresden', icon: 'pi pi-building', url: 'https://opendata.dresden.de/informationsportal/#app/mainpage' , license: 'Datenlizenz Deutschland Namensnennung 2.0' },
     { name: 'Leipzig', icon: 'pi pi-building', url: 'https://opendata.leipzig.de/de/dataset/geodaten-stadtbezirke-leipzig/resource/81a423d8-1a2b-4f84-b9f1-0d8b9533d5a8' , license: '	Datenlizenz Deutschland Namensnennung 2.0' },
     { name: 'Wuppertal', icon: 'pi pi-building', url: 'https://www.offenedaten-wuppertal.de/dataset/stadtbezirke-wuppertal' , license: 'cc-by/4.0' },
