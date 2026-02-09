@@ -1,0 +1,57 @@
+<mat-sidenav-container class="dashboard-container">
+  <!-- Left Sidebar -->
+  <mat-sidenav 
+    #leftSidenav
+    mode="side" 
+    opened="true"
+    [mode]="(isHandset$ | async) ? 'over' : 'side'"
+    class="left-sidebar">
+    <!-- Left sidebar content (filters, projects) -->
+    <ng-content select="[leftSidebar]"></ng-content>
+  </mat-sidenav>
+
+  <!-- Main Content -->
+  <mat-sidenav-content class="main-content">
+    <!-- Header -->
+    <mat-toolbar color="primary" class="dashboard-header">
+      <button 
+        mat-icon-button 
+        (click)="leftSidenav.toggle()"
+        *ngIf="isHandset$ | async">
+        <mat-icon>menu</mat-icon>
+      </button>
+      
+      <span class="flex-1">
+        <img src="assets/images/logo.png" alt="Logo" class="h-12">
+      </span>
+      
+      <!-- Header content slot -->
+      <ng-content select="[header]"></ng-content>
+      
+      <!-- Right sidebar toggle button -->
+      <button 
+        mat-icon-button 
+        (click)="rightSidenav.toggle()"
+        title="Toggle Details">
+        <mat-icon>info</mat-icon>
+      </button>
+    </mat-toolbar>
+
+    <!-- Main content area -->
+    <div class="content-area">
+      <ng-content></ng-content>
+    </div>
+  </mat-sidenav-content>
+
+  <!-- Right Sidebar -->
+  <mat-sidenav 
+    #rightSidenav
+    position="end"
+    mode="side"
+    [mode]="(isHandset$ | async) ? 'over' : 'side'"
+    class="right-sidebar"
+    (openedChange)="onRightSidenavChange($event)">
+    <!-- Right sidebar content (details) -->
+    <ng-content select="[rightSidebar]"></ng-content>
+  </mat-sidenav>
+</mat-sidenav-container>

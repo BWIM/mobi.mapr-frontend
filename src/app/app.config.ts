@@ -3,8 +3,8 @@ import { provideZoneChangeDetection } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import { provideRouter } from '@angular/router';
-import Material from '@primeng/themes/material';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import Material from '@primeng/themes/material';
 import { AuthInterceptor } from './auth/auth.interceptor';
 import { routes } from './app.routes';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -22,12 +22,13 @@ export const appConfig: ApplicationConfig = {
         provideZoneChangeDetection({ eventCoalescing: true }),
         provideRouter(routes),
         provideAnimationsAsync(),
+        // PrimeNG provider - temporary, will be removed as components migrate
         providePrimeNG({
             theme: {
                 preset: Material,
                 options: {
                     prefix: 'p',
-                    darkModeSelector: 'none', // Disable dark mode to force light theme
+                    darkModeSelector: 'none',
                     cssLayer: false,
                     ripple: true,
                     inputStyle: 'filled',

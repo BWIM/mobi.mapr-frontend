@@ -1,33 +1,23 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { MenubarModule } from 'primeng/menubar';
-import { ButtonModule } from 'primeng/button';
 import { TranslateService } from '@ngx-translate/core';
-import { SharedModule } from './shared/shared.module';
-import { ProjectWizardComponent } from './projects/project-wizard/project-wizard.component';
-import { AnalyzeComponent } from './analyze/analyze.component';
-import { CreditsComponent } from './credits/credits.component';
-import { AuthService } from './auth/auth.service';
-import { StatisticsComponent } from './statistics/statistics.component';
-import { KeyboardShortcutsService, ShortcutAction } from './map-v2/keyboard-shortcuts.service';
 import { Subscription } from 'rxjs';
-import { HostListener } from '@angular/core';
-import { ExportMapComponent } from './map-v2/export-map/export-map.component';
+import { AuthService } from './auth/auth.service';
 import { HealthService } from './services/health.service';
+// Archived components - to be migrated back
+// import { ProjectWizardComponent } from './_archive/legacy/project-wizard/project-wizard.component';
+// import { AnalyzeComponent } from './_archive/components/analyze/analyze.component';
+// import { CreditsComponent } from './_archive/components/credits/credits.component';
+// import { StatisticsComponent } from './_archive/components/statistics/statistics.component';
+// import { ExportMapComponent } from './_archive/features/map-v2/export-map/export-map.component';
+// import { KeyboardShortcutsService, ShortcutAction } from './_archive/features/map-v2/keyboard-shortcuts.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
     RouterOutlet,
-    MenubarModule,
-    ButtonModule,
-    SharedModule,
-    ProjectWizardComponent,
-    AnalyzeComponent,
-    CreditsComponent,
-    StatisticsComponent,
-    ExportMapComponent,
+    // Archived components removed
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
@@ -40,7 +30,7 @@ export class AppComponent implements OnDestroy {
   constructor(
     private translate: TranslateService,
     private authService: AuthService,
-    private keyboardShortcutsService: KeyboardShortcutsService,
+    // private keyboardShortcutsService: KeyboardShortcutsService, // Archived
     private healthService: HealthService,
     private router: Router
   ) {
@@ -52,22 +42,8 @@ export class AppComponent implements OnDestroy {
     document.documentElement.removeAttribute('data-theme');
     document.documentElement.classList.remove('dark');
 
-    // Subscribe to keyboard shortcuts
+    // Subscribe to health check
     this.subscriptions.push(
-      this.keyboardShortcutsService.getShortcutStream().subscribe(action => {
-        switch (action) {
-          case ShortcutAction.SHOW_STATISTICS:
-            // Statistics visibility is handled by the service
-            break;
-          case ShortcutAction.EXPORT_PDF_PORTRAIT:
-          case ShortcutAction.EXPORT_PDF_LANDSCAPE:
-            // These actions are now handled by the export map component
-            break;
-          case ShortcutAction.CREATE_SHARE:
-            // These actions are handled by their respective services
-            break;
-        }
-      }),
       this.healthService.checkHealth().subscribe(health => {
         if (health.status !== 'healthy') {
           console.warn('Health check failed, navigating to maintenance page');
@@ -75,12 +51,19 @@ export class AppComponent implements OnDestroy {
         }
       })
     );
+
+    // Keyboard shortcuts - to be re-enabled when map component is migrated
+    // this.subscriptions.push(
+    //   this.keyboardShortcutsService.getShortcutStream().subscribe(action => {
+    //     // Handle shortcuts
+    //   })
+    // );
   }
 
-  @HostListener('window:keydown', ['$event'])
-  handleKeyboardEvent(event: KeyboardEvent) {
-    this.keyboardShortcutsService.handleKeyboardEvent(event);
-  }
+  // @HostListener('window:keydown', ['$event'])
+  // handleKeyboardEvent(event: KeyboardEvent) {
+  //   this.keyboardShortcutsService.handleKeyboardEvent(event);
+  // }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
