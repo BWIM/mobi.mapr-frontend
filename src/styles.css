@@ -17,6 +17,8 @@
     --second-background-color: #ffffff;
     /* Hintergrundfarbe - White background */
     --dark-background-color: #2c104c;
+
+    --light-background-color: #4a2a82;
     /* Hintergrundfarbe - Dark background */
     --light-accent-background: #ffed99;
     /* Hintergrundfarbe - Light yellow background */
@@ -875,6 +877,20 @@ button.ol-zoom-in {
 
 button.ol-zoom-out {
     display: none !important;
+}
+
+/* Global filter card style - brighter background with rounded corners, padding and margins */
+.filter-card {
+    background-color: rgba(208, 187, 219, 0.15); /* Using secondary-color with opacity for brighter background */
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.filter-card:hover {
+    background-color: rgba(208, 187, 219, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .ol-zoom-in {

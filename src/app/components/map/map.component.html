@@ -1,0 +1,40 @@
+<div class="map-container">
+  <!-- Search Bar and Location Buttons -->
+  <div class="map-controls">
+    <div class="search-bar">
+      <input type="text" placeholder="Ort suchen" class="search-input">
+      <button mat-icon-button class="search-button" title="Search">
+        <mat-icon>search</mat-icon>
+      </button>
+      <button mat-icon-button class="location-button" title="Current Location">
+        <mat-icon>place</mat-icon>
+      </button>
+    </div>
+
+    <!-- Location Type Buttons -->
+    <div class="location-type-buttons">
+      <button class="location-type-btn" [class.active]="selectedLocationType === 'land'" (click)="selectedLocationType = 'land'">Land</button>
+      <button class="location-type-btn active" [class.active]="selectedLocationType === 'region'" (click)="selectedLocationType = 'region'">Region</button>
+      <button class="location-type-btn" [class.active]="selectedLocationType === 'kreis'" (click)="selectedLocationType = 'kreis'">Kreis</button>
+      <button class="location-type-btn" [class.active]="selectedLocationType === 'gemeinde'" (click)="selectedLocationType = 'gemeinde'">Gemeinde</button>
+    </div>
+
+  </div>
+
+  <!-- Map Container -->
+  <div class="map-outer-wrapper">
+    <div class="map-background-wrapper">
+      <div #mapContainer class="map-wrapper"></div>
+    </div>
+  </div>
+
+  <!-- Map Legend 
+  {% comment %} <div class="map-legend">
+    <div class="legend-gradient">
+      <span>0 Min</span>
+      <span>21 Min</span>
+      <span>60+ Min</span>
+    </div>
+  </div> {% endcomment %} -->
+
+</div>

@@ -1,0 +1,35 @@
+/* Logo header (above icon sidebar) */
+.logo-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: var(--dark-background-color, #2c104c);
+  color: var(--secondary-text-color, #ffffff);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  height: 100%;
+}
+
+.logo-image {
+  height: 2.5rem;
+  width: auto;
+}
+
+/* Title header (above filter sidebar) */
+.title-header {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background-color: var(--dark-background-color, #2c104c);
+  color: var(--secondary-text-color, #ffffff);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  height: 100%;
+}
+
+.header-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--secondary-text-color, #ffffff);
+}
+

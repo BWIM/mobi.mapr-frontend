@@ -1,30 +1,54 @@
-<div class="dashboard-container">
-  <div class="dashboard-header">
-    <h1>Dashboard</h1>
-    <button mat-icon-button (click)="addItem()" title="Add Widget">
-      <mat-icon>add</mat-icon>
-    </button>
+<app-dashboard-layout>
+  <!-- Logo Header (above icon sidebar) -->
+  <div logoHeader>
+    <div class="logo-header">
+      <div class="logo-text">
+        <span class="logo-line1">mobi.</span>
+        <span class="logo-line2">mapr</span>
+      </div>
+      <div class="logo-line"></div>
+    </div>
   </div>
 
-  <gridster [options]="options">
-    <gridster-item *ngFor="let item of dashboard" [item]="item">
-      <mat-card class="widget-card">
-        <mat-card-header>
-          <mat-card-title>Widget {{ item['id'] }}</mat-card-title>
-          <button 
-            mat-icon-button 
-            (click)="removeItem($event, item)" 
-            class="widget-remove-button">
-            <mat-icon>close</mat-icon>
-          </button>
-        </mat-card-header>
-        <mat-card-content>
-          <p>Widget content will go here</p>
-          <p>ID: {{ item['id'] }}</p>
-          <p>Position: x={{ item.x }}, y={{ item.y }}</p>
-          <p>Size: {{ item['cols'] }}x{{ item['rows'] }}</p>
-        </mat-card-content>
-      </mat-card>
-    </gridster-item>
-  </gridster>
-</div>
+  <!-- Title Header (centered) -->
+  <div titleHeader>
+    <div class="title-header">
+      <h1 class="header-title">Alltagsmobilität in Deutschland</h1>
+    </div>
+  </div>
+
+  <!-- Left Icon Sidebar (Icon Rail) -->
+  <div iconSidebar>
+    <app-icon-rail></app-icon-rail>
+  </div>
+
+  <!-- Filter Sidebar -->
+  <div filterSidebar>
+    <app-filter-view></app-filter-view>
+  </div>
+
+  <!-- Map / Main Content -->
+  <app-map></app-map>
+
+  <!-- Top-Listen (Right Sidebar Top) -->
+  <div topListen>
+    <app-stats></app-stats>
+  </div>
+
+  <!-- Analyze (Right Sidebar Bottom) -->
+  <div analyze>
+    <app-analyze></app-analyze>
+  </div>
+
+  <!-- Footer -->
+  <div footer>
+    <div class="dashboard-footer">
+      <span class="footer-left">Lizenzinfos</span>
+      <div class="footer-center">
+        <span>© BWIM 2026</span>
+        <span>Hintergrundkarte: CARTO, OSM</span>
+      </div>
+      <a href="https://bw-im.de/mobimapr" target="_blank" rel="noopener noreferrer" class="footer-right">bw-im.de/mobimapr</a>
+    </div>
+  </div>
+</app-dashboard-layout>

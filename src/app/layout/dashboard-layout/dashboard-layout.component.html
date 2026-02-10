@@ -1,57 +1,37 @@
-<mat-sidenav-container class="dashboard-container">
-  <!-- Left Sidebar -->
-  <mat-sidenav 
-    #leftSidenav
-    mode="side" 
-    opened="true"
-    [mode]="(isHandset$ | async) ? 'over' : 'side'"
-    class="left-sidebar">
-    <!-- Left sidebar content (filters, projects) -->
-    <ng-content select="[leftSidebar]"></ng-content>
-  </mat-sidenav>
+<div class="dashboard-wrapper">
+  <div class="dashboard">
+    <!-- Header Row -->
+    <header class="header-logo">
+      <ng-content select="[logoHeader]"></ng-content>
+    </header>
+    <header class="header-title">
+      <ng-content select="[titleHeader]"></ng-content>
+    </header>
 
-  <!-- Main Content -->
-  <mat-sidenav-content class="main-content">
-    <!-- Header -->
-    <mat-toolbar color="primary" class="dashboard-header">
-      <button 
-        mat-icon-button 
-        (click)="leftSidenav.toggle()"
-        *ngIf="isHandset$ | async">
-        <mat-icon>menu</mat-icon>
-      </button>
-      
-      <span class="flex-1">
-        <img src="assets/images/logo.png" alt="Logo" class="h-12">
-      </span>
-      
-      <!-- Header content slot -->
-      <ng-content select="[header]"></ng-content>
-      
-      <!-- Right sidebar toggle button -->
-      <button 
-        mat-icon-button 
-        (click)="rightSidenav.toggle()"
-        title="Toggle Details">
-        <mat-icon>info</mat-icon>
-      </button>
-    </mat-toolbar>
+    <!-- Main Content Area -->
+    <aside class="rail-left">
+      <ng-content select="[iconSidebar]"></ng-content>
+    </aside>
 
-    <!-- Main content area -->
-    <div class="content-area">
+    <aside class="panel-left">
+      <ng-content select="[filterSidebar]"></ng-content>
+    </aside>
+
+    <main class="map">
       <ng-content></ng-content>
-    </div>
-  </mat-sidenav-content>
+    </main>
 
-  <!-- Right Sidebar -->
-  <mat-sidenav 
-    #rightSidenav
-    position="end"
-    mode="side"
-    [mode]="(isHandset$ | async) ? 'over' : 'side'"
-    class="right-sidebar"
-    (openedChange)="onRightSidenavChange($event)">
-    <!-- Right sidebar content (details) -->
-    <ng-content select="[rightSidebar]"></ng-content>
-  </mat-sidenav>
-</mat-sidenav-container>
+    <aside class="panel-right">
+      <div class="panel-right-top">
+        <ng-content select="[topListen]"></ng-content>
+      </div>
+      <div class="panel-right-bottom">
+        <ng-content select="[analyze]"></ng-content>
+      </div>
+    </aside>
+
+    <footer class="bar-bottom">
+      <ng-content select="[footer]"></ng-content>
+    </footer>
+  </div>
+</div>
