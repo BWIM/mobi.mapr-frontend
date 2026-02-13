@@ -46,8 +46,41 @@ body {
 }
 
 button {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.primary-button {
     background-color: var(--primary-color);
     color: var(--background-color);
+    border: none;
+    border-radius: 50%;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    &:hover {
+        background-color: var(--secondary-color);
+        color: var(--primary-color);
+    }
+}
+
+.secondary-button {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border: none;
+    border-radius: 50%;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    &:hover {
+        background-color: var(--primary-color);
+        color: var(--secondary-color);
+    }
+}
+
+.tertiary-button {
+    background-color: var(--background-color);
+    color: var(--primary-color);
     border: none;
     border-radius: 50%;
     padding: 10px;

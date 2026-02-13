@@ -7,10 +7,22 @@
       <img src="assets/images/logo_name.png" alt="Logo Text" class="w-auto h-18">
     </div>
     
-    <!-- Button with distance -->
-    <button class="flex items-center gap-2">
-      <span class="text-xl font-bold">DE</span>
+    <!-- Language Selector Button with Menu -->
+    <button 
+      [matMenuTriggerFor]="languageMenu"
+      class="flex items-center gap-2">
+      <span class="text-xl font-bold">{{ currentLang.toUpperCase() }}</span>
     </button>
+    <mat-menu #languageMenu="matMenu">
+      <button mat-menu-item (click)="switchLanguage('de')">
+        <span>DE</span>
+        <mat-icon *ngIf="currentLang === 'de'">check</mat-icon>
+      </button>
+      <button mat-menu-item (click)="switchLanguage('en')">
+        <span>EN</span>
+        <mat-icon *ngIf="currentLang === 'en'">check</mat-icon>
+      </button>
+    </mat-menu>
   </div>
   
   <!-- Filling Space -->

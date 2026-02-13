@@ -5,6 +5,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 
 
 
@@ -12,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
   imports: [
     MatButtonModule,
     MatIconModule,
+    MatMenuModule,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
@@ -21,6 +23,8 @@ import { MatIconModule } from '@angular/material/icon';
   exports: [
     MatButtonModule,
     MatIconModule,
+    MatMenuModule,
+    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
