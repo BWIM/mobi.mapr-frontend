@@ -1,88 +1,94 @@
-@use '@angular/material' as mat;
+/* Simplified Angular Material theme using only three colors */
+/* Colors: primary: #ffffff (white), background: #2C104C (dark violet), secondary: #482683 (light violet) */
 
-@include mat.core();
+@use "@angular/material" as mat;
 
-/* Your purple color palette */
-$primary-palette: (
-  50: #f3e5f5,
-  100: #e1bee7,
-  200: #ce93d8,
-  300: #ba68c8,
-  400: #ab47bc,
-  500: #482683,
-  600: #7b1fa2,
-  700: #6a1b9a,
-  800: #4a148c,
-  900: #38006b,
-  A100: #ea80fc,
-  A200: #e040fb,
-  A400: #d500f9,
-  A700: #aa00ff,
-  contrast: (
-    50: rgba(black, 0.87),
-    100: rgba(black, 0.87),
-    200: rgba(black, 0.87),
-    300: white,
-    400: white,
-    500: white,
-    600: white,
-    700: white,
-    800: white,
-    900: white,
-    A100: rgba(black, 0.87),
-    A200: white,
-    A400: white,
-    A700: white,
-  )
-);
+/* Main Theme - using simplified color palette */
+:root, :host {
+  @include mat.theme-overrides((
+    /* Primary color: white (#ffffff) */
+    primary: #482683,
+    on-primary: #ffffff,
+    primary-container: #482683,
+    on-primary-container: #ffffff,
+    
+    /* Secondary color: light violet (#482683) */
+    secondary: #482683,
+    on-secondary: #ffffff,
+    secondary-container: #482683,
+    on-secondary-container: #ffffff,
+    
+    /* Background: dark violet (#2C104C) */
+    background: #2C104C,
+    on-background: #ffffff,
+    surface: #2C104C,
+    on-surface: #ffffff,
+    surface-container: #2C104C,
+    surface-container-low: #2C104C,
+    surface-container-high: #2C104C,
+    surface-container-highest: #2C104C,
+    
+    /* Error colors (kept minimal for Material components) */
+    error: #ba1a1a,
+    on-error: #ffffff,
+    error-container: #ffdad6,
+    on-error-container: #410002,
+    
+    /* Outline and neutral (minimal) */
+    outline: #482683,
+    outline-variant: #482683,
+    shadow: #000000,
+    scrim: #000000,
+  ));
+}
 
-/* Your yellow accent palette */
-$accent-palette: (
-  50: #fffde7,
-  100: #fff9c4,
-  200: #fff59d,
-  300: #fff176,
-  400: #ffee58,
-  500: #ffed00,
-  600: #fdd835,
-  700: #fbc02d,
-  800: #f9a825,
-  900: #f57f17,
-  A100: #ffff8d,
-  A200: #ffff00,
-  A400: #ffea00,
-  A700: #ffd600,
-  contrast: (
-    50: rgba(black, 0.87),
-    100: rgba(black, 0.87),
-    200: rgba(black, 0.87),
-    300: rgba(black, 0.87),
-    400: rgba(black, 0.87),
-    500: rgba(black, 0.87),
-    600: rgba(black, 0.87),
-    700: rgba(black, 0.87),
-    800: rgba(black, 0.87),
-    900: rgba(black, 0.87),
-    A100: rgba(black, 0.87),
-    A200: rgba(black, 0.87),
-    A400: rgba(black, 0.87),
-    A700: rgba(black, 0.87),
-  )
-);
+/* Dark Theme - same colors, inverted contrast where needed */
+.dark {
+  @include mat.theme-overrides((
+    primary: #ffffff,
+    on-primary: #2C104C,
+    primary-container: #482683,
+    on-primary-container: #ffffff,
+    
+    secondary: #482683,
+    on-secondary: #ffffff,
+    secondary-container: #482683,
+    on-secondary-container: #ffffff,
+    
+    background: #2C104C,
+    on-background: #ffffff,
+    surface: #2C104C,
+    on-surface: #ffffff,
+    surface-container: #2C104C,
+    surface-container-low: #2C104C,
+    surface-container-high: #2C104C,
+    surface-container-highest: #2C104C,
+    
+    error: #ffb4ab,
+    on-error: #690005,
+    error-container: #93000a,
+    on-error-container: #ffdad6,
+    
+    outline: #482683,
+    outline-variant: #482683,
+    shadow: #000000,
+    scrim: #000000,
+  ));
+}
 
-$primary: mat.m2-define-palette($primary-palette);
-$accent: mat.m2-define-palette($accent-palette);
-$warn: mat.m2-define-palette(mat.$m2-red-palette);
+/* Typography - using Archivo font family */
+:root, :host {
+  --mat-sys-brand-font-family: Archivo;
+  --mat-sys-plain-font-family: Archivo;
+  --mat-sys-bold-font-weight: 700;
+  --mat-sys-medium-font-weight: 500;
+  --mat-sys-regular-font-weight: 400;
 
-$theme: mat.m2-define-dark-theme((
-  color: (
-    primary: $primary,
-    accent: $accent,
-    warn: $warn,
-  ),
-  typography: mat.m2-define-typography-config(),
-  density: 0,
-));
-
-@include mat.all-component-colors($theme);
-@include mat.all-component-typographies($theme);
+  @include mat.theme-overrides((
+    brand-family: Archivo,
+    plain-family: Archivo,
+    bold-weight: 700,
+    medium-weight: 500,
+    regular-weight: 400,
+  ));
+}

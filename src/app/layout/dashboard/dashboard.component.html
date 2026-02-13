@@ -1,0 +1,84 @@
+<div class="flex h-screen w-screen overflow-hidden bg-[var(--background-color)]">
+  <!-- RAIL - Narrow left section -->
+  <div class="flex-shrink-0 w-24 bg-[var(--secondary-color)]">
+    <app-rail></app-rail>
+  </div>
+
+  <!-- LEFT PANEL - Expandable -->
+  <div class="flex flex-col transition-all duration-300 ease-in-out"
+       [class.w-80]="leftPanelExpanded()"
+       [class.w-12]="!leftPanelExpanded()">
+    @if (leftPanelExpanded()) {
+      <div class="flex-shrink-0 h-12 flex items-center justify-between px-2 bg-[var(--background-color)]">
+        <button 
+          (click)="toggleLeftPanel()"
+          class="p-2 hover:bg-[var(--highlight-color)] rounded transition-colors"
+          aria-label="Collapse left panel">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+      </div>
+      <div class="flex-1 overflow-auto bg-[var(--background-color)]">
+        <app-left></app-left>
+      </div>
+    } @else {
+      <div class="flex-shrink-0 h-12 flex items-center justify-center bg-[var(--background-color)]">
+        <button 
+          (click)="toggleLeftPanel()"
+          class="p-2 hover:bg-[var(--highlight-color)] rounded transition-colors"
+          aria-label="Expand left panel">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- CENTER AREA - Map and Credits -->
+  <div class="flex-1 flex flex-col min-w-0 bg-[var(--secondary-color)]">
+    <div class="flex-1 flex flex-col min-h-0 bg-[var(--background-color)] rounded-tr-3xl rounded-br-3xl">
+    <!-- MAP - Main content area that grows to fill space, large, right corner rounded -->
+      <div class="flex-1 min-h-0 ">
+        <app-center></app-center>
+      </div>
+      <!-- CREDITS - Footer at bottom -->
+      <div class="flex-shrink-0 h-12">
+        <app-bottom></app-bottom>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL - Expandable -->
+  <div class="flex flex-col transition-all duration-300 ease-in-out relative z-0"
+       [class.w-80]="rightPanelExpanded()"
+       [class.w-12]="!rightPanelExpanded()">
+    @if (rightPanelExpanded()) {
+      <div class="flex-shrink-0 h-12 flex items-center justify-between px-2 bg-[var(--secondary-color)]">
+        <button 
+          (click)="toggleRightPanel()"
+          class="p-2 hover:bg-[var(--highlight-color)] rounded transition-colors"
+          aria-label="Collapse right panel">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+      <div class="flex-1 overflow-auto bg-[var(--secondary-color)]">
+        <app-right></app-right>
+      </div>
+    } @else {
+      <div class="flex-shrink-0 h-12 flex items-center justify-center bg-[var(--secondary-color)]">
+        <button 
+          (click)="toggleRightPanel()"
+          class="p-2 hover:bg-[var(--highlight-color)] rounded transition-colors"
+          aria-label="Expand right panel">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+      </div>
+    }
+  </div>
+</div>
