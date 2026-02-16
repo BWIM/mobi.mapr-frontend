@@ -3,6 +3,7 @@ import { LoginComponent } from './auth/login/login.component';
 import { DashboardComponent } from './layout/dashboard/dashboard.component';
 import { LandingComponent } from './landing/landing.component';
 import { MaintenanceComponent } from './maintenance/maintenance.component';
+import { UsersAreaComponent } from './users-area/users-area.component';
 
 export const routes: Routes = [
   // {
@@ -13,6 +14,7 @@ export const routes: Routes = [
   { path: 'landing', component: LandingComponent, data: { public: true } },
   { path: 'login', component: LoginComponent, data: { public: true } },
   { path: 'maintenance', component: MaintenanceComponent, data: { public: true } },
+  { path: 'users-area', component: UsersAreaComponent },
   {
     path: 'dashboard',
     component: DashboardComponent,

@@ -11,16 +11,20 @@
     <button 
       [matMenuTriggerFor]="languageMenu"
       class="flex items-center gap-2">
-      <span class="text-xl font-bold">{{ currentLang.toUpperCase() }}</span>
+      <span class="text-xl font-bold">{{ currentLang().toUpperCase() }}</span>
     </button>
     <mat-menu #languageMenu="matMenu">
       <button mat-menu-item (click)="switchLanguage('de')">
         <span>DE</span>
-        <mat-icon *ngIf="currentLang === 'de'">check</mat-icon>
+        @if (currentLang() === 'de') {
+          <mat-icon>check</mat-icon>
+        }
       </button>
       <button mat-menu-item (click)="switchLanguage('en')">
         <span>EN</span>
-        <mat-icon *ngIf="currentLang === 'en'">check</mat-icon>
+        @if (currentLang() === 'en') {
+          <mat-icon>check</mat-icon>
+        }
       </button>
     </mat-menu>
   </div>
@@ -36,8 +40,10 @@
     <button matIconButton>
       <mat-icon>question_mark</mat-icon>
     </button>
-    <button matIconButton>
-      <mat-icon>person</mat-icon>
-    </button>
+    @if (isLoggedIn()) {
+      <button matIconButton (click)="navigateToUsersArea()" aria-label="Projekte verwalten">
+        <mat-icon>person</mat-icon>
+      </button>
+    }
   </div>
 </div>

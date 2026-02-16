@@ -95,7 +95,7 @@ export class LoginComponent {
         finalize(() => this.isLoading = false)
       ).subscribe({
         next: () => {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/users-area']);
         },
         error: (err) => {
           this.error = 'Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Eingaben.';

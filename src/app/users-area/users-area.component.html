@@ -1,0 +1,51 @@
+<div class="min-h-screen bg-[var(--background-color)] p-8">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-[var(--primary-color)] mb-6">Meine Projekte</h1>
+
+    @if (loading()) {
+      <div class="flex justify-center items-center py-12">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    } @else if (error()) {
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {{ error() }}
+      </div>
+    } @else if (projects().length === 0) {
+      <div class="text-center py-12">
+        <p class="text-lg text-[var(--primary-color)]">Keine Projekte gefunden.</p>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 gap-4">
+        @for (project of projects(); track project.id) {
+          <button
+            (click)="selectProject(project)"
+            [class.selected]="isProjectSelected(project.id)"
+            [style.border-color]="isProjectSelected(project.id) ? 'var(--primary-color)' : 'transparent'"
+            class="w-full text-left p-6 bg-[var(--secondary-color)] rounded-lg border-2 transition-all duration-200 hover:shadow-lg">
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <h3 class="text-xl font-semibold text-[var(--primary-color)] mb-2">
+                  {{ project.display_name }}
+                </h3>
+                @if (project.description) {
+                  <p class="text-sm text-[var(--primary-color)] opacity-80 mb-2">
+                    {{ project.description }}
+                  </p>
+                }
+                <div class="flex gap-4 text-xs text-[var(--primary-color)] opacity-60">
+                  <span>Status: {{ project.status }}</span>
+                  @if (project.category) {
+                    <span>Kategorie: {{ project.category }}</span>
+                  }
+                </div>
+              </div>
+              @if (isProjectSelected(project.id)) {
+                <mat-icon class="text-[var(--primary-color)] ml-4">check_circle</mat-icon>
+              }
+            </div>
+          </button>
+        }
+      </div>
+    }
+  </div>
+</div>
