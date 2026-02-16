@@ -1,0 +1,14 @@
+<div class="p-4 bg-[var(--secondary-color)] text-[var(--primary-color)] relative flex flex-col rounded-2xl border border-[var(--primary-color)]" *ngIf="!selectedFeature">
+  <div class="flex-1 flex items-center justify-center">
+    <p class="text-sm text-[var(--primary-color)] text-center px-4">
+      Klicke auf einen Ort in der Karte oder nutze die Suchleiste, um weitere Analysen zu erhalten
+    </p>
+  </div>
+</div>
+<div class="h-full p-4 bg-[var(--background-color)] text-[var(--primary-color)] relative flex flex-col rounded-2xl" *ngIf="selectedFeature">
+    <div class="flex-1 flex items-center justify-center">
+      <p class="text-sm text-[var(--primary-color)] text-center px-4">
+        Klicke auf einen Ort in der Karte oder nutze die Suchleiste, um weitere Analysen zu erhalten
+      </p>
+    </div>
+  </div>

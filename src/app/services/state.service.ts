@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   PaginatedResponse } from '../interfaces/http';
-import { State } from '../interfaces/state';
+import { State } from '../interfaces/features';
 
 
 

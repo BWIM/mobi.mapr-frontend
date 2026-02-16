@@ -1,0 +1,111 @@
+.map-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Ensure map canvas has rounded corners */
+:host ::ng-deep .maplibregl-canvas-container {
+  border-radius: 0.75rem; /* matches rounded-xl */
+  overflow: hidden;
+}
+
+:host ::ng-deep .maplibregl-map {
+  border-radius: 0.75rem; /* matches rounded-xl */
+  overflow: hidden;
+}
+
+/* Map Controls Styling - Move everything 20px down */
+:host ::ng-deep .maplibregl-ctrl {
+  margin-top: 20px !important;
+}
+
+
+:host ::ng-deep .maplibregl-ctrl-group:has(.maplibregl-ctrl-zoom-in) {
+  background-color: var(--background-color) !important;
+  border-radius: 9999px !important;
+  padding: 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  border: none !important;
+}
+
+/* Individual zoom buttons - make round with primary-color background */
+:host ::ng-deep .maplibregl-ctrl-zoom-in,
+:host ::ng-deep .maplibregl-ctrl-zoom-out {
+  background-color: var(--primary-color) !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-shadow: none !important;
+}
+
+
+/* Zoom button icons - background-color */
+:host ::ng-deep .maplibregl-ctrl-zoom-in svg,
+:host ::ng-deep .maplibregl-ctrl-zoom-out svg {
+  fill: var(--background-color) !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+/* Target all child elements inside the SVG (path, circle, etc.) */
+:host ::ng-deep .maplibregl-ctrl-zoom-in svg *,
+:host ::ng-deep .maplibregl-ctrl-zoom-out svg * {
+  fill: var(--background-color) !important;
+}
+
+:host ::ng-deep .maplibregl-ctrl-group:has(.maplibregl-ctrl-fullscreen) {
+  background-color: var(--primary-color) !important;
+  border-radius: 9999px !important;
+  border: 1px solid var(--background-color) !important;
+  padding: 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  border: none !important;
+}
+
+:host ::ng-deep .maplibregl-ctrl-group:has(.maplibregl-ctrl-shrink) {
+  background-color: var(--primary-color) !important;
+  border-radius: 9999px !important;
+  border: 1px solid var(--background-color) !important;
+  padding: 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  border: none !important;
+}
+
+/* Fullscreen button - primary color background */
+:host ::ng-deep .maplibregl-ctrl-fullscreen,
+:host ::ng-deep .maplibregl-ctrl-shrink {
+  background-color: var(--primary-color) !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-shadow: none !important;
+}
+:host ::ng-deep .maplibregl-ctrl-fullscreen .maplibregl-ctrl-icon svg,
+:host ::ng-deep .maplibregl-ctrl-shrink .maplibregl-ctrl-icon svg {
+  width: 18px !important;
+  height: 18px !important;
+}

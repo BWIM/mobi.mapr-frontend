@@ -1,0 +1,34 @@
+<div class="h-full p-4 bg-[var(--background-color)] text-[var(--primary-color)] relative flex flex-col rounded-2xl">
+  <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2 leading-6">Top 10 Landkreise</h2>
+  <p class="text-sm text-[var(--primary-color)] mb-4 leading-6">nach Bevölkerung filtern</p>
+  
+  <div class="flex flex-col gap-2 mb-6">
+    <div class="flex gap-2 flex-wrap">
+      <button 
+        *ngFor="let filter of populationFilters.slice(0, 4)" 
+        [class]="getButtonClasses(filter.value)"
+        (click)="selectFilter(filter.value)">
+        {{ filter.label }}
+      </button>
+    </div>
+    <div class="flex gap-2 flex-wrap">
+      <button 
+        *ngFor="let filter of populationFilters.slice(4)" 
+        [class]="getButtonClasses(filter.value)"
+        (click)="selectFilter(filter.value)">
+        {{ filter.label }}
+      </button>
+    </div>
+  </div>
+
+  <ol class="list-decimal pl-6 m-0 flex-1 text-[var(--primary-color)] leading-[1.8]">
+    <li *ngFor="let county of filteredCounties; let i = index" class="mb-2 flex justify-between items-center text-[var(--primary-color)]">
+      <span class="flex-1">{{ county.name }}</span>
+      <span class="ml-2 font-medium">({{ getRating(county.index) }})</span>
+    </li>
+  </ol>
+
+  <button class="absolute bottom-4 right-4 w-7 h-7 rounded-full bg-[var(--secondary-color)] text-[var(--primary-color)] border-none cursor-pointer flex items-center justify-center transition-all duration-200 text-sm hover:opacity-80 hover:scale-105" title="Information">
+    <span class="material-icons text-sm leading-none">info</span>
+  </button>
+</div>

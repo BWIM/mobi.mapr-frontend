@@ -7,11 +7,17 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTabsModule } from '@angular/material/tabs';
+
 
 
 
 @NgModule({
   imports: [
+    MatDialogModule,
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
@@ -21,8 +27,12 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
     ReactiveFormsModule,
     RouterModule,
     TranslateModule,
+    MatCheckboxModule,
+    MatProgressSpinnerModule,
+    MatTabsModule,
   ],
   exports: [
+    MatDialogModule,
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
@@ -32,6 +42,9 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
     ReactiveFormsModule,
     RouterModule,
     TranslateModule,
+    MatCheckboxModule,
+    MatProgressSpinnerModule,
+    MatTabsModule,
   ],
   providers: []
 })

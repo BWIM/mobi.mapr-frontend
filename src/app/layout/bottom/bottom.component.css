@@ -1,0 +1,31 @@
+.credits-content {
+  padding: 1rem;
+}
+
+.credits-section {
+  margin-bottom: 1.5rem;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.credits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.credits-item {
+  transition: background-color 0.2s;
+}
+
+.credits-item:hover {
+  background-color: var(--surface-hover);
+}
+
+.credits-item.cursor-pointer {
+  cursor: pointer;
+}

@@ -1,12 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivityService } from '../../../services/activity.service';
 import { PersonaService } from '../../../services/persona.service';
 import { RegioStarService } from '../../../services/regiostar.service';
@@ -14,7 +7,8 @@ import { StateService } from '../../../services/state.service';
 import { Activity } from '../../../interfaces/activity';
 import { Persona } from '../../../interfaces/persona';
 import { RegioStar } from '../../../interfaces/regiostar';
-import { State } from '../../../interfaces/state';
+import { State } from '../../../interfaces/features';
+import { SharedModule } from '../../../shared/shared.module';
 
 export interface FilterDialogData {
   selectedActivities: number[];
@@ -27,14 +21,7 @@ export interface FilterDialogData {
   selector: 'app-filter-dialog',
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
-    MatDialogModule,
-    MatCheckboxModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTabsModule,
-    MatProgressSpinnerModule
+    SharedModule,
   ],
   templateUrl: './filter-dialog.component.html',
   styleUrl: './filter-dialog.component.css'

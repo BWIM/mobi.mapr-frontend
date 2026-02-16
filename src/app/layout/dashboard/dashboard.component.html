@@ -9,13 +9,13 @@
        [class.w-80]="leftPanelExpanded()"
        [class.w-12]="!leftPanelExpanded()">
     @if (leftPanelExpanded()) {
-      <div class="flex-1 overflow-auto bg-[var(--background-color)]">
+      <div class="flex-1 overflow-auto bg-none">
         <app-left></app-left>
       </div>
       <div class="absolute top-1/2 right-0 transform -translate-y-1/2 z-10">
         <button 
           (click)="toggleLeftPanel()"
-          class="p-2 hover:bg-[var(--background-color)] rounded transition-colors"
+          class="p-2 hover:bg-none rounded transition-colors"
           aria-label="Collapse left panel">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -23,11 +23,11 @@
         </button>
       </div>
     } @else {
-      <div class="flex-1 relative bg-[var(--background-color)]">
+      <div class="flex-1 relative bg-none">
         <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
           <button 
             (click)="toggleLeftPanel()"
-            class="p-2 hover:bg-[var(--background-color)] rounded transition-colors"
+            class="p-2 hover:bg-none rounded transition-colors"
             aria-label="Expand left panel">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -42,7 +42,7 @@
   <div class="flex-1 flex flex-col min-w-0 bg-[var(--secondary-color)]">
     <div class="flex-1 flex flex-col min-h-0 bg-[var(--background-color)] rounded-tr-3xl rounded-br-3xl">
     <!-- MAP - Main content area that grows to fill space, large, right corner rounded -->
-      <div class="flex-1 min-h-0 ">
+      <div class="flex-1 min-h-0 p-4 rounded-1xl overflow-hidden">
         <app-center></app-center>
       </div>
       <!-- CREDITS - Footer at bottom -->
@@ -63,7 +63,7 @@
       <div class="absolute top-1/2 left-0 transform -translate-y-1/2 z-10">
         <button 
           (click)="toggleRightPanel()"
-          class="p-2 hover:bg-[var(--secondary-color)] rounded transition-colors"
+          class="p-2 hover:bg-none rounded transition-colors"
           aria-label="Collapse right panel">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -75,7 +75,7 @@
         <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
           <button 
             (click)="toggleRightPanel()"
-            class="p-2 hover:bg-[var(--secondary-color)] rounded transition-colors"
+            class="p-2 hover:bg-none rounded transition-colors"
             aria-label="Expand right panel">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
