@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, inject } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RailComponent } from '../rail/rail.component';
@@ -15,7 +15,7 @@ import { AuthService } from '../../auth/auth.service';
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private dashboardSessionService = inject(DashboardSessionService);
@@ -24,8 +24,9 @@ export class DashboardComponent implements OnInit {
   leftPanelExpanded = signal(true);
   rightPanelExpanded = signal(true);
 
-  ngOnInit(): void {
+  constructor() {
     // Subscribe to query parameters to get project_id or share_key
+    // takeUntilDestroyed() must be used in constructor (injection context)
     this.route.queryParams
       .pipe(takeUntilDestroyed())
       .subscribe(params => {

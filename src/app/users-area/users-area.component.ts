@@ -48,6 +48,7 @@ export class UsersAreaComponent implements OnInit {
     this.projectsService.getProjects(1, 100).subscribe({
       next: (response) => {
         this.projects.set(response.results);
+        console.log(this.projects());
         this.loading.set(false);
       },
       error: (err) => {

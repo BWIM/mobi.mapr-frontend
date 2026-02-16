@@ -1,76 +1,156 @@
-import { Component } from '@angular/core';
+import { Component, inject, effect } from '@angular/core';
 import { ProjectsService } from '../../services/project.service';
-import { Project } from '../../interfaces/project';
+import { ProfileService } from '../../services/profile.service';
 import { SharedModule } from '../../shared/shared.module';
 import { MatDialog } from '@angular/material/dialog';
 import { FilterDialogComponent, FilterDialogData } from './filter-dialog/filter-dialog.component';
+import { Profile, Mode } from '../../interfaces/profile';
 
 @Component({
   selector: 'app-left',
   imports: [SharedModule],
   templateUrl: './left.component.html',
-  styleUrl: './left.component.css',
 })
 export class LeftComponent {
-  project: Project | null = null;
+  private projectService = inject(ProjectsService);
+  private profileService = inject(ProfileService);
+  private dialog = inject(MatDialog);
+
+  // Use the project signal directly - it will reactively update when the project loads
+  project = this.projectService.project;
+  isLoading = this.projectService.isLoading;
+  
   isExpanded = false;
-  selectedVerkehrsmittel: string[] = [];
-  selectedMobilitatsbewertung: string[] = [];
+  selectedVerkehrsmittel: number[] = []; // Changed to number[] to store mode IDs
+  selectedMobilitatsbewertung: string | null = 'qualitaet';
   selectedActivities: number[] = [];
   selectedPersonas: number[] = [];
   selectedRegioStars: number[] = [];
   selectedStates: number[] = [];
 
+  // Store all available modes and profiles
+  allModes: Mode[] = [];
+  allProfiles: Profile[] = [];
+  modeOptions: Array<{ id: number; name: string; display_name: string; icon: string }> = [];
+  
+  // Map mode IDs to icon names
+  private modeIcons: { [key: string]: string } = {
+    'pedestrian': 'directions_walk',
+    'bicycle': 'directions_bike',
+    'car': 'directions_car',
+    'bus': 'directions_bus',
+    'transit': 'train',
+    'tram': 'tram',
+    'default': 'directions'
+  };
 
-  verkehrsmittelOptions = [
-    { id: 'walk', icon: 'directions_walk', label: 'Zu Fuß' },
-    { id: 'bike', icon: 'directions_bike', label: 'Fahrrad' },
-    { id: 'car', icon: 'directions_car', label: 'Auto' },
-    { id: 'bus', icon: 'directions_bus', label: 'Bus' }
-  ];
+  constructor() {
+    // Initialize project if not already initialized
+    if (!this.projectService.isInitialized()) {
+      this.projectService.initializeProject();
+    }
 
-  constructor(
-    private projectService: ProjectsService,
-    private dialog: MatDialog
-  ) {
-    this.projectService.getProjectById(1).subscribe({
-      next: (project) => {
-        this.project = project;
-      },
-      error: (error) => {
-        console.error('Error fetching project:', error);
+    // Load profiles and modes
+    this.loadProfilesAndModes();
+
+    // React to project changes to update mode selection
+    effect(() => {
+      const currentProject = this.project();
+      if (currentProject && this.allProfiles.length > 0) {
+        this.updateModeSelection(currentProject.base_profiles);
       }
     });
+  }
+
+  private loadProfilesAndModes(): void {
+    this.profileService.getProfiles(1, 1000).subscribe({
+      next: (response) => {
+        this.allProfiles = response.results;
+        this.extractModes();
+        // Update mode selection after modes are loaded
+        this.updateModeSelectionFromProject();
+      },
+      error: (error) => {
+        console.error('Error loading profiles:', error);
+      }
+    });
+  }
+
+  private updateModeSelectionFromProject(): void {
+    const currentProject = this.project();
+    if (currentProject && currentProject.base_profiles) {
+      this.updateModeSelection(currentProject.base_profiles);
+    }
+  }
+
+  private extractModes(): void {
+    // Extract unique modes from profiles
+    const modeMap = new Map<number, Mode>();
+    
+    this.allProfiles.forEach(profile => {
+      if (profile.mode && !modeMap.has(profile.mode.id)) {
+        modeMap.set(profile.mode.id, profile.mode);
+      }
+    });
+
+    this.allModes = Array.from(modeMap.values());
+  }
+
+  private updateModeSelection(baseProfiles: number[]): void {
+    if (!baseProfiles || baseProfiles.length === 0 || this.allProfiles.length === 0) {
+      this.modeOptions = [];
+      return;
+    }
+
+    // Find which modes are represented in base_profiles
+    const modesInProject = new Set<number>();
+    const modeMap = new Map<number, Mode>();
+    
+    baseProfiles.forEach(profileId => {
+      const profile = this.allProfiles.find(p => p.id === profileId);
+      if (profile && profile.mode) {
+        modesInProject.add(profile.mode.id);
+        if (!modeMap.has(profile.mode.id)) {
+          modeMap.set(profile.mode.id, profile.mode);
+        }
+      }
+    });
+
+    // Preselect modes that have base_profiles
+    this.selectedVerkehrsmittel = Array.from(modesInProject);
+
+    // Only show modes that are in base_profiles
+    this.modeOptions = Array.from(modeMap.values()).map(mode => ({
+      id: mode.id,
+      name: mode.name,
+      display_name: mode.display_name,
+      icon: this.modeIcons[mode.name.toLowerCase()] || this.modeIcons['default']
+    }));
   }
 
   toggleSidebar() {
     this.isExpanded = !this.isExpanded;
   }
 
-  toggleVerkehrsmittel(id: string) {
-    const index = this.selectedVerkehrsmittel.indexOf(id);
+  toggleVerkehrsmittel(modeId: number) {
+    const index = this.selectedVerkehrsmittel.indexOf(modeId);
     if (index > -1) {
       this.selectedVerkehrsmittel.splice(index, 1);
     } else {
-      this.selectedVerkehrsmittel.push(id);
+      this.selectedVerkehrsmittel.push(modeId);
     }
   }
 
-  isSelected(id: string): boolean {
-    return this.selectedVerkehrsmittel.includes(id);
+  isSelected(modeId: number): boolean {
+    return this.selectedVerkehrsmittel.includes(modeId);
   }
 
-  toggleMobilitatsbewertung(id: string) {
-    const index = this.selectedMobilitatsbewertung.indexOf(id);
-    if (index > -1) {
-      this.selectedMobilitatsbewertung.splice(index, 1);
-    } else {
-      this.selectedMobilitatsbewertung.push(id);
-    }
+  selectMobilitatsbewertung(id: string) {
+    this.selectedMobilitatsbewertung = id;
   }
 
   isMobilitatsbewertungSelected(id: string): boolean {
-    return this.selectedMobilitatsbewertung.includes(id);
+    return this.selectedMobilitatsbewertung === id;
   }
 
   openFilterDialog() {

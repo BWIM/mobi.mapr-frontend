@@ -91,3 +91,48 @@ button {
         color: var(--primary-color);
     }
 }
+
+/* Material Icon Button - Global styling */
+button[mat-icon-button],
+button[matIconButton],
+.mat-mdc-icon-button {
+    border-radius: 50% !important;
+    background-color: var(--primary-color) !important;
+    color: var(--background-color) !important;
+}
+
+button[mat-icon-button] mat-icon,
+button[matIconButton] mat-icon,
+.mat-mdc-icon-button mat-icon {
+    color: var(--background-color) !important;
+}
+
+button[mat-icon-button]:hover,
+button[matIconButton]:hover,
+.mat-mdc-icon-button:hover {
+    background-color: var(--primary-color) !important;
+    opacity: 0.9;
+}
+
+button[mat-icon-button]:hover mat-icon,
+button[matIconButton]:hover mat-icon,
+.mat-mdc-icon-button:hover mat-icon {
+    color: var(--secondary-color) !important;
+    opacity: 0.9;
+}
+
+button[mat-button],
+button[matButton],
+.mat-mdc-button {
+    border-radius: 50% !important;
+    background-color: var(--primary-color) !important;
+    color: var(--background-color) !important;
+}
+
+
+button[mat-button]:hover,
+button[matButton]:hover,
+.mat-mdc-button:hover {
+    background-color: var(--primary-color) !important;
+    opacity: 0.9;
+}

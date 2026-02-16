@@ -8,4 +8,5 @@ export interface Project {
     status: string;
     created: Date;
     version: string;
+    base_profiles: number[];
 }

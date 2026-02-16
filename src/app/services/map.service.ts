@@ -73,7 +73,6 @@ export class MapService {
       width: "200px",
       height: "200px",
       zoomLevelOffset: 5,
-      interactions: { drag: false, zoom: false },
       initialMinimized: false,
       minimizableMinimap: true,
       collapsedWidth: "30px",

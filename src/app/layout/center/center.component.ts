@@ -52,10 +52,16 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
       // Add navigation controls
       this.map.addControl(new NavigationControl({ showCompass: false }), 'top-right');
-      this.map.addControl(new MinimapControl(this.mapService.getMinimapConfig()), 'bottom-right');
       this.map.addControl(new FullscreenControl(), 'top-right');
       this.map.dragRotate.disable();
       this.map.touchZoomRotate.disableRotation();
+
+      // Wait for map to load before adding minimap to avoid initialization errors
+      this.map.once('load', () => {
+        if (this.map) {
+          this.map.addControl(new MinimapControl(this.mapService.getMinimapConfig()), 'bottom-right');
+        }
+      });
     }
   }
 
