@@ -11,6 +11,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { RouterModule } from '@angular/router';
+import { MatDialogModule } from '@angular/material/dialog';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -51,7 +52,8 @@ export const appConfig: ApplicationConfig = {
                     useFactory: HttpLoaderFactory,
                     deps: [HttpClient]
                 }
-            })
+            }),
+            MatDialogModule
         )
     ]
 };

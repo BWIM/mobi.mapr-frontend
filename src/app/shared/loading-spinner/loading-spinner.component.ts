@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LoadingService } from '../../services/loading.service';
+import { LoadingService } from '../../services/_archive/loading.service';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @Component({

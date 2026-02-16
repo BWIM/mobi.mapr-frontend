@@ -1,6 +1,65 @@
 <div class="h-full p-4">
-  <div class="text-lg font-semibold text-[var(--primary-color)] mb-4">PANEL</div>
+  <div class="text-2xl font-semibold text-[var(--primary-color)] mb-4 pt-[6rem]">{{ project?.display_name }}</div>
   <div class="space-y-2">
-    <p class="text-sm text-[var(--text-color)]">Left panel content</p>
+    <mat-slide-toggle [checked]="isExpanded" (change)="toggleSidebar()" labelPosition="before">erweiterter Modus</mat-slide-toggle>
+  </div>
+  <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4">
+    <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">Verkehrsmittel</h2>
+    <div class="flex flex-col gap-2">
+      <div class="flex items-center gap-2">
+        @for (option of verkehrsmittelOptions; track option.id) {
+          <button 
+            mat-icon-button 
+            [class.selected]="isSelected(option.id)"
+            (click)="toggleVerkehrsmittel(option.id)"
+            [attr.aria-label]="option.label"
+            [attr.aria-pressed]="isSelected(option.id)">
+            <mat-icon>{{ option.icon }}</mat-icon>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+  <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4">
+    <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">Mobilitätsbewertung</h2>
+    <div class="flex flex-col gap-2">
+      <div class="flex items-center gap-4">
+        <mat-slide-toggle 
+          [checked]="isMobilitatsbewertungSelected('zeit')" 
+          (change)="toggleMobilitatsbewertung('zeit')"
+          labelPosition="after">
+          Zeit
+        </mat-slide-toggle>
+        <mat-slide-toggle 
+          [checked]="isMobilitatsbewertungSelected('qualitaet')" 
+          (change)="toggleMobilitatsbewertung('qualitaet')"
+          labelPosition="after">
+          Qualität
+        </mat-slide-toggle>
+      </div>
+    </div>
+  </div>
+
+  <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4">
+    <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">Aktive Filter</h2>
+    <div class="flex flex-col gap-2"  >
+      Aktivitäten ({{ selectedActivities.length }} / 10)
+    </div>
+    <div class="flex flex-col gap-2">
+      Personas ({{ selectedPersonas.length }} / 11)
+    </div>
+    <div class="flex flex-col gap-2">
+      RegioStars ({{ selectedRegioStars.length }} / 7)
+    </div>
+    <div class="flex flex-col gap-2">
+      States ({{ selectedStates.length }} / 16)
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <button class="text-primary-color" (click)="openFilterDialog()">
+        <mat-icon>filter_list</mat-icon>
+        Filtern
+      </button>
+    </div>
   </div>
 </div>

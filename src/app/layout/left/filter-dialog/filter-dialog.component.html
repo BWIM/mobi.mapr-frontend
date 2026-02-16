@@ -1,0 +1,114 @@
+<div class="filter-dialog">
+  <h2 mat-dialog-title class="text-2xl font-semibold text-[var(--primary-color)] mb-4">
+    Filter konfigurieren
+  </h2>
+
+  <mat-dialog-content class="mat-typography">
+    <mat-tab-group>
+      <!-- Activities Tab -->
+      <mat-tab label="Aktivitäten">
+        <div class="tab-content">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">Aktivitäten ({{ selectedActivities.size }} / {{ activities.length }})</h3>
+            <button mat-button (click)="selectAllActivities()" class="text-sm">
+              {{ selectedActivities.size === activities.length ? 'Alle abwählen' : 'Alle auswählen' }}
+            </button>
+          </div>
+          <div *ngIf="loading.activities" class="flex justify-center items-center py-8">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+          <div *ngIf="!loading.activities" class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
+            <div *ngFor="let activity of activities" class="flex items-center">
+              <mat-checkbox
+                [checked]="isActivitySelected(activity.id)"
+                (change)="toggleActivity(activity.id)"
+                class="w-full">
+                {{ activity.display_name || activity.name }}
+              </mat-checkbox>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Personas Tab -->
+      <mat-tab label="Personas">
+        <div class="tab-content">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">Personas ({{ selectedPersonas.size }} / {{ personas.length }})</h3>
+            <button mat-button (click)="selectAllPersonas()" class="text-sm">
+              {{ selectedPersonas.size === personas.length ? 'Alle abwählen' : 'Alle auswählen' }}
+            </button>
+          </div>
+          <div *ngIf="loading.personas" class="flex justify-center items-center py-8">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+          <div *ngIf="!loading.personas" class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
+            <div *ngFor="let persona of personas" class="flex items-center">
+              <mat-checkbox
+                [checked]="isPersonaSelected(persona.id)"
+                (change)="togglePersona(persona.id)"
+                class="w-full">
+                {{ persona.display_name || persona.name }}
+              </mat-checkbox>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- RegioStars Tab -->
+      <mat-tab label="RegioStars">
+        <div class="tab-content">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">RegioStars ({{ selectedRegioStars.size }} / {{ regiostars.length }})</h3>
+            <button mat-button (click)="selectAllRegioStars()" class="text-sm">
+              {{ selectedRegioStars.size === regiostars.length ? 'Alle abwählen' : 'Alle auswählen' }}
+            </button>
+          </div>
+          <div *ngIf="loading.regiostars" class="flex justify-center items-center py-8">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+          <div *ngIf="!loading.regiostars" class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
+            <div *ngFor="let regiostar of regiostars" class="flex items-center">
+              <mat-checkbox
+                [checked]="isRegioStarSelected(regiostar.id)"
+                (change)="toggleRegioStar(regiostar.id)"
+                class="w-full">
+                {{ regiostar.name }}
+              </mat-checkbox>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- States Tab -->
+      <mat-tab label="States">
+        <div class="tab-content">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">States ({{ selectedStates.size }} / {{ states.length }})</h3>
+            <button mat-button (click)="selectAllStates()" class="text-sm">
+              {{ selectedStates.size === states.length ? 'Alle abwählen' : 'Alle auswählen' }}
+            </button>
+          </div>
+          <div *ngIf="loading.states" class="flex justify-center items-center py-8">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+          <div *ngIf="!loading.states" class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
+            <div *ngFor="let state of states" class="flex items-center">
+              <mat-checkbox
+                [checked]="isStateSelected(state.id)"
+                (change)="toggleState(state.id)"
+                class="w-full">
+                {{ state.name }}
+              </mat-checkbox>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="mt-4">
+    <button mat-button (click)="onCancel()">Abbrechen</button>
+    <button mat-raised-button color="primary" (click)="onApply()">Anwenden</button>
+  </mat-dialog-actions>
+</div>

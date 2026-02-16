@@ -3,7 +3,7 @@ import { Router, RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { AuthService } from './auth/auth.service';
-import { HealthService } from './services/health.service';
+import { HealthService } from './services/_archive/health.service';
 // Archived components - to be migrated back
 // import { ProjectWizardComponent } from './_archive/legacy/project-wizard/project-wizard.component';
 // import { AnalyzeComponent } from './_archive/components/analyze/analyze.component';
