@@ -13,7 +13,6 @@ interface PopulationFilter {
   selector: 'app-stats',
   imports: [CommonModule],
   templateUrl: './stats.component.html',
-  styleUrl: './stats.component.css',
 })
 export class StatsComponent {
   selectedFilter: string = '5-10';
@@ -68,11 +67,11 @@ export class StatsComponent {
   }
 
   getButtonClasses(filterValue: string): string {
-    const baseClasses = 'px-4 py-2 rounded-lg border-none cursor-pointer text-sm font-medium transition-all duration-200 whitespace-nowrap hover:opacity-90';
+    const baseClasses = 'px-2 py-1 rounded-md border-[var(--primary-color)] cursor-pointer text-xs font-medium transition-all duration-200 whitespace-nowrap hover:opacity-90';
     if (this.selectedFilter === filterValue) {
-      return `${baseClasses} bg-[var(--primary-color)] text-[var(--background-color)] shadow-lg border border-[var(--primary-color)]`;
+      return `${baseClasses} bg-[var(--primary-color)] text-[var(--background-color)] shadow-md border border-[var(--primary-color)]`;
     }
-    return `${baseClasses} bg-[var(--background-color)] text-[var(--primary-color)] border-transparent`;
+    return `${baseClasses} bg-[var(--background-color)] text-[var(--primary-color)] border-[var(--primary-color)]`;
   }
 
   getRating(index: number): string {

@@ -8,23 +8,21 @@
     </div>
     
     <!-- Language Selector Button with Menu -->
-    <button mat-button
+    <button 
       [matMenuTriggerFor]="languageMenu"
       class="flex items-center gap-2">
       <span class="text-xl font-bold">{{ currentLang().toUpperCase() }}</span>
     </button>
     <mat-menu #languageMenu="matMenu">
-      <button mat-menu-item (click)="switchLanguage('de')">
-        <span>DE</span>
-        @if (currentLang() === 'de') {
-          <mat-icon>check</mat-icon>
-        }
+      <button mat-menu-item 
+              (click)="switchLanguage('de')"
+              [class.selected-language]="currentLang() === 'de'">
+        DE
       </button>
-      <button mat-menu-item (click)="switchLanguage('en')">
-        <span>EN</span>
-        @if (currentLang() === 'en') {
-          <mat-icon>check</mat-icon>
-        }
+      <button mat-menu-item 
+              (click)="switchLanguage('en')"
+              [class.selected-language]="currentLang() === 'en'">
+        EN
       </button>
     </mat-menu>
   </div>

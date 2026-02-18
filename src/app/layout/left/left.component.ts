@@ -1,10 +1,11 @@
 import { Component, inject, effect } from '@angular/core';
 import { ProjectsService } from '../../services/project.service';
 import { ProfileService } from '../../services/profile.service';
+import { MapService, ContentLayerFilters } from '../../services/map.service';
 import { SharedModule } from '../../shared/shared.module';
 import { MatDialog } from '@angular/material/dialog';
 import { FilterDialogComponent, FilterDialogData } from './filter-dialog/filter-dialog.component';
-import { Profile, Mode } from '../../interfaces/profile';
+import { Profile, Mode, ProfileCombination } from '../../interfaces/profile';
 
 @Component({
   selector: 'app-left',
@@ -14,6 +15,7 @@ import { Profile, Mode } from '../../interfaces/profile';
 export class LeftComponent {
   private projectService = inject(ProjectsService);
   private profileService = inject(ProfileService);
+  private mapService = inject(MapService);
   private dialog = inject(MatDialog);
 
   // Use the project signal directly - it will reactively update when the project loads
@@ -31,6 +33,8 @@ export class LeftComponent {
   // Store all available modes and profiles
   allModes: Mode[] = [];
   allProfiles: Profile[] = [];
+  allProfileCombinations: ProfileCombination[] = [];
+  currentProfileCombinationID: number | null = null;
   modeOptions: Array<{ id: number; name: string; display_name: string; icon: string }> = [];
   
   // Map mode IDs to icon names
@@ -50,8 +54,9 @@ export class LeftComponent {
       this.projectService.initializeProject();
     }
 
-    // Load profiles and modes
+    // Load profiles, modes, and profile combinations
     this.loadProfilesAndModes();
+    this.loadProfileCombinations();
 
     // React to project changes to update mode selection
     effect(() => {
@@ -72,6 +77,19 @@ export class LeftComponent {
       },
       error: (error) => {
         console.error('Error loading profiles:', error);
+      }
+    });
+  }
+
+  private loadProfileCombinations(): void {
+    this.profileService.getProfileCombinations(1, 1000).subscribe({
+      next: (response) => {
+        this.allProfileCombinations = response.results;
+        // Update profile combination ID after combinations are loaded
+        this.updateProfileCombinationID();
+      },
+      error: (error) => {
+        console.error('Error loading profile combinations:', error);
       }
     });
   }
@@ -126,6 +144,46 @@ export class LeftComponent {
       display_name: mode.display_name,
       icon: this.modeIcons[mode.name.toLowerCase()] || this.modeIcons['default']
     }));
+
+    // Update profile combination ID after mode selection is updated
+    if (this.allProfileCombinations.length > 0) {
+      this.updateProfileCombinationID();
+    }
+  }
+
+  private updateProfileCombinationID(): void {
+    const currentProject = this.project();
+    if (!currentProject || !currentProject.base_profiles || this.selectedVerkehrsmittel.length === 0) {
+      this.currentProfileCombinationID = null;
+      this.updateContentLayer();
+      return;
+    }
+
+    // Find all profiles that match the selected modes and are in base_profiles
+    const selectedProfileIds = this.allProfiles
+      .filter(profile => 
+        profile.mode && 
+        this.selectedVerkehrsmittel.includes(profile.mode.id) &&
+        currentProject.base_profiles.includes(profile.id)
+      )
+      .map(profile => profile.id)
+      .sort((a, b) => a - b); // Sort for consistent comparison
+
+    if (selectedProfileIds.length === 0) {
+      this.currentProfileCombinationID = null;
+      this.updateContentLayer();
+      return;
+    }
+
+    // Find the profile combination that matches exactly
+    const matchingCombination = this.allProfileCombinations.find(combination => {
+      const sortedProfileIds = [...combination.profile_ids].sort((a, b) => a - b);
+      return sortedProfileIds.length === selectedProfileIds.length &&
+             sortedProfileIds.every((id, index) => id === selectedProfileIds[index]);
+    });
+
+    this.currentProfileCombinationID = matchingCombination ? matchingCombination.id : null;
+    this.updateContentLayer();
   }
 
   toggleSidebar() {
@@ -139,6 +197,9 @@ export class LeftComponent {
     } else {
       this.selectedVerkehrsmittel.push(modeId);
     }
+    // Update profile combination ID when mode selection changes
+    this.updateProfileCombinationID();
+    // updateProfileCombinationID already calls updateContentLayer
   }
 
   isSelected(modeId: number): boolean {
@@ -147,6 +208,7 @@ export class LeftComponent {
 
   selectMobilitatsbewertung(id: string) {
     this.selectedMobilitatsbewertung = id;
+    this.updateContentLayer();
   }
 
   isMobilitatsbewertungSelected(id: string): boolean {
@@ -173,7 +235,37 @@ export class LeftComponent {
         this.selectedPersonas = result.selectedPersonas || [];
         this.selectedRegioStars = result.selectedRegioStars || [];
         this.selectedStates = result.selectedStates || [];
+        this.updateContentLayer();
       }
     });
+  }
+
+  /**
+   * Updates the content layer in the map based on current filter selections
+   */
+  private updateContentLayer(): void {
+    // Don't update if profile combination ID is not available
+    if (!this.currentProfileCombinationID) {
+      this.mapService.removeContentLayer();
+      return;
+    }
+
+    // Map "zeit" -> "Score" and "qualität" -> "Index"
+    const featureType: 'index' | 'score' = this.selectedMobilitatsbewertung === 'zeit' ? 'score' : 'index';
+
+    // Build filter parameters
+    // Note: regiotyp_id accepts a single ID, so we use the first selected RegioStar if any are selected
+    const filters: ContentLayerFilters = {
+      profile_combination_id: this.currentProfileCombinationID,
+      feature_type: featureType,
+      state_ids: this.selectedStates.length > 0 ? this.selectedStates : undefined,
+      category_ids: this.selectedActivities.length > 0 ? this.selectedActivities : undefined,
+      persona_ids: this.selectedPersonas.length > 0 ? this.selectedPersonas : undefined,
+      regiotyp_id: this.selectedRegioStars.length === 1 ? this.selectedRegioStars[0] : 
+                   (this.selectedRegioStars.length > 1 ? this.selectedRegioStars[0] : undefined)
+    };
+
+    // Load the content layer with current filters
+    this.mapService.loadContentLayer(filters);
   }
 }

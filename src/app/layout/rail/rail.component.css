@@ -1,0 +1,4 @@
+.selected-language {
+  background-color: var(--primary-color) !important;
+  color: var(--background-color) !important;
+}
