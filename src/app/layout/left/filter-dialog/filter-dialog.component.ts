@@ -15,6 +15,7 @@ export interface FilterDialogData {
   selectedPersonas: number[];
   selectedRegioStars: number[];
   selectedStates: number[];
+  is_mid?: boolean;
 }
 
 @Component({
@@ -37,6 +38,8 @@ export class FilterDialogComponent implements OnInit {
   selectedRegioStars: Set<number> = new Set();
   selectedStates: Set<number> = new Set();
 
+  is_mid: boolean = true;
+
   loading = {
     activities: true,
     personas: true,
@@ -57,11 +60,14 @@ export class FilterDialogComponent implements OnInit {
     this.selectedPersonas = new Set(data.selectedPersonas || []);
     this.selectedRegioStars = new Set(data.selectedRegioStars || []);
     this.selectedStates = new Set(data.selectedStates || []);
+    this.is_mid = data.is_mid !== undefined ? data.is_mid : true;
   }
 
   ngOnInit() {
-    this.loadActivities();
-    this.loadPersonas();
+    if (this.is_mid) {
+      this.loadActivities();
+      this.loadPersonas();
+    }
     this.loadRegioStars();
     this.loadStates();
   }

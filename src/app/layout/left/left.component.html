@@ -55,12 +55,14 @@
     @if (isExpanded) {
       <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4" >
         <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">Aktive Filter</h2>
-        <div class="flex flex-col gap-2"  >
-          Aktivitäten ({{ selectedActivities.length }} / 10)
-        </div>
-        <div class="flex flex-col gap-2">
-          Personas ({{ selectedPersonas.length }} / 11)
-        </div>
+        @if (project()?.is_mid) {
+          <div class="flex flex-col gap-2"  >
+            Aktivitäten ({{ selectedActivities.length }} / 10)
+          </div>
+          <div class="flex flex-col gap-2">
+            Personas ({{ selectedPersonas.length }} / 11)
+          </div>
+        }
         <div class="flex flex-col gap-2">
           RegioStars ({{ selectedRegioStars.length }} / 7)
         </div>

@@ -6,6 +6,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { MatDialog } from '@angular/material/dialog';
 import { FilterDialogComponent, FilterDialogData } from './filter-dialog/filter-dialog.component';
 import { Profile, Mode, ProfileCombination } from '../../interfaces/profile';
+import { PreparingProjectDialogComponent } from './preparing-project-dialog/preparing-project-dialog.component';
 
 @Component({
   selector: 'app-left',
@@ -216,11 +217,13 @@ export class LeftComponent {
   }
 
   openFilterDialog() {
+    const currentProject = this.project();
     const dialogData: FilterDialogData = {
       selectedActivities: this.selectedActivities,
       selectedPersonas: this.selectedPersonas,
       selectedRegioStars: this.selectedRegioStars,
-      selectedStates: this.selectedStates
+      selectedStates: this.selectedStates,
+      is_mid: currentProject?.is_mid ?? true
     };
 
     const dialogRef = this.dialog.open(FilterDialogComponent, {
@@ -243,7 +246,7 @@ export class LeftComponent {
   /**
    * Updates the content layer in the map based on current filter selections
    */
-  private updateContentLayer(): void {
+  private async updateContentLayer(): Promise<void> {
     // Don't update if profile combination ID is not available
     if (!this.currentProfileCombinationID) {
       this.mapService.removeContentLayer();
@@ -264,6 +267,34 @@ export class LeftComponent {
       regiotyp_id: this.selectedRegioStars.length === 1 ? this.selectedRegioStars[0] : 
                    (this.selectedRegioStars.length > 1 ? this.selectedRegioStars[0] : undefined)
     };
+
+    // Show preparing dialog (non-closable) before calling ready endpoint
+    const dialogRef = this.dialog.open(PreparingProjectDialogComponent, {
+      width: '400px',
+      disableClose: true,
+      hasBackdrop: true,
+      panelClass: 'preparing-project-dialog-panel'
+    });
+
+    try {
+      // Call the ready endpoint before loading the map
+      console.log('Calling ready endpoint with filters:', filters);
+      const readyResponse = await this.mapService.checkReady(filters);
+      console.log('Ready endpoint call completed:', readyResponse);
+
+      // If data is not cached, wait for preload via websocket
+      if (!readyResponse.cache_flag && readyResponse.session_id) {
+        console.log('Data not cached, waiting for preload via websocket, session_id:', readyResponse.session_id);
+        await this.mapService.waitForPreload(readyResponse.session_id);
+        console.log('Preload completed via websocket');
+      }
+    } catch (error) {
+      console.error('Error checking ready status or waiting for preload:', error);
+      // Continue with loading even if ready check fails
+    } finally {
+      // Close the dialog
+      dialogRef.close();
+    }
 
     // Load the content layer with current filters
     this.mapService.loadContentLayer(filters);

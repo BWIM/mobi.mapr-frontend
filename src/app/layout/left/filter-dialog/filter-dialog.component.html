@@ -6,7 +6,7 @@
   <mat-dialog-content class="mat-typography">
     <mat-tab-group>
       <!-- Activities Tab -->
-      <mat-tab label="Aktivitäten">
+      <mat-tab *ngIf="is_mid" label="Aktivitäten">
         <div class="tab-content">
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold">Aktivitäten ({{ selectedActivities.size }} / {{ activities.length }})</h3>
@@ -31,7 +31,7 @@
       </mat-tab>
 
       <!-- Personas Tab -->
-      <mat-tab label="Personas">
+      <mat-tab *ngIf="is_mid" label="Personas">
         <div class="tab-content">
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold">Personas ({{ selectedPersonas.size }} / {{ personas.length }})</h3>
