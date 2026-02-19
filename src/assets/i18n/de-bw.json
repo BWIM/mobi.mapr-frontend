@@ -591,6 +591,12 @@
     "CHECKING": "Service wird überprüft...",
     "INFO": "Diese Seite wird automatisch aktualisiert, sobald der Service wieder verfügbar ist."
   },
+  "INVALID_SHARE_KEY": {
+    "TITLE": "Ungültiger Freigabeschlüssel",
+    "MESSAGE": "Der verwendete Freigabeschlüssel ist ungültig oder abgelaufen. Bitte überprüfen Sie den Link oder kontaktieren Sie den Projektbesitzer für einen neuen Freigabeschlüssel.",
+    "GO_TO_LOGIN": "Zur Anmeldung",
+    "GO_TO_LANDING": "Zur Startseite"
+  },
   "MAP_HINT": {
     "ZOOM": "Zoom in d' Kärt, zum Details z' sehe",
     "ZOOM_DETAIL": "Zoom e weng ri, bis kleineri Gebiet sichtbar werre",

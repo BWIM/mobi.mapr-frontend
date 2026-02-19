@@ -329,7 +329,7 @@ export class LeftComponent {
     }
 
     // Load the content layer with current filters
-    this.mapService.loadContentLayer(filters);
+    await this.mapService.loadContentLayer(filters);
     
     // Clear loading state after a short delay to allow map to render
     const wasLoading = this.mapService.isMapLoading();

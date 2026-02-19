@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { Map, StyleSpecification, SourceSpecification, LayerSpecification } from 'maplibre-gl';
+import { Map, StyleSpecification, SourceSpecification, LayerSpecification, LngLatBounds } from 'maplibre-gl';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { DashboardSessionService } from './dashboard-session.service';
@@ -309,9 +309,68 @@ export class MapService {
   }
 
   /**
+   * Fetches bounds for the content layer from the API
+   */
+  private async fetchContentLayerBounds(filters: ContentLayerFilters): Promise<{ min_lon: number; min_lat: number; max_lon: number; max_lat: number } | null> {
+    try {
+      let params = new HttpParams();
+
+      // Add authentication token if available
+      const token = this.authService.getAuthorizationHeaders().get('Authorization')?.split(' ')[1];
+      if (token) {
+        params = params.set('token', token);
+      }
+
+      // Add share key if available (for unauthenticated access)
+      const shareKey = this.dashboardSessionService.getShareKey();
+      if (shareKey && !token) {
+        params = params.set('key', shareKey);
+      }
+
+      // Only send state_ids if they are selected
+      if (filters.state_ids && filters.state_ids.length > 0) {
+        params = params.set('state_ids', filters.state_ids.join(','));
+      }
+
+      const url = `${environment.apiUrl}/tiles/bounds/`;
+      const bounds = await firstValueFrom(
+        this.http.get<{ min_lon: number; min_lat: number; max_lon: number; max_lat: number }>(url, { params })
+      );
+      return bounds;
+    } catch (error) {
+      console.warn('Could not fetch bounds from API:', error);
+      return null;
+    }
+  }
+
+
+  /**
+   * Zooms the map to the bounds of the content layer
+   */
+  private async zoomToContentLayerBounds(filters: ContentLayerFilters): Promise<void> {
+    if (!this.map) {
+      return;
+    }
+
+    const apiBounds = await this.fetchContentLayerBounds(filters);
+    
+    if (apiBounds) {
+      const bounds = new LngLatBounds(
+        [apiBounds.min_lon, apiBounds.min_lat],
+        [apiBounds.max_lon, apiBounds.max_lat]
+      );
+      
+      this.map.fitBounds(bounds, {
+        padding: 50,
+        duration: 1000
+      });
+    }
+  }
+
+  /**
    * Updates the content layer in the map style based on filter parameters
    */
-  loadContentLayer(filters: ContentLayerFilters): void {
+  async loadContentLayer(filters: ContentLayerFilters): Promise<void> {
     const projectId = this.dashboardSessionService.getProjectId();
     
     if (!projectId) {
@@ -328,6 +387,10 @@ export class MapService {
     // Update the shared profile combination ID signal
     this._currentProfileCombinationID.set(filters.profile_combination_id);
     this.currentFilters = filters;
+
+    // First, zoom to bounds before loading the layer
+    await this.zoomToContentLayerBounds(filters);
+
     const tileUrl = this.buildTileUrl(projectId, filters);
 
     if (!tileUrl) {

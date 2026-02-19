@@ -658,6 +658,12 @@
     "CHECKING": "Checking service...",
     "INFO": "This page will automatically refresh once the service is available again."
   },
+  "INVALID_SHARE_KEY": {
+    "TITLE": "Invalid Share Key",
+    "MESSAGE": "The share key you used is invalid or has expired. Please check the link or contact the project owner for a new share key.",
+    "GO_TO_LOGIN": "Go to Login",
+    "GO_TO_LANDING": "Go to Landing Page"
+  },
   "MAP_HINT": {
     "ZOOM": "Zoom into the map to see details",
     "ZOOM_DETAIL": "Pinch or scroll until the map shows finer areas",

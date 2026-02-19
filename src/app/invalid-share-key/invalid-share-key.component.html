@@ -1,0 +1,36 @@
+<div
+    class="invalid-share-key-container min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+        <!-- Error Icon -->
+        <div class="mb-6">
+            <div
+                class="mx-auto w-20 h-20 bg-red-100 rounded-full flex items-center justify-center">
+                <i class="pi pi-times-circle text-4xl text-red-600"></i>
+            </div>
+        </div>
+
+        <!-- Title -->
+        <h1 class="text-2xl font-semibold text-gray-900 mb-4">
+            {{ 'INVALID_SHARE_KEY.TITLE' | translate }}
+        </h1>
+
+        <!-- Message -->
+        <p class="text-gray-600 mb-6 leading-relaxed">
+            {{ 'INVALID_SHARE_KEY.MESSAGE' | translate }}
+        </p>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col space-y-3">
+            <button
+                (click)="goToLogin()"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                {{ 'INVALID_SHARE_KEY.GO_TO_LOGIN' | translate }}
+            </button>
+            <button
+                (click)="goToLanding()"
+                class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors">
+                {{ 'INVALID_SHARE_KEY.GO_TO_LANDING' | translate }}
+            </button>
+        </div>
+    </div>
+</div>
