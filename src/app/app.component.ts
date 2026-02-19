@@ -4,6 +4,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { AuthService } from './auth/auth.service';
 import { HealthService } from './services/_archive/health.service';
+import { SessionService } from './services/session.service';
 // Archived components - to be migrated back
 // import { ProjectWizardComponent } from './_archive/legacy/project-wizard/project-wizard.component';
 // import { AnalyzeComponent } from './_archive/components/analyze/analyze.component';
@@ -32,7 +33,8 @@ export class AppComponent implements OnDestroy {
     private authService: AuthService,
     // private keyboardShortcutsService: KeyboardShortcutsService, // Archived
     private healthService: HealthService,
-    private router: Router
+    private router: Router,
+    private sessionService: SessionService // Initialize SessionService early to ensure session_id is generated
   ) {
     translate.setDefaultLang('de');
     translate.use('de');

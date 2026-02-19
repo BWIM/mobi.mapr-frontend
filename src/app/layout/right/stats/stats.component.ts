@@ -21,14 +21,23 @@ export class StatsComponent {
   selectedLevel: 'municipality' | 'county' | 'state' = 'county';
 
   constructor() {
-    // React to profile combination changes from MapService to fetch data
+    // React to profile combination changes and map loading state from MapService to fetch data
     effect(() => {
       const profileCombinationID = this.mapService.currentProfileCombinationID();
-      if (profileCombinationID !== null) {
+      const isMapLoading = this.mapService.isMapLoading();
+      
+      // Only load stats when map is ready (not loading) and profile combination is available
+      if (profileCombinationID !== null && !isMapLoading) {
         this.loadTopRankings();
       } else {
-        // Clear data if no profile combination is available
-        this.counties = [];
+        // Clear data if no profile combination is available or map is still loading
+        if (profileCombinationID === null) {
+          this.counties = [];
+        }
+        // Keep loading state if map is still loading
+        if (isMapLoading) {
+          this.isLoading = true;
+        }
       }
     });
   }
@@ -44,7 +53,8 @@ export class StatsComponent {
 
     const params = {
       type: this.selectedLevel,
-      profile_combination_id: profileCombinationID
+      profile_combination_id: profileCombinationID,
+      state_ids: this.mapService.getCurrentFilters()?.state_ids
     };
 
     this.statsService.getTopRankings(params).subscribe({

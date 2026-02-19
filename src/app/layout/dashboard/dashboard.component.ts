@@ -13,6 +13,7 @@ import { ProfileService } from '../../services/profile.service';
 import { MapService, ContentLayerFilters } from '../../services/map.service';
 import { Project } from '../../interfaces/project';
 import { firstValueFrom } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,11 +32,18 @@ export class DashboardComponent {
 
   leftPanelExpanded = signal(true);
   rightPanelExpanded = signal(true);
+  private hasInitialized = false;
 
   constructor() {
     // First check: If user is not logged in and no share_key, redirect to login
     this.route.queryParams
-      .pipe(takeUntilDestroyed())
+      .pipe(
+        takeUntilDestroyed(),
+        distinctUntilChanged((prev, curr) => 
+          prev['project_id'] === curr['project_id'] && 
+          prev['share_key'] === curr['share_key']
+        )
+      )
       .subscribe(async params => {
         const projectId = params['project_id'];
         const shareKey = params['share_key'];
@@ -43,28 +51,57 @@ export class DashboardComponent {
         // Check authentication tokens
         const isLoggedIn = this.authService.isLoggedIn();
 
+        // Check if there's already a project or share key in the session service
+        const existingProjectId = this.dashboardSessionService.getProjectId();
+        const existingShareKey = this.dashboardSessionService.getShareKey();
+
+        // Check current route to prevent redirect loops
+        const currentUrl = this.router.url.split('?')[0];
+
         if (projectId) {
           // User is accessing with project_id (authenticated)
           if (!isLoggedIn) {
             // User has project_id but no auth tokens - redirect to login
-            this.router.navigate(['/login']);
+            if (currentUrl !== '/login') {
+              this.router.navigate(['/login']);
+            }
             return;
           }
           this.dashboardSessionService.setProjectId(projectId);
+          this.hasInitialized = true;
         } else if (shareKey) {
           // User is accessing with share_key (unauthenticated)
           // Validate share key by making preload call with defaults
           await this.validateShareKeyAndPreload(shareKey);
+          this.hasInitialized = true;
+        } else if (existingProjectId) {
+          // No project_id or share_key in query params, but there's one in session
+          // User already has a project selected, allow access
+          // No action needed - session service already has the project
+          this.hasInitialized = true;
+        } else if (existingShareKey) {
+          // No project_id or share_key in query params, but there's a share key in session
+          // User already has a share key, allow access
+          // No action needed - session service already has the share key
+          this.hasInitialized = true;
         } else {
-          // No share_key or project_id provided
-          // If user is not authenticated, redirect to login
-          if (!isLoggedIn) {
-            this.router.navigate(['/login']);
-            return;
+          // No project_id or share_key in query params AND none in session service
+          // Only redirect on initial load, not on subsequent query param changes
+          if (!this.hasInitialized) {
+            if (isLoggedIn) {
+              // User is authenticated but has no project - redirect to users-area to select one
+              if (currentUrl !== '/users-area') {
+                this.router.navigate(['/users-area']);
+              }
+              return;
+            } else {
+              // User is not authenticated and has no share key - redirect to login
+              if (currentUrl !== '/login') {
+                this.router.navigate(['/login']);
+              }
+              return;
+            }
           }
-          // If user is authenticated but no project_id, they should select one from users-area
-          // But we don't redirect here to avoid infinite loops - let them access dashboard
-          // The users-area will be accessible via the rail button
         }
       });
   }
