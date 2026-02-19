@@ -2,6 +2,7 @@ import { Component, inject, effect } from '@angular/core';
 import { ProjectsService } from '../../services/project.service';
 import { ProfileService } from '../../services/profile.service';
 import { MapService, ContentLayerFilters } from '../../services/map.service';
+import { SettingsService } from '../../services/settings.service';
 import { SharedModule } from '../../shared/shared.module';
 import { MatDialog } from '@angular/material/dialog';
 import { FilterDialogComponent, FilterDialogData } from './filter-dialog/filter-dialog.component';
@@ -18,6 +19,7 @@ export class LeftComponent {
   private projectService = inject(ProjectsService);
   private profileService = inject(ProfileService);
   private mapService = inject(MapService);
+  private settingsService = inject(SettingsService);
   private dialog = inject(MatDialog);
 
   // Use the project signal directly - it will reactively update when the project loads
@@ -74,6 +76,8 @@ export class LeftComponent {
       next: (response) => {
         this.allProfiles = response.results;
         this.extractModes();
+        // Load saved settings after modes are loaded
+        this.loadSettings();
         // Update mode selection after modes are loaded
         this.updateModeSelectionFromProject();
       },
@@ -136,9 +140,6 @@ export class LeftComponent {
       }
     });
 
-    // Preselect modes that have base_profiles
-    this.selectedVerkehrsmittel = Array.from(modesInProject);
-
     // Only show modes that are in base_profiles
     this.modeOptions = Array.from(modeMap.values()).map(mode => ({
       id: mode.id,
@@ -146,6 +147,21 @@ export class LeftComponent {
       display_name: mode.display_name,
       icon: this.modeIcons[mode.name.toLowerCase()] || this.modeIcons['default']
     }));
+
+    // If we don't have saved settings, preselect modes that have base_profiles
+    // Otherwise, validate saved settings against available modes
+    if (this.selectedVerkehrsmittel.length === 0) {
+      this.selectedVerkehrsmittel = Array.from(modesInProject);
+    } else {
+      // Filter out any saved modes that are not available in the current project
+      this.selectedVerkehrsmittel = this.selectedVerkehrsmittel.filter(modeId => 
+        modesInProject.has(modeId)
+      );
+      // If all saved modes were invalid, fall back to all available modes
+      if (this.selectedVerkehrsmittel.length === 0) {
+        this.selectedVerkehrsmittel = Array.from(modesInProject);
+      }
+    }
 
     // Update profile combination ID after mode selection is updated
     if (this.allProfileCombinations.length > 0) {
@@ -190,6 +206,7 @@ export class LeftComponent {
 
   toggleSidebar() {
     this.isExpanded = !this.isExpanded;
+    this.saveSettings();
   }
 
   toggleVerkehrsmittel(modeId: number) {
@@ -199,6 +216,8 @@ export class LeftComponent {
     } else {
       this.selectedVerkehrsmittel.push(modeId);
     }
+    // Save settings when mode selection changes
+    this.saveSettings();
     // Update profile combination ID when mode selection changes
     this.updateProfileCombinationID();
     // updateProfileCombinationID already calls updateContentLayer
@@ -210,6 +229,7 @@ export class LeftComponent {
 
   selectMobilitatsbewertung(id: string) {
     this.selectedMobilitatsbewertung = id;
+    this.saveSettings();
     this.updateContentLayer();
   }
 
@@ -239,6 +259,7 @@ export class LeftComponent {
         this.selectedPersonas = result.selectedPersonas || [];
         this.selectedRegioStars = result.selectedRegioStars || [];
         this.selectedStates = result.selectedStates || [];
+        this.saveSettings();
         this.updateContentLayer();
       }
     });
@@ -317,5 +338,47 @@ export class LeftComponent {
         this.mapService.setMapLoading(false);
       }, 500);
     }
+  }
+
+  /**
+   * Load settings from localStorage
+   */
+  private loadSettings(): void {
+    const settings = this.settingsService.loadSettings();
+    if (settings) {
+      this.isExpanded = settings.expanded ?? false;
+      this.selectedMobilitatsbewertung = settings.bewertung ?? 'qualitaet';
+      
+      // Load filter settings
+      if (settings.filters) {
+        this.selectedActivities = settings.filters.activities || [];
+        this.selectedPersonas = settings.filters.personas || [];
+        this.selectedRegioStars = settings.filters.regiostars || [];
+        this.selectedStates = settings.filters.states || [];
+      }
+
+      // Note: verkehrsmittel will be loaded/validated in updateModeSelection
+      // We set it here but it will be validated against available modes
+      if (settings.verkehrsmittel && settings.verkehrsmittel.length > 0) {
+        this.selectedVerkehrsmittel = [...settings.verkehrsmittel];
+      }
+    }
+  }
+
+  /**
+   * Save current settings to localStorage
+   */
+  private saveSettings(): void {
+    this.settingsService.saveSettings({
+      expanded: this.isExpanded,
+      verkehrsmittel: [...this.selectedVerkehrsmittel],
+      bewertung: this.selectedMobilitatsbewertung,
+      filters: {
+        activities: [...this.selectedActivities],
+        personas: [...this.selectedPersonas],
+        regiostars: [...this.selectedRegioStars],
+        states: [...this.selectedStates]
+      }
+    });
   }
 }
