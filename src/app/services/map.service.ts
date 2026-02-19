@@ -343,15 +343,32 @@ export class MapService {
       delete updatedStyle.sources['content-layer'];
     }
 
-    // Remove existing content layer from layers array
+    // Remove existing border layer source and layers if they exist
+    if (updatedStyle.sources['border-layer']) {
+      delete updatedStyle.sources['border-layer'];
+    }
+
+    // Remove existing content and border layers from layers array
     updatedStyle.layers = updatedStyle.layers.filter(
-      layer => layer.id !== 'content-layer-fill' && layer.id !== 'content-layer-outline'
+      layer => layer.id !== 'content-layer-fill' && 
+               layer.id !== 'content-layer-outline' && 
+               layer.id !== 'border-layer'
     );
 
     // Add the new content layer source
     updatedStyle.sources['content-layer'] = {
       type: 'vector',
       tiles: [tileUrl],
+      minzoom: 0,
+      maxzoom: 14,
+      tileSize: 512
+    } as SourceSpecification;
+
+    // Add the border layer source
+    const borderTileUrl = `${environment.apiUrl}/borders/{z}/{x}/{y}.pbf`;
+    updatedStyle.sources['border-layer'] = {
+      type: 'vector',
+      tiles: [borderTileUrl],
       minzoom: 0,
       maxzoom: 14,
       tileSize: 512
@@ -387,6 +404,19 @@ export class MapService {
       }
     } as LayerSpecification);
 
+    // Add border layer (between feature layers and labels)
+    updatedStyle.layers.push({
+      id: 'border-layer',
+      type: 'line',
+      source: 'border-layer',
+      'source-layer': 'borders',
+      paint: {
+        'line-color': fillColorExpression,
+        'line-width': 0.1,
+        'line-opacity': 0.5
+      }
+    } as LayerSpecification);
+
     // Ensure labels layer is on top
     const labelsLayerIndex = updatedStyle.layers.findIndex(layer => layer.id === 'carto-labels-layer');
     if (labelsLayerIndex !== -1) {
@@ -409,9 +439,16 @@ export class MapService {
       delete updatedStyle.sources['content-layer'];
     }
 
-    // Remove content layer from layers array
+    // Remove border layer source
+    if (updatedStyle.sources['border-layer']) {
+      delete updatedStyle.sources['border-layer'];
+    }
+
+    // Remove content and border layers from layers array
     updatedStyle.layers = updatedStyle.layers.filter(
-      layer => layer.id !== 'content-layer-fill' && layer.id !== 'content-layer-outline'
+      layer => layer.id !== 'content-layer-fill' && 
+               layer.id !== 'content-layer-outline' && 
+               layer.id !== 'border-layer'
     );
 
     this._currentProfileCombinationID.set(null);
@@ -433,13 +470,13 @@ export class MapService {
     return [
       'step',
       ['get', 'score'],
-      'rgb(0, 60, 0)',      // < 10 min (deep dark green)
-      600, 'rgb(0, 100, 0)',    // 10-20 min
-      1200, 'rgb(0, 140, 0)',   // 20-30 min
-      1800, 'rgb(133, 218, 133)', // 30-40 min (transition)
-      2400, 'rgb(238, 61, 61)', // 40-50 min
-      3000, 'rgb(201, 0, 0)',   // 50-60 min
-      3600, 'rgb(126, 0, 0)'      // > 60 min (dark red)
+      'rgb(181, 212, 233)',  // b5d4e9
+      600, 'rgb(147, 195, 224)',   // 93c3e0
+      1200, 'rgb(109, 173, 213)',   // 6dadd5
+      1800, 'rgb(75, 151, 201)',  // 4b97c9
+      2400, 'rgb(48, 126, 188)',  // 307ebc
+      3000, 'rgb(24, 100, 170)',  // 1864aa
+      3600, 'rgb(24, 100, 170)'   // 1864aa (same as last for > 60 min)
     ];
   }
 

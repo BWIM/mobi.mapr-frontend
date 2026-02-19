@@ -12,6 +12,7 @@ import { PreparingProjectDialogComponent } from './preparing-project-dialog/prep
   selector: 'app-left',
   imports: [SharedModule],
   templateUrl: './left.component.html',
+  styleUrl: './left.component.css',
 })
 export class LeftComponent {
   private projectService = inject(ProjectsService);
