@@ -35,6 +35,10 @@ export class MapService {
   private _currentProfileCombinationID = signal<number | null>(null);
   readonly currentProfileCombinationID = this._currentProfileCombinationID.asReadonly();
 
+  // Signal to track map loading state
+  private _isMapLoading = signal<boolean>(true);
+  readonly isMapLoading = this._isMapLoading.asReadonly();
+
   constructor() {}
 
   setMap(map: Map): void {
@@ -295,6 +299,13 @@ export class MapService {
     }
 
     return `${baseUrl}?${params.join('&')}`;
+  }
+
+  /**
+   * Sets the map loading state
+   */
+  setMapLoading(loading: boolean): void {
+    this._isMapLoading.set(loading);
   }
 
   /**

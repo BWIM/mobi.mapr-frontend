@@ -268,35 +268,53 @@ export class LeftComponent {
                    (this.selectedRegioStars.length > 1 ? this.selectedRegioStars[0] : undefined)
     };
 
-    // Show preparing dialog (non-closable) before calling ready endpoint
-    const dialogRef = this.dialog.open(PreparingProjectDialogComponent, {
-      width: '400px',
-      disableClose: true,
-      hasBackdrop: true,
-      panelClass: 'preparing-project-dialog-panel'
-    });
+    let dialogRef: any = null;
 
     try {
-      // Call the ready endpoint before loading the map
+      // Call the ready endpoint first to check if project is ready
       console.log('Calling ready endpoint with filters:', filters);
       const readyResponse = await this.mapService.checkReady(filters);
       console.log('Ready endpoint call completed:', readyResponse);
 
-      // If data is not cached, wait for preload via websocket
-      if (!readyResponse.cache_flag && readyResponse.session_id) {
-        console.log('Data not cached, waiting for preload via websocket, session_id:', readyResponse.session_id);
-        await this.mapService.waitForPreload(readyResponse.session_id);
-        console.log('Preload completed via websocket');
+      // Only open dialog if project is not ready (cache_flag is false)
+      if (!readyResponse.cache_flag) {
+        // Show preparing dialog (non-closable) for preloading
+        dialogRef = this.dialog.open(PreparingProjectDialogComponent, {
+          width: '400px',
+          disableClose: true,
+          hasBackdrop: true,
+          panelClass: 'preparing-project-dialog-panel'
+        });
+
+        // Wait for preload via websocket
+        if (readyResponse.session_id) {
+          console.log('Data not cached, waiting for preload via websocket, session_id:', readyResponse.session_id);
+          await this.mapService.waitForPreload(readyResponse.session_id);
+          console.log('Preload completed via websocket');
+        }
+      } else {
+        // Project is ready, show loading indicator on map instead
+        this.mapService.setMapLoading(true);
       }
     } catch (error) {
       console.error('Error checking ready status or waiting for preload:', error);
       // Continue with loading even if ready check fails
     } finally {
-      // Close the dialog
-      dialogRef.close();
+      // Close the dialog if it was opened
+      if (dialogRef) {
+        dialogRef.close();
+      }
     }
 
     // Load the content layer with current filters
     this.mapService.loadContentLayer(filters);
+    
+    // Clear loading state after a short delay to allow map to render
+    const wasLoading = this.mapService.isMapLoading();
+    if (wasLoading) {
+      setTimeout(() => {
+        this.mapService.setMapLoading(false);
+      }, 500);
+    }
   }
 }

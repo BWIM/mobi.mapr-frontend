@@ -1,5 +1,12 @@
 <!-- map.component.html -->
-<div class="rounded-xl overflow-hidden h-full w-full">
+<div class="rounded-xl overflow-hidden h-full w-full relative">
   <div #mapContainer class="h-full w-full rounded-xl"></div>
+  <!-- Loading indicator overlay -->
+  <div class="map-loading-overlay" *ngIf="isMapLoading()">
+    <div class="map-loading-content">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p class="map-loading-text">Loading map data...</p>
+    </div>
+  </div>
 </div>
 

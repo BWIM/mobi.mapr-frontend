@@ -4,11 +4,12 @@ import { Map, NavigationControl, FullscreenControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { MapService } from '../../services/map.service';
 import MinimapControl from "maplibregl-minimap";
+import { SharedModule } from '../../shared/shared.module';
 
 
 @Component({
   selector: 'app-center',
-  imports: [],
+  imports: [SharedModule],
   templateUrl: './center.component.html',
   styleUrl: './center.component.css',
 })
@@ -21,6 +22,10 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   center: [number, number] = [9.2156505, 49.320099];
 
   constructor(private mapService: MapService) {}
+
+  get isMapLoading() {
+    return this.mapService.isMapLoading;
+  }
 
   async ngOnInit() {
     // Get initial style value immediately
