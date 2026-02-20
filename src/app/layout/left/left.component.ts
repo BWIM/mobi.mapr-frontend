@@ -42,12 +42,36 @@ export class LeftComponent {
     this.filterConfigService.toggleSidebar();
   }
 
+  setSidebarExpanded(expanded: boolean) {
+    this.filterConfigService.setSidebarExpanded(expanded);
+  }
+
   toggleVerkehrsmittel(modeId: number) {
+    // Find the mode option to check if it's pedestrian
+    const modeOption = this.modeOptions().find(option => option.id === modeId);
+    
+    // Prevent deselecting pedestrian mode if it's currently selected
+    if (modeOption && modeOption.name.toLowerCase() === 'pedestrian' && this.isSelected(modeId)) {
+      return; // Don't allow deselecting pedestrian mode
+    }
+    
     this.filterConfigService.toggleMode(modeId);
   }
 
   isSelected(modeId: number): boolean {
     return this.filterConfigService.isModeSelected(modeId);
+  }
+
+  isPedestrianMode(modeId: number): boolean {
+    const modeOption = this.modeOptions().find(option => option.id === modeId);
+    return modeOption?.name.toLowerCase() === 'pedestrian';
+  }
+
+  getModeTooltip(option: { id: number; display_name: string }): string {
+    if (this.isPedestrianMode(option.id) && this.isSelected(option.id)) {
+      return `${option.display_name} - Kann nicht deaktiviert werden`;
+    }
+    return option.display_name;
   }
 
   selectMobilitatsbewertung(bewertung: 'qualitaet' | 'zeit') {

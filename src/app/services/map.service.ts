@@ -6,7 +6,6 @@ import { AuthService } from '../auth/auth.service';
 import { DashboardSessionService } from './dashboard-session.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { WebsocketService } from './websocket.service';
-import { WebSocketSubject } from 'rxjs/webSocket';
 
 export interface ContentLayerFilters {
   profile_combination_id: number | null;

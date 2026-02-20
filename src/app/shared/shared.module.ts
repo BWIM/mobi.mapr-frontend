@@ -11,7 +11,9 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
-import { MatSidenavModule } from '@angular/material/sidenav';  
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';  
 
 
 
@@ -31,6 +33,8 @@ import { MatSidenavModule } from '@angular/material/sidenav';
     MatProgressSpinnerModule,
     MatTabsModule,
     MatSidenavModule,
+    MatSelectModule,
+    MatFormFieldModule,
   ],
   exports: [
     MatDialogModule,
@@ -47,6 +51,8 @@ import { MatSidenavModule } from '@angular/material/sidenav';
     MatProgressSpinnerModule,
     MatTabsModule,
     MatSidenavModule,
+    MatSelectModule,
+    MatFormFieldModule,
   ],
   providers: []
 })

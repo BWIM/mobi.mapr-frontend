@@ -4,6 +4,7 @@ export interface UserSettings {
   expanded: boolean;
   verkehrsmittel: number[];
   bewertung: string | null;
+  statsLevel?: 'municipality' | 'county' | 'state';
   filters: {
     activities: number[];
     personas: number[];
@@ -54,6 +55,7 @@ export class SettingsService {
       expanded: false,
       verkehrsmittel: [],
       bewertung: 'qualitaet',
+      statsLevel: 'county',
       filters: {
         activities: [],
         personas: [],

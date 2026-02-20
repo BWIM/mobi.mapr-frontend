@@ -5,15 +5,25 @@
     </div>
   } @else {
     <div class="text-2xl font-semibold text-[var(--primary-color)] mb-4 pt-[6rem]">{{ project()?.display_name }}</div>
-    <div class="flex items-center justify-end gap-2 mb-4">
+    <div class="flex items-center justify-end gap-2 mb-4 relative mr-4">
       <span class="text-sm text-[var(--primary-color)]">erweiterter Modus</span>
       <button 
-        class="w-7 h-7 rounded-full bg-[var(--secondary-color)] text-[var(--primary-color)] border-none cursor-pointer flex items-center justify-center transition-all duration-200 text-sm hover:opacity-80 hover:scale-105" 
+        class="w-7 h-7 rounded-full bg-[var(--background-color)] text-[var(--primary-color)] border-none cursor-pointer flex items-center justify-center transition-all duration-200 text-sm hover:opacity-80 hover:scale-105" 
         title="Information"
         (click)="openDialog()">
-        <span class="material-icons text-sm leading-none">info</span>
+        <span class="material-icons text-sm leading-none text-[var(--primary-color)]">info</span>
       </button>
-      <mat-slide-toggle [checked]="isExpanded()" (change)="toggleSidebar()" class="pill-toggle"></mat-slide-toggle>
+      <button 
+        class="relative w-10 h-5 border border-[var(--light-primary-color)] rounded-full bg-[var(--secondary-color)] cursor-pointer transition-all duration-200 overflow-hidden"
+        [style.background-color]="isExpanded() ? 'var(--primary-color)' : 'var(--secondary-color)'"
+        (click)="toggleSidebar()"
+        [title]="isExpanded() ? 'Erweitert' : 'Normal'">
+        <div 
+          class="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[var(--light-primary-color)] transition-all duration-200"
+          [style.left]="isExpanded() ? 'calc(100% - 1.125rem)' : '0.125rem'"
+          [style.background-color]="isExpanded() ? 'var(--secondary-color)' : 'var(--light-primary-color)'">
+        </div>
+      </button>
     </div>
     <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4 relative">
       <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">Verkehrsmittel</h2>
@@ -21,13 +31,18 @@
         <div class="flex items-center gap-2">
           @for (option of modeOptions(); track option.id) {
             <button 
-              mat-icon-button 
-              [class.selected]="isSelected(option.id)"
+              class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200"
+              [style.background-color]="isSelected(option.id) ? 'var(--primary-color)' : 'var(--secondary-color)'"
+              [style.border]="!isSelected(option.id) ? '1px solid var(--light-primary-color)' : 'none'"
               (click)="toggleVerkehrsmittel(option.id)"
               [attr.aria-label]="option.display_name"
               [attr.aria-pressed]="isSelected(option.id)"
-              [title]="option.display_name">
-              <mat-icon>{{ option.icon }}</mat-icon>
+              [title]="getModeTooltip(option)">
+              <mat-icon 
+                class="text-base leading-none"
+                [style.color]="isSelected(option.id) ? 'var(--background-color)' : 'var(--light-primary-color)'">
+                {{ option.icon }}
+              </mat-icon>
             </button>
           }
         </div>
@@ -54,20 +69,24 @@
     <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4 relative">
       <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">Mobilitätsbewertung</h2>
       <div class="flex flex-col gap-2">
-        <div class="flex border border-[var(--primary-color)] rounded-lg overflow-hidden bg-[var(--background-color)] w-fit">
+        <div class="flex border border-[var(--light-primary-color)] rounded-full overflow-hidden bg-[var(--secondary-color)] w-fit">
           <button 
-            class="flex-1 px-4 py-2 border-none border-r border-[var(--primary-color)] text-sm font-medium cursor-pointer transition-all duration-200"
-            [style.background-color]="isMobilitatsbewertungSelected('zeit') ? 'var(--primary-color)' : 'var(--background-color)'"
-            [style.color]="isMobilitatsbewertungSelected('zeit') ? 'var(--background-color)' : 'var(--primary-color)'"
+            class="flex-1 px-8 py-1 border-none border-r border-[var(--light-primary-color)] text-sm cursor-pointer transition-all duration-200 rounded-l-full"
+            [class.font-medium]="isMobilitatsbewertungSelected('zeit')"
+            [class.font-light]="!isMobilitatsbewertungSelected('zeit')"
+            [style.background-color]="isMobilitatsbewertungSelected('zeit') ? 'var(--primary-color)' : 'var(--secondary-color)'"
+            [style.color]="isMobilitatsbewertungSelected('zeit') ? 'var(--secondary-color)' : 'var(--light-primary-color)'"
             [class.hover:opacity-100]="isMobilitatsbewertungSelected('zeit')"
             [class.hover:opacity-80]="!isMobilitatsbewertungSelected('zeit')"
             (click)="selectMobilitatsbewertung('zeit')">
             Zeit
           </button>
           <button 
-            class="flex-1 px-4 py-2 border-none text-sm font-medium cursor-pointer transition-all duration-200"
-            [style.background-color]="isMobilitatsbewertungSelected('qualitaet') ? 'var(--primary-color)' : 'var(--background-color)'"
-            [style.color]="isMobilitatsbewertungSelected('qualitaet') ? 'var(--background-color)' : 'var(--primary-color)'"
+            class="flex-1 px-8 py-1 border-none text-sm cursor-pointer transition-all duration-200 rounded-r-full"
+            [class.font-medium]="isMobilitatsbewertungSelected('qualitaet')"
+            [class.font-light]="!isMobilitatsbewertungSelected('qualitaet')"
+            [style.background-color]="isMobilitatsbewertungSelected('qualitaet') ? 'var(--primary-color)' : 'var(--secondary-color)'"
+            [style.color]="isMobilitatsbewertungSelected('qualitaet') ? 'var(--secondary-color)' : 'var(--light-primary-color)'"
             [class.hover:opacity-100]="isMobilitatsbewertungSelected('qualitaet')"
             [class.hover:opacity-80]="!isMobilitatsbewertungSelected('qualitaet')"
             (click)="selectMobilitatsbewertung('qualitaet')">
@@ -105,24 +124,30 @@
       <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4 relative" >
         <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">Aktive Filter</h2>
         @if (project()?.is_mid) {
-          <div class="flex flex-col gap-2"  >
-            Aktivitäten ({{ selectedActivities().length }} / 10)
+          <div class="flex items-center gap-2"  >
+            <span class="text-base font-bold text-[var(--primary-color)]">Aktivitäten</span>
+            <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedActivities().length }} / 10)</span>
           </div>
-          <div class="flex flex-col gap-2">
-            Personas ({{ selectedPersonas().length }} / 11)
+          <div class="flex items-center gap-2">
+            <span class="text-base font-bold text-[var(--primary-color)]">Personas</span>
+            <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedPersonas().length }} / 11)</span>
           </div>
         }
-        <div class="flex flex-col gap-2">
-          RegioStars ({{ selectedRegioStars().length }} / 7)
+        <div class="flex items-center gap-2">
+          <span class="text-base font-bold text-[var(--primary-color)]">RegioStars</span>
+          <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedRegioStars().length }} / 7)</span>
         </div>
-        <div class="flex flex-col gap-2">
-          States ({{ selectedStates().length }} / 16)
+        <div class="flex items-center gap-2">
+          <span class="text-base font-bold text-[var(--primary-color)]">States</span>
+          <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedStates().length }} / 16)</span>
         </div>
 
-        <div class="flex flex-col gap-2">
-          <button class="text-primary-color" (click)="openFilterDialog()">
-            <mat-icon>filter_list</mat-icon>
+        <div class="flex flex-col gap-2 items-center">
+          <button 
+            class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full border transition-all duration-200 w-fit bg-[var(--primary-color)] text-[var(--background-color)] border-[var(--background-color)] font-bold"
+            (click)="openFilterDialog()">
             Filtern
+            <mat-icon class="text-base leading-none">tune</mat-icon>
           </button>
         </div>
         <app-info-overlay>

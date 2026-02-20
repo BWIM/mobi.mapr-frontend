@@ -3,6 +3,7 @@ import { County } from '../../../interfaces/features';
 import { StatsService } from '../../../services/stats.service';
 import { FilterConfigService } from '../../../services/filter-config.service';
 import { MapService } from '../../../services/map.service';
+import { SettingsService } from '../../../services/settings.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { InfoOverlayComponent } from '../../../shared/info-overlay/info-overlay.component';
 
@@ -10,20 +11,30 @@ import { InfoOverlayComponent } from '../../../shared/info-overlay/info-overlay.
   selector: 'app-stats',
   imports: [SharedModule, InfoOverlayComponent],
   templateUrl: './stats.component.html',
+  styleUrl: './stats.component.css',
 })
 export class StatsComponent {
   private statsService = inject(StatsService);
   private filterConfigService = inject(FilterConfigService);
   private mapService = inject(MapService);
+  private settingsService = inject(SettingsService);
 
   counties: County[] = [];
   isLoading = true;
   error: string | null = null;
   
-  // Level selection - hardcoded to county for now (user will implement level selection later)
+  // Level selection options
+  levelOptions = [
+    { value: 'state' as const, label: 'Bundesländer' },
+    { value: 'county' as const, label: 'Landkreise' },
+    { value: 'municipality' as const, label: 'Gemeinden' }
+  ];
+  
   selectedLevel: 'municipality' | 'county' | 'state' = 'county';
 
   constructor() {
+    // Load saved level selection from localStorage
+    this.loadSavedLevel();
     // React to profile combination changes and map loading state to fetch data
     effect(() => {
       const profileCombinationID = this.filterConfigService.currentProfileCombinationID();
@@ -43,6 +54,46 @@ export class StatsComponent {
         }
       }
     });
+  }
+
+  onLevelChange(newLevel: 'municipality' | 'county' | 'state'): void {
+    this.selectedLevel = newLevel;
+    // Save the selection to localStorage
+    this.saveLevel();
+    // Trigger new API call when level changes
+    const profileCombinationID = this.filterConfigService.currentProfileCombinationID();
+    const isMapLoading = this.mapService.isMapLoading();
+    
+    if (profileCombinationID !== null && !isMapLoading) {
+      this.loadTopRankings();
+    }
+  }
+
+  /**
+   * Load saved level selection from localStorage
+   */
+  private loadSavedLevel(): void {
+    const settings = this.settingsService.loadSettings();
+    if (settings?.statsLevel) {
+      // Validate that the saved level is one of the valid options
+      const validLevels: ('municipality' | 'county' | 'state')[] = ['municipality', 'county', 'state'];
+      if (validLevels.includes(settings.statsLevel)) {
+        this.selectedLevel = settings.statsLevel;
+      }
+    }
+  }
+
+  /**
+   * Save current level selection to localStorage
+   */
+  private saveLevel(): void {
+    this.settingsService.saveSettings({
+      statsLevel: this.selectedLevel
+    });
+  }
+
+  get selectedLevelLabel(): string {
+    return this.levelOptions.find(opt => opt.value === this.selectedLevel)?.label || 'Landkreise';
   }
 
   private loadTopRankings(): void {
@@ -103,7 +154,7 @@ export class StatsComponent {
       return county.score.toFixed(2);
     } else {
       // For index, show the rating letter grade
-      return this.getRating(county.index);
+      return this.getRating(county.index / 100) as string;
     }
   }
 

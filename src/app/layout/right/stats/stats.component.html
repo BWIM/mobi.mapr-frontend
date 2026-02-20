@@ -1,7 +1,19 @@
 <mat-drawer-container class="h-full  rounded-2xl" [hasBackdrop]="true">
   <mat-drawer-content>
     <div class="h-full p-4 bg-[var(--background-color)] text-[var(--primary-color)] relative flex flex-col">
-      <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2 leading-6">Top 10 Landkreise</h2>
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-lg font-semibold text-[var(--primary-color)] leading-6">Top 10</h2>
+        <mat-form-field appearance="outline" class="level-selector">
+          <mat-select 
+            [value]="selectedLevel" 
+            (selectionChange)="onLevelChange($event.value)"
+            class="text-[var(--primary-color)]">
+            <mat-option *ngFor="let option of levelOptions" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
 
       <div *ngIf="isLoading" class="flex-1 flex items-center justify-center text-[var(--primary-color)]">
         <p>Laden...</p>
@@ -45,7 +57,7 @@
           <div>
             <h3 class="font-semibold mb-2">About the Data</h3>
             <p class="text-sm opacity-90">
-              The data shown represents the top 10 Landkreise (counties) based on the selected filters and evaluation criteria.
+              The data shown represents the top 10 rankings based on the selected level (Bundesländer, Landkreise, or Gemeinden) and the current filters and evaluation criteria.
             </p>
           </div>
         </div>
