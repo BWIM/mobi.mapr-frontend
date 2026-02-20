@@ -126,20 +126,20 @@
         @if (project()?.is_mid) {
           <div class="flex items-center gap-2"  >
             <span class="text-base font-bold text-[var(--primary-color)]">Aktivitäten</span>
-            <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedActivities().length }} / 10)</span>
+            <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedActivities().length }} / {{ allActivities().length }})</span>
           </div>
           <div class="flex items-center gap-2">
             <span class="text-base font-bold text-[var(--primary-color)]">Personas</span>
-            <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedPersonas().length }} / 11)</span>
+            <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedPersonas().length }} / {{ allPersonas().length }})</span>
           </div>
         }
         <div class="flex items-center gap-2">
           <span class="text-base font-bold text-[var(--primary-color)]">RegioStars</span>
-          <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedRegioStars().length }} / 7)</span>
+          <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedRegioStars().length }} / {{ allRegioStars().length }})</span>
         </div>
         <div class="flex items-center gap-2">
           <span class="text-base font-bold text-[var(--primary-color)]">States</span>
-          <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedStates().length }} / 16)</span>
+          <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedStates().length }} / {{ allStates().length }})</span>
         </div>
 
         <div class="flex flex-col gap-2 items-center">

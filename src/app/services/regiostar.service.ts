@@ -19,10 +19,10 @@ export class RegioStarService {
       .set('page', page.toString())
       .set('page_size', pageSize.toString());
 
-    return this.http.get<PaginatedResponse<RegioStar>>(`${this.apiUrl}/regiostars/`, { params });
+    return this.http.get<PaginatedResponse<RegioStar>>(`${this.apiUrl}/regiostar/`, { params });
   }
 
   getRegioStarById(id: number): Observable<RegioStar> {
-    return this.http.get<RegioStar>(`${this.apiUrl}/regiostars/${id}/`);
+    return this.http.get<RegioStar>(`${this.apiUrl}/regiostar/${id}/`);
   }
 }

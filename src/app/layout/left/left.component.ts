@@ -30,6 +30,10 @@ export class LeftComponent {
   selectedPersonas = this.filterConfigService.selectedPersonas;
   selectedRegioStars = this.filterConfigService.selectedRegioStars;
   selectedStates = this.filterConfigService.selectedStates;
+  allActivities = this.filterConfigService.allActivities;
+  allPersonas = this.filterConfigService.allPersonas;
+  allRegioStars = this.filterConfigService.allRegioStars;
+  allStates = this.filterConfigService.allStates;
 
   constructor() {
     // Initialize project if not already initialized

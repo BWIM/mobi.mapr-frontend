@@ -5,26 +5,42 @@
 
   <mat-dialog-content class="mat-typography">
     <mat-tab-group>
-      <!-- Activities Tab -->
+      <!-- Categories Tab (labeled as Activities) -->
       <mat-tab *ngIf="is_mid" label="Aktivitäten">
         <div class="tab-content">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">Aktivitäten ({{ selectedActivities.size }} / {{ activities.length }})</h3>
-            <button mat-button (click)="selectAllActivities()" class="text-sm">
-              {{ selectedActivities.size === activities.length ? 'Alle abwählen' : 'Alle auswählen' }}
+            <h3 class="text-lg font-semibold">Aktivitäten ({{ selectedActivities.size }} / {{ categoriesLength }})</h3>
+            <button mat-button (click)="selectAllCategories()" class="text-sm">
+              {{ selectedActivities.size === categoriesLength ? 'Alle abwählen' : 'Alle auswählen' }}
             </button>
           </div>
-          <div *ngIf="loading.activities" class="flex justify-center items-center py-8">
-            <mat-spinner diameter="40"></mat-spinner>
-          </div>
-          <div *ngIf="!loading.activities" class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
-            <div *ngFor="let activity of activities" class="flex items-center">
-              <mat-checkbox
-                [checked]="isActivitySelected(activity.id)"
-                (change)="toggleActivity(activity.id)"
-                class="w-full">
-                {{ activity.display_name || activity.name }}
-              </mat-checkbox>
+          <div class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
+            <div *ngFor="let group of groupedCategories()" class="border-b border-gray-200 pb-2 mb-2">
+              <div class="flex items-center">
+                <button 
+                  mat-icon-button 
+                  (click)="toggleCategoryGroupExpanded(group.wegezweck)"
+                  class="mr-2">
+                  <mat-icon>{{ isCategoryGroupExpanded(group.wegezweck) ? 'expand_more' : 'chevron_right' }}</mat-icon>
+                </button>
+                <mat-checkbox
+                  [checked]="getCategoryGroupState(group.wegezweck) === 'all'"
+                  [indeterminate]="getCategoryGroupState(group.wegezweck) === 'some'"
+                  (change)="toggleCategoryGroup(group.wegezweck)"
+                  class="flex-1">
+                  {{ group.wegezweck }}
+                </mat-checkbox>
+              </div>
+              <div *ngIf="isCategoryGroupExpanded(group.wegezweck)" class="ml-10 mt-2 space-y-1">
+                <div *ngFor="let category of group.categories" class="flex items-center">
+                  <mat-checkbox
+                    [checked]="isCategorySelected(category.id)"
+                    (change)="toggleCategory(category.id)"
+                    class="w-full">
+                    {{ category.display_name || category.name }}
+                  </mat-checkbox>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -34,16 +50,13 @@
       <mat-tab *ngIf="is_mid" label="Personas">
         <div class="tab-content">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">Personas ({{ selectedPersonas.size }} / {{ personas.length }})</h3>
+            <h3 class="text-lg font-semibold">Personas ({{ selectedPersonas.size }} / {{ personasLength }})</h3>
             <button mat-button (click)="selectAllPersonas()" class="text-sm">
-              {{ selectedPersonas.size === personas.length ? 'Alle abwählen' : 'Alle auswählen' }}
+              {{ selectedPersonas.size === personasLength ? 'Alle abwählen' : 'Alle auswählen' }}
             </button>
           </div>
-          <div *ngIf="loading.personas" class="flex justify-center items-center py-8">
-            <mat-spinner diameter="40"></mat-spinner>
-          </div>
-          <div *ngIf="!loading.personas" class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
-            <div *ngFor="let persona of personas" class="flex items-center">
+          <div class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
+            <div *ngFor="let persona of personas()" class="flex items-center">
               <mat-checkbox
                 [checked]="isPersonaSelected(persona.id)"
                 (change)="togglePersona(persona.id)"
@@ -59,22 +72,38 @@
       <mat-tab label="RegioStars">
         <div class="tab-content">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">RegioStars ({{ selectedRegioStars.size }} / {{ regiostars.length }})</h3>
+            <h3 class="text-lg font-semibold">RegioStars ({{ selectedRegioStars.size }} / {{ regiostarsLength }})</h3>
             <button mat-button (click)="selectAllRegioStars()" class="text-sm">
-              {{ selectedRegioStars.size === regiostars.length ? 'Alle abwählen' : 'Alle auswählen' }}
+              {{ selectedRegioStars.size === regiostarsLength ? 'Alle abwählen' : 'Alle auswählen' }}
             </button>
           </div>
-          <div *ngIf="loading.regiostars" class="flex justify-center items-center py-8">
-            <mat-spinner diameter="40"></mat-spinner>
-          </div>
-          <div *ngIf="!loading.regiostars" class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
-            <div *ngFor="let regiostar of regiostars" class="flex items-center">
-              <mat-checkbox
-                [checked]="isRegioStarSelected(regiostar.id)"
-                (change)="toggleRegioStar(regiostar.id)"
-                class="w-full">
-                {{ regiostar.name }}
-              </mat-checkbox>
+          <div class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
+            <div *ngFor="let group of groupedRegioStars()" class="border-b border-gray-200 pb-2 mb-2">
+              <div class="flex items-center">
+                <button 
+                  mat-icon-button 
+                  (click)="toggleRegioStarGroupExpanded(group.class_name)"
+                  class="mr-2">
+                  <mat-icon>{{ isRegioStarGroupExpanded(group.class_name) ? 'expand_more' : 'chevron_right' }}</mat-icon>
+                </button>
+                <mat-checkbox
+                  [checked]="getRegioStarGroupState(group.class_name) === 'all'"
+                  [indeterminate]="getRegioStarGroupState(group.class_name) === 'some'"
+                  (change)="toggleRegioStarGroup(group.class_name)"
+                  class="flex-1">
+                  {{ group.class_name }}
+                </mat-checkbox>
+              </div>
+              <div *ngIf="isRegioStarGroupExpanded(group.class_name)" class="ml-10 mt-2 space-y-1">
+                <div *ngFor="let regiostar of group.regiostars" class="flex items-center">
+                  <mat-checkbox
+                    [checked]="isRegioStarSelected(regiostar.id)"
+                    (change)="toggleRegioStar(regiostar.id)"
+                    class="w-full">
+                    {{ regiostar.name }}
+                  </mat-checkbox>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -84,16 +113,13 @@
       <mat-tab label="States">
         <div class="tab-content">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">States ({{ selectedStates.size }} / {{ states.length }})</h3>
+            <h3 class="text-lg font-semibold">States ({{ selectedStates.size }} / {{ statesLength }})</h3>
             <button mat-button (click)="selectAllStates()" class="text-sm">
-              {{ selectedStates.size === states.length ? 'Alle abwählen' : 'Alle auswählen' }}
+              {{ selectedStates.size === statesLength ? 'Alle abwählen' : 'Alle auswählen' }}
             </button>
           </div>
-          <div *ngIf="loading.states" class="flex justify-center items-center py-8">
-            <mat-spinner diameter="40"></mat-spinner>
-          </div>
-          <div *ngIf="!loading.states" class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
-            <div *ngFor="let state of states" class="flex items-center">
+          <div class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
+            <div *ngFor="let state of states()" class="flex items-center">
               <mat-checkbox
                 [checked]="isStateSelected(state.id)"
                 (change)="toggleState(state.id)"

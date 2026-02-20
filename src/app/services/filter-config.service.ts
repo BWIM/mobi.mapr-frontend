@@ -7,6 +7,17 @@ import { Profile, Mode, ProfileCombination } from '../interfaces/profile';
 import { MatDialog } from '@angular/material/dialog';
 import { FilterDialogComponent, FilterDialogData } from '../layout/left/filter-dialog/filter-dialog.component';
 import { PreparingProjectDialogComponent } from '../layout/left/preparing-project-dialog/preparing-project-dialog.component';
+import { ActivityService } from './activity.service';
+import { PersonaService } from './persona.service';
+import { RegioStarService } from './regiostar.service';
+import { StateService } from './state.service';
+import { CategoryService } from './category.service';
+import { Activity } from '../interfaces/activity';
+import { Persona } from '../interfaces/persona';
+import { RegioStar } from '../interfaces/regiostar';
+import { Category } from '../interfaces/category';
+import { State } from '../interfaces/features';
+import { forkJoin } from 'rxjs';
 
 export interface FilterState {
   // UI state
@@ -34,6 +45,11 @@ export class FilterConfigService {
   private settingsService = inject(SettingsService);
   private mapService = inject(MapService);
   private dialog = inject(MatDialog);
+  private activityService = inject(ActivityService);
+  private personaService = inject(PersonaService);
+  private regiostarService = inject(RegioStarService);
+  private stateService = inject(StateService);
+  private categoryService = inject(CategoryService);
 
   // Internal state signals
   private _isExpanded = signal<boolean>(false);
@@ -50,6 +66,13 @@ export class FilterConfigService {
   private _allProfileCombinations = signal<ProfileCombination[]>([]);
   private _modeOptions = signal<Array<{ id: number; name: string; display_name: string; icon: string }>>([]);
 
+  // Filter data
+  private _allActivities = signal<Activity[]>([]);
+  private _allCategories = signal<Category[]>([]);
+  private _allPersonas = signal<Persona[]>([]);
+  private _allRegioStars = signal<RegioStar[]>([]);
+  private _allStates = signal<State[]>([]);
+
   // Public readonly signals
   readonly isExpanded = this._isExpanded.asReadonly();
   readonly selectedModes = this._selectedModes.asReadonly();
@@ -62,6 +85,60 @@ export class FilterConfigService {
   readonly allModes = this._allModes.asReadonly();
   readonly allProfiles = this._allProfiles.asReadonly();
   readonly allProfileCombinations = this._allProfileCombinations.asReadonly();
+  readonly allActivities = this._allActivities.asReadonly();
+  readonly allCategories = this._allCategories.asReadonly();
+  readonly allPersonas = this._allPersonas.asReadonly();
+  readonly allRegioStars = this._allRegioStars.asReadonly();
+  readonly allStates = this._allStates.asReadonly();
+
+  // Grouped data for nested selects
+  readonly groupedCategories = computed(() => {
+    const categories = this._allCategories();
+    const grouped = new Map<string, Category[]>();
+    
+    categories.forEach(category => {
+      const key = (category.wegezweck && String(category.wegezweck)) || 'Other';
+      if (!grouped.has(key)) {
+        grouped.set(key, []);
+      }
+      grouped.get(key)!.push(category);
+    });
+    
+    return Array.from(grouped.entries()).map(([wegezweck, items]) => ({
+      wegezweck,
+      categories: items.sort((a, b) => {
+        const aName = (a.display_name || a.name || '');
+        const bName = (b.display_name || b.name || '');
+        return aName.localeCompare(bName);
+      })
+    })).sort((a, b) => {
+      const aName = a.wegezweck || '';
+      const bName = b.wegezweck || '';
+      return aName.localeCompare(bName);
+    });
+  });
+
+  readonly groupedRegioStars = computed(() => {
+    const regiostars = this._allRegioStars();
+    const grouped = new Map<string, RegioStar[]>();
+    
+    regiostars.forEach(regiostar => {
+      const key = (regiostar.class_name && String(regiostar.class_name)) || 'Other';
+      if (!grouped.has(key)) {
+        grouped.set(key, []);
+      }
+      grouped.get(key)!.push(regiostar);
+    });
+    
+    return Array.from(grouped.entries()).map(([class_name, items]) => ({
+      class_name,
+      regiostars: items.sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+    })).sort((a, b) => {
+      const aName = a.class_name || '';
+      const bName = b.class_name || '';
+      return aName.localeCompare(bName);
+    });
+  });
 
   // Computed signal for current profile combination ID
   readonly currentProfileCombinationID = computed(() => {
@@ -138,11 +215,17 @@ export class FilterConfigService {
     this.loadProfilesAndModes();
     this.loadProfileCombinations();
 
-    // React to project changes to update mode selection
+    // React to project changes to load all filter data and update mode selection
     effect(() => {
       const currentProject = this.projectService.project();
-      if (currentProject && this._allProfiles().length > 0) {
-        this.updateModeSelection(currentProject.base_profiles);
+      if (currentProject) {
+        // Load all filter data when project is loaded
+        this.loadAllFilterData(currentProject.is_mid);
+        
+        // Update mode selection if profiles are already loaded
+        if (this._allProfiles().length > 0) {
+          this.updateModeSelection(currentProject.base_profiles);
+        }
       }
     });
 
@@ -192,6 +275,109 @@ export class FilterConfigService {
         console.error('Error loading profile combinations:', error);
       }
     });
+  }
+
+  /**
+   * Load all filter data (RegioStars, States, Categories and Personas if mid)
+   */
+  private loadAllFilterData(isMid: boolean): void {
+    // Always load RegioStars and States
+    const regiostars$ = this.regiostarService.getRegioStars(1, 100);
+    const states$ = this.stateService.getStates(1, 100);
+
+    if (isMid) {
+      // Load Categories and Personas only if mid
+      const categories$ = this.categoryService.getCategories(1, 100);
+      const personas$ = this.personaService.getPersonas(1, 100);
+
+      forkJoin({
+        regiostars: regiostars$,
+        states: states$,
+        categories: categories$,
+        personas: personas$
+      }).subscribe({
+        next: (responses) => {
+          this._allRegioStars.set(responses.regiostars.results);
+          this._allStates.set(responses.states.results);
+          this._allCategories.set(responses.categories.results);
+          this._allPersonas.set(responses.personas.results);
+
+          // Preselect all items
+          this.preselectAllRegioStars();
+          this.preselectAllStates();
+          this.preselectAllCategories();
+          this.preselectAllPersonas();
+        },
+        error: (error) => {
+          console.error('Error loading filter data:', error);
+        }
+      });
+    } else {
+      // Load only RegioStars and States if not mid
+      forkJoin({
+        regiostars: regiostars$,
+        states: states$
+      }).subscribe({
+        next: (responses) => {
+          this._allRegioStars.set(responses.regiostars.results);
+          this._allStates.set(responses.states.results);
+
+          // Preselect all RegioStars and States
+          this.preselectAllRegioStars();
+          this.preselectAllStates();
+
+          // Clear categories, activities and personas if not mid
+          this._allCategories.set([]);
+          this._allActivities.set([]);
+          this._allPersonas.set([]);
+          this._selectedActivities.set([]);
+          this._selectedPersonas.set([]);
+        },
+        error: (error) => {
+          console.error('Error loading filter data:', error);
+        }
+      });
+    }
+  }
+
+  /**
+   * Preselect all categories
+   */
+  private preselectAllCategories(): void {
+    const allCategoryIds = this._allCategories().map(c => c.id);
+    this._selectedActivities.set([...allCategoryIds]);
+  }
+
+  /**
+   * Preselect all activities
+   */
+  private preselectAllActivities(): void {
+    const allActivityIds = this._allActivities().map(a => a.id);
+    this._selectedActivities.set([...allActivityIds]);
+  }
+
+  /**
+   * Preselect all personas
+   */
+  private preselectAllPersonas(): void {
+    const allPersonaIds = this._allPersonas().map(p => p.id);
+    this._selectedPersonas.set([...allPersonaIds]);
+  }
+
+  /**
+   * Preselect all regiostars
+   */
+  private preselectAllRegioStars(): void {
+    const allRegioStarIds = this._allRegioStars().map(r => r.id);
+    this._selectedRegioStars.set([...allRegioStarIds]);
+  }
+
+  /**
+   * Preselect all states
+   */
+  private preselectAllStates(): void {
+    const allStateIds = this._allStates().map(s => s.id);
+    this._selectedStates.set([...allStateIds]);
   }
 
   /**
@@ -370,6 +556,7 @@ export class FilterConfigService {
       }
     });
   }
+
 
   /**
    * Update map layer with current filters
