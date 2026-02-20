@@ -10,13 +10,13 @@
       <button mat-icon-button class="info-button" [attr.aria-label]="'Info'">
         <mat-icon>info</mat-icon>
       </button>
-      <mat-slide-toggle [checked]="isExpanded" (change)="toggleSidebar()" class="pill-toggle"></mat-slide-toggle>
+      <mat-slide-toggle [checked]="isExpanded()" (change)="toggleSidebar()" class="pill-toggle"></mat-slide-toggle>
     </div>
     <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4">
       <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">Verkehrsmittel</h2>
       <div class="flex flex-col gap-2">
         <div class="flex items-center gap-2">
-          @for (option of modeOptions; track option.id) {
+          @for (option of modeOptions(); track option.id) {
             <button 
               mat-icon-button 
               [class.selected]="isSelected(option.id)"
@@ -56,22 +56,22 @@
       </div>
     </div>
 
-    @if (isExpanded) {
+    @if (isExpanded()) {
       <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4" >
         <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">Aktive Filter</h2>
         @if (project()?.is_mid) {
           <div class="flex flex-col gap-2"  >
-            Aktivitäten ({{ selectedActivities.length }} / 10)
+            Aktivitäten ({{ selectedActivities().length }} / 10)
           </div>
           <div class="flex flex-col gap-2">
-            Personas ({{ selectedPersonas.length }} / 11)
+            Personas ({{ selectedPersonas().length }} / 11)
           </div>
         }
         <div class="flex flex-col gap-2">
-          RegioStars ({{ selectedRegioStars.length }} / 7)
+          RegioStars ({{ selectedRegioStars().length }} / 7)
         </div>
         <div class="flex flex-col gap-2">
-          States ({{ selectedStates.length }} / 16)
+          States ({{ selectedStates().length }} / 16)
         </div>
 
         <div class="flex flex-col gap-2">

@@ -2,6 +2,7 @@ import { Component, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { County } from '../../../interfaces/features';
 import { StatsService } from '../../../services/stats.service';
+import { FilterConfigService } from '../../../services/filter-config.service';
 import { MapService } from '../../../services/map.service';
 
 @Component({
@@ -11,6 +12,7 @@ import { MapService } from '../../../services/map.service';
 })
 export class StatsComponent {
   private statsService = inject(StatsService);
+  private filterConfigService = inject(FilterConfigService);
   private mapService = inject(MapService);
 
   counties: County[] = [];
@@ -21,9 +23,9 @@ export class StatsComponent {
   selectedLevel: 'municipality' | 'county' | 'state' = 'county';
 
   constructor() {
-    // React to profile combination changes and map loading state from MapService to fetch data
+    // React to profile combination changes and map loading state to fetch data
     effect(() => {
-      const profileCombinationID = this.mapService.currentProfileCombinationID();
+      const profileCombinationID = this.filterConfigService.currentProfileCombinationID();
       const isMapLoading = this.mapService.isMapLoading();
       
       // Only load stats when map is ready (not loading) and profile combination is available
@@ -43,7 +45,7 @@ export class StatsComponent {
   }
 
   private loadTopRankings(): void {
-    const profileCombinationID = this.mapService.currentProfileCombinationID();
+    const profileCombinationID = this.filterConfigService.currentProfileCombinationID();
     if (!profileCombinationID) {
       return;
     }
@@ -51,10 +53,14 @@ export class StatsComponent {
     this.isLoading = true;
     this.error = null;
 
+    const filters = this.filterConfigService.contentLayerFilters();
     const params = {
       type: this.selectedLevel,
       profile_combination_id: profileCombinationID,
-      state_ids: this.mapService.getCurrentFilters()?.state_ids
+      state_ids: filters?.state_ids,
+      category_ids: filters?.category_ids,
+      persona_ids: filters?.persona_ids,
+      regiostar_ids: filters?.regiotyp_id ? [filters.regiotyp_id] : undefined
     };
 
     this.statsService.getTopRankings(params).subscribe({
@@ -74,6 +80,30 @@ export class StatsComponent {
 
   get filteredCounties(): County[] {
     return this.counties;
+  }
+
+  /**
+   * Get the display value (index or score) based on settings
+   */
+  getDisplayValue(county: County): number {
+    const bewertung = this.filterConfigService.selectedBewertung();
+    // 'zeit' -> score, 'qualitaet' -> index
+    return bewertung === 'zeit' ? county.score : county.index;
+  }
+
+  /**
+   * Format the display value based on settings
+   */
+  formatDisplayValue(county: County): string {
+    const bewertung = this.filterConfigService.selectedBewertung();
+    
+    if (bewertung === 'zeit') {
+      // For score, show the raw value
+      return county.score.toFixed(2);
+    } else {
+      // For index, show the rating letter grade
+      return this.getRating(county.index);
+    }
   }
 
   getRating(index: number): string {

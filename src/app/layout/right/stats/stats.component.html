@@ -9,15 +9,22 @@
     <p>{{ error }}</p>
   </div>
   
-  <ol *ngIf="!isLoading && !error" class="list-decimal pl-6 m-0 flex-1 text-[var(--primary-color)] leading-[1.8]">
-    <li *ngFor="let county of filteredCounties; let i = index" class="mb-2 flex justify-between items-center text-[var(--primary-color)]">
-      <span class="flex-1">{{ county.name }}</span>
-      <span class="ml-2 font-medium">({{ getRating(county.index) }})</span>
-    </li>
-    <li *ngIf="filteredCounties.length === 0" class="text-sm text-[var(--primary-color)] opacity-70">
-      Keine Daten verfügbar
-    </li>
-  </ol>
+  <div *ngIf="!isLoading && !error" class="flex-1 overflow-auto">
+    <table class="w-full border-collapse border-0 text-[var(--primary-color)]">
+      <tbody>
+        <tr *ngFor="let county of filteredCounties" class="leading-[1.8]">
+          <td class="pr-3 align-top border-0 w-auto">{{ county.rank }}</td>
+          <td class="pr-3 align-top border-0">{{ county.name }}</td>
+          <td class="align-top font-medium text-right border-0 w-auto whitespace-nowrap">{{ formatDisplayValue(county) }}</td>
+        </tr>
+        <tr *ngIf="filteredCounties.length === 0">
+          <td colspan="3" class="text-sm text-[var(--primary-color)] opacity-70 py-2 border-0">
+            Keine Daten verfügbar
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <button class="absolute bottom-4 right-4 w-7 h-7 rounded-full bg-[var(--secondary-color)] text-[var(--primary-color)] border-none cursor-pointer flex items-center justify-center transition-all duration-200 text-sm hover:opacity-80 hover:scale-105" title="Information">
     <span class="material-icons text-sm leading-none">info</span>
