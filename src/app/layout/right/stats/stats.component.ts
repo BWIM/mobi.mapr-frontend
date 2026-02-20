@@ -1,13 +1,14 @@
 import { Component, inject, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { County } from '../../../interfaces/features';
 import { StatsService } from '../../../services/stats.service';
 import { FilterConfigService } from '../../../services/filter-config.service';
 import { MapService } from '../../../services/map.service';
+import { SharedModule } from '../../../shared/shared.module';
+import { InfoOverlayComponent } from '../../../shared/info-overlay/info-overlay.component';
 
 @Component({
   selector: 'app-stats',
-  imports: [CommonModule],
+  imports: [SharedModule, InfoOverlayComponent],
   templateUrl: './stats.component.html',
 })
 export class StatsComponent {

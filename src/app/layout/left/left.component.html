@@ -7,12 +7,15 @@
     <div class="text-2xl font-semibold text-[var(--primary-color)] mb-4 pt-[6rem]">{{ project()?.display_name }}</div>
     <div class="flex items-center justify-end gap-2 mb-4">
       <span class="text-sm text-[var(--primary-color)]">erweiterter Modus</span>
-      <button mat-icon-button class="info-button" [attr.aria-label]="'Info'">
-        <mat-icon>info</mat-icon>
+      <button 
+        class="w-7 h-7 rounded-full bg-[var(--secondary-color)] text-[var(--primary-color)] border-none cursor-pointer flex items-center justify-center transition-all duration-200 text-sm hover:opacity-80 hover:scale-105" 
+        title="Information"
+        (click)="openDialog()">
+        <span class="material-icons text-sm leading-none">info</span>
       </button>
       <mat-slide-toggle [checked]="isExpanded()" (change)="toggleSidebar()" class="pill-toggle"></mat-slide-toggle>
     </div>
-    <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4">
+    <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4 relative">
       <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">Verkehrsmittel</h2>
       <div class="flex flex-col gap-2">
         <div class="flex items-center gap-2">
@@ -29,8 +32,26 @@
           }
         </div>
       </div>
+      <app-info-overlay>
+        <div class="space-y-4">
+          <div>
+            <h3 class="font-semibold mb-2">Verkehrsmittel</h3>
+            <p class="text-sm opacity-90">
+              Wählen Sie die Verkehrsmittel aus, die in der Berechnung berücksichtigt werden sollen. 
+              Sie können mehrere Verkehrsmittel gleichzeitig aktivieren oder deaktivieren.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-semibold mb-2">Verfügbare Optionen</h3>
+            <p class="text-sm opacity-90">
+              Jedes Verkehrsmittel kann einzeln ein- oder ausgeschaltet werden, um die Analyse 
+              entsprechend Ihren Anforderungen anzupassen.
+            </p>
+          </div>
+        </div>
+      </app-info-overlay>
     </div>
-    <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4">
+    <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4 relative">
       <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">Mobilitätsbewertung</h2>
       <div class="flex flex-col gap-2">
         <div class="flex border border-[var(--primary-color)] rounded-lg overflow-hidden bg-[var(--background-color)] w-fit">
@@ -54,10 +75,34 @@
           </button>
         </div>
       </div>
+      <app-info-overlay>
+        <div class="space-y-4">
+          <div>
+            <h3 class="font-semibold mb-2">Mobilitätsbewertung</h3>
+            <p class="text-sm opacity-90">
+              Wählen Sie zwischen zwei Bewertungsmethoden für die Mobilitätsanalyse.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-semibold mb-2">Zeit</h3>
+            <p class="text-sm opacity-90">
+              Bewertet die Mobilität basierend auf der Reisezeit. Diese Methode misst, 
+              wie schnell verschiedene Ziele erreicht werden können.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-semibold mb-2">Qualität</h3>
+            <p class="text-sm opacity-90">
+              Bewertet die Mobilität basierend auf der Qualität der Verbindungen. Diese Methode 
+              berücksichtigt Faktoren wie Komfort, Zuverlässigkeit und Servicequalität.
+            </p>
+          </div>
+        </div>
+      </app-info-overlay>
     </div>
 
     @if (isExpanded()) {
-      <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4" >
+      <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4 relative" >
         <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">Aktive Filter</h2>
         @if (project()?.is_mid) {
           <div class="flex flex-col gap-2"  >
@@ -80,7 +125,58 @@
             Filtern
           </button>
         </div>
+        <app-info-overlay>
+          <div class="space-y-4">
+            <div>
+              <h3 class="font-semibold mb-2">Aktive Filter</h3>
+              <p class="text-sm opacity-90">
+                Diese Übersicht zeigt die aktuell aktiven Filter und deren Anzahl. 
+                Die Zahlen zeigen, wie viele Filter in jeder Kategorie ausgewählt sind.
+              </p>
+            </div>
+            <div>
+              <h3 class="font-semibold mb-2">Filter anpassen</h3>
+              <p class="text-sm opacity-90">
+                Klicken Sie auf "Filtern", um die Filtereinstellungen zu öffnen und anzupassen. 
+                Dort können Sie Aktivitäten, Personas, RegioStars und Bundesländer auswählen.
+              </p>
+            </div>
+            @if (project()?.is_mid) {
+              <div>
+                <h3 class="font-semibold mb-2">MID-Projekt</h3>
+                <p class="text-sm opacity-90">
+                  Da dies ein MID-Projekt ist, können Sie zusätzlich Aktivitäten und Personas filtern, 
+                  um die Analyse weiter zu verfeinern.
+                </p>
+              </div>
+            }
+          </div>
+        </app-info-overlay>
       </div>
     }
   }
 </div>
+
+<!-- Info Panel Content Template -->
+<ng-template #infoContentTemplate>
+<div class="space-y-4">
+<div>
+  <h3 class="font-semibold mb-2">Foobar Information</h3>
+  <p class="text-sm opacity-90">
+    This is some foobar information displayed in the Material panel.
+  </p>
+</div>
+<div>
+  <h3 class="font-semibold mb-2">Additional Details</h3>
+  <p class="text-sm opacity-90">
+    Here you can find additional information about the statistics and rankings displayed in this component.
+  </p>
+</div>
+<div>
+  <h3 class="font-semibold mb-2">About the Data</h3>
+  <p class="text-sm opacity-90">
+    The data shown represents the top 10 Landkreise (counties) based on the selected filters and evaluation criteria.
+  </p>
+</div>
+</div>
+</ng-template>

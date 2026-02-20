@@ -11,7 +11,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
-
+import { MatSidenavModule } from '@angular/material/sidenav';  
 
 
 
@@ -30,6 +30,7 @@ import { MatTabsModule } from '@angular/material/tabs';
     MatCheckboxModule,
     MatProgressSpinnerModule,
     MatTabsModule,
+    MatSidenavModule,
   ],
   exports: [
     MatDialogModule,
@@ -45,6 +46,7 @@ import { MatTabsModule } from '@angular/material/tabs';
     MatCheckboxModule,
     MatProgressSpinnerModule,
     MatTabsModule,
+    MatSidenavModule,
   ],
   providers: []
 })

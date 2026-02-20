@@ -1,0 +1,12 @@
+<div class="h-full flex flex-col bg-[var(--background-color)] text-[var(--primary-color)] p-6">
+  <div class="flex justify-between items-center mb-4 pb-4 border-b border-[var(--primary-color)] border-opacity-20">
+    <h2 class="text-xl font-semibold text-[var(--primary-color)]">Information</h2>
+    <button mat-icon-button (click)="onClose()" aria-label="Close dialog">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  
+  <div class="flex-1 overflow-auto pt-4">
+    <ng-container *ngTemplateOutlet="data.content"></ng-container>
+  </div>
+</div>

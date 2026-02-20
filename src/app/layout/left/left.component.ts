@@ -2,16 +2,20 @@ import { Component, inject } from '@angular/core';
 import { ProjectsService } from '../../services/project.service';
 import { FilterConfigService } from '../../services/filter-config.service';
 import { SharedModule } from '../../shared/shared.module';
+import { InfoOverlayComponent } from '../../shared/info-overlay/info-overlay.component';
+import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-left',
-  imports: [SharedModule],
+  imports: [SharedModule, InfoOverlayComponent],
   templateUrl: './left.component.html',
   styleUrl: './left.component.css',
 })
 export class LeftComponent {
   private projectService = inject(ProjectsService);
   private filterConfigService = inject(FilterConfigService);
+  private dialog = inject(MatDialog);
 
   // Use the project signal directly - it will reactively update when the project loads
   project = this.projectService.project;
@@ -57,4 +61,14 @@ export class LeftComponent {
   openFilterDialog() {
     this.filterConfigService.openFilterDialog();
   }
+
+  openDialog() {
+    this.dialog.open(InfoDialogComponent, {
+      width: '80vw',
+      height: '80vh',
+      maxWidth: '80vw',
+      maxHeight: '80vh',
+    });
+  }
+
 }

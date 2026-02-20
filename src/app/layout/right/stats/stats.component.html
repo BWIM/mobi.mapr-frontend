@@ -1,32 +1,55 @@
-<div class="h-full p-4 bg-[var(--background-color)] text-[var(--primary-color)] relative flex flex-col rounded-2xl">
-  <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2 leading-6">Top 10 Landkreise</h2>
+<mat-drawer-container class="h-full  rounded-2xl" [hasBackdrop]="true">
+  <mat-drawer-content>
+    <div class="h-full p-4 bg-[var(--background-color)] text-[var(--primary-color)] relative flex flex-col">
+      <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2 leading-6">Top 10 Landkreise</h2>
 
-  <div *ngIf="isLoading" class="flex-1 flex items-center justify-center text-[var(--primary-color)]">
-    <p>Laden...</p>
-  </div>
-  
-  <div *ngIf="error && !isLoading" class="flex-1 flex items-center justify-center text-red-500">
-    <p>{{ error }}</p>
-  </div>
-  
-  <div *ngIf="!isLoading && !error" class="flex-1 overflow-auto">
-    <table class="w-full border-collapse border-0 text-[var(--primary-color)]">
-      <tbody>
-        <tr *ngFor="let county of filteredCounties" class="leading-[1.8]">
-          <td class="pr-3 align-top border-0 w-auto">{{ county.rank }}</td>
-          <td class="pr-3 align-top border-0">{{ county.name }}</td>
-          <td class="align-top font-medium text-right border-0 w-auto whitespace-nowrap">{{ formatDisplayValue(county) }}</td>
-        </tr>
-        <tr *ngIf="filteredCounties.length === 0">
-          <td colspan="3" class="text-sm text-[var(--primary-color)] opacity-70 py-2 border-0">
-            Keine Daten verfügbar
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+      <div *ngIf="isLoading" class="flex-1 flex items-center justify-center text-[var(--primary-color)]">
+        <p>Laden...</p>
+      </div>
+      
+      <div *ngIf="error && !isLoading" class="flex-1 flex items-center justify-center text-red-500">
+        <p>{{ error }}</p>
+      </div>
+      
+      <div *ngIf="!isLoading && !error" class="flex-1 overflow-auto">
+        <table class="w-full border-collapse border-0 text-[var(--primary-color)]">
+          <tbody>
+            <tr *ngFor="let county of filteredCounties" class="leading-[1.8]">
+              <td class="pr-3 align-top border-0 w-auto">{{ county.rank }}</td>
+              <td class="pr-3 align-top border-0">{{ county.name }}</td>
+              <td class="align-top font-medium text-right border-0 w-auto whitespace-nowrap">{{ formatDisplayValue(county) }}</td>
+            </tr>
+            <tr *ngIf="filteredCounties.length === 0">
+              <td colspan="3" class="text-sm text-[var(--primary-color)] opacity-70 py-2 border-0">
+                Keine Daten verfügbar
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-  <button class="absolute bottom-4 right-4 w-7 h-7 rounded-full bg-[var(--secondary-color)] text-[var(--primary-color)] border-none cursor-pointer flex items-center justify-center transition-all duration-200 text-sm hover:opacity-80 hover:scale-105" title="Information">
-    <span class="material-icons text-sm leading-none">info</span>
-  </button>
-</div>
+      <app-info-overlay>
+        <div class="space-y-4">
+          <div>
+            <h3 class="font-semibold mb-2">Foobar Information</h3>
+            <p class="text-sm opacity-90">
+              This is some foobar information displayed in the Material panel.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-semibold mb-2">Additional Details</h3>
+            <p class="text-sm opacity-90">
+              Here you can find additional information about the statistics and rankings displayed in this component.
+            </p>
+          </div>
+          <div>
+            <h3 class="font-semibold mb-2">About the Data</h3>
+            <p class="text-sm opacity-90">
+              The data shown represents the top 10 Landkreise (counties) based on the selected filters and evaluation criteria.
+            </p>
+          </div>
+        </div>
+      </app-info-overlay>
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container>
