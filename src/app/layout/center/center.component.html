@@ -8,5 +8,117 @@
       <p class="map-loading-text">Loading map data...</p>
     </div>
   </div>
+  <!-- Legend -->
+  <div class="map-legend" (click)="openLegendDialog()" title="Click for more information">
+    <!-- Quality legend (A-F letters) -->
+    <div class="legend-quality" *ngIf="isQualityMode">
+      <div class="legend-items">
+        <div class="legend-item-quality" *ngFor="let item of qualityColors">
+          <div class="legend-circle" [style.background-color]="item.color">
+            <span class="legend-letter">{{ item.letter }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Time legend (color gradient) -->
+    <div class="legend-time" *ngIf="!isQualityMode">
+      <div class="legend-gradient">
+        <div class="gradient-bar" [style.background]="getTimeGradient()"></div>
+      </div>
+      <div class="legend-labels">
+        <span class="legend-label">0 min</span>
+        <span class="legend-label">60+ min</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legend Info Dialog Content Template -->
+  <ng-template #legendContentTemplate>
+    <div class="space-y-4">
+      <div *ngIf="isQualityMode">
+        <h3 class="font-semibold mb-2">Qualitätsbewertung (A-F)</h3>
+        <p class="text-sm opacity-90 mb-4">
+          Die Qualitätsbewertung zeigt die Mobilitätsqualität in verschiedenen Kategorien von A (beste Qualität) bis F (niedrigste Qualität).
+        </p>
+        <div class="space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="legend-circle" style="background-color: rgba(50, 97, 45, 0.7); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
+              <span class="legend-letter" style="color: white; font-weight: 600; font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">A</span>
+            </div>
+            <div>
+              <p class="font-medium">A - Beste Qualität</p>
+              <p class="text-sm opacity-90">Sehr gute Mobilitätsqualität (Index: 0 - 0.35)</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="legend-circle" style="background-color: rgba(60, 176, 67, 0.7); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
+              <span class="legend-letter" style="color: white; font-weight: 600; font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">B</span>
+            </div>
+            <div>
+              <p class="font-medium">B - Gute Qualität</p>
+              <p class="text-sm opacity-90">Gute Mobilitätsqualität (Index: 0.35 - 0.5)</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="legend-circle" style="background-color: rgba(238, 210, 2, 0.7); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
+              <span class="legend-letter" style="color: white; font-weight: 600; font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">C</span>
+            </div>
+            <div>
+              <p class="font-medium">C - Mittlere Qualität</p>
+              <p class="text-sm opacity-90">Mittlere Mobilitätsqualität (Index: 0.5 - 0.71)</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="legend-circle" style="background-color: rgba(237, 112, 20, 0.7); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
+              <span class="legend-letter" style="color: white; font-weight: 600; font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">D</span>
+            </div>
+            <div>
+              <p class="font-medium">D - Unterdurchschnittliche Qualität</p>
+              <p class="text-sm opacity-90">Unterdurchschnittliche Mobilitätsqualität (Index: 0.71 - 1.0)</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="legend-circle" style="background-color: rgba(194, 24, 7, 0.7); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
+              <span class="legend-letter" style="color: white; font-weight: 600; font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">E</span>
+            </div>
+            <div>
+              <p class="font-medium">E - Schlechte Qualität</p>
+              <p class="text-sm opacity-90">Schlechte Mobilitätsqualität (Index: 1.0 - 1.41)</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="legend-circle" style="background-color: rgba(150, 86, 162, 0.7); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
+              <span class="legend-letter" style="color: white; font-weight: 600; font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">F</span>
+            </div>
+            <div>
+              <p class="font-medium">F - Sehr schlechte Qualität</p>
+              <p class="text-sm opacity-90">Sehr schlechte Mobilitätsqualität (Index: > 1.41)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="!isQualityMode">
+        <h3 class="font-semibold mb-2">Zeitbewertung (Reisezeit)</h3>
+        <p class="text-sm opacity-90 mb-4">
+          Die Zeitbewertung zeigt die durchschnittliche Reisezeit in Minuten. Die Farben reichen von hellblau (kurze Reisezeiten) bis dunkelblau (lange Reisezeiten).
+        </p>
+        <div class="space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="gradient-bar" style="width: 100px; height: 20px; border-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.2); background: linear-gradient(to right, rgb(181, 212, 233) 0%, rgb(147, 195, 224) 16.67%, rgb(109, 173, 213) 33.33%, rgb(75, 151, 201) 50%, rgb(48, 126, 188) 66.67%, rgb(24, 100, 170) 83.33%, rgb(24, 100, 170) 100%);"></div>
+            <div>
+              <p class="font-medium">Reisezeit-Skala</p>
+              <p class="text-sm opacity-90">0 Minuten (hellblau) bis 60+ Minuten (dunkelblau)</p>
+            </div>
+          </div>
+          <div class="mt-4">
+            <p class="text-sm opacity-90">
+              Die Reisezeit wird in Minuten gemessen und zeigt, wie schnell verschiedene Ziele erreicht werden können. 
+              Kürzere Reisezeiten werden in helleren Blautönen dargestellt, während längere Reisezeiten in dunkleren Blautönen erscheinen.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
 </div>
 
