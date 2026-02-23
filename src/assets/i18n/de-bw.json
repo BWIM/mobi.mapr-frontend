@@ -602,5 +602,30 @@
     "ZOOM_DETAIL": "Zoom e weng ri, bis kleineri Gebiet sichtbar werre",
     "CLICK": "Klick uff e Gebiet, zum meh Informatione z' kriege",
     "CLICK_DETAIL": "Tippe uff e farbiges Gebiet, zum Details z' öffne"
+  },
+  "PREPARING_PROJECT": {
+    "TITLE": "Projekt wird vorbereitet",
+    "MESSAGE": "Bitte warte, während mir dini Projektdate vorbereite...",
+    "INFO": {
+      "ABOUT_TITLE": "Über mobi.mapr",
+      "ABOUT_TEXT": "mobi.mapr isch e umfassends Mobilitätsanalyse-Tool, entwicklet vom BWIM, zum Mobilitätsmuster un Erreichbarkeit z' analysiere un z' visualisiere.",
+      "WHAT_TITLE": "Was mir mache",
+      "WHAT_TEXT": "Mir verarbeite dini usgwählte Aktivitäte, Personas un Verkehrsmittel, zum e detaillierti Mobilitätsanalyse-Kärt z' erstelle."
+    },
+    "FUN_FACTS": {
+      "TITLE": "Hesch gwüsst?",
+      "FACT_1": "Radfahre isch eis vo de effizienteschte Verkehrsmittel un verbraucht nur etwa 35 Kalorie pro Kilometer!",
+      "FACT_2": "Öffentlichi Verkehrsmittel chönne d' CO2-Emissione um bis zu 45% im Verglich zum individuelle Autoverkehr reduziere.",
+      "FACT_3": "Z' Fueß goh un Radfahre mache in viele europäische Städt über 50% vo alle Wäg us.",
+      "FACT_4": "Mobilitätsanalyse helfe Städt debi, besseri Infrastruktur z' plane un d' Erreichbarkeit für alli Bewohner z' verbessere.",
+      "FACT_5": "E durchschnittliche Mensch goht etwa 4.000 Schritt pro Tag, was ungefähr 3 Kilometer entspricht!"
+    },
+    "STATUS": {
+      "COMPLETED": "Fertig",
+      "ERROR": "E Fehler isch ufftrete",
+      "STARTING": "Starte...",
+      "CALCULATING": "Berechne...",
+      "PROCESSING": "Verarbeite..."
+    }
   }
 }

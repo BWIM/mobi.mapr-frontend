@@ -669,5 +669,30 @@
     "ZOOM_DETAIL": "Pinch or scroll until the map shows finer areas",
     "CLICK": "Click on an area to get more information",
     "CLICK_DETAIL": "Tap a colored area to open its details"
+  },
+  "PREPARING_PROJECT": {
+    "TITLE": "Preparing Project",
+    "MESSAGE": "Please wait while we prepare your project data...",
+    "INFO": {
+      "ABOUT_TITLE": "About mobi.mapr",
+      "ABOUT_TEXT": "mobi.mapr is a comprehensive mobility analysis tool developed by BWIM to help analyze and visualize mobility patterns and accessibility.",
+      "WHAT_TITLE": "What we're doing",
+      "WHAT_TEXT": "We're processing your selected activities, personas, and transportation modes to create a detailed mobility analysis map."
+    },
+    "FUN_FACTS": {
+      "TITLE": "Did you know?",
+      "FACT_1": "Cycling is one of the most efficient modes of transportation, using only about 35 calories per kilometer!",
+      "FACT_2": "Public transportation can reduce carbon emissions by up to 45% compared to individual car travel.",
+      "FACT_3": "Walking and cycling account for over 50% of all trips in many European cities.",
+      "FACT_4": "Mobility analysis helps cities plan better infrastructure and improve accessibility for all residents.",
+      "FACT_5": "The average person walks about 4,000 steps per day, which equals roughly 3 kilometers!"
+    },
+    "STATUS": {
+      "COMPLETED": "Completed",
+      "ERROR": "An error occurred",
+      "STARTING": "Starting...",
+      "CALCULATING": "Calculating...",
+      "PROCESSING": "Processing..."
+    }
   }
 }

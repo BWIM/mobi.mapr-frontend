@@ -1,7 +1,88 @@
-<div class="preparing-project-dialog">
-  <div class="dialog-content">
-    <mat-spinner diameter="50"></mat-spinner>
-    <h2 class="dialog-title">Preparing project</h2>
-    <p class="dialog-message">Please wait while we prepare your project data...</p>
+<div class="p-6 md:p-8 w-full">
+  <div class="flex flex-col items-center gap-6">
+    <h2 class="m-0 text-2xl font-semibold text-center text-[var(--primary-color)]">
+      {{ 'PREPARING_PROJECT.TITLE' | translate }}
+    </h2>
+    
+    <!-- Progress Section -->
+    <div *ngIf="showProgress || statusMessage" class="w-full mb-2">
+      <div *ngIf="statusMessage" class="mb-3 text-sm text-[var(--primary-color)] text-center opacity-90 font-medium">
+        {{ statusMessage | translate }}
+      </div>
+      <mat-progress-bar 
+        *ngIf="showProgress"
+        mode="determinate" 
+        [value]="progress"
+        class="w-full h-2">
+      </mat-progress-bar>
+      <div *ngIf="showProgress" class="mt-1 text-xs text-[var(--primary-color)] text-center opacity-70">
+        {{ progress | number:'1.0-0' }}%
+      </div>
+    </div>
+    
+    <!-- Project Information Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-2">
+      <mat-card class="text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-[var(--secondary-color)]">
+        <mat-card-content class="p-5">
+          <mat-icon class="text-4xl mb-3 text-[var(--primary-color)]">map</mat-icon>
+          <h3 class="m-0 mb-2 text-base font-semibold text-[var(--primary-color)]">
+            {{ 'PREPARING_PROJECT.INFO.ABOUT_TITLE' | translate }}
+          </h3>
+          <p class="m-0 text-sm text-[var(--light-primary-color)] leading-relaxed">
+            {{ 'PREPARING_PROJECT.INFO.ABOUT_TEXT' | translate }}
+          </p>
+        </mat-card-content>
+      </mat-card>
+      
+      <mat-card class="text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg bg-[var(--secondary-color)]">
+        <mat-card-content class="p-5">
+          <mat-icon class="text-4xl mb-3 text-[var(--primary-color)]">bolt</mat-icon>
+          <h3 class="m-0 mb-2 text-base font-semibold text-[var(--primary-color)]">
+            {{ 'PREPARING_PROJECT.INFO.WHAT_TITLE' | translate }}
+          </h3>
+          <p class="m-0 text-sm text-[var(--light-primary-color)] leading-relaxed">
+            {{ 'PREPARING_PROJECT.INFO.WHAT_TEXT' | translate }}
+          </p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- GIF Section -->
+    <div class="w-full bg-[var(--primary-color)] rounded-xl p-4 shadow-md my-2">
+      <img 
+        src="assets/video/loading.gif" 
+        alt="Loading animation" 
+        class="w-full h-auto aspect-[21/9] object-contain rounded-lg block" 
+      />
+    </div>
+
+    <!-- Fun Facts Section -->
+    <div class="w-full mt-2">
+      <h3 class="m-0 mb-4 text-lg font-semibold text-center text-[var(--primary-color)]">
+        {{ 'PREPARING_PROJECT.FUN_FACTS.TITLE' | translate }}
+      </h3>
+      <mat-card class="fun-fact-card flex flex-col md:flex-row items-center gap-3 md:gap-4 min-h-[80px] bg-[var(--secondary-color)] border border-[var(--primary-color)] border-opacity-20">
+        <mat-card-content class="flex flex-col md:flex-row items-center gap-3 md:gap-4 p-5 w-full text-center md:text-left">
+          <div class="text-4xl flex-shrink-0">{{ currentFunFact.icon }}</div>
+          <p class="m-0 text-sm text-[var(--primary-color)] leading-relaxed flex-1 font-medium">
+            {{ currentFunFact.text | translate }}
+          </p>
+        </mat-card-content>
+      </mat-card>
+      <div class="flex justify-center gap-2 mt-3">
+        <span 
+          *ngFor="let fact of funFacts; let i = index" 
+          [class.bg-[var(--primary-color)]]="i === currentFactIndex"
+          [class.opacity-100]="i === currentFactIndex"
+          [class.scale-125]="i === currentFactIndex"
+          class="w-2 h-2 rounded-full bg-[var(--primary-color)] opacity-30 transition-all duration-300 cursor-pointer">
+        </span>
+      </div>
+    </div>
+
+    <!-- Loading Message -->
+    <p class="m-0 text-sm text-[var(--light-primary-color)] text-center italic">
+      {{ 'PREPARING_PROJECT.MESSAGE' | translate }}
+    </p>
   </div>
 </div>

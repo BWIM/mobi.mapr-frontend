@@ -1,18 +1,146 @@
-import { Component } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { Component, OnInit, OnDestroy, Inject, inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { SharedModule } from '../../../shared/shared.module';
+import { CommonModule } from '@angular/common';
+import { WebsocketService } from '../../../services/websocket.service';
+import { Subscription } from 'rxjs';
+import { environment } from '../../../../environments/environment';
+
+interface FunFact {
+  icon: string;
+  text: string;
+}
+
+export interface PreparingProjectDialogData {
+  sessionId?: string;
+}
 
 @Component({
   selector: 'app-preparing-project-dialog',
   standalone: true,
   imports: [
     SharedModule,
+    CommonModule,
+    MatCardModule,
+    MatProgressBarModule,
   ],
   templateUrl: './preparing-project-dialog.component.html',
   styleUrl: './preparing-project-dialog.component.css'
 })
-export class PreparingProjectDialogComponent {
+export class PreparingProjectDialogComponent implements OnInit, OnDestroy {
+  currentFactIndex = 0;
+  private factInterval?: any;
+  private wsSubscription?: Subscription;
+  private websocketService = inject(WebsocketService);
+
+  progress = 0;
+  statusMessage = '';
+  showProgress = false;
+
+  funFacts: FunFact[] = [
+    { icon: '🚴', text: 'PREPARING_PROJECT.FUN_FACTS.FACT_1' },
+    { icon: '🚊', text: 'PREPARING_PROJECT.FUN_FACTS.FACT_2' },
+    { icon: '🌍', text: 'PREPARING_PROJECT.FUN_FACTS.FACT_3' },
+    { icon: '📊', text: 'PREPARING_PROJECT.FUN_FACTS.FACT_4' },
+    { icon: '🚶', text: 'PREPARING_PROJECT.FUN_FACTS.FACT_5' },
+  ];
+
+  get currentFunFact(): FunFact {
+    return this.funFacts[this.currentFactIndex];
+  }
+
   constructor(
-    public dialogRef: MatDialogRef<PreparingProjectDialogComponent>
+    public dialogRef: MatDialogRef<PreparingProjectDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: PreparingProjectDialogData
   ) {}
+
+  ngOnInit(): void {
+    // Rotate fun facts every 4 seconds
+    this.factInterval = setInterval(() => {
+      this.currentFactIndex = (this.currentFactIndex + 1) % this.funFacts.length;
+    }, 4000);
+
+    // Connect to websocket if sessionId is provided
+    if (this.data?.sessionId) {
+      this.connectWebsocket(this.data.sessionId);
+    }
+  }
+
+  private connectWebsocket(sessionId: string): void {
+    const wsUrl = `${environment.wsURL}/preload/?session=${sessionId}`;
+    const wsSubject = this.websocketService.connect<any>(wsUrl);
+
+    this.wsSubscription = wsSubject.subscribe({
+      next: (message: any) => {
+        console.log('Preload websocket message:', message);
+        
+        // Extract progress information
+        if (message.progress !== undefined) {
+          this.progress = Math.min(100, Math.max(0, message.progress));
+          this.showProgress = true;
+        } else if (message.percentage !== undefined) {
+          this.progress = Math.min(100, Math.max(0, message.percentage));
+          this.showProgress = true;
+        }
+
+        // Extract status message - prioritize message field from websocket
+        // The message field will contain translation keys for multilingual support
+        if (message.message && typeof message.message === 'string') {
+          this.statusMessage = message.message;
+        } else {
+          // Fall back to status-based messages if message field is not present
+          const status = message.status || message.type || '';
+          if (status && typeof status === 'string') {
+            // Map common status strings to translation keys
+            const statusLower = status.toLowerCase();
+            if (statusLower.includes('start') || statusLower === 'starting') {
+              this.statusMessage = 'PREPARING_PROJECT.STATUS.STARTING';
+            } else if (statusLower.includes('calculat') || statusLower === 'calculating') {
+              this.statusMessage = 'PREPARING_PROJECT.STATUS.CALCULATING';
+            } else if (statusLower.includes('process') || statusLower === 'processing') {
+              this.statusMessage = 'PREPARING_PROJECT.STATUS.PROCESSING';
+            } else {
+              // Use the status as-is if it doesn't match known patterns
+              this.statusMessage = status;
+            }
+          }
+        }
+
+        // Check for completion
+        const status = message.status || message.type || '';
+        const isCompleted = 
+          status === 'completed' || 
+          status === 'complete' || 
+          message.completed === true ||
+          message.finished === true ||
+          message.done === true;
+        
+        if (isCompleted) {
+          this.progress = 100;
+          // Only override message if not already set from websocket
+          if (!message.message) {
+            this.statusMessage = 'PREPARING_PROJECT.STATUS.COMPLETED';
+          }
+        }
+      },
+      error: (error) => {
+        console.error('Preload websocket error:', error);
+        this.statusMessage = 'PREPARING_PROJECT.STATUS.ERROR';
+      },
+      complete: () => {
+        console.log('Preload websocket connection closed');
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.factInterval) {
+      clearInterval(this.factInterval);
+    }
+    if (this.wsSubscription) {
+      this.wsSubscription.unsubscribe();
+    }
+  }
 }

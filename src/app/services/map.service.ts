@@ -13,6 +13,7 @@ export interface ContentLayerFilters {
   category_ids?: number[];
   persona_ids?: number[];
   regiotyp_id?: number | null;
+  regiostar_ids?: number[];
   admin_level?: 'state' | 'county' | 'municipality' | 'hexagon';
   feature_type: 'index' | 'score';
 }

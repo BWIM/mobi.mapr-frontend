@@ -1,4 +1,4 @@
-import { Component, inject, effect } from '@angular/core';
+import { Component, inject, effect, OnDestroy } from '@angular/core';
 import { County } from '../../../interfaces/features';
 import { StatsService } from '../../../services/stats.service';
 import { FilterConfigService } from '../../../services/filter-config.service';
@@ -13,7 +13,7 @@ import { InfoOverlayComponent } from '../../../shared/info-overlay/info-overlay.
   templateUrl: './stats.component.html',
   styleUrl: './stats.component.css',
 })
-export class StatsComponent {
+export class StatsComponent implements OnDestroy {
   private statsService = inject(StatsService);
   private filterConfigService = inject(FilterConfigService);
   private mapService = inject(MapService);
@@ -31,12 +31,14 @@ export class StatsComponent {
   ];
   
   selectedLevel: 'municipality' | 'county' | 'state' = 'county';
+  private loadRankingsTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     // Load saved level selection from localStorage
     this.loadSavedLevel();
     // Track previous filter state to detect actual changes (excluding bewertung)
-    let previousFilters: { profileCombinationID: number | null; stateIds: number[] | undefined; categoryIds: number[] | undefined; personaIds: number[] | undefined; regiostarId: number | null | undefined } | null = null;
+    let previousFilters: { profileCombinationID: number | null; stateIds: number[] | undefined; categoryIds: number[] | undefined; personaIds: number[] | undefined; regiostarIds: number[] | undefined } | null = null;
+    let previousMapLoading = true;
     
     // React to all relevant filter changes: profile combination, filters, and map loading state
     // Note: bewertung is NOT watched here because both index and score are already in the response
@@ -46,6 +48,10 @@ export class StatsComponent {
       const isMapLoading = this.mapService.isMapLoading();
       const filters = this.filterConfigService.contentLayerFilters();
       
+      // Detect when map transitions from loading to not loading
+      const mapJustFinishedLoading = previousMapLoading && !isMapLoading;
+      previousMapLoading = isMapLoading;
+      
       // Only load stats when map is ready (not loading) and profile combination is available
       if (profileCombinationID !== null && !isMapLoading && filters) {
         // Check if filters actually changed (excluding bewertung which doesn't require API call)
@@ -54,7 +60,7 @@ export class StatsComponent {
           stateIds: filters.state_ids,
           categoryIds: filters.category_ids,
           personaIds: filters.persona_ids,
-          regiostarId: filters.regiotyp_id
+          regiostarIds: filters.regiostar_ids
         };
         
         // Only reload if filters actually changed or this is the first load
@@ -63,13 +69,34 @@ export class StatsComponent {
           JSON.stringify(previousFilters.stateIds?.sort()) !== JSON.stringify(currentFilterState.stateIds?.sort()) ||
           JSON.stringify(previousFilters.categoryIds?.sort()) !== JSON.stringify(currentFilterState.categoryIds?.sort()) ||
           JSON.stringify(previousFilters.personaIds?.sort()) !== JSON.stringify(currentFilterState.personaIds?.sort()) ||
-          previousFilters.regiostarId !== currentFilterState.regiostarId;
+          JSON.stringify(previousFilters.regiostarIds?.sort()) !== JSON.stringify(currentFilterState.regiostarIds?.sort());
         
         if (filtersChanged) {
-          this.loadTopRankings();
+          // Clear any existing timeout
+          if (this.loadRankingsTimeout) {
+            clearTimeout(this.loadRankingsTimeout);
+            this.loadRankingsTimeout = null;
+          }
+          
+          // If map just finished loading, wait 1 second before loading rankings to avoid race condition
+          if (mapJustFinishedLoading) {
+            this.loadRankingsTimeout = setTimeout(() => {
+              this.loadTopRankings();
+              this.loadRankingsTimeout = null;
+            }, 0);
+          } else {
+            // Map was already loaded, load immediately
+            this.loadTopRankings();
+          }
           previousFilters = currentFilterState;
         }
       } else {
+        // Clear any pending timeout if conditions are no longer met
+        if (this.loadRankingsTimeout) {
+          clearTimeout(this.loadRankingsTimeout);
+          this.loadRankingsTimeout = null;
+        }
+        
         // Clear data if no profile combination is available or map is still loading
         if (profileCombinationID === null) {
           this.counties = [];
@@ -140,7 +167,7 @@ export class StatsComponent {
       state_ids: filters?.state_ids,
       category_ids: filters?.category_ids,
       persona_ids: filters?.persona_ids,
-      regiostar_ids: filters?.regiotyp_id ? [filters.regiotyp_id] : undefined
+      regiostar_ids: filters?.regiostar_ids
     };
 
     this.statsService.getTopRankings(params).subscribe({
@@ -207,5 +234,13 @@ export class StatsComponent {
     if (index < 1.59) return "F+";
     if (index < 1.78) return "F";
     return "F-";
+  }
+
+  ngOnDestroy(): void {
+    // Clear any pending timeout when component is destroyed
+    if (this.loadRankingsTimeout) {
+      clearTimeout(this.loadRankingsTimeout);
+      this.loadRankingsTimeout = null;
+    }
   }
 }

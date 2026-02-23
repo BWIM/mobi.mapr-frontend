@@ -195,7 +195,8 @@ export class FilterConfigService {
       category_ids: selectedActivities.length > 0 ? selectedActivities : undefined,
       persona_ids: selectedPersonas.length > 0 ? selectedPersonas : undefined,
       regiotyp_id: selectedRegioStars.length === 1 ? selectedRegioStars[0] :
-        (selectedRegioStars.length > 1 ? selectedRegioStars[0] : undefined)
+        (selectedRegioStars.length > 1 ? selectedRegioStars[0] : undefined),
+      regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined
     };
   });
 
@@ -618,10 +619,12 @@ export class FilterConfigService {
           if (!readyResponse.cache_flag) {
             // Show preparing dialog (non-closable) for preloading
             dialogRef = this.dialog.open(PreparingProjectDialogComponent, {
-              width: '400px',
+              width: '80%',
+              maxWidth: '900px',
               disableClose: true,
               hasBackdrop: true,
-              panelClass: 'preparing-project-dialog-panel'
+              panelClass: 'preparing-project-dialog-panel',
+              data: { sessionId: readyResponse.session_id }
             });
 
             if (readyResponse.session_id) {

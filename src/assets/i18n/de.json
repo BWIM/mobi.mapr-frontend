@@ -669,5 +669,30 @@
     "ZOOM_DETAIL": "Reinzoomen, bis die Karte kleinere Gebiete zeigt",
     "CLICK": "Klicke auf ein Gebiet, um mehr Informationen zu erhalten",
     "CLICK_DETAIL": "Tippe auf ein farbiges Gebiet, um Details zu öffnen"
+  },
+  "PREPARING_PROJECT": {
+    "TITLE": "Projekt wird vorbereitet",
+    "MESSAGE": "Bitte warten Sie, während wir Ihre Projektdaten vorbereiten...",
+    "INFO": {
+      "ABOUT_TITLE": "Über mobi.mapr",
+      "ABOUT_TEXT": "mobi.mapr ist ein umfassendes Mobilitätsanalyse-Tool, entwickelt vom BWIM, um Mobilitätsmuster und Erreichbarkeit zu analysieren und zu visualisieren.",
+      "WHAT_TITLE": "Was wir tun",
+      "WHAT_TEXT": "Wir verarbeiten Ihre ausgewählten Aktivitäten, Personas und Verkehrsmittel, um eine detaillierte Mobilitätsanalyse-Karte zu erstellen."
+    },
+    "FUN_FACTS": {
+      "TITLE": "Wussten Sie schon?",
+      "FACT_1": "Radfahren ist eines der effizientesten Verkehrsmittel und verbraucht nur etwa 35 Kalorien pro Kilometer!",
+      "FACT_2": "Öffentliche Verkehrsmittel können die CO2-Emissionen um bis zu 45% im Vergleich zum individuellen Autoverkehr reduzieren.",
+      "FACT_3": "Zu Fuß gehen und Radfahren machen in vielen europäischen Städten über 50% aller Wege aus.",
+      "FACT_4": "Mobilitätsanalysen helfen Städten dabei, bessere Infrastruktur zu planen und die Erreichbarkeit für alle Bewohner zu verbessern.",
+      "FACT_5": "Ein durchschnittlicher Mensch geht etwa 4.000 Schritte pro Tag, was ungefähr 3 Kilometern entspricht!"
+    },
+    "STATUS": {
+      "COMPLETED": "Abgeschlossen",
+      "ERROR": "Ein Fehler ist aufgetreten",
+      "STARTING": "Starte...",
+      "CALCULATING": "Berechne...",
+      "PROCESSING": "Verarbeite..."
+    }
   }
 }
