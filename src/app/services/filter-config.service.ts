@@ -182,6 +182,9 @@ export class FilterConfigService {
       return null;
     }
 
+    const currentProject = this.projectService.project();
+    const isMid = currentProject?.is_mid ?? false;
+
     const featureType: 'index' | 'score' = this._selectedBewertung() === 'zeit' ? 'score' : 'index';
     const selectedStates = this._selectedStates();
     const selectedActivities = this._selectedActivities();
@@ -192,8 +195,9 @@ export class FilterConfigService {
       profile_combination_id: profileCombinationID,
       feature_type: featureType,
       state_ids: selectedStates.length > 0 ? selectedStates : undefined,
-      category_ids: selectedActivities.length > 0 ? selectedActivities : undefined,
-      persona_ids: selectedPersonas.length > 0 ? selectedPersonas : undefined,
+      // Only include category_ids and persona_ids if project is MID
+      category_ids: (isMid && selectedActivities.length > 0) ? selectedActivities : undefined,
+      persona_ids: (isMid && selectedPersonas.length > 0) ? selectedPersonas : undefined,
       regiotyp_id: selectedRegioStars.length === 1 ? selectedRegioStars[0] :
         (selectedRegioStars.length > 1 ? selectedRegioStars[0] : undefined),
       regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined
@@ -219,10 +223,20 @@ export class FilterConfigService {
     this.loadProfilesAndModes();
     this.loadProfileCombinations();
 
+    // Track previous project ID to detect project changes
+    let previousProjectId: number | null = null;
+
     // React to project changes to load all filter data and update mode selection
     effect(() => {
       const currentProject = this.projectService.project();
       if (currentProject) {
+        // Reset activities and personas when project changes
+        if (previousProjectId !== null && previousProjectId !== currentProject.id) {
+          this._selectedActivities.set([]);
+          this._selectedPersonas.set([]);
+        }
+        previousProjectId = currentProject.id;
+
         // Load all filter data when project is loaded
         this.loadAllFilterData(currentProject.is_mid);
         
@@ -230,6 +244,9 @@ export class FilterConfigService {
         if (this._allProfiles().length > 0) {
           this.updateModeSelection(currentProject.base_profiles);
         }
+      } else {
+        // Reset when project is cleared
+        previousProjectId = null;
       }
     });
 

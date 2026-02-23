@@ -128,7 +128,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         style: this.mapStyle,
         center: this.center,
         zoom: this.zoom,
-        minZoom: 6,
+        minZoom: 5,
         maxZoom: 12,
         dragRotate: false,
         renderWorldCopies: false,

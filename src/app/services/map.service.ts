@@ -272,7 +272,7 @@ export class MapService {
           this.websocketService.closeConnection(wsUrl);
           resolve();
         }
-      }, 300000);
+      }, 1000000);
     });
   }
 
