@@ -123,7 +123,7 @@ export class FilterConfigService {
     const grouped = new Map<string, RegioStar[]>();
     
     regiostars.forEach(regiostar => {
-      const key = (regiostar.class_name && String(regiostar.class_name)) || 'Other';
+      const key = (regiostar.class_name?.display_name) || 'Other';
       if (!grouped.has(key)) {
         grouped.set(key, []);
       }
@@ -210,6 +210,9 @@ export class FilterConfigService {
     'default': 'directions'
   };
 
+  // Guard to prevent concurrent updateMapLayer calls
+  private updateMapLayerInProgress = false;
+
   constructor() {
     // Initialize data loading
     this.loadProfilesAndModes();
@@ -230,14 +233,39 @@ export class FilterConfigService {
     });
 
     // React to filter changes and update map
+    // Track previous filter state to determine if it's a full reload or tile-only update
+    let previousFilters: ContentLayerFilters | null = null;
+    let isInitialLoad = true;
     effect(() => {
       const filters = this.contentLayerFilters();
       if (filters) {
-        // Sync MapService's profile combination ID signal
-        // (MapService will also update it in loadContentLayer, but we do it here for immediate sync)
-        this.updateMapLayer(filters);
+        // On initial load, always do a full reload
+        // Otherwise, determine if this is a full reload (filter settings changed) or tile-only update (modes/bewertung changed)
+        const isFullReload = isInitialLoad || (previousFilters && (
+          JSON.stringify(previousFilters.state_ids?.sort()) !== JSON.stringify(filters.state_ids?.sort()) ||
+          JSON.stringify(previousFilters.category_ids?.sort()) !== JSON.stringify(filters.category_ids?.sort()) ||
+          JSON.stringify(previousFilters.persona_ids?.sort()) !== JSON.stringify(filters.persona_ids?.sort()) ||
+          previousFilters.regiotyp_id !== filters.regiotyp_id
+        ));
+        
+        if (isFullReload) {
+          // Full reload with zoom to bounds
+          this.updateMapLayer(filters, true).catch(error => {
+            console.error('Error in updateMapLayer (full reload):', error);
+          });
+        } else {
+          // Tile-only update (modes or bewertung changed) - preserve map position
+          this.updateMapLayer(filters, false).catch(error => {
+            console.error('Error in updateMapLayer (tile update):', error);
+          });
+        }
+        
+        previousFilters = { ...filters };
+        isInitialLoad = false;
       } else {
         this.mapService.removeContentLayer();
+        previousFilters = null;
+        isInitialLoad = true;
       }
     });
 
@@ -287,7 +315,7 @@ export class FilterConfigService {
 
     if (isMid) {
       // Load Categories and Personas only if mid
-      const categories$ = this.categoryService.getCategories(1, 100);
+      const categories$ = this.categoryService.getCategories(1, 100, isMid);
       const personas$ = this.personaService.getPersonas(1, 100);
 
       forkJoin({
@@ -560,55 +588,98 @@ export class FilterConfigService {
 
   /**
    * Update map layer with current filters
+   * @param filters - The filter parameters
+   * @param fullReload - Whether to do a full reload with zoom to bounds (default: true)
    */
-  private async updateMapLayer(filters: ContentLayerFilters): Promise<void> {
+  private async updateMapLayer(filters: ContentLayerFilters, fullReload: boolean = true): Promise<void> {
+    // Prevent concurrent calls - if one is already in progress, skip this one
+    if (this.updateMapLayerInProgress) {
+      console.log('updateMapLayer already in progress, skipping concurrent call');
+      return;
+    }
+
+    this.updateMapLayerInProgress = true;
     let dialogRef: any = null;
 
     try {
+      // Set loading state immediately to prevent race conditions
+      // This ensures other components (like stats) don't call APIs before project is ready
+      this.mapService.setMapLoading(true);
+
       // Call the ready endpoint first to check if project is ready
-      console.log('Calling ready endpoint with filters:', filters);
-      const readyResponse = await this.mapService.checkReady(filters);
-      console.log('Ready endpoint call completed:', readyResponse);
+      // Only check ready for full reloads (filter changes), not for tile-only updates
+      if (fullReload) {
+        console.log('Calling ready endpoint with filters:', filters);
+        try {
+          const readyResponse = await this.mapService.checkReady(filters);
+          console.log('Ready endpoint call completed:', readyResponse);
 
-      // Only open dialog if project is not ready (cache_flag is false)
-      if (!readyResponse.cache_flag) {
-        // Show preparing dialog (non-closable) for preloading
-        dialogRef = this.dialog.open(PreparingProjectDialogComponent, {
-          width: '400px',
-          disableClose: true,
-          hasBackdrop: true,
-          panelClass: 'preparing-project-dialog-panel'
-        });
+          // Only open dialog if project is not ready (cache_flag is false)
+          if (!readyResponse.cache_flag) {
+            // Show preparing dialog (non-closable) for preloading
+            dialogRef = this.dialog.open(PreparingProjectDialogComponent, {
+              width: '400px',
+              disableClose: true,
+              hasBackdrop: true,
+              panelClass: 'preparing-project-dialog-panel'
+            });
 
-        // Wait for preload via websocket
-        if (readyResponse.session_id) {
-          console.log('Data not cached, waiting for preload via websocket, session_id:', readyResponse.session_id);
-          await this.mapService.waitForPreload(readyResponse.session_id);
-          console.log('Preload completed via websocket');
+            if (readyResponse.session_id) {
+              console.log('Data not cached, waiting for preload via websocket, session_id:', readyResponse.session_id);
+              try {
+                await this.mapService.waitForPreload(readyResponse.session_id);
+                console.log('Preload completed via websocket');
+              } catch (preloadError) {
+                console.error('Error waiting for preload via websocket:', preloadError);
+              }
+            } else {
+              console.warn('No session_id provided, cannot wait for preload');
+            }
+          }
+          // If cache_flag is true, the endpoint was successful and data is ready
+          // Proceed to load content layer below
+        } catch (readyError) {
+          console.error('Error calling ready endpoint:', readyError);
+          // If ready endpoint fails, we can't determine if data is ready
+          this.mapService.setMapLoading(false);
+          return;
         }
+      }
+
+      // Close the dialog if it was opened (before loading content layer)
+      if (dialogRef) {
+        dialogRef.close();
+        dialogRef = null;
+      }
+
+      // Only load the content layer AFTER we've confirmed data is ready
+      // (either via cache_flag: true OR websocket completion)
+      // Use updateContentLayerTiles for tile-only updates to preserve map position
+      console.log('Loading content layer after ready check/websocket completion');
+      if (fullReload) {
+        await this.mapService.loadContentLayer(filters, true);
       } else {
-        // Project is ready, show loading indicator on map instead
-        this.mapService.setMapLoading(true);
+        await this.mapService.updateContentLayerTiles(filters);
+      }
+
+      // Clear loading state after a short delay to allow map to render
+      // This triggers borders, boundingBox, and stats
+      const wasLoading = this.mapService.isMapLoading();
+      if (wasLoading) {
+        setTimeout(() => {
+          this.mapService.setMapLoading(false);
+        }, 500);
       }
     } catch (error) {
-      console.error('Error checking ready status or waiting for preload:', error);
-      // Continue with loading even if ready check fails
-    } finally {
-      // Close the dialog if it was opened
+      console.error('Error in updateMapLayer:', error);
+      // Make sure to close dialog and reset loading state on error
       if (dialogRef) {
         dialogRef.close();
       }
-    }
-
-    // Load the content layer with current filters
-    await this.mapService.loadContentLayer(filters);
-
-    // Clear loading state after a short delay to allow map to render
-    const wasLoading = this.mapService.isMapLoading();
-    if (wasLoading) {
-      setTimeout(() => {
-        this.mapService.setMapLoading(false);
-      }, 500);
+      this.mapService.setMapLoading(false);
+    } finally {
+      // Always reset the guard, even if an error occurred
+      this.updateMapLayerInProgress = false;
     }
   }
 

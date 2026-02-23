@@ -15,11 +15,11 @@ export class CategoryService {
 
   constructor(private http: HttpClient) { }
 
-  getCategories(page: number = 1, pageSize: number = 100): Observable<PaginatedResponse<Category>> {
+  getCategories(page: number = 1, pageSize: number = 100, mid: boolean = false): Observable<PaginatedResponse<Category>> {
     const params = new HttpParams()
       .set('page', page.toString())
-      .set('page_size', pageSize.toString());
-
+      .set('page_size', pageSize.toString())
+      .set('mid', mid ? 'true' : 'false');
     return this.http.get<PaginatedResponse<Category>>(`${this.apiUrl}/categories/`, { params });
   }
 }

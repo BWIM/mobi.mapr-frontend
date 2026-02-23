@@ -191,6 +191,8 @@ export class MapService {
    */
   waitForPreload(sessionId: string): Promise<void> {
     return new Promise((resolve, reject) => {
+      let isResolved = false;
+      
       // Construct the websocket URL with the session_id from the API response
       // The websocket service will add its own session parameter, but the API expects session=<session_id>
       const wsUrl = `${environment.wsURL}/preload/?session=${sessionId}`;
@@ -204,41 +206,67 @@ export class MapService {
           
           // Handle different message formats
           const status = message.status || message.type || message.message;
+          const messageStr = typeof message === 'string' ? message : JSON.stringify(message);
           
-          if (status === 'completed' || status === 'complete' || message.completed === true) {
-            console.log('Preload completed');
-            subscription.unsubscribe();
-            this.websocketService.closeConnection(wsUrl);
-            resolve();
+          // Check for completion in various formats
+          const isCompleted = 
+            status === 'completed' || 
+            status === 'complete' || 
+            message.completed === true ||
+            messageStr?.toLowerCase().includes('completed') ||
+            messageStr?.toLowerCase().includes('complete') ||
+            message.finished === true ||
+            message.done === true;
+          
+          if (isCompleted) {
+            console.log('Preload completed via websocket message');
+            if (!isResolved) {
+              isResolved = true;
+              subscription.unsubscribe();
+              this.websocketService.closeConnection(wsUrl);
+              resolve();
+            }
           } else if (status === 'error' || message.error) {
             console.error('Preload error:', message.error || message);
-            subscription.unsubscribe();
-            this.websocketService.closeConnection(wsUrl);
-            reject(new Error(message.error || 'Preload failed'));
+            if (!isResolved) {
+              isResolved = true;
+              subscription.unsubscribe();
+              this.websocketService.closeConnection(wsUrl);
+              reject(new Error(message.error || 'Preload failed'));
+            }
           } else {
             // Status updates: "starting", "calculating", etc.
-            console.log('Preload status:', status);
+            console.log('Preload status:', status || messageStr);
           }
         },
         error: (error) => {
           console.error('Preload websocket error:', error);
-          subscription.unsubscribe();
-          this.websocketService.closeConnection(wsUrl);
-          reject(error);
+          if (!isResolved) {
+            isResolved = true;
+            subscription.unsubscribe();
+            this.websocketService.closeConnection(wsUrl);
+            reject(error);
+          }
         },
         complete: () => {
           console.log('Preload websocket connection closed');
+          // Don't resolve here - only resolve when we get explicit completion message
+          // Connection might close for other reasons before preload is actually complete
           subscription.unsubscribe();
           this.websocketService.closeConnection(wsUrl);
-          // If websocket closes without error, assume preload is complete
-          resolve();
+          // Only reject if we haven't resolved yet and connection closed unexpectedly
+          if (!isResolved) {
+            console.warn('Websocket closed before receiving completion message');
+            // Don't reject here - let timeout handle it, or wait for explicit message
+          }
         }
       });
 
       // Set a timeout to avoid waiting indefinitely (5 minutes)
       setTimeout(() => {
-        if (subscription && !subscription.closed) {
+        if (!isResolved && subscription && !subscription.closed) {
           console.warn('Preload websocket timeout, assuming complete');
+          isResolved = true;
           subscription.unsubscribe();
           this.websocketService.closeConnection(wsUrl);
           resolve();
@@ -368,8 +396,10 @@ export class MapService {
 
   /**
    * Updates the content layer in the map style based on filter parameters
+   * @param filters - The filter parameters
+   * @param zoomToBounds - Whether to zoom to bounds (default: true)
    */
-  async loadContentLayer(filters: ContentLayerFilters): Promise<void> {
+  async loadContentLayer(filters: ContentLayerFilters, zoomToBounds: boolean = true): Promise<void> {
     const projectId = this.dashboardSessionService.getProjectId();
     
     if (!projectId) {
@@ -387,8 +417,10 @@ export class MapService {
     this._currentProfileCombinationID.set(filters.profile_combination_id);
     this.currentFilters = filters;
 
-    // First, zoom to bounds before loading the layer
-    await this.zoomToContentLayerBounds(filters);
+    // Zoom to bounds only if requested (for full reloads)
+    if (zoomToBounds) {
+      await this.zoomToContentLayerBounds(filters);
+    }
 
     const tileUrl = this.buildTileUrl(projectId, filters);
 
@@ -490,6 +522,14 @@ export class MapService {
   }
 
   /**
+   * Updates only the tile source without zooming (for Verkehrsmittel/Bewertung changes)
+   * This preserves the current map view while updating the data
+   */
+  async updateContentLayerTiles(filters: ContentLayerFilters): Promise<void> {
+    await this.loadContentLayer(filters, false);
+  }
+
+  /**
    * Removes the content layer from the map
    */
   removeContentLayer(): void {
@@ -530,16 +570,14 @@ export class MapService {
    */
   private getScoreFillColorExpression(): any {
     return [
-      'step',
+      'interpolate',
+      ['linear'],
       ['get', 'score'],
-      'rgb(181, 212, 233)',  // b5d4e9
-      600, 'rgb(147, 195, 224)',   // 93c3e0
-      1200, 'rgb(109, 173, 213)',   // 6dadd5
-      1800, 'rgb(75, 151, 201)',  // 4b97c9
-      2400, 'rgb(48, 126, 188)',  // 307ebc
-      3000, 'rgb(24, 100, 170)',  // 1864aa
-      3600, 'rgb(24, 100, 170)'   // 1864aa (same as last for > 60 min)
+      0,    'rgb(240, 240, 240)',
+      3600, 'rgb(55, 30, 120)'
     ];
+    
+    
   }
 
   /**

@@ -1,6 +1,26 @@
 <!-- map.component.html -->
 <div class="rounded-xl overflow-hidden h-full w-full relative">
   <div #mapContainer class="h-full w-full rounded-xl"></div>
+  <!-- Nominatim Search -->
+  <div class="absolute top-0 left-0 z-[1000] p-3 min-w-[300px] max-w-[400px] flex items-center gap-2">
+    <mat-form-field appearance="fill" class="search-form-field w-full rounded-full" >
+      <mat-label>Ort suchen</mat-label>
+      <input 
+        matInput 
+        type="text" 
+        [(ngModel)]="searchQuery"
+        (input)="onSearchInput($event)"
+        (keydown.enter)="onSearchSubmit()"
+        placeholder="z.B. Berlin, München..."
+        [matAutocomplete]="auto">
+      <mat-icon matPrefix>search</mat-icon>
+      <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onLocationSelected($event)">
+        <mat-option *ngFor="let result of searchResults" [value]="result">
+          <span>{{ result.display_name }}</span>
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+  </div>
   <!-- Loading indicator overlay -->
   <div class="map-loading-overlay" *ngIf="isMapLoading()">
     <div class="map-loading-content">

@@ -35,18 +35,45 @@ export class StatsComponent {
   constructor() {
     // Load saved level selection from localStorage
     this.loadSavedLevel();
-    // React to profile combination changes and map loading state to fetch data
+    // Track previous filter state to detect actual changes (excluding bewertung)
+    let previousFilters: { profileCombinationID: number | null; stateIds: number[] | undefined; categoryIds: number[] | undefined; personaIds: number[] | undefined; regiostarId: number | null | undefined } | null = null;
+    
+    // React to all relevant filter changes: profile combination, filters, and map loading state
+    // Note: bewertung is NOT watched here because both index and score are already in the response
+    // The display methods (formatDisplayValue, getDisplayValue) handle showing the correct value
     effect(() => {
       const profileCombinationID = this.filterConfigService.currentProfileCombinationID();
       const isMapLoading = this.mapService.isMapLoading();
+      const filters = this.filterConfigService.contentLayerFilters();
       
       // Only load stats when map is ready (not loading) and profile combination is available
-      if (profileCombinationID !== null && !isMapLoading) {
-        this.loadTopRankings();
+      if (profileCombinationID !== null && !isMapLoading && filters) {
+        // Check if filters actually changed (excluding bewertung which doesn't require API call)
+        const currentFilterState = {
+          profileCombinationID,
+          stateIds: filters.state_ids,
+          categoryIds: filters.category_ids,
+          personaIds: filters.persona_ids,
+          regiostarId: filters.regiotyp_id
+        };
+        
+        // Only reload if filters actually changed or this is the first load
+        const filtersChanged = !previousFilters || 
+          previousFilters.profileCombinationID !== currentFilterState.profileCombinationID ||
+          JSON.stringify(previousFilters.stateIds?.sort()) !== JSON.stringify(currentFilterState.stateIds?.sort()) ||
+          JSON.stringify(previousFilters.categoryIds?.sort()) !== JSON.stringify(currentFilterState.categoryIds?.sort()) ||
+          JSON.stringify(previousFilters.personaIds?.sort()) !== JSON.stringify(currentFilterState.personaIds?.sort()) ||
+          previousFilters.regiostarId !== currentFilterState.regiostarId;
+        
+        if (filtersChanged) {
+          this.loadTopRankings();
+          previousFilters = currentFilterState;
+        }
       } else {
         // Clear data if no profile combination is available or map is still loading
         if (profileCombinationID === null) {
           this.counties = [];
+          previousFilters = null;
         }
         // Keep loading state if map is still loading
         if (isMapLoading) {
@@ -60,11 +87,12 @@ export class StatsComponent {
     this.selectedLevel = newLevel;
     // Save the selection to localStorage
     this.saveLevel();
-    // Trigger new API call when level changes
+    // Trigger new API call when level changes (level is a parameter, not a filter)
     const profileCombinationID = this.filterConfigService.currentProfileCombinationID();
     const isMapLoading = this.mapService.isMapLoading();
+    const filters = this.filterConfigService.contentLayerFilters();
     
-    if (profileCombinationID !== null && !isMapLoading) {
+    if (profileCombinationID !== null && !isMapLoading && filters) {
       this.loadTopRankings();
     }
   }
