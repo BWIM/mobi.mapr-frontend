@@ -173,6 +173,10 @@ export class MapService {
       params = params.set('state_ids', filters.state_ids.join(','));
     }
 
+    if (filters.regiostar_ids && filters.regiostar_ids.length > 0) {
+      params = params.set('regiostar_ids', filters.regiostar_ids.join(','));
+    }
+
     // Note: regiostar_ids is not in ContentLayerFilters, but regiotyp_id is
     // The API expects regiostar_ids, so we'll skip it for now
     // If needed, we can add it to ContentLayerFilters later
@@ -303,8 +307,8 @@ export class MapService {
       params.push(`persona_ids=${filters.persona_ids.join(',')}`);
     }
 
-    if (filters.regiotyp_id !== undefined && filters.regiotyp_id !== null) {
-      params.push(`regiotyp_id=${filters.regiotyp_id}`);
+    if (filters.regiostar_ids && filters.regiostar_ids.length > 0) {
+      params.push(`regiostar_ids=${filters.regiostar_ids.join(',')}`);
     }
 
     if (filters.admin_level) {
@@ -439,15 +443,14 @@ export class MapService {
     }
 
     // Remove existing border layer source and layers if they exist
-    if (updatedStyle.sources['border-layer']) {
-      delete updatedStyle.sources['border-layer'];
-    }
+    // if (updatedStyle.sources['border-layer']) {
+    //   delete updatedStyle.sources['border-layer'];
+    // }
 
     // Remove existing content and border layers from layers array
     updatedStyle.layers = updatedStyle.layers.filter(
       layer => layer.id !== 'content-layer-fill' && 
-               layer.id !== 'content-layer-outline' && 
-               layer.id !== 'border-layer'
+               layer.id !== 'content-layer-outline'
     );
 
     // Add the new content layer source
@@ -460,14 +463,14 @@ export class MapService {
     } as SourceSpecification;
 
     // Add the border layer source
-    const borderTileUrl = `${environment.apiUrl}/borders/{z}/{x}/{y}.pbf`;
-    updatedStyle.sources['border-layer'] = {
-      type: 'vector',
-      tiles: [borderTileUrl],
-      minzoom: 0,
-      maxzoom: 14,
-      tileSize: 512
-    } as SourceSpecification;
+    // const borderTileUrl = `${environment.apiUrl}/borders/{z}/{x}/{y}.pbf`;
+    // updatedStyle.sources['border-layer'] = {
+    //   type: 'vector',
+    //   tiles: [borderTileUrl],
+    //   minzoom: 0,
+    //   maxzoom: 14,
+    //   tileSize: 512
+    // } as SourceSpecification;
 
     // Determine the fill color expression based on feature_type
     const fillColorExpression = filters.feature_type === 'score'
@@ -500,17 +503,17 @@ export class MapService {
     } as LayerSpecification);
 
     // Add border layer (between feature layers and labels)
-    updatedStyle.layers.push({
-      id: 'border-layer',
-      type: 'line',
-      source: 'border-layer',
-      'source-layer': 'borders',
-      paint: {
-        'line-color': fillColorExpression,
-        'line-width': 0.1,
-        'line-opacity': 0.5
-      }
-    } as LayerSpecification);
+    // updatedStyle.layers.push({
+    //   id: 'border-layer',
+    //   type: 'line',
+    //   source: 'border-layer',
+    //   'source-layer': 'borders',
+    //   paint: {
+    //     'line-color': fillColorExpression,
+    //     'line-width': 0.1,
+    //     'line-opacity': 0.5
+    //   }
+    // } as LayerSpecification);
 
     // Ensure labels layer is on top
     const labelsLayerIndex = updatedStyle.layers.findIndex(layer => layer.id === 'carto-labels-layer');
@@ -543,15 +546,14 @@ export class MapService {
     }
 
     // Remove border layer source
-    if (updatedStyle.sources['border-layer']) {
-      delete updatedStyle.sources['border-layer'];
-    }
+    // if (updatedStyle.sources['border-layer']) {
+    //   delete updatedStyle.sources['border-layer'];
+    // }
 
     // Remove content and border layers from layers array
     updatedStyle.layers = updatedStyle.layers.filter(
       layer => layer.id !== 'content-layer-fill' && 
-               layer.id !== 'content-layer-outline' && 
-               layer.id !== 'border-layer'
+               layer.id !== 'content-layer-outline'
     );
 
     this._currentProfileCombinationID.set(null);
@@ -569,16 +571,19 @@ export class MapService {
   /**
    * Returns the fill color expression for Score feature type
    */
+
   private getScoreFillColorExpression(): any {
     return [
-      'interpolate',
-      ['linear'],
+      'step',
       ['get', 'score'],
-      0,    'rgb(240, 240, 240)',
-      3600, 'rgb(55, 30, 120)'
+      'rgb(0,73,40)',      // 004928 (Dunkelgrün) - 0 min
+      600,  'rgb(0,73,40)',      // 004928 (Dunkelgrün) - 0-10 min
+      1200, 'rgb(60,140,100)',   // Darker medium green - 10-20 min
+      1800, 'rgb(120,180,160)',  // Medium-light green - 20-30 min
+      2400, 'rgb(160,140,180)',  // Purple-green transition - 30-40 min
+      3000, 'rgb(180,100,160)',  // Medium purple - 40-50 min
+      3600, 'rgb(72,38,131)'      // #482683 (Dark purple) - 50-60 min
     ];
-    
-    
   }
 
   /**

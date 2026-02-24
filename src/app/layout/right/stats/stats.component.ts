@@ -4,6 +4,7 @@ import { StatsService } from '../../../services/stats.service';
 import { FilterConfigService } from '../../../services/filter-config.service';
 import { MapService } from '../../../services/map.service';
 import { SettingsService } from '../../../services/settings.service';
+import { ProjectsService } from '../../../services/project.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { InfoOverlayComponent } from '../../../shared/info-overlay/info-overlay.component';
 
@@ -18,6 +19,7 @@ export class StatsComponent implements OnDestroy {
   private filterConfigService = inject(FilterConfigService);
   private mapService = inject(MapService);
   private settingsService = inject(SettingsService);
+  private projectService = inject(ProjectsService);
 
   counties: County[] = [];
   isLoading = true;
@@ -160,14 +162,28 @@ export class StatsComponent implements OnDestroy {
     this.isLoading = true;
     this.error = null;
 
+    // Use the same filtering logic as filter-config.service.ts contentLayerFilters
     const filters = this.filterConfigService.contentLayerFilters();
+    const currentProject = this.projectService.project();
+    const isMid = currentProject?.is_mid ?? false;
+    
+    // Apply the same filtering logic as contentLayerFilters
+    const selectedStates = this.filterConfigService.selectedStates();
+    const selectedActivities = this.filterConfigService.selectedActivities();
+    const selectedPersonas = this.filterConfigService.selectedPersonas();
+    const selectedRegioStars = this.filterConfigService.selectedRegioStars();
+
     const params = {
       type: this.selectedLevel,
       profile_combination_id: profileCombinationID,
-      state_ids: filters?.state_ids,
-      category_ids: filters?.category_ids,
-      persona_ids: filters?.persona_ids,
-      regiostar_ids: filters?.regiostar_ids
+      // Only include state_ids if there are selected states (same logic as contentLayerFilters)
+      state_ids: selectedStates.length > 0 ? selectedStates : undefined,
+      // Only include category_ids if project is MID and there are selected activities (same logic as contentLayerFilters)
+      category_ids: (isMid && selectedActivities.length > 0) ? selectedActivities : undefined,
+      // Only include persona_ids if project is MID and there are selected personas (same logic as contentLayerFilters)
+      persona_ids: (isMid && selectedPersonas.length > 0) ? selectedPersonas : undefined,
+      // Only include regiostar_ids if there are selected regiostars (same logic as contentLayerFilters)
+      regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined
     };
 
     this.statsService.getTopRankings(params).subscribe({

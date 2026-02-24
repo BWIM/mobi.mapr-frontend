@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, TemplateRef } from '@angular/core';
 import { Subscription, firstValueFrom, debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
-import { Map, NavigationControl, FullscreenControl } from 'maplibre-gl';
+import { Map, NavigationControl, FullscreenControl, Popup } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { MapService } from '../../services/map.service';
 import MinimapControl from "maplibregl-minimap";
@@ -9,6 +9,7 @@ import { FilterConfigService } from '../../services/filter-config.service';
 import { MatDialog } from '@angular/material/dialog';
 import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.component';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { FeatureSelectionService } from '../../shared/services/feature-selection.service';
 
 interface NominatimResult {
   display_name: string;
@@ -34,6 +35,8 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private filterConfigService = inject(FilterConfigService);
   private dialog = inject(MatDialog);
   private http = inject(HttpClient);
+  private featureSelectionService = inject(FeatureSelectionService);
+  private popup?: Popup;
 
   // Nominatim search properties
   searchQuery: string = '';
@@ -72,7 +75,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     { letter: 'C', color: 'rgba(238, 210, 2, 0.7)' },
     { letter: 'D', color: 'rgba(237, 112, 20, 0.7)' },
     { letter: 'E', color: 'rgba(194, 24, 7, 0.7)' },
-    { letter: 'F', color: 'rgba(150, 86, 162, 0.7)' }
+    { letter: 'F', color: 'rgba(197, 136, 187, 0.7)' }
   ];
 
   // Time (score) colors - gradient stops
@@ -97,6 +100,28 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       rgb(24, 100, 170) 100%)`;
   }
 
+  getIndexName(index: number): string {
+    if (index <= 0) return "Error";
+    if (index < 0.28) return "A+";
+    if (index < 0.32) return "A";
+    if (index < 0.35) return "A-";
+    if (index < 0.4) return "B+";
+    if (index < 0.45) return "B";
+    if (index < 0.5) return "B-";
+    if (index < 0.56) return "C+";
+    if (index < 0.63) return "C";
+    if (index < 0.71) return "C-";
+    if (index < 0.8) return "D+";
+    if (index < 0.9) return "D";
+    if (index < 1.0) return "D-";
+    if (index < 1.12) return "E+";
+    if (index < 1.26) return "E";
+    if (index < 1.41) return "E-";
+    if (index < 1.59) return "F+";
+    if (index < 1.78) return "F";
+    return "F-";
+  }
+
   openLegendDialog(): void {
     this.dialog.open(InfoDialogComponent, {
       width: '80vw',
@@ -117,6 +142,10 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       this.mapStyle = style;
       if (this.map) {
         this.map.setStyle(style);
+        // Re-setup event handlers after style change (MapLibre removes them when style changes)
+        this.map.once('style.load', () => {
+          this.setupFeatureInteractions();
+        });
       }
     });
   }
@@ -138,16 +167,25 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       this.map = new Map(mapOptions);
       this.mapService.setMap(this.map);
 
+      // Initialize popup for hover tooltips
+      this.popup = new Popup({
+        closeButton: false,
+        closeOnClick: false,
+        anchor: 'bottom',
+        offset: [0, -5]
+      });
+
       // Add navigation controls
       this.map.addControl(new NavigationControl({ showCompass: false }), 'top-right');
       this.map.addControl(new FullscreenControl(), 'top-right');
       this.map.dragRotate.disable();
       this.map.touchZoomRotate.disableRotation();
 
-      // Wait for map to load before adding minimap to avoid initialization errors
+      // Wait for map to load before adding minimap and setting up event handlers
       this.map.once('load', () => {
         if (this.map) {
           this.map.addControl(new MinimapControl(this.mapService.getMinimapConfig()), 'bottom-right');
+          this.setupFeatureInteractions();
         }
       });
     }
@@ -220,6 +258,101 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       center: [lon, lat],
       zoom: 12,
       duration: 1500
+    });
+  }
+
+  private setupFeatureInteractions(): void {
+    if (!this.map || !this.popup) {
+      return;
+    }
+
+    // Note: MapLibre automatically removes all event handlers when setStyle() is called,
+    // so we don't need to manually remove them here. We just add them fresh each time.
+
+    // Change cursor to pointer when hovering over features
+    this.map.on('mouseenter', 'content-layer-fill', () => {
+      if (this.map) {
+        this.map.getCanvas().style.cursor = 'pointer';
+      }
+    });
+
+    this.map.on('mouseleave', 'content-layer-fill', () => {
+      if (this.map) {
+        this.map.getCanvas().style.cursor = '';
+      }
+      if (this.popup) {
+        this.popup.remove();
+      }
+    });
+
+    // Show feature name and score/index on hover
+    this.map.on('mousemove', 'content-layer-fill', (e) => {
+      if (!this.map || !this.popup || !e.features || e.features.length === 0) {
+        return;
+      }
+
+      const feature = e.features[0];
+      const properties = feature.properties;
+      const name = properties['name'] || properties['NAME'] || 'Unnamed';
+      const isQualityMode = this.isQualityMode;
+      
+      let valueText = '';
+      if (isQualityMode) {
+        const index = properties['index'];
+        if (index !== undefined && index !== null) {
+          // Index is stored as integer (multiplied by 100), so divide by 100
+          const indexValue = index / 100;
+          const indexName = this.getIndexName(indexValue);
+          valueText = `Index: ${indexName}`;
+        } else {
+          valueText = 'Index: N/A';
+        }
+      } else {
+        const score = properties['score'];
+        if (score !== undefined && score !== null) {
+          // Score is in seconds, convert to minutes
+          const minutes = (score / 60).toFixed(1);
+          valueText = `Score: ${minutes} min`;
+        } else {
+          valueText = 'Score: N/A';
+        }
+      }
+
+      const popupContent = `
+        <div>
+          <div style="font-weight: 600; margin-bottom: 4px;">${name}</div>
+          <div>${valueText}</div>
+        </div>
+      `;
+
+      this.popup
+        .setLngLat(e.lngLat)
+        .setHTML(popupContent)
+        .addTo(this.map);
+    });
+
+    // Handle feature click - log to analyze component
+    this.map.on('click', 'content-layer-fill', (e) => {
+      if (!e.features || e.features.length === 0) {
+        return;
+      }
+
+      const feature = e.features[0];
+      const properties = feature.properties;
+      
+      const featureData = {
+        properties: {
+          name: properties['name'] || properties['NAME'] || 'Unnamed',
+          score: properties['score'],
+          index: properties['index'],
+          ...properties
+        },
+        geometry: feature.geometry,
+        id: feature.id
+      };
+
+      // Send to feature selection service
+      this.featureSelectionService.setSelectedMapLibreFeature(featureData);
     });
   }
 }
