@@ -145,6 +145,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         // Re-setup event handlers after style change (MapLibre removes them when style changes)
         this.map.once('style.load', () => {
           this.setupFeatureInteractions();
+          this.setupTileLoadingEvents();
         });
       }
     });
@@ -186,6 +187,9 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         if (this.map) {
           this.map.addControl(new MinimapControl(this.mapService.getMinimapConfig()), 'bottom-right');
           this.setupFeatureInteractions();
+          this.setupTileLoadingEvents();
+          // Initial map load is complete
+          this.mapService.setMapLoading(false);
         }
       });
     }
@@ -353,6 +357,55 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
       // Send to feature selection service
       this.featureSelectionService.setSelectedMapLibreFeature(featureData);
+    });
+  }
+
+  /**
+   * Sets up event listeners to track tile loading state
+   */
+  private setupTileLoadingEvents(): void {
+    if (!this.map) {
+      return;
+    }
+
+    // Track source data loading for content layer specifically
+    this.map.on('sourcedata', (e) => {
+      if (e?.sourceId === 'content-layer') {
+        if (!e?.isSourceLoaded) {
+          // Content layer source is starting to load
+          this.mapService.setMapLoading(true);
+        }
+        // When isSourceLoaded is true, we wait for idle event to hide loading
+      }
+    });
+
+    // Track when tiles start loading - show loading if content-layer exists
+    // This handles both initial load and subsequent tile loads (pan/zoom)
+    this.map.on('dataloading', (e) => {
+      if (e?.dataType === 'tile') {
+        // Check if content-layer source exists (meaning we care about these tiles)
+        const style = this.map?.getStyle();
+        if (style?.sources && 'content-layer' in style.sources) {
+          this.mapService.setMapLoading(true);
+        }
+      }
+    });
+
+    // Track when tiles finish loading
+    this.map.on('idle', () => {
+      // Only hide loading indicator if we're actually loading
+      // This prevents flickering when map is idle but not loading
+      if (this.mapService.isMapLoading()) {
+        // Small delay to ensure all tiles are rendered
+        setTimeout(() => {
+          this.mapService.setMapLoading(false);
+        }, 100);
+      }
+    });
+
+    // Handle errors - stop loading indicator
+    this.map.on('error', () => {
+      this.mapService.setMapLoading(false);
     });
   }
 }

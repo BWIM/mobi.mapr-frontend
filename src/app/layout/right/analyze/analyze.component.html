@@ -1,14 +1,100 @@
 <div class="p-4 bg-[var(--secondary-color)] text-[var(--primary-color)] relative flex flex-col rounded-2xl border border-[var(--primary-color)]" *ngIf="!selectedFeature">
   <div class="flex-1 flex items-center justify-center">
     <p class="text-sm text-[var(--primary-color)] text-center px-4">
-      Klicke auf einen Ort in der Karte oder nutze die Suchleiste, um weitere Analysen zu erhalten
+      Klicke auf einen Ort in der Karte, um weitere Analysen zu erhalten
     </p>
   </div>
 </div>
 <div class="h-full p-4 bg-[var(--background-color)] text-[var(--primary-color)] relative flex flex-col rounded-2xl" *ngIf="selectedFeature">
-    <div class="flex-1 flex items-center justify-center">
-      <p class="text-sm text-[var(--primary-color)] text-center px-4">
-        Klicke auf einen Ort in der Karte oder nutze die Suchleiste, um weitere Analysen zu erhalten
-      </p>
+  <!-- Feature Info Section at the top -->
+  <div class="mb-4" *ngIf="selectedFeature">
+    <!-- Loading State -->
+    <div *ngIf="isLoadingFeatureInfo" class="text-sm text-[var(--primary-color)] py-4">
+      Lade Feature-Informationen...
+    </div>
+    
+    <!-- Error State -->
+    <div *ngIf="featureInfoError" class="text-sm text-red-600 py-4">
+      {{ featureInfoError }}
+    </div>
+    
+    <!-- Feature Info Table Layout -->
+    <div *ngIf="featureInfo && !isLoadingFeatureInfo && !featureInfoError" class="rounded-lg overflow-hidden">
+      <!-- Title -->
+      <div class="px-2 py-2 border-b border-white">
+        <h3 class="text-xl font-bold text-white">{{ featureInfo.name }}</h3>
+      </div>
+      
+      <!-- Table-like Layout with 3 columns -->
+      <div class="flex">
+        <!-- Column 1: Overall Rank -->
+        <div class="flex-1 px-2 py-2 border-r border-white">
+          <div><span class="text-m text-white font-bold">Platz </span><span class="text-xs text-white">gesamt</span></div>
+          <div><span class="text-4xl font-bold text-white mr-1">{{ featureInfo.rank }}</span><span class="text-sm text-white mt-1">/ {{ featureInfo.total_ranks }}</span></div>
+        </div>
+        
+        <!-- Column 2: Regional Class Rank -->
+        <div class="flex-1 px-2 py-2 border-r border-white" *ngIf="featureInfo.rank_regiostar !== null">
+          <div><span class="text-m text-white font-bold">Platz </span><span class="text-xs text-white">Regionalklasse</span></div>
+          <div class="text-4xl font-bold text-white">{{ featureInfo.rank_regiostar }}</div>
+          <div class="text-4xl font-bold text-white">-</div>
+          <div class="text-sm text-white mt-1">/ {{ featureInfo.total_rank_regiostar }}</div>
+        </div>
+        
+        <!-- Column 3: Population and Grade -->
+        <div class="flex-1 px-2 py-2">
+          <div class="text-sm text-white font-bold">Einwohnende:</div>
+          <div class="text-base text-white mb-2">{{ featureInfo.population | number }}</div>
+          <div class="text-sm text-white font-bold">Note:</div>
+          <div class="text-base text-white">{{ getGrade(featureInfo.index) }}</div>
+        </div>
+      </div>
     </div>
   </div>
+  
+  <!-- Analyze Chart Section -->
+  <div class="mb-4" *ngIf="selectedFeature">
+    <!-- Loading State -->
+    <div *ngIf="isLoadingAnalyze" class="text-sm text-[var(--primary-color)] py-4">
+      Lade Aktivitäts-Analyse...
+    </div>
+    
+    <!-- Error State -->
+    <div *ngIf="analyzeError" class="text-sm text-red-600 py-4">
+      {{ analyzeError }}
+    </div>
+    
+    <!-- Chart -->
+    <div *ngIf="activitiesChartData && !isLoadingAnalyze && !analyzeError" class="overflow-hidden">
+      <!-- Title -->
+      <div class="mb-4">
+        <h3 class="text-lg font-bold text-white">Analyse Top 5 Aktivitäten</h3>
+      </div>
+      
+      <!-- Chart Container -->
+      <div class="relative" style="">
+        <p-chart #activitiesChart type="bar" [data]="activitiesChartData" [options]="activitiesChartOptions"></p-chart>
+      </div>
+      
+      <!-- Activity List -->
+      <div class="">
+        <div *ngFor="let category of getSortedCategories(); let i = index" 
+             class="text-sm text-white flex items-center">
+          <span class="font-bold mr-2">{{ i + 1 }}.</span>
+          <span>{{ getCategoryDisplayName(category.category_name) }}</span>
+        </div>
+      </div>
+      
+      <!-- Plus Button -->
+      <div class="mt-4 flex justify-center">
+        <button 
+          mat-fab
+          color="primary"
+          (click)="openAllCategoriesOverlay()"
+          aria-label="Alle Kategorien anzeigen">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

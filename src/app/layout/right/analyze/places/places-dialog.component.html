@@ -1,0 +1,45 @@
+<div class="w-full max-w-full h-[85vh] flex flex-col">
+  <h2 mat-dialog-title class="text-2xl font-bold text-white mb-4">
+    {{ categoryName }}
+  </h2>
+  
+  <mat-dialog-content class="mat-typography flex-1 overflow-hidden py-4 flex flex-col">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="text-sm text-[var(--primary-color)] py-4 text-center flex-1 flex items-center justify-center">
+      <div class="flex flex-col items-center gap-4">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Lade Karte...</p>
+      </div>
+    </div>
+    
+    <!-- Error State -->
+    <div *ngIf="error && !isLoading" class="text-sm text-red-600 py-4 text-center flex-1 flex items-center justify-center">
+      {{ error }}
+    </div>
+    
+    <!-- Map Content -->
+    <div class="relative w-full h-full">
+      <div #mapContainerPlaces class="w-full h-full"></div>
+      
+      <!-- Legend Overlay -->
+      <div *ngIf="categoryLegendItems.length > 0" class="absolute top-0 left-0 bg-[var(--background-color)] bg-opacity-75 p-3" style="z-index: 1000;">
+        <div class="text-[var(--primary-color)] text-sm font-semibold mb-2">Kategorien</div>
+        <div class="flex flex-col gap-2">
+          <div *ngFor="let item of categoryLegendItems" 
+               class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+               (click)="toggleCategory(item.name)"
+               [class.opacity-50]="!item.enabled">
+            <div class="w-4 h-4 rounded-full border-2 border-[var(--primary-color)] flex-shrink-0" [style.background-color]="item.color"></div>
+            <span class="text-[var(--primary-color)] text-xs">
+              {{ item.name }} ({{ item.relevance.toFixed(1) }}%)
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="mt-4 flex-shrink-0">
+    <button mat-button (click)="onClose()">Schließen</button>
+  </mat-dialog-actions>
+</div>

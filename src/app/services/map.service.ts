@@ -18,6 +18,27 @@ export interface ContentLayerFilters {
   feature_type: 'index' | 'score';
 }
 
+export interface FeatureInfoResponse {
+  name: string;
+  population: number;
+  rank: number;
+  total_ranks: number;
+  rank_regiostar: number | null;
+  total_rank_regiostar: number | null;
+  index: number;
+  score: number;
+}
+
+export interface FeatureInfoParams {
+  feature_type: 'municipality' | 'hexagon' | 'county' | 'state';
+  feature_id: number;
+  profile_combination_id: number;
+  category_ids?: number[];
+  persona_ids?: number[];
+  regiostar_ids?: number[];
+  state_ids?: number[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -607,5 +628,69 @@ export class MapService {
       'rgba(194, 24, 7, 0.7)',
       'rgba(150, 86, 162, 0.7)'
     ];
+  }
+
+  /**
+   * Determines the feature type based on map zoom level
+   * Matches backend logic: if z <= 7: state, elif z <= 9: county, elif z <= 10: municipality, else: hexagon
+   * Uses Math.floor to match backend integer comparison behavior
+   */
+  getFeatureTypeFromZoom(zoom: number): 'municipality' | 'hexagon' | 'county' | 'state' {
+    // Backend compares integers, so we floor the zoom to match that behavior
+    // This ensures zoom 10.0, 10.1, 10.9 all map to the same integer (10) for comparison
+    const z = Math.floor(zoom);
+    if (z <= 7) {
+      return 'state';
+    } else if (z <= 9) {
+      return 'county';
+    } else if (z <= 10) {
+      return 'municipality';
+    } else {
+      return 'hexagon';
+    }
+  }
+
+  /**
+   * Gets feature information from the API
+   */
+  getFeatureInfo(params: FeatureInfoParams): Observable<FeatureInfoResponse> {
+    const projectId = this.dashboardSessionService.getProjectId();
+    const shareKey = this.dashboardSessionService.getShareKey();
+    
+    if (!projectId && !shareKey) {
+      throw new Error('Project ID or share key is required');
+    }
+
+    const url = `${environment.apiUrl}/feature-info/`;
+    let httpParams = new HttpParams()
+      .set('feature_type', params.feature_type)
+      .set('feature_id', params.feature_id.toString())
+      .set('profile_combination_id', params.profile_combination_id.toString());
+
+    // Add project or key
+    if (projectId) {
+      httpParams = httpParams.set('project', projectId.toString());
+    } else if (shareKey) {
+      httpParams = httpParams.set('key', shareKey);
+    }
+
+    // Add optional filter parameters
+    if (params.category_ids && params.category_ids.length > 0) {
+      httpParams = httpParams.set('category_ids', params.category_ids.join(','));
+    }
+
+    if (params.persona_ids && params.persona_ids.length > 0) {
+      httpParams = httpParams.set('persona_ids', params.persona_ids.join(','));
+    }
+
+    if (params.regiostar_ids && params.regiostar_ids.length > 0) {
+      httpParams = httpParams.set('regiostar_ids', params.regiostar_ids.join(','));
+    }
+
+    if (params.state_ids && params.state_ids.length > 0) {
+      httpParams = httpParams.set('state_ids', params.state_ids.join(','));
+    }
+
+    return this.http.get<FeatureInfoResponse>(url, { params: httpParams });
   }
 }

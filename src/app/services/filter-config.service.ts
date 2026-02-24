@@ -682,14 +682,8 @@ export class FilterConfigService {
         await this.mapService.updateContentLayerTiles(filters);
       }
 
-      // Clear loading state after a short delay to allow map to render
-      // This triggers borders, boundingBox, and stats
-      const wasLoading = this.mapService.isMapLoading();
-      if (wasLoading) {
-        setTimeout(() => {
-          this.mapService.setMapLoading(false);
-        }, 500);
-      }
+      // Loading state will be managed by map event listeners (dataloading/idle events)
+      // in center.component.ts, so we don't need to manually clear it here
     } catch (error) {
       console.error('Error in updateMapLayer:', error);
       // Make sure to close dialog and reset loading state on error
