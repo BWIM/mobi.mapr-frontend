@@ -12,7 +12,7 @@
       </h3>
       <ul class="list-none p-0 m-0 flex flex-col gap-2">
         <li *ngFor="let item of visualComponents" 
-            [ngClass]="'flex items-center gap-3 p-3 rounded-lg transition-colors' + (item.url ? ' cursor-pointer hover:bg-gray-100' : '')"
+            [ngClass]="'flex items-center gap-3 p-3 rounded-lg text-[var(--primary-color)] transition-colors' + (item.url ? ' cursor-pointer hover:bg-gray-100' : '')"
             (click)="item.url ? openLink(item.url) : null">
           <mat-icon class="text-[var(--primary-color)]">{{item.icon}}</mat-icon>
           <span class="flex-1">{{item.name}}</span>
@@ -29,7 +29,7 @@
       </h3>
       <ul class="list-none p-0 m-0 flex flex-col gap-2">
         <li *ngFor="let item of dataComponents" 
-            [ngClass]="'flex items-center gap-3 p-3 rounded-lg transition-colors' + (item.url ? ' cursor-pointer hover:bg-gray-100' : '')"
+            [ngClass]="'flex items-center gap-3 p-3 rounded-lg text-[var(--primary-color)] transition-colors' + (item.url ? ' cursor-pointer hover:bg-gray-100' : '')"
             (click)="item.url ? openLink(item.url) : null">
           <mat-icon class="text-[var(--primary-color)]">{{item.icon}}</mat-icon>
           <span class="flex-1">{{item.name}}</span>
@@ -46,7 +46,7 @@
       </h3>
       <ul class="list-none p-0 m-0 flex flex-col gap-2">
         <li *ngFor="let item of backendComponents" 
-            [ngClass]="'flex items-center gap-3 p-3 rounded-lg transition-colors' + (item.url ? ' cursor-pointer hover:bg-gray-100' : '')"
+            [ngClass]="'flex items-center gap-3 p-3 rounded-lg text-[var(--primary-color)] transition-colors' + (item.url ? ' cursor-pointer hover:bg-gray-100' : '')"
             (click)="item.url ? openLink(item.url) : null">
           <mat-icon class="text-[var(--primary-color)]">{{item.icon}}</mat-icon>
           <span class="flex-1">{{item.name}}</span>
@@ -63,7 +63,7 @@
       </h3>
       <ul class="list-none p-0 m-0 flex flex-col gap-2">
         <li *ngFor="let item of routingComponents" 
-            [ngClass]="'flex items-center gap-3 p-3 rounded-lg transition-colors' + (item.url ? ' cursor-pointer hover:bg-gray-100' : '')"
+            [ngClass]="'flex items-center gap-3 p-3 rounded-lg text-[var(--primary-color)] transition-colors' + (item.url ? ' cursor-pointer hover:bg-gray-100' : '')"
             (click)="item.url ? openLink(item.url) : null">
           <mat-icon class="text-[var(--primary-color)]">{{item.icon}}</mat-icon>
           <span class="flex-1">{{item.name}}</span>
@@ -81,7 +81,7 @@
     </div>
     <ul class="list-none p-0 m-0 flex flex-col gap-2">
       <li *ngFor="let item of citiesComponents" 
-          [ngClass]="'flex items-center gap-3 p-3 rounded-lg transition-colors' + (item.url ? ' cursor-pointer hover:bg-gray-100' : '')"
+          [ngClass]="'flex items-center gap-3 p-3 rounded-lg text-[var(--primary-color)] transition-colors' + (item.url ? ' cursor-pointer hover:bg-gray-100' : '')"
           (click)="item.url ? openLink(item.url) : null">
           <mat-icon class="text-[var(--primary-color)]">{{item.icon}}</mat-icon>
           <span class="flex-1">{{item.name}}</span>

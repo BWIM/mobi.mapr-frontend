@@ -51,6 +51,16 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
     { letter: 'F', color: 'rgba(197, 136, 187, 0.7)' }
   ];
 
+  // Time (score) colors - discrete 10-minute steps
+  timeColors = [
+    { value: '0-10', color: 'rgb(162, 210, 235)' },
+    { value: '10-20', color: 'rgb(152, 202, 193)' },
+    { value: '20-30', color: 'rgb(98, 146, 165)' },
+    { value: '30-40', color: 'rgb(74, 89, 160)' },
+    { value: '40-50', color: 'rgb(43, 40, 105)' },
+    { value: '50-60+', color: 'rgb(23, 25, 63)' }
+  ];
+
   private translate = inject(TranslateService);
 
   constructor(
@@ -264,16 +274,6 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
     return this.data.getGrade(index);
   }
 
-  getTimeGradient(): string {
-    return `linear-gradient(to right, 
-      rgb(181, 212, 233) 0%, 
-      rgb(147, 195, 224) 16.67%, 
-      rgb(109, 173, 213) 33.33%, 
-      rgb(75, 151, 201) 50%, 
-      rgb(48, 126, 188) 66.67%, 
-      rgb(24, 100, 170) 83.33%, 
-      rgb(24, 100, 170) 100%)`;
-  }
 
   isPlacesButtonEnabled(): boolean {
     return this.data.featureType === 'hexagon' || this.data.featureType === 'municipality';

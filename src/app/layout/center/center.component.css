@@ -232,22 +232,25 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Time legend (color gradient) */
+/* Time legend (discrete color steps) */
 .legend-time {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.legend-gradient {
-  width: 100%;
-}
-
-.gradient-bar {
+.legend-steps {
+  display: flex;
   width: 100%;
   height: 20px;
   border-radius: 4px;
+  overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.legend-step {
+  flex: 1;
+  height: 100%;
 }
 
 .legend-labels {

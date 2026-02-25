@@ -40,13 +40,18 @@
         </div>
       </div>
     </div>
-    <!-- Time legend (color gradient) -->
+    <!-- Time legend (discrete color steps) -->
     <div class="legend-time" *ngIf="!isQualityMode">
-      <div class="legend-gradient">
-        <div class="gradient-bar" [style.background]="getTimeGradient()"></div>
+      <div class="legend-steps">
+        <div class="legend-step" *ngFor="let item of timeColors" [style.background-color]="item.color"></div>
       </div>
       <div class="legend-labels">
         <span class="legend-label">{{ 'map.legend.time.min0' | translate }}</span>
+        <span class="legend-label">10</span>
+        <span class="legend-label">20</span>
+        <span class="legend-label">30</span>
+        <span class="legend-label">40</span>
+        <span class="legend-label">50</span>
         <span class="legend-label">{{ 'map.legend.time.min60Plus' | translate }}</span>
       </div>
     </div>
@@ -65,7 +70,9 @@
           </p>
           <div class="space-y-3">
             <div class="flex items-center gap-3">
-              <div class="gradient-bar" style="width: 100px; height: 20px; border-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.2); background: linear-gradient(to right, rgb(181, 212, 233) 0%, rgb(147, 195, 224) 16.67%, rgb(109, 173, 213) 33.33%, rgb(75, 151, 201) 50%, rgb(48, 126, 188) 66.67%, rgb(24, 100, 170) 83.33%, rgb(24, 100, 170) 100%);"></div>
+              <div class="legend-steps" style="width: 100px; height: 20px; border-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.2); display: flex; overflow: hidden;">
+                <div class="legend-step" *ngFor="let item of timeColors" [style.background-color]="item.color" style="flex: 1; height: 100%;"></div>
+              </div>
               <div>
                 <p class="font-medium">{{ 'map.legend.time.scale' | translate }}</p>
                 <p class="text-sm opacity-90">{{ 'map.legend.time.scaleDescription' | translate }}</p>

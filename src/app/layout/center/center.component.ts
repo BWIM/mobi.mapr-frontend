@@ -79,28 +79,21 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     { letter: 'E', color: 'rgba(194, 24, 7, 0.7)' },
     { letter: 'F', color: 'rgba(197, 136, 187, 0.7)' }
   ];
-
-  // Time (score) colors - gradient stops
+  // 185, 221, 239
+  // 187, 219, 214
+  // 98, 146, 165
+  // 74, 89, 160
+  // 67, 43, 112
+  // 196, 40, 112
+  // Time (score) colors - discrete 10-minute steps
   timeColors = [
-    { value: '< 10', color: 'rgb(204, 232, 230)' },
-    { value: '10', color: 'rgb(153, 211, 206)' },
-    { value: '20', color: 'rgb(102, 190, 181)' },
-    { value: '30', color: 'rgb(51, 170, 156)' },
-    { value: '40', color: 'rgb(0, 150, 131)' },
-    { value: '50', color: 'rgb(0, 121, 107)' },
-    { value: '60+', color: 'rgb(0, 96, 85)' }
+    { value: '0-10', color: 'rgb(185, 221, 239)' },
+    { value: '10-20', color: 'rgb(187, 219, 214)' },
+    { value: '20-30', color: 'rgb(98, 146, 165)' },
+    { value: '30-40', color: 'rgb(74, 89, 160)' },
+    { value: '40-50', color: 'rgb(67, 43, 112)' },
+    { value: '50-60+', color: 'rgb(196, 40, 112)' }
   ];
-
-  getTimeGradient(): string {
-    return `linear-gradient(to right, 
-      rgb(181, 212, 233) 0%, 
-      rgb(147, 195, 224) 16.67%, 
-      rgb(109, 173, 213) 33.33%, 
-      rgb(75, 151, 201) 50%, 
-      rgb(48, 126, 188) 66.67%, 
-      rgb(24, 100, 170) 83.33%, 
-      rgb(24, 100, 170) 100%)`;
-  }
 
   getIndexName(index: number): string {
     if (index <= 0) return this.translate.instant('map.popup.error');
@@ -380,38 +373,27 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    // Track source data loading for content layer specifically
-    this.map.on('sourcedata', (e) => {
-      if (e?.sourceId === 'content-layer') {
-        if (!e?.isSourceLoaded) {
-          // Content layer source is starting to load
-          this.mapService.setMapLoading(true);
-        }
-        // When isSourceLoaded is true, we wait for idle event to hide loading
-      }
-    });
-
-    // Track when tiles start loading - show loading if content-layer exists
+    // Track when tiles start loading - show loading immediately when request starts
     // This handles both initial load and subsequent tile loads (pan/zoom)
     this.map.on('dataloading', (e) => {
       if (e?.dataType === 'tile') {
         // Check if content-layer source exists (meaning we care about these tiles)
         const style = this.map?.getStyle();
         if (style?.sources && 'content-layer' in style.sources) {
+          // Start loading immediately when tile request begins
           this.mapService.setMapLoading(true);
         }
       }
     });
 
-    // Track when tiles finish loading
+    // Track when tiles finish loading and are rendered
+    // idle fires when all tiles are loaded AND rendered (map is idle)
     this.map.on('idle', () => {
       // Only hide loading indicator if we're actually loading
       // This prevents flickering when map is idle but not loading
       if (this.mapService.isMapLoading()) {
-        // Small delay to ensure all tiles are rendered
-        setTimeout(() => {
-          this.mapService.setMapLoading(false);
-        }, 100);
+        // Stop loading when map is idle (all tiles loaded and rendered)
+        this.mapService.setMapLoading(false);
       }
     });
 

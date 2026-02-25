@@ -591,19 +591,25 @@ export class MapService {
 
   /**
    * Returns the fill color expression for Score feature type
+   * 185, 221, 239
+187, 219, 214
+98, 146, 165
+74, 89, 160
+67, 43, 112
+196, 40, 112
    */
 
   private getScoreFillColorExpression(): any {
     return [
       'step',
       ['get', 'score'],
-      'rgb(2,46,33)',      // 004928 (Dunkelgrün) - 0 min
-      600,  'rgb(2,46,33)',      // 004928 (Dunkelgrün) - 0-10 min
-      1200, 'rgb(77,135,105)',   // Darker medium green - 10-20 min
-      1800, 'rgb(186,211,201)',  // Medium-light green - 20-30 min
-      2400, 'rgb(205,189,218)',  // Purple-green transition - 30-40 min
-      3000, 'rgb(211,174,206)',  // Medium purple - 40-50 min
-      3600, 'rgb(193,121,171)'      // #482683 (Dark purple) - 50-60 min
+      'rgb(185,221,239)',      // 004928 (Dunkelgrün) - 0 min
+      600,  'rgb(185,221,214)',      // 004928 (Dunkelgrün) - 0-10 min
+      1200, 'rgb(187,219,214)',   // Darker medium green - 10-20 min
+      1800, 'rgb(98,146,165)',  // Medium-light green - 20-30 min
+      2400, 'rgb(74,89,160)',  // Purple-green transition - 30-40 min
+      3000, 'rgb(67,43,112)',  // Medium purple - 40-50 min
+      3600, 'rgb(196,40,112)'      // #482683 (Dark purple) - 50-60 min
     ];
   }
 

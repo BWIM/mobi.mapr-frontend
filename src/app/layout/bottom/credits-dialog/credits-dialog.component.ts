@@ -22,7 +22,7 @@ export class CreditsDialogComponent {
   visualComponents: InfoComponent[] = [
     { name: 'OpenStreetMap', icon: 'map', url: 'https://www.openstreetmap.org' },
     { name: 'Angular', icon: 'code', url: 'https://angular.io' },
-    { name: 'PrimeNG', icon: 'desktop_windows', url: 'https://primeng.org' },
+    { name: 'Material Design', icon: 'desktop_windows', url: 'https://material.angular.io' },
     { name: 'Carto', icon: 'place', url: 'https://carto.com' },
     { name: 'MapLibre', icon: 'place', url: 'https://maplibre.org' },
     { name: 'Nominatim', icon: 'place', url: 'https://nominatim.org' },
