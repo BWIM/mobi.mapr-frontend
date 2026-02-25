@@ -30,7 +30,7 @@
           <div *ngFor="let category of allCategories; let i = index" 
                class="category-item text-sm text-white flex items-center mb-2">
             <span class="font-bold mr-2">{{ i + 1 }}.</span>
-            <span>{{ getCategoryDisplayName(category.category_name) }}</span>
+              <span>{{ category.category_name }}</span>
           </div>
         </div>
       </div>

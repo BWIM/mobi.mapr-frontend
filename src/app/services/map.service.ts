@@ -597,13 +597,13 @@ export class MapService {
     return [
       'step',
       ['get', 'score'],
-      'rgb(0,73,40)',      // 004928 (Dunkelgrün) - 0 min
-      600,  'rgb(0,73,40)',      // 004928 (Dunkelgrün) - 0-10 min
-      1200, 'rgb(60,140,100)',   // Darker medium green - 10-20 min
-      1800, 'rgb(120,180,160)',  // Medium-light green - 20-30 min
-      2400, 'rgb(160,140,180)',  // Purple-green transition - 30-40 min
-      3000, 'rgb(180,100,160)',  // Medium purple - 40-50 min
-      3600, 'rgb(72,38,131)'      // #482683 (Dark purple) - 50-60 min
+      'rgb(2,46,33)',      // 004928 (Dunkelgrün) - 0 min
+      600,  'rgb(2,46,33)',      // 004928 (Dunkelgrün) - 0-10 min
+      1200, 'rgb(77,135,105)',   // Darker medium green - 10-20 min
+      1800, 'rgb(186,211,201)',  // Medium-light green - 20-30 min
+      2400, 'rgb(205,189,218)',  // Purple-green transition - 30-40 min
+      3000, 'rgb(211,174,206)',  // Medium purple - 40-50 min
+      3600, 'rgb(193,121,171)'      // #482683 (Dark purple) - 50-60 min
     ];
   }
 

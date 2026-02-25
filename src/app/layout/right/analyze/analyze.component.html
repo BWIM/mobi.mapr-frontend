@@ -52,8 +52,27 @@
     </div>
   </div>
   
-  <!-- Analyze Chart Section -->
-  <div class="mb-4" *ngIf="selectedFeature">
+  <!-- Map Section (for non-MID projects or single category) -->
+  <div class="mb-4 flex-1 flex flex-col min-h-0" *ngIf="selectedFeature && shouldShowMap()">
+    <!-- Loading State -->
+    <div *ngIf="isLoadingPlaces || isLoadingAnalyze" class="text-sm text-[var(--primary-color)] py-4">
+      Lade Karte mit Aktivitäten...
+    </div>
+    
+    <!-- Error State -->
+    <div *ngIf="placesError || analyzeError" class="text-sm text-red-600 py-4">
+      {{ placesError || analyzeError }}
+    </div>
+    
+    <!-- Map Container -->
+    <div *ngIf="!isLoadingPlaces && !isLoadingAnalyze && !placesError && !analyzeError" 
+         class="flex-1 min-h-0 rounded-lg overflow-hidden border border-white">
+      <div #mapContainerMini class="w-full h-full"></div>
+    </div>
+  </div>
+  
+  <!-- Analyze Chart Section (for MID projects with multiple categories) -->
+  <div class="mb-4" *ngIf="selectedFeature && !shouldShowMap()">
     <!-- Loading State -->
     <div *ngIf="isLoadingAnalyze" class="text-sm text-[var(--primary-color)] py-4">
       Lade Aktivitäts-Analyse...
@@ -81,7 +100,7 @@
         <div *ngFor="let category of getSortedCategories(); let i = index" 
              class="text-sm text-white flex items-center">
           <span class="font-bold mr-2">{{ i + 1 }}.</span>
-          <span>{{ getCategoryDisplayName(category.category_name) }}</span>
+          <span>{{ category.category_name }}</span>
         </div>
       </div>
       

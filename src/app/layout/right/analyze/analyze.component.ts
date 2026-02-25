@@ -1,15 +1,19 @@
-import { Component, OnInit, OnDestroy, inject, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subscription, catchError, of, forkJoin } from 'rxjs';
+import { Subscription, catchError, of, forkJoin, firstValueFrom } from 'rxjs';
 import { FeatureSelectionService } from '../../../shared/services/feature-selection.service';
 import { MapService, FeatureInfoResponse } from '../../../services/map.service';
 import { FilterConfigService } from '../../../services/filter-config.service';
 import { AnalyzeService, AnalyzeResponse, CategoryScore } from '../../../services/analyze.service';
+import { ProjectsService } from '../../../services/project.service';
+import { PlacesService, Place } from '../../../services/places.service';
 import { UIChart } from 'primeng/chart';
 import { ChartModule } from 'primeng/chart';
 import { MatDialog } from '@angular/material/dialog';
 import { SharedModule } from '../../../shared/shared.module';
 import { AllCategoriesDialogComponent, AllCategoriesDialogData } from './overlay/all-categories-dialog.component';
+import { Map as MapLibreMap, NavigationControl, FullscreenControl, Popup, GeoJSONSource } from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 @Component({
   selector: 'app-analyze',
@@ -17,7 +21,7 @@ import { AllCategoriesDialogComponent, AllCategoriesDialogData } from './overlay
   templateUrl: './analyze.component.html',
   styleUrl: './analyze.component.css',
 })
-export class AnalyzeComponent implements OnInit, OnDestroy {
+export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   selectedFeature: any | null = null;
   featureInfo: FeatureInfoResponse | null = null;
   isLoadingFeatureInfo: boolean = false;
@@ -30,12 +34,30 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
   activitiesChartData: any = null;
   activitiesChartOptions: any = null;
   
+  // Map data
+  @ViewChild('mapContainerMini') mapContainerMini?: ElementRef;
+  private map?: MapLibreMap;
+  private popup?: Popup;
+  private places: Place[] = [];
+  private categoryData: Array<{ name: string; weight: number; places: Place[] }> = [];
+  private categoryColors = new Map<string, string>();
+  isLoadingPlaces: boolean = false;
+  placesError: string | null = null;
+  private pendingFeatureShape: any = null;
+  private colorPalette = [
+    '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+    '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52BE80',
+    '#EC7063', '#5DADE2', '#58D68D', '#F4D03F', '#AF7AC5'
+  ];
+  
   @ViewChild('activitiesChart') activitiesChart?: UIChart;
   
   private featureSelectionService = inject(FeatureSelectionService);
   private mapService = inject(MapService);
   private filterConfigService = inject(FilterConfigService);
   private analyzeService = inject(AnalyzeService);
+  private projectsService = inject(ProjectsService);
+  private placesService = inject(PlacesService);
   private dialog = inject(MatDialog);
   private featureSubscription?: Subscription;
   private featureInfoSubscription?: Subscription;
@@ -60,6 +82,16 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
             this.analyzeSubscription.unsubscribe();
             this.analyzeSubscription = undefined;
           }
+          // Clean up map
+          if (this.map) {
+            this.map.remove();
+            this.map = undefined;
+          }
+          this.popup = undefined;
+          this.places = [];
+          this.categoryData = [];
+          this.categoryColors.clear();
+          this.pendingFeatureShape = null;
           this.selectedFeature = null;
           this.featureInfo = null;
           this.featureInfoError = null;
@@ -69,9 +101,25 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
           this.activitiesChartData = null;
           this.isLoadingAnalyze = false;
           this.analyzeError = null;
+          this.isLoadingPlaces = false;
+          this.placesError = null;
         }
       }
     );
+  }
+
+  ngAfterViewInit() {
+    // Use setTimeout to ensure the view is fully rendered
+    setTimeout(() => {
+      if (this.mapContainerMini && !this.map && this.shouldShowMap() && this.categoryData.length > 0) {
+        this.initializeMap();
+        this.addPlacesWhenReady();
+        if (this.pendingFeatureShape) {
+          this.addFeatureShapeToMap(this.pendingFeatureShape);
+          this.pendingFeatureShape = null;
+        }
+      }
+    }, 0);
   }
 
   ngOnDestroy() {
@@ -84,6 +132,19 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     if (this.analyzeSubscription) {
       this.analyzeSubscription.unsubscribe();
     }
+    if (this.map) {
+      this.map.remove();
+    }
+  }
+
+  /**
+   * Determines if we should show the map instead of the chart
+   */
+  shouldShowMap(): boolean {
+    const project = this.projectsService.project();
+    const isNotMid = project ? !project.is_mid : false;
+    const hasSingleCategory = this.analyzeData?.categories?.length === 1;
+    return isNotMid || hasSingleCategory;
   }
 
   getGrade(index: number): string {
@@ -164,6 +225,19 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
       this.analyzeSubscription.unsubscribe();
       this.analyzeSubscription = undefined;
     }
+    
+    // Clean up existing map if switching features
+    if (this.map) {
+      this.map.remove();
+      this.map = undefined;
+    }
+    this.popup = undefined;
+    this.places = [];
+    this.categoryData = [];
+    this.categoryColors.clear();
+    this.pendingFeatureShape = null;
+    this.isLoadingPlaces = false;
+    this.placesError = null;
 
     // Get current zoom level to determine feature type
     const zoom = map.getZoom();
@@ -244,14 +318,123 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
       
       // Update analyze data
       this.analyzeData = analyzeData;
-      if (analyzeData && analyzeData.categories) {
-        this.initializeActivitiesChart(analyzeData.categories);
+      
+      // Check if we should show map instead of chart
+      if (this.shouldShowMap()) {
+        // Load places for the map
+        this.loadPlacesForMap();
       } else {
-        this.activitiesChartData = null;
+        // Show chart as usual
+        if (analyzeData && analyzeData.categories) {
+          this.initializeActivitiesChart(analyzeData.categories);
+        } else {
+          this.activitiesChartData = null;
+        }
       }
       
       this.featureInfoSubscription = undefined;
     });
+  }
+
+  private async loadPlacesForMap(): Promise<void> {
+    if (!this.selectedFeature || !this.analyzeData) {
+      return;
+    }
+
+    const map = this.mapService.getMap();
+    if (!map) {
+      console.warn('Map not available for places');
+      return;
+    }
+
+    const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
+    if (!featureIdRaw) {
+      console.warn('Feature ID not available');
+      return;
+    }
+
+    const featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
+    if (isNaN(featureId)) {
+      console.warn('Invalid feature ID:', featureIdRaw);
+      return;
+    }
+
+    const zoom = map.getZoom();
+    const featureType = this.mapService.getFeatureTypeFromZoom(zoom);
+    const profileCombinationId = this.filterConfigService.currentProfileCombinationID();
+    
+    if (!profileCombinationId) {
+      console.warn('Profile combination ID not available');
+      return;
+    }
+
+    this.isLoadingPlaces = true;
+    this.placesError = null;
+
+    try {
+      // Get category IDs from analyzeData
+      const categoryIds = this.analyzeData.categories.map(cat => cat.category_id);
+
+      // Load places and feature shape in parallel
+      const featureTypeForPlaces = featureType === 'municipality' || featureType === 'hexagon' 
+        ? featureType 
+        : 'municipality';
+
+      const [placesResponse, featureShape] = await Promise.all([
+        firstValueFrom(
+          this.placesService.getPlaces({
+            feature_type: featureTypeForPlaces,
+            feature_id: featureId,
+            profile_combination_id: profileCombinationId,
+            category_ids: categoryIds.length > 0 ? categoryIds : undefined
+          })
+        ),
+        firstValueFrom(
+          this.placesService.getFeatureShape({
+            feature_type: featureType,
+            feature_id: featureId
+          }).pipe(
+            catchError((error) => {
+              console.warn('Could not load feature shape:', error);
+              return of(null);
+            })
+          )
+        )
+      ]);
+
+      this.places = placesResponse.places || [];
+      this.places = this.places.filter(p => p.lat !== 0 && p.lon !== 0 && !isNaN(p.lat) && !isNaN(p.lon));
+
+      if (placesResponse.categories) {
+        this.categoryData = placesResponse.categories
+          .map(cat => ({
+            name: cat.category_name,
+            weight: cat.weight,
+            places: cat.places.filter(p => p.lat !== 0 && p.lon !== 0 && !isNaN(p.lat) && !isNaN(p.lon))
+          }))
+          .sort((a, b) => b.weight - a.weight);
+      }
+
+      this.assignCategoryColors();
+
+      // Initialize map if not already done
+      if (!this.map && this.mapContainerMini) {
+        this.initializeMap();
+      } else if (this.map) {
+        this.addPlacesWhenReady();
+        if (featureShape) {
+          this.addFeatureShapeToMap(featureShape);
+        }
+      } else {
+        this.pendingFeatureShape = featureShape;
+      }
+
+      this.isLoadingPlaces = false;
+    } catch (err: any) {
+      console.error('Error loading places:', err);
+      this.placesError = err?.message || 'Fehler beim Laden der Orte';
+      this.isLoadingPlaces = false;
+    }
   }
 
   private initializeActivitiesChart(categories: CategoryScore[]): void {
@@ -268,8 +451,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
     const labels = sortedCategories.map((_, index) => (index + 1).toString());
     // Convert weights from decimals (0-1) to percentages (0-100)
     const weights = sortedCategories.map(cat => cat.weight * 100);
-    const categoryNames = sortedCategories.map(cat => this.getCategoryDisplayName(cat.category_name));
-    const scores = sortedCategories.map(cat => cat.score);
 
     // Get current map visualization type (index or score)
     const filters = this.filterConfigService.contentLayerFilters();
@@ -416,6 +597,322 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
       .slice(0, 5);
   }
 
+  private initializeMap(): void {
+    if (!this.mapContainerMini) {
+      return;
+    }
+
+    const baseStyle = this.mapService.getBaseMapStyle();
+
+    const mapOptions: any = {
+      container: this.mapContainerMini.nativeElement,
+      style: baseStyle,
+      center: [9.2156505, 49.320099],
+      zoom: 7,
+      minZoom: 5,
+      maxZoom: 14,
+      dragRotate: false,
+      renderWorldCopies: false,
+      attributionControl: false
+    };
+
+    this.map = new MapLibreMap(mapOptions);
+
+    this.popup = new Popup({
+      closeButton: false,
+      closeOnClick: false,
+      anchor: 'bottom',
+      offset: [0, -5]
+    });
+
+    this.map.addControl(new NavigationControl({ showCompass: false }), 'top-right');
+    this.map.addControl(new FullscreenControl(), 'top-right');
+    this.map.dragRotate.disable();
+    this.map.touchZoomRotate.disableRotation();
+
+    this.map.once('load', () => {
+      if (this.map) {
+        this.map.resize();
+      }
+      this.addPlacesWhenReady();
+      if (this.pendingFeatureShape) {
+        this.addFeatureShapeToMap(this.pendingFeatureShape);
+        this.pendingFeatureShape = null;
+      }
+    });
+  }
+
+  private addPlacesWhenReady(): void {
+    if (!this.map) {
+      console.warn('Cannot add places: map not initialized');
+      return;
+    }
+
+    if (this.categoryData.length === 0) {
+      console.warn('Cannot add places: no category data available');
+      return;
+    }
+
+    if (this.map.loaded()) {
+      this.addPlacesToMap();
+      this.fitMapToPlaces();
+    } else {
+      this.map.once('load', () => {
+        this.addPlacesToMap();
+        this.fitMapToPlaces();
+      });
+    }
+  }
+
+  private assignCategoryColors(): void {
+    let colorIndex = 0;
+    this.categoryColors.clear();
+
+    this.categoryData.forEach((category) => {
+      if (category.name && !this.categoryColors.has(category.name)) {
+        const color = this.colorPalette[colorIndex % this.colorPalette.length];
+        this.categoryColors.set(category.name, color);
+        colorIndex++;
+      }
+    });
+  }
+
+  private addPlacesToMap(): void {
+    if (!this.map || this.categoryData.length === 0) {
+      return;
+    }
+
+    const beforeLayer = this.map.getLayer('carto-labels-layer') ? 'carto-labels-layer' : undefined;
+
+    this.categoryData.forEach((category) => {
+      const sourceId = `places-${category.name}`;
+      const layerId = `places-circles-${category.name}`;
+
+      const features = category.places.map(place => ({
+        type: 'Feature' as const,
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [place.lon, place.lat]
+        },
+        properties: {
+          id: place.id,
+          name: place.name,
+          category_id: place.category_id || 0,
+          category_name: place.category_name || 'Unknown',
+          url: place['url'] || null
+        }
+      }));
+
+      const geoJsonData = {
+        type: 'FeatureCollection' as const,
+        features
+      };
+
+      const color = this.categoryColors.get(category.name) || '#4ECDC4';
+
+      if (this.map!.getSource(sourceId)) {
+        (this.map!.getSource(sourceId) as GeoJSONSource).setData(geoJsonData);
+      } else {
+        this.map!.addSource(sourceId, {
+          type: 'geojson',
+          data: geoJsonData
+        });
+      }
+
+      if (!this.map!.getLayer(layerId)) {
+        try {
+          this.map!.addLayer({
+            id: layerId,
+            type: 'circle',
+            source: sourceId,
+            paint: {
+              'circle-radius': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                5, 4,
+                10, 8,
+                14, 12
+              ],
+              'circle-color': color,
+              'circle-stroke-width': 2,
+              'circle-stroke-color': '#ffffff',
+              'circle-opacity': 1.0
+            }
+          }, beforeLayer);
+        } catch (error) {
+          console.error(`Error adding layer for ${category.name}:`, error);
+        }
+      } else {
+        this.map!.setPaintProperty(layerId, 'circle-color', color);
+      }
+    });
+
+    this.setupMarkerInteractions();
+    this.setupMarkerClickHandlers();
+  }
+
+  private setupMarkerInteractions(): void {
+    if (!this.map || !this.popup) {
+      return;
+    }
+
+    this.categoryData.forEach(category => {
+      const layerId = `places-circles-${category.name}`;
+
+      this.map!.on('mouseenter', layerId, () => {
+        if (this.map) {
+          this.map.getCanvas().style.cursor = 'pointer';
+        }
+      });
+
+      this.map!.on('mouseleave', layerId, () => {
+        if (this.map) {
+          this.map.getCanvas().style.cursor = '';
+        }
+        if (this.popup) {
+          this.popup.remove();
+        }
+      });
+
+      this.map!.on('mousemove', layerId, (e) => {
+        if (!this.map || !this.popup || !e.features || e.features.length === 0) {
+          return;
+        }
+
+        const feature = e.features[0];
+        const properties = feature.properties;
+        const name = properties['name'] || 'Unnamed';
+        const categoryName = properties['category_name'] || 'Unknown';
+
+        const popupContent = `
+          <div>
+            <div style="font-weight: 600; margin-bottom: 4px;">${name}</div>
+            <div style="font-size: 12px; color: #666;">${categoryName}</div>
+          </div>
+        `;
+
+        this.popup
+          .setLngLat(e.lngLat)
+          .setHTML(popupContent)
+          .addTo(this.map);
+      });
+    });
+  }
+
+  private setupMarkerClickHandlers(): void {
+    if (!this.map) {
+      return;
+    }
+
+    this.categoryData.forEach(category => {
+      const layerId = `places-circles-${category.name}`;
+
+      this.map!.on('click', layerId, (e) => {
+        if (!e.features || e.features.length === 0) {
+          return;
+        }
+
+        const feature = e.features[0];
+        const properties = feature.properties;
+        const url = properties['url'];
+
+        if (url) {
+          window.open(url, '_blank', 'noopener,noreferrer');
+        }
+      });
+    });
+  }
+
+  private addFeatureShapeToMap(featureShape: any): void {
+    if (!this.map || !featureShape) {
+      return;
+    }
+
+    const geoJsonData = featureShape.type === 'FeatureCollection' 
+      ? featureShape 
+      : {
+          type: 'FeatureCollection' as const,
+          features: [featureShape]
+        };
+
+    const sourceId = 'feature-shape';
+    const layerId = 'feature-shape-fill';
+
+    if (this.map.getSource(sourceId)) {
+      (this.map.getSource(sourceId) as GeoJSONSource).setData(geoJsonData);
+    } else {
+      this.map.addSource(sourceId, {
+        type: 'geojson',
+        data: geoJsonData
+      });
+    }
+
+    if (!this.map.getLayer(layerId)) {
+      try {
+        const beforeLayer = this.map.getLayer('carto-labels-layer') ? 'carto-labels-layer' : undefined;
+        
+        this.map.addLayer({
+          id: layerId,
+          type: 'fill',
+          source: sourceId,
+          paint: {
+            'fill-color': '#808080',
+            'fill-opacity': 0.3
+          }
+        }, beforeLayer);
+
+        this.map.addLayer({
+          id: 'feature-shape-outline',
+          type: 'line',
+          source: sourceId,
+          paint: {
+            'line-color': '#808080',
+            'line-width': 1,
+            'line-opacity': 0.5
+          }
+        }, beforeLayer);
+      } catch (error) {
+        console.error('Error adding feature shape layer:', error);
+      }
+    } else {
+      (this.map.getSource(sourceId) as GeoJSONSource).setData(geoJsonData);
+    }
+  }
+
+  private fitMapToPlaces(): void {
+    if (!this.map || this.categoryData.length === 0) {
+      return;
+    }
+
+    const allPlaces = this.categoryData.flatMap(cat => cat.places);
+    const lngs = allPlaces.map(p => p.lon).filter(lng => !isNaN(lng) && lng !== 0);
+    const lats = allPlaces.map(p => p.lat).filter(lat => !isNaN(lat) && lat !== 0);
+
+    if (lngs.length === 0 || lats.length === 0) {
+      return;
+    }
+
+    const minLng = Math.min(...lngs);
+    const maxLng = Math.max(...lngs);
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+
+    const padding = 0.1;
+    const lngPadding = (maxLng - minLng) * padding;
+    const latPadding = (maxLat - minLat) * padding;
+
+    const bounds: [[number, number], [number, number]] = [
+      [minLng - lngPadding, minLat - latPadding],
+      [maxLng + lngPadding, maxLat + latPadding]
+    ];
+
+    this.map.fitBounds(bounds, {
+      padding: 50,
+      duration: 1000
+    });
+  }
+
   openAllCategoriesOverlay(): void {
     if (!this.selectedFeature) {
       return;
@@ -464,7 +961,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
       personaIds: filters.persona_ids,
       isScoreMode: isScoreMode,
       getGrade: (index: number) => this.getGrade(index),
-      getCategoryDisplayName: (categoryName: string) => this.getCategoryDisplayName(categoryName)
     };
 
     this.dialog.open(AllCategoriesDialogComponent, {
@@ -474,47 +970,5 @@ export class AnalyzeComponent implements OnInit, OnDestroy {
       panelClass: 'all-categories-dialog-panel',
       data: dialogData
     });
-  }
-
-  /**
-   * Converts snake_case category names to display names
-   * Maps common category names to German display names
-   */
-  getCategoryDisplayName(categoryName: string): string {
-    const categoryMap: { [key: string]: string } = {
-      'daily_needs': 'täglicher Bedarf',
-      'friends': 'Besuch/Freund*innen treffen',
-      'general_shopping': 'Einkauf',
-      'dog_walking': 'Hund ausführen',
-      'medical_services': 'Medizinische Versorgung',
-      'restaurant': 'Restaurant, Gaststätte, Mittagessen, Kneipe, Disco',
-      'sport': 'Sport (selbst aktiv), Sportverein',
-      'walking': 'Spaziergang, Spazierfahrt',
-      'work': 'Arbeit',
-      'education': 'Bildung',
-      'leisure': 'Freizeit',
-      'shopping': 'Einkauf',
-      'health': 'Gesundheit',
-      'culture': 'Kultur',
-      'transport': 'Verkehr'
-    };
-
-    // Try to find in map first
-    if (categoryMap[categoryName]) {
-      return categoryMap[categoryName];
-    }
-
-    // Try to find in FilterConfigService categories
-    const allCategories = this.filterConfigService.allCategories();
-    const category = allCategories.find(cat => cat.name === categoryName || cat.wegezweck === categoryName);
-    if (category && category.display_name) {
-      return category.display_name;
-    }
-
-    // Fallback: convert snake_case to readable format
-    return categoryName
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
   }
 }

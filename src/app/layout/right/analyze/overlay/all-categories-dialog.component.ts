@@ -17,7 +17,6 @@ export interface AllCategoriesDialogData {
   isScoreMode: boolean;
   featureName?: string;
   getGrade: (index: number) => string;
-  getCategoryDisplayName: (categoryName: string) => string;
 }
 
 @Component({
@@ -199,7 +198,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
               const index = context.dataIndex;
               const grade = this.getGrade(categories[index].index);
               return [
-                `Aktivität: ${this.getCategoryDisplayName(categories[index].category_name)}`,
+                `Aktivität: ${categories[index].category_name}`,
                 `Bewertung: ${grade}`,
                 `Relevanz: ${weights[index].toFixed(1)}%`
               ];
@@ -253,10 +252,6 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
 
   getGrade(index: number): string {
     return this.data.getGrade(index);
-  }
-
-  getCategoryDisplayName(categoryName: string): string {
-    return this.data.getCategoryDisplayName(categoryName);
   }
 
   getTimeGradient(): string {
