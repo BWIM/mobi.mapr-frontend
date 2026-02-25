@@ -29,7 +29,7 @@
       "username": "Benutzername",
       "password": "Passwort",
       "loginButton": "Anmelden",
-      "loginFailed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Eingaben.",
+      "loginFailed": "Anmeldung fehlgeschlagen. Bitte überprüfe deine Eingaben.",
       "usernameRequired": "Benutzername ist erforderlich",
       "passwordRequired": "Passwort ist erforderlich",
       "usernameMinLength": "Benutzername muss mindestens 3 Zeichen lang sein",
@@ -79,9 +79,9 @@
       "overall": "Platz",
       "overallLabel": "gesamt",
       "regionalClass": "Platz",
-      "regionalClassLabel": "Regionalklasse"
+      "regionalClassLabel": "Regioklasse"
     },
-    "population": "Einwohnende:",
+    "population": "Einwohnende",
     "grade": "Note:",
     "analysis": {
       "title": "Analyse Top 5 Aktivitäten",
@@ -97,7 +97,7 @@
   },
   "errors": {
     "generic": "Ein Fehler ist aufgetreten",
-    "network": "Netzwerkfehler. Bitte versuchen Sie es später erneut.",
+    "network": "Netzwerkfehler. Bitte versuche es später erneut.",
     "notFound": "Nicht gefunden",
     "unauthorized": "Nicht autorisiert",
     "forbidden": "Zugriff verweigert",
@@ -106,7 +106,7 @@
   },
   "maintenance": {
     "title": "Wartung",
-    "message": "Die Anwendung wird derzeit gewartet. Bitte versuchen Sie es später erneut."
+    "message": "Die Anwendung wird derzeit gewartet. Bitte versuche es später erneut."
   },
   "language": {
     "de": "Deutsch",
@@ -118,7 +118,7 @@
       "label": "Ort suchen",
       "placeholder": "z.B. Berlin, München...",
       "loading": "Lade Kartendaten...",
-      "clickForInfo": "Klicken Sie für weitere Informationen"
+      "clickForInfo": "Klicke für weitere Informationen"
     },
     "popup": {
       "index": "Index:",
@@ -175,11 +175,11 @@
     "normal": "Normal",
     "transportModes": {
       "title": "Verkehrsmittel",
-      "description": "Wählen Sie die Verkehrsmittel aus, die in der Berechnung berücksichtigt werden sollen. Sie können mehrere Verkehrsmittel gleichzeitig aktivieren oder deaktivieren.",
+      "description": "Wähle die Verkehrsmittel aus, die in der Berechnung berücksichtigt werden sollen. Du kannst mehrere Verkehrsmittel gleichzeitig aktivieren oder deaktivieren.",
       "availableOptions": "Verfügbare Optionen",
-      "availableOptionsDescription": "Jedes Verkehrsmittel kann einzeln ein- oder ausgeschaltet werden, um die Analyse entsprechend Ihren Anforderungen anzupassen.",
+      "availableOptionsDescription": "Jedes Verkehrsmittel kann einzeln ein- oder ausgeschaltet werden, um die Analyse entsprechend deinen Anforderungen anzupassen.",
       "cannotDisable": "Kann nicht deaktiviert werden",
-      "introduction": "Wählen Sie aus vier Verkehrsmitteln, um die Mobilität in Ihrer Region zu analysieren. Jeder Modus verwendet ausgeklügelte Routing-Algorithmen, um realistische Reisezeiten zu berechnen.",
+      "introduction": "Wähle aus vier Verkehrsmitteln, um die Mobilität in deiner Region zu analysieren. Jeder Modus verwendet ausgeklügelte Routing-Algorithmen, um realistische Reisezeiten zu berechnen.",
       "modes": {
         "title": "Verfügbare Verkehrsmittel",
         "pedestrian": {
@@ -220,8 +220,8 @@
     },
     "mobilityRating": {
       "title": "Mobilitätsbewertung",
-      "description": "Wählen Sie zwischen zwei Bewertungsmethoden für die Mobilitätsanalyse.",
-      "introduction": "Das Mobilitätsbewertungssystem bietet zwei verschiedene Bewertungsansätze: Die zeitbasierte Bewertung misst absolute Reisezeiten, während die qualitätsbasierte Bewertung die Leistung Ihrer Gemeinde im Vergleich zu ähnlichen Regionen betrachtet.",
+      "description": "Wähle zwischen zwei Bewertungsmethoden für die Mobilitätsanalyse.",
+      "introduction": "Das Mobilitätsbewertungssystem bietet zwei verschiedene Bewertungsansätze: Die zeitbasierte Bewertung misst absolute Reisezeiten, während die qualitätsbasierte Bewertung die Leistung deiner Gemeinde im Vergleich zu ähnlichen Regionen betrachtet.",
       "time": {
         "label": "Zeit",
         "title": "Zeitbasierte Bewertung",
@@ -235,7 +235,7 @@
         "label": "Qualität",
         "title": "Qualitätsbasierte Bewertung",
         "description": "Die qualitätsbasierte Bewertung bewertet die Mobilitätsleistung relativ zu ähnlichen Gemeinden und bietet eine vergleichende Perspektive statt absoluter Zeitwerte.",
-        "example": "Beispiel: Wenn Ihre Gemeinde 15 Minuten benötigt, um einen Supermarkt zu erreichen, ähnliche Gemeinden (nach RegioStar) aber durchschnittlich 20 Minuten benötigen, benötigen Sie nur 75% der Zeit. Diese relative Leistung wird dann in eine Qualitätsnote übersetzt.",
+        "example": "Beispiel: Wenn deine Gemeinde 15 Minuten benötigt, um einen Supermarkt zu erreichen, ähnliche Gemeinden (nach RegioStar) aber durchschnittlich 20 Minuten benötigen, benötigst du nur 75% der Zeit. Diese relative Leistung wird dann in eine Qualitätsnote übersetzt.",
         "graphTitle": "Qualitätsübersetzungsgraph",
         "graphDescription": "Der relative Zeitprozentsatz (z.B. 75%) wird mithilfe einer Exponentialfunktion auf eine Qualitätsnote (A+ bis F-) abgebildet. Niedrigere Prozentsätze (bessere Leistung) führen zu höheren Noten."
       }
@@ -243,19 +243,19 @@
     "activeFilters": {
       "title": "Aktive Filter",
       "description": "Diese Übersicht zeigt die aktuell aktiven Filter und deren Anzahl. Die Zahlen zeigen, wie viele Filter in jeder Kategorie ausgewählt sind.",
-      "introduction": "Filter ermöglichen es Ihnen, die Analyse anzupassen, indem Sie bestimmte Aktivitäten, Personas, Regionen und Regionaltypen auswählen. Verwenden Sie die Filter-Schaltfläche, um diese Einstellungen anzupassen.",
+      "introduction": "Filter ermöglichen es dir, die Analyse anzupassen, indem du bestimmte Aktivitäten, Personas, Regionen und Regionaltypen auswählst. Verwende die Filter-Schaltfläche, um diese Einstellungen anzupassen.",
       "adjustFilters": "Filter anpassen",
-      "adjustFiltersDescription": "Klicken Sie auf \"Filtern\", um die Filtereinstellungen zu öffnen und anzupassen. Dort können Sie Aktivitäten, Personas, Regionalklassen und Bundesländer auswählen.",
+      "adjustFiltersDescription": "Klicke auf \"Filtern\", um die Filtereinstellungen zu öffnen und anzupassen. Dort kannst du Aktivitäten, Personas, Regionalklassen und Bundesländer auswählen.",
       "midProject": "MID-Projekt",
-      "midProjectDescription": "Da dies ein MID-Projekt ist, können Sie zusätzlich Aktivitäten und Personas filtern, um die Analyse weiter zu verfeinern.",
+      "midProjectDescription": "Da dies ein MID-Projekt ist, kannst du zusätzlich Aktivitäten und Personas filtern, um die Analyse weiter zu verfeinern.",
       "activities": "Aktivitäten",
       "activitiesDescription": "Die Aktivitäten basieren auf der Studie \"Mobilität in Deutschland\". Sie gruppieren verschiedene reale Aktivitäten (z.B. Supermarkt) in abstrakte Kategorien des täglichen Bedarfs.",
       "personas": "Personas",
       "personasDescription": "Eine Persona definiert, wie relevant bestimmte Aktivitäten für verschiedene Nutzergruppen sind. Für ein Kind ist beispielsweise der Besuch eines Spielplatzes normalerweise relevanter als für einen Erwachsenen. Die Personas stammen ebenfalls aus der MID-Studie.",
       "regioStars": "Regionalklassen",
-      "regioStarsDescription": "Wenn Sie nur bestimmte Regionen in Deutschland betrachten möchten, z.B. ländliche Gebiete, können Sie dies hier filtern. Es ändert die Daten selbst nicht, wie Bundesländer, filtert aber auch die Ergebnisse. Dies spiegelt sich auch in den Top-10-Rankings wider.",
+      "regioStarsDescription": "Wenn du nur bestimmte Regionen in Deutschland betrachten möchtest, z.B. ländliche Gebiete, kannst du dies hier filtern. Es ändert die Daten selbst nicht, wie Bundesländer, filtert aber auch die Ergebnisse. Dies spiegelt sich auch in den Top-10-Rankings wider.",
       "states": "Bundesländer",
-      "statesDescription": "Bundesländer ermöglichen es Ihnen, Regionen auf der Karte zu filtern. Während dies die Daten überhaupt nicht beeinflusst, ermöglicht es einen besseren Vergleich sowie die Filterung der Top-10-Rankings.",
+      "statesDescription": "Bundesländer ermöglichen es dir, Regionen auf der Karte zu filtern. Während dies die Daten überhaupt nicht beeinflusst, ermöglicht es einen besseren Vergleich sowie die Filterung der Top-10-Rankings.",
       "filterButton": "Filtern"
     }
   },
@@ -271,7 +271,23 @@
     "deselectAll": "Alle abwählen"
   },
   "rail": {
-    "manageProjects": "Projekte verwalten"
+    "manageProjects": "Projekte verwalten",
+    "mail": {
+      "title": "Über das Projekt",
+      "developedBy": "Willkommen bei mobi.mapr! Dieses Projekt wird vom Baden-Württemberg Institut für Nachhaltige Mobilität (BWIM) entwickelt und kontinuierlich weiterentwickelt.",
+      "sourceCode": "Wir freuen uns über dein Interesse! Den Quellcode des Frontends haben wir als Open Source zur Verfügung gestellt:",
+      "sourceCodeUrl": "https://github.com/BWIM/mobi.mapr-frontend",
+      "apiDocumented": "Auch unsere API ist offen dokumentiert, sodass du die Daten und Funktionen für eigene Projekte nutzen kannst.",
+      "moreOnWebsite": "Auf unserer Website findest du weitere spannende Informationen über das Projekt, unsere Forschung und aktuelle Entwicklungen.",
+      "questions": "Hast du Fragen, Anregungen oder Feedback? Wir freuen uns über deine Nachricht:"
+    },
+    "questionMark": {
+      "title": "Hilfe",
+      "infoButtons": "In den verschiedenen Panels findest du Info-Buttons, die dir detaillierte Informationen zu den jeweiligen Funktionen und Einstellungen bieten. Einfach auf das Info-Symbol klicken!",
+      "moreOnWebsite": "Für umfassendere Informationen und Hintergründe schau gerne auf unserer Website vorbei.",
+      "faq": "Häufig gestellte Fragen findest du in unserem FAQ:",
+      "faqUrl": "https://bw-im.de/mobimapr-faq"
+    }
   },
   "dashboard": {
     "collapseLeftPanel": "Linkes Panel einklappen",
@@ -295,7 +311,7 @@
       "aboutDataTitle": "Über die Daten",
       "aboutData": "Die angezeigten Daten repräsentieren die Top 10 Rankings basierend auf der ausgewählten Ebene und den aktuellen Filtern und Bewertungskriterien.",
       "layerSelection": "Ebenenauswahl",
-      "layerSelectionDescription": "Wählen Sie die geografische Ebene aus, für die die Rankings angezeigt werden sollen: Bundesländer, Landkreise oder Gemeinden.",
+      "layerSelectionDescription": "Wähle die geografische Ebene aus, für die die Rankings angezeigt werden sollen: Bundesländer, Landkreise oder Gemeinden.",
       "selectLayer": "Ebene auswählen",
       "currentLayer": "Aktuelle Ebene",
       "prefiltersNote": "Hinweis zu Filtern",
@@ -308,13 +324,13 @@
   },
   "PREPARING_PROJECT": {
     "TITLE": "Projekt wird vorbereitet",
-    "MESSAGE": "Bitte warten Sie, während das Projekt geladen wird...",
-    "COFFEE_MESSAGE": "Gönnen Sie sich einen Kaffee! Je nach Komplexität der Filter kann dies bis zu 5 Minuten dauern.",
+    "MESSAGE": "Bitte warte, während das Projekt geladen wird...",
+    "COFFEE_MESSAGE": "Gönn dir einen Kaffee! Je nach Komplexität der Filter kann dies bis zu 5 Minuten dauern.",
     "INFO": {
       "PREPARING": "Das Projekt wird vorbereitet..."
     },
     "FUN_FACTS": {
-      "TITLE": "Wussten Sie schon?",
+      "TITLE": "Wusstest du schon?",
       "FACT_1": "In Deutschland gibt es über 9.000 Bahnhöfe, die täglich von Millionen von Menschen genutzt werden.",
       "FACT_2": "Das deutsche Schienennetz erstreckt sich über mehr als 38.000 Kilometer.",
       "FACT_3": "Öffentliche Verkehrsmittel tragen erheblich zur Reduzierung des CO2-Ausstoßes bei.",
@@ -332,11 +348,11 @@
       "ONE_TIME_TITLE": "Einmalige Vorbereitung",
       "ONE_TIME_TEXT": "Die Projektvorbereitung muss nur einmal durchgeführt werden.",
       "FILTER_TITLE": "Filter geändert",
-      "FILTER_TEXT": "Dieser Dialog öffnet sich nur, nachdem Sie einige Filterparameter geändert haben.",
+      "FILTER_TEXT": "Dieser Dialog öffnet sich nur, nachdem du einige Filterparameter geändert hast.",
       "UNIQUE_TITLE": "Einzigartige Karte",
-      "UNIQUE_TEXT": "Wenn Sie diesen Bildschirm sehen, hat noch niemand eine solche Karte erstellt (zumindest in den letzten 30 Tagen).",
+      "UNIQUE_TEXT": "Wenn du diesen Bildschirm siehst, hat noch niemand eine solche Karte erstellt (zumindest in den letzten 30 Tagen).",
       "STATS_TITLE": "Über 15 Milliarden Möglichkeiten",
-      "STATS_TEXT": "Sie können die 28 Aktivitäten frei kombinieren, für 8 verschiedene Modus-Kombinationen und 7 Personas bedeutet dies mehr als 15 Milliarden verschiedene Karten."
+      "STATS_TEXT": "Du kannst die 28 Aktivitäten frei kombinieren, für 8 verschiedene Modus-Kombinationen und 7 Personas bedeutet dies mehr als 15 Milliarden verschiedene Karten."
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Component, inject, effect, OnDestroy } from '@angular/core';
+import { Component, inject, effect, OnDestroy, computed, signal } from '@angular/core';
 import { County } from '../../../interfaces/features';
 import { StatsService } from '../../../services/stats.service';
 import { FilterConfigService } from '../../../services/filter-config.service';
@@ -8,6 +8,7 @@ import { ProjectsService } from '../../../services/project.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { InfoOverlayComponent } from '../../../shared/info-overlay/info-overlay.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { LanguageService } from '../../../services/language.service';
 
 @Component({
   selector: 'app-stats',
@@ -22,29 +23,42 @@ export class StatsComponent implements OnDestroy {
   private settingsService = inject(SettingsService);
   private projectService = inject(ProjectsService);
   private translate = inject(TranslateService);
+  private languageService = inject(LanguageService);
 
   counties: County[] = [];
-  isLoading = true;
+  isLoading = signal(true);
   error: string | null = null;
   
-  // Level selection options - will be initialized in constructor
-  levelOptions: Array<{ value: 'state' | 'county' | 'municipality'; label: string }> = [];
+  // Track current language to trigger translation updates
+  private currentLang = signal<string>(this.languageService.getCurrentLanguage());
+  
+  // Level selection options - signal that updates when language changes
+  levelOptions = signal<Array<{ value: 'state' | 'county' | 'municipality'; label: string }>>([
+    { value: 'state' as const, label: '' },
+    { value: 'county' as const, label: '' },
+    { value: 'municipality' as const, label: '' }
+  ]);
   
   selectedLevel: 'municipality' | 'county' | 'state' = 'county';
   private loadRankingsTimeout: ReturnType<typeof setTimeout> | null = null;
+  private languageSubscription: any = null;
 
   constructor() {
-    // Initialize level options with translations
-    this.levelOptions = [
-      { value: 'state' as const, label: this.translate.instant('stats.levels.state') },
-      { value: 'county' as const, label: this.translate.instant('stats.levels.county') },
-      { value: 'municipality' as const, label: this.translate.instant('stats.levels.municipality') }
-    ];
-    
     // Load saved level selection from localStorage
     this.loadSavedLevel();
+    
+    // Initialize level options with translations
+    this.updateLevelOptions();
+    
+    // Subscribe to language changes to update translations
+    this.languageSubscription = this.languageService.onLanguageChange().subscribe(event => {
+      this.currentLang.set(event.lang);
+      // Update level options when language changes
+      this.updateLevelOptions();
+    });
     // Track previous filter state to detect actual changes (excluding bewertung)
     let previousFilters: { profileCombinationID: number | null; stateIds: number[] | undefined; categoryIds: number[] | undefined; personaIds: number[] | undefined; regiostarIds: number[] | undefined } | null = null;
+    let previousBewertung: 'qualitaet' | 'zeit' | null = null;
     let previousMapLoading = true;
     
     // React to all relevant filter changes: profile combination, filters, and map loading state
@@ -53,14 +67,34 @@ export class StatsComponent implements OnDestroy {
     effect(() => {
       const profileCombinationID = this.filterConfigService.currentProfileCombinationID();
       const isMapLoading = this.mapService.isMapLoading();
+      const isPreparingProject = this.mapService.isPreparingProject();
       const filters = this.filterConfigService.contentLayerFilters();
+      const currentBewertung = this.filterConfigService.selectedBewertung();
       
       // Detect when map transitions from loading to not loading
       const mapJustFinishedLoading = previousMapLoading && !isMapLoading;
       previousMapLoading = isMapLoading;
       
-      // Only load stats when map is ready (not loading) and profile combination is available
-      if (profileCombinationID !== null && !isMapLoading && filters) {
+      // Check if only bewertung changed (no API call needed)
+      const onlyBewertungChanged = previousBewertung !== null && 
+        previousBewertung !== currentBewertung &&
+        previousFilters !== null &&
+        profileCombinationID === previousFilters.profileCombinationID &&
+        JSON.stringify(previousFilters.stateIds?.sort()) === JSON.stringify(filters?.state_ids?.sort()) &&
+        JSON.stringify(previousFilters.categoryIds?.sort()) === JSON.stringify(filters?.category_ids?.sort()) &&
+        JSON.stringify(previousFilters.personaIds?.sort()) === JSON.stringify(filters?.persona_ids?.sort()) &&
+        JSON.stringify(previousFilters.regiostarIds?.sort()) === JSON.stringify(filters?.regiostar_ids?.sort());
+      
+      // If only bewertung changed, just update the previous value and don't change loading state
+      // The display will update automatically through the computed getters
+      if (onlyBewertungChanged) {
+        previousBewertung = currentBewertung;
+        // Don't set loading state - data is already loaded, just display changes
+        return;
+      }
+      
+      // Only load stats when map is ready (not loading), project is not being prepared, and profile combination is available
+      if (profileCombinationID !== null && !isMapLoading && !isPreparingProject && filters) {
         // Check if filters actually changed (excluding bewertung which doesn't require API call)
         const currentFilterState = {
           profileCombinationID,
@@ -97,6 +131,8 @@ export class StatsComponent implements OnDestroy {
           }
           previousFilters = currentFilterState;
         }
+        // Always update bewertung tracking when we have valid filters
+        previousBewertung = currentBewertung;
       } else {
         // Clear any pending timeout if conditions are no longer met
         if (this.loadRankingsTimeout) {
@@ -104,14 +140,20 @@ export class StatsComponent implements OnDestroy {
           this.loadRankingsTimeout = null;
         }
         
-        // Clear data if no profile combination is available or map is still loading
+        // Clear data if no profile combination is available
         if (profileCombinationID === null) {
           this.counties = [];
           previousFilters = null;
-        }
-        // Keep loading state if map is still loading
-        if (isMapLoading) {
-          this.isLoading = true;
+          previousBewertung = null;
+          // No data to load, so set loading to false
+          this.isLoading.set(false);
+        } else if (isMapLoading || isPreparingProject) {
+          // Only set loading state if we don't already have data loaded
+          // If we have data and only bewertung might change, don't show loading
+          if (this.counties.length === 0) {
+            this.isLoading.set(true);
+          }
+          // If we already have data, keep it displayed (bewertung change doesn't need loading state)
         }
       }
     });
@@ -124,9 +166,10 @@ export class StatsComponent implements OnDestroy {
     // Trigger new API call when level changes (level is a parameter, not a filter)
     const profileCombinationID = this.filterConfigService.currentProfileCombinationID();
     const isMapLoading = this.mapService.isMapLoading();
+    const isPreparingProject = this.mapService.isPreparingProject();
     const filters = this.filterConfigService.contentLayerFilters();
     
-    if (profileCombinationID !== null && !isMapLoading && filters) {
+    if (profileCombinationID !== null && !isMapLoading && !isPreparingProject && filters) {
       this.loadTopRankings();
     }
   }
@@ -155,7 +198,18 @@ export class StatsComponent implements OnDestroy {
   }
 
   get selectedLevelLabel(): string {
-    return this.levelOptions.find(opt => opt.value === this.selectedLevel)?.label || this.translate.instant('stats.levels.county');
+    return this.levelOptions().find(opt => opt.value === this.selectedLevel)?.label || this.translate.instant('stats.levels.county');
+  }
+
+  /**
+   * Update level options with current translations
+   */
+  private updateLevelOptions(): void {
+    this.levelOptions.set([
+      { value: 'state' as const, label: this.translate.instant('stats.levels.state') },
+      { value: 'county' as const, label: this.translate.instant('stats.levels.county') },
+      { value: 'municipality' as const, label: this.translate.instant('stats.levels.municipality') }
+    ]);
   }
 
   private loadTopRankings(): void {
@@ -164,7 +218,14 @@ export class StatsComponent implements OnDestroy {
       return;
     }
 
-    this.isLoading = true;
+    // Don't load if map is loading or project is being prepared
+    const isMapLoading = this.mapService.isMapLoading();
+    const isPreparingProject = this.mapService.isPreparingProject();
+    if (isMapLoading || isPreparingProject) {
+      return;
+    }
+
+    this.isLoading.set(true);
     this.error = null;
 
     // Use the same filtering logic as filter-config.service.ts contentLayerFilters
@@ -195,12 +256,12 @@ export class StatsComponent implements OnDestroy {
       next: (data) => {
         // Store raw data - ranks will be recalculated in filteredCounties getter to handle ties
         this.counties = data as County[];
-        this.isLoading = false;
+        this.isLoading.set(false);
       },
       error: (error) => {
         console.error('Error loading top rankings:', error);
         this.error = this.translate.instant('stats.errorLoading');
-        this.isLoading = false;
+        this.isLoading.set(false);
         this.counties = [];
       }
     });
@@ -214,17 +275,13 @@ export class StatsComponent implements OnDestroy {
       return [];
     }
 
-    // Sort by the display value (score or index) in descending order
+    // Sort by the display value (score or index) in ascending order
+    // Lower values are better for both score (zeit) and index (qualitaet)
     const sorted = [...this.counties].sort((a, b) => {
       const valueA = this.getDisplayValue(a);
       const valueB = this.getDisplayValue(b);
-      // For 'zeit' (score), higher is better, for 'qualitaet' (index), lower is better
-      const bewertung = this.filterConfigService.selectedBewertung();
-      if (bewertung === 'zeit') {
-        return valueB - valueA; // Descending for score
-      } else {
-        return valueA - valueB; // Ascending for index (lower is better)
-      }
+      // For both 'zeit' (score) and 'qualitaet' (index), lower is better
+      return valueA - valueB; // Ascending order (lower values first)
     });
 
     // Assign ranks, handling ties
@@ -270,8 +327,11 @@ export class StatsComponent implements OnDestroy {
     const bewertung = this.filterConfigService.selectedBewertung();
     
     if (bewertung === 'zeit') {
-      // For score, show the raw value
-      return county.score.toFixed(2);
+      // For score, convert seconds to minutes for display
+      // API returns score in seconds, but we display in minutes
+      const minutes = (county.score / 60).toFixed(1);
+      const minLabel = this.translate.instant('map.popup.minutes');
+      return `${minutes} ${minLabel}`;
     } else {
       // For index, show the rating letter grade
       return this.getRating(county.index / 100) as string;
@@ -306,6 +366,10 @@ export class StatsComponent implements OnDestroy {
     if (this.loadRankingsTimeout) {
       clearTimeout(this.loadRankingsTimeout);
       this.loadRankingsTimeout = null;
+    }
+    // Unsubscribe from language changes
+    if (this.languageSubscription) {
+      this.languageSubscription.unsubscribe();
     }
   }
 }

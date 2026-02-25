@@ -271,7 +271,23 @@
     "deselectAll": "Deselect All"
   },
   "rail": {
-    "manageProjects": "Manage Projects"
+    "manageProjects": "Manage Projects",
+    "mail": {
+      "title": "About the Project",
+      "developedBy": "Welcome to mobi.mapr! This project is developed and continuously improved by the Baden-Württemberg Institut für Nachhaltige Mobilität (BWIM).",
+      "sourceCode": "We're excited about your interest! The frontend source code is available as open source:",
+      "sourceCodeUrl": "https://github.com/BWIM/mobi.mapr-frontend",
+      "apiDocumented": "Our API is also openly documented, so you can use the data and functions for your own projects.",
+      "moreOnWebsite": "On our website, you'll find more exciting information about the project, our research, and current developments.",
+      "questions": "Do you have questions, suggestions, or feedback? We'd love to hear from you:"
+    },
+    "questionMark": {
+      "title": "Help",
+      "infoButtons": "In the various panels, you'll find info buttons that provide detailed information about the respective functions and settings. Just click on the info icon!",
+      "moreOnWebsite": "For more comprehensive information and background, feel free to visit our website.",
+      "faq": "Frequently asked questions can be found in our FAQ:",
+      "faqUrl": "https://bw-im.de/mobimapr-faq"
+    }
   },
   "dashboard": {
     "collapseLeftPanel": "Collapse left panel",

@@ -37,11 +37,10 @@
         </div>
         
         <!-- Column 2: Regional Class Rank -->
-        <div class="flex-1 px-2 py-2 border-r border-white" *ngIf="featureInfo.rank_regiostar !== null">
+        <div class="flex-1 px-2 py-2 border-r border-white" *ngIf="featureInfo.regiostar_rank">
           <div><span class="text-m text-white font-bold">{{ 'analyze.rank.regionalClass' | translate }} </span><span class="text-xs text-white">{{ 'analyze.rank.regionalClassLabel' | translate }}</span></div>
-          <div class="text-4xl font-bold text-white">{{ featureInfo.rank_regiostar }}</div>
-          <div class="text-4xl font-bold text-white">-</div>
-          <div class="text-sm text-white mt-1">/ {{ featureInfo.total_rank_regiostar }}</div>
+          <div class="text-4xl font-bold text-white">{{ featureInfo.regiostar_rank }}</div>
+          <div class="text-sm text-white mt-1">/ {{ featureInfo.regiostar_total_ranks }}</div>
         </div>
         
         <!-- Column 3: Population and Grade -->

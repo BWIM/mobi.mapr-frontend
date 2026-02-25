@@ -32,10 +32,10 @@
   
   <!-- Lower Section - Button Group -->
   <div class="flex flex-col items-center gap-2 bg-[var(--background-color)] rounded-full p-4 shadow-lg">
-    <button matIconButton>
+    <button matIconButton (click)="openMailDialog()" [attr.aria-label]="'rail.mail.title' | translate">
       <mat-icon>mail</mat-icon>
     </button>
-    <button matIconButton>
+    <button matIconButton (click)="openQuestionMarkDialog()" [attr.aria-label]="'rail.questionMark.title' | translate">
       <mat-icon>question_mark</mat-icon>
     </button>
     @if (isLoggedIn()) {
@@ -44,4 +44,101 @@
       </button>
     }
   </div>
+
+  <!-- Mail Dialog Content Template -->
+  <ng-template #mailContentTemplate>
+    <div class="space-y-6">
+      <div class="flex items-start gap-4 p-4 rounded-lg bg-[var(--background-color)] border border-[var(--primary-color)] border-opacity-10">
+        <mat-icon class="text-[var(--primary-color)] mt-1">business</mat-icon>
+        <div class="flex-1">
+          <p class="text-[var(--primary-color)] leading-relaxed text-base m-0">
+            {{ 'rail.mail.developedBy' | translate }}
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-4 p-4 rounded-lg bg-[var(--background-color)] border border-[var(--primary-color)] border-opacity-10">
+        <mat-icon class="text-[var(--primary-color)] mt-1">code</mat-icon>
+        <div class="flex-1">
+          <p class="text-[var(--primary-color)] leading-relaxed text-base m-0 mb-2">
+            {{ 'rail.mail.sourceCode' | translate }}
+          </p>
+          <a href="https://github.com/BWIM/mobi.mapr-frontend" target="_blank" 
+             class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline transition-colors font-medium">
+            <mat-icon class="text-sm">open_in_new</mat-icon>
+            <span>https://github.com/BWIM/mobi.mapr-frontend</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-4 p-4 rounded-lg bg-[var(--background-color)] border border-[var(--primary-color)] border-opacity-10">
+        <mat-icon class="text-[var(--primary-color)] mt-1">description</mat-icon>
+        <div class="flex-1">
+          <p class="text-[var(--primary-color)] leading-relaxed text-base m-0">
+            {{ 'rail.mail.apiDocumented' | translate }}
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-4 p-4 rounded-lg bg-[var(--background-color)] border border-[var(--primary-color)] border-opacity-10">
+        <mat-icon class="text-[var(--primary-color)] mt-1">language</mat-icon>
+        <div class="flex-1">
+          <p class="text-[var(--primary-color)] leading-relaxed text-base m-0">
+            {{ 'rail.mail.moreOnWebsite' | translate }}
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-4 p-4 rounded-lg bg-[var(--background-color)] border border-[var(--primary-color)] border-opacity-10 mt-6">
+        <mat-icon class="text-[var(--primary-color)] mt-1">email</mat-icon>
+        <div class="flex-1">
+          <p class="text-[var(--primary-color)] leading-relaxed text-base m-0 mb-2">
+            {{ 'rail.mail.questions' | translate }}
+          </p>
+          <a href="mailto:mobimapr@bw-im.de" 
+             class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline transition-colors font-medium">
+            <mat-icon class="text-sm">mail</mat-icon>
+            <span>mobimapr@bw-im.de</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- Question Mark Dialog Content Template -->
+  <ng-template #questionMarkContentTemplate>
+    <div class="space-y-6">
+      <div class="flex items-start gap-4 p-4 rounded-lg bg-[var(--background-color)] border border-[var(--primary-color)] border-opacity-10">
+        <mat-icon class="text-[var(--primary-color)] mt-1">info</mat-icon>
+        <div class="flex-1">
+          <p class="text-[var(--primary-color)] leading-relaxed text-base m-0">
+            {{ 'rail.questionMark.infoButtons' | translate }}
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-4 p-4 rounded-lg bg-[var(--background-color)] border border-[var(--primary-color)] border-opacity-10">
+        <mat-icon class="text-[var(--primary-color)] mt-1">language</mat-icon>
+        <div class="flex-1">
+          <p class="text-[var(--primary-color)] leading-relaxed text-base m-0">
+            {{ 'rail.questionMark.moreOnWebsite' | translate }}
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-4 p-4 rounded-lg bg-[var(--background-color)] border border-[var(--primary-color)] border-opacity-10">
+        <mat-icon class="text-[var(--primary-color)] mt-1">help_outline</mat-icon>
+        <div class="flex-1">
+          <p class="text-[var(--primary-color)] leading-relaxed text-base m-0 mb-2">
+            {{ 'rail.questionMark.faq' | translate }}
+          </p>
+          <a href="https://bw-im.de/mobimapr-faq" target="_blank" 
+             class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline transition-colors font-medium">
+            <mat-icon class="text-sm">open_in_new</mat-icon>
+            <span>https://bw-im.de/mobimapr-faq</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </ng-template>
 </div>

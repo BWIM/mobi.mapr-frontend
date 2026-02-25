@@ -23,8 +23,8 @@ export interface FeatureInfoResponse {
   population: number;
   rank: number;
   total_ranks: number;
-  rank_regiostar: number | null;
-  total_rank_regiostar: number | null;
+  regiostar_rank: number | null;
+  regiostar_total_ranks: number | null;
   index: number;
   score: number;
 }
@@ -59,6 +59,10 @@ export class MapService {
   // Signal to track map loading state
   private _isMapLoading = signal<boolean>(true);
   readonly isMapLoading = this._isMapLoading.asReadonly();
+
+  // Signal to track project preparation state (when preparing dialog is shown)
+  private _isPreparingProject = signal<boolean>(false);
+  readonly isPreparingProject = this._isPreparingProject.asReadonly();
 
   constructor() {}
 
@@ -359,6 +363,13 @@ export class MapService {
    */
   setMapLoading(loading: boolean): void {
     this._isMapLoading.set(loading);
+  }
+
+  /**
+   * Sets the project preparation state
+   */
+  setPreparingProject(preparing: boolean): void {
+    this._isPreparingProject.set(preparing);
   }
 
   /**

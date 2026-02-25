@@ -68,22 +68,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Navigation Arrows -->
-        <button 
-          *ngIf="achievementCards.length > 1 && currentCardIndex > 0"
-          (click)="previousCard()"
-          type="button"
-          class="absolute left-2 top-1/2 -translate-y-1/2 bg-[var(--primary-color)] text-white rounded-full w-8 h-8 flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity shadow-md z-10">
-          <span class="text-xl leading-none">‹</span>
-        </button>
-        <button 
-          *ngIf="achievementCards.length > 1 && currentCardIndex < achievementCards.length - 1"
-          (click)="nextCard()"
-          type="button"
-          class="absolute right-2 top-1/2 -translate-y-1/2 bg-[var(--primary-color)] text-white rounded-full w-8 h-8 flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity shadow-md z-10">
-          <span class="text-xl leading-none">›</span>
-        </button>
       </div>
 
       <!-- Slider Indicators -->

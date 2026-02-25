@@ -636,6 +636,9 @@ export class FilterConfigService {
 
           // Only open dialog if project is not ready (cache_flag is false)
           if (!readyResponse.cache_flag) {
+            // Set preparation state to true before opening dialog
+            this.mapService.setPreparingProject(true);
+            
             // Show preparing dialog (non-closable) for preloading
             dialogRef = this.dialog.open(PreparingProjectDialogComponent, {
               width: '80%',
@@ -664,6 +667,7 @@ export class FilterConfigService {
           console.error('Error calling ready endpoint:', readyError);
           // If ready endpoint fails, we can't determine if data is ready
           this.mapService.setMapLoading(false);
+          this.mapService.setPreparingProject(false);
           return;
         }
       }
@@ -672,6 +676,8 @@ export class FilterConfigService {
       if (dialogRef) {
         dialogRef.close();
         dialogRef = null;
+        // Set preparation state to false after closing dialog
+        this.mapService.setPreparingProject(false);
       }
 
       // Only load the content layer AFTER we've confirmed data is ready
@@ -691,6 +697,7 @@ export class FilterConfigService {
       // Make sure to close dialog and reset loading state on error
       if (dialogRef) {
         dialogRef.close();
+        this.mapService.setPreparingProject(false);
       }
       this.mapService.setMapLoading(false);
     } finally {

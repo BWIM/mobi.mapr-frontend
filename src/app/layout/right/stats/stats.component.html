@@ -2,7 +2,7 @@
   <mat-drawer-content>
     <div class="h-full p-4 bg-[var(--background-color)] text-[var(--primary-color)] relative flex flex-col">
       <!-- Single Loading Spinner -->
-      <div *ngIf="isLoading" class="absolute inset-0 flex items-center justify-center bg-[var(--background-color)] bg-opacity-75 z-10 rounded-2xl">
+      <div *ngIf="isLoading()" class="absolute inset-0 flex items-center justify-center bg-[var(--background-color)] bg-opacity-75 z-10 rounded-2xl">
         <div class="flex flex-col items-center">
           <mat-spinner diameter="40"></mat-spinner>
           <p class="text-sm text-[var(--primary-color)] mt-4">{{ 'stats.loading' | translate }}</p>
@@ -16,18 +16,18 @@
             [value]="selectedLevel" 
             (selectionChange)="onLevelChange($event.value)"
             class="text-[var(--primary-color)]">
-            <mat-option *ngFor="let option of levelOptions" [value]="option.value">
+            <mat-option *ngFor="let option of levelOptions()" [value]="option.value">
               {{ option.label }}
             </mat-option>
           </mat-select>
         </mat-form-field>
       </div>
       
-      <div *ngIf="error && !isLoading" class="flex-1 flex items-center justify-center text-red-500">
+      <div *ngIf="error && !isLoading()" class="flex-1 flex items-center justify-center text-red-500">
         <p>{{ error }}</p>
       </div>
       
-      <div *ngIf="!isLoading && !error" class="flex-1 overflow-auto">
+      <div *ngIf="!isLoading() && !error" class="flex-1 overflow-auto">
         <table class="w-full border-collapse border-0 text-[var(--primary-color)]">
           <tbody>
             <tr *ngFor="let county of filteredCounties" class="leading-[1.8]">
@@ -58,9 +58,9 @@
                 [value]="selectedLevel" 
                 (selectionChange)="onLevelChange($event.value)"
                 class="text-[var(--primary-color)]">
-                <mat-option *ngFor="let option of levelOptions" [value]="option.value">
-                  {{ option.label }}
-                </mat-option>
+              <mat-option *ngFor="let option of levelOptions()" [value]="option.value">
+                {{ option.label }}
+              </mat-option>
               </mat-select>
             </mat-form-field>
             <p class="text-xs opacity-75 mt-2">

@@ -1,9 +1,11 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, ViewChild, TemplateRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { SharedModule } from '../../shared/shared.module';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../auth/auth.service';
 import { LanguageService } from '../../services/language.service';
+import { MatDialog } from '@angular/material/dialog';
+import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.component';
 
 @Component({
   selector: 'app-rail',
@@ -12,10 +14,14 @@ import { LanguageService } from '../../services/language.service';
   styleUrl: './rail.component.css',
 })
 export class RailComponent implements OnInit {
+  @ViewChild('mailContentTemplate') mailContentTemplate!: TemplateRef<any>;
+  @ViewChild('questionMarkContentTemplate') questionMarkContentTemplate!: TemplateRef<any>;
+
   private translate = inject(TranslateService);
   private router = inject(Router);
   private authService = inject(AuthService);
   private languageService = inject(LanguageService);
+  private dialog = inject(MatDialog);
 
   currentLang = signal<string>('de');
   isLoggedIn = signal<boolean>(false);
@@ -52,5 +58,27 @@ export class RailComponent implements OnInit {
 
   navigateToUsersArea(): void {
     this.router.navigate(['/users-area']);
+  }
+
+  openMailDialog(): void {
+    this.dialog.open(InfoDialogComponent, {
+      width: '80vw',
+      height: '80vh',
+      maxWidth: '80vw',
+      maxHeight: '80vh',
+      panelClass: 'info-dialog-panel',
+      data: { content: this.mailContentTemplate }
+    });
+  }
+
+  openQuestionMarkDialog(): void {
+    this.dialog.open(InfoDialogComponent, {
+      width: '80vw',
+      height: '80vh',
+      maxWidth: '80vw',
+      maxHeight: '80vh',
+      panelClass: 'info-dialog-panel',
+      data: { content: this.questionMarkContentTemplate }
+    });
   }
 }
