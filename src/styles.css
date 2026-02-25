@@ -137,3 +137,37 @@ button[matButton]:hover,
     background-color: var(--primary-color) !important;
     opacity: 0.9;
 }
+
+/* Custom Scrollbar Styles - Rounded and matching design */
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--secondary-color);
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+    background: var(--secondary-color);
+    border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 10px;
+    border: 2px solid var(--secondary-color);
+    transition: background 0.3s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: var(--light-primary-color);
+}
+
+*::-webkit-scrollbar-corner {
+    background: var(--secondary-color);
+    border-radius: 10px;
+}

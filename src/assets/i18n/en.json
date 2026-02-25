@@ -40,6 +40,7 @@
   },
   "analyze": {
     "selectPlace": "Click on a place on the map to get further analysis",
+    "loading": "Loading...",
     "loadingFeatureInfo": "Loading feature information...",
     "loadingPlaces": "Loading map with activities...",
     "loadingAnalysis": "Loading activity analysis...",
@@ -84,7 +85,7 @@
     "grade": "Grade:",
     "analysis": {
       "title": "Analysis Top 5 Activities",
-      "showAllCategories": "Show all categories",
+      "showAllCategories": "Show all activities",
       "categoriesNotFound": "Categories not found",
       "dataNotLoaded": "Data not yet loaded",
       "errorLoadingCategories": "Error loading categories",
@@ -177,31 +178,84 @@
       "description": "Select the transport modes that should be considered in the calculation. You can activate or deactivate multiple transport modes simultaneously.",
       "availableOptions": "Available Options",
       "availableOptionsDescription": "Each transport mode can be individually turned on or off to adapt the analysis to your requirements.",
-      "cannotDisable": "Cannot be disabled"
+      "cannotDisable": "Cannot be disabled",
+      "introduction": "Choose from four transport modes to analyze mobility in your region. Each mode uses sophisticated routing algorithms to provide realistic travel time calculations.",
+      "modes": {
+        "title": "Available Transport Modes",
+        "pedestrian": {
+          "title": "Pedestrian",
+          "description": "Walking routes are calculated using realistic pedestrian paths, taking into account sidewalks, pedestrian zones, and walking-friendly infrastructure.",
+          "alwaysEnabled": "Always enabled and cannot be disabled"
+        },
+        "bicycle": {
+          "title": "Bicycle",
+          "description": "Bicycle routing is optimized for average city bicycles, prioritizing dedicated bicycle paths and lanes for safer and more efficient cycling routes."
+        },
+        "car": {
+          "title": "Car",
+          "description": "Car routing considers road networks, traffic patterns, and realistic driving conditions to calculate accurate travel times."
+        },
+        "transit": {
+          "title": "Transit",
+          "description": "Public transportation routing uses real transit schedules and connections to find the best routes using buses, trains, trams, and other public transport options."
+        }
+      },
+      "routing": {
+        "title": "Routing Technology",
+        "valhalla": {
+          "title": "Valhalla Routing (Walk, Bike, Car)",
+          "description": "Pedestrian, bicycle, and car routes are calculated using Valhalla, a powerful open-source routing engine that provides realistic and accurate pathfinding.",
+          "feature1": "Hills, elevation changes, and terrain are factored into route calculations",
+          "feature2": "Bicycle routes prioritize dedicated bicycle paths and lanes when available",
+          "feature3": "Realistic routing considers actual road conditions and infrastructure"
+        },
+        "motis": {
+          "title": "Motis Transit Routing",
+          "description": "Public transportation routes are calculated using Motis, which processes real transit schedules and timetables to find optimal connections.",
+          "feature1": "Calculations are based on a reference Tuesday schedule for consistent results",
+          "feature2": "Each activity has a default time assigned (e.g., restaurants at 19:00), and transit is calculated to arrive at the optimal time",
+          "feature3": "The best connection is selected automatically, with no waiting time at the destination counted"
+        }
+      }
     },
     "mobilityRating": {
       "title": "Mobility Rating",
       "description": "Choose between two rating methods for mobility analysis.",
+      "introduction": "The mobility rating system offers two different evaluation approaches: Time-based rating measures absolute travel times, while Quality-based rating compares your municipality's performance relative to similar regions.",
       "time": {
         "label": "Time",
-        "description": "Rates mobility based on travel time. This method measures how quickly different destinations can be reached."
+        "title": "Time-Based Rating",
+        "description": "Time-based rating calculates absolute travel times to destinations, taking into account route penalties and mode-specific factors.",
+        "step1": "From a starting point, the next three instances of each activity (e.g., restaurants) are calculated for all enabled transport modes.",
+        "step2": "Each route receives penalties depending on the transport mode, such as parking search time for cars or bicycle infrastructure quality (ADFC-Fahrradklimatest) for bicycles.",
+        "step3": "For the chosen mode mix, the best three routes are selected and weighted together. The weighting depends on the activity type - you want more choices for a restaurant than for a post office.",
+        "example": "Example: The best route might be by foot, the second best by bicycle, and the third best by car. All three are combined with activity-specific weights."
       },
       "quality": {
         "label": "Quality",
-        "description": "Rates mobility based on the quality of connections. This method considers factors such as comfort, reliability, and service quality."
+        "title": "Quality-Based Rating",
+        "description": "Quality-based rating evaluates mobility performance relative to similar municipalities, providing a comparative perspective rather than absolute time values.",
+        "example": "Example: If your municipality needs 15 minutes to reach a supermarket, but similar municipalities (by RegioStar) need 20 minutes on average, you only need 75% of the time. This relative performance is then translated into a quality grade.",
+        "graphTitle": "Quality Translation Graph",
+        "graphDescription": "The relative time percentage (e.g., 75%) is mapped to a quality grade (A+ to F-) using an exponential function. Lower percentages (better performance) result in higher grades."
       }
     },
     "activeFilters": {
       "title": "Active Filters",
       "description": "This overview shows the currently active filters and their count. The numbers show how many filters are selected in each category.",
+      "introduction": "Filters allow you to customize the analysis by selecting specific activities, personas, regions, and regional types. Use the filter button to adjust these settings.",
       "adjustFilters": "Adjust Filters",
       "adjustFiltersDescription": "Click on \"Filter\" to open and adjust the filter settings. There you can select activities, personas, RegioStars, and states.",
       "midProject": "MID Project",
       "midProjectDescription": "Since this is a MID project, you can additionally filter activities and personas to further refine the analysis.",
       "activities": "Activities",
+      "activitiesDescription": "Activities are based on the study \"Mobilität in Deutschland\" (Mobility in Germany). They group different real-life activities (e.g., supermarket) into abstract daily needs categories.",
       "personas": "Personas",
+      "personasDescription": "A persona defines how relevant certain activities are for different user groups. For example, going to a playground is normally more relevant for a child than for an adult. Personas also come from the MID study.",
       "regioStars": "RegioStars",
+      "regioStarsDescription": "If you only want to look at certain regions in Germany, for example rural areas, you can filter this here. It does not change the data itself, like states, but also filters the results. It is also reflected in the Top 10 rankings.",
       "states": "States",
+      "statesDescription": "States allow you to filter for regions on the map. While this does not influence the data at all, it allows for better comparison, as well as filtering the Top 10 rankings.",
       "filterButton": "Filter"
     }
   },
@@ -239,7 +293,17 @@
       "title": "Statistics",
       "description": "This overview shows the top 10 rankings based on the selected level (States, Counties, or Municipalities) and the current filters and evaluation criteria.",
       "aboutDataTitle": "About the Data",
-      "aboutData": "The data shown represents the top 10 rankings based on the selected level and the current filters and evaluation criteria."
+      "aboutData": "The data shown represents the top 10 rankings based on the selected level and the current filters and evaluation criteria.",
+      "layerSelection": "Layer Selection",
+      "layerSelectionDescription": "Select the geographic level for which rankings should be displayed: States, Counties, or Municipalities.",
+      "selectLayer": "Select Layer",
+      "currentLayer": "Current Layer",
+      "prefiltersNote": "Note on Filters",
+      "prefiltersDescription": "The top 10 rankings automatically reflect all active filters on the left side, including selected States and RegioStars. Rankings are adjusted according to these filters.",
+      "rankingRules": "Ranking Rules",
+      "tiedRanksDescription": "When multiple areas have the same value, they share the same rank:",
+      "tiedRanksRule1": "Areas with identical values receive the same rank position",
+      "tiedRanksRule2": "The next rank position is skipped accordingly (e.g., if two areas share rank 3, the next rank is 5)"
     }
   },
   "PREPARING_PROJECT": {

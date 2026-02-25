@@ -54,86 +54,92 @@
 
   <!-- Legend Info Dialog Content Template -->
   <ng-template #legendContentTemplate>
-    <div class="space-y-4">
-      <div *ngIf="isQualityMode">
-        <h3 class="font-semibold mb-2">{{ 'map.legend.quality.title' | translate }}</h3>
-        <p class="text-sm opacity-90 mb-4">
-          {{ 'map.legend.quality.description' | translate }}
-        </p>
-        <div class="space-y-3">
-          <div class="flex items-center gap-3">
-            <div class="legend-circle" style="background-color: rgba(50, 97, 45, 0.7); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
-              <span class="legend-letter" style="color: white; font-weight: 600; font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">A</span>
+    <div class="space-y-6">
+      <!-- Both Legends Side by Side -->
+      <div class="flex gap-6">
+        <!-- Time Legend (Left Side) -->
+        <div class="flex-1 space-y-4">
+          <h4 class="font-semibold text-base text-[var(--primary-color)]">{{ 'map.legend.time.title' | translate }}</h4>
+          <p class="text-sm opacity-90 leading-relaxed mb-4">
+            {{ 'map.legend.time.description' | translate }}
+          </p>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="gradient-bar" style="width: 100px; height: 20px; border-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.2); background: linear-gradient(to right, rgb(181, 212, 233) 0%, rgb(147, 195, 224) 16.67%, rgb(109, 173, 213) 33.33%, rgb(75, 151, 201) 50%, rgb(48, 126, 188) 66.67%, rgb(24, 100, 170) 83.33%, rgb(24, 100, 170) 100%);"></div>
+              <div>
+                <p class="font-medium">{{ 'map.legend.time.scale' | translate }}</p>
+                <p class="text-sm opacity-90">{{ 'map.legend.time.scaleDescription' | translate }}</p>
+              </div>
             </div>
-            <div>
-              <p class="font-medium">{{ 'map.legend.quality.a.title' | translate }}</p>
-              <p class="text-sm opacity-90">{{ 'map.legend.quality.a.description' | translate }}</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-3">
-            <div class="legend-circle" style="background-color: rgba(60, 176, 67, 0.7); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
-              <span class="legend-letter" style="color: white; font-weight: 600; font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">B</span>
-            </div>
-            <div>
-              <p class="font-medium">{{ 'map.legend.quality.b.title' | translate }}</p>
-              <p class="text-sm opacity-90">{{ 'map.legend.quality.b.description' | translate }}</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-3">
-            <div class="legend-circle" style="background-color: rgba(238, 210, 2, 0.7); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
-              <span class="legend-letter" style="color: white; font-weight: 600; font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">C</span>
-            </div>
-            <div>
-              <p class="font-medium">{{ 'map.legend.quality.c.title' | translate }}</p>
-              <p class="text-sm opacity-90">{{ 'map.legend.quality.c.description' | translate }}</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-3">
-            <div class="legend-circle" style="background-color: rgba(237, 112, 20, 0.7); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
-              <span class="legend-letter" style="color: white; font-weight: 600; font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">D</span>
-            </div>
-            <div>
-              <p class="font-medium">{{ 'map.legend.quality.d.title' | translate }}</p>
-              <p class="text-sm opacity-90">{{ 'map.legend.quality.d.description' | translate }}</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-3">
-            <div class="legend-circle" style="background-color: rgba(194, 24, 7, 0.7); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
-              <span class="legend-letter" style="color: white; font-weight: 600; font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">E</span>
-            </div>
-            <div>
-              <p class="font-medium">{{ 'map.legend.quality.e.title' | translate }}</p>
-              <p class="text-sm opacity-90">{{ 'map.legend.quality.e.description' | translate }}</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-3">
-            <div class="legend-circle" style="background-color: rgba(197, 136, 187, 0.7); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
-              <span class="legend-letter" style="color: white; font-weight: 600; font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">F</span>
-            </div>
-            <div>
-              <p class="font-medium">{{ 'map.legend.quality.f.title' | translate }}</p>
-              <p class="text-sm opacity-90">{{ 'map.legend.quality.f.description' | translate }}</p>
+            <div class="mt-4">
+              <p class="text-sm opacity-90">
+                {{ 'map.legend.time.detailedDescription' | translate }}
+              </p>
             </div>
           </div>
         </div>
-      </div>
-      <div *ngIf="!isQualityMode">
-        <h3 class="font-semibold mb-2">{{ 'map.legend.time.title' | translate }}</h3>
-        <p class="text-sm opacity-90 mb-4">
-          {{ 'map.legend.time.description' | translate }}
-        </p>
-        <div class="space-y-3">
-          <div class="flex items-center gap-3">
-            <div class="gradient-bar" style="width: 100px; height: 20px; border-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.2); background: linear-gradient(to right, rgb(181, 212, 233) 0%, rgb(147, 195, 224) 16.67%, rgb(109, 173, 213) 33.33%, rgb(75, 151, 201) 50%, rgb(48, 126, 188) 66.67%, rgb(24, 100, 170) 83.33%, rgb(24, 100, 170) 100%);"></div>
-            <div>
-              <p class="font-medium">{{ 'map.legend.time.scale' | translate }}</p>
-              <p class="text-sm opacity-90">{{ 'map.legend.time.scaleDescription' | translate }}</p>
+
+        <!-- Quality Legend (Right Side) -->
+        <div class="flex-1 space-y-4">
+          <h4 class="font-semibold text-base text-[var(--primary-color)]">{{ 'map.legend.quality.title' | translate }}</h4>
+          <p class="text-sm opacity-90 leading-relaxed mb-4">
+            {{ 'map.legend.quality.description' | translate }}
+          </p>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="legend-circle" style="background-color: rgba(50, 97, 45, 0.7); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
+                <span class="legend-letter" style="color: white; font-weight: 600; font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">A</span>
+              </div>
+              <div>
+                <p class="font-medium">{{ 'map.legend.quality.a.title' | translate }}</p>
+                <p class="text-sm opacity-90">{{ 'map.legend.quality.a.description' | translate }}</p>
+              </div>
             </div>
-          </div>
-          <div class="mt-4">
-            <p class="text-sm opacity-90">
-              {{ 'map.legend.time.detailedDescription' | translate }}
-            </p>
+            <div class="flex items-center gap-3">
+              <div class="legend-circle" style="background-color: rgba(60, 176, 67, 0.7); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
+                <span class="legend-letter" style="color: white; font-weight: 600; font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">B</span>
+              </div>
+              <div>
+                <p class="font-medium">{{ 'map.legend.quality.b.title' | translate }}</p>
+                <p class="text-sm opacity-90">{{ 'map.legend.quality.b.description' | translate }}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="legend-circle" style="background-color: rgba(238, 210, 2, 0.7); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
+                <span class="legend-letter" style="color: white; font-weight: 600; font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">C</span>
+              </div>
+              <div>
+                <p class="font-medium">{{ 'map.legend.quality.c.title' | translate }}</p>
+                <p class="text-sm opacity-90">{{ 'map.legend.quality.c.description' | translate }}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="legend-circle" style="background-color: rgba(237, 112, 20, 0.7); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
+                <span class="legend-letter" style="color: white; font-weight: 600; font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">D</span>
+              </div>
+              <div>
+                <p class="font-medium">{{ 'map.legend.quality.d.title' | translate }}</p>
+                <p class="text-sm opacity-90">{{ 'map.legend.quality.d.description' | translate }}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="legend-circle" style="background-color: rgba(194, 24, 7, 0.7); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
+                <span class="legend-letter" style="color: white; font-weight: 600; font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">E</span>
+              </div>
+              <div>
+                <p class="font-medium">{{ 'map.legend.quality.e.title' | translate }}</p>
+                <p class="text-sm opacity-90">{{ 'map.legend.quality.e.description' | translate }}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="legend-circle" style="background-color: rgba(197, 136, 187, 0.7); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
+                <span class="legend-letter" style="color: white; font-weight: 600; font-size: 14px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">F</span>
+              </div>
+              <div>
+                <p class="font-medium">{{ 'map.legend.quality.f.title' | translate }}</p>
+                <p class="text-sm opacity-90">{{ 'map.legend.quality.f.description' | translate }}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

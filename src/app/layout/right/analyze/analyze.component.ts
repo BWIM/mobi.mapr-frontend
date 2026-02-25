@@ -607,6 +607,13 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       .slice(0, 5);
   }
 
+  /**
+   * Returns true if any content is currently loading
+   */
+  isLoading(): boolean {
+    return this.isLoadingFeatureInfo || this.isLoadingAnalyze || this.isLoadingPlaces;
+  }
+
   private initializeMap(): void {
     if (!this.mapContainerMini) {
       return;

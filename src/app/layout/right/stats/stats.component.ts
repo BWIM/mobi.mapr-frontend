@@ -193,7 +193,7 @@ export class StatsComponent implements OnDestroy {
 
     this.statsService.getTopRankings(params).subscribe({
       next: (data) => {
-        // Response already includes rank from the API
+        // Store raw data - ranks will be recalculated in filteredCounties getter to handle ties
         this.counties = data as County[];
         this.isLoading = false;
       },
@@ -206,8 +206,52 @@ export class StatsComponent implements OnDestroy {
     });
   }
 
+  /**
+   * Process rankings to handle tied scores - areas with the same score share the same rank
+   */
   get filteredCounties(): County[] {
-    return this.counties;
+    if (this.counties.length === 0) {
+      return [];
+    }
+
+    // Sort by the display value (score or index) in descending order
+    const sorted = [...this.counties].sort((a, b) => {
+      const valueA = this.getDisplayValue(a);
+      const valueB = this.getDisplayValue(b);
+      // For 'zeit' (score), higher is better, for 'qualitaet' (index), lower is better
+      const bewertung = this.filterConfigService.selectedBewertung();
+      if (bewertung === 'zeit') {
+        return valueB - valueA; // Descending for score
+      } else {
+        return valueA - valueB; // Ascending for index (lower is better)
+      }
+    });
+
+    // Assign ranks, handling ties
+    // When areas have the same value, they share the same rank
+    // The next rank skips positions (e.g., if rank 3 is shared by 2 items, next is rank 5)
+    for (let i = 0; i < sorted.length; i++) {
+      if (i === 0) {
+        // First item always gets rank 1
+        sorted[i].rank = 1;
+      } else {
+        const prevValue = this.getDisplayValue(sorted[i - 1]);
+        const currentValue = this.getDisplayValue(sorted[i]);
+        
+        // Check if values are equal (with small tolerance for floating point)
+        const isEqual = Math.abs(prevValue - currentValue) < 0.001;
+        
+        if (isEqual) {
+          // Same rank as previous (tied)
+          sorted[i].rank = sorted[i - 1].rank;
+        } else {
+          // New rank - use position (i + 1) which automatically accounts for skipped positions
+          sorted[i].rank = i + 1;
+        }
+      }
+    }
+
+    return sorted;
   }
 
   /**

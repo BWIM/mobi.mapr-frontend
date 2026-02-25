@@ -40,6 +40,7 @@
   },
   "analyze": {
     "selectPlace": "Klicke auf einen Ort in der Karte, um weitere Analysen zu erhalten",
+    "loading": "Lade...",
     "loadingFeatureInfo": "Lade Feature-Informationen...",
     "loadingPlaces": "Lade Karte mit Aktivitäten...",
     "loadingAnalysis": "Lade Aktivitäts-Analyse...",
@@ -84,7 +85,7 @@
     "grade": "Note:",
     "analysis": {
       "title": "Analyse Top 5 Aktivitäten",
-      "showAllCategories": "Alle Kategorien anzeigen",
+      "showAllCategories": "Alle Aktivitäten anzeigen",
       "categoriesNotFound": "Kategorien nicht gefunden",
       "dataNotLoaded": "Daten noch nicht geladen",
       "errorLoadingCategories": "Fehler beim Laden der Kategorien",
@@ -177,31 +178,84 @@
       "description": "Wählen Sie die Verkehrsmittel aus, die in der Berechnung berücksichtigt werden sollen. Sie können mehrere Verkehrsmittel gleichzeitig aktivieren oder deaktivieren.",
       "availableOptions": "Verfügbare Optionen",
       "availableOptionsDescription": "Jedes Verkehrsmittel kann einzeln ein- oder ausgeschaltet werden, um die Analyse entsprechend Ihren Anforderungen anzupassen.",
-      "cannotDisable": "Kann nicht deaktiviert werden"
+      "cannotDisable": "Kann nicht deaktiviert werden",
+      "introduction": "Wählen Sie aus vier Verkehrsmitteln, um die Mobilität in Ihrer Region zu analysieren. Jeder Modus verwendet ausgeklügelte Routing-Algorithmen, um realistische Reisezeiten zu berechnen.",
+      "modes": {
+        "title": "Verfügbare Verkehrsmittel",
+        "pedestrian": {
+          "title": "Fußgänger",
+          "description": "Fußgänger-Routen werden unter Berücksichtigung von Gehwegen, Fußgängerzonen und fußgängerfreundlicher Infrastruktur berechnet.",
+          "alwaysEnabled": "Immer aktiviert und kann nicht deaktiviert werden"
+        },
+        "bicycle": {
+          "title": "Fahrrad",
+          "description": "Die Fahrrad-Routing ist für durchschnittliche Stadtfahrräder optimiert und priorisiert dedizierte Fahrradwege und -spuren für sicherere und effizientere Radrouten."
+        },
+        "car": {
+          "title": "Auto",
+          "description": "Die Auto-Routing berücksichtigt Straßennetze, Verkehrsmuster und realistische Fahrbedingungen, um genaue Reisezeiten zu berechnen."
+        },
+        "transit": {
+          "title": "Öffentlicher Verkehr",
+          "description": "Die Routing für öffentliche Verkehrsmittel nutzt echte Fahrpläne und Verbindungen, um die besten Routen mit Bussen, Zügen, Straßenbahnen und anderen öffentlichen Verkehrsmitteln zu finden."
+        }
+      },
+      "routing": {
+        "title": "Routing-Technologie",
+        "valhalla": {
+          "title": "Valhalla Routing (Fuß, Rad, Auto)",
+          "description": "Fußgänger-, Fahrrad- und Auto-Routen werden mit Valhalla berechnet, einer leistungsstarken Open-Source-Routing-Engine, die realistische und genaue Wegfindung bietet.",
+          "feature1": "Hügel, Höhenunterschiede und Gelände werden in die Routenberechnungen einbezogen",
+          "feature2": "Fahrradrouten priorisieren dedizierte Fahrradwege und -spuren, wenn verfügbar",
+          "feature3": "Realistisches Routing berücksichtigt tatsächliche Straßenbedingungen und Infrastruktur"
+        },
+        "motis": {
+          "title": "Motis Transit Routing",
+          "description": "Öffentliche Verkehrsrouten werden mit Motis berechnet, das echte Fahrpläne und Zeitpläne verarbeitet, um optimale Verbindungen zu finden.",
+          "feature1": "Berechnungen basieren auf einem Referenz-Dienstag-Fahrplan für konsistente Ergebnisse",
+          "feature2": "Jede Aktivität hat eine Standardzeit zugewiesen (z.B. Restaurants um 19:00 Uhr), und der ÖPNV wird so berechnet, dass die optimale Ankunftszeit erreicht wird",
+          "feature3": "Die beste Verbindung wird automatisch ausgewählt, wobei keine Wartezeit am Ziel berücksichtigt wird"
+        }
+      }
     },
     "mobilityRating": {
       "title": "Mobilitätsbewertung",
       "description": "Wählen Sie zwischen zwei Bewertungsmethoden für die Mobilitätsanalyse.",
+      "introduction": "Das Mobilitätsbewertungssystem bietet zwei verschiedene Bewertungsansätze: Die zeitbasierte Bewertung misst absolute Reisezeiten, während die qualitätsbasierte Bewertung die Leistung Ihrer Gemeinde im Vergleich zu ähnlichen Regionen betrachtet.",
       "time": {
         "label": "Zeit",
-        "description": "Bewertet die Mobilität basierend auf der Reisezeit. Diese Methode misst, wie schnell verschiedene Ziele erreicht werden können."
+        "title": "Zeitbasierte Bewertung",
+        "description": "Die zeitbasierte Bewertung berechnet absolute Reisezeiten zu Zielen unter Berücksichtigung von Routenstrafen und modusspezifischen Faktoren.",
+        "step1": "Von einem Ausgangspunkt werden die nächsten drei Instanzen jeder Aktivität (z.B. Restaurants) für alle aktivierten Verkehrsmittel berechnet.",
+        "step2": "Jede Route erhält Strafen je nach Verkehrsmittel, wie z.B. Parkplatzsuche für Autos oder Fahrradinfrastruktur-Qualität (ADFC-Fahrradklimatest) für Fahrräder.",
+        "step3": "Für die gewählte Verkehrsmittel-Mischung werden die besten drei Routen ausgewählt und gewichtet. Die Gewichtung hängt vom Aktivitätstyp ab - für ein Restaurant möchte man mehr Auswahlmöglichkeiten als für ein Postamt.",
+        "example": "Beispiel: Die beste Route könnte zu Fuß sein, die zweitbeste mit dem Fahrrad und die drittbeste mit dem Auto. Alle drei werden mit aktivitätsspezifischen Gewichtungen kombiniert."
       },
       "quality": {
         "label": "Qualität",
-        "description": "Bewertet die Mobilität basierend auf der Qualität der Verbindungen. Diese Methode berücksichtigt Faktoren wie Komfort, Zuverlässigkeit und Servicequalität."
+        "title": "Qualitätsbasierte Bewertung",
+        "description": "Die qualitätsbasierte Bewertung bewertet die Mobilitätsleistung relativ zu ähnlichen Gemeinden und bietet eine vergleichende Perspektive statt absoluter Zeitwerte.",
+        "example": "Beispiel: Wenn Ihre Gemeinde 15 Minuten benötigt, um einen Supermarkt zu erreichen, ähnliche Gemeinden (nach RegioStar) aber durchschnittlich 20 Minuten benötigen, benötigen Sie nur 75% der Zeit. Diese relative Leistung wird dann in eine Qualitätsnote übersetzt.",
+        "graphTitle": "Qualitätsübersetzungsgraph",
+        "graphDescription": "Der relative Zeitprozentsatz (z.B. 75%) wird mithilfe einer Exponentialfunktion auf eine Qualitätsnote (A+ bis F-) abgebildet. Niedrigere Prozentsätze (bessere Leistung) führen zu höheren Noten."
       }
     },
     "activeFilters": {
       "title": "Aktive Filter",
       "description": "Diese Übersicht zeigt die aktuell aktiven Filter und deren Anzahl. Die Zahlen zeigen, wie viele Filter in jeder Kategorie ausgewählt sind.",
+      "introduction": "Filter ermöglichen es Ihnen, die Analyse anzupassen, indem Sie bestimmte Aktivitäten, Personas, Regionen und Regionaltypen auswählen. Verwenden Sie die Filter-Schaltfläche, um diese Einstellungen anzupassen.",
       "adjustFilters": "Filter anpassen",
-      "adjustFiltersDescription": "Klicken Sie auf \"Filtern\", um die Filtereinstellungen zu öffnen und anzupassen. Dort können Sie Aktivitäten, Personas, RegioStars und Bundesländer auswählen.",
+      "adjustFiltersDescription": "Klicken Sie auf \"Filtern\", um die Filtereinstellungen zu öffnen und anzupassen. Dort können Sie Aktivitäten, Personas, Regionalklassen und Bundesländer auswählen.",
       "midProject": "MID-Projekt",
       "midProjectDescription": "Da dies ein MID-Projekt ist, können Sie zusätzlich Aktivitäten und Personas filtern, um die Analyse weiter zu verfeinern.",
       "activities": "Aktivitäten",
+      "activitiesDescription": "Die Aktivitäten basieren auf der Studie \"Mobilität in Deutschland\". Sie gruppieren verschiedene reale Aktivitäten (z.B. Supermarkt) in abstrakte Kategorien des täglichen Bedarfs.",
       "personas": "Personas",
-      "regioStars": "RegioStars",
-      "states": "States",
+      "personasDescription": "Eine Persona definiert, wie relevant bestimmte Aktivitäten für verschiedene Nutzergruppen sind. Für ein Kind ist beispielsweise der Besuch eines Spielplatzes normalerweise relevanter als für einen Erwachsenen. Die Personas stammen ebenfalls aus der MID-Studie.",
+      "regioStars": "Regionalklassen",
+      "regioStarsDescription": "Wenn Sie nur bestimmte Regionen in Deutschland betrachten möchten, z.B. ländliche Gebiete, können Sie dies hier filtern. Es ändert die Daten selbst nicht, wie Bundesländer, filtert aber auch die Ergebnisse. Dies spiegelt sich auch in den Top-10-Rankings wider.",
+      "states": "Bundesländer",
+      "statesDescription": "Bundesländer ermöglichen es Ihnen, Regionen auf der Karte zu filtern. Während dies die Daten überhaupt nicht beeinflusst, ermöglicht es einen besseren Vergleich sowie die Filterung der Top-10-Rankings.",
       "filterButton": "Filtern"
     }
   },
@@ -239,7 +293,17 @@
       "title": "Statistiken",
       "description": "Diese Übersicht zeigt die Top 10 Rankings basierend auf der ausgewählten Ebene (Bundesländer, Landkreise oder Gemeinden) und den aktuellen Filtern und Bewertungskriterien.",
       "aboutDataTitle": "Über die Daten",
-      "aboutData": "Die angezeigten Daten repräsentieren die Top 10 Rankings basierend auf der ausgewählten Ebene und den aktuellen Filtern und Bewertungskriterien."
+      "aboutData": "Die angezeigten Daten repräsentieren die Top 10 Rankings basierend auf der ausgewählten Ebene und den aktuellen Filtern und Bewertungskriterien.",
+      "layerSelection": "Ebenenauswahl",
+      "layerSelectionDescription": "Wählen Sie die geografische Ebene aus, für die die Rankings angezeigt werden sollen: Bundesländer, Landkreise oder Gemeinden.",
+      "selectLayer": "Ebene auswählen",
+      "currentLayer": "Aktuelle Ebene",
+      "prefiltersNote": "Hinweis zu Filtern",
+      "prefiltersDescription": "Die Top 10 Rankings berücksichtigen automatisch alle aktiven Filter auf der linken Seite, einschließlich ausgewählter Bundesländer und RegioStars. Die Rankings werden entsprechend dieser Filter angepasst.",
+      "rankingRules": "Ranking-Regeln",
+      "tiedRanksDescription": "Wenn mehrere Gebiete den gleichen Wert haben, teilen sie sich den gleichen Rang:",
+      "tiedRanksRule1": "Gebiete mit identischem Wert erhalten den gleichen Rangplatz",
+      "tiedRanksRule2": "Der nächste Rangplatz wird entsprechend übersprungen (z.B. wenn zwei Gebiete Rang 3 teilen, ist der nächste Rang 5)"
     }
   },
   "PREPARING_PROJECT": {
