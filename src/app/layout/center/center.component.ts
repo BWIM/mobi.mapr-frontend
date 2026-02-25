@@ -10,6 +10,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.component';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { FeatureSelectionService } from '../../shared/services/feature-selection.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 interface NominatimResult {
   display_name: string;
@@ -20,7 +21,7 @@ interface NominatimResult {
 
 @Component({
   selector: 'app-center',
-  imports: [SharedModule],
+  imports: [SharedModule, TranslateModule],
   templateUrl: './center.component.html',
   styleUrl: './center.component.css',
 })
@@ -36,6 +37,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private dialog = inject(MatDialog);
   private http = inject(HttpClient);
   private featureSelectionService = inject(FeatureSelectionService);
+  private translate = inject(TranslateService);
   private popup?: Popup;
 
   // Nominatim search properties
@@ -101,7 +103,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getIndexName(index: number): string {
-    if (index <= 0) return "Error";
+    if (index <= 0) return this.translate.instant('map.popup.error');
     if (index < 0.28) return "A+";
     if (index < 0.32) return "A";
     if (index < 0.35) return "A-";
@@ -297,7 +299,8 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
       const feature = e.features[0];
       const properties = feature.properties;
-      const name = properties['name'] || properties['NAME'] || 'Unnamed';
+      const unnamedText = this.translate.instant('map.popup.unnamed');
+      const name = properties['name'] || properties['NAME'] || unnamedText;
       const isQualityMode = this.isQualityMode;
       
       let valueText = '';
@@ -307,18 +310,26 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
           // Index is stored as integer (multiplied by 100), so divide by 100
           const indexValue = index / 100;
           const indexName = this.getIndexName(indexValue);
-          valueText = `Index: ${indexName}`;
+          const indexLabel = this.translate.instant('map.popup.index');
+          const notAvailable = this.translate.instant('map.popup.notAvailable');
+          valueText = `${indexLabel} ${indexName}`;
         } else {
-          valueText = 'Index: N/A';
+          const indexLabel = this.translate.instant('map.popup.index');
+          const notAvailable = this.translate.instant('map.popup.notAvailable');
+          valueText = `${indexLabel} ${notAvailable}`;
         }
       } else {
         const score = properties['score'];
         if (score !== undefined && score !== null) {
           // Score is in seconds, convert to minutes
           const minutes = (score / 60).toFixed(1);
-          valueText = `Score: ${minutes} min`;
+          const scoreLabel = this.translate.instant('map.popup.score');
+          const minLabel = this.translate.instant('map.popup.minutes');
+          valueText = `${scoreLabel} ${minutes} ${minLabel}`;
         } else {
-          valueText = 'Score: N/A';
+          const scoreLabel = this.translate.instant('map.popup.score');
+          const notAvailable = this.translate.instant('map.popup.notAvailable');
+          valueText = `${scoreLabel} ${notAvailable}`;
         }
       }
 
@@ -344,9 +355,10 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       const feature = e.features[0];
       const properties = feature.properties;
       
+      const unnamedText = this.translate.instant('map.popup.unnamed');
       const featureData = {
         properties: {
-          name: properties['name'] || properties['NAME'] || 'Unnamed',
+          name: properties['name'] || properties['NAME'] || unnamedText,
           score: properties['score'],
           index: properties['index'],
           ...properties

@@ -1,13 +1,13 @@
 <div class="w-full max-w-full h-[80vh] flex flex-col">
   <h2 mat-dialog-title class="text-2xl font-bold text-white mb-4 flex-shrink-0">
-    {{ data.featureName || 'Aktivitäten' }}
+    {{ data.featureName || ('analyze.activities' | translate) }}
   </h2>
   
   <mat-dialog-content class="mat-typography flex-[4] min-h-0 overflow-hidden py-4 px-4 flex flex-col">
     <!-- Loading State -->
     <div *ngIf="isLoading" class="text-sm text-[var(--primary-color)] py-4 text-center flex-shrink-0">
       <mat-spinner diameter="40" class="mx-auto mb-4"></mat-spinner>
-      Lade alle Kategorien...
+      {{ 'analyze.allCategoriesDialog.loading' | translate }}
     </div>
     
     <!-- Error State -->
@@ -50,7 +50,7 @@
                 <span class="legend-letter">{{ item.letter }}</span>
               </div>
             </div>
-            <mat-icon class="text-[var(--primary-color)] cursor-pointer" (click)="openLegendInfo()" matTooltip="Mehr Informationen">info</mat-icon>
+            <mat-icon class="text-[var(--primary-color)] cursor-pointer" (click)="openLegendInfo()" [matTooltip]="'analyze.moreInfo' | translate">info</mat-icon>
           </div>
         </div>
         <!-- Time legend (color gradient) -->
@@ -60,8 +60,8 @@
               <div class="gradient-bar" [style.background]="getTimeGradient()"></div>
             </div>
             <div class="legend-labels flex justify-between">
-              <span class="legend-label text-xs text-white">0 min</span>
-              <span class="legend-label text-xs text-white">60+ min</span>
+              <span class="legend-label text-xs text-white">{{ 'map.legend.time.min0' | translate }}</span>
+              <span class="legend-label text-xs text-white">{{ 'map.legend.time.min60Plus' | translate }}</span>
             </div>
           </div>
         </div>
@@ -70,6 +70,6 @@
   </div>
 
   <mat-dialog-actions align="end" class="mt-2 flex-shrink-0">
-    <button mat-button (click)="onClose()">Schließen</button>
+    <button mat-button (click)="onClose()">{{ 'common.close' | translate }}</button>
   </mat-dialog-actions>
 </div>

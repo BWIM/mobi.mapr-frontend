@@ -16,7 +16,7 @@
         <button 
           (click)="toggleLeftPanel()"
           class="p-2 hover:bg-none rounded transition-colors"
-          aria-label="Collapse left panel">
+          [attr.aria-label]="'dashboard.collapseLeftPanel' | translate">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
           </svg>
@@ -28,7 +28,7 @@
           <button 
             (click)="toggleLeftPanel()"
             class="p-2 hover:bg-none rounded transition-colors"
-            aria-label="Expand left panel">
+            [attr.aria-label]="'dashboard.expandLeftPanel' | translate">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
@@ -64,7 +64,7 @@
         <button 
           (click)="toggleRightPanel()"
           class="p-2 hover:bg-none rounded transition-colors"
-          aria-label="Collapse right panel">
+          [attr.aria-label]="'dashboard.collapseRightPanel' | translate">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
           </svg>
@@ -76,7 +76,7 @@
           <button 
             (click)="toggleRightPanel()"
             class="p-2 hover:bg-none rounded transition-colors"
-            aria-label="Expand right panel">
+            [attr.aria-label]="'dashboard.expandRightPanel' | translate">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>

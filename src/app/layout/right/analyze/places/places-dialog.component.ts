@@ -7,6 +7,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { PlacesService, Place } from '../../../../services/places.service';
 import { MapService } from '../../../../services/map.service';
 import { firstValueFrom, catchError, of } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 export interface PlacesDialogData {
   featureType: 'municipality' | 'hexagon' | 'county' | 'state';
@@ -23,6 +24,7 @@ export interface PlacesDialogData {
   imports: [
     SharedModule,
     CommonModule,
+    TranslateModule,
   ],
   templateUrl: './places-dialog.component.html',
   styleUrl: './places-dialog.component.css'
@@ -32,8 +34,9 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   
   isLoading: boolean = false;
   error: string | null = null;
-  categoryName: string = 'Karte mit Orten der Aktivitäten';
+  categoryName: string = '';
   private map?: MapLibreMap;
+  private translate = inject(TranslateService);
   private popup?: Popup;
   private places: Place[] = [];
   private categoryData: Array<{ name: string; weight: number; places: Place[] }> = [];
@@ -57,6 +60,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   async ngOnInit() {
     this.isLoading = true;
     this.error = null;
+    this.categoryName = this.translate.instant('analyze.placesDialog.title');
 
     try {
       // Load places data and feature shape in parallel
@@ -87,7 +91,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         )
       ]);
 
-      this.categoryName = this.data.categoryNames || 'Karte mit Orten der Aktivitäten';
+      this.categoryName = this.data.categoryNames || this.translate.instant('analyze.placesDialog.title');
 
       this.places = placesResponse.places || [];
       
@@ -132,7 +136,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       this.isLoading = false;
     } catch (err: any) {
       console.error('Error loading places:', err);
-      this.error = err?.message || 'Fehler beim Laden der Orte';
+      this.error = err?.message || this.translate.instant('analyze.placesDialog.errorLoadingPlaces');
       this.isLoading = false;
     }
   }
@@ -306,7 +310,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
           id: place.id,
           name: place.name,
           category_id: place.category_id || 0,
-          category_name: place.category_name || 'Unknown',
+          category_name: place.category_name || this.translate.instant('map.popup.notAvailable'),
           url: place['url'] || null
         }
       }));
@@ -392,7 +396,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
                 id: place.id,
                 name: place.name,
                 category_id: place.category_id || 0,
-                category_name: place.category_name || 'Unknown',
+                category_name: place.category_name || this.translate.instant('map.popup.notAvailable'),
                 url: place['url'] || null
               }
             }));
@@ -490,8 +494,10 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
       const feature = e.features[0];
       const properties = feature.properties;
-      const name = properties['name'] || 'Unnamed';
-      const categoryName = properties['category_name'] || 'Unknown';
+      const unnamedText = this.translate.instant('map.popup.unnamed');
+      const notAvailableText = this.translate.instant('map.popup.notAvailable');
+      const name = properties['name'] || unnamedText;
+      const categoryName = properties['category_name'] || notAvailableText;
 
       const popupContent = `
         <div>

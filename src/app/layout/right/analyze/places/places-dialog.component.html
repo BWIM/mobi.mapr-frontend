@@ -8,7 +8,7 @@
     <div *ngIf="isLoading" class="text-sm text-[var(--primary-color)] py-4 text-center flex-1 flex items-center justify-center">
       <div class="flex flex-col items-center gap-4">
         <mat-spinner diameter="40"></mat-spinner>
-        <p>Lade Karte...</p>
+        <p>{{ 'analyze.placesDialog.loading' | translate }}</p>
       </div>
     </div>
     
@@ -23,7 +23,7 @@
       
       <!-- Legend Overlay -->
       <div *ngIf="categoryLegendItems.length > 0" class="absolute top-0 left-0 bg-[var(--background-color)] bg-opacity-75 p-3" style="z-index: 1000;">
-        <div class="text-[var(--primary-color)] text-sm font-semibold mb-2">Kategorien</div>
+        <div class="text-[var(--primary-color)] text-sm font-semibold mb-2">{{ 'analyze.categories' | translate }}</div>
         <div class="flex flex-col gap-2">
           <div *ngFor="let item of categoryLegendItems" 
                class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
@@ -40,6 +40,6 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end" class="mt-4 flex-shrink-0">
-    <button mat-button (click)="onClose()">Schließen</button>
+    <button mat-button (click)="onClose()">{{ 'common.close' | translate }}</button>
   </mat-dialog-actions>
 </div>

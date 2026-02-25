@@ -11,6 +11,7 @@ import { MessageModule } from 'primeng/message';
 import { SelectModule } from 'primeng/select';
 import { finalize } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { LanguageService } from '../../services/language.service';
 
 @Component({
   selector: 'app-login',
@@ -35,35 +36,18 @@ export class LoginComponent {
   error: string = '';
   isLoading: boolean = false;
   currentLang = 'de';
-  private readonly LANGUAGE_KEY = 'mobi.mapr.language';
-
-  languages = [
-    { code: 'de', name: 'Deutsch' },
-    { code: 'de-bw', name: 'Badisch' },
-    { code: 'de-sw', name: 'Schwäbisch' },
-    { code: 'en', name: 'English' }
-  ];
+  languages: { code: string; name: string }[] = [];
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private languageService: LanguageService
   ) {
     this.initForm();
-    this.loadLanguagePreference();
-  }
-
-
-  private loadLanguagePreference(): void {
-    const savedLang = localStorage.getItem(this.LANGUAGE_KEY);
-    if (savedLang) {
-      this.currentLang = savedLang;
-      this.translate.use(savedLang);
-    } else {
-      this.translate.setDefaultLang('de');
-      this.translate.use('de');
-    }
+    this.currentLang = this.languageService.getCurrentLanguage();
+    this.languages = this.languageService.availableLanguages;
   }
 
   private initForm(): void {
@@ -75,9 +59,8 @@ export class LoginComponent {
 
   onLanguageChange(event: any): void {
     const selectedLang = event.value?.code || 'de';
+    this.languageService.setLanguage(selectedLang);
     this.currentLang = selectedLang;
-    this.translate.use(selectedLang);
-    localStorage.setItem(this.LANGUAGE_KEY, selectedLang);
   }
 
   isFieldInvalid(fieldName: string): boolean {
@@ -98,7 +81,9 @@ export class LoginComponent {
           this.router.navigate(['/users-area']);
         },
         error: (err) => {
-          this.error = 'Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Eingaben.';
+          this.translate.get('auth.login.loginFailed').subscribe(text => {
+            this.error = text;
+          });
           console.error('Login error:', err);
         }
       });
@@ -116,11 +101,12 @@ export class LoginComponent {
     const control = this.loginForm.get(fieldName);
     if (control?.errors && control.touched) {
       if (control.errors['required']) {
-        return `${fieldName === 'username' ? 'Benutzername' : 'Passwort'} ist erforderlich`;
+        const key = fieldName === 'username' ? 'auth.login.usernameRequired' : 'auth.login.passwordRequired';
+        return this.translate.instant(key);
       }
       if (control.errors['minlength']) {
-        return `${fieldName === 'username' ? 'Benutzername' : 'Passwort'} muss mindestens ${fieldName === 'username' ? '3' : '6'
-          } Zeichen lang sein`;
+        const key = fieldName === 'username' ? 'auth.login.usernameMinLength' : 'auth.login.passwordMinLength';
+        return this.translate.instant(key);
       }
     }
     return '';

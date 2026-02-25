@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { WebsocketService } from '../../../services/websocket.service';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { TranslateModule } from '@ngx-translate/core';
 
 interface FunFact {
   icon: string;
@@ -25,6 +26,7 @@ export interface PreparingProjectDialogData {
     CommonModule,
     MatCardModule,
     MatProgressBarModule,
+    TranslateModule,
   ],
   templateUrl: './preparing-project-dialog.component.html',
   styleUrl: './preparing-project-dialog.component.css'

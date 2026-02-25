@@ -1,698 +1,270 @@
 {
-  "PROJECTS": {
-    "TITLE": "Projekte",
-    "LIST": {
-      "TITLE": "Projekte",
-      "NO_PROJECTS": "Es sind keine Projekte verfügbar",
-      "DELETED": "Alle Informationen zum Projekt erfolgreich gelöscht"
-    },
-    "DETAILS": {
-      "NAME": "Name",
-      "DESCRIPTION": "Beschreibung",
-      "CREATED": "Erstellt am",
-      "UPDATED": "Aktualisiert am"
-    },
-    "FIELDS": {
-      "NAME": "Name",
-      "DESCRIPTION": "Beschreibung",
-      "TYPE": "Typ",
-      "CREATED": "Erstellt am",
-      "STATUS": "Status",
-      "GROUP": "Gruppe",
-      "SELECT_GROUP": "Gruppe auswählen"
-    },
-    "ACTIONS": {
-      "CREATE": "Neues Projekt",
-      "CREATE_GROUP": "Neue Gruppe",
-      "CANCEL_TOOLTIP": "Abbrechen",
-      "SAVE_TOOLTIP": "Speichern",
-      "MORE_OPTIONS": "Weitere Optionen",
-      "EDIT_GROUP": "Gruppe bearbeiten",
-      "SHOW_RESULTS": "Ergebnisse anzeigen",
-      "CREATE_GROUP_TOOLTIP": "Gruppe erstellen",
-      "CREATE_TOOLTIP": "Erstellen"
-    },
-    "STATUS": {
-      "FINISHED": "Abgeschlossen",
-      "IN_PROGRESS": "In Bearbeitung",
-      "QUEUED": "Warteschlange"
-    },
-    "QUEUED_MESSAGE": "Projekt ist in der Warteschlange für die Verarbeitung...",
-    "EDIT": {
-      "TITLE": "Projekt bearbeiten"
-    },
-    "UNGROUPED": "Nicht gruppierte Projekte",
-    "TABS": {
-      "PERSONAL": "Persönlich",
-      "SHARED": "Geteilt",
-      "PUBLIC": "Öffentlich"
-    },
-    "READ_ONLY": "Nur Lesen",
-    "SHARED": "Geteilt",
-    "TYPE": {
-      "DEFAULT": "Standard",
-      "PERSONAL": "Persönlich"
-    },
-    "MESSAGES": {
-      "UPDATE_SUCCESS": "Projekt erfolgreich aktualisiert",
-      "UPDATE_ERROR": "Fehler beim Aktualisieren des Projekts",
-      "CONFIRM_DELETE": "Möchtest du dieses Projekt wirklich löschen?",
-      "UNFINISHED_PROJECTS": "Es gibt noch nicht abgeschlossene Projekte",
-      "UNFINISHED_PROJECTS_DETAIL": "Die folgenden Projekte müssen noch abgeschlossen werden: {projects}",
-      "CHECK_PROJECTS_ERROR": "Fehler beim Überprüfen der Projekte",
-      "FORM_INVALID": "Formular ist ungültig",
-      "CREATE_ERROR": "Fehler beim Erstellen",
-      "CREATE_SUCCESS": "Erfolgreich erstellt",
-      "INVALID_DATA": "Ungülgtige Daten",
-      "PERMISSION_DENIED": "Keine Berechtigung",
-      "SERVER_ERROR": "Es gab einen Fehler im Backend",
-      "LOAD_GROUPS_ERROR": "Gruppen konnten nicht geladen werden",
-      "CONFIRM_DELETE_GROUP": "Willst du die Gruppe wirklich löschen?",
-      "DELETE_GROUP_SUCCESS": "Gruppe erfolgreich gelöscht",
-      "DELETE_GROUP_ERROR": "Gruppe kann nicht gelöscht werden",
-      "LOAD_AREAS_ERROR": "Gebiete können nicht geladen werden"
-    },
-    "DELETE": {
-      "TITLE": "Projekt löschen",
-      "CONFIRMATION": "Bist du sicher, dass du dieses Projekt löschen möchtest?"
-    },
-    "PROGRESS_TOOLTIP": "Fortschritt",
-    "WIZARD": {
-      "SELECT_ALL_ACTIVITIES": "Alle auswählen",
-      "SELECT_ALL_PERSONAS": "Alle Personas auswählen",
-      "DESELECT_ALL_PERSONAS": "Alle Personas abwählen",
-      "SELECT_ALL_MODES": "Alle Modi auswählen",
-      "DESELECT_ALL_MODES": "Alle Modi abwählen",
-      "DESELECT_ALL_ACTIVITIES": "Alle abwählen"
-    },
-    "RESULTS": {
-      "LOAD_ERROR": "Ergebnisse können nicht geladen werden"
-    },
-    "DEFAULT_GROUP": "Vorberechnete Karten",
-    "AUTO_CLOSE_SIDEBAR": "Sidebar pinnen",
-    "HINT": {
-      "UPGRADE": "Aufgrund von Änderungen der Datenstruktur mussten alle Projekte, die vor dem 4.6.25 erstellt wurden, gelöscht werden."
-    },
-    "COMPARE": "Vergleichen"
+  "common": {
+    "loading": "Lade...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "yes": "Ja",
+    "no": "Nein",
+    "ok": "OK",
+    "search": "Suchen",
+    "filter": "Filter",
+    "reset": "Zurücksetzen",
+    "apply": "Anwenden",
+    "back": "Zurück",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "submit": "Absenden",
+    "required": "Erforderlich",
+    "optional": "Optional"
   },
-  "PROJECT_GROUPS": {
-    "CREATE": {
-      "TITLE": "Neue Gruppe"
+  "auth": {
+    "login": {
+      "title": "Anmeldung",
+      "username": "Benutzername",
+      "password": "Passwort",
+      "loginButton": "Anmelden",
+      "loginFailed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Eingaben.",
+      "usernameRequired": "Benutzername ist erforderlich",
+      "passwordRequired": "Passwort ist erforderlich",
+      "usernameMinLength": "Benutzername muss mindestens 3 Zeichen lang sein",
+      "passwordMinLength": "Passwort muss mindestens 6 Zeichen lang sein",
+      "selectLanguage": "Sprache auswählen"
     },
-    "EDIT": {
-      "TITLE": "Gruppe bearbeiten"
-    },
-    "FIELDS": {
-      "NAME": "Name"
-    },
-    "MESSAGES": {
-      "UPDATE_SUCCESS": "Projektgruppe erfolgreich aktualisiert",
-      "UPDATE_ERROR": "Fehler beim Aktualisieren der Projektgruppe",
-      "CONFIRM_DELETE": "Bist du sicher, dass du diese Projektgruppe löschen möchtest?",
-      "CREATE_SUCCESS": "Das Erstellen einer neuen Gruppe war erfolgreich",
-      "CREATE_ERROR": "Fehler beim erstellen einer neuen Gruppe",
-      "CONFIRM_DELETE_MULTIPLE": "Alle ausgewählten Gruppen löschen?",
-      "DELETE_SUCCESS": "Erlfogreich gelöscht",
-      "DELETE_ERROR": "Fehler beim löschen"
-    },
-    "DELETE_WARNING": "Die Projektgruppe wird gelöscht",
-    "DELETE": "Projektgruppe löschen",
-    "DELETE_TOOLTIP": "Gruppe löschen",
-    "MANAGE_UNUSED": "Ungenutze Projektgruppen verwalten",
-    "UNUSED_GROUPS": "Ungenutze Projektgruppen",
-    "NO_UNUSED_GROUPS": "Es gibt keine ungenutzten Gruppen",
-    "DELETE_SELECTED": "Ausgewählte Gruppen löschen"
+    "logout": "Abmelden"
   },
-  "COMMON": {
-    "ACTIONS": {
-      "SAVE": "Speichern",
-      "CANCEL": "Abbrechen",
-      "EDIT": "Bearbeiten",
-      "DELETE": "Löschen",
-      "LABEL": "Aktionen",
-      "CLOSE": "Schließen",
-      "CONFIRM": "Bestätigen",
-      "SHARE": "Teilen",
-      "DOWNLOAD": "Herunterladen",
-      "CANCEL_TOOLTIP": "Abbrechen",
-      "SAVE_TOOLTIP": "Speichern",
-      "EXPORT": "Exportieren",
-      "EXPORTING": "Exportieren..."
+  "analyze": {
+    "selectPlace": "Klicke auf einen Ort in der Karte, um weitere Analysen zu erhalten",
+    "loadingFeatureInfo": "Lade Feature-Informationen...",
+    "loadingPlaces": "Lade Karte mit Aktivitäten...",
+    "loadingAnalysis": "Lade Aktivitäts-Analyse...",
+    "loadingCategories": "Lade alle Kategorien...",
+    "loadingMap": "Lade Karte...",
+    "activities": "Aktivitäten",
+    "categories": "Kategorien",
+    "relevance": "Relevanz",
+    "relevancePercent": "Relevanz (%)",
+    "activity": "Aktivität",
+    "rating": "Bewertung",
+    "moreInfo": "Mehr Informationen",
+    "allCategoriesDialog": {
+      "title": "Aktivitäten",
+      "loading": "Lade alle Kategorien...",
+      "categoriesNotFound": "Kategorien nicht gefunden",
+      "dataNotLoaded": "Daten noch nicht geladen",
+      "errorLoadingCategories": "Fehler beim Laden der Kategorien"
     },
-    "MESSAGES": {
-      "ERROR": {
-        "LOAD": "Fehler beim Laden der Daten",
-        "DELETE": "Fehler beim Löschen",
-        "CREATE": "Fehler beim Erstellen",
-        "UPDATE": "Fehler beim Aktualisieren"
-      },
-      "SUCCESS": {
-        "DELETE": "Erfolgreich gelöscht",
-        "CREATE": "Erfolgreich erstellt",
-        "UPDATE": "Aktualisiert"
-      },
-      "CONFIRM_DELETE": "Bist du sicher, dass du dieses Projekt löschen möchtest?",
-      "CONFIRM_DELETE_GROUP": "Bist du sicher, dass du diese Projektgruppe löschen möchtest?"
+    "featureInfo": {
+      "notFound": "Feature-Informationen nicht gefunden",
+      "dataNotPreloaded": "Daten noch nicht vorgeladen",
+      "errorLoading": "Fehler beim Laden der Feature-Informationen"
     },
-    "CANCEL": "Abbrechen",
-    "EXPORT": "Export"
-  },
-  "LEGEND": {
-    "TITLE": "Legende",
-    "LVLA": "Die erforderliche Mobilitätszeit beträgt maximal 35 % im lokalen Vergleich.",
-    "LVLB": "Die erforderliche Mobilitätszeit liegt zwischen 36 % und 50 % im lokalen Vergleich.",
-    "LVLC": "Die erforderliche Mobilitätszeit liegt zwischen 51 % und 71 % im lokalen Vergleich.",
-    "LVLD": "Die erforderliche Mobilitätszeit liegt zwischen 72 % und 100 % im lokalen Vergleich.",
-    "LVLE": "Die erforderliche Mobilitätszeit liegt zwischen 101 % und 140 % im lokalen Vergleich.",
-    "LVLF": "Die erforderliche Mobilitätszeit beträgt mindestens 141 % im lokalen Vergleich.",
-    "DIFFERENCE_HEADER": "Legende für Differenzkarten",
-    "SCORE_HEADER": "Reisezeit (Minuten)",
-    "SCORE": "Score",
-    "MINUTES": "Min"
-  },
-  "MAP": {
-    "ACTIONS": {
-      "HEXAGON": "Hexagon",
-      "GEMEINDE": "Gemeinde",
-      "LANDKREIS": "Landkreis",
-      "LAND": "Land"
+    "analyzeData": {
+      "notFound": "Analyse-Daten nicht gefunden",
+      "dataNotPreloaded": "Daten noch nicht vorgeladen",
+      "errorLoading": "Fehler beim Laden der Analyse-Daten"
     },
-    "CONTROLS": {
-      "ZOOM_IN": "Hineinzoomen",
-      "ZOOM_OUT": "Herauszoomen"
+    "placesDialog": {
+      "title": "Karte mit Orten der Aktivitäten",
+      "loading": "Lade Karte...",
+      "errorLoadingPlaces": "Fehler beim Laden der Orte"
     },
-    "VISUALIZATION": {
-      "MEAN": "Durchschnitt",
-      "MEDIAN": "Median",
-      "POP": "Bevölkerung",
-      "AREA": "Fläche"
+    "rank": {
+      "overall": "Platz",
+      "overallLabel": "gesamt",
+      "regionalClass": "Platz",
+      "regionalClassLabel": "Regionalklasse"
     },
-    "TOOLTIP": {
-      "BASELINE": "Baseline",
-      "COMPARISON": "Vergleich",
-      "BETTER_THAN": "{{project1}} ist <strong>{{percentage}}%</strong> besser als {{project2}}",
-      "EQUAL": "Beide Projekte sind gleich"
+    "population": "Einwohnende:",
+    "grade": "Note:",
+    "analysis": {
+      "title": "Analyse Top 5 Aktivitäten",
+      "showAllCategories": "Alle Kategorien anzeigen",
+      "categoriesNotFound": "Kategorien nicht gefunden",
+      "dataNotLoaded": "Daten noch nicht geladen",
+      "errorLoadingCategories": "Fehler beim Laden der Kategorien",
+      "errorLoadingPlaces": "Fehler beim Laden der Orte",
+      "activities": "Aktivitäten",
+      "qualityRating": "Qualitätsbewertung: Die Qualitätsbewertung zeigt die Mobilitätsqualität in verschiedenen Kategorien von A (beste Qualität) bis F (niedrigste Qualität).",
+      "placesMap": "Karte mit Orten der Aktivitäten"
     }
   },
-  "PROJECT_WIZARD": {
-    "CREATE_NEW_PROJECT": "Neues Projekt erstellen",
-    "SELECT_ACTIVITIES": "Relevante Aktivitäten auswählen",
-    "SELECT_PERSONAS": "Relevante Personas auswählen",
-    "SELECT_MODES": "Relevante Modi auswählen",
-    "CREATE_PROJECT": "Projekt erstellen",
-    "PROJECT_NAME": "Projektname",
-    "DESCRIPTION": "Beschreibung",
-    "PROJECT_SETTINGS": "Projekteinstellungen",
-    "MAKE_PUBLIC": "Projekt öffentlich machen",
-    "ALLOW_SHARING": "Freigabe erlauben",
-    "SEND_EMAIL": "E-Mail nach Abschluss senden",
-    "LOAD_AREAS_ON_MAP": "Berechnete Gemeinden direkt auf der Karte anzeigen",
-    "AVAILABLE_PERSONAS": "Verfügbare Personas",
-    "AVAILABLE_MODES": "Verfügbare Modi",
-    "NON_MID_ACTIVITIES": "Nicht-MID Aktivitäten",
-    "CANCEL": "Abbrechen",
-    "BACK": "Zurück",
-    "NEXT": "Weiter",
-    "FINISH": "Fertigstellen",
-    "ERRORS": {
-      "NAME_REQUIRED": "Bitte einen Projektnamen eingeben.",
-      "SELECT_MID_ACTIVITIES": "Bitte wähle mindestens eine MID-Aktivität aus.",
-      "SELECT_NON_MID_ACTIVITY": "Bitte wähle eine Nicht-MID-Aktivität aus.",
-      "SELECT_PERSONAS": "Bitte wähle mindestens eine Persona aus.",
-      "SELECT_MODES": "Bitte wähle mindestens einen Modus aus.",
-      "SELECT_OSM_ACTIVITY": "Wähle eine Aktivität aus"
+  "errors": {
+    "generic": "Ein Fehler ist aufgetreten",
+    "network": "Netzwerkfehler. Bitte versuchen Sie es später erneut.",
+    "notFound": "Nicht gefunden",
+    "unauthorized": "Nicht autorisiert",
+    "forbidden": "Zugriff verweigert",
+    "serverError": "Serverfehler",
+    "unknown": "Unbekannter Fehler"
+  },
+  "maintenance": {
+    "title": "Wartung",
+    "message": "Die Anwendung wird derzeit gewartet. Bitte versuchen Sie es später erneut."
+  },
+  "language": {
+    "de": "Deutsch",
+    "en": "English",
+    "select": "Sprache auswählen"
+  },
+  "map": {
+    "search": {
+      "label": "Ort suchen",
+      "placeholder": "z.B. Berlin, München...",
+      "loading": "Lade Kartendaten...",
+      "clickForInfo": "Klicken Sie für weitere Informationen"
     },
-    "ACTIVITIES": {
-      "MID": "Aktivitäten",
-      "NON_MID": "Standardaktivitäten",
-      "TOGGLE_TOOLTIP": "umschalten",
-      "NO_MID_ACTIVITIES": "Fehler bei den Aktivitäten. Lade die Seite neu.",
-      "OSM": "Aktivitäten wechseln"
+    "popup": {
+      "index": "Index:",
+      "score": "Score:",
+      "minutes": "min",
+      "notAvailable": "N/A",
+      "unnamed": "Unbenannt",
+      "error": "Fehler"
     },
-    "PROJECT_NAME_TOOLTIP": "Projektname",
-    "DESCRIPTION_TOOLTIP": "Projektbeschreibung",
-    "PROJECT_GROUP_TOOLTIP": "Projektgruppe auswählen",
-    "SEND_EMAIL_TOOLTIP": "E-Mail nach Abschluss senden",
-    "LOAD_AREAS_ON_MAP_TOOLTIP": "Bereiche direkt laden",
-    "CANCEL_TOOLTIP": "Erstellung des Projekts abbrechen",
-    "BACK_TOOLTIP": "Einen Schritt zurückgehen",
-    "FINISH_TOOLTIP": "Fertigstellen",
-    "NEXT_TOOLTIP": "Weiter",
-    "STEPS_TOOLTIP": "Schritte",
-    "STEPS": {
-      "STEP": "Schritt",
-      "OF": "von",
-      "ACTIVITIES": "Aktivitäten",
-      "PERSONAS": "Personas",
-      "MODES": "Modi",
-      "AREA": "Gebiet auswählen",
-      "PROJECT_INFO": "Projektinformationen"
-    },
-    "START_ACTIVITY": "Start Aktivität",
-    "START_ACTIVITY_TOOLTIP": "Berechnet den score nur für Hexagone, in denen ein Ort dieser Aktivität ist",
-    "OSM_ACTIVITIES": "Openstreetmap Aktivitäten",
-    "REGIOSTAR": "RegioStar",
-    "REGIOSTAR_TOOLTIP": "RegioStar-Kategorien auswählen",
-    "SELECT_REGIOSTAR": "RegioStar auswählen",
-    "PERSONA_GROUP": "Persona-Gruppe",
-    "PERSONA_GROUP_TOOLTIP": "Persona-Gruppe auswählen, um Personas zu filtern",
-    "SELECT_PERSONA_GROUP": "Persona-Gruppe auswählen"
-  },
-  "SIDEBAR": {
-    "TITLE": "Details",
-    "DESCRIPTION": "Beschreibung",
-    "STATUS": "Status",
-    "NO_SELECTION": "Keine Auswahl",
-    "CLICK_HINT": "Klicke auf eine Karte, um Details anzuzeigen",
-    "PROJECT_INFO": "Projektinformationen",
-    "ACTIVITIES": "Aktivitäten",
-    "MODES": "Modi",
-    "PERSONAS": "Personas",
-    "NO_PROJECT_SELECTED": "Kein Projekt ausgewählt",
-    "EXPORT_PDF_LANDSCAPE": "PDF im Querformat exportieren",
-    "EXPORT_PDF_PORTRAIT": "PDF im Hochformat exportieren",
-    "SHARE_LINK": "Link teilen",
-    "SHARE_LINK_DESCRIPTION": "Teile diesen Link, damit andere das Projekt ohne Konto anzeigen können.",
-    "SHARE": "Teilen",
-    "COPY_LINK": "Link kopieren",
-    "COPY_LINK_SUCCESS": "Link erfolgreich kopiert",
-    "COPY_LINK_SUCCESS_TITLE": "Erfolg",
-    "COPY_LINK_SUCCESS_MESSAGE": "Share-Link in Zwischenablage kopiert",
-    "COPY_LINK_ERROR_TITLE": "Fehler",
-    "COPY_LINK_ERROR_MESSAGE": "Link konnte nicht in Zwischenablage kopiert werden",
-    "SHARE_TOOLTIP": "Teilen",
-    "EXPORT_PDF_LANDSCAPE_TOOLTIP": "Im Querformat exportieren",
-    "EXPORT_PDF_PORTRAIT_TOOLTIP": "Im Hochformat exportieren",
-    "AVERAGE_TYPE": "Mittelwerttyp",
-    "POPULATION_AREA": "Bevölkerung/Fläche",
-    "MEDIAN": "Median",
-    "AVERAGE": "Durchschnitt",
-    "AREA": "Fläche",
-    "POPULATION": "Bevölkerung",
-    "OPACITY_THRESHOLDS": "Farb-Dichte",
-    "COUNTY_THRESHOLD": "Landkreise",
-    "MUNICIPALITY_THRESHOLD": "Kommunen",
-    "HEXAGON_THRESHOLD": "Hexagon",
-    "REDUCE_OPACITY": "Knopf halten, um Basis-Karte besser zu sehen.",
-    "REDUCE_OPACITY_TOOLTIP": "Features weniger intensiv anzeigen",
-    "RESTORE_OPACITY": "Karte wiederherstellen",
-    "ZOOM_TO_FEATURES": "Karte zentrieren",
-    "ZOOM_TO_FEATURES_TOOLTIP": "Zentriert die Karte wieder zum Initialzustand",
-    "EXPORT_PDF_TOOLTIP": "PDF exportieren",
-    "EXPORT_PDF": "PDF exportieren",
-    "COMPARISON_DIALOG_TITLE": "Projekt wählen",
-    "CREATED": "Erstellt",
-    "COMPARISON_ERROR_TITLE": "Kein Projekt verfügbar",
-    "COMPARISON_DIALOG_NO_PROJECTS": "Keine ähnliche Projekte verfügbar",
-    "EXIT_COMPARISON": "Vergleich beenden",
-    "VISUALIZATION_TYPE": "Visualisierung",
-    "INDEX": "Index",
-    "INDEX_TOOLTIP": "Zeigt die bewertete Mobilitätszeit in Relation zur jw. Regionalklasse.",
-    "SCORE": "Score",
-    "SCORE_TOOLTIP": "Zeigt die Reisezeit in Minuten, angereichert mit subjektiven Faktoren."
-  },
-  "ANALYZE": {
-    "PERSONA": {
-      "TITLE": "Persona",
-      "NO_DATA": "Keine Daten verfügbar",
-      "HINT": "Hinweis: Die Werte der Persona können bei einer limitieren Anzahl an Modi sehr ähnlich sein.",
-      "LOADING": "Lade Persona-Daten..."
-    },
-    "ACTIVITIES": {
-      "TITLE": "Aktivitäten",
-      "NO_DATA": "Keine Daten verfügbar",
-      "SWITCH_TO_DOUGHNUT": "Ansicht wechseln",
-      "EXPLANATION": "Die Aktivitäten gewichtet nach lokaler Relevanz",
-      "HINT": "💡 Klicke auf einen Balken im Diagramm, um eine Karte mit den Orten dieser Aktivität anzuzeigen!",
-      "SUBACTIVITIES_HINT": "💡 Klicke auf einen Balken im Diagramm, um Orte auf der Karte anzuzeigen!",
-      "NO_PLACES": "Keine Orte gefunden",
-      "DISABLE_PLACES": "Die Orts-Ansicht ist nur für Gemeinde-Ebene oder Hexagone aktiviert. Um mehr Details zu bekommen, zoome in die Karte hinein!",
-      "OSM_HINT": "Fehlt ein Ort? Du kannst ihn direkt zu OpenStreetMap hinzufügen:",
-      "OSM_LINK": "Den OpenStreetMap Editor öffnen",
-      "LOADING": "Lade Aktivitäten...",
-      "LOADING_SUBACTIVITIES": "Lade Unteraktivitäten...",
-      "LOADING_MAP": "Lade Karte..."
-    },
-    "MODES": {
-      "TITLE": "Modi",
-      "NO_DATA": "Keine Daten verfügbar",
-      "LOADING": "Lade Modi..."
-    },
-    "PROFILES": {
-      "TITLE": "Modi",
-      "NO_DATA": "Keine Daten verfügbar",
-      "HINT": "Hinweis: Die Werte der Modi können bei einer limitieren Anzahl an Personas sehr ähnlich sein.",
-      "LOADING": "Lade Profile...",
-      "EXPLANATION": "Die Abbildung oben zeigt, wie gut jedes einzelne Verkehrsmittel performt."
-    },
-    "TITLE": "Details",
-    "START": "Start",
-    "END": "Ende",
-    "PROPERTIES": {
-      "POPULATION": "Bevölkerung"
-    },
-    "WEIGHTING": {
-      "POPULATION": "Gewichten nach Bevölkerung",
-      "AREA": "Gewichten nach Fläche"
-    },
-    "LOADING": {
-      "HINT": "Hinweis: Umso mehr Fläche, die angeklickte Verwaltungseinheit hat, desto länger dauert der Ladevorgang!"
-    },
-    "POPULATION_WEIGHTING_HINT": "Hinweis: Die angezeigten Werte sind immer nach Bevölkerung gewichtet, nicht nach Fläche",
-    "COMPARISON_MODE": {
-      "DISABLED_TITLE": "Analyse deaktiviert",
-      "DISABLED_MESSAGE": "Die Analyse-Funktion ist für Vergleichsprojekte deaktiviert. Bitte verwenden Sie ein Standard-Projekt, um die Analyse zu nutzen."
-    }
-  },
-  "EXPORT": {
-    "IS_EXPORTING": "Export läuft...",
-    "GENERATING_PDF": "PDF wird generiert..."
-  },
-  "SHARE": {
-    "NO_PROJECT_SELECTED": "Kein Projekt ausgewählt",
-    "CREATED_BY": "Erstellt von",
-    "EXPIRES": "Läuft ab am",
-    "DETAILS": "Infos",
-    "LINKED_MAPS": "Verknüpfte Karten",
-    "PROJECTS": "Projekte",
-    "DESCRIPTION": "Beschreibung",
-    "ACTIVITIES": "Aktivitäten",
-    "PERSONAS": "Personas",
-    "NO_ACTIVITIES": "Keine Aktivitäten",
-    "NO_PERSONAS": "Keine Personas",
-    "NO_DESCRIPTION": "Keine Beschreibung",
-    "MODES": "Modi",
-    "NO_PROFILES": "Keine Profile gefunden"
-  },
-  "DETAILS": {
-    "FIELDS": {
-      "OVERVIEW": "Übersicht",
-      "ACTIVITIES": "Aktivitäten"
-    },
-    "TITLE": "Details"
-  },
-  "EDIT": {
-    "TITLE": "Projekt bearbeiten"
-  },
-  "AUTH": {
-    "LOGIN": {
-      "LOGIN": "Anmelden"
-    }
-  },
-  "RATE_LIMIT": {
-    "TITLE": "Zu viele Benutzer",
-    "MESSAGE": "Die maximale Anzahl gleichzeitiger Benutzer wurde erreicht",
-    "DESCRIPTION": "Leider sind derzeit zu viele Benutzer gleichzeitig auf der Plattform. Bitte versuche es später erneut.",
-    "CURRENT_STATUS": "Aktueller Status",
-    "CAPACITY_REACHED": "Kapazität erreicht",
-    "CAPACITY_MESSAGE": "Die Plattform ist derzeit voll ausgelastet",
-    "SYSTEM_BUSY": "System ausgelastet",
-    "NEXT_CHECK": "Nächste Überprüfung in",
-    "AUTO_RETRY": "Die Seite wird automatisch überprüft und du wirst weitergeleitet, sobald ein Platz verfügbar ist.",
-    "RETRY_NOW": "Jetzt erneut versuchen",
-    "BACK_TO_SHARE": "Zurück zum geteilten Projekt",
-    "GO_TO_LANDING": "Zur Startseite",
-    "HELP_TEXT": "Bitte habe Verständnis, dass wir die Qualität des Services für alle Benutzer sicherstellen möchten. Bei dauerhaften Problemen kannst du uns per E-Mail an mobimapr@bw-im.de kontaktieren.",
-    "TO_PROJECT_PAGE": "Zur Projektseite"
-  },
-  "CREDITS": {
-    "VISIT_WEBSITE": "Besuche unsere Website",
-    "INFO_BUTTON_TOOLTIP": "Informationen und Hilfe",
-    "VISUALIZATION_SECTION_TOOLTIP": "Verwendete Komponenten für die Visualisierung",
-    "DATA_SECTION_TOOLTIP": "Verwendete Datenquellen und -verarbeitung",
-    "BACKEND_SECTION_TOOLTIP": "Verwendete Backend-Technologien",
-    "ROUTING_SECTION_TOOLTIP": "Verwendete Routing-Dienste",
-    "VISIT_COMPONENT_WEBSITE": "Besuche die {{name}} Website",
-    "LANGUAGE_BUTTON_TOOLTIP": "Sprache ändern",
-    "SHORTCUTS": {
-      "CENTER_MAP": "Karte zentrieren",
-      "FREEZE_MAP": "Kartenoverlay einfrieren (für Screenshots)",
-      "SHOW_STATISTICS": "Statistiken anzeigen",
-      "EXPORT_PDF_PORTRAIT": "PDF im Hochformat exportieren",
-      "EXPORT_PDF_LANDSCAPE": "PDF im Querformat exportieren",
-      "SHARE": "Teilen",
-      "TOGGLE_HEXAGON_VIEW": "Hexagon Ansicht togglen",
-      "EXPORT_PDF": "Karte als PDF exportieren"
-    },
-    "LOGOUT": "Abmelden",
-    "SHOW_CREDITS": "Infos anzeigen",
-    "SHOW_HELP": "Hilfe anzeigen",
-    "START_TUTORIAL": "Tutorial starten",
-    "CHANGE_LANGUAGE": "Sprache wechseln",
-    "SHOW_SHORTCUTS": "Tastaturkürzel",
-    "TOGGLE_TUTORIAL": "Tutorial anzeigen"
-  },
-  "HELP": {
-    "GETTING_STARTED_TOOLTIP": "Erste Schritte mit der Anwendung",
-    "FAQ_TOOLTIP": "Häufig gestellte Fragen und Antworten",
-    "CONTACT_TOOLTIP": "Kontaktinformationen für Support"
-  },
-  "STATISTICS": {
-    "TITLE": "Rangliste",
-    "SHOW_STATISTICS_TOOLTIP": "Detaillierte Statistiken für dieses Projekt anzeigen",
-    "STATES": "Bundesländer",
-    "COUNTIES": "Land-/ Stadtkreise",
-    "MUNICIPALITIES": "Gemeinden",
-    "RANK": "Rang",
-    "NAME": "Name",
-    "SCORE": "Score",
-    "GRADE": "Note",
-    "CURRENT_SETTINGS": "Aktuelle Einstellungen",
-    "POPULATION_WEIGHTED": "Bevölkerung gewichtet",
-    "AREA_WEIGHTED": "Fläche gewichtet",
-    "FILTER_BY_CITY_SIZE": "Nach Bevölkerung filtern",
-    "FILTER_BY_NAME": "Gemeinden nach Name filtern",
-    "ENTER_MUNICIPALITY_NAME": "Gemeindename eingeben...",
-    "SHOW_BEZIRKE": "Bezirke anzeigen",
-    "LOADING_MORE_DATA": "Lade weitere Daten im Hintergrund...",
-    "PROJECT_VERSION_INVALID": "Die Version des Projektes ist zu alt. Erstelle es neu, um Statistiken angezeigt zu bekommen!",
-    "POPULATION": "Bevölkerung",
-    "MUNICIPALITY_SUBDIVISION_HINT": "Hinweis: Gemeinden, die allein den jeweiligen Stadt- oder Landkreis bilden, werden nicht noch einmal unter 'Gemeinden' aufgeführt, sondern nur unter 'Stadt- bzw. Landkreise'.",
-    "NO_MUNICIPALITIES_FOUND": "Keine Gemeinden gefunden",
-    "NO_MUNICIPALITIES_HINT": "Keine Gemeinden entsprechen den ausgewählten Kriterien. Versuchen Sie, die Bevölkerungsfilter anzupassen oder eine andere Gemeinde auszuwählen.",
-    "SEARCH_KEYWORD_STATE": "Gib zum filtern ein Bundesland ein....",
-    "SEARCH_KEYWORD_COUNTY": "Gib zum filtern eine Stadt/ Landkreis an"
-  },
-  "PDF_EXPORT": {
-    "TITLE": "PDF Export",
-    "ORIENTATION": "Ausrichtung",
-    "PORTRAIT": "Hochformat",
-    "LANDSCAPE": "Querformat",
-    "PAPER_SIZE": "Papiergröße",
-    "RESOLUTION": "Auflösung (DPI)",
-    "MAP_EXTENT": "Kartenausschnitt",
-    "CURRENT_VIEW": "Aktuelle Ansicht",
-    "FULL_MAP": "Gesamte Karte",
-    "EXPORT_INFO": "Export-Informationen",
-    "SELECTED_SIZE": "Ausgewählte Größe",
-    "ESTIMATED_SIZE": "Hinweis: Die Dateigröße hängt von der Kartenkomplexität und den gewählten Optionen ab"
-  },
-  "SEARCH_OVERLAY": {
-    "SEARCH_PLACEHOLDER": "Orte suchen",
-    "SEARCH_HINT": "Suche nach einem Ort, um ihn direkt auf der Karte anzuzeigen"
-  },
-  "LANDING": {
-    "TITLE": "Willkommen beim mobi.mapr",
-    "SUBTITLE": "Deine umfassende Mobilitätskartierungs- und Analyseplattform. Greife auf alle Tools und Ressourcen von einem zentralen Ort aus zu.",
-    "CARDS": {
-      "PROJECT_MAIN_SITE": {
-        "TITLE": "Projektseite",
-        "DESCRIPTION": "Auf unserer Hauptseite findest du alles zum mobi.mapr. Dort findest du aktelle Projekte und weitere spannende Informationen.",
-        "BUTTON": "Hauptseite besuchen"
+    "legend": {
+      "quality": {
+        "title": "Qualitätsbewertung (A-F)",
+        "description": "Die Qualitätsbewertung zeigt die Mobilitätsqualität in verschiedenen Kategorien von A (beste Qualität) bis F (niedrigste Qualität).",
+        "a": {
+          "title": "A - Beste Qualität",
+          "description": "Sehr gute Mobilitätsqualität (Index: 0 - 0.35)"
+        },
+        "b": {
+          "title": "B - Gute Qualität",
+          "description": "Gute Mobilitätsqualität (Index: 0.35 - 0.5)"
+        },
+        "c": {
+          "title": "C - Mittlere Qualität",
+          "description": "Mittlere Mobilitätsqualität (Index: 0.5 - 0.71)"
+        },
+        "d": {
+          "title": "D - Unterdurchschnittliche Qualität",
+          "description": "Unterdurchschnittliche Mobilitätsqualität (Index: 0.71 - 1.0)"
+        },
+        "e": {
+          "title": "E - Schlechte Qualität",
+          "description": "Schlechte Mobilitätsqualität (Index: 1.0 - 1.41)"
+        },
+        "f": {
+          "title": "F - Sehr schlechte Qualität",
+          "description": "Sehr schlechte Mobilitätsqualität (Index: > 1.41)"
+        }
       },
-      "CONTACT": {
-        "TITLE": "Kontakt",
-        "DESCRIPTION": "Bei Fragen oder Problemen kontaktiere uns!",
-        "BUTTON": "Projekt öffnen"
-      },
-      "TECHNICAL_DOCS": {
-        "TITLE": "Technische Dokumentation",
-        "DESCRIPTION": "Umfassende technische Dokumentation, die den mobi.mapr genauer beschreibt.",
-        "BUTTON": "Dokumentation anzeigen"
-      },
-      "FAQ": {
-        "TITLE": "FAQ",
-        "DESCRIPTION": "Finde Antworten auf häufig gestellte Fragen rund um das Projekt.",
-        "BUTTON": "FAQ anzeigen"
-      },
-      "LOGIN": {
-        "TITLE": "Anmelden",
-        "DESCRIPTION": "Zugriff auf das Anwendungsdashboard und alle verfügbaren Funktionen.",
-        "BUTTON": "In App anmelden"
-      },
-      "DASHBOARD": {
-        "TITLE": "Dashboard",
-        "DESCRIPTION": "Zugriff auf das Hauptanwendungsdashboard mit allen Kartierungs- und Analysetools.",
-        "BUTTON": "Zum Dashboard"
-      }
-    },
-    "FOOTER": "© 2025 bwim. Alle Rechte vorbehalten."
-  },
-  "ADVERTISING": {
-    "TITLE": "Entdecke Weitere Projekte",
-    "DESCRIPTION": "Erkunde alle unsere Mobilitätskartierungsprojekte und bleibe über die neuesten Entwicklungen informiert.",
-    "VISIT_MAIN_SITE": "Hauptseite besuchen",
-    "NEWSLETTER_TEXT": "Abonniere unseren Newsletter für Projektupdates und neue Funktionen!"
-  },
-  "TUTORIAL": {
-    "STEP": "Schritt",
-    "OF": "von",
-    "PREVIOUS": "Zurück",
-    "NEXT": "Weiter",
-    "FINISH": "Fertig",
-    "SKIP": "Überspringen",
-    "SELECT_TUTORIAL": "Tutorial auswählen",
-    "CLICK_TO_CONTINUE": "Klicke auf das hervorgehobene Element, um fortzufahren",
-    "DASHBOARD": {
-      "NAME": "Willkommen Tutorial",
-      "DESCRIPTION": "Lerne die wichtigsten Funktionen der Anwendung kennen",
-      "STEP1": {
-        "TITLE": "Willkommen!",
-        "CONTENT": "Willkommen beim mobi.mapr! Mit diesem kleinen Tutorial zeigen wir dir die wichtigsten Funktionen des Tools. Du kannst das Tutorial jederzeit überspringen und später erneut starten. Um neu zu starten, klicke auf das gelbe i unten rechts und dann auf den obersten Knopf.",
-        "NEXT_HINT": "Klicke auf den Knopf unten in der Mitte, um loszulegen."
-      },
-      "STEP2": {
-        "TITLE": "Projekt-Übersicht",
-        "CONTENT": "Hier sind verschiedene vorberechnete Karten gelistet. Weiter unten findest du die Projekte, die du selbst erstellt hast."
-      },
-      "STEP3": {
-        "TITLE": "Karte anzeigen",
-        "CONTENT": "Um eine Karte anzuzeigen, klicke auf das kleine Symbol. Je nach Größe der Karte, dauert es ein paar Sekunden, bis die Karte geladen ist.",
-        "NEXT_HINT": "Klicke auf den Knopf, um die Karte anzuzeigen."
-      },
-      "STEP4": {
-        "TITLE": "Die Karte",
-        "CONTENT": "In der Mitte ist die Karte für Mobilitätsqualität. Du kannst zoomen, um andere Auflösungen zu erhalten. Du kannst direkt nach dem Tutorial anfangen zu spielen.",
-        "NEXT_HINT": "Klicke unten auf den Weiter-Knopf, wenn du bereit bist."
-      },
-      "STEP5": {
-        "TITLE": "Die Legende",
-        "CONTENT": "Unten links siehst du die Legende. Mit einem Klick erfährst du, was die einzelnen Farben bedeuten.",
-        "NEXT_HINT": "Klicke auf die Legende, um mehr Informationen zu erhalten."
-      },
-      "STEP6": {
-        "TITLE": "Details anzeigen",
-        "CONTENT": "Hier findest du alle Informationen zu dem Projekt, wie die Aktivitäten, Personas und Modi. Hier kannst du auch die Gewichtung auf der Karte umschalten oder die Karte exportieren.",
-        "NEXT_HINT": "Unten geht es wieder weiter."
-      },
-      "STEP7": {
-        "TITLE": "Karte analysieren",
-        "CONTENT": "Wenn du auf ein Gebiet auf der Karte klickst, bekommst du detaillierte Informationen, wie sich der Score zusammensetzt.",
-        "NEXT_HINT": "Klicke auf ein farbiges Gebiet auf der Karte, das du gerade siehst."
-      },
-      "STEP8": {
-        "TITLE": "Fokus auf Karte",
-        "CONTENT": "Um zur Karte zurückzukehren, klicke auf das schließen Symbol oben rechts.",
-        "NEXT_HINT": "Klicke auf das schließen Symbol oben rechts, um zur Karte zurückzukehren."
-      },
-      "STEP9": {
-        "TITLE": "Projekte anzeigen",
-        "CONTENT": "Klicke links auf die Projekte, um wieder alle Projekte anzuzeigen.",
-        "NEXT_HINT": "Klicke links auf das Seitenelement."
-      },
-      "STEP10": {
-        "TITLE": "Mehr Informationen",
-        "CONTENT": "Unten rechts, kannst du mehr Informationen über die Anwendung erhalten, die Sprache einstellen, Tastaturkürzel anzeigen und dieses Tutorial erneut starten.",
-        "NEXT_HINT": "Unten geht es wieder weiter."
-      },
-      "STEP11": {
-        "TITLE": "Viel Spaß!",
-        "CONTENT": "Wir hoffen, dass dir das Tutorial gefallen hat und du viel Spaß mit mobi.mapr hast!",
-        "NEXT_HINT": "Du kannst unten das Tutorial beenden!"
-      }
-    },
-    "SHARE": {
-      "NAME": "Teilen",
-      "LANGUAGE_HINT": "You can change the language in the top right corner!",
-      "DESCRIPTION": "Lerne die wichtigsten Funktionen des Teilens kennen",
-      "STEP1": {
-        "TITLE": "Willkommen!",
-        "CONTENT": "Willkommen beim mobi.mapr! Mit diesem kleinen Tutorial zeigen wir dir die wichtigsten Funktionen deiner geteilten Karte.",
-        "NEXT_HINT": "Klicke auf den Knopf unten in der Mitte, um loszulegen."
-      },
-      "STEP2": {
-        "TITLE": "Die Karte",
-        "CONTENT": "In der Mitte ist die Karte für Mobilitätsqualität. Du kannst zoomen, um andere Auflösungen zu erhalten. Du kannst direkt nach dem Tutorial anfangen zu spielen.",
-        "NEXT_HINT": "Klicke unten auf den Weiter-Knopf, wenn du bereit bist."
-      },
-      "STEP3": {
-        "TITLE": "Die Legende",
-        "CONTENT": "Unten links siehst du die Legende. Mit einem Klick darauf, öffnet sich die Beschreibung.",
-        "NEXT_HINT": "Klicke irgendwo auf die Legende."
-      },
-      "STEP3-1": {
-        "TITLE": "Übersicht",
-        "CONTENT": "Du kannst die Legende jederzeit schließen, indem du erneut auf diese klickst.",
-        "NEXT_HINT": "Klicke irgendwo auf die Legende, um diese zu schließen."
-      },
-      "STEP4": {
-        "TITLE": "Details anzeigen",
-        "CONTENT": "Hier findest du alle Informationen zu dem Projekt, wie die Aktivitäten, Personas und Modi.",
-        "NEXT_HINT": "Schließe die Details, um fortzufahren."
-      },
-      "STEP5": {
-        "TITLE": "Karte analysieren",
-        "CONTENT": "Wenn du auf ein Gebiet auf der Karte klickst, bekommst du detaillierte Informationen, wie sich der Score zusammensetzt.",
-        "NEXT_HINT": "Klicke auf ein farbiges Gebiet auf der Karte, das du gerade siehst."
-      },
-      "STEP6": {
-        "TITLE": "Fokus auf Karte",
-        "CONTENT": "Um zur Karte zurückzukehren, klicke auf das schließen Symbol oben rechts.",
-        "NEXT_HINT": "Klicke auf das schließen Symbol oben rechts, um zur Karte zurückzukehren."
-      },
-      "STEP7": {
-        "TITLE": "Mehr Informationen",
-        "CONTENT": "Unten rechts, kannst du mehr Informationen über die Anwendung erhalten, wie z.B. die Tastaturkürzel anzeigen lassen.",
-        "NEXT_HINT": "Unten geht es wieder weiter."
-      },
-      "STEP8": {
-        "TITLE": "Viel Spaß!",
-        "CONTENT": "Wir hoffen, dass dir das Tutorial gefallen hat und du viel Spaß mit mobi.mapr hast!",
-        "NEXT_HINT": "Du kannst unten das Tutorial beenden!"
+      "time": {
+        "title": "Zeitbewertung (Reisezeit)",
+        "description": "Die Zeitbewertung zeigt die durchschnittliche Reisezeit in Minuten. Die Farben reichen von hellblau (kurze Reisezeiten) bis dunkelblau (lange Reisezeiten).",
+        "scale": "Reisezeit-Skala",
+        "scaleDescription": "0 Minuten (hellblau) bis 60+ Minuten (dunkelblau)",
+        "detailedDescription": "Die Reisezeit wird in Minuten gemessen und zeigt, wie schnell verschiedene Ziele erreicht werden können. Kürzere Reisezeiten werden in helleren Blautönen dargestellt, während längere Reisezeiten in dunkleren Blautönen erscheinen.",
+        "min0": "0 min",
+        "min60Plus": "60+ min"
       }
     }
   },
-  "MAINTENANCE": {
-    "TITLE": "Wartungsarbeiten",
-    "MESSAGE": "Derzeit werden Wartungsarbeiten durchgeführt. Bitte versuchen Sie es später erneut. Die Seite wird automatisch aktualisiert, sobald der Service wieder verfügbar ist.",
-    "CHECKING": "Service wird überprüft...",
-    "INFO": "Diese Seite wird automatisch aktualisiert, sobald der Service wieder verfügbar ist."
+  "left": {
+    "extendedMode": "erweiterter Modus",
+    "information": "Information",
+    "expanded": "Erweitert",
+    "normal": "Normal",
+    "transportModes": {
+      "title": "Verkehrsmittel",
+      "description": "Wählen Sie die Verkehrsmittel aus, die in der Berechnung berücksichtigt werden sollen. Sie können mehrere Verkehrsmittel gleichzeitig aktivieren oder deaktivieren.",
+      "availableOptions": "Verfügbare Optionen",
+      "availableOptionsDescription": "Jedes Verkehrsmittel kann einzeln ein- oder ausgeschaltet werden, um die Analyse entsprechend Ihren Anforderungen anzupassen.",
+      "cannotDisable": "Kann nicht deaktiviert werden"
+    },
+    "mobilityRating": {
+      "title": "Mobilitätsbewertung",
+      "description": "Wählen Sie zwischen zwei Bewertungsmethoden für die Mobilitätsanalyse.",
+      "time": {
+        "label": "Zeit",
+        "description": "Bewertet die Mobilität basierend auf der Reisezeit. Diese Methode misst, wie schnell verschiedene Ziele erreicht werden können."
+      },
+      "quality": {
+        "label": "Qualität",
+        "description": "Bewertet die Mobilität basierend auf der Qualität der Verbindungen. Diese Methode berücksichtigt Faktoren wie Komfort, Zuverlässigkeit und Servicequalität."
+      }
+    },
+    "activeFilters": {
+      "title": "Aktive Filter",
+      "description": "Diese Übersicht zeigt die aktuell aktiven Filter und deren Anzahl. Die Zahlen zeigen, wie viele Filter in jeder Kategorie ausgewählt sind.",
+      "adjustFilters": "Filter anpassen",
+      "adjustFiltersDescription": "Klicken Sie auf \"Filtern\", um die Filtereinstellungen zu öffnen und anzupassen. Dort können Sie Aktivitäten, Personas, RegioStars und Bundesländer auswählen.",
+      "midProject": "MID-Projekt",
+      "midProjectDescription": "Da dies ein MID-Projekt ist, können Sie zusätzlich Aktivitäten und Personas filtern, um die Analyse weiter zu verfeinern.",
+      "activities": "Aktivitäten",
+      "personas": "Personas",
+      "regioStars": "RegioStars",
+      "states": "States",
+      "filterButton": "Filtern"
+    }
   },
-  "INVALID_SHARE_KEY": {
-    "TITLE": "Ungültiger Freigabeschlüssel",
-    "MESSAGE": "Der verwendete Freigabeschlüssel ist ungültig oder abgelaufen. Bitte überprüfen Sie den Link oder kontaktieren Sie den Projektbesitzer für einen neuen Freigabeschlüssel.",
-    "GO_TO_LOGIN": "Zur Anmeldung",
-    "GO_TO_LANDING": "Zur Startseite"
+  "filterDialog": {
+    "title": "Filter konfigurieren",
+    "tabs": {
+      "activities": "Aktivitäten",
+      "personas": "Personas",
+      "regioStars": "RegioStars",
+      "states": "States"
+    },
+    "selectAll": "Alle auswählen",
+    "deselectAll": "Alle abwählen"
   },
-  "MAP_HINT": {
-    "ZOOM": "Zoome in die Karte, um Details zu sehen",
-    "ZOOM_DETAIL": "Reinzoomen, bis die Karte kleinere Gebiete zeigt",
-    "CLICK": "Klicke auf ein Gebiet, um mehr Informationen zu erhalten",
-    "CLICK_DETAIL": "Tippe auf ein farbiges Gebiet, um Details zu öffnen"
+  "rail": {
+    "manageProjects": "Projekte verwalten"
+  },
+  "dashboard": {
+    "collapseLeftPanel": "Linkes Panel einklappen",
+    "expandLeftPanel": "Linkes Panel ausklappen",
+    "collapseRightPanel": "Rechtes Panel einklappen",
+    "expandRightPanel": "Rechtes Panel ausklappen"
+  },
+  "stats": {
+    "title": "Top 10",
+    "loading": "Laden...",
+    "errorLoading": "Fehler beim Laden der Daten",
+    "noDataAvailable": "Keine Daten verfügbar",
+    "levels": {
+      "state": "Bundesländer",
+      "county": "Landkreise",
+      "municipality": "Gemeinden"
+    },
+    "info": {
+      "title": "Statistiken",
+      "description": "Diese Übersicht zeigt die Top 10 Rankings basierend auf der ausgewählten Ebene (Bundesländer, Landkreise oder Gemeinden) und den aktuellen Filtern und Bewertungskriterien.",
+      "aboutDataTitle": "Über die Daten",
+      "aboutData": "Die angezeigten Daten repräsentieren die Top 10 Rankings basierend auf der ausgewählten Ebene und den aktuellen Filtern und Bewertungskriterien."
+    }
   },
   "PREPARING_PROJECT": {
     "TITLE": "Projekt wird vorbereitet",
-    "MESSAGE": "Bitte warten Sie, während wir Ihre Projektdaten vorbereiten...",
-    "INFO": {
-      "ABOUT_TITLE": "Über mobi.mapr",
-      "ABOUT_TEXT": "mobi.mapr ist ein umfassendes Mobilitätsanalyse-Tool, entwickelt vom BWIM, um Mobilitätsmuster und Erreichbarkeit zu analysieren und zu visualisieren.",
-      "WHAT_TITLE": "Was wir tun",
-      "WHAT_TEXT": "Wir verarbeiten Ihre ausgewählten Aktivitäten, Personas und Verkehrsmittel, um eine detaillierte Mobilitätsanalyse-Karte zu erstellen."
-    },
+    "MESSAGE": "Bitte warten Sie, während das Projekt geladen wird...",
     "FUN_FACTS": {
       "TITLE": "Wussten Sie schon?",
-      "FACT_1": "Radfahren ist eines der effizientesten Verkehrsmittel und verbraucht nur etwa 35 Kalorien pro Kilometer!",
-      "FACT_2": "Öffentliche Verkehrsmittel können die CO2-Emissionen um bis zu 45% im Vergleich zum individuellen Autoverkehr reduzieren.",
-      "FACT_3": "Zu Fuß gehen und Radfahren machen in vielen europäischen Städten über 50% aller Wege aus.",
-      "FACT_4": "Mobilitätsanalysen helfen Städten dabei, bessere Infrastruktur zu planen und die Erreichbarkeit für alle Bewohner zu verbessern.",
-      "FACT_5": "Ein durchschnittlicher Mensch geht etwa 4.000 Schritte pro Tag, was ungefähr 3 Kilometern entspricht!"
+      "FACT_1": "In Deutschland gibt es über 9.000 Bahnhöfe, die täglich von Millionen von Menschen genutzt werden.",
+      "FACT_2": "Das deutsche Schienennetz erstreckt sich über mehr als 38.000 Kilometer.",
+      "FACT_3": "Öffentliche Verkehrsmittel tragen erheblich zur Reduzierung des CO2-Ausstoßes bei.",
+      "FACT_4": "Die Mobilitätsanalyse hilft dabei, die beste Verkehrsinfrastruktur zu planen.",
+      "FACT_5": "Zu Fuß gehen ist die umweltfreundlichste Art der Fortbewegung."
     },
     "STATUS": {
-      "COMPLETED": "Abgeschlossen",
-      "ERROR": "Ein Fehler ist aufgetreten",
-      "STARTING": "Starte...",
-      "CALCULATING": "Berechne...",
-      "PROCESSING": "Verarbeite..."
+      "STARTING": "Projekt wird gestartet...",
+      "CALCULATING": "Berechnung läuft...",
+      "PROCESSING": "Daten werden verarbeitet...",
+      "COMPLETED": "Projekt erfolgreich geladen",
+      "ERROR": "Fehler beim Laden des Projekts"
+    },
+    "INFO": {
+      "ABOUT_TITLE": "Über dieses Projekt",
+      "ABOUT_TEXT": "Dieses Projekt analysiert die Mobilität in verschiedenen Regionen und bewertet die Qualität der Verkehrsinfrastruktur.",
+      "WHAT_TITLE": "Was passiert hier?",
+      "WHAT_TEXT": "Wir berechnen und analysieren Mobilitätsdaten, um Ihnen die besten Einblicke zu bieten."
     }
   }
 }

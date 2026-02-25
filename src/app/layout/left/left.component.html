@@ -6,10 +6,10 @@
   } @else {
     <div class="text-2xl font-semibold text-[var(--primary-color)] mb-4 pt-[6rem]">{{ project()?.display_name }}</div>
     <div class="flex items-center justify-end gap-2 mb-4 relative mr-4">
-      <span class="text-sm text-[var(--primary-color)]">erweiterter Modus</span>
+      <span class="text-sm text-[var(--primary-color)]">{{ 'left.extendedMode' | translate }}</span>
       <button 
         class="w-7 h-7 rounded-full bg-[var(--background-color)] text-[var(--primary-color)] border-none cursor-pointer flex items-center justify-center transition-all duration-200 text-sm hover:opacity-80 hover:scale-105" 
-        title="Information"
+        [title]="'left.information' | translate"
         (click)="openDialog()">
         <span class="material-icons text-sm leading-none text-[var(--primary-color)]">info</span>
       </button>
@@ -17,7 +17,7 @@
         class="relative w-10 h-5 border border-[var(--light-primary-color)] rounded-full bg-[var(--secondary-color)] cursor-pointer transition-all duration-200 overflow-hidden"
         [style.background-color]="isExpanded() ? 'var(--primary-color)' : 'var(--secondary-color)'"
         (click)="toggleSidebar()"
-        [title]="isExpanded() ? 'Erweitert' : 'Normal'">
+        [title]="isExpanded() ? ('left.expanded' | translate) : ('left.normal' | translate)">
         <div 
           class="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[var(--light-primary-color)] transition-all duration-200"
           [style.left]="isExpanded() ? 'calc(100% - 1.125rem)' : '0.125rem'"
@@ -26,7 +26,7 @@
       </button>
     </div>
     <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4 relative">
-      <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">Verkehrsmittel</h2>
+      <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.transportModes.title' | translate }}</h2>
       <div class="flex flex-col gap-2">
         <div class="flex items-center gap-2">
           @for (option of modeOptions(); track option.id) {
@@ -50,24 +50,22 @@
       <app-info-overlay>
         <div class="space-y-4">
           <div>
-            <h3 class="font-semibold mb-2">Verkehrsmittel</h3>
+            <h3 class="font-semibold mb-2">{{ 'left.transportModes.title' | translate }}</h3>
             <p class="text-sm opacity-90">
-              Wählen Sie die Verkehrsmittel aus, die in der Berechnung berücksichtigt werden sollen. 
-              Sie können mehrere Verkehrsmittel gleichzeitig aktivieren oder deaktivieren.
+              {{ 'left.transportModes.description' | translate }}
             </p>
           </div>
           <div>
-            <h3 class="font-semibold mb-2">Verfügbare Optionen</h3>
+            <h3 class="font-semibold mb-2">{{ 'left.transportModes.availableOptions' | translate }}</h3>
             <p class="text-sm opacity-90">
-              Jedes Verkehrsmittel kann einzeln ein- oder ausgeschaltet werden, um die Analyse 
-              entsprechend Ihren Anforderungen anzupassen.
+              {{ 'left.transportModes.availableOptionsDescription' | translate }}
             </p>
           </div>
         </div>
       </app-info-overlay>
     </div>
     <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4 relative">
-      <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">Mobilitätsbewertung</h2>
+      <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.mobilityRating.title' | translate }}</h2>
       <div class="flex flex-col gap-2">
         <div class="flex border border-[var(--light-primary-color)] rounded-full overflow-hidden bg-[var(--secondary-color)] w-fit">
           <button 
@@ -79,7 +77,7 @@
             [class.hover:opacity-100]="isMobilitatsbewertungSelected('zeit')"
             [class.hover:opacity-80]="!isMobilitatsbewertungSelected('zeit')"
             (click)="selectMobilitatsbewertung('zeit')">
-            Zeit
+            {{ 'left.mobilityRating.time.label' | translate }}
           </button>
           <button 
             class="flex-1 px-8 py-1 border-none text-sm cursor-pointer transition-all duration-200 rounded-r-full"
@@ -90,30 +88,28 @@
             [class.hover:opacity-100]="isMobilitatsbewertungSelected('qualitaet')"
             [class.hover:opacity-80]="!isMobilitatsbewertungSelected('qualitaet')"
             (click)="selectMobilitatsbewertung('qualitaet')">
-            Qualität
+            {{ 'left.mobilityRating.quality.label' | translate }}
           </button>
         </div>
       </div>
       <app-info-overlay>
         <div class="space-y-4">
           <div>
-            <h3 class="font-semibold mb-2">Mobilitätsbewertung</h3>
+            <h3 class="font-semibold mb-2">{{ 'left.mobilityRating.title' | translate }}</h3>
             <p class="text-sm opacity-90">
-              Wählen Sie zwischen zwei Bewertungsmethoden für die Mobilitätsanalyse.
+              {{ 'left.mobilityRating.description' | translate }}
             </p>
           </div>
           <div>
-            <h3 class="font-semibold mb-2">Zeit</h3>
+            <h3 class="font-semibold mb-2">{{ 'left.mobilityRating.time.label' | translate }}</h3>
             <p class="text-sm opacity-90">
-              Bewertet die Mobilität basierend auf der Reisezeit. Diese Methode misst, 
-              wie schnell verschiedene Ziele erreicht werden können.
+              {{ 'left.mobilityRating.time.description' | translate }}
             </p>
           </div>
           <div>
-            <h3 class="font-semibold mb-2">Qualität</h3>
+            <h3 class="font-semibold mb-2">{{ 'left.mobilityRating.quality.label' | translate }}</h3>
             <p class="text-sm opacity-90">
-              Bewertet die Mobilität basierend auf der Qualität der Verbindungen. Diese Methode 
-              berücksichtigt Faktoren wie Komfort, Zuverlässigkeit und Servicequalität.
+              {{ 'left.mobilityRating.quality.description' | translate }}
             </p>
           </div>
         </div>
@@ -122,23 +118,23 @@
 
     @if (isExpanded()) {
       <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4 relative" >
-        <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">Aktive Filter</h2>
+        <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.activeFilters.title' | translate }}</h2>
         @if (project()?.is_mid) {
           <div class="flex items-center gap-2"  >
-            <span class="text-base font-bold text-[var(--primary-color)]">Aktivitäten</span>
+            <span class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.activities' | translate }}</span>
             <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedActivities().length }} / {{ allActivities().length }})</span>
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-base font-bold text-[var(--primary-color)]">Personas</span>
+            <span class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.personas' | translate }}</span>
             <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedPersonas().length }} / {{ allPersonas().length }})</span>
           </div>
         }
         <div class="flex items-center gap-2">
-          <span class="text-base font-bold text-[var(--primary-color)]">RegioStars</span>
+          <span class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.regioStars' | translate }}</span>
           <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedRegioStars().length }} / {{ allRegioStars().length }})</span>
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-base font-bold text-[var(--primary-color)]">States</span>
+          <span class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.states' | translate }}</span>
           <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedStates().length }} / {{ allStates().length }})</span>
         </div>
 
@@ -146,32 +142,29 @@
           <button 
             class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full border transition-all duration-200 w-fit bg-[var(--primary-color)] text-[var(--background-color)] border-[var(--background-color)] font-bold"
             (click)="openFilterDialog()">
-            Filtern
+            {{ 'left.activeFilters.filterButton' | translate }}
             <mat-icon class="text-base leading-none">tune</mat-icon>
           </button>
         </div>
         <app-info-overlay>
           <div class="space-y-4">
             <div>
-              <h3 class="font-semibold mb-2">Aktive Filter</h3>
+              <h3 class="font-semibold mb-2">{{ 'left.activeFilters.title' | translate }}</h3>
               <p class="text-sm opacity-90">
-                Diese Übersicht zeigt die aktuell aktiven Filter und deren Anzahl. 
-                Die Zahlen zeigen, wie viele Filter in jeder Kategorie ausgewählt sind.
+                {{ 'left.activeFilters.description' | translate }}
               </p>
             </div>
             <div>
-              <h3 class="font-semibold mb-2">Filter anpassen</h3>
+              <h3 class="font-semibold mb-2">{{ 'left.activeFilters.adjustFilters' | translate }}</h3>
               <p class="text-sm opacity-90">
-                Klicken Sie auf "Filtern", um die Filtereinstellungen zu öffnen und anzupassen. 
-                Dort können Sie Aktivitäten, Personas, RegioStars und Bundesländer auswählen.
+                {{ 'left.activeFilters.adjustFiltersDescription' | translate }}
               </p>
             </div>
             @if (project()?.is_mid) {
               <div>
-                <h3 class="font-semibold mb-2">MID-Projekt</h3>
+                <h3 class="font-semibold mb-2">{{ 'left.activeFilters.midProject' | translate }}</h3>
                 <p class="text-sm opacity-90">
-                  Da dies ein MID-Projekt ist, können Sie zusätzlich Aktivitäten und Personas filtern, 
-                  um die Analyse weiter zu verfeinern.
+                  {{ 'left.activeFilters.midProjectDescription' | translate }}
                 </p>
               </div>
             }

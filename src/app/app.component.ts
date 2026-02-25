@@ -1,10 +1,10 @@
 import { Component, OnDestroy } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { AuthService } from './auth/auth.service';
 import { HealthService } from './services/_archive/health.service';
 import { SessionService } from './services/session.service';
+import { LanguageService } from './services/language.service';
 // Archived components - to be migrated back
 // import { ProjectWizardComponent } from './_archive/legacy/project-wizard/project-wizard.component';
 // import { AnalyzeComponent } from './_archive/components/analyze/analyze.component';
@@ -29,15 +29,14 @@ export class AppComponent implements OnDestroy {
   private subscriptions: Subscription[] = [];
 
   constructor(
-    private translate: TranslateService,
+    private languageService: LanguageService,
     private authService: AuthService,
     // private keyboardShortcutsService: KeyboardShortcutsService, // Archived
     private healthService: HealthService,
     private router: Router,
     private sessionService: SessionService // Initialize SessionService early to ensure session_id is generated
   ) {
-    translate.setDefaultLang('de');
-    translate.use('de');
+    // LanguageService initializes language on construction
     this.isLoggedIn = this.authService.isLoggedIn();
 
     // Ensure light theme is applied by default

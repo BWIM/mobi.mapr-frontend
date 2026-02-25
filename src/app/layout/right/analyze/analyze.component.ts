@@ -14,10 +14,11 @@ import { SharedModule } from '../../../shared/shared.module';
 import { AllCategoriesDialogComponent, AllCategoriesDialogData } from './overlay/all-categories-dialog.component';
 import { Map as MapLibreMap, NavigationControl, FullscreenControl, Popup, GeoJSONSource } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-analyze',
-  imports: [CommonModule, ChartModule, SharedModule],
+  imports: [CommonModule, ChartModule, SharedModule, TranslateModule],
   templateUrl: './analyze.component.html',
   styleUrl: './analyze.component.css',
 })
@@ -59,6 +60,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private projectsService = inject(ProjectsService);
   private placesService = inject(PlacesService);
   private dialog = inject(MatDialog);
+  private translate = inject(TranslateService);
   private featureSubscription?: Subscription;
   private featureInfoSubscription?: Subscription;
   private analyzeSubscription?: Subscription;
@@ -149,7 +151,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   getGrade(index: number): string {
     const indexValue = index / 100;
-    if (indexValue <= 0) return "Error";
+    if (indexValue <= 0) return this.translate.instant('map.popup.error');
     if (indexValue < 0.28) return "A+";
     if (indexValue < 0.32) return "A";
     if (indexValue < 0.35) return "A-";
@@ -172,7 +174,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private logFeatureInformation(feature: any): void {
     console.log('=== Feature Information ===');
-    console.log('Name:', feature.properties.name || feature.properties.NAME || 'Unnamed');
+    const unnamedText = this.translate.instant('map.popup.unnamed');
+    console.log('Name:', feature.properties.name || feature.properties.NAME || unnamedText);
     
     if (feature.properties.score !== undefined && feature.properties.score !== null) {
       const minutes = (feature.properties.score / 60).toFixed(1);
@@ -276,11 +279,13 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     }).pipe(
       catchError((error) => {
         console.error('Error loading feature info:', error);
-        this.featureInfoError = error.status === 404 
-          ? 'Feature information not found' 
-          : error.status === 503
-          ? 'Data not preloaded yet'
-          : 'Error loading feature information';
+        if (error.status === 404) {
+          this.featureInfoError = this.translate.instant('analyze.featureInfo.notFound');
+        } else if (error.status === 503) {
+          this.featureInfoError = this.translate.instant('analyze.featureInfo.dataNotPreloaded');
+        } else {
+          this.featureInfoError = this.translate.instant('analyze.featureInfo.errorLoading');
+        }
         return of(null);
       })
     );
@@ -295,11 +300,13 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     }).pipe(
       catchError((error) => {
         console.error('Error loading analyze data:', error);
-        this.analyzeError = error.status === 404 
-          ? 'Analyze data not found' 
-          : error.status === 503
-          ? 'Data not preloaded yet'
-          : 'Error loading analyze data';
+        if (error.status === 404) {
+          this.analyzeError = this.translate.instant('analyze.analyzeData.notFound');
+        } else if (error.status === 503) {
+          this.analyzeError = this.translate.instant('analyze.analyzeData.dataNotPreloaded');
+        } else {
+          this.analyzeError = this.translate.instant('analyze.analyzeData.errorLoading');
+        }
         return of(null);
       })
     );
@@ -432,7 +439,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.isLoadingPlaces = false;
     } catch (err: any) {
       console.error('Error loading places:', err);
-      this.placesError = err?.message || 'Fehler beim Laden der Orte';
+      this.placesError = err?.message || this.translate.instant('analyze.placesDialog.errorLoadingPlaces');
       this.isLoadingPlaces = false;
     }
   }
@@ -495,11 +502,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
 
+    const relevanceLabel = this.translate.instant('analyze.relevancePercent');
     this.activitiesChartData = {
       labels: labels,
       datasets: [
         {
-          label: 'Relevanz (%)',
+          label: relevanceLabel,
           data: weights,
           backgroundColor: colors,
           borderColor: colors,
@@ -532,9 +540,11 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
             label: (context: any) => {
               const index = context.dataIndex;
               const grade = this.getGradeFromIndex(sortedCategories[index].index);
+              const ratingLabel = this.translate.instant('analyze.rating');
+              const relevanceLabel = this.translate.instant('analyze.relevance');
               return [
-                `Bewertung: ${grade}`,
-                `Relevanz: ${weights[index].toFixed(1)}%`
+                `${ratingLabel}: ${grade}`,
+                `${relevanceLabel}: ${weights[index].toFixed(1)}%`
               ];
             }
           }
@@ -569,7 +579,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           },
           title: {
             display: true,
-            text: 'Relevanz (%)',
+            text: this.translate.instant('analyze.relevancePercent'),
             color: '#ffffff',
             font: {
               size: 12
@@ -698,7 +708,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           id: place.id,
           name: place.name,
           category_id: place.category_id || 0,
-          category_name: place.category_name || 'Unknown',
+          category_name: place.category_name || this.translate.instant('map.popup.notAvailable'),
           url: place['url'] || null
         }
       }));
@@ -782,8 +792,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
         const feature = e.features[0];
         const properties = feature.properties;
-        const name = properties['name'] || 'Unnamed';
-        const categoryName = properties['category_name'] || 'Unknown';
+        const unnamedText = this.translate.instant('map.popup.unnamed');
+        const notAvailableText = this.translate.instant('map.popup.notAvailable');
+        const name = properties['name'] || unnamedText;
+        const categoryName = properties['category_name'] || notAvailableText;
 
         const popupContent = `
           <div>

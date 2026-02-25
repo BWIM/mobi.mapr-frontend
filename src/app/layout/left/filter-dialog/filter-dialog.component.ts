@@ -2,6 +2,7 @@ import { Component, OnInit, Inject, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { FilterConfigService } from '../../../services/filter-config.service';
 import { SharedModule } from '../../../shared/shared.module';
+import { TranslateModule } from '@ngx-translate/core';
 
 export interface FilterDialogData {
   selectedActivities: number[];
@@ -16,6 +17,7 @@ export interface FilterDialogData {
   standalone: true,
   imports: [
     SharedModule,
+    TranslateModule,
   ],
   templateUrl: './filter-dialog.component.html',
   styleUrl: './filter-dialog.component.css'

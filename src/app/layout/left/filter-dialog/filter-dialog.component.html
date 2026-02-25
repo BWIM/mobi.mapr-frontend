@@ -1,17 +1,17 @@
 <div class="filter-dialog">
   <h2 mat-dialog-title class="text-2xl font-semibold text-[var(--primary-color)] mb-4">
-    Filter konfigurieren
+    {{ 'filterDialog.title' | translate }}
   </h2>
 
   <mat-dialog-content class="mat-typography">
     <mat-tab-group>
       <!-- Categories Tab (labeled as Activities) -->
-      <mat-tab *ngIf="is_mid" label="Aktivitäten">
+      <mat-tab *ngIf="is_mid" [label]="'filterDialog.tabs.activities' | translate">
         <div class="tab-content">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">Aktivitäten ({{ selectedActivities.size }} / {{ categoriesLength }})</h3>
+            <h3 class="text-lg font-semibold">{{ 'filterDialog.tabs.activities' | translate }} ({{ selectedActivities.size }} / {{ categoriesLength }})</h3>
             <button mat-button (click)="selectAllCategories()" class="text-sm">
-              {{ selectedActivities.size === categoriesLength ? 'Alle abwählen' : 'Alle auswählen' }}
+              {{ selectedActivities.size === categoriesLength ? ('filterDialog.deselectAll' | translate) : ('filterDialog.selectAll' | translate) }}
             </button>
           </div>
           <div class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
@@ -47,12 +47,12 @@
       </mat-tab>
 
       <!-- Personas Tab -->
-      <mat-tab *ngIf="is_mid" label="Personas">
+      <mat-tab *ngIf="is_mid" [label]="'filterDialog.tabs.personas' | translate">
         <div class="tab-content">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">Personas ({{ selectedPersonas.size }} / {{ personasLength }})</h3>
+            <h3 class="text-lg font-semibold">{{ 'filterDialog.tabs.personas' | translate }} ({{ selectedPersonas.size }} / {{ personasLength }})</h3>
             <button mat-button (click)="selectAllPersonas()" class="text-sm">
-              {{ selectedPersonas.size === personasLength ? 'Alle abwählen' : 'Alle auswählen' }}
+              {{ selectedPersonas.size === personasLength ? ('filterDialog.deselectAll' | translate) : ('filterDialog.selectAll' | translate) }}
             </button>
           </div>
           <div class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
@@ -69,12 +69,12 @@
       </mat-tab>
 
       <!-- RegioStars Tab -->
-      <mat-tab label="RegioStars">
+      <mat-tab [label]="'filterDialog.tabs.regioStars' | translate">
         <div class="tab-content">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">RegioStars ({{ selectedRegioStars.size }} / {{ regiostarsLength }})</h3>
+            <h3 class="text-lg font-semibold">{{ 'filterDialog.tabs.regioStars' | translate }} ({{ selectedRegioStars.size }} / {{ regiostarsLength }})</h3>
             <button mat-button (click)="selectAllRegioStars()" class="text-sm">
-              {{ selectedRegioStars.size === regiostarsLength ? 'Alle abwählen' : 'Alle auswählen' }}
+              {{ selectedRegioStars.size === regiostarsLength ? ('filterDialog.deselectAll' | translate) : ('filterDialog.selectAll' | translate) }}
             </button>
           </div>
           <div class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
@@ -110,12 +110,12 @@
       </mat-tab>
 
       <!-- States Tab -->
-      <mat-tab label="States">
+      <mat-tab [label]="'filterDialog.tabs.states' | translate">
         <div class="tab-content">
           <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold">States ({{ selectedStates.size }} / {{ statesLength }})</h3>
+            <h3 class="text-lg font-semibold">{{ 'filterDialog.tabs.states' | translate }} ({{ selectedStates.size }} / {{ statesLength }})</h3>
             <button mat-button (click)="selectAllStates()" class="text-sm">
-              {{ selectedStates.size === statesLength ? 'Alle abwählen' : 'Alle auswählen' }}
+              {{ selectedStates.size === statesLength ? ('filterDialog.deselectAll' | translate) : ('filterDialog.selectAll' | translate) }}
             </button>
           </div>
           <div class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
@@ -134,7 +134,7 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end" class="mt-4">
-    <button mat-button (click)="onCancel()">Abbrechen</button>
-    <button mat-raised-button color="primary" (click)="onApply()">Anwenden</button>
+    <button mat-button (click)="onCancel()">{{ 'common.cancel' | translate }}</button>
+    <button mat-raised-button color="primary" (click)="onApply()">{{ 'common.apply' | translate }}</button>
   </mat-dialog-actions>
 </div>

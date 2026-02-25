@@ -5,10 +5,11 @@ import { SharedModule } from '../../shared/shared.module';
 import { InfoOverlayComponent } from '../../shared/info-overlay/info-overlay.component';
 import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-left',
-  imports: [SharedModule, InfoOverlayComponent],
+  imports: [SharedModule, InfoOverlayComponent, TranslateModule],
   templateUrl: './left.component.html',
   styleUrl: './left.component.css',
 })
@@ -16,6 +17,7 @@ export class LeftComponent {
   private projectService = inject(ProjectsService);
   private filterConfigService = inject(FilterConfigService);
   private dialog = inject(MatDialog);
+  private translate = inject(TranslateService);
 
   // Use the project signal directly - it will reactively update when the project loads
   project = this.projectService.project;
@@ -73,7 +75,8 @@ export class LeftComponent {
 
   getModeTooltip(option: { id: number; display_name: string }): string {
     if (this.isPedestrianMode(option.id) && this.isSelected(option.id)) {
-      return `${option.display_name} - Kann nicht deaktiviert werden`;
+      const cannotDisable = this.translate.instant('left.transportModes.cannotDisable');
+      return `${option.display_name} - ${cannotDisable}`;
     }
     return option.display_name;
   }

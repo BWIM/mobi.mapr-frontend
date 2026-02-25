@@ -7,10 +7,11 @@ import { SettingsService } from '../../../services/settings.service';
 import { ProjectsService } from '../../../services/project.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { InfoOverlayComponent } from '../../../shared/info-overlay/info-overlay.component';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-stats',
-  imports: [SharedModule, InfoOverlayComponent],
+  imports: [SharedModule, InfoOverlayComponent, TranslateModule],
   templateUrl: './stats.component.html',
   styleUrl: './stats.component.css',
 })
@@ -20,22 +21,26 @@ export class StatsComponent implements OnDestroy {
   private mapService = inject(MapService);
   private settingsService = inject(SettingsService);
   private projectService = inject(ProjectsService);
+  private translate = inject(TranslateService);
 
   counties: County[] = [];
   isLoading = true;
   error: string | null = null;
   
-  // Level selection options
-  levelOptions = [
-    { value: 'state' as const, label: 'Bundesländer' },
-    { value: 'county' as const, label: 'Landkreise' },
-    { value: 'municipality' as const, label: 'Gemeinden' }
-  ];
+  // Level selection options - will be initialized in constructor
+  levelOptions: Array<{ value: 'state' | 'county' | 'municipality'; label: string }> = [];
   
   selectedLevel: 'municipality' | 'county' | 'state' = 'county';
   private loadRankingsTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
+    // Initialize level options with translations
+    this.levelOptions = [
+      { value: 'state' as const, label: this.translate.instant('stats.levels.state') },
+      { value: 'county' as const, label: this.translate.instant('stats.levels.county') },
+      { value: 'municipality' as const, label: this.translate.instant('stats.levels.municipality') }
+    ];
+    
     // Load saved level selection from localStorage
     this.loadSavedLevel();
     // Track previous filter state to detect actual changes (excluding bewertung)
@@ -150,7 +155,7 @@ export class StatsComponent implements OnDestroy {
   }
 
   get selectedLevelLabel(): string {
-    return this.levelOptions.find(opt => opt.value === this.selectedLevel)?.label || 'Landkreise';
+    return this.levelOptions.find(opt => opt.value === this.selectedLevel)?.label || this.translate.instant('stats.levels.county');
   }
 
   private loadTopRankings(): void {
@@ -194,7 +199,7 @@ export class StatsComponent implements OnDestroy {
       },
       error: (error) => {
         console.error('Error loading top rankings:', error);
-        this.error = 'Fehler beim Laden der Daten';
+        this.error = this.translate.instant('stats.errorLoading');
         this.isLoading = false;
         this.counties = [];
       }
@@ -231,7 +236,7 @@ export class StatsComponent implements OnDestroy {
 
   getRating(index: number): string {
     index = index / 100;
-    if (index <= 0) return "Error";
+    if (index <= 0) return this.translate.instant('map.popup.error');
     if (index < 0.28) return "A+";
     if (index < 0.32) return "A";
     if (index < 0.35) return "A-";

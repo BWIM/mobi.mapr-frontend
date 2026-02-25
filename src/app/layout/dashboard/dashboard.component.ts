@@ -14,10 +14,11 @@ import { MapService, ContentLayerFilters } from '../../services/map.service';
 import { Project } from '../../interfaces/project';
 import { firstValueFrom } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RailComponent, LeftComponent, RightComponent, CenterComponent, BottomComponent],
+  imports: [RailComponent, LeftComponent, RightComponent, CenterComponent, BottomComponent, TranslateModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })

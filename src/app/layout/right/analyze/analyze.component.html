@@ -1,7 +1,7 @@
 <div class="p-4 bg-[var(--secondary-color)] text-[var(--primary-color)] relative flex flex-col rounded-2xl border border-[var(--primary-color)]" *ngIf="!selectedFeature">
   <div class="flex-1 flex items-center justify-center">
     <p class="text-sm text-[var(--primary-color)] text-center px-4">
-      Klicke auf einen Ort in der Karte, um weitere Analysen zu erhalten
+      {{ 'analyze.selectPlace' | translate }}
     </p>
   </div>
 </div>
@@ -10,7 +10,7 @@
   <div class="mb-4" *ngIf="selectedFeature">
     <!-- Loading State -->
     <div *ngIf="isLoadingFeatureInfo" class="text-sm text-[var(--primary-color)] py-4">
-      Lade Feature-Informationen...
+      {{ 'analyze.loadingFeatureInfo' | translate }}
     </div>
     
     <!-- Error State -->
@@ -29,13 +29,13 @@
       <div class="flex">
         <!-- Column 1: Overall Rank -->
         <div class="flex-1 px-2 py-2 border-r border-white">
-          <div><span class="text-m text-white font-bold">Platz </span><span class="text-xs text-white">gesamt</span></div>
+          <div><span class="text-m text-white font-bold">{{ 'analyze.rank.overall' | translate }} </span><span class="text-xs text-white">{{ 'analyze.rank.overallLabel' | translate }}</span></div>
           <div><span class="text-4xl font-bold text-white mr-1">{{ featureInfo.rank }}</span><span class="text-sm text-white mt-1">/ {{ featureInfo.total_ranks }}</span></div>
         </div>
         
         <!-- Column 2: Regional Class Rank -->
         <div class="flex-1 px-2 py-2 border-r border-white" *ngIf="featureInfo.rank_regiostar !== null">
-          <div><span class="text-m text-white font-bold">Platz </span><span class="text-xs text-white">Regionalklasse</span></div>
+          <div><span class="text-m text-white font-bold">{{ 'analyze.rank.regionalClass' | translate }} </span><span class="text-xs text-white">{{ 'analyze.rank.regionalClassLabel' | translate }}</span></div>
           <div class="text-4xl font-bold text-white">{{ featureInfo.rank_regiostar }}</div>
           <div class="text-4xl font-bold text-white">-</div>
           <div class="text-sm text-white mt-1">/ {{ featureInfo.total_rank_regiostar }}</div>
@@ -43,9 +43,9 @@
         
         <!-- Column 3: Population and Grade -->
         <div class="flex-1 px-2 py-2">
-          <div class="text-sm text-white font-bold">Einwohnende:</div>
+          <div class="text-sm text-white font-bold">{{ 'analyze.population' | translate }}</div>
           <div class="text-base text-white mb-2">{{ featureInfo.population | number }}</div>
-          <div class="text-sm text-white font-bold">Note:</div>
+          <div class="text-sm text-white font-bold">{{ 'analyze.grade' | translate }}</div>
           <div class="text-base text-white">{{ getGrade(featureInfo.index) }}</div>
         </div>
       </div>
@@ -56,7 +56,7 @@
   <div class="mb-4 flex-1 flex flex-col min-h-0" *ngIf="selectedFeature && shouldShowMap()">
     <!-- Loading State -->
     <div *ngIf="isLoadingPlaces || isLoadingAnalyze" class="text-sm text-[var(--primary-color)] py-4">
-      Lade Karte mit Aktivitäten...
+      {{ 'analyze.loadingPlaces' | translate }}
     </div>
     
     <!-- Error State -->
@@ -75,7 +75,7 @@
   <div class="mb-4" *ngIf="selectedFeature && !shouldShowMap()">
     <!-- Loading State -->
     <div *ngIf="isLoadingAnalyze" class="text-sm text-[var(--primary-color)] py-4">
-      Lade Aktivitäts-Analyse...
+      {{ 'analyze.loadingAnalysis' | translate }}
     </div>
     
     <!-- Error State -->
@@ -87,7 +87,7 @@
     <div *ngIf="activitiesChartData && !isLoadingAnalyze && !analyzeError" class="overflow-hidden">
       <!-- Title -->
       <div class="mb-4">
-        <h3 class="text-lg font-bold text-white">Analyse Top 5 Aktivitäten</h3>
+        <h3 class="text-lg font-bold text-white">{{ 'analyze.analysis.title' | translate }}</h3>
       </div>
       
       <!-- Chart Container -->
@@ -110,7 +110,7 @@
           mat-fab
           color="primary"
           (click)="openAllCategoriesOverlay()"
-          aria-label="Alle Kategorien anzeigen">
+          [attr.aria-label]="'analyze.analysis.showAllCategories' | translate">
           <mat-icon>add</mat-icon>
         </button>
       </div>

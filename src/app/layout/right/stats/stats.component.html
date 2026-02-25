@@ -2,7 +2,7 @@
   <mat-drawer-content>
     <div class="h-full p-4 bg-[var(--background-color)] text-[var(--primary-color)] relative flex flex-col">
       <div class="flex items-center justify-between mb-2">
-        <h2 class="text-lg font-semibold text-[var(--primary-color)] leading-6">Top 10</h2>
+        <h2 class="text-lg font-semibold text-[var(--primary-color)] leading-6">{{ 'stats.title' | translate }}</h2>
         <mat-form-field appearance="outline" class="level-selector">
           <mat-select 
             [value]="selectedLevel" 
@@ -16,7 +16,7 @@
       </div>
 
       <div *ngIf="isLoading" class="flex-1 flex items-center justify-center text-[var(--primary-color)]">
-        <p>Laden...</p>
+        <p>{{ 'stats.loading' | translate }}</p>
       </div>
       
       <div *ngIf="error && !isLoading" class="flex-1 flex items-center justify-center text-red-500">
@@ -33,7 +33,7 @@
             </tr>
             <tr *ngIf="filteredCounties.length === 0">
               <td colspan="3" class="text-sm text-[var(--primary-color)] opacity-70 py-2 border-0">
-                Keine Daten verfügbar
+                {{ 'stats.noDataAvailable' | translate }}
               </td>
             </tr>
           </tbody>
@@ -43,21 +43,15 @@
       <app-info-overlay>
         <div class="space-y-4">
           <div>
-            <h3 class="font-semibold mb-2">Foobar Information</h3>
+            <h3 class="font-semibold mb-2">{{ 'stats.info.title' | translate }}</h3>
             <p class="text-sm opacity-90">
-              This is some foobar information displayed in the Material panel.
+              {{ 'stats.info.description' | translate }}
             </p>
           </div>
           <div>
-            <h3 class="font-semibold mb-2">Additional Details</h3>
+            <h3 class="font-semibold mb-2">{{ 'stats.info.aboutDataTitle' | translate }}</h3>
             <p class="text-sm opacity-90">
-              Here you can find additional information about the statistics and rankings displayed in this component.
-            </p>
-          </div>
-          <div>
-            <h3 class="font-semibold mb-2">About the Data</h3>
-            <p class="text-sm opacity-90">
-              The data shown represents the top 10 rankings based on the selected level (Bundesländer, Landkreise, or Gemeinden) and the current filters and evaluation criteria.
+              {{ 'stats.info.aboutData' | translate }}
             </p>
           </div>
         </div>

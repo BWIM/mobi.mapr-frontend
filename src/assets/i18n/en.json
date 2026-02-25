@@ -1,698 +1,270 @@
 {
-  "PROJECTS": {
-    "TITLE": "Projects",
-    "LIST": {
-      "TITLE": "Projects",
-      "NO_PROJECTS": "No projects available",
-      "DELETED": "All information about the project got successfully deleted"
-    },
-    "DETAILS": {
-      "NAME": "Name",
-      "DESCRIPTION": "Description",
-      "CREATED": "Created at",
-      "UPDATED": "Updated at"
-    },
-    "FIELDS": {
-      "NAME": "Name",
-      "DESCRIPTION": "Description",
-      "TYPE": "Type",
-      "CREATED": "Created at",
-      "STATUS": "Status",
-      "GROUP": "Group",
-      "SELECT_GROUP": "Select Group"
-    },
-    "ACTIONS": {
-      "CREATE": "New Project",
-      "CREATE_GROUP": "New Group",
-      "CANCEL_TOOLTIP": "Cancel",
-      "SAVE_TOOLTIP": "Save",
-      "MORE_OPTIONS": "More Options",
-      "EDIT_GROUP": "Edit group",
-      "SHOW_RESULTS": "Show results",
-      "CREATE_GROUP_TOOLTIP": "Create group",
-      "CREATE_TOOLTIP": "Create"
-    },
-    "STATUS": {
-      "FINISHED": "Completed",
-      "IN_PROGRESS": "In Progress",
-      "QUEUED": "Queued"
-    },
-    "QUEUED_MESSAGE": "Project is queued for processing...",
-    "EDIT": {
-      "TITLE": "Edit Project"
-    },
-    "TABS": {
-      "PERSONAL": "Personal",
-      "SHARED": "Shared",
-      "PUBLIC": "Public"
-    },
-    "READ_ONLY": "Read Only",
-    "SHARED": "Shared",
-    "UNGROUPED": "Ungrouped",
-    "TYPE": {
-      "DEFAULT": "Standard",
-      "PERSONAL": "Personal"
-    },
-    "MESSAGES": {
-      "UPDATE_SUCCESS": "Project successfully updated",
-      "UPDATE_ERROR": "Error updating project",
-      "CONFIRM_DELETE": "Are you sure you want to delete this project?",
-      "UNFINISHED_PROJECTS": "There are still unfinished projects",
-      "UNFINISHED_PROJECTS_DETAIL": "The following projects must still be completed: {projects}",
-      "CHECK_PROJECTS_ERROR": "Error checking projects",
-      "FORM_INVALID": "Form is invalid",
-      "CREATE_ERROR": "Error creating",
-      "CREATE_SUCCESS": "Success creating",
-      "INVALID_DATA": "Invaldid data",
-      "PERMISSION_DENIED": "Permission deneied",
-      "SERVER_ERROR": "Server error",
-      "LOAD_GROUPS_ERROR": "Cannot load groups",
-      "CONFIRM_DELETE_GROUP": "Do you really want to delete the group?",
-      "DELETE_GROUP_SUCCESS": "Group successfully deleted",
-      "DELETE_GROUP_ERROR": "Cannot delete group",
-      "LOAD_AREAS_ERROR": "Cannot load areas"
-    },
-    "DELETE": {
-      "TITLE": "Delete Project",
-      "CONFIRMATION": "Are you sure you want to delete this project?"
-    },
-    "PROGRESS_TOOLTIP": "Progress",
-    "WIZARD": {
-      "SELECT_ALL_ACTIVITIES": "Select all",
-      "SELECT_ALL_PERSONAS": "Select all persona",
-      "DESELECT_ALL_PERSONAS": "deselect all persona",
-      "SELECT_ALL_MODES": "select all modes",
-      "DESELECT_ALL_MODES": "deselect all modes",
-      "DESELECT_ALL_ACTIVITIES": "deselect all"
-    },
-    "RESULTS": {
-      "LOAD_ERROR": "Results cannot be loaded"
-    },
-    "DEFAULT_GROUP": "Precalculated maps",
-    "AUTO_CLOSE_SIDEBAR": "Pin sidebar",
-    "HINT": {
-      "UPGRADE": "Due to changes in the data model, all projects created before the 4.6.25 needed to be removed."
-    },
-    "COMPARE": "Compare"
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "search": "Search",
+    "filter": "Filter",
+    "reset": "Reset",
+    "apply": "Apply",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "required": "Required",
+    "optional": "Optional"
   },
-  "PROJECT_GROUPS": {
-    "CREATE": {
-      "TITLE": "New Group"
+  "auth": {
+    "login": {
+      "title": "Login",
+      "username": "Username",
+      "password": "Password",
+      "loginButton": "Login",
+      "loginFailed": "Login failed. Please check your credentials.",
+      "usernameRequired": "Username is required",
+      "passwordRequired": "Password is required",
+      "usernameMinLength": "Username must be at least 3 characters long",
+      "passwordMinLength": "Password must be at least 6 characters long",
+      "selectLanguage": "Select language"
     },
-    "EDIT": {
-      "TITLE": "Edit Group"
-    },
-    "FIELDS": {
-      "NAME": "Name"
-    },
-    "MESSAGES": {
-      "UPDATE_SUCCESS": "Project group successfully updated",
-      "UPDATE_ERROR": "Error updating project group",
-      "CONFIRM_DELETE": "Are you sure you want to delete this project group?",
-      "CREATE_SUCCESS": "Success creating a new project group",
-      "CREATE_ERROR": "Error when creating a new group",
-      "CONFIRM_DELETE_MULTIPLE": "Delete all selected groups?",
-      "DELETE_SUCCESS": "Successfully deleted",
-      "DELETE_ERROR": "Cannto delete group"
-    },
-    "DELETE_WARNING": "The project group will be deleted",
-    "DELETE": "Delete prject group",
-    "DELETE_TOOLTIP": "Delete group",
-    "MANAGE_UNUSED": "Manage unused groups",
-    "UNUSED_GROUPS": "Unused projectgroups",
-    "NO_UNUSED_GROUPS": "There are no unsed groups",
-    "DELETE_SELECTED": "Delete selected groups"
+    "logout": "Logout"
   },
-  "COMMON": {
-    "ACTIONS": {
-      "SAVE": "Save",
-      "CANCEL": "Cancel",
-      "EDIT": "Edit",
-      "DELETE": "Delete",
-      "LABEL": "Actions",
-      "CLOSE": "Close",
-      "CONFIRM": "Confirm",
-      "SHARE": "Share",
-      "DOWNLOAD": "Download",
-      "CANCEL_TOOLTIP": "Cancel",
-      "SAVE_TOOLTIP": "Save"
+  "analyze": {
+    "selectPlace": "Click on a place on the map to get further analysis",
+    "loadingFeatureInfo": "Loading feature information...",
+    "loadingPlaces": "Loading map with activities...",
+    "loadingAnalysis": "Loading activity analysis...",
+    "loadingCategories": "Loading all categories...",
+    "loadingMap": "Loading map...",
+    "activities": "Activities",
+    "categories": "Categories",
+    "relevance": "Relevance",
+    "relevancePercent": "Relevance (%)",
+    "activity": "Activity",
+    "rating": "Rating",
+    "moreInfo": "More information",
+    "allCategoriesDialog": {
+      "title": "Activities",
+      "loading": "Loading all categories...",
+      "categoriesNotFound": "Categories not found",
+      "dataNotLoaded": "Data not yet loaded",
+      "errorLoadingCategories": "Error loading categories"
     },
-    "MESSAGES": {
-      "ERROR": {
-        "LOAD": "Error loading data",
-        "DELETE": "Error deleting",
-        "CREATE": "Create",
-        "UPDATE": "Error when updating"
-      },
-      "SUCCESS": {
-        "DELETE": "Successfully deleted",
-        "CREATE": "Success creating",
-        "UPDATE": "Updated"
-      },
-      "CONFIRM_DELETE": "Are you sure you want to delete this project?",
-      "CONFIRM_DELETE_GROUP": "Are you sure you want to delete this project group?"
+    "featureInfo": {
+      "notFound": "Feature information not found",
+      "dataNotPreloaded": "Data not preloaded yet",
+      "errorLoading": "Error loading feature information"
     },
-    "CANCEL": "Cancel",
-    "EXPORT": "Export",
-    "EXPORTING": "Exporting..."
-  },
-  "LEGEND": {
-    "TITLE": "Legend",
-    "LVLA": "The required mobility time is max. 35% of the local average.",
-    "LVLB": "The required mobility time is between 36% and 50% of the local average.",
-    "LVLC": "The required mobility time is between 51% and 71% of the local average.",
-    "LVLD": "The required mobility time is between 72% and 100% of the local average.",
-    "LVLE": "The required mobility time is between 101% and 140% of the local average.",
-    "LVLF": "The required mobility time is at least 141% of the local average.",
-    "DIFFERENCE_HEADER": "Legend for difference maps",
-    "SCORE_HEADER": "Travel time (minutes)",
-    "SCORE": "Score",
-    "MINUTES": "min"
-  },
-  "MAP": {
-    "ACTIONS": {
-      "HEXAGON": "Hexagon",
-      "GEMEINDE": "Gemeinde",
-      "LANDKREIS": "Landkreis",
-      "LAND": "Land"
+    "analyzeData": {
+      "notFound": "Analyze data not found",
+      "dataNotPreloaded": "Data not preloaded yet",
+      "errorLoading": "Error loading analyze data"
     },
-    "CONTROLS": {
-      "ZOOM_IN": "zoom in",
-      "ZOOM_OUT": "zoom out"
+    "placesDialog": {
+      "title": "Map with activity places",
+      "loading": "Loading map...",
+      "errorLoadingPlaces": "Error loading places"
     },
-    "VISUALIZATION": {
-      "MEAN": "Mean",
-      "MEDIAN": "Median",
-      "POP": "Population",
-      "AREA": "Area"
+    "rank": {
+      "overall": "Rank",
+      "overallLabel": "overall",
+      "regionalClass": "Rank",
+      "regionalClassLabel": "Regional class"
     },
-    "TOOLTIP": {
-      "BASELINE": "Baseline",
-      "COMPARISON": "Comparison",
-      "BETTER_THAN": "{{project1}} is <strong>{{percentage}}%</strong> better than {{project2}}",
-      "EQUAL": "Both projects are equal"
+    "population": "Population:",
+    "grade": "Grade:",
+    "analysis": {
+      "title": "Analysis Top 5 Activities",
+      "showAllCategories": "Show all categories",
+      "categoriesNotFound": "Categories not found",
+      "dataNotLoaded": "Data not yet loaded",
+      "errorLoadingCategories": "Error loading categories",
+      "errorLoadingPlaces": "Error loading places",
+      "activities": "Activities",
+      "qualityRating": "Quality rating: The quality rating shows the mobility quality in different categories from A (best quality) to F (lowest quality).",
+      "placesMap": "Map with activity places"
     }
   },
-  "PROJECT_WIZARD": {
-    "CREATE_NEW_PROJECT": "Create New Project",
-    "SELECT_ACTIVITIES": "Select relevant activities",
-    "SELECT_PERSONAS": "Select relevant personas",
-    "SELECT_MODES": "Select relevant modes",
-    "CREATE_PROJECT": "Create Project",
-    "PROJECT_NAME": "Project Name",
-    "DESCRIPTION": "Description",
-    "PROJECT_SETTINGS": "Project Settings",
-    "MAKE_PUBLIC": "Make Project Public",
-    "ALLOW_SHARING": "Allow Sharing",
-    "SEND_EMAIL": "Send Email after Completion",
-    "LOAD_AREAS_ON_MAP": "Load calculated municipalities directly on map",
-    "AVAILABLE_PERSONAS": "Available Personas",
-    "AVAILABLE_MODES": "Available Modes",
-    "NON_MID_ACTIVITIES": "Non-MID Activities",
-    "CANCEL": "Cancel",
-    "BACK": "Back",
-    "NEXT": "Next",
-    "FINISH": "Finish",
-    "ERRORS": {
-      "NAME_REQUIRED": "Please enter a project name.",
-      "SELECT_MID_ACTIVITIES": "Please select at least one MID activity.",
-      "SELECT_NON_MID_ACTIVITY": "Please select a non-MID activity.",
-      "SELECT_PERSONAS": "Please select at least one persona.",
-      "SELECT_MODES": "Please select at least one mode.",
-      "SELECT_OSM_ACTIVITY": "Please select an activity"
+  "errors": {
+    "generic": "An error occurred",
+    "network": "Network error. Please try again later.",
+    "notFound": "Not found",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Access denied",
+    "serverError": "Server error",
+    "unknown": "Unknown error"
+  },
+  "maintenance": {
+    "title": "Maintenance",
+    "message": "The application is currently under maintenance. Please try again later."
+  },
+  "language": {
+    "de": "German",
+    "en": "English",
+    "select": "Select language"
+  },
+  "map": {
+    "search": {
+      "label": "Search place",
+      "placeholder": "e.g. Berlin, Munich...",
+      "loading": "Loading map data...",
+      "clickForInfo": "Click for more information"
     },
-    "ACTIVITIES": {
-      "MID": "Activities",
-      "NON_MID": "Standard Activities",
-      "TOGGLE_TOOLTIP": "toggle",
-      "NO_MID_ACTIVITIES": "Error with the Activities. Please reload the page",
-      "OSM": "Switch activities"
+    "popup": {
+      "index": "Index:",
+      "score": "Score:",
+      "minutes": "min",
+      "notAvailable": "N/A",
+      "unnamed": "Unnamed",
+      "error": "Error"
     },
-    "PROJECT_NAME_TOOLTIP": "project name",
-    "DESCRIPTION_TOOLTIP": "Project description",
-    "PROJECT_GROUP_TOOLTIP": "Choose project group",
-    "SEND_EMAIL_TOOLTIP": "Send an email after finished",
-    "LOAD_AREAS_ON_MAP_TOOLTIP": "Load areas directly",
-    "CANCEL_TOOLTIP": "cancel creating project",
-    "BACK_TOOLTIP": "Go back one step",
-    "FINISH_TOOLTIP": "finish",
-    "NEXT_TOOLTIP": "next",
-    "STEPS_TOOLTIP": "steps",
-    "STEPS": {
-      "STEP": "Step",
-      "OF": "of",
-      "ACTIVITIES": "Activities",
-      "PERSONAS": "Personas",
-      "MODES": "Modes",
-      "AREA": "Select Area",
-      "PROJECT_INFO": "Project Information"
-    },
-    "START_ACTIVITY": "Start activity",
-    "START_ACTIVITY_TOOLTIP": "Only calculates the score for a hexagon that has said activity",
-    "OSM_ACTIVITIES": "OpenStreetMap Activities",
-    "REGIOSTAR": "RegioStar",
-    "REGIOSTAR_TOOLTIP": "Select RegioStar categories",
-    "SELECT_REGIOSTAR": "Select RegioStar",
-    "PERSONA_GROUP": "Persona Group",
-    "PERSONA_GROUP_TOOLTIP": "Select persona group to filter personas",
-    "SELECT_PERSONA_GROUP": "Select Persona Group"
-  },
-  "SIDEBAR": {
-    "TITLE": "Details",
-    "DESCRIPTION": "Description",
-    "STATUS": "Status",
-    "NO_SELECTION": "No selection",
-    "CLICK_HINT": "Click on a map to display details",
-    "PROJECT_INFO": "Project Info",
-    "ACTIVITIES": "Activities",
-    "MODES": "Modes",
-    "PERSONAS": "Personas",
-    "NO_PROJECT_SELECTED": "No project selected",
-    "EXPORT_PDF_LANDSCAPE": "Export PDF Landscape",
-    "EXPORT_PDF_PORTRAIT": "Export PDF Portrait",
-    "SHARE_LINK": "Share Link",
-    "SHARE_LINK_DESCRIPTION": "Share this link so that others can view the project without having an account.",
-    "SHARE": "Share",
-    "COPY_LINK": "Copy Link",
-    "COPY_LINK_SUCCESS": "Link successfully copied",
-    "COPY_LINK_SUCCESS_TITLE": "Success",
-    "COPY_LINK_SUCCESS_MESSAGE": "Share link copied to clipboard",
-    "COPY_LINK_ERROR_TITLE": "Error",
-    "COPY_LINK_ERROR_MESSAGE": "Failed to copy link to clipboard",
-    "SHARE_TOOLTIP": "Share",
-    "EXPORT_PDF_LANDSCAPE_TOOLTIP": "Export in Landscape",
-    "EXPORT_PDF_PORTRAIT_TOOLTIP": "Export in portrait",
-    "AVERAGE_TYPE": "Average Type",
-    "POPULATION_AREA": "Population/Area",
-    "MEDIAN": "Median",
-    "AVERAGE": "Average",
-    "AREA": "Area",
-    "POPULATION": "Population",
-    "OPACITY_THRESHOLDS": "Opacity",
-    "COUNTY_THRESHOLD": "County threshold",
-    "MUNICIPALITY_THRESHOLD": "Municipality threshold",
-    "HEXAGON_THRESHOLD": "Hexagon",
-    "REDUCE_OPACITY": "Reduce opacity",
-    "REDUCE_OPACITY_TOOLTIP": "Reduce opacity of features",
-    "RESTORE_OPACITY": "Restore opacity",
-    "ZOOM_TO_FEATURES": "Recenter Map",
-    "ZOOM_TO_FEATURES_TOOLTIP": "Recenters the map to the original state",
-    "EXPORT_PDF_TOOLTIP": "export pdf",
-    "EXPORT_PDF": "Export PDF",
-    "COMPARISON_DIALOG_TITLE": "Choose project",
-    "CREATED": "Created",
-    "COMPARISON_ERROR_TITLE": "No projects available",
-    "COMPARISON_DIALOG_NO_PROJECTS": "No similar project available",
-    "EXIT_COMPARISON": "Exit comparison",
-    "VISUALIZATION_TYPE": "Visualization",
-    "INDEX": "Index",
-    "INDEX_TOOLTIP": "Shows the evaluated mobility time in relation to the local average.",
-    "SCORE": "Score",
-    "SCORE_TOOLTIP": "Shows travel time in minutes, enriched with subjective factors."
-  },
-  "ANALYZE": {
-    "PERSONA": {
-      "TITLE": "Persona",
-      "NO_DATA": "No data available",
-      "HINT": "Hint: The values of the persona can be very similar with a limited number of modes.",
-      "LOADING": "Loading persona data..."
-    },
-    "ACTIVITIES": {
-      "TITLE": "Activities",
-      "NO_DATA": "No data available",
-      "SWITCH_TO_DOUGHNUT": "Change view",
-      "EXPLANATION": "The activities weighted by their local relevance",
-      "HINT": "💡 Click on a bar in the diagram to view a map with the places of this activity!",
-      "SUBACTIVITIES_HINT": "💡 Click on a bar in the diagram to view places on the map!",
-      "NO_PLACES": "No places available",
-      "DISABLE_PLACES": "The places are only available for hexagons or municipalities. Please zoom into the map to get more details!",
-      "OSM_HINT": "Missing a place? You can add it directly to OpenStreetMap:",
-      "OSM_LINK": "Open OpenStreetMap Editor",
-      "LOADING": "Loading activities...",
-      "LOADING_SUBACTIVITIES": "Loading subactivities...",
-      "LOADING_MAP": "Loading map..."
-    },
-    "MODES": {
-      "TITLE": "Modes",
-      "NO_DATA": "No data available",
-      "LOADING": "Loading modes..."
-    },
-    "PROFILES": {
-      "TITLE": "Modes",
-      "NO_DATA": "No data available",
-      "HINT": "Hint: The values of the modes can be very similar with a limited number of personas.",
-      "LOADING": "Loading profiles...",
-      "EXPLANATION": "The figure above shows how well each individual mode of transport performs."
-    },
-    "TITLE": "Details",
-    "START": "Start",
-    "END": "End",
-    "PROPERTIES": {
-      "POPULATION": "Population"
-    },
-    "WEIGHTING": {
-      "POPULATION": "Weight by population",
-      "AREA": "Weight by area"
-    },
-    "LOADING": {
-      "HINT": "Hint: The larger the size of the clicked feature, the longer is the loading time for it!"
-    },
-    "POPULATION_WEIGHTING_HINT": "Hint: the seen values are always weighted by population, not by area",
-    "COMPARISON_MODE": {
-      "DISABLED_TITLE": "Analysis Disabled",
-      "DISABLED_MESSAGE": "The analysis feature is disabled for comparison projects. Please use a standard project to access the analysis."
-    }
-  },
-  "EXPORT": {
-    "IS_EXPORTING": "Export is in progress...",
-    "GENERATING_PDF": "Generating PDF..."
-  },
-  "SHARE": {
-    "DETAILS": "Details",
-    "LINKED_MAPS": "Linked Maps",
-    "PROJECTS": "Projects",
-    "NO_PROJECT_SELECTED": "No project selected",
-    "CREATED_BY": "Created by",
-    "EXPIRES": "Expires at",
-    "DESCRIPTION": "Description",
-    "ACTIVITIES": "Activities",
-    "PERSONAS": "Personas",
-    "NO_ACTIVITIES": "No activities",
-    "NO_PERSONAS": "No personas",
-    "NO_DESCRIPTION": "No description",
-    "MODES": "Modes",
-    "NO_PROFILES": "No profiles found"
-  },
-  "DETAILS": {
-    "FIELDS": {
-      "OVERVIEW": "Overview",
-      "ACTIVITIES": "Activities"
-    },
-    "TITLE": "Details"
-  },
-  "EDIT": {
-    "TITLE": "Edit project"
-  },
-  "AUTH": {
-    "LOGIN": {
-      "LOGIN": "login"
-    }
-  },
-  "RATE_LIMIT": {
-    "TITLE": "Too Many Users",
-    "MESSAGE": "Maximum number of concurrent users reached",
-    "DESCRIPTION": "Unfortunately, too many users are currently on the platform at the same time. Please try again later.",
-    "CURRENT_STATUS": "Current Status",
-    "CAPACITY_REACHED": "Capacity Reached",
-    "CAPACITY_MESSAGE": "The platform is currently at full capacity",
-    "SYSTEM_BUSY": "System Busy",
-    "NEXT_CHECK": "Next check in",
-    "AUTO_RETRY": "The page will automatically check and redirect you as soon as a spot becomes available.",
-    "RETRY_NOW": "Retry Now",
-    "BACK_TO_SHARE": "Back to Shared Project",
-    "GO_TO_LANDING": "Go to Landing",
-    "HELP_TEXT": "Please understand that we want to ensure the quality of service for all users.",
-    "TO_PROJECT_PAGE": "Go to the project page"
-  },
-  "CREDITS": {
-    "VISIT_WEBSITE": "Visit website",
-    "INFO_BUTTON_TOOLTIP": "Information and Help",
-    "VISUALIZATION_SECTION_TOOLTIP": "Components used for visualization",
-    "DATA_SECTION_TOOLTIP": "Data sources and processing components",
-    "BACKEND_SECTION_TOOLTIP": "Backend technologies used",
-    "ROUTING_SECTION_TOOLTIP": "Routing services used",
-    "VISIT_COMPONENT_WEBSITE": "Visit the {{name}} website",
-    "LANGUAGE_BUTTON_TOOLTIP": "Change language",
-    "SHORTCUTS": {
-      "CENTER_MAP": "Recenter map",
-      "FREEZE_MAP": "Freeze map (for screenshots)",
-      "SHOW_STATISTICS": "Show statistics",
-      "EXPORT_PDF_PORTRAIT": "Export PDF Portrait",
-      "EXPORT_PDF_LANDSCAPE": "Export PDF Landscape",
-      "SHARE": "Share",
-      "TOGGLE_HEXAGON_VIEW": "toggle Hexagon view",
-      "EXPORT_PDF": "Export map to PDF"
-    },
-    "LOGOUT": "Logout",
-    "SHOW_CREDITS": "Show attributions",
-    "SHOW_HELP": "show help",
-    "START_TUTORIAL": "Start Tutorial",
-    "CHANGE_LANGUAGE": "Change language",
-    "SHOW_SHORTCUTS": "Keyboard shortcuts",
-    "TOGGLE_TUTORIAL": "Start the tutorial"
-  },
-  "HELP": {
-    "GETTING_STARTED_TOOLTIP": "Getting started with the application",
-    "FAQ_TOOLTIP": "Frequently asked questions and answers",
-    "CONTACT_TOOLTIP": "Contact information for support"
-  },
-  "STATISTICS": {
-    "TITLE": "Rankings",
-    "SHOW_STATISTICS_TOOLTIP": "View detailed statistics for this project",
-    "STATES": "States",
-    "COUNTIES": "Counties",
-    "MUNICIPALITIES": "Municipalities",
-    "RANK": "Rank",
-    "NAME": "Name",
-    "SCORE": "Score",
-    "GRADE": "Grade",
-    "CURRENT_SETTINGS": "Current settings",
-    "POPULATION_WEIGHTED": "Population weighted",
-    "AREA_WEIGHTED": "Area weighted",
-    "FILTER_BY_CITY_SIZE": "Filter by population",
-    "SHOW_BEZIRKE": "Show districts (Bezirke)",
-    "LOADING_MORE_DATA": "Loading more data in background...",
-    "PROJECT_VERSION_INVALID": "The version of the project is too low. Please recreate it, to also show statistics.",
-    "POPULATION": "Population",
-    "MUNICIPALITY_SUBDIVISION_HINT": "Note: Municipalities that alone form the respective city or county district are not listed again under 'Municipalities', but only under 'Counties'.",
-    "FILTER_BY_NAME": "Filter municpalities by name",
-    "ENTER_MUNICIPALITY_NAME": "Enter municipality name",
-    "NO_MUNICIPALITIES_FOUND": "No municipalities found",
-    "NO_MUNICIPALITIES_HINT": "No municipalities match the selected criteria. Try adjusting the population filters or selecting a different municipality.",
-    "SEARCH_KEYWORD_STATE": "To filter, enter a state...",
-    "SEARCH_KEYWORD_COUNTY": "To filter, enter a city/county"
-  },
-  "PDF_EXPORT": {
-    "FULL_MAP": "Full map",
-    "CURRENT_VIEW": "Current view",
-    "MAP_EXTENT": "Map extent",
-    "RESOLUTION": "Resolution (DPI)",
-    "PAPER_SIZE": "Paper size",
-    "LANDSCAPE": "Landscape",
-    "PORTRAIT": "Portrait",
-    "ORIENTATION": "Ortientation",
-    "TITLE": "PDF Export",
-    "EXPORT_INFO": "Export Information",
-    "SELECTED_SIZE": "Selected Size",
-    "ESTIMATED_SIZE": "Note: File size will depend on map complexity and selected options"
-  },
-  "SEARCH_OVERLAY": {
-    "SEARCH_PLACEHOLDER": "Search locations",
-    "SEARCH_HINT": "Search for a place to show it directly on the map"
-  },
-  "LANDING": {
-    "TITLE": "Welcome to mobi.mapr",
-    "SUBTITLE": "Your comprehensive mobility mapping and analysis platform. Access all tools and resources from one central location.",
-    "CARDS": {
-      "PROJECT_MAIN_SITE": {
-        "TITLE": "Homepage",
-        "DESCRIPTION": "On our main site you can find everything about mobi.mapr. There you can find current projects and other exciting information.",
-        "BUTTON": "Visit Main Site"
+    "legend": {
+      "quality": {
+        "title": "Quality Rating (A-F)",
+        "description": "The quality rating shows the mobility quality in different categories from A (best quality) to F (lowest quality).",
+        "a": {
+          "title": "A - Best Quality",
+          "description": "Very good mobility quality (Index: 0 - 0.35)"
+        },
+        "b": {
+          "title": "B - Good Quality",
+          "description": "Good mobility quality (Index: 0.35 - 0.5)"
+        },
+        "c": {
+          "title": "C - Average Quality",
+          "description": "Average mobility quality (Index: 0.5 - 0.71)"
+        },
+        "d": {
+          "title": "D - Below Average Quality",
+          "description": "Below average mobility quality (Index: 0.71 - 1.0)"
+        },
+        "e": {
+          "title": "E - Poor Quality",
+          "description": "Poor mobility quality (Index: 1.0 - 1.41)"
+        },
+        "f": {
+          "title": "F - Very Poor Quality",
+          "description": "Very poor mobility quality (Index: > 1.41)"
+        }
       },
-      "CONTACT": {
-        "TITLE": "Contact",
-        "DESCRIPTION": "If you have any questions or problems, please contact us!",
-        "BUTTON": "Open Project"
-      },
-      "TECHNICAL_DOCS": {
-        "TITLE": "Technical Documentation",
-        "DESCRIPTION": "Comprehensive technical documentation, which describes the mobi.mapr in more detail.",
-        "BUTTON": "View Docs"
-      },
-      "FAQ": {
-        "TITLE": "FAQ",
-        "DESCRIPTION": "Find answers to frequently asked questions about the project.",
-        "BUTTON": "View FAQ"
-      },
-      "LOGIN": {
-        "TITLE": "Login",
-        "DESCRIPTION": "Access the application dashboard and all available features.",
-        "BUTTON": "Login to App"
-      },
-      "DASHBOARD": {
-        "TITLE": "Dashboard",
-        "DESCRIPTION": "Access the main application dashboard with all mapping and analysis tools.",
-        "BUTTON": "Go to Dashboard"
-      }
-    },
-    "FOOTER": "© 2025 bwim. All rights reserved."
-  },
-  "ADVERTISING": {
-    "TITLE": "Discover More Projects",
-    "DESCRIPTION": "Explore all our mobility mapping projects and stay updated with the latest developments.",
-    "VISIT_MAIN_SITE": "Visit Main Site",
-    "NEWSLETTER_TEXT": "Subscribe to our newsletter for project updates and new features!"
-  },
-  "TUTORIAL": {
-    "STEP": "Step",
-    "OF": "of",
-    "PREVIOUS": "Previous",
-    "NEXT": "Next",
-    "FINISH": "Finish",
-    "SKIP": "Skip",
-    "SELECT_TUTORIAL": "Select tutorial",
-    "CLICK_TO_CONTINUE": "Click on the highlighted element to continue",
-    "DASHBOARD": {
-      "NAME": "Welcome Tutorial",
-      "DESCRIPTION": "Learn the main features of the application",
-      "STEP1": {
-        "TITLE": "Welcome!",
-        "CONTENT": "Welcome to mobi.mapr! This short tutorial will show you the main features of the tool. You can skip the tutorial at any time and restart it later. To restart, click the yellow 'i' in the bottom right and then click the top button.",
-        "NEXT_HINT": "Click the button in the bottom center to start."
-      },
-      "STEP2": {
-        "TITLE": "Project Overview",
-        "CONTENT": "Here you can find various precomputed maps. Further down, you will find the projects you created yourself."
-      },
-      "STEP3": {
-        "TITLE": "View Map",
-        "CONTENT": "To view a map, click the small icon. Depending on the size of the map, it may take a few seconds to load.",
-        "NEXT_HINT": "Click the button in the bottom center to start."
-      },
-      "STEP4": {
-        "TITLE": "The Map",
-        "CONTENT": "In the center is the map showing mobility quality. You can zoom to get different resolutions. You can start exploring right after the tutorial.",
-        "NEXT_HINT": "Click the button in the bottom center to continue."
-      },
-      "STEP5": {
-        "TITLE": "The Legend",
-        "CONTENT": "In the bottom left, you'll see the legend. Click on it to see what the different colors mean.",
-        "NEXT_HINT": "Click on the legend to see what the different colors mean."
-      },
-      "STEP6": {
-        "TITLE": "Show Details",
-        "CONTENT": "Here you'll find all project-related information such as activities, personas, and modes. You can also switch map weighting or export the map here.",
-        "NEXT_HINT": "Click on the details to see more information.",
-        "NEXT_HINT_2": "The tutorial continues below."
-      },
-      "STEP7": {
-        "TITLE": "Analyze Map",
-        "CONTENT": "Clicking on an area of the map will show you detailed information about how the score is composed.",
-        "NEXT_HINT": "Click on a colored area on the map."
-      },
-      "STEP8": {
-        "TITLE": "Focus on Map",
-        "CONTENT": "To return to the map, click the close icon in the top right.",
-        "NEXT_HINT": "Click on the close icon in the top right to return to the map."
-      },
-      "STEP9": {
-        "TITLE": "Show Projects",
-        "CONTENT": "Click on 'Projects' on the left to view all projects again.",
-        "NEXT_HINT": "Click on the 'Projects' on the left to view all projects again."
-      },
-      "STEP10": {
-        "TITLE": "More Information",
-        "CONTENT": "In the bottom right, you can get more information about the application, set the language, view keyboard shortcuts, and restart this tutorial.",
-        "NEXT_HINT": "The tutorial continues below."
-      },
-      "STEP11": {
-        "TITLE": "Have Fun!",
-        "CONTENT": "We hope you enjoyed the tutorial and have lots of fun with mobi.mapr!",
-        "NEXT_HINT": "You can end the tutorial at the bottom."
-      }
-    },
-    "SHARE": {
-      "NAME": "Share",
-      "DESCRIPTION": "Learn the main features of sharing",
-      "LANGUAGE_HINT": "You can change the language in the top right corner!",
-      "STEP1": {
-        "TITLE": "Welcome!",
-        "CONTENT": "Welcome to mobi.mapr! This short tutorial will show you the key features of your shared map.",
-        "NEXT_HINT": "Click the button in the bottom center to start."
-      },
-      "STEP2": {
-        "TITLE": "The Map",
-        "CONTENT": "In the center is the map showing mobility quality. You can zoom to get different resolutions. You can start exploring right after the tutorial.",
-        "NEXT_HINT": "Click the button in the bottom center to continue."
-      },
-      "STEP3": {
-        "TITLE": "The Legend",
-        "CONTENT": "In the bottom left, you'll see the legend. Click on it to see what the different colors mean.",
-        "NEXT_HINT": "Click somewhere on the legend."
-      },
-      "STEP3-1": {
-        "TITLE": "Overview",
-        "CONTENT": "You can close the legend at any time by clicking on it again.",
-        "NEXT_HINT": "Click somewhere on the legend to close it."
-      },
-      "STEP4": {
-        "TITLE": "Show Details",
-        "CONTENT": "Here you'll find all project-related information such as activities, personas, and modes.",
-        "NEXT_HINT": "The tutorial continues below."
-      },
-      "STEP5": {
-        "TITLE": "Analyze Map",
-        "CONTENT": "Clicking on an area of the map will show you detailed information about how the score is composed.",
-        "NEXT_HINT": "Click on a colored area on the map."
-      },
-      "STEP6": {
-        "TITLE": "Focus on Map",
-        "CONTENT": "To return to the map, click the close icon in the top right.",
-        "NEXT_HINT": "Click on the close icon in the top right to return to the map."
-      },
-      "STEP7": {
-        "TITLE": "More Information",
-        "CONTENT": "In the bottom right, you can get more information about the application, like showing the keyboard shortcuts.",
-        "NEXT_HINT": "The tutorial continues below."
-      },
-      "STEP8": {
-        "TITLE": "Have Fun!",
-        "CONTENT": "We hope you enjoyed the tutorial and have lots of fun with mobi.mapr!",
-        "NEXT_HINT": "You can end the tutorial at the bottom."
+      "time": {
+        "title": "Time Rating (Travel Time)",
+        "description": "The time rating shows the average travel time in minutes. Colors range from light blue (short travel times) to dark blue (long travel times).",
+        "scale": "Travel Time Scale",
+        "scaleDescription": "0 minutes (light blue) to 60+ minutes (dark blue)",
+        "detailedDescription": "Travel time is measured in minutes and shows how quickly different destinations can be reached. Shorter travel times are displayed in lighter shades of blue, while longer travel times appear in darker shades of blue.",
+        "min0": "0 min",
+        "min60Plus": "60+ min"
       }
     }
   },
-  "MAINTENANCE": {
-    "TITLE": "Maintenance",
-    "MESSAGE": "We are currently performing maintenance. Please try again later. The page will automatically refresh once the service is available again.",
-    "CHECKING": "Checking service...",
-    "INFO": "This page will automatically refresh once the service is available again."
+  "left": {
+    "extendedMode": "Extended mode",
+    "information": "Information",
+    "expanded": "Expanded",
+    "normal": "Normal",
+    "transportModes": {
+      "title": "Transport Modes",
+      "description": "Select the transport modes that should be considered in the calculation. You can activate or deactivate multiple transport modes simultaneously.",
+      "availableOptions": "Available Options",
+      "availableOptionsDescription": "Each transport mode can be individually turned on or off to adapt the analysis to your requirements.",
+      "cannotDisable": "Cannot be disabled"
+    },
+    "mobilityRating": {
+      "title": "Mobility Rating",
+      "description": "Choose between two rating methods for mobility analysis.",
+      "time": {
+        "label": "Time",
+        "description": "Rates mobility based on travel time. This method measures how quickly different destinations can be reached."
+      },
+      "quality": {
+        "label": "Quality",
+        "description": "Rates mobility based on the quality of connections. This method considers factors such as comfort, reliability, and service quality."
+      }
+    },
+    "activeFilters": {
+      "title": "Active Filters",
+      "description": "This overview shows the currently active filters and their count. The numbers show how many filters are selected in each category.",
+      "adjustFilters": "Adjust Filters",
+      "adjustFiltersDescription": "Click on \"Filter\" to open and adjust the filter settings. There you can select activities, personas, RegioStars, and states.",
+      "midProject": "MID Project",
+      "midProjectDescription": "Since this is a MID project, you can additionally filter activities and personas to further refine the analysis.",
+      "activities": "Activities",
+      "personas": "Personas",
+      "regioStars": "RegioStars",
+      "states": "States",
+      "filterButton": "Filter"
+    }
   },
-  "INVALID_SHARE_KEY": {
-    "TITLE": "Invalid Share Key",
-    "MESSAGE": "The share key you used is invalid or has expired. Please check the link or contact the project owner for a new share key.",
-    "GO_TO_LOGIN": "Go to Login",
-    "GO_TO_LANDING": "Go to Landing Page"
+  "filterDialog": {
+    "title": "Configure Filters",
+    "tabs": {
+      "activities": "Activities",
+      "personas": "Personas",
+      "regioStars": "RegioStars",
+      "states": "States"
+    },
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All"
   },
-  "MAP_HINT": {
-    "ZOOM": "Zoom into the map to see details",
-    "ZOOM_DETAIL": "Pinch or scroll until the map shows finer areas",
-    "CLICK": "Click on an area to get more information",
-    "CLICK_DETAIL": "Tap a colored area to open its details"
+  "rail": {
+    "manageProjects": "Manage Projects"
+  },
+  "dashboard": {
+    "collapseLeftPanel": "Collapse left panel",
+    "expandLeftPanel": "Expand left panel",
+    "collapseRightPanel": "Collapse right panel",
+    "expandRightPanel": "Expand right panel"
+  },
+  "stats": {
+    "title": "Top 10",
+    "loading": "Loading...",
+    "errorLoading": "Error loading data",
+    "noDataAvailable": "No data available",
+    "levels": {
+      "state": "States",
+      "county": "Counties",
+      "municipality": "Municipalities"
+    },
+    "info": {
+      "title": "Statistics",
+      "description": "This overview shows the top 10 rankings based on the selected level (States, Counties, or Municipalities) and the current filters and evaluation criteria.",
+      "aboutDataTitle": "About the Data",
+      "aboutData": "The data shown represents the top 10 rankings based on the selected level and the current filters and evaluation criteria."
+    }
   },
   "PREPARING_PROJECT": {
     "TITLE": "Preparing Project",
-    "MESSAGE": "Please wait while we prepare your project data...",
-    "INFO": {
-      "ABOUT_TITLE": "About mobi.mapr",
-      "ABOUT_TEXT": "mobi.mapr is a comprehensive mobility analysis tool developed by BWIM to help analyze and visualize mobility patterns and accessibility.",
-      "WHAT_TITLE": "What we're doing",
-      "WHAT_TEXT": "We're processing your selected activities, personas, and transportation modes to create a detailed mobility analysis map."
-    },
+    "MESSAGE": "Please wait while the project is being loaded...",
     "FUN_FACTS": {
-      "TITLE": "Did you know?",
-      "FACT_1": "Cycling is one of the most efficient modes of transportation, using only about 35 calories per kilometer!",
-      "FACT_2": "Public transportation can reduce carbon emissions by up to 45% compared to individual car travel.",
-      "FACT_3": "Walking and cycling account for over 50% of all trips in many European cities.",
-      "FACT_4": "Mobility analysis helps cities plan better infrastructure and improve accessibility for all residents.",
-      "FACT_5": "The average person walks about 4,000 steps per day, which equals roughly 3 kilometers!"
+      "TITLE": "Did You Know?",
+      "FACT_1": "Germany has over 9,000 train stations that are used daily by millions of people.",
+      "FACT_2": "The German rail network extends over more than 38,000 kilometers.",
+      "FACT_3": "Public transportation significantly contributes to reducing CO2 emissions.",
+      "FACT_4": "Mobility analysis helps plan the best transportation infrastructure.",
+      "FACT_5": "Walking is the most environmentally friendly way to get around."
     },
     "STATUS": {
-      "COMPLETED": "Completed",
-      "ERROR": "An error occurred",
-      "STARTING": "Starting...",
+      "STARTING": "Starting project...",
       "CALCULATING": "Calculating...",
-      "PROCESSING": "Processing..."
+      "PROCESSING": "Processing data...",
+      "COMPLETED": "Project loaded successfully",
+      "ERROR": "Error loading project"
+    },
+    "INFO": {
+      "ABOUT_TITLE": "About This Project",
+      "ABOUT_TEXT": "This project analyzes mobility in various regions and evaluates the quality of transportation infrastructure.",
+      "WHAT_TITLE": "What's Happening?",
+      "WHAT_TEXT": "We are calculating and analyzing mobility data to provide you with the best insights."
     }
   }
 }

@@ -1,12 +1,13 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { SharedModule } from '../../shared/shared.module';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../auth/auth.service';
+import { LanguageService } from '../../services/language.service';
 
 @Component({
   selector: 'app-rail',
-  imports: [SharedModule],
+  imports: [SharedModule, TranslateModule],
   templateUrl: './rail.component.html',
   styleUrl: './rail.component.css',
 })
@@ -14,20 +15,19 @@ export class RailComponent implements OnInit {
   private translate = inject(TranslateService);
   private router = inject(Router);
   private authService = inject(AuthService);
+  private languageService = inject(LanguageService);
 
   currentLang = signal<string>('de');
   isLoggedIn = signal<boolean>(false);
 
-  availableLangs = [
-    { code: 'de', name: 'DE' },
-    { code: 'en', name: 'EN' }
-  ];
+  availableLangs = this.languageService.availableLanguages.map(lang => ({
+    code: lang.code,
+    name: lang.code.toUpperCase()
+  }));
 
   constructor() {
-    // Load saved language preference or default to German
-    const savedLang = localStorage.getItem('language') || 'de';
-    this.currentLang.set(savedLang);
-    this.translate.use(savedLang);
+    // Initialize language from LanguageService
+    this.currentLang.set(this.languageService.getCurrentLanguage());
     
     // Initialize authentication state
     this.isLoggedIn.set(this.authService.isLoggedIn());
@@ -35,7 +35,7 @@ export class RailComponent implements OnInit {
 
   ngOnInit(): void {
     // Subscribe to language changes to keep currentLang in sync
-    this.translate.onLangChange.subscribe(event => {
+    this.languageService.onLanguageChange().subscribe(event => {
       this.currentLang.set(event.lang);
     });
 
@@ -46,9 +46,8 @@ export class RailComponent implements OnInit {
   }
 
   switchLanguage(lang: string): void {
+    this.languageService.setLanguage(lang);
     this.currentLang.set(lang);
-    this.translate.use(lang);
-    localStorage.setItem('language', lang);
   }
 
   navigateToUsersArea(): void {

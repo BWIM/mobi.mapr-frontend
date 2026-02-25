@@ -39,7 +39,7 @@
       <mat-icon>question_mark</mat-icon>
     </button>
     @if (isLoggedIn()) {
-      <button matIconButton (click)="navigateToUsersArea()" aria-label="Projekte verwalten">
+      <button matIconButton (click)="navigateToUsersArea()" [attr.aria-label]="'rail.manageProjects' | translate">
         <mat-icon>person</mat-icon>
       </button>
     }

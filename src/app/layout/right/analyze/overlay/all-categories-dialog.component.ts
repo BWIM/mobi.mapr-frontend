@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, AfterViewInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, Inject, OnInit, AfterViewInit, ViewChild, ChangeDetectorRef, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialog } from '@angular/material/dialog';
 import { SharedModule } from '../../../../shared/shared.module';
 import { CommonModule } from '@angular/common';
@@ -7,6 +7,7 @@ import { catchError, of } from 'rxjs';
 import { ChartModule } from 'primeng/chart';
 import { UIChart } from 'primeng/chart';
 import { PlacesDialogComponent, PlacesDialogData } from '../places/places-dialog.component';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 export interface AllCategoriesDialogData {
   featureType: 'municipality' | 'hexagon' | 'county' | 'state';
@@ -26,6 +27,7 @@ export interface AllCategoriesDialogData {
     SharedModule,
     CommonModule,
     ChartModule,
+    TranslateModule,
   ],
   templateUrl: './all-categories-dialog.component.html',
   styleUrl: './all-categories-dialog.component.css'
@@ -48,6 +50,8 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
     { letter: 'E', color: 'rgba(194, 24, 7, 0.7)' },
     { letter: 'F', color: 'rgba(197, 136, 187, 0.7)' }
   ];
+
+  private translate = inject(TranslateService);
 
   constructor(
     public dialogRef: MatDialogRef<AllCategoriesDialogComponent>,
@@ -84,11 +88,13 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
     }).pipe(
       catchError((error) => {
         console.error('Error loading all categories:', error);
-        this.error = error.status === 404 
-          ? 'Kategorien nicht gefunden' 
-          : error.status === 503
-          ? 'Daten noch nicht geladen'
-          : 'Fehler beim Laden der Kategorien';
+        if (error.status === 404) {
+          this.error = this.translate.instant('analyze.allCategoriesDialog.categoriesNotFound');
+        } else if (error.status === 503) {
+          this.error = this.translate.instant('analyze.allCategoriesDialog.dataNotLoaded');
+        } else {
+          this.error = this.translate.instant('analyze.allCategoriesDialog.errorLoadingCategories');
+        }
         return of(null);
       })
     ).subscribe((response) => {
@@ -160,11 +166,12 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
     const maxWeight = Math.max(...weights);
     const yAxisMax = Math.ceil(maxWeight / 5) * 5; // Round up to nearest 5
 
+    const relevanceLabel = this.translate.instant('analyze.relevancePercent');
     this.chartData = {
       labels: labels,
       datasets: [
         {
-          label: 'Relevanz (%)',
+          label: relevanceLabel,
           data: weights,
           backgroundColor: colors,
           borderColor: colors,
@@ -197,10 +204,13 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
             label: (context: any) => {
               const index = context.dataIndex;
               const grade = this.getGrade(categories[index].index);
+              const activityLabel = this.translate.instant('analyze.activity');
+              const ratingLabel = this.translate.instant('analyze.rating');
+              const relevanceLabel = this.translate.instant('analyze.relevance');
               return [
-                `Aktivität: ${categories[index].category_name}`,
-                `Bewertung: ${grade}`,
-                `Relevanz: ${weights[index].toFixed(1)}%`
+                `${activityLabel}: ${categories[index].category_name}`,
+                `${ratingLabel}: ${grade}`,
+                `${relevanceLabel}: ${weights[index].toFixed(1)}%`
               ];
             }
           }
@@ -235,7 +245,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
           },
           title: {
             display: true,
-            text: 'Relevanz (%)',
+            text: this.translate.instant('analyze.relevancePercent'),
             color: '#ffffff',
             font: {
               size: 12
@@ -320,8 +330,8 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
   openLegendInfo(): void {
     // Simple alert for now - can be enhanced with a proper dialog later
     const message = this.data.isScoreMode
-      ? 'Zeitbewertung: Die Reisezeit wird in Minuten gemessen. Die Farben reichen von hellblau (kurze Reisezeiten) bis dunkelblau (lange Reisezeiten).'
-      : 'Qualitätsbewertung: Die Qualitätsbewertung zeigt die Mobilitätsqualität in verschiedenen Kategorien von A (beste Qualität) bis F (niedrigste Qualität).';
+      ? this.translate.instant('map.legend.time.description')
+      : this.translate.instant('map.legend.quality.description');
     
     // For now, just log - can be replaced with a proper dialog
     console.log(message);
