@@ -61,6 +61,15 @@ export class ProjectsService {
     this._project.set(project);
     this._isInitialized.set(true);
   }
+
+  /**
+   * Clear the current project and reset initialization state
+   */
+  clearProject(): void {
+    this._project.set(null);
+    this._isInitialized.set(false);
+    this._isLoading.set(false);
+  }
   
   initializeProject(): void {
     // Prevent multiple simultaneous initializations

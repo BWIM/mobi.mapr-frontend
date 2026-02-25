@@ -9,8 +9,9 @@ import { Subscription } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { TranslateModule } from '@ngx-translate/core';
 
-interface FunFact {
+interface AchievementCard {
   icon: string;
+  title: string;
   text: string;
 }
 
@@ -32,8 +33,8 @@ export interface PreparingProjectDialogData {
   styleUrl: './preparing-project-dialog.component.css'
 })
 export class PreparingProjectDialogComponent implements OnInit, OnDestroy {
-  currentFactIndex = 0;
-  private factInterval?: any;
+  currentCardIndex = 0;
+  private cardInterval?: any;
   private wsSubscription?: Subscription;
   private websocketService = inject(WebsocketService);
 
@@ -41,17 +42,28 @@ export class PreparingProjectDialogComponent implements OnInit, OnDestroy {
   statusMessage = '';
   showProgress = false;
 
-  funFacts: FunFact[] = [
-    { icon: '🚴', text: 'PREPARING_PROJECT.FUN_FACTS.FACT_1' },
-    { icon: '🚊', text: 'PREPARING_PROJECT.FUN_FACTS.FACT_2' },
-    { icon: '🌍', text: 'PREPARING_PROJECT.FUN_FACTS.FACT_3' },
-    { icon: '📊', text: 'PREPARING_PROJECT.FUN_FACTS.FACT_4' },
-    { icon: '🚶', text: 'PREPARING_PROJECT.FUN_FACTS.FACT_5' },
+  achievementCards: AchievementCard[] = [
+    { 
+      icon: '✨', 
+      title: 'PREPARING_PROJECT.ACHIEVEMENTS.ONE_TIME_TITLE',
+      text: 'PREPARING_PROJECT.ACHIEVEMENTS.ONE_TIME_TEXT'
+    },
+    { 
+      icon: '🔧', 
+      title: 'PREPARING_PROJECT.ACHIEVEMENTS.FILTER_TITLE',
+      text: 'PREPARING_PROJECT.ACHIEVEMENTS.FILTER_TEXT'
+    },
+    { 
+      icon: '🌟', 
+      title: 'PREPARING_PROJECT.ACHIEVEMENTS.UNIQUE_TITLE',
+      text: 'PREPARING_PROJECT.ACHIEVEMENTS.UNIQUE_TEXT'
+    },
+    { 
+      icon: '📊', 
+      title: 'PREPARING_PROJECT.ACHIEVEMENTS.STATS_TITLE',
+      text: 'PREPARING_PROJECT.ACHIEVEMENTS.STATS_TEXT'
+    },
   ];
-
-  get currentFunFact(): FunFact {
-    return this.funFacts[this.currentFactIndex];
-  }
 
   constructor(
     public dialogRef: MatDialogRef<PreparingProjectDialogComponent>,
@@ -59,15 +71,35 @@ export class PreparingProjectDialogComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Rotate fun facts every 4 seconds
-    this.factInterval = setInterval(() => {
-      this.currentFactIndex = (this.currentFactIndex + 1) % this.funFacts.length;
-    }, 4000);
+    // Auto-rotate achievement cards every 5 seconds
+    this.cardInterval = setInterval(() => {
+      this.nextCard();
+    }, 5000);
 
     // Connect to websocket if sessionId is provided
     if (this.data?.sessionId) {
       this.connectWebsocket(this.data.sessionId);
     }
+  }
+
+  nextCard(): void {
+    if (this.currentCardIndex < this.achievementCards.length - 1) {
+      this.currentCardIndex++;
+    } else {
+      this.currentCardIndex = 0;
+    }
+  }
+
+  previousCard(): void {
+    if (this.currentCardIndex > 0) {
+      this.currentCardIndex--;
+    } else {
+      this.currentCardIndex = this.achievementCards.length - 1;
+    }
+  }
+
+  goToCard(index: number): void {
+    this.currentCardIndex = index;
   }
 
   private connectWebsocket(sessionId: string): void {
@@ -138,8 +170,8 @@ export class PreparingProjectDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.factInterval) {
-      clearInterval(this.factInterval);
+    if (this.cardInterval) {
+      clearInterval(this.cardInterval);
     }
     if (this.wsSubscription) {
       this.wsSubscription.unsubscribe();

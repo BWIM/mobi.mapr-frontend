@@ -1,4 +1,4 @@
-/* Custom animations for fun facts */
+/* Custom animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -10,9 +10,41 @@
   }
 }
 
-/* Apply fade-in animation to fun fact card */
-:host ::ng-deep .fun-fact-card {
+/* Apply fade-in animation to achievement card */
+:host ::ng-deep .achievement-card {
   animation: fadeIn 0.5s ease-in;
+}
+
+/* Allow line breaks in text content */
+:host ::ng-deep p,
+:host ::ng-deep .text-content,
+:host ::ng-deep mat-card-content {
+  white-space: pre-line;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Ensure text containers don't overflow */
+:host ::ng-deep mat-card-content p,
+:host ::ng-deep mat-card-content h3 {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* Ensure achievement cards don't overflow */
+:host ::ng-deep .achievement-card {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+:host ::ng-deep .achievement-card mat-card-content {
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 /* Material Progress Bar styling */
@@ -26,4 +58,9 @@
 
 :host ::ng-deep mat-progress-bar .mdc-linear-progress__bar-inner {
   background-color: var(--primary-color);
+}
+
+/* Slider container */
+:host ::ng-deep .slider-container {
+  position: relative;
 }

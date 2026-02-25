@@ -309,6 +309,10 @@
   "PREPARING_PROJECT": {
     "TITLE": "Preparing Project",
     "MESSAGE": "Please wait while the project is being loaded...",
+    "COFFEE_MESSAGE": "Grab a coffee! Depending on the complexity of the filters, this can take up to 5 minutes.",
+    "INFO": {
+      "PREPARING": "The project is being prepared..."
+    },
     "FUN_FACTS": {
       "TITLE": "Did You Know?",
       "FACT_1": "Germany has over 9,000 train stations that are used daily by millions of people.",
@@ -324,11 +328,15 @@
       "COMPLETED": "Project loaded successfully",
       "ERROR": "Error loading project"
     },
-    "INFO": {
-      "ABOUT_TITLE": "About This Project",
-      "ABOUT_TEXT": "This project analyzes mobility in various regions and evaluates the quality of transportation infrastructure.",
-      "WHAT_TITLE": "What's Happening?",
-      "WHAT_TEXT": "We are calculating and analyzing mobility data to provide you with the best insights."
+    "ACHIEVEMENTS": {
+      "ONE_TIME_TITLE": "One-Time Setup",
+      "ONE_TIME_TEXT": "Preparing a project only needs to be done once.",
+      "FILTER_TITLE": "Filter Changed",
+      "FILTER_TEXT": "This dialogue only opens after changing some filter parameters.",
+      "UNIQUE_TITLE": "Unique Map",
+      "UNIQUE_TEXT": "If you see this screen, nobody has ever produced a map like this (at least in the last 30 days).",
+      "STATS_TITLE": "Over 15 Billion Possibilities",
+      "STATS_TEXT": "You can combine the 28 activities freely, for 8 different mode combinations and 7 personas, this means more than 15 billion different maps to produce."
     }
   }
 }

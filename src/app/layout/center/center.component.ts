@@ -79,20 +79,20 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     { letter: 'E', color: 'rgba(194, 24, 7, 0.7)' },
     { letter: 'F', color: 'rgba(197, 136, 187, 0.7)' }
   ];
-  // 185, 221, 239
-  // 187, 219, 214
-  // 98, 146, 165
+  // 162, 210, 235
+  // 121, 194, 230
+  // 90, 135, 185
   // 74, 89, 160
-  // 67, 43, 112
-  // 196, 40, 112
+  // 43, 40, 105
+  // 23, 25, 63
   // Time (score) colors - discrete 10-minute steps
   timeColors = [
-    { value: '0-10', color: 'rgb(185, 221, 239)' },
-    { value: '10-20', color: 'rgb(187, 219, 214)' },
-    { value: '20-30', color: 'rgb(98, 146, 165)' },
+    { value: '0-10', color: 'rgb(162, 210, 235)' },
+    { value: '10-20', color: 'rgb(121, 194, 230)' },
+    { value: '20-30', color: 'rgb(90, 135, 185)' },
     { value: '30-40', color: 'rgb(74, 89, 160)' },
-    { value: '40-50', color: 'rgb(67, 43, 112)' },
-    { value: '50-60+', color: 'rgb(196, 40, 112)' }
+    { value: '40-50', color: 'rgb(43, 40, 105)' },
+    { value: '50-60+', color: 'rgb(23, 25, 63)' }
   ];
 
   getIndexName(index: number): string {

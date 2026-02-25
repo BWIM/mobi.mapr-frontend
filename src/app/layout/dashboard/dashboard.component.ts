@@ -34,6 +34,7 @@ export class DashboardComponent {
   leftPanelExpanded = signal(true);
   rightPanelExpanded = signal(true);
   private hasInitialized = false;
+  private currentProjectIdentifier: string | null = null;
 
   constructor() {
     // First check: If user is not logged in and no share_key, redirect to login
@@ -59,6 +60,21 @@ export class DashboardComponent {
         // Check current route to prevent redirect loops
         const currentUrl = this.router.url.split('?')[0];
 
+        // Determine the new project identifier
+        const newProjectIdentifier = projectId || shareKey || existingProjectId || existingShareKey || null;
+        
+        // Check if project has changed
+        const projectChanged = this.currentProjectIdentifier !== newProjectIdentifier;
+        if (projectChanged && this.currentProjectIdentifier !== null) {
+          // Clear the old project when switching to a new one
+          this.projectService.clearProject();
+        }
+        if (projectChanged) {
+          // Reset initialization state when project changes
+          this.hasInitialized = false;
+          this.currentProjectIdentifier = newProjectIdentifier;
+        }
+
         if (projectId) {
           // User is accessing with project_id (authenticated)
           if (!isLoggedIn) {
@@ -68,7 +84,15 @@ export class DashboardComponent {
             }
             return;
           }
+          
+          // Set project ID in session service (this will clear share_key if present)
           this.dashboardSessionService.setProjectId(projectId);
+          
+          // Load the project if it changed or hasn't been loaded yet
+          if (projectChanged || !this.projectService.isInitialized()) {
+            await this.loadProjectById(projectId);
+          }
+          
           this.hasInitialized = true;
         } else if (shareKey) {
           // User is accessing with share_key (unauthenticated)
@@ -78,12 +102,18 @@ export class DashboardComponent {
         } else if (existingProjectId) {
           // No project_id or share_key in query params, but there's one in session
           // User already has a project selected, allow access
-          // No action needed - session service already has the project
+          // Load the project if it changed or hasn't been loaded yet
+          if (projectChanged || !this.projectService.isInitialized()) {
+            await this.loadProjectById(existingProjectId);
+          }
           this.hasInitialized = true;
         } else if (existingShareKey) {
           // No project_id or share_key in query params, but there's a share key in session
           // User already has a share key, allow access
-          // No action needed - session service already has the share key
+          // Load the project if it changed or hasn't been loaded yet
+          if (projectChanged || !this.projectService.isInitialized()) {
+            await this.validateShareKeyAndPreload(existingShareKey);
+          }
           this.hasInitialized = true;
         } else {
           // No project_id or share_key in query params AND none in session service
@@ -105,6 +135,31 @@ export class DashboardComponent {
           }
         }
       });
+  }
+
+  /**
+   * Loads a project by ID (for authenticated users)
+   */
+  private async loadProjectById(projectId: string): Promise<void> {
+    try {
+      const project = await firstValueFrom(
+        this.projectService.getProjectById(Number(projectId))
+      );
+      
+      if (!project) {
+        console.error('Project not found:', projectId);
+        // Redirect to users-area if project not found
+        this.router.navigate(['/users-area']);
+        return;
+      }
+
+      // Set the project in the service
+      this.projectService.setProject(project);
+    } catch (error) {
+      console.error('Error loading project by ID:', error);
+      // Redirect to users-area on error
+      this.router.navigate(['/users-area']);
+    }
   }
 
   /**

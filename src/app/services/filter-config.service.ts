@@ -258,8 +258,10 @@ export class FilterConfigService {
       const filters = this.contentLayerFilters();
       if (filters) {
         // On initial load, always do a full reload
-        // Otherwise, determine if this is a full reload (filter settings changed) or tile-only update (modes/bewertung changed)
+        // Otherwise, determine if this is a full reload (filter settings changed) or tile-only update (bewertung changed)
+        // Note: profile_combination_id changes (from mode selection) require a full reload to call /ready endpoint
         const isFullReload = isInitialLoad || (previousFilters && (
+          previousFilters.profile_combination_id !== filters.profile_combination_id ||
           JSON.stringify(previousFilters.state_ids?.sort()) !== JSON.stringify(filters.state_ids?.sort()) ||
           JSON.stringify(previousFilters.category_ids?.sort()) !== JSON.stringify(filters.category_ids?.sort()) ||
           JSON.stringify(previousFilters.persona_ids?.sort()) !== JSON.stringify(filters.persona_ids?.sort()) ||
@@ -272,7 +274,7 @@ export class FilterConfigService {
             console.error('Error in updateMapLayer (full reload):', error);
           });
         } else {
-          // Tile-only update (modes or bewertung changed) - preserve map position
+          // Tile-only update (only bewertung changed) - preserve map position
           this.updateMapLayer(filters, false).catch(error => {
             console.error('Error in updateMapLayer (tile update):', error);
           });

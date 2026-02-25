@@ -54,8 +54,8 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
   // Time (score) colors - discrete 10-minute steps
   timeColors = [
     { value: '0-10', color: 'rgb(162, 210, 235)' },
-    { value: '10-20', color: 'rgb(152, 202, 193)' },
-    { value: '20-30', color: 'rgb(98, 146, 165)' },
+    { value: '10-20', color: 'rgb(121, 194, 230)' },
+    { value: '20-30', color: 'rgb(90, 135, 185)' },
     { value: '30-40', color: 'rgb(74, 89, 160)' },
     { value: '40-50', color: 'rgb(43, 40, 105)' },
     { value: '50-60+', color: 'rgb(23, 25, 63)' }
@@ -139,17 +139,17 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
         // Use score-based colors
         const scoreValue = cat.score;
         if (scoreValue <= 600) {
-          return 'rgb(0,73,40)'; // Dark green - 0-10 min
+          return 'rgb(162, 210, 235)'; // 0-10 min
         } else if (scoreValue <= 1200) {
-          return 'rgb(60,140,100)'; // Darker medium green - 10-20 min
+          return 'rgb(121, 194, 230)'; // 10-20 min
         } else if (scoreValue <= 1800) {
-          return 'rgb(120,180,160)'; // Medium-light green - 20-30 min
+          return 'rgb(90, 135, 185)'; // 20-30 min
         } else if (scoreValue <= 2400) {
-          return 'rgb(160,140,180)'; // Purple-green transition - 30-40 min
+          return 'rgb(74, 89, 160)'; // 30-40 min
         } else if (scoreValue <= 3000) {
-          return 'rgb(180,100,160)'; // Medium purple - 40-50 min
+          return 'rgb(43, 40, 105)'; // 40-50 min
         } else {
-          return 'rgb(72,38,131)'; // Dark purple - 50-60 min
+          return 'rgb(23, 25, 63)'; // 50-60+ min
         }
       } else {
         // Use index-based colors

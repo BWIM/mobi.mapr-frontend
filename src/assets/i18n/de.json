@@ -309,6 +309,10 @@
   "PREPARING_PROJECT": {
     "TITLE": "Projekt wird vorbereitet",
     "MESSAGE": "Bitte warten Sie, während das Projekt geladen wird...",
+    "COFFEE_MESSAGE": "Gönnen Sie sich einen Kaffee! Je nach Komplexität der Filter kann dies bis zu 5 Minuten dauern.",
+    "INFO": {
+      "PREPARING": "Das Projekt wird vorbereitet..."
+    },
     "FUN_FACTS": {
       "TITLE": "Wussten Sie schon?",
       "FACT_1": "In Deutschland gibt es über 9.000 Bahnhöfe, die täglich von Millionen von Menschen genutzt werden.",
@@ -324,11 +328,15 @@
       "COMPLETED": "Projekt erfolgreich geladen",
       "ERROR": "Fehler beim Laden des Projekts"
     },
-    "INFO": {
-      "ABOUT_TITLE": "Über dieses Projekt",
-      "ABOUT_TEXT": "Dieses Projekt analysiert die Mobilität in verschiedenen Regionen und bewertet die Qualität der Verkehrsinfrastruktur.",
-      "WHAT_TITLE": "Was passiert hier?",
-      "WHAT_TEXT": "Wir berechnen und analysieren Mobilitätsdaten, um Ihnen die besten Einblicke zu bieten."
+    "ACHIEVEMENTS": {
+      "ONE_TIME_TITLE": "Einmalige Vorbereitung",
+      "ONE_TIME_TEXT": "Die Projektvorbereitung muss nur einmal durchgeführt werden.",
+      "FILTER_TITLE": "Filter geändert",
+      "FILTER_TEXT": "Dieser Dialog öffnet sich nur, nachdem Sie einige Filterparameter geändert haben.",
+      "UNIQUE_TITLE": "Einzigartige Karte",
+      "UNIQUE_TEXT": "Wenn Sie diesen Bildschirm sehen, hat noch niemand eine solche Karte erstellt (zumindest in den letzten 30 Tagen).",
+      "STATS_TITLE": "Über 15 Milliarden Möglichkeiten",
+      "STATS_TEXT": "Sie können die 28 Aktivitäten frei kombinieren, für 8 verschiedene Modus-Kombinationen und 7 Personas bedeutet dies mehr als 15 Milliarden verschiedene Karten."
     }
   }
 }
