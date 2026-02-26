@@ -26,7 +26,7 @@ export class StatsComponent implements OnDestroy {
   private languageService = inject(LanguageService);
 
   counties: County[] = [];
-  isLoading = signal(true);
+  isLoading = signal(true); // Start with loading state true by default (step 0)
   error: string | null = null;
   
   // Track current language to trigger translation updates
@@ -68,6 +68,7 @@ export class StatsComponent implements OnDestroy {
       const profileCombinationID = this.filterConfigService.currentProfileCombinationID();
       const isMapLoading = this.mapService.isMapLoading();
       const isPreparingProject = this.mapService.isPreparingProject();
+      const isReadyCheckComplete = this.mapService.isReadyCheckComplete();
       const filters = this.filterConfigService.contentLayerFilters();
       const currentBewertung = this.filterConfigService.selectedBewertung();
       
@@ -93,8 +94,13 @@ export class StatsComponent implements OnDestroy {
         return;
       }
       
-      // Only load stats when map is ready (not loading), project is not being prepared, and profile combination is available
-      if (profileCombinationID !== null && !isMapLoading && !isPreparingProject && filters) {
+      // Only load stats when:
+      // - Map is ready (not loading)
+      // - Project is not being prepared
+      // - Ready check has completed (step 2 is done, so step 3 can proceed)
+      // - Profile combination is available
+      // This ensures rankings only load after ready check completes (step 3)
+      if (profileCombinationID !== null && !isMapLoading && !isPreparingProject && isReadyCheckComplete && filters) {
         // Check if filters actually changed (excluding bewertung which doesn't require API call)
         const currentFilterState = {
           profileCombinationID,
@@ -169,7 +175,8 @@ export class StatsComponent implements OnDestroy {
     const isPreparingProject = this.mapService.isPreparingProject();
     const filters = this.filterConfigService.contentLayerFilters();
     
-    if (profileCombinationID !== null && !isMapLoading && !isPreparingProject && filters) {
+    const isReadyCheckComplete = this.mapService.isReadyCheckComplete();
+    if (profileCombinationID !== null && !isMapLoading && !isPreparingProject && isReadyCheckComplete && filters) {
       this.loadTopRankings();
     }
   }
@@ -218,10 +225,11 @@ export class StatsComponent implements OnDestroy {
       return;
     }
 
-    // Don't load if map is loading or project is being prepared
+    // Don't load if map is loading, project is being prepared, or ready check hasn't completed
     const isMapLoading = this.mapService.isMapLoading();
     const isPreparingProject = this.mapService.isPreparingProject();
-    if (isMapLoading || isPreparingProject) {
+    const isReadyCheckComplete = this.mapService.isReadyCheckComplete();
+    if (isMapLoading || isPreparingProject || !isReadyCheckComplete) {
       return;
     }
 

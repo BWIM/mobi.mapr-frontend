@@ -63,6 +63,10 @@ export class MapService {
   // Signal to track project preparation state (when preparing dialog is shown)
   private _isPreparingProject = signal<boolean>(false);
   readonly isPreparingProject = this._isPreparingProject.asReadonly();
+  
+  // Signal to track if ready check has completed (prevents rankings from loading too early)
+  private _isReadyCheckComplete = signal<boolean>(false);
+  readonly isReadyCheckComplete = this._isReadyCheckComplete.asReadonly();
 
   constructor() {}
 
@@ -371,6 +375,13 @@ export class MapService {
   setPreparingProject(preparing: boolean): void {
     this._isPreparingProject.set(preparing);
   }
+  
+  /**
+   * Sets the ready check completion state
+   */
+  setReadyCheckComplete(complete: boolean): void {
+    this._isReadyCheckComplete.set(complete);
+  }
 
   /**
    * Fetches bounds for the content layer from the API
@@ -590,6 +601,8 @@ export class MapService {
 
     this._currentProfileCombinationID.set(null);
     this.currentFilters = null;
+    // Reset ready check state when content layer is removed
+    this._isReadyCheckComplete.set(false);
     this.updateStyle(updatedStyle);
   }
 

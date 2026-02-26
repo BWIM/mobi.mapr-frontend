@@ -179,6 +179,7 @@
       "availableOptions": "Verfügbare Optionen",
       "availableOptionsDescription": "Jedes Verkehrsmittel kann einzeln ein- oder ausgeschaltet werden, um die Analyse entsprechend deinen Anforderungen anzupassen.",
       "cannotDisable": "Kann nicht deaktiviert werden",
+      "cannotUseCar": "Für ausgewählte Persona nicht verfügbar",
       "introduction": "Wähle aus vier Verkehrsmitteln, um die Mobilität in deiner Region zu analysieren. Jeder Modus verwendet ausgeklügelte Routing-Algorithmen, um realistische Reisezeiten zu berechnen.",
       "modes": {
         "title": "Verfügbare Verkehrsmittel",
@@ -325,7 +326,7 @@
   "PREPARING_PROJECT": {
     "TITLE": "Projekt wird vorbereitet",
     "MESSAGE": "Bitte warte, während das Projekt geladen wird...",
-    "COFFEE_MESSAGE": "Gönn dir einen Kaffee! Je nach Komplexität der Filter kann dies bis zu 5 Minuten dauern.",
+    "COFFEE_MESSAGE": "Gönn dir einen Kaffee! Je nach Komplexität der Filter kann dies mehrere Minuten dauern.",
     "INFO": {
       "PREPARING": "Das Projekt wird vorbereitet..."
     },

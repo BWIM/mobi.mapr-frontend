@@ -179,6 +179,7 @@
       "availableOptions": "Available Options",
       "availableOptionsDescription": "Each transport mode can be individually turned on or off to adapt the analysis to your requirements.",
       "cannotDisable": "Cannot be disabled",
+      "cannotUseCar": "Not available for selected persona",
       "introduction": "Choose from four transport modes to analyze mobility in your region. Each mode uses sophisticated routing algorithms to provide realistic travel time calculations.",
       "modes": {
         "title": "Available Transport Modes",
@@ -325,7 +326,7 @@
   "PREPARING_PROJECT": {
     "TITLE": "Preparing Project",
     "MESSAGE": "Please wait while the project is being loaded...",
-    "COFFEE_MESSAGE": "Grab a coffee! Depending on the complexity of the filters, this can take up to 5 minutes.",
+    "COFFEE_MESSAGE": "Grab a coffee! Depending on the complexity of the filters, this can take a couple of minutes.",
     "INFO": {
       "PREPARING": "The project is being prepared..."
     },

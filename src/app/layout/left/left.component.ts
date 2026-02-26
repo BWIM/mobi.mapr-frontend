@@ -243,12 +243,17 @@ export class LeftComponent implements OnInit {
   }
 
   toggleVerkehrsmittel(modeId: number) {
-    // Find the mode option to check if it's pedestrian
+    // Find the mode option to check if it's pedestrian or car
     const modeOption = this.modeOptions().find(option => option.id === modeId);
     
     // Prevent deselecting pedestrian mode if it's currently selected
     if (modeOption && modeOption.name.toLowerCase() === 'pedestrian' && this.isSelected(modeId)) {
       return; // Don't allow deselecting pedestrian mode
+    }
+    
+    // Prevent toggling car mode if it's disabled (persona cannot use car)
+    if (this.isModeDisabled(modeId)) {
+      return; // Don't allow toggling car mode when disabled
     }
     
     this.filterConfigService.toggleMode(modeId);
@@ -263,10 +268,23 @@ export class LeftComponent implements OnInit {
     return modeOption?.name.toLowerCase() === 'pedestrian';
   }
 
+  isCarMode(modeId: number): boolean {
+    const modeOption = this.modeOptions().find(option => option.id === modeId);
+    return modeOption?.name.toLowerCase() === 'car';
+  }
+
+  isModeDisabled(modeId: number): boolean {
+    return this.filterConfigService.isModeDisabled(modeId);
+  }
+
   getModeTooltip(option: { id: number; display_name: string }): string {
     if (this.isPedestrianMode(option.id) && this.isSelected(option.id)) {
       const cannotDisable = this.translate.instant('left.transportModes.cannotDisable');
       return `${option.display_name} - ${cannotDisable}`;
+    }
+    if (this.isCarMode(option.id) && this.isModeDisabled(option.id)) {
+      const cannotUseCar = this.translate.instant('left.transportModes.cannotUseCar');
+      return `${option.display_name} - ${cannotUseCar}`;
     }
     return option.display_name;
   }

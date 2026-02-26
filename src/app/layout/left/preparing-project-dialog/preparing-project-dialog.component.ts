@@ -121,23 +121,26 @@ export class PreparingProjectDialogComponent implements OnInit, OnDestroy {
 
         // Extract status message - prioritize message field from websocket
         // The message field will contain translation keys for multilingual support
-        if (message.message && typeof message.message === 'string') {
-          this.statusMessage = message.message;
-        } else {
-          // Fall back to status-based messages if message field is not present
-          const status = message.status || message.type || '';
-          if (status && typeof status === 'string') {
-            // Map common status strings to translation keys
-            const statusLower = status.toLowerCase();
-            if (statusLower.includes('start') || statusLower === 'starting') {
-              this.statusMessage = 'PREPARING_PROJECT.STATUS.STARTING';
-            } else if (statusLower.includes('calculat') || statusLower === 'calculating') {
-              this.statusMessage = 'PREPARING_PROJECT.STATUS.CALCULATING';
-            } else if (statusLower.includes('process') || statusLower === 'processing') {
-              this.statusMessage = 'PREPARING_PROJECT.STATUS.PROCESSING';
-            } else {
-              // Use the status as-is if it doesn't match known patterns
-              this.statusMessage = status;
+        // Skip displaying connection_ready messages visually
+        if (message.type !== 'connection_ready') {
+          if (message.message && typeof message.message === 'string') {
+            this.statusMessage = message.message;
+          } else {
+            // Fall back to status-based messages if message field is not present
+            const status = message.status || message.type || '';
+            if (status && typeof status === 'string') {
+              // Map common status strings to translation keys
+              const statusLower = status.toLowerCase();
+              if (statusLower.includes('start') || statusLower === 'starting') {
+                this.statusMessage = 'PREPARING_PROJECT.STATUS.STARTING';
+              } else if (statusLower.includes('calculat') || statusLower === 'calculating') {
+                this.statusMessage = 'PREPARING_PROJECT.STATUS.CALCULATING';
+              } else if (statusLower.includes('process') || statusLower === 'processing') {
+                this.statusMessage = 'PREPARING_PROJECT.STATUS.PROCESSING';
+              } else {
+                // Use the status as-is if it doesn't match known patterns
+                this.statusMessage = status;
+              }
             }
           }
         }

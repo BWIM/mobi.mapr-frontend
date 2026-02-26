@@ -72,6 +72,9 @@ export class FilterConfigService {
   private _allPersonas = signal<Persona[]>([]);
   private _allRegioStars = signal<RegioStar[]>([]);
   private _allStates = signal<State[]>([]);
+  
+  // Track when filter data is loaded (for initialization order)
+  private _isFilterDataLoaded = signal<boolean>(false);
 
   // Public readonly signals
   readonly isExpanded = this._isExpanded.asReadonly();
@@ -234,9 +237,14 @@ export class FilterConfigService {
         if (previousProjectId !== null && previousProjectId !== currentProject.id) {
           this._selectedActivities.set([]);
           this._selectedPersonas.set(null);
+          // Reset filter data loaded flag when project changes
+          this._isFilterDataLoaded.set(false);
         }
         previousProjectId = currentProject.id;
 
+        // Set loading states to true by default when project is loaded
+        this.mapService.setMapLoading(true);
+        
         // Load all filter data when project is loaded
         this.loadAllFilterData(currentProject.is_mid);
         
@@ -247,6 +255,9 @@ export class FilterConfigService {
       } else {
         // Reset when project is cleared
         previousProjectId = null;
+        this._isFilterDataLoaded.set(false);
+        // Reset ready check state when project is cleared
+        this.mapService.setReadyCheckComplete(false);
       }
     });
 
@@ -256,7 +267,16 @@ export class FilterConfigService {
     let isInitialLoad = true;
     effect(() => {
       const filters = this.contentLayerFilters();
+      const isFilterDataLoaded = this._isFilterDataLoaded();
+      
       if (filters) {
+        // Wait for filter data to be loaded before calling ready/loading map
+        // This ensures step 1 (load filter options) completes before step 2 (ready request)
+        if (!isFilterDataLoaded && isInitialLoad) {
+          // Filter data not loaded yet, wait for it
+          return;
+        }
+        
         // On initial load, always do a full reload
         // Otherwise, determine if this is a full reload (filter settings changed) or tile-only update (bewertung changed)
         // Note: profile_combination_id changes (from mode selection) require a full reload to call /ready endpoint
@@ -286,6 +306,28 @@ export class FilterConfigService {
         this.mapService.removeContentLayer();
         previousFilters = null;
         isInitialLoad = true;
+      }
+    });
+
+    // React to persona changes and deselect car mode if persona cannot use car
+    effect(() => {
+      const selectedPersonaId = this._selectedPersonas();
+      const allPersonas = this._allPersonas();
+      const selectedModes = this._selectedModes();
+      
+      if (selectedPersonaId !== null) {
+        const selectedPersona = allPersonas.find(p => p.id === selectedPersonaId);
+        
+        if (selectedPersona && selectedPersona.can_use_car === false) {
+          // Find the car mode ID
+          const carMode = this._allModes().find(mode => mode.name.toLowerCase() === 'car');
+          
+          if (carMode && selectedModes.includes(carMode.id)) {
+            // Deselect car mode
+            this._selectedModes.set(selectedModes.filter(id => id !== carMode.id));
+            this.saveSettings();
+          }
+        }
       }
     });
 
@@ -355,9 +397,14 @@ export class FilterConfigService {
           this.preselectAllStates();
           this.preselectAllCategories();
           this.preselectAllPersonas();
+          
+          // Mark filter data as loaded (step 1 complete)
+          this._isFilterDataLoaded.set(true);
         },
         error: (error) => {
           console.error('Error loading filter data:', error);
+          // Still mark as loaded to allow the flow to continue
+          this._isFilterDataLoaded.set(true);
         }
       });
     } else {
@@ -380,9 +427,14 @@ export class FilterConfigService {
           this._allPersonas.set([]);
           this._selectedActivities.set([]);
           this._selectedPersonas.set(null);
+          
+          // Mark filter data as loaded (step 1 complete)
+          this._isFilterDataLoaded.set(true);
         },
         error: (error) => {
           console.error('Error loading filter data:', error);
+          // Still mark as loaded to allow the flow to continue
+          this._isFilterDataLoaded.set(true);
         }
       });
     }
@@ -581,6 +633,30 @@ export class FilterConfigService {
   }
 
   /**
+   * Check if a mode is disabled based on persona selection
+   */
+  isModeDisabled(modeId: number): boolean {
+    const selectedPersonaId = this._selectedPersonas();
+    if (selectedPersonaId === null) {
+      return false;
+    }
+    
+    const selectedPersona = this._allPersonas().find(p => p.id === selectedPersonaId);
+    if (!selectedPersona) {
+      return false;
+    }
+    
+    // Check if this is the car mode
+    const mode = this._allModes().find(m => m.id === modeId);
+    if (mode && mode.name.toLowerCase() === 'car') {
+      // Disable car mode if persona cannot use car
+      return selectedPersona.can_use_car === false;
+    }
+    
+    return false;
+  }
+
+  /**
    * Set mobility evaluation (bewertung)
    */
   setBewertung(bewertung: 'qualitaet' | 'zeit'): void {
@@ -642,13 +718,16 @@ export class FilterConfigService {
     let dialogRef: any = null;
 
     try {
-      // Set loading state immediately to prevent race conditions
-      // This ensures other components (like stats) don't call APIs before project is ready
+      // Set loading state BEFORE calling ready endpoint (step 0: turn on loading)
+      // This ensures the map is in loading state when ready request is made
       this.mapService.setMapLoading(true);
 
-      // Call the ready endpoint first to check if project is ready
+      // Call the ready endpoint first to check if project is ready (step 2)
       // Only check ready for full reloads (filter changes), not for tile-only updates
       if (fullReload) {
+        // Mark ready check as not complete yet (prevents rankings from loading)
+        this.mapService.setReadyCheckComplete(false);
+        
         console.log('Calling ready endpoint with filters:', filters);
         try {
           const readyResponse = await this.mapService.checkReady(filters);
@@ -682,14 +761,20 @@ export class FilterConfigService {
             }
           }
           // If cache_flag is true, the endpoint was successful and data is ready
+          // Mark ready check as complete (step 2 done, now step 3 can proceed)
+          this.mapService.setReadyCheckComplete(true);
           // Proceed to load content layer below
         } catch (readyError) {
           console.error('Error calling ready endpoint:', readyError);
           // If ready endpoint fails, we can't determine if data is ready
           this.mapService.setMapLoading(false);
           this.mapService.setPreparingProject(false);
+          this.mapService.setReadyCheckComplete(false);
           return;
         }
+      } else {
+        // For tile-only updates, ready check is not needed, so mark as complete
+        this.mapService.setReadyCheckComplete(true);
       }
 
       // Close the dialog if it was opened (before loading content layer)
@@ -700,10 +785,10 @@ export class FilterConfigService {
         this.mapService.setPreparingProject(false);
       }
 
-      // Only load the content layer AFTER we've confirmed data is ready
+      // Only load the content layer AFTER we've confirmed data is ready (step 3)
       // (either via cache_flag: true OR websocket completion)
       // Use updateContentLayerTiles for tile-only updates to preserve map position
-      console.log('Loading content layer after ready check/websocket completion');
+      console.log('Loading content layer after ready check/websocket completion (step 3)');
       if (fullReload) {
         await this.mapService.loadContentLayer(filters, true);
       } else {
@@ -712,6 +797,7 @@ export class FilterConfigService {
 
       // Loading state will be managed by map event listeners (dataloading/idle events)
       // in center.component.ts, so we don't need to manually clear it here
+      // Rankings will load automatically when map loading is false and ready check is complete
     } catch (error) {
       console.error('Error in updateMapLayer:', error);
       // Make sure to close dialog and reset loading state on error
