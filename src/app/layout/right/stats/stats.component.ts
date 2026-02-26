@@ -57,7 +57,7 @@ export class StatsComponent implements OnDestroy {
       this.updateLevelOptions();
     });
     // Track previous filter state to detect actual changes (excluding bewertung)
-    let previousFilters: { profileCombinationID: number | null; stateIds: number[] | undefined; categoryIds: number[] | undefined; personaIds: number[] | undefined; regiostarIds: number[] | undefined } | null = null;
+    let previousFilters: { profileCombinationID: number | null; stateIds: number[] | undefined; categoryIds: number[] | undefined; personaId: number | null | undefined; regiostarIds: number[] | undefined } | null = null;
     let previousBewertung: 'qualitaet' | 'zeit' | null = null;
     let previousMapLoading = true;
     
@@ -82,7 +82,7 @@ export class StatsComponent implements OnDestroy {
         profileCombinationID === previousFilters.profileCombinationID &&
         JSON.stringify(previousFilters.stateIds?.sort()) === JSON.stringify(filters?.state_ids?.sort()) &&
         JSON.stringify(previousFilters.categoryIds?.sort()) === JSON.stringify(filters?.category_ids?.sort()) &&
-        JSON.stringify(previousFilters.personaIds?.sort()) === JSON.stringify(filters?.persona_ids?.sort()) &&
+        previousFilters.personaId === filters?.persona_id &&
         JSON.stringify(previousFilters.regiostarIds?.sort()) === JSON.stringify(filters?.regiostar_ids?.sort());
       
       // If only bewertung changed, just update the previous value and don't change loading state
@@ -100,7 +100,7 @@ export class StatsComponent implements OnDestroy {
           profileCombinationID,
           stateIds: filters.state_ids,
           categoryIds: filters.category_ids,
-          personaIds: filters.persona_ids,
+          personaId: filters.persona_id,
           regiostarIds: filters.regiostar_ids
         };
         
@@ -109,7 +109,7 @@ export class StatsComponent implements OnDestroy {
           previousFilters.profileCombinationID !== currentFilterState.profileCombinationID ||
           JSON.stringify(previousFilters.stateIds?.sort()) !== JSON.stringify(currentFilterState.stateIds?.sort()) ||
           JSON.stringify(previousFilters.categoryIds?.sort()) !== JSON.stringify(currentFilterState.categoryIds?.sort()) ||
-          JSON.stringify(previousFilters.personaIds?.sort()) !== JSON.stringify(currentFilterState.personaIds?.sort()) ||
+          previousFilters.personaId !== currentFilterState.personaId ||
           JSON.stringify(previousFilters.regiostarIds?.sort()) !== JSON.stringify(currentFilterState.regiostarIds?.sort());
         
         if (filtersChanged) {
@@ -246,8 +246,8 @@ export class StatsComponent implements OnDestroy {
       state_ids: selectedStates.length > 0 ? selectedStates : undefined,
       // Only include category_ids if project is MID and there are selected activities (same logic as contentLayerFilters)
       category_ids: (isMid && selectedActivities.length > 0) ? selectedActivities : undefined,
-      // Only include persona_ids if project is MID and there are selected personas (same logic as contentLayerFilters)
-      persona_ids: (isMid && selectedPersonas.length > 0) ? selectedPersonas : undefined,
+      // Only include persona_id if project is MID and there is a selected persona (same logic as contentLayerFilters)
+      persona_id: (isMid && selectedPersonas !== null) ? selectedPersonas : undefined,
       // Only include regiostar_ids if there are selected regiostars (same logic as contentLayerFilters)
       regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined
     };

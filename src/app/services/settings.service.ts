@@ -7,7 +7,7 @@ export interface UserSettings {
   statsLevel?: 'municipality' | 'county' | 'state';
   filters: {
     activities: number[];
-    personas: number[];
+    personas: number | number[] | null; // Support both old array format and new single value format
     regiostars: number[];
     states: number[];
   };
@@ -58,7 +58,7 @@ export class SettingsService {
       statsLevel: 'county',
       filters: {
         activities: [],
-        personas: [],
+        personas: null,
         regiostars: [],
         states: []
       }

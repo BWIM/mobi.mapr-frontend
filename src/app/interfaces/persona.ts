@@ -3,4 +3,5 @@ export interface Persona {
     name: string;
     display_name: string;
     description?: string;
+    default?: boolean;
 }

@@ -31,7 +31,7 @@ export interface FilterState {
   
   // Advanced filters
   selectedActivities: number[];
-  selectedPersonas: number[];
+  selectedPersonas: number | null;
   selectedRegioStars: number[];
   selectedStates: number[];
 }
@@ -56,7 +56,7 @@ export class FilterConfigService {
   private _selectedModes = signal<number[]>([]);
   private _selectedBewertung = signal<'qualitaet' | 'zeit'>('qualitaet');
   private _selectedActivities = signal<number[]>([]);
-  private _selectedPersonas = signal<number[]>([]);
+  private _selectedPersonas = signal<number | null>(null);
   private _selectedRegioStars = signal<number[]>([]);
   private _selectedStates = signal<number[]>([]);
 
@@ -195,9 +195,9 @@ export class FilterConfigService {
       profile_combination_id: profileCombinationID,
       feature_type: featureType,
       state_ids: selectedStates.length > 0 ? selectedStates : undefined,
-      // Only include category_ids and persona_ids if project is MID
+      // Only include category_ids and persona_id if project is MID
       category_ids: (isMid && selectedActivities.length > 0) ? selectedActivities : undefined,
-      persona_ids: (isMid && selectedPersonas.length > 0) ? selectedPersonas : undefined,
+      persona_id: (isMid && selectedPersonas !== null) ? selectedPersonas : undefined,
       regiotyp_id: selectedRegioStars.length === 1 ? selectedRegioStars[0] :
         (selectedRegioStars.length > 1 ? selectedRegioStars[0] : undefined),
       regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined
@@ -233,7 +233,7 @@ export class FilterConfigService {
         // Reset activities and personas when project changes
         if (previousProjectId !== null && previousProjectId !== currentProject.id) {
           this._selectedActivities.set([]);
-          this._selectedPersonas.set([]);
+          this._selectedPersonas.set(null);
         }
         previousProjectId = currentProject.id;
 
@@ -264,7 +264,7 @@ export class FilterConfigService {
           previousFilters.profile_combination_id !== filters.profile_combination_id ||
           JSON.stringify(previousFilters.state_ids?.sort()) !== JSON.stringify(filters.state_ids?.sort()) ||
           JSON.stringify(previousFilters.category_ids?.sort()) !== JSON.stringify(filters.category_ids?.sort()) ||
-          JSON.stringify(previousFilters.persona_ids?.sort()) !== JSON.stringify(filters.persona_ids?.sort()) ||
+          previousFilters.persona_id !== filters.persona_id ||
           previousFilters.regiotyp_id !== filters.regiotyp_id
         ));
         
@@ -379,7 +379,7 @@ export class FilterConfigService {
           this._allActivities.set([]);
           this._allPersonas.set([]);
           this._selectedActivities.set([]);
-          this._selectedPersonas.set([]);
+          this._selectedPersonas.set(null);
         },
         error: (error) => {
           console.error('Error loading filter data:', error);
@@ -405,11 +405,31 @@ export class FilterConfigService {
   }
 
   /**
-   * Preselect all personas
+   * Preselect default persona (only if no persona is currently selected)
    */
   private preselectAllPersonas(): void {
-    const allPersonaIds = this._allPersonas().map(p => p.id);
-    this._selectedPersonas.set([...allPersonaIds]);
+    const currentSelection = this._selectedPersonas();
+    const personas = this._allPersonas();
+    
+    // If a persona is already selected, validate it exists in the loaded personas
+    if (currentSelection !== null) {
+      const personaExists = personas.some(p => p.id === currentSelection);
+      if (personaExists) {
+        // Valid selection, keep it
+        return;
+      }
+      // Invalid selection (e.g., from old localStorage), clear it
+      this._selectedPersonas.set(null);
+    }
+    
+    // No valid selection, select the default persona
+    const defaultPersona = personas.find(p => p.default === true);
+    if (defaultPersona) {
+      this._selectedPersonas.set(defaultPersona.id);
+    } else if (personas.length > 0) {
+      // Fallback to first persona if no default is set
+      this._selectedPersonas.set(personas[0].id);
+    }
   }
 
   /**
@@ -597,7 +617,7 @@ export class FilterConfigService {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this._selectedActivities.set(result.selectedActivities || []);
-        this._selectedPersonas.set(result.selectedPersonas || []);
+        this._selectedPersonas.set(result.selectedPersonas ?? null);
         this._selectedRegioStars.set(result.selectedRegioStars || []);
         this._selectedStates.set(result.selectedStates || []);
         this.saveSettings();
@@ -718,7 +738,16 @@ export class FilterConfigService {
       // Load filter settings
       if (settings.filters) {
         this._selectedActivities.set(settings.filters.activities || []);
-        this._selectedPersonas.set(settings.filters.personas || []);
+        // Handle both old array format and new single value format
+        // Note: We'll validate the persona ID exists when personas are loaded
+        const personasValue = settings.filters.personas;
+        if (Array.isArray(personasValue)) {
+          // Old array format - ignore it, will be set to default when personas load
+          this._selectedPersonas.set(null);
+        } else {
+          // New single value format - set it, but it will be validated when personas load
+          this._selectedPersonas.set(personasValue ?? null);
+        }
         this._selectedRegioStars.set(settings.filters.regiostars || []);
         this._selectedStates.set(settings.filters.states || []);
       }
@@ -734,13 +763,14 @@ export class FilterConfigService {
    * Save current settings to localStorage
    */
   private saveSettings(): void {
+    const selectedPersonas = this._selectedPersonas();
     this.settingsService.saveSettings({
       expanded: this._isExpanded(),
       verkehrsmittel: [...this._selectedModes()],
       bewertung: this._selectedBewertung(),
       filters: {
         activities: [...this._selectedActivities()],
-        personas: [...this._selectedPersonas()],
+        personas: selectedPersonas !== null ? selectedPersonas : null,
         regiostars: [...this._selectedRegioStars()],
         states: [...this._selectedStates()]
       }

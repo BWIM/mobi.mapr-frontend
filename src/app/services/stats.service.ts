@@ -21,7 +21,7 @@ export interface TopRankingsParams {
   type: 'municipality' | 'county' | 'state';
   profile_combination_id: number;
   category_ids?: number[];
-  persona_ids?: number[];
+  persona_id?: number;
   regiostar_ids?: number[];
   state_ids?: number[];
 }
@@ -65,8 +65,8 @@ export class StatsService {
       httpParams = httpParams.set('category_ids', params.category_ids.join(','));
     }
 
-    if (params.persona_ids && params.persona_ids.length > 0) {
-      httpParams = httpParams.set('persona_ids', params.persona_ids.join(','));
+    if (params.persona_id !== undefined && params.persona_id !== null) {
+      httpParams = httpParams.set('persona_id', params.persona_id.toString());
     }
 
     if (params.regiostar_ids && params.regiostar_ids.length > 0) {

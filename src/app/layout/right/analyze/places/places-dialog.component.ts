@@ -15,7 +15,7 @@ export interface PlacesDialogData {
   profileCombinationId: number;
   categoryIds?: number[];
   categoryNames: string;
-  personaIds?: number[];
+  personaId?: number;
 }
 
 @Component({

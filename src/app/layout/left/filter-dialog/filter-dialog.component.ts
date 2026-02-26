@@ -1,12 +1,13 @@
 import { Component, OnInit, Inject, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { MatRadioModule } from '@angular/material/radio';
 import { FilterConfigService } from '../../../services/filter-config.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { TranslateModule } from '@ngx-translate/core';
 
 export interface FilterDialogData {
   selectedActivities: number[];
-  selectedPersonas: number[];
+  selectedPersonas: number | null;
   selectedRegioStars: number[];
   selectedStates: number[];
   is_mid?: boolean;
@@ -18,6 +19,7 @@ export interface FilterDialogData {
   imports: [
     SharedModule,
     TranslateModule,
+    MatRadioModule,
   ],
   templateUrl: './filter-dialog.component.html',
   styleUrl: './filter-dialog.component.css'
@@ -34,7 +36,7 @@ export class FilterDialogComponent implements OnInit {
   states = this.filterConfigService.allStates;
 
   selectedActivities: Set<number> = new Set();
-  selectedPersonas: Set<number> = new Set();
+  selectedPersonas: number | null = null;
   selectedRegioStars: Set<number> = new Set();
   selectedStates: Set<number> = new Set();
 
@@ -50,7 +52,12 @@ export class FilterDialogComponent implements OnInit {
   ) {
     // Initialize selections from data
     this.selectedActivities = new Set(data.selectedActivities || []);
-    this.selectedPersonas = new Set(data.selectedPersonas || []);
+    // Handle both old array format and new single value format
+    if (Array.isArray(data.selectedPersonas)) {
+      this.selectedPersonas = data.selectedPersonas.length > 0 ? data.selectedPersonas[0] : null;
+    } else {
+      this.selectedPersonas = data.selectedPersonas ?? null;
+    }
     this.selectedRegioStars = new Set(data.selectedRegioStars || []);
     this.selectedStates = new Set(data.selectedStates || []);
     this.is_mid = data.is_mid !== undefined ? data.is_mid : true;
@@ -69,12 +76,8 @@ export class FilterDialogComponent implements OnInit {
     }
   }
 
-  togglePersona(id: number) {
-    if (this.selectedPersonas.has(id)) {
-      this.selectedPersonas.delete(id);
-    } else {
-      this.selectedPersonas.add(id);
-    }
+  selectPersona(id: number) {
+    this.selectedPersonas = id;
   }
 
   toggleRegioStar(id: number) {
@@ -188,7 +191,7 @@ export class FilterDialogComponent implements OnInit {
   }
 
   isPersonaSelected(id: number): boolean {
-    return this.selectedPersonas.has(id);
+    return this.selectedPersonas === id;
   }
 
   isRegioStarSelected(id: number): boolean {
@@ -205,6 +208,10 @@ export class FilterDialogComponent implements OnInit {
 
   get personasLength(): number {
     return this.personas().length;
+  }
+
+  get selectedPersonaCount(): number {
+    return this.selectedPersonas !== null ? 1 : 0;
   }
 
   get regiostarsLength(): number {
@@ -224,14 +231,7 @@ export class FilterDialogComponent implements OnInit {
     }
   }
 
-  selectAllPersonas() {
-    const personas = this.personas();
-    if (this.selectedPersonas.size === personas.length) {
-      this.selectedPersonas.clear();
-    } else {
-      personas.forEach(persona => this.selectedPersonas.add(persona.id));
-    }
-  }
+  // Removed selectAllPersonas - not needed for single select
 
   selectAllRegioStars() {
     const regiostars = this.regiostars();
@@ -271,7 +271,7 @@ export class FilterDialogComponent implements OnInit {
   onApply() {
     this.dialogRef.close({
       selectedActivities: Array.from(this.selectedActivities),
-      selectedPersonas: Array.from(this.selectedPersonas),
+      selectedPersonas: this.selectedPersonas,
       selectedRegioStars: Array.from(this.selectedRegioStars),
       selectedStates: Array.from(this.selectedStates)
     });

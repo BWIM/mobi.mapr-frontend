@@ -11,7 +11,7 @@ export interface AnalyzeParams {
   feature_id: number;
   profile_combination_id: number;
   category_ids?: number[];
-  persona_ids?: number[];
+  persona_id?: number;
   top5?: boolean;
 }
 
@@ -67,8 +67,8 @@ export class AnalyzeService {
       httpParams = httpParams.set('category_ids', params.category_ids.join(','));
     }
 
-    if (params.persona_ids && params.persona_ids.length > 0) {
-      httpParams = httpParams.set('persona_ids', params.persona_ids.join(','));
+    if (params.persona_id !== undefined && params.persona_id !== null) {
+      httpParams = httpParams.set('persona_id', params.persona_id.toString());
     }
 
     return this.http.get<AnalyzeResponse>(url, { params: httpParams });

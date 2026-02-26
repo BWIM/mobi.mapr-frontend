@@ -11,7 +11,7 @@ export interface ContentLayerFilters {
   profile_combination_id: number | null;
   state_ids?: number[];
   category_ids?: number[];
-  persona_ids?: number[];
+  persona_id?: number;
   regiotyp_id?: number | null;
   regiostar_ids?: number[];
   admin_level?: 'state' | 'county' | 'municipality' | 'hexagon';
@@ -34,7 +34,7 @@ export interface FeatureInfoParams {
   feature_id: number;
   profile_combination_id: number;
   category_ids?: number[];
-  persona_ids?: number[];
+  persona_id?: number;
   regiostar_ids?: number[];
   state_ids?: number[];
 }
@@ -190,8 +190,8 @@ export class MapService {
       params = params.set('category_ids', filters.category_ids.join(','));
     }
 
-    if (filters.persona_ids && filters.persona_ids.length > 0) {
-      params = params.set('persona_ids', filters.persona_ids.join(','));
+    if (filters.persona_id !== undefined && filters.persona_id !== null) {
+      params = params.set('persona_id', filters.persona_id.toString());
     }
 
     if (filters.state_ids && filters.state_ids.length > 0) {
@@ -328,8 +328,8 @@ export class MapService {
       params.push(`category_ids=${filters.category_ids.join(',')}`);
     }
 
-    if (filters.persona_ids && filters.persona_ids.length > 0) {
-      params.push(`persona_ids=${filters.persona_ids.join(',')}`);
+    if (filters.persona_id !== undefined && filters.persona_id !== null) {
+      params.push(`persona_id=${filters.persona_id}`);
     }
 
     if (filters.regiostar_ids && filters.regiostar_ids.length > 0) {
@@ -697,8 +697,8 @@ export class MapService {
       httpParams = httpParams.set('category_ids', params.category_ids.join(','));
     }
 
-    if (params.persona_ids && params.persona_ids.length > 0) {
-      httpParams = httpParams.set('persona_ids', params.persona_ids.join(','));
+    if (params.persona_id !== undefined && params.persona_id !== null) {
+      httpParams = httpParams.set('persona_id', params.persona_id.toString());
     }
 
     if (params.regiostar_ids && params.regiostar_ids.length > 0) {

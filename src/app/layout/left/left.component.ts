@@ -292,4 +292,13 @@ export class LeftComponent implements OnInit {
     });
   }
 
+  getSelectedPersonaName(): string {
+    const selectedPersonaId = this.selectedPersonas();
+    if (selectedPersonaId === null) {
+      return '';
+    }
+    const persona = this.allPersonas().find(p => p.id === selectedPersonaId);
+    return persona ? (persona.display_name || persona.name) : '';
+  }
+
 }

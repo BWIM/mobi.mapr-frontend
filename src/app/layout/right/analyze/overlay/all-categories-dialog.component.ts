@@ -14,7 +14,7 @@ export interface AllCategoriesDialogData {
   featureId: number;
   profileCombinationId: number;
   categoryIds?: number[];
-  personaIds?: number[];
+  personaId?: number;
   isScoreMode: boolean;
   featureName?: string;
   getGrade: (index: number) => string;
@@ -93,7 +93,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
       feature_id: this.data.featureId,
       profile_combination_id: this.data.profileCombinationId,
       category_ids: this.data.categoryIds,
-      persona_ids: this.data.personaIds,
+      persona_id: this.data.personaId,
       top5: false
     }).pipe(
       catchError((error) => {
@@ -314,7 +314,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
       featureId: this.data.featureId,
       profileCombinationId: this.data.profileCombinationId,
       categoryIds: categoryId ? [categoryId] : this.data.categoryIds,
-      personaIds: this.data.personaIds,
+      personaId: this.data.personaId,
       categoryNames: categoryName || ''
     };
 

@@ -273,7 +273,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       feature_id: featureId,
       profile_combination_id: profileCombinationId,
       category_ids: filters.category_ids,
-      persona_ids: filters.persona_ids,
+      persona_id: filters.persona_id,
       regiostar_ids: filters.regiostar_ids,
       state_ids: filters.state_ids
     }).pipe(
@@ -295,7 +295,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       feature_id: featureId,
       profile_combination_id: profileCombinationId,
       category_ids: filters.category_ids,
-      persona_ids: filters.persona_ids,
+      persona_id: filters.persona_id,
       top5: true
     }).pipe(
       catchError((error) => {
@@ -977,7 +977,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       featureId: featureId,
       profileCombinationId: profileCombinationId,
       categoryIds: filters.category_ids,
-      personaIds: filters.persona_ids,
+      personaId: filters.persona_id,
       isScoreMode: isScoreMode,
       getGrade: (index: number) => this.getGrade(index),
     };
