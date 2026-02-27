@@ -326,4 +326,16 @@ export class LeftComponent implements OnInit {
     return persona ? (persona.display_name || persona.name) : '';
   }
 
+  getFormattedCreatedDate(): string {
+    const projectData = this.project();
+    if (!projectData?.created) {
+      return '';
+    }
+    const createdDate = new Date(projectData.created);
+    const day = String(createdDate.getDate()).padStart(2, '0');
+    const month = String(createdDate.getMonth() + 1).padStart(2, '0');
+    const year = createdDate.getFullYear();
+    return `${day}.${month}.${year}`;
+  }
+
 }

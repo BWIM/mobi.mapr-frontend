@@ -173,6 +173,7 @@
     "information": "Information",
     "expanded": "Expanded",
     "normal": "Normal",
+    "createdDate": "Project creation date",
     "transportModes": {
       "title": "Transport Modes",
       "description": "Select the transport modes that should be considered in the calculation. You can activate or deactivate multiple transport modes simultaneously.",
@@ -273,6 +274,7 @@
   },
   "rail": {
     "manageProjects": "Manage Projects",
+    "logoHint": "To the project page",
     "mail": {
       "title": "About the Project",
       "developedBy": "Welcome to mobi.mapr! This project is developed and continuously improved by the Baden-Württemberg Institut für Nachhaltige Mobilität (BWIM).",

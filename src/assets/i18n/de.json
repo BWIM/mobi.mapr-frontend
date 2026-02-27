@@ -173,6 +173,7 @@
     "information": "Information",
     "expanded": "Erweitert",
     "normal": "Normal",
+    "createdDate": "Erstellungsdatum des Projekts",
     "transportModes": {
       "title": "Verkehrsmittel",
       "description": "Wähle die Verkehrsmittel aus, die in der Berechnung berücksichtigt werden sollen. Du kannst mehrere Verkehrsmittel gleichzeitig aktivieren oder deaktivieren.",
@@ -273,6 +274,7 @@
   },
   "rail": {
     "manageProjects": "Projekte verwalten",
+    "logoHint": "Zur Projektseite",
     "mail": {
       "title": "Über das Projekt",
       "developedBy": "Willkommen bei mobi.mapr! Dieses Projekt wird vom Baden-Württemberg Institut für Nachhaltige Mobilität (BWIM) entwickelt und kontinuierlich weiterentwickelt.",

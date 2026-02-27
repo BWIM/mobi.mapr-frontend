@@ -5,6 +5,7 @@ import { AuthService } from './auth/auth.service';
 import { HealthService } from './services/health.service';
 import { SessionService } from './services/session.service';
 import { LanguageService } from './services/language.service';
+import { environment } from '../environments/environment';
 // Archived components - to be migrated back
 // import { ProjectWizardComponent } from './_archive/legacy/project-wizard/project-wizard.component';
 // import { AnalyzeComponent } from './_archive/components/analyze/analyze.component';
@@ -27,6 +28,7 @@ export class AppComponent implements OnDestroy {
   title = 'mobi.mapr-frontend-2.0';
   isLoggedIn: boolean = false;
   private subscriptions: Subscription[] = [];
+  buildDate: string;
 
   constructor(
     private languageService: LanguageService,
@@ -36,6 +38,14 @@ export class AppComponent implements OnDestroy {
     private router: Router,
     private sessionService: SessionService // Initialize SessionService early to ensure session_id is generated
   ) {
+    // Format build date for display
+    const buildDateObj = new Date(environment.buildDate);
+    this.buildDate = buildDateObj.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+    
     // LanguageService initializes language on construction
     this.isLoggedIn = this.authService.isLoggedIn();
 

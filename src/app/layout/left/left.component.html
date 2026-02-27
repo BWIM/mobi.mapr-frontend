@@ -4,7 +4,16 @@
       <mat-spinner diameter="40"></mat-spinner>
     </div>
   } @else {
-    <div class="text-2xl font-semibold text-[var(--primary-color)] mb-4 pt-[6rem]">{{ project()?.display_name }}</div>
+    <div class="pt-[6rem]">
+      <div class="text-2xl font-semibold text-[var(--primary-color)] mb-1">{{ project()?.display_name }}</div>
+      @if (getFormattedCreatedDate()) {
+        <div 
+          class="text-xs text-[var(--primary-color)] opacity-40 mb-4 cursor-help" 
+          [title]="'left.createdDate' | translate">
+          {{ getFormattedCreatedDate() }}
+        </div>
+      }
+    </div>
     @if (!isShareKeyOnly()) {
       <div class="flex items-center justify-end gap-2 mb-4 relative mr-4">
         <span class="text-sm text-[var(--primary-color)]">{{ 'left.extendedMode' | translate }}</span>
