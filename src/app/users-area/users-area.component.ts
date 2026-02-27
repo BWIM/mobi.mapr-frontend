@@ -25,9 +25,9 @@ export class UsersAreaComponent implements OnInit {
   selectedProjectId = signal<number | null>(null);
 
   ngOnInit(): void {
-    // Redirect to login if not authenticated
+    // Redirect anonymous users to the landing page if not authenticated
     if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/landing']);
       return;
     }
 

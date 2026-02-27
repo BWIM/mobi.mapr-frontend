@@ -22,5 +22,6 @@ export const routes: Routes = [
     component: DashboardComponent,
     // canActivate: [AuthGuard] // Temporarily disabled for clean start
   },
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' } // Changed default to dashboard
+  // Default arrival: go to landing page, which then routes based on auth/share-key state
+  { path: '', redirectTo: '/landing', pathMatch: 'full' }
 ];

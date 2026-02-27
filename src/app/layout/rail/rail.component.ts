@@ -6,6 +6,7 @@ import { AuthService } from '../../auth/auth.service';
 import { LanguageService } from '../../services/language.service';
 import { MatDialog } from '@angular/material/dialog';
 import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.component';
+import { CreditsDialogComponent } from './credits-dialog/credits-dialog.component';
 
 @Component({
   selector: 'app-rail',
@@ -71,14 +72,11 @@ export class RailComponent implements OnInit {
     });
   }
 
-  openQuestionMarkDialog(): void {
-    this.dialog.open(InfoDialogComponent, {
-      width: '80vw',
-      height: '80vh',
-      maxWidth: '80vw',
-      maxHeight: '80vh',
-      panelClass: 'info-dialog-panel',
-      data: { content: this.questionMarkContentTemplate }
+  openCredits() {
+    this.dialog.open(CreditsDialogComponent, {
+      width: '800px',
+      maxWidth: '90vw',
+      maxHeight: '90vh'
     });
-  }
+  } 
 }

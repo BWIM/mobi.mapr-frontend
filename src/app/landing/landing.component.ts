@@ -26,12 +26,14 @@ export class LandingComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        // Check if user is already logged in and redirect to dashboard
+        // Check if user is already logged in and redirect to users-area
         if (this.authService.isLoggedIn()) {
             if (this.router.url.includes('redirect=false')) {
 
             } else {
-                this.router.navigate(['/dashboard']);
+                // Logged-in users arriving without a specific project/share-key
+                // are sent to the users-area to choose a project.
+                this.router.navigate(['/users-area']);
             }
         }
     }

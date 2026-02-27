@@ -6,6 +6,7 @@ import { AuthService } from '../auth/auth.service';
 import { DashboardSessionService } from './dashboard-session.service';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { WebsocketService } from './websocket.service';
+import { ProjectsService } from './project.service';
 
 export interface ContentLayerFilters {
   profile_combination_id: number | null;
@@ -50,6 +51,7 @@ export class MapService {
   private dashboardSessionService = inject(DashboardSessionService);
   private http = inject(HttpClient);
   private websocketService = inject(WebsocketService);
+  private projectService = inject(ProjectsService);
   private currentFilters: ContentLayerFilters | null = null;
   
   // Signal to share current profile combination ID with other components
@@ -448,7 +450,19 @@ export class MapService {
    * @param zoomToBounds - Whether to zoom to bounds (default: true)
    */
   async loadContentLayer(filters: ContentLayerFilters, zoomToBounds: boolean = true): Promise<void> {
-    const projectId = this.dashboardSessionService.getProjectId();
+    let projectId = this.dashboardSessionService.getProjectId();
+    const shareKey = this.dashboardSessionService.getShareKey();
+    
+    // If no projectId but we have a shareKey, get the project ID from the loaded project
+    if (!projectId && shareKey) {
+      const project = this.projectService.getProject();
+      if (project) {
+        projectId = project.id.toString();
+      } else {
+        console.warn('Cannot load content layer: No project ID available and project not loaded');
+        return;
+      }
+    }
     
     if (!projectId) {
       console.warn('Cannot load content layer: No project ID available');
@@ -628,13 +642,14 @@ export class MapService {
     return [
       'step',
       ['get', 'score'],
-      'rgb(162,210,235)',
-      600,  'rgb(162,210,235)',
-      1200, 'rgb(121,194,230)',
-      1800, 'rgb(90,135,185)',
-      2400, 'rgb(74,89,160)',
-      3000, 'rgb(43,40,105)',
-      3600, 'rgb(23,25,63)'
+      'rgb(23,25,63)',     // 0-5 min (default for < 300) - darkest
+      300, 'rgb(23,25,63)',     // 5-10 min (300-600s) - darkest
+      600, 'rgb(43,40,105)',   // 10-15 min (600-900s) - very dark
+      900, 'rgb(74,89,160)',    // 15-20 min (900-1200s) - darker
+      1200, 'rgb(90,135,185)',  // 20-30 min (1200-1800s) - medium
+      1800, 'rgb(121,194,230)', // 30-45 min (1800-2700s) - medium-light
+      2700, 'rgb(162,210,235)', // 45-60 min (2700-3600s) - light
+      3600, 'rgb(162,210,235)'  // > 60 min (>3600s) - lightest
     ];
   }
 

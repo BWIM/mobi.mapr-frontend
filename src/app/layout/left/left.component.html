@@ -5,26 +5,28 @@
     </div>
   } @else {
     <div class="text-2xl font-semibold text-[var(--primary-color)] mb-4 pt-[6rem]">{{ project()?.display_name }}</div>
-    <div class="flex items-center justify-end gap-2 mb-4 relative mr-4">
-      <span class="text-sm text-[var(--primary-color)]">{{ 'left.extendedMode' | translate }}</span>
-      <button 
-        class="w-7 h-7 rounded-full bg-[var(--background-color)] text-[var(--primary-color)] border-none cursor-pointer flex items-center justify-center transition-all duration-200 text-sm hover:opacity-80 hover:scale-105" 
-        [title]="'left.information' | translate"
-        (click)="openDialog()">
-        <span class="material-icons text-sm leading-none text-[var(--primary-color)]">info</span>
-      </button>
-      <button 
-        class="relative w-10 h-5 border border-[var(--light-primary-color)] rounded-full bg-[var(--secondary-color)] cursor-pointer transition-all duration-200 overflow-hidden"
-        [style.background-color]="isExpanded() ? 'var(--primary-color)' : 'var(--secondary-color)'"
-        (click)="toggleSidebar()"
-        [title]="isExpanded() ? ('left.expanded' | translate) : ('left.normal' | translate)">
-        <div 
-          class="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[var(--light-primary-color)] transition-all duration-200"
-          [style.left]="isExpanded() ? 'calc(100% - 1.125rem)' : '0.125rem'"
-          [style.background-color]="isExpanded() ? 'var(--secondary-color)' : 'var(--light-primary-color)'">
-        </div>
-      </button>
-    </div>
+    @if (!isShareKeyOnly()) {
+      <div class="flex items-center justify-end gap-2 mb-4 relative mr-4">
+        <span class="text-sm text-[var(--primary-color)]">{{ 'left.extendedMode' | translate }}</span>
+        <button 
+          class="w-7 h-7 rounded-full bg-[var(--background-color)] text-[var(--primary-color)] border-none cursor-pointer flex items-center justify-center transition-all duration-200 text-sm hover:opacity-80 hover:scale-105" 
+          [title]="'left.information' | translate"
+          (click)="openDialog()">
+          <span class="material-icons text-sm leading-none text-[var(--primary-color)]">info</span>
+        </button>
+        <button 
+          class="relative w-10 h-5 border border-[var(--light-primary-color)] rounded-full bg-[var(--secondary-color)] cursor-pointer transition-all duration-200 overflow-hidden"
+          [style.background-color]="isExpanded() ? 'var(--primary-color)' : 'var(--secondary-color)'"
+          (click)="toggleSidebar()"
+          [title]="isExpanded() ? ('left.expanded' | translate) : ('left.normal' | translate)">
+          <div 
+            class="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[var(--light-primary-color)] transition-all duration-200"
+            [style.left]="isExpanded() ? 'calc(100% - 1.125rem)' : '0.125rem'"
+            [style.background-color]="isExpanded() ? 'var(--secondary-color)' : 'var(--light-primary-color)'">
+          </div>
+        </button>
+      </div>
+    }
     <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4 relative">
       <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.transportModes.title' | translate }}</h2>
       <div class="flex flex-col gap-2">

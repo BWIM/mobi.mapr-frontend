@@ -5,7 +5,6 @@ import { RailComponent } from '../rail/rail.component';
 import { LeftComponent } from '../left/left.component';
 import { RightComponent } from '../right/right.component';
 import { CenterComponent } from '../center/center.component';
-import { BottomComponent } from '../bottom/bottom.component';
 import { DashboardSessionService } from '../../services/dashboard-session.service';
 import { AuthService } from '../../auth/auth.service';
 import { ProjectsService } from '../../services/project.service';
@@ -18,7 +17,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RailComponent, LeftComponent, RightComponent, CenterComponent, BottomComponent, TranslateModule],
+  imports: [RailComponent, LeftComponent, RightComponent, CenterComponent, TranslateModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
@@ -126,9 +125,9 @@ export class DashboardComponent {
               }
               return;
             } else {
-              // User is not authenticated and has no share key - redirect to login
-              if (currentUrl !== '/login') {
-                this.router.navigate(['/login']);
+              // User is not authenticated and has no share key - redirect to landing
+              if (currentUrl !== '/landing') {
+                this.router.navigate(['/landing']);
               }
               return;
             }

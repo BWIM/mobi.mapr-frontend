@@ -1,6 +1,7 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, computed } from '@angular/core';
 import { ProjectsService } from '../../services/project.service';
 import { FilterConfigService } from '../../services/filter-config.service';
+import { DashboardSessionService } from '../../services/dashboard-session.service';
 import { SharedModule } from '../../shared/shared.module';
 import { InfoOverlayComponent } from '../../shared/info-overlay/info-overlay.component';
 import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.component';
@@ -17,12 +18,18 @@ import { ChartModule } from 'primeng/chart';
 export class LeftComponent implements OnInit {
   private projectService = inject(ProjectsService);
   private filterConfigService = inject(FilterConfigService);
+  private dashboardSessionService = inject(DashboardSessionService);
   private dialog = inject(MatDialog);
   private translate = inject(TranslateService);
 
   // Use the project signal directly - it will reactively update when the project loads
   project = this.projectService.project;
   isLoading = this.projectService.isLoading;
+
+  // Check if user is only authenticated via share_key (not logged in)
+  isShareKeyOnly = computed(() => {
+    return this.dashboardSessionService.accessMethod() === 'share_key';
+  });
 
   // Quality graph data
   qualityChartData: any;

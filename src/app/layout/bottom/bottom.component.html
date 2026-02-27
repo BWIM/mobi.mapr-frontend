@@ -1,6 +1,12 @@
 <div class="h-full flex items-center justify-center px-4 flex-row gap-10">
-  <div class="text-sm text-[var(--text-color)] cursor-pointer hover:underline" (click)="openCredits()">Lizenzinfos</div>
-  <div class="text-sm text-[var(--text-color)]">© BWIM {{ currentYear }}</div>
-  <div class="text-sm text-[var(--text-color)]">Hintergrundkarte: © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>, <a href="https://carto.com" target="_blank">CARTO</a></div>
-  <div class="text-sm text-[var(--text-color)]"><a href="https://mobimapr.bw-im.de" target="_blank">mobimapr.bw-im.de</a></div>
+  @if (project()) {
+    <div class="text-sm text-[var(--text-color)]">
+      © BWIM {{ project()?.created | date:'dd.MM.yyyy' }}
+    </div>
+  }
+  <div class="text-sm text-[var(--text-color)]">
+    Hintergrundkarte: ©
+    <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>,
+    <a href="https://carto.com" target="_blank">CARTO</a>
+  </div>
 </div>

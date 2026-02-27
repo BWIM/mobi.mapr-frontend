@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, TemplateRef } from '@angular/core';
 import { Subscription, firstValueFrom, debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
-import { Map, NavigationControl, FullscreenControl, Popup } from 'maplibre-gl';
+import { Map, NavigationControl, FullscreenControl, Popup, AttributionControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { MapService } from '../../services/map.service';
 import MinimapControl from "maplibregl-minimap";
@@ -85,14 +85,16 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   // 74, 89, 160
   // 43, 40, 105
   // 23, 25, 63
-  // Time (score) colors - discrete 10-minute steps
+  // Time (score) colors - updated ranges with inverted colors
   timeColors = [
-    { value: '0-10', color: 'rgb(162, 210, 235)' },
-    { value: '10-20', color: 'rgb(121, 194, 230)' },
+    { value: '0-5', color: 'rgb(23, 25, 63)' },
+    { value: '5-10', color: 'rgb(23, 25, 63)' },
+    { value: '10-15', color: 'rgb(43, 40, 105)' },
+    { value: '15-20', color: 'rgb(74, 89, 160)' },
     { value: '20-30', color: 'rgb(90, 135, 185)' },
-    { value: '30-40', color: 'rgb(74, 89, 160)' },
-    { value: '40-50', color: 'rgb(43, 40, 105)' },
-    { value: '50-60+', color: 'rgb(23, 25, 63)' }
+    { value: '30-45', color: 'rgb(121, 194, 230)' },
+    { value: '45-60', color: 'rgb(162, 210, 235)' },
+    { value: '>60', color: 'rgb(162, 210, 235)' }
   ];
 
   getIndexName(index: number): string {
@@ -183,6 +185,15 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
           this.map.addControl(new MinimapControl(this.mapService.getMinimapConfig()), 'bottom-right');
           this.setupFeatureInteractions();
           this.setupTileLoadingEvents();
+          this.map.addControl(new AttributionControl({customAttribution:'Hintergrundkarte: © OpenStreetMap, CARTO', compact: true}), 'bottom-right');
+
+          setTimeout(() => {
+            const btn = this.map!
+              .getContainer()
+              .querySelector<HTMLButtonElement>('.maplibregl-ctrl-attrib-button');
+            btn?.click();
+          }, 0);
+      
           // Initial map load is complete
           this.mapService.setMapLoading(false);
         }

@@ -44,9 +44,9 @@ export class ProjectsService {
 
   getProjectByShareKey(shareKey: string): Observable<Project> {
     const params = new HttpParams()
-      .set('share_key', shareKey);
+      .set('key', shareKey);
 
-    return this.http.get<Project>(`${this.apiUrl}/projects/`, { params });
+    return this.http.get<Project>(`${this.apiUrl}/projects/share-key/`, { params });
   }
 
   fetchProject(): Observable<Project> {

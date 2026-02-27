@@ -1,7 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDialog } from '@angular/material/dialog';
-import { CreditsDialogComponent } from './credits-dialog/credits-dialog.component';
+import { ProjectsService } from '../../services/project.service';
 
 @Component({
   selector: 'app-bottom',
@@ -10,15 +9,7 @@ import { CreditsDialogComponent } from './credits-dialog/credits-dialog.componen
   styleUrl: './bottom.component.css',
 })
 export class BottomComponent {
-  currentYear = new Date().getFullYear();
+  private projectsService = inject(ProjectsService);
+  project = this.projectsService.project;
 
-  constructor(private dialog: MatDialog) {}
-
-  openCredits() {
-    this.dialog.open(CreditsDialogComponent, {
-      width: '800px',
-      maxWidth: '90vw',
-      maxHeight: '90vh'
-    });
-  }
 }

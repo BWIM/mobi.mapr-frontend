@@ -2,7 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from './auth/auth.service';
-import { HealthService } from './services/_archive/health.service';
+import { HealthService } from './services/health.service';
 import { SessionService } from './services/session.service';
 import { LanguageService } from './services/language.service';
 // Archived components - to be migrated back
