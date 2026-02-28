@@ -1,8 +1,8 @@
-import { Component, OnInit, OnDestroy, inject, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ViewChild, ElementRef, AfterViewInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription, catchError, of, forkJoin, firstValueFrom } from 'rxjs';
 import { FeatureSelectionService } from '../../../shared/services/feature-selection.service';
-import { MapService, FeatureInfoResponse } from '../../../services/map.service';
+import { MapService, FeatureInfoResponse, ContentLayerFilters } from '../../../services/map.service';
 import { FilterConfigService } from '../../../services/filter-config.service';
 import { AnalyzeService, AnalyzeResponse, CategoryScore } from '../../../services/analyze.service';
 import { ProjectsService } from '../../../services/project.service';
@@ -12,6 +12,7 @@ import { ChartModule } from 'primeng/chart';
 import { MatDialog } from '@angular/material/dialog';
 import { SharedModule } from '../../../shared/shared.module';
 import { AllCategoriesDialogComponent, AllCategoriesDialogData } from './overlay/all-categories-dialog.component';
+import { PlacesDialogComponent, PlacesDialogData } from './places/places-dialog.component';
 import { Map as MapLibreMap, NavigationControl, FullscreenControl, Popup, GeoJSONSource } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -65,6 +66,43 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private featureInfoSubscription?: Subscription;
   private analyzeSubscription?: Subscription;
   private currentLoadingFeatureId: number | null = null;
+  private previousFilters: ContentLayerFilters | null = null;
+  private isInitialFilterLoad = true;
+  private savedFeatureType: 'municipality' | 'hexagon' | 'county' | 'state' | null = null;
+
+  constructor() {
+    // Watch for filter changes and reset the component
+    effect(() => {
+      const filters = this.filterConfigService.contentLayerFilters();
+      
+      // Skip reset on initial load
+      if (this.isInitialFilterLoad) {
+        this.previousFilters = filters ? { ...filters } : null;
+        this.isInitialFilterLoad = false;
+        return;
+      }
+      
+      // Only reset if filters actually changed
+      if (filters && this.previousFilters) {
+        const filtersChanged = 
+          this.previousFilters.profile_combination_id !== filters.profile_combination_id ||
+          JSON.stringify(this.previousFilters.state_ids?.sort()) !== JSON.stringify(filters.state_ids?.sort()) ||
+          JSON.stringify(this.previousFilters.category_ids?.sort()) !== JSON.stringify(filters.category_ids?.sort()) ||
+          this.previousFilters.persona_id !== filters.persona_id ||
+          this.previousFilters.regiotyp_id !== filters.regiotyp_id ||
+          JSON.stringify(this.previousFilters.regiostar_ids?.sort()) !== JSON.stringify(filters.regiostar_ids?.sort());
+        
+        if (filtersChanged) {
+          this.resetComponent();
+        }
+      } else if (filters !== this.previousFilters) {
+        // Filters changed from null to non-null or vice versa
+        this.resetComponent();
+      }
+      
+      this.previousFilters = filters ? { ...filters } : null;
+    });
+  }
 
   ngOnInit() {
     // Subscribe to feature selection changes
@@ -72,39 +110,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       (feature) => {
         if (feature) {
           this.selectedFeature = feature;
-          this.logFeatureInformation(feature);
           this.loadFeatureInfo(feature);
         } else {
-          // Cancel any ongoing request
-          if (this.featureInfoSubscription) {
-            this.featureInfoSubscription.unsubscribe();
-            this.featureInfoSubscription = undefined;
-          }
-          if (this.analyzeSubscription) {
-            this.analyzeSubscription.unsubscribe();
-            this.analyzeSubscription = undefined;
-          }
-          // Clean up map
-          if (this.map) {
-            this.map.remove();
-            this.map = undefined;
-          }
-          this.popup = undefined;
-          this.places = [];
-          this.categoryData = [];
-          this.categoryColors.clear();
-          this.pendingFeatureShape = null;
-          this.selectedFeature = null;
-          this.featureInfo = null;
-          this.featureInfoError = null;
-          this.isLoadingFeatureInfo = false;
-          this.currentLoadingFeatureId = null;
-          this.analyzeData = null;
-          this.activitiesChartData = null;
-          this.isLoadingAnalyze = false;
-          this.analyzeError = null;
-          this.isLoadingPlaces = false;
-          this.placesError = null;
+          this.resetComponent();
         }
       }
     );
@@ -137,6 +145,44 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.map) {
       this.map.remove();
     }
+    // Angular effects are automatically cleaned up on component destruction
+  }
+
+  /**
+   * Reset the component state
+   */
+  private resetComponent(): void {
+    // Cancel any ongoing requests
+    if (this.featureInfoSubscription) {
+      this.featureInfoSubscription.unsubscribe();
+      this.featureInfoSubscription = undefined;
+    }
+    if (this.analyzeSubscription) {
+      this.analyzeSubscription.unsubscribe();
+      this.analyzeSubscription = undefined;
+    }
+    // Clean up map
+    if (this.map) {
+      this.map.remove();
+      this.map = undefined;
+    }
+    this.popup = undefined;
+    this.places = [];
+    this.categoryData = [];
+    this.categoryColors.clear();
+    this.pendingFeatureShape = null;
+    this.selectedFeature = null;
+    this.featureInfo = null;
+    this.featureInfoError = null;
+    this.isLoadingFeatureInfo = false;
+    this.currentLoadingFeatureId = null;
+    this.analyzeData = null;
+    this.activitiesChartData = null;
+    this.isLoadingAnalyze = false;
+    this.analyzeError = null;
+    this.isLoadingPlaces = false;
+    this.placesError = null;
+    this.savedFeatureType = null;
   }
 
   /**
@@ -172,25 +218,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     return "F-";
   }
 
-  private logFeatureInformation(feature: any): void {
-    console.log('=== Feature Information ===');
-    const unnamedText = this.translate.instant('map.popup.unnamed');
-    console.log('Name:', feature.properties.name || feature.properties.NAME || unnamedText);
-    
-    if (feature.properties.score !== undefined && feature.properties.score !== null) {
-      const minutes = (feature.properties.score / 60).toFixed(1);
-      console.log('Score:', feature.properties.score, 'seconds', `(${minutes} minutes)`);
+  getRankPercentage(rank: number | null, totalRanks: number | null): string {
+    if (!rank || !totalRanks || totalRanks === 0) {
+      return 'N/A';
     }
-    
-    if (feature.properties.index !== undefined && feature.properties.index !== null) {
-      const indexValue = feature.properties.index / 100;
-      console.log('Index:', feature.properties.index, `(${indexValue.toFixed(2)})`);
-    }
-    
-    console.log('ID:', feature.properties.id);
-    console.log('All Properties:', feature.properties);
-    console.log('Geometry:', feature.geometry);
-    console.log('===========================');
+    const percentage = Math.ceil((rank / totalRanks) * 100);
+    return `Top ${percentage}%`;
   }
 
   private loadFeatureInfo(feature: any): void {
@@ -242,9 +275,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isLoadingPlaces = false;
     this.placesError = null;
 
-    // Get current zoom level to determine feature type
+    // Get current zoom level to determine feature type and save it
     const zoom = map.getZoom();
     const featureType = this.mapService.getFeatureTypeFromZoom(zoom);
+    this.savedFeatureType = featureType;
 
     // Get profile combination ID
     const profileCombinationId = this.filterConfigService.currentProfileCombinationID();
@@ -366,8 +400,14 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const zoom = map.getZoom();
-    const featureType = this.mapService.getFeatureTypeFromZoom(zoom);
+    // Use saved feature type if available, otherwise determine from current zoom
+    let featureType: 'municipality' | 'hexagon' | 'county' | 'state';
+    if (this.savedFeatureType) {
+      featureType = this.savedFeatureType;
+    } else {
+      const zoom = map.getZoom();
+      featureType = this.mapService.getFeatureTypeFromZoom(zoom);
+    }
     const profileCombinationId = this.filterConfigService.currentProfileCombinationID();
     
     if (!profileCombinationId) {
@@ -466,38 +506,42 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Get colors based on current map visualization type
     const colors = sortedCategories.map((cat) => {
       if (isScoreMode) {
-        // Use score-based colors (from getScoreFillColorExpression)
+        // Use score-based colors (blue colors for zeit bewertung from getScoreFillColorExpression)
         const scoreValue = cat.score;
-        if (scoreValue <= 600) {
-          return 'rgb(0,73,40)'; // Dark green - 0-10 min
+        if (scoreValue <= 300) {
+          return 'rgb(23, 25, 63)'; // Darkest blue - 0-5 min
+        } else if (scoreValue <= 600) {
+          return 'rgb(23, 25, 63)'; // Darkest blue - 5-10 min
+        } else if (scoreValue <= 900) {
+          return 'rgb(43, 40, 105)'; // Very dark blue - 10-15 min
         } else if (scoreValue <= 1200) {
-          return 'rgb(60,140,100)'; // Darker medium green - 10-20 min
+          return 'rgb(74, 89, 160)'; // Darker blue - 15-20 min
         } else if (scoreValue <= 1800) {
-          return 'rgb(120,180,160)'; // Medium-light green - 20-30 min
-        } else if (scoreValue <= 2400) {
-          return 'rgb(160,140,180)'; // Purple-green transition - 30-40 min
-        } else if (scoreValue <= 3000) {
-          return 'rgb(180,100,160)'; // Medium purple - 40-50 min
+          return 'rgb(90, 135, 185)'; // Medium blue - 20-30 min
+        } else if (scoreValue <= 2700) {
+          return 'rgb(121, 194, 230)'; // Medium-light blue - 30-45 min
+        } else if (scoreValue <= 3600) {
+          return 'rgb(162, 210, 235)'; // Light blue - 45-60 min
         } else {
-          return 'rgb(72,38,131)'; // Dark purple - 50-60 min
+          return 'rgb(162, 210, 235)'; // Lightest blue - >60 min
         }
       } else {
         // Use index-based colors (from getIndexFillColorExpression)
         const indexValue = cat.index / 100;
         if (indexValue <= 0) {
-          return 'rgba(128, 128, 128, 0.7)'; // Transparent gray
+          return 'rgba(128, 128, 128)'; // Transparent gray
         } else if (indexValue <= 0.35) {
-          return 'rgba(50, 97, 45, 0.7)'; // Dark green
+          return 'rgba(50, 97, 45)'; // Dark green
         } else if (indexValue <= 0.5) {
-          return 'rgba(60, 176, 67, 0.7)'; // Green
+          return 'rgba(60, 176, 67)'; // Green
         } else if (indexValue <= 0.71) {
-          return 'rgba(238, 210, 2, 0.7)'; // Yellow
+          return 'rgba(238, 210, 2)'; // Yellow
         } else if (indexValue <= 1) {
-          return 'rgba(237, 112, 20, 0.7)'; // Orange
+          return 'rgba(237, 112, 20)'; // Orange
         } else if (indexValue <= 1.41) {
-          return 'rgba(194, 24, 7, 0.7)'; // Red
+          return 'rgba(194, 24, 7)'; // Red
         } else {
-          return 'rgba(150, 86, 162, 0.7)'; // Purple
+          return 'rgba(150, 86, 162)'; // Purple
         }
       }
     });
@@ -536,7 +580,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           mode: 'index',
           intersect: false,
           callbacks: {
-            title: () => '',
+            title: (context: any) => {
+              const index = context[0].dataIndex;
+              return sortedCategories[index].category_name || '';
+            },
             label: (context: any) => {
               const index = context.dataIndex;
               const grade = this.getGradeFromIndex(sortedCategories[index].index);
@@ -596,6 +643,48 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private getGradeFromIndex(index: number): string {
     return this.getGrade(index);
+  }
+
+  onChartDataSelect(event: any): void {
+    if (!event || !event.element || event.element.index === undefined) {
+      return;
+    }
+
+    const clickedIndex = event.element.index;
+    const sortedCategories = this.getSortedCategories();
+    
+    if (clickedIndex < 0 || clickedIndex >= sortedCategories.length) {
+      return;
+    }
+
+    const clickedCategory = sortedCategories[clickedIndex];
+    if (!clickedCategory) {
+      return;
+    }
+
+    // Use category_id directly from the API response
+    if (!clickedCategory.category_id) {
+      console.warn('Category ID not available for category:', clickedCategory.category_name);
+      return;
+    }
+
+    // Open places dialog with the specific category_id
+    this.openPlacesDialog(clickedCategory.category_id, clickedCategory.category_name);
+  }
+
+  onCategoryNameClick(category: CategoryScore): void {
+    if (!category) {
+      return;
+    }
+
+    // Use category_id directly from the API response
+    if (!category.category_id) {
+      console.warn('Category ID not available for category:', category.category_name);
+      return;
+    }
+
+    // Open places dialog with the specific category_id
+    this.openPlacesDialog(category.category_id, category.category_name);
   }
 
   getSortedCategories(): CategoryScore[] {
@@ -955,8 +1044,14 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const zoom = map.getZoom();
-    const featureType = this.mapService.getFeatureTypeFromZoom(zoom);
+    // Use saved feature type if available, otherwise determine from current zoom
+    let featureType: 'municipality' | 'hexagon' | 'county' | 'state';
+    if (this.savedFeatureType) {
+      featureType = this.savedFeatureType;
+    } else {
+      const zoom = map.getZoom();
+      featureType = this.mapService.getFeatureTypeFromZoom(zoom);
+    }
     const profileCombinationId = this.filterConfigService.currentProfileCombinationID();
     
     if (!profileCombinationId) {
@@ -988,6 +1083,68 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       maxHeight: '90vh',
       panelClass: 'all-categories-dialog-panel',
       data: dialogData
+    });
+  }
+
+  openPlacesDialog(categoryId?: number, categoryName?: string): void {
+    if (!this.selectedFeature) {
+      return;
+    }
+
+    const map = this.mapService.getMap();
+    if (!map) {
+      console.warn('Map not available for places dialog');
+      return;
+    }
+
+    const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
+    if (!featureIdRaw) {
+      console.warn('Feature ID not available');
+      return;
+    }
+
+    const featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
+    if (isNaN(featureId)) {
+      console.warn('Invalid feature ID:', featureIdRaw);
+      return;
+    }
+
+    // Use saved feature type if available, otherwise determine from current zoom
+    let featureType: 'municipality' | 'hexagon' | 'county' | 'state';
+    if (this.savedFeatureType) {
+      featureType = this.savedFeatureType;
+    } else {
+      const zoom = map.getZoom();
+      featureType = this.mapService.getFeatureTypeFromZoom(zoom);
+    }
+    const profileCombinationId = this.filterConfigService.currentProfileCombinationID();
+    
+    if (!profileCombinationId) {
+      console.warn('Profile combination ID not available');
+      return;
+    }
+
+    const filters = this.filterConfigService.contentLayerFilters();
+    if (!filters) {
+      console.warn('Content layer filters not available');
+      return;
+    }
+
+    const placesData: PlacesDialogData = {
+      featureType: featureType,
+      featureId: featureId,
+      profileCombinationId: profileCombinationId,
+      categoryIds: categoryId ? [categoryId] : filters.category_ids,
+      personaId: filters.persona_id,
+      categoryNames: categoryName || ''
+    };
+
+    this.dialog.open(PlacesDialogComponent, {
+      width: '85vw',
+      maxWidth: '1200px',
+      maxHeight: '85vh',
+      panelClass: 'places-dialog-panel',
+      data: placesData
     });
   }
 }

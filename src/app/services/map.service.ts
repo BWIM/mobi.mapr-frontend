@@ -89,14 +89,12 @@ export class MapService {
           tiles: ['https://basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png'],
           tileSize: 256,
           minzoom: 0,
-          maxzoom: 14
         } as SourceSpecification,
         'carto-labels': {
           type: 'raster',
           tiles: ['https://basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png'],
           tileSize: 256,
           minzoom: 0,
-          maxzoom: 14
         } as SourceSpecification
       },
       layers: [
@@ -105,14 +103,12 @@ export class MapService {
           type: 'raster',
           source: 'carto-light',
           minzoom: 0,
-          maxzoom: 14
         } as LayerSpecification,
         {
           id: 'carto-labels-layer',
           type: 'raster',
           source: 'carto-labels',
           minzoom: 0,
-          maxzoom: 14
         } as LayerSpecification
       ],
       glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf'
@@ -213,11 +209,9 @@ export class MapService {
     // If needed, we can add it to ContentLayerFilters later
 
     const url = `${environment.apiUrl}/ready/`;
-    console.log('Calling ready endpoint:', url, params.toString());
     const response = await firstValueFrom(
       this.http.get<{ cache_flag: boolean; was_preloaded: boolean; session_id?: string }>(url, { params })
     );
-    console.log('Ready endpoint response:', response);
 
     return response;
   }
@@ -232,13 +226,11 @@ export class MapService {
       // Construct the websocket URL with the session_id from the API response
       // The websocket service will add its own session parameter, but the API expects session=<session_id>
       const wsUrl = `${environment.wsURL}/preload/?session=${sessionId}`;
-      console.log('Connecting to preload websocket:', wsUrl);
 
       const wsSubject = this.websocketService.connect<any>(wsUrl);
 
       const subscription = wsSubject.subscribe({
         next: (message: any) => {
-          console.log('Preload websocket message:', message);
           
           // Handle different message formats
           const status = message.status || message.type || message.message;
@@ -255,7 +247,6 @@ export class MapService {
             message.done === true;
           
           if (isCompleted) {
-            console.log('Preload completed via websocket message');
             if (!isResolved) {
               isResolved = true;
               subscription.unsubscribe();
@@ -270,9 +261,6 @@ export class MapService {
               this.websocketService.closeConnection(wsUrl);
               reject(new Error(message.error || 'Preload failed'));
             }
-          } else {
-            // Status updates: "starting", "calculating", etc.
-            console.log('Preload status:', status || messageStr);
           }
         },
         error: (error) => {
@@ -285,7 +273,6 @@ export class MapService {
           }
         },
         complete: () => {
-          console.log('Preload websocket connection closed');
           // Don't resolve here - only resolve when we get explicit completion message
           // Connection might close for other reasons before preload is actually complete
           subscription.unsubscribe();

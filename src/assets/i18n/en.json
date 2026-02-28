@@ -59,7 +59,8 @@
       "loading": "Loading all categories...",
       "categoriesNotFound": "Categories not found",
       "dataNotLoaded": "Data not yet loaded",
-      "errorLoadingCategories": "Error loading categories"
+      "errorLoadingCategories": "Error loading categories",
+      "clickHint": "Click on any activity to get detailed information"
     },
     "featureInfo": {
       "notFound": "Feature information not found",
@@ -74,13 +75,15 @@
     "placesDialog": {
       "title": "Map with activity places",
       "loading": "Loading map...",
-      "errorLoadingPlaces": "Error loading places"
+      "errorLoadingPlaces": "Error loading places",
+      "disabledForCountiesStates": "The places view is disabled for counties and states. To make a detailed analysis about an area, please select the municipality/Hexagon view"
     },
     "rank": {
       "overall": "Rank",
       "overallLabel": "overall",
       "regionalClass": "Rank",
-      "regionalClassLabel": "Regional class"
+      "regionalClassLabel": "Regional class",
+      "total": "Total"
     },
     "population": "Population:",
     "grade": "Grade:",

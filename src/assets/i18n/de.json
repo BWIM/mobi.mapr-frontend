@@ -59,7 +59,8 @@
       "loading": "Lade alle Kategorien...",
       "categoriesNotFound": "Kategorien nicht gefunden",
       "dataNotLoaded": "Daten noch nicht geladen",
-      "errorLoadingCategories": "Fehler beim Laden der Kategorien"
+      "errorLoadingCategories": "Fehler beim Laden der Kategorien",
+      "clickHint": "Klicken Sie auf eine beliebige Aktivität, um detaillierte Informationen zu erhalten"
     },
     "featureInfo": {
       "notFound": "Feature-Informationen nicht gefunden",
@@ -74,13 +75,15 @@
     "placesDialog": {
       "title": "Karte mit Orten der Aktivitäten",
       "loading": "Lade Karte...",
-      "errorLoadingPlaces": "Fehler beim Laden der Orte"
+      "errorLoadingPlaces": "Fehler beim Laden der Orte",
+      "disabledForCountiesStates": "Die Ortsansicht ist für Landkreise und Bundesländer deaktiviert. Um eine detaillierte Analyse eines Gebiets durchzuführen, wähle bitte die Gemeinde/Hexagon-Ansicht, indem du in die Karte zoomst."
     },
     "rank": {
       "overall": "Platz",
       "overallLabel": "gesamt",
       "regionalClass": "Platz",
-      "regionalClassLabel": "Regioklasse"
+      "regionalClassLabel": "Regioklasse",
+      "total": "Gesamt"
     },
     "population": "Einwohnende",
     "grade": "Note:",

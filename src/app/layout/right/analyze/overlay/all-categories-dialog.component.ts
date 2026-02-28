@@ -43,12 +43,12 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
 
   // Quality (index) colors - A through F
   qualityColors = [
-    { letter: 'A', color: 'rgba(50, 97, 45, 0.7)' },
-    { letter: 'B', color: 'rgba(60, 176, 67, 0.7)' },
-    { letter: 'C', color: 'rgba(238, 210, 2, 0.7)' },
-    { letter: 'D', color: 'rgba(237, 112, 20, 0.7)' },
-    { letter: 'E', color: 'rgba(194, 24, 7, 0.7)' },
-    { letter: 'F', color: 'rgba(197, 136, 187, 0.7)' }
+    { letter: 'A', color: 'rgb(50, 97, 45)' },
+    { letter: 'B', color: 'rgb(60, 176, 67)' },
+    { letter: 'C', color: 'rgb(238, 210, 2)' },
+    { letter: 'D', color: 'rgb(237, 112, 20)' },
+    { letter: 'E', color: 'rgb(194, 24, 7)' },
+    { letter: 'F', color: 'rgb(197, 136, 187)' }
   ];
 
   // Time (score) colors - discrete 10-minute steps
@@ -155,19 +155,19 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
         // Use index-based colors
         const indexValue = cat.index / 100;
         if (indexValue <= 0) {
-          return 'rgba(128, 128, 128, 0.7)'; // Transparent gray
+          return 'rgb(128, 128, 128)'; // Transparent gray
         } else if (indexValue <= 0.35) {
-          return 'rgba(50, 97, 45, 0.7)'; // Dark green
+          return 'rgb(50, 97, 45)'; // Dark green
         } else if (indexValue <= 0.5) {
-          return 'rgba(60, 176, 67, 0.7)'; // Green
+          return 'rgb(60, 176, 67)'; // Green
         } else if (indexValue <= 0.71) {
-          return 'rgba(238, 210, 2, 0.7)'; // Yellow
+          return 'rgb(238, 210, 2)'; // Yellow
         } else if (indexValue <= 1) {
-          return 'rgba(237, 112, 20, 0.7)'; // Orange
+          return 'rgb(237, 112, 20)'; // Orange
         } else if (indexValue <= 1.41) {
-          return 'rgba(194, 24, 7, 0.7)'; // Red
+          return 'rgb(194, 24, 7)'; // Red
         } else {
-          return 'rgba(150, 86, 162, 0.7)'; // Purple
+          return 'rgb(150, 86, 162)'; // Purple
         }
       }
     });
@@ -302,6 +302,21 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
 
     // Open places overlay with the specific category_id
     this.openPlacesOverlay(clickedCategory.category_id, clickedCategory.category_name);
+  }
+
+  onCategoryNameClick(category: CategoryScore): void {
+    if (!category) {
+      return;
+    }
+
+    // Use category_id directly from the API response
+    if (!category.category_id) {
+      console.warn('Category ID not available for category:', category.category_name);
+      return;
+    }
+
+    // Open places overlay with the specific category_id
+    this.openPlacesOverlay(category.category_id, category.category_name);
   }
 
   openPlacesOverlay(categoryId?: number, categoryName?: string): void {

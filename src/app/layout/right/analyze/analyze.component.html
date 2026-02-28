@@ -22,34 +22,64 @@
     </div>
     
     <!-- Feature Info Table Layout -->
-    <div *ngIf="featureInfo && !isLoading() && !featureInfoError" class="rounded-lg overflow-hidden">
+    <div *ngIf="featureInfo && !isLoading() && !featureInfoError" class="rounded-lg overflow-hidden pb-5">
       <!-- Title -->
       <div class="px-2 py-2 border-b border-white">
         <h3 class="text-xl font-bold text-white">{{ featureInfo.name }}</h3>
       </div>
       
-      <!-- Table-like Layout with 3 columns -->
+      <!-- Table-like Layout: Two columns when regiostar exists, three columns otherwise -->
       <div class="flex">
-        <!-- Column 1: Overall Rank -->
-        <div class="flex-1 px-2 py-2 border-r border-white">
-          <div><span class="text-m text-white font-bold">{{ 'analyze.rank.overall' | translate }} </span><span class="text-xs text-white">{{ 'analyze.rank.overallLabel' | translate }}</span></div>
-          <div><span class="text-4xl font-bold text-white mr-1">{{ featureInfo.rank }}</span><span class="text-sm text-white mt-1">/ {{ featureInfo.total_ranks }}</span></div>
-        </div>
+        <!-- When regiostar exists: Left column with Platz gesamt and Population -->
+        <ng-container *ngIf="featureInfo.regiostar_rank">
+          <!-- Left Column: Platz gesamt and Population -->
+          <div class="flex-1 px-2 py-2 border-r border-white flex flex-col">
+            <!-- Overall Rank (Platz gesamt) -->
+            <div class="mb-4">
+              <div><span class="text-m text-white font-bold">{{ 'analyze.rank.overall' | translate }} </span><span class="text-xs text-white">{{ 'analyze.rank.overallLabel' | translate }}</span></div>
+              <div class="text-3xl font-bold text-white">{{ featureInfo.rank }} <span class="text-sm text-white">/ {{ featureInfo.total_ranks }}</span></div>
+              <div class="text-sm text-white mt-1">{{ getRankPercentage(featureInfo.rank, featureInfo.total_ranks) }}</div>
+            </div>
+            <!-- Population -->
+            <div>
+              <div class="text-sm text-white font-bold">{{ 'analyze.population' | translate }}</div>
+              <div class="text-base text-white">{{ featureInfo.population | number }}</div>
+            </div>
+          </div>
+          
+          <!-- Right Column: Platz regioklasse and Grade -->
+          <div class="flex-1 px-2 py-2 flex flex-col">
+            <!-- Regional Class Rank (Platz regioklasse) -->
+            <div class="mb-4">
+              <div><span class="text-m text-white font-bold">{{ 'analyze.rank.regionalClass' | translate }} </span><span class="text-xs text-white">{{ 'analyze.rank.regionalClassLabel' | translate }}</span></div>
+              <div class="text-3xl font-bold text-white">{{ featureInfo.regiostar_rank }} <span class="text-sm text-white">/ {{ featureInfo.regiostar_total_ranks }}</span></div>
+              <div class="text-sm text-white mt-1">{{ getRankPercentage(featureInfo.regiostar_rank, featureInfo.regiostar_total_ranks) }}</div>
+            </div>
+            <!-- Grade -->
+            <div>
+              <div class="text-sm text-white font-bold">{{ 'analyze.grade' | translate }}</div>
+              <div class="text-base text-white">{{ getGrade(featureInfo.index) }}</div>
+            </div>
+          </div>
+        </ng-container>
         
-        <!-- Column 2: Regional Class Rank -->
-        <div class="flex-1 px-2 py-2 border-r border-white" *ngIf="featureInfo.regiostar_rank">
-          <div><span class="text-m text-white font-bold">{{ 'analyze.rank.regionalClass' | translate }} </span><span class="text-xs text-white">{{ 'analyze.rank.regionalClassLabel' | translate }}</span></div>
-          <div class="text-4xl font-bold text-white">{{ featureInfo.regiostar_rank }}</div>
-          <div class="text-sm text-white mt-1">/ {{ featureInfo.regiostar_total_ranks }}</div>
-        </div>
-        
-        <!-- Column 3: Population and Grade -->
-        <div class="flex-1 px-2 py-2">
-          <div class="text-sm text-white font-bold">{{ 'analyze.population' | translate }}</div>
-          <div class="text-base text-white mb-2">{{ featureInfo.population | number }}</div>
-          <div class="text-sm text-white font-bold">{{ 'analyze.grade' | translate }}</div>
-          <div class="text-base text-white">{{ getGrade(featureInfo.index) }}</div>
-        </div>
+        <!-- When no regiostar: Original three-column layout -->
+        <ng-container *ngIf="!featureInfo.regiostar_rank">
+          <!-- Column 1: Overall Rank -->
+          <div class="flex-1 px-2 py-2 border-r border-white">
+            <div><span class="text-m text-white font-bold">{{ 'analyze.rank.overall' | translate }} </span><span class="text-xs text-white">{{ 'analyze.rank.overallLabel' | translate }}</span></div>
+            <div><span class="text-4xl font-bold text-white mr-1">{{ featureInfo.rank }}</span><span class="text-sm text-white mt-1">/ {{ featureInfo.total_ranks }}</span></div>
+            <div class="text-sm text-white mt-1">{{ getRankPercentage(featureInfo.rank, featureInfo.total_ranks) }}</div>
+          </div>
+          
+          <!-- Column 2: Population and Grade -->
+          <div class="flex-1 px-2 py-2">
+            <div class="text-sm text-white font-bold">{{ 'analyze.population' | translate }}</div>
+            <div class="text-base text-white mb-2">{{ featureInfo.population | number }}</div>
+            <div class="text-sm text-white font-bold">{{ 'analyze.grade' | translate }}</div>
+            <div class="text-base text-white">{{ getGrade(featureInfo.index) }}</div>
+          </div>
+        </ng-container>
       </div>
     </div>
   </div>
@@ -84,7 +114,7 @@
       
       <!-- Chart Container -->
       <div class="relative">
-        <p-chart #activitiesChart type="bar" [data]="activitiesChartData" [options]="activitiesChartOptions"></p-chart>
+        <p-chart #activitiesChart type="bar" [data]="activitiesChartData" [options]="activitiesChartOptions" (onDataSelect)="onChartDataSelect($event)" style="cursor: pointer;"></p-chart>
       </div>
       
       <!-- Activity List -->
@@ -92,7 +122,7 @@
         <div *ngFor="let category of getSortedCategories(); let i = index" 
              class="text-sm text-white flex items-center">
           <span class="font-bold mr-2">{{ i + 1 }}.</span>
-          <span>{{ category.category_name }}</span>
+          <span class="cursor-pointer hover:underline" (click)="onCategoryNameClick(category)">{{ category.category_name }}</span>
         </div>
       </div>
       

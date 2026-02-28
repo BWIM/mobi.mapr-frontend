@@ -1,4 +1,13 @@
-<div class="w-full max-w-full h-[80vh] flex flex-col">
+<div class="w-full max-w-full h-[80vh] flex flex-col relative">
+  <!-- Overlay Close Button -->
+  <button 
+    type="button"
+    class="absolute -top-4 -right-4 w-10 h-10 rounded-full bg-[var(--primary-color)] cursor-pointer flex items-center justify-center z-[1000] shadow-lg transition-all duration-200 ease-in-out hover:scale-110 hover:shadow-xl active:scale-95 border-[var(--background-color)] border-2"
+    (click)="onClose()"
+    aria-label="Close">
+    <span class="text-[var(--secondary-color)] text-[28px] font-bold leading-none m-0 p-0">×</span>
+  </button>
+  
   <h2 mat-dialog-title class="text-2xl font-bold text-white mb-4 flex-shrink-0">
     {{ data.featureName || ('analyze.activities' | translate) }}
   </h2>
@@ -30,7 +39,7 @@
           <div *ngFor="let category of allCategories; let i = index" 
                class="category-item text-sm text-white flex items-center mb-2">
             <span class="font-bold mr-2">{{ i + 1 }}.</span>
-              <span>{{ category.category_name }}</span>
+              <span class="cursor-pointer hover:underline" (click)="onCategoryNameClick(category)">{{ category.category_name }}</span>
           </div>
         </div>
       </div>
@@ -39,7 +48,7 @@
 
   <!-- Bottom Section - 20% with Legend -->
   <div class="flex-[0] flex-shrink-0 border-t border-[var(--primary-color)] border-opacity-30 pt-4 px-4 pb-2 min-h-[100px]">
-    <div class="flex h-full gap-6">
+    <div class="flex h-full gap-6 items-center">
       <!-- Legend -->
       <div class="flex-1 flex items-center">
         <!-- Quality legend (A-F letters) -->
@@ -50,8 +59,6 @@
                 <span class="legend-letter">{{ item.letter }}</span>
               </div>
             </div>
-            <mat-icon class="text-[var(--primary-color)] cursor-pointer" (click)="openLegendInfo()" [matTooltip]="'analyze.moreInfo' | translate">info</mat-icon>
-          </div>
         </div>
         <!-- Time legend (discrete color steps) -->
         <div class="legend-time w-full" *ngIf="data.isScoreMode">
@@ -71,10 +78,13 @@
           </div>
         </div>
       </div>
+
+      <!-- Hint -->
+      <div class="flex items-center">
+        <p class="text-sm text-white opacity-75 italic border-[var(--primary-color)] border-2 rounded-md p-2">
+          {{ 'analyze.allCategoriesDialog.clickHint' | translate }}
+        </p>
+      </div>
     </div>
   </div>
-
-  <mat-dialog-actions align="end" class="mt-2 flex-shrink-0">
-    <button mat-button (click)="onClose()">{{ 'common.close' | translate }}</button>
-  </mat-dialog-actions>
 </div>

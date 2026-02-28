@@ -26,3 +26,16 @@
   border: 2px solid white;
   flex-shrink: 0;
 }
+
+
+::ng-deep .places-dialog-panel {
+  overflow: visible !important;
+}
+
+::ng-deep .places-dialog-panel .mat-mdc-dialog-container {
+  overflow: visible !important;
+}
+
+::ng-deep .places-dialog-panel .mat-mdc-dialog-surface {
+  overflow: visible !important;
+}

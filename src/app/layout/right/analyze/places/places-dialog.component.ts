@@ -63,6 +63,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     this.categoryName = this.translate.instant('analyze.placesDialog.title');
 
     try {
+      console.log('Loading places for category:', this.data);
       // Load places data and feature shape in parallel
       const featureType = this.data.featureType === 'municipality' || this.data.featureType === 'hexagon' 
         ? this.data.featureType 
@@ -170,8 +171,6 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       style: baseStyle,
       center: [9.2156505, 49.320099], // Default center (Germany)
       zoom: 7,
-      minZoom: 5,
-      maxZoom: 14,
       dragRotate: false,
       renderWorldCopies: false,
       attributionControl: false
@@ -710,7 +709,8 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.map.fitBounds(bounds, {
       padding: 50,
-      duration: 1000
+      duration: 1000,
+      maxZoom: 14 // Prevent zooming too close
     });
   }
 

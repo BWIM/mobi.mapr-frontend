@@ -1,4 +1,16 @@
 /* Dialog specific styles */
+::ng-deep .all-categories-dialog-panel {
+  overflow: visible !important;
+}
+
+::ng-deep .all-categories-dialog-panel .mat-mdc-dialog-container {
+  overflow: visible !important;
+}
+
+::ng-deep .all-categories-dialog-panel .mat-mdc-dialog-surface {
+  overflow: visible !important;
+}
+
 ::ng-deep .all-categories-dialog-panel .mat-mdc-dialog-content {
   padding: 24px !important;
   display: flex !important;

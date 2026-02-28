@@ -764,10 +764,8 @@ export class FilterConfigService {
         // Mark ready check as not complete yet (prevents rankings from loading)
         this.mapService.setReadyCheckComplete(false);
         
-        console.log('Calling ready endpoint with filters:', filters);
         try {
           const readyResponse = await this.mapService.checkReady(filters);
-          console.log('Ready endpoint call completed:', readyResponse);
 
           // Only open dialog if project is not ready (cache_flag is false)
           if (!readyResponse.cache_flag) {
@@ -824,7 +822,6 @@ export class FilterConfigService {
       // Only load the content layer AFTER we've confirmed data is ready (step 3)
       // (either via cache_flag: true OR websocket completion)
       // Use updateContentLayerTiles for tile-only updates to preserve map position
-      console.log('Loading content layer after ready check/websocket completion (step 3)');
       if (fullReload) {
         await this.mapService.loadContentLayer(filters, true);
       } else {
