@@ -34,7 +34,8 @@
       "passwordRequired": "Password is required",
       "usernameMinLength": "Username must be at least 3 characters long",
       "passwordMinLength": "Password must be at least 6 characters long",
-      "selectLanguage": "Select language"
+      "selectLanguage": "Select language",
+      "login": "Login"
     },
     "logout": "Logout"
   },

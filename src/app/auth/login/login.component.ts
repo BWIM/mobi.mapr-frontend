@@ -58,7 +58,7 @@ export class LoginComponent {
   }
 
   onLanguageChange(event: any): void {
-    const selectedLang = event.value?.code || 'de';
+    const selectedLang = event.value?.code || event.value || 'de';
     this.languageService.setLanguage(selectedLang);
     this.currentLang = selectedLang;
   }
@@ -81,7 +81,7 @@ export class LoginComponent {
           this.router.navigate(['/users-area']);
         },
         error: (err) => {
-          this.translate.get('auth.login.loginFailed').subscribe(text => {
+          this.translate.get('auth.login.loginFailed').subscribe((text: string) => {
             this.error = text;
           });
           console.error('Login error:', err);
