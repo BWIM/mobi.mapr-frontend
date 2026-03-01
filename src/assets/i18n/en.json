@@ -259,9 +259,9 @@
       "personas": "Personas",
       "personasDescription": "A persona defines how relevant certain activities are for different user groups. For example, going to a playground is normally more relevant for a child than for an adult. Personas also come from the MID study.",
       "regioStars": "RegioStars",
-      "regioStarsDescription": "If you only want to look at certain regions in Germany, for example rural areas, you can filter this here. It does not change the data itself, like states, but also filters the results. It is also reflected in the Top 10 rankings.",
+      "regioStarsDescription": "If you only want to look at certain regions in Germany, for example rural areas, you can filter this here. It does not change the data itself, like states, but also filters the results. It is also reflected in the Top rankings.",
       "states": "States",
-      "statesDescription": "States allow you to filter for regions on the map. While this does not influence the data at all, it allows for better comparison, as well as filtering the Top 10 rankings.",
+      "statesDescription": "States allow you to filter for regions on the map. While this does not influence the data at all, it allows for better comparison, as well as filtering the Top rankings.",
       "filterButton": "Filter"
     }
   },
@@ -303,10 +303,11 @@
     "expandRightPanel": "Expand right panel"
   },
   "stats": {
-    "title": "Top 10",
+    "title": "The Best",
     "loading": "Loading...",
     "errorLoading": "Error loading data",
     "noDataAvailable": "No data available",
+    "clickToSearch": "Click to search",
     "levels": {
       "state": "States",
       "county": "Counties",
@@ -314,19 +315,22 @@
     },
     "info": {
       "title": "Statistics",
-      "description": "This overview shows the top 10 rankings based on the selected level (States, Counties, or Municipalities) and the current filters and evaluation criteria.",
+      "description": "This overview shows the best rankings based on the selected level (States, Counties, or Municipalities) and the current filters and evaluation criteria.",
       "aboutDataTitle": "About the Data",
-      "aboutData": "The data shown represents the top 10 rankings based on the selected level and the current filters and evaluation criteria.",
+      "aboutData": "The data shown represents the best rankings based on the selected level and the current filters and evaluation criteria.",
       "layerSelection": "Layer Selection",
       "layerSelectionDescription": "Select the geographic level for which rankings should be displayed: States, Counties, or Municipalities.",
       "selectLayer": "Select Layer",
       "currentLayer": "Current Layer",
       "prefiltersNote": "Note on Filters",
-      "prefiltersDescription": "The top 10 rankings automatically reflect all active filters on the left side, including selected States and RegioStars. Rankings are adjusted according to these filters.",
+      "prefiltersDescription": "The best rankings automatically reflect all active filters on the left side, including selected States and RegioStars. Rankings are adjusted according to these filters.",
       "rankingRules": "Ranking Rules",
       "tiedRanksDescription": "When multiple areas have the same value, they share the same rank:",
       "tiedRanksRule1": "Areas with identical values receive the same rank position",
-      "tiedRanksRule2": "The next rank position is skipped accordingly (e.g., if two areas share rank 3, the next rank is 5)"
+      "tiedRanksRule2": "The next rank position is skipped accordingly (e.g., if two areas share rank 3, the next rank is 5)",
+      "countyDefinition": "With 'Kreis' (county) we mean both urban and rural districts. Since this is not uniformly regulated nationwide, we do not distinguish between them",
+      "largeCountySplit": "For better comparability, counties that consist of only one municipality with more than 300,000 inhabitants are divided into their districts. The county (e.g., Berlin) is then under \"Kreis\" and B-Spandau accordingly under \"Gemeinde\"",
+      "qualityViewHint": "In the quality view, area units are grouped and evaluated by their index (see info on mobility evaluation). This means area units with the same grade (e.g., C+) can be on different positions in the ranking."
     }
   },
   "PREPARING_PROJECT": {
@@ -358,7 +362,7 @@
       "FILTER_TEXT": "This dialogue only opens after changing some filter parameters.",
       "UNIQUE_TITLE": "Unique Map",
       "UNIQUE_TEXT": "If you see this screen, nobody has ever produced a map like this (at least in the last 30 days).",
-      "STATS_TITLE": "Over 15 Billion Possibilities",
+      "STATS_TITLE": "More than 15 Billion Possibilities",
       "STATS_TEXT": "You can combine the 28 activities freely, for 8 different mode combinations and 7 personas, this means more than 15 billion different maps to produce."
     }
   }

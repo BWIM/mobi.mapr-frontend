@@ -11,6 +11,7 @@ import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.compo
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { FeatureSelectionService } from '../../shared/services/feature-selection.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { SearchService } from '../../services/search.service';
 
 interface NominatimResult {
   display_name: string;
@@ -28,8 +29,10 @@ interface NominatimResult {
 export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('mapContainer') mapContainer?: ElementRef;
   @ViewChild('legendContentTemplate') legendContentTemplate!: TemplateRef<any>;
+  @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
   private map?: Map;
   private mapStyleSubscription?: Subscription;
+  private searchQuerySubscription?: Subscription;
   mapStyle: any;
   zoom: number = 7;
   center: [number, number] = [9.2156505, 49.320099];
@@ -38,6 +41,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private http = inject(HttpClient);
   private featureSelectionService = inject(FeatureSelectionService);
   private translate = inject(TranslateService);
+  private searchService = inject(SearchService);
   private popup?: Popup;
 
   // Nominatim search properties
@@ -54,6 +58,23 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       switchMap(query => this.searchNominatim(query))
     ).subscribe(results => {
       this.searchResults = results;
+    });
+
+    // Subscribe to search queries from other components (e.g., stats component)
+    this.searchQuerySubscription = this.searchService.searchQuery$.subscribe(query => {
+      if (query) {
+        this.searchQuery = query;
+        // Trigger search if query is long enough
+        if (query.trim().length >= 3) {
+          this.searchSubject.next(query.trim());
+        }
+        // Focus the search input after a short delay to ensure it's rendered
+        setTimeout(() => {
+          if (this.searchInput?.nativeElement) {
+            this.searchInput.nativeElement.focus();
+          }
+        }, 100);
+      }
     });
   }
 
@@ -207,6 +228,9 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     if (this.mapStyleSubscription) {
       this.mapStyleSubscription.unsubscribe();
+    }
+    if (this.searchQuerySubscription) {
+      this.searchQuerySubscription.unsubscribe();
     }
     this.searchSubject.complete();
   }

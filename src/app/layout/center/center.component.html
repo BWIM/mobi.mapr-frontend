@@ -6,6 +6,7 @@
     <mat-form-field appearance="fill" class="search-form-field w-full rounded-full" >
       <mat-label>{{ 'map.search.label' | translate }}</mat-label>
       <input 
+        #searchInput
         matInput 
         type="text" 
         [(ngModel)]="searchQuery"

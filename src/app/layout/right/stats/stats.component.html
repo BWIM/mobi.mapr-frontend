@@ -9,7 +9,7 @@
         </div>
       </div>
       
-      <div class="flex items-center justify-between mb-2">
+      <div class="flex items-center justify-between mb-2 pr-2">
         <h2 class="text-lg font-semibold text-[var(--primary-color)] leading-6">{{ 'stats.title' | translate }}</h2>
         <mat-form-field appearance="outline" class="level-selector">
           <mat-select 
@@ -27,13 +27,20 @@
         <p>{{ error }}</p>
       </div>
       
-      <div *ngIf="!isLoading() && !error" class="flex-1 overflow-auto">
+      <div *ngIf="!isLoading() && !error" class="flex-1 overflow-auto pr-4">
         <table class="w-full border-collapse border-0 text-[var(--primary-color)]">
           <tbody>
             <tr *ngFor="let county of filteredCounties" class="leading-[1.8]">
               <td class="pr-3 align-top border-0 w-auto">{{ county.rank }}</td>
-              <td class="pr-3 align-top border-0">{{ county.name }}</td>
-              <td class="align-top font-medium text-right border-0 w-auto whitespace-nowrap">{{ formatDisplayValue(county) }}</td>
+              <td class="pr-3 align-top border-0">
+                <span 
+                  (click)="onFeatureNameClick(county)" 
+                  class="cursor-pointer hover:underline"
+                  [title]="'stats.clickToSearch' | translate">
+                  {{ county.name }}
+                </span>
+              </td>
+              <td class="align-top font-medium text-left border-0 w-[3ch] font-mono">{{ formatDisplayValue(county) }}</td>
             </tr>
             <tr *ngIf="filteredCounties.length === 0">
               <td colspan="3" class="text-sm text-[var(--primary-color)] opacity-70 py-2 border-0">
@@ -78,6 +85,15 @@
               <p class="text-sm opacity-90 leading-relaxed">
                 <strong>{{ 'stats.info.prefiltersNote' | translate }}</strong><br>
                 {{ 'stats.info.prefiltersDescription' | translate }}
+              </p>
+            </div>
+            <ul class="text-sm opacity-90 space-y-2 ml-4 list-disc mt-3">
+              <li>{{ 'stats.info.countyDefinition' | translate }}</li>
+              <li>{{ 'stats.info.largeCountySplit' | translate }}</li>
+            </ul>
+            <div class="bg-[var(--secondary-color)] rounded-lg p-3 mt-3">
+              <p class="text-sm opacity-90 leading-relaxed">
+                {{ 'stats.info.qualityViewHint' | translate }}
               </p>
             </div>
           </div>

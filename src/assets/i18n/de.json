@@ -303,13 +303,14 @@
     "expandRightPanel": "Rechtes Panel ausklappen"
   },
   "stats": {
-    "title": "Top 10",
+    "title": "Die Besten",
     "loading": "Laden...",
     "errorLoading": "Fehler beim Laden der Daten",
     "noDataAvailable": "Keine Daten verfügbar",
+    "clickToSearch": "Klicken zum Suchen",
     "levels": {
       "state": "Bundesländer",
-      "county": "Landkreise",
+      "county": "Kreise",
       "municipality": "Gemeinden"
     },
     "info": {
@@ -326,7 +327,10 @@
       "rankingRules": "Ranking-Regeln",
       "tiedRanksDescription": "Wenn mehrere Gebiete den gleichen Wert haben, teilen sie sich den gleichen Rang:",
       "tiedRanksRule1": "Gebiete mit identischem Wert erhalten den gleichen Rangplatz",
-      "tiedRanksRule2": "Der nächste Rangplatz wird entsprechend übersprungen (z.B. wenn zwei Gebiete Rang 3 teilen, ist der nächste Rang 5)"
+      "tiedRanksRule2": "Der nächste Rangplatz wird entsprechend übersprungen (z.B. wenn zwei Gebiete Rang 3 teilen, ist der nächste Rang 5)",
+      "countyDefinition": "Mit Kreis sind Stadt und Landkreise gemeint. Da dies bundesweit nicht einheitlich geregelt wird unterscheiden wir nicht",
+      "largeCountySplit": "Für eine bessere Vergleichbarkeit sind Landkreise, die nur aus einer Gemeinde bestehen, mit mehr als 300 000 Einwohnenden in ihre Stadtteile aufgeteitl. Der Landkreis (z.B. Berlin) ist dann in \"Kreis\" und B-Spandau dementsprechend unter \"Gemeinde\"",
+      "qualityViewHint": "In der Qualitäts-Ansicht werden die Gebietseinheiten nach ihrem Index gruppiert und bewertet (sh. Info zur Mobilitätsbewertung). So können Gebietseinheiten mit der selben Note (z.B. C+) auf einem unterschiedlichen Platz auf dem Treppchen sein."
     }
   },
   "PREPARING_PROJECT": {

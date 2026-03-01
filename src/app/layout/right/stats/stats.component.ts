@@ -9,6 +9,7 @@ import { SharedModule } from '../../../shared/shared.module';
 import { InfoOverlayComponent } from '../../../shared/info-overlay/info-overlay.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../services/language.service';
+import { SearchService } from '../../../services/search.service';
 
 @Component({
   selector: 'app-stats',
@@ -24,6 +25,7 @@ export class StatsComponent implements OnDestroy {
   private projectService = inject(ProjectsService);
   private translate = inject(TranslateService);
   private languageService = inject(LanguageService);
+  private searchService = inject(SearchService);
 
   counties: County[] = [];
   isLoading = signal(true); // Start with loading state true by default (step 0)
@@ -64,6 +66,7 @@ export class StatsComponent implements OnDestroy {
     // React to all relevant filter changes: profile combination, filters, and map loading state
     // Note: bewertung is NOT watched here because both index and score are already in the response
     // The display methods (formatDisplayValue, getDisplayValue) handle showing the correct value
+    // Watch individual filter signals to ensure we catch all changes
     effect(() => {
       const profileCombinationID = this.filterConfigService.currentProfileCombinationID();
       const isMapLoading = this.mapService.isMapLoading();
@@ -71,26 +74,55 @@ export class StatsComponent implements OnDestroy {
       const isReadyCheckComplete = this.mapService.isReadyCheckComplete();
       const filters = this.filterConfigService.contentLayerFilters();
       const currentBewertung = this.filterConfigService.selectedBewertung();
+      // Watch individual filter signals to ensure effect triggers on all filter changes
+      const selectedStates = this.filterConfigService.selectedStates();
+      const selectedActivities = this.filterConfigService.selectedActivities();
+      const selectedPersonas = this.filterConfigService.selectedPersonas();
+      const selectedRegioStars = this.filterConfigService.selectedRegioStars();
       
       // Detect when map transitions from loading to not loading
       const mapJustFinishedLoading = previousMapLoading && !isMapLoading;
       previousMapLoading = isMapLoading;
       
-      // Check if only bewertung changed (no API call needed)
+      // Compute current filter state once for reuse
+      // Use signal values for comparison to ensure we catch all changes
+      const currentFilterState = {
+        profileCombinationID,
+        stateIds: selectedStates.length > 0 ? [...selectedStates].sort() : undefined,
+        categoryIds: selectedActivities.length > 0 ? [...selectedActivities].sort() : undefined,
+        personaId: selectedPersonas,
+        regiostarIds: selectedRegioStars.length > 0 ? [...selectedRegioStars].sort() : undefined
+      };
+      
+      // Check if only bewertung changed
       const onlyBewertungChanged = previousBewertung !== null && 
         previousBewertung !== currentBewertung &&
         previousFilters !== null &&
         profileCombinationID === previousFilters.profileCombinationID &&
-        JSON.stringify(previousFilters.stateIds?.sort()) === JSON.stringify(filters?.state_ids?.sort()) &&
-        JSON.stringify(previousFilters.categoryIds?.sort()) === JSON.stringify(filters?.category_ids?.sort()) &&
-        previousFilters.personaId === filters?.persona_id &&
-        JSON.stringify(previousFilters.regiostarIds?.sort()) === JSON.stringify(filters?.regiostar_ids?.sort());
+        JSON.stringify(previousFilters.stateIds) === JSON.stringify(currentFilterState.stateIds) &&
+        JSON.stringify(previousFilters.categoryIds) === JSON.stringify(currentFilterState.categoryIds) &&
+        previousFilters.personaId === currentFilterState.personaId &&
+        JSON.stringify(previousFilters.regiostarIds) === JSON.stringify(currentFilterState.regiostarIds);
       
-      // If only bewertung changed, just update the previous value and don't change loading state
-      // The display will update automatically through the computed getters
+      // If only bewertung changed, check if it's a change from zeit to qualitaet
       if (onlyBewertungChanged) {
+        // If changing from zeit to qualitaet, send a request to the backend
+        if (previousBewertung === 'zeit' && currentBewertung === 'qualitaet') {
+          // Only send request if conditions are met (map ready, project ready, etc.)
+          if (profileCombinationID !== null && !isMapLoading && !isPreparingProject && isReadyCheckComplete && filters) {
+            // Clear any existing timeout
+            if (this.loadRankingsTimeout) {
+              clearTimeout(this.loadRankingsTimeout);
+              this.loadRankingsTimeout = null;
+            }
+            
+            // Send request to backend
+            this.loadTopRankings();
+          }
+        }
+        // Update the previous value
         previousBewertung = currentBewertung;
-        // Don't set loading state - data is already loaded, just display changes
+        // For other bewertung changes, just update the display without API call
         return;
       }
       
@@ -102,21 +134,15 @@ export class StatsComponent implements OnDestroy {
       // This ensures rankings only load after ready check completes (step 3)
       if (profileCombinationID !== null && !isMapLoading && !isPreparingProject && isReadyCheckComplete && filters) {
         // Check if filters actually changed (excluding bewertung which doesn't require API call)
-        const currentFilterState = {
-          profileCombinationID,
-          stateIds: filters.state_ids,
-          categoryIds: filters.category_ids,
-          personaId: filters.persona_id,
-          regiostarIds: filters.regiostar_ids
-        };
         
         // Only reload if filters actually changed or this is the first load
+        // Compare sorted arrays to handle order differences
         const filtersChanged = !previousFilters || 
           previousFilters.profileCombinationID !== currentFilterState.profileCombinationID ||
-          JSON.stringify(previousFilters.stateIds?.sort()) !== JSON.stringify(currentFilterState.stateIds?.sort()) ||
-          JSON.stringify(previousFilters.categoryIds?.sort()) !== JSON.stringify(currentFilterState.categoryIds?.sort()) ||
+          JSON.stringify(previousFilters.stateIds) !== JSON.stringify(currentFilterState.stateIds) ||
+          JSON.stringify(previousFilters.categoryIds) !== JSON.stringify(currentFilterState.categoryIds) ||
           previousFilters.personaId !== currentFilterState.personaId ||
-          JSON.stringify(previousFilters.regiostarIds?.sort()) !== JSON.stringify(currentFilterState.regiostarIds?.sort());
+          JSON.stringify(previousFilters.regiostarIds) !== JSON.stringify(currentFilterState.regiostarIds);
         
         if (filtersChanged) {
           // Clear any existing timeout
@@ -257,7 +283,8 @@ export class StatsComponent implements OnDestroy {
       // Only include persona_id if project is MID and there is a selected persona (same logic as contentLayerFilters)
       persona_id: (isMid && selectedPersonas !== null) ? selectedPersonas : undefined,
       // Only include regiostar_ids if there are selected regiostars (same logic as contentLayerFilters)
-      regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined
+      regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined,
+      bewertung: this.filterConfigService.selectedBewertung()
     };
 
     this.statsService.getTopRankings(params).subscribe({
@@ -276,7 +303,7 @@ export class StatsComponent implements OnDestroy {
   }
 
   /**
-   * Process rankings to handle tied scores - areas with the same score share the same rank
+   * Process rankings to handle tied scores - areas with the same score/index share the same rank
    */
   get filteredCounties(): County[] {
     if (this.counties.length === 0) {
@@ -293,7 +320,7 @@ export class StatsComponent implements OnDestroy {
     });
 
     // Assign ranks, handling ties
-    // When areas have the same value, they share the same rank
+    // When areas have the same numeric value (score or index), they share the same rank
     // The next rank skips positions (e.g., if rank 3 is shared by 2 items, next is rank 5)
     for (let i = 0; i < sorted.length; i++) {
       if (i === 0) {
@@ -347,7 +374,6 @@ export class StatsComponent implements OnDestroy {
   }
 
   getRating(index: number): string {
-    index = index / 100;
     if (index <= 0) return this.translate.instant('map.popup.error');
     if (index < 0.28) return "A+";
     if (index < 0.32) return "A";
@@ -367,6 +393,15 @@ export class StatsComponent implements OnDestroy {
     if (index < 1.59) return "F+";
     if (index < 1.78) return "F";
     return "F-";
+  }
+
+  /**
+   * Handle clicking on a feature name - copy it to the search bar
+   */
+  onFeatureNameClick(county: County): void {
+    if (county.name) {
+      this.searchService.setSearchQuery(county.name);
+    }
   }
 
   ngOnDestroy(): void {
