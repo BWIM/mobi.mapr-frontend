@@ -307,6 +307,9 @@
     "closeSidebar": "Close sidebar",
     "closeFilters": "Close filters"
   },
+  "mobileFilter": {
+    "licenseInfo": "License Info"
+  },
   "right": {
     "mobile": {
       "hint": "For a detailed analysis, please open this site on desktop."

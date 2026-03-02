@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, effect } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
@@ -36,7 +36,7 @@ export class DashboardComponent {
   private breakpointObserver = inject(BreakpointObserver);
 
   leftPanelExpanded = signal(true);
-  rightPanelExpanded = signal(false);
+  rightPanelExpanded = signal(true);
   mobileFilterExpanded = signal(false);
   private hasInitialized = false;
   private currentProjectIdentifier: string | null = null;
@@ -49,6 +49,12 @@ export class DashboardComponent {
   );
 
   constructor() {
+    // Automatically collapse right panel when on mobile
+    effect(() => {
+      if (this.isMobile()) {
+        this.rightPanelExpanded.set(false);
+      }
+    });
     // First check: If user is not logged in and no share_key, redirect to login
     this.route.queryParams
       .pipe(

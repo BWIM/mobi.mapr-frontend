@@ -307,6 +307,9 @@
     "closeSidebar": "Sidebar schließen",
     "closeFilters": "Filter schließen"
   },
+  "mobileFilter": {
+    "licenseInfo": "Lizenzinfos"
+  },
   "right": {
     "mobile": {
       "hint": "Für eine detaillierte Analyse öffnen Sie diese Seite bitte auf dem Desktop."
