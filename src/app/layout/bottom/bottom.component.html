@@ -1,12 +1,7 @@
-<div class="h-full flex items-center justify-center px-4 flex-row gap-10">
+<div class="h-full flex items-center justify-center px-4 flex-col md:flex-row gap-2 md:gap-10">
   @if (project()) {
-    <div class="text-sm text-[var(--text-color)]">
+    <div class="text-xs md:text-sm text-[var(--primary-color)]">
       © BWIM {{ project()?.created | date:'dd.MM.yyyy' }}
     </div>
   }
-  <div class="text-sm text-[var(--text-color)]">
-    Hintergrundkarte: ©
-    <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>,
-    <a href="https://carto.com" target="_blank">CARTO</a>
-  </div>
 </div>

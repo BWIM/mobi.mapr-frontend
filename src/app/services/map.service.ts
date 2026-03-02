@@ -642,45 +642,56 @@ export class MapService {
 
   /**
    * Returns the fill color expression for Index feature type
+   * Color breaks match the grade boundaries from getIndexName():
+   * - A (A+, A, A-): < 0.35
+   * - B (B+, B, B-): < 0.5
+   * - C (C+, C, C-): < 0.71
+   * - D (D+, D, D-): < 1.0
+   * - E (E+, E, E-): < 1.41
+   * - F (F+, F, F-): >= 1.41
    */
   private getIndexFillColorExpression(): any {
     // Divide "index" by 100 before applying color breaks
     return [
       'case',
       ['<=', ['/', ['get', 'index'], 100], 0],
-      'rgba(128, 128, 128, 0)',
-      ['<=', ['/', ['get', 'index'], 100], 0.35],
-      'rgba(50, 97, 45, 0.7)',
-      ['<=', ['/', ['get', 'index'], 100], 0.5],
-      'rgba(60, 176, 67, 0.7)',
-      ['<=', ['/', ['get', 'index'], 100], 0.71],
-      'rgba(238, 210, 2, 0.7)',
-      ['<=', ['/', ['get', 'index'], 100], 1],
-      'rgba(237, 112, 20, 0.7)',
-      ['<=', ['/', ['get', 'index'], 100], 1.41],
-      'rgba(194, 24, 7, 0.7)',
-      'rgba(150, 86, 162, 0.7)'
+      'rgba(128, 128, 128, 0)', // NaN or invalid
+      ['<', ['/', ['get', 'index'], 100], 0.35],
+      'rgba(50, 97, 45, 0.7)',  // Grade A (A+, A, A-)
+      ['<', ['/', ['get', 'index'], 100], 0.5],
+      'rgba(60, 176, 67, 0.7)',  // Grade B (B+, B, B-)
+      ['<', ['/', ['get', 'index'], 100], 0.71],
+      'rgba(238, 210, 2, 0.7)',  // Grade C (C+, C, C-)
+      ['<', ['/', ['get', 'index'], 100], 1.0],
+      'rgba(237, 112, 20, 0.7)',  // Grade D (D+, D, D-)
+      ['<', ['/', ['get', 'index'], 100], 1.41],
+      'rgba(194, 24, 7, 0.7)',  // Grade E (E+, E, E-)
+      'rgba(150, 86, 162, 0.7)',  // Grade F (F+, F, F-)
     ];
   }
 
+
   /**
-   * Determines the feature type based on map zoom level
-   * Matches backend logic: if z <= 7: state, elif z <= 9: county, elif z <= 10: municipality, else: hexagon
-   * Uses Math.floor to match backend integer comparison behavior
+   * Determines the feature type based on the 't' property from the tile
+   * t='h' -> hexagon, t='m' -> municipality, t='c' -> county, t='s' -> state
+   * Returns null if 't' property is not available (no fallback)
    */
-  getFeatureTypeFromZoom(zoom: number): 'municipality' | 'hexagon' | 'county' | 'state' {
-    // Backend compares integers, so we floor the zoom to match that behavior
-    // This ensures zoom 10.0, 10.1, 10.9 all map to the same integer (10) for comparison
-    const z = Math.floor(zoom);
-    if (z <= 7) {
-      return 'state';
-    } else if (z <= 9) {
-      return 'county';
-    } else if (z <= 10) {
-      return 'municipality';
-    } else {
+  getFeatureTypeFromTileProperty(feature: any): 'municipality' | 'hexagon' | 'county' | 'state' | null {
+    const tileType = feature?.properties?.['t'];
+    
+    if (tileType === 'h') {
       return 'hexagon';
+    } else if (tileType === 'm') {
+      return 'municipality';
+    } else if (tileType === 'c') {
+      return 'county';
+    } else if (tileType === 's') {
+      return 'state';
     }
+    
+    // No fallback - return null if 't' property is missing
+    console.error('Tile type property "t" not found in feature properties:', feature?.properties);
+    return null;
   }
 
   /**

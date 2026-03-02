@@ -125,8 +125,8 @@
       "clickForInfo": "Click for more information"
     },
     "popup": {
-      "index": "Index:",
-      "score": "Score:",
+      "index": "Mobility quality:",
+      "score": "Mobility time:",
       "minutes": "min",
       "notAvailable": "N/A",
       "unnamed": "Unnamed",
@@ -173,6 +173,7 @@
     }
   },
   "left": {
+    "filters": "Filters",
     "extendedMode": "Extended mode",
     "information": "Information",
     "expanded": "Expanded",
@@ -300,7 +301,16 @@
     "collapseLeftPanel": "Collapse left panel",
     "expandLeftPanel": "Expand left panel",
     "collapseRightPanel": "Collapse right panel",
-    "expandRightPanel": "Expand right panel"
+    "expandRightPanel": "Expand right panel",
+    "openFilters": "Open filters",
+    "toggleSidebar": "Toggle sidebar",
+    "closeSidebar": "Close sidebar",
+    "closeFilters": "Close filters"
+  },
+  "right": {
+    "mobile": {
+      "hint": "For a detailed analysis, please open this site on desktop."
+    }
   },
   "stats": {
     "title": "The Best",

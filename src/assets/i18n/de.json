@@ -125,8 +125,8 @@
       "clickForInfo": "Klicke für weitere Informationen"
     },
     "popup": {
-      "index": "Index:",
-      "score": "Score:",
+      "index": "Mobilitätsqualität:",
+      "score": "Mobilitätszeit:",
       "minutes": "min",
       "notAvailable": "N/A",
       "unnamed": "Unbenannt",
@@ -178,6 +178,7 @@
     "expanded": "Erweitert",
     "normal": "Normal",
     "createdDate": "Erstellungsdatum des Projekts",
+    "filters": "Filter",
     "transportModes": {
       "title": "Verkehrsmittel",
       "description": "Wähle die Verkehrsmittel aus, die in der Berechnung berücksichtigt werden sollen. Du kannst mehrere Verkehrsmittel gleichzeitig aktivieren oder deaktivieren.",
@@ -300,7 +301,16 @@
     "collapseLeftPanel": "Linkes Panel einklappen",
     "expandLeftPanel": "Linkes Panel ausklappen",
     "collapseRightPanel": "Rechtes Panel einklappen",
-    "expandRightPanel": "Rechtes Panel ausklappen"
+    "expandRightPanel": "Rechtes Panel ausklappen",
+    "openFilters": "Filter öffnen",
+    "toggleSidebar": "Sidebar umschalten",
+    "closeSidebar": "Sidebar schließen",
+    "closeFilters": "Filter schließen"
+  },
+  "right": {
+    "mobile": {
+      "hint": "Für eine detaillierte Analyse öffnen Sie diese Seite bitte auf dem Desktop."
+    }
   },
   "stats": {
     "title": "Die Besten",

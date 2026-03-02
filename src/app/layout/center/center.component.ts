@@ -12,6 +12,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { FeatureSelectionService } from '../../shared/services/feature-selection.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SearchService } from '../../services/search.service';
+import { BottomComponent } from '../bottom/bottom.component';
 
 interface NominatimResult {
   display_name: string;
@@ -22,7 +23,7 @@ interface NominatimResult {
 
 @Component({
   selector: 'app-center',
-  imports: [SharedModule, TranslateModule],
+  imports: [SharedModule, TranslateModule, BottomComponent],
   templateUrl: './center.component.html',
   styleUrl: './center.component.css',
 })

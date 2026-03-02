@@ -1,6 +1,7 @@
 import { Component, signal, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { RailComponent } from '../rail/rail.component';
 import { LeftComponent } from '../left/left.component';
 import { RightComponent } from '../right/right.component';
@@ -12,12 +13,15 @@ import { ProfileService } from '../../services/profile.service';
 import { MapService, ContentLayerFilters } from '../../services/map.service';
 import { Project } from '../../interfaces/project';
 import { firstValueFrom } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 import { TranslateModule } from '@ngx-translate/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { MatIcon } from '@angular/material/icon';
+import { MobileFilterPanelComponent } from '../mobile-filter-panel/mobile-filter-panel.component';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RailComponent, LeftComponent, RightComponent, CenterComponent, TranslateModule],
+  imports: [RailComponent, LeftComponent, RightComponent, CenterComponent, TranslateModule, MatIcon, MobileFilterPanelComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
@@ -29,11 +33,20 @@ export class DashboardComponent {
   private projectService = inject(ProjectsService);
   private profileService = inject(ProfileService);
   private mapService = inject(MapService);
+  private breakpointObserver = inject(BreakpointObserver);
 
   leftPanelExpanded = signal(true);
-  rightPanelExpanded = signal(true);
+  rightPanelExpanded = signal(false);
+  mobileFilterExpanded = signal(false);
   private hasInitialized = false;
   private currentProjectIdentifier: string | null = null;
+
+  // Mobile breakpoint detection (768px = md breakpoint)
+  isMobile = toSignal(
+    this.breakpointObserver.observe([Breakpoints.XSmall, Breakpoints.Small])
+      .pipe(map(result => result.matches)),
+    { initialValue: false }
+  );
 
   constructor() {
     // First check: If user is not logged in and no share_key, redirect to login
@@ -250,5 +263,9 @@ export class DashboardComponent {
 
   toggleRightPanel() {
     this.rightPanelExpanded.update(value => !value);
+  }
+
+  toggleMobileFilterPanel() {
+    this.mobileFilterExpanded.update(value => !value);
   }
 }

@@ -110,7 +110,17 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       (feature) => {
         if (feature) {
           this.selectedFeature = feature;
-          this.loadFeatureInfo(feature);
+          // Extract and save feature type from tile property 't' immediately when feature is selected
+          const featureType = this.mapService.getFeatureTypeFromTileProperty(feature);
+          if (featureType) {
+            this.savedFeatureType = featureType;
+            this.loadFeatureInfo(feature);
+          } else {
+            console.error('Feature type could not be determined from tile property "t"');
+            this.featureInfoError = this.translate.instant('analyze.featureInfo.errorLoading');
+            this.isLoadingFeatureInfo = false;
+            this.isLoadingAnalyze = false;
+          }
         } else {
           this.resetComponent();
         }
@@ -275,10 +285,13 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isLoadingPlaces = false;
     this.placesError = null;
 
-    // Get current zoom level to determine feature type and save it
-    const zoom = map.getZoom();
-    const featureType = this.mapService.getFeatureTypeFromZoom(zoom);
-    this.savedFeatureType = featureType;
+    // Use saved feature type (already extracted when feature was selected)
+    if (!this.savedFeatureType) {
+      console.error('Feature type not available - should have been set when feature was selected');
+      this.featureInfoError = this.translate.instant('analyze.featureInfo.errorLoading');
+      return;
+    }
+    const featureType = this.savedFeatureType;
 
     // Get profile combination ID
     const profileCombinationId = this.filterConfigService.currentProfileCombinationID();
@@ -400,14 +413,13 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    // Use saved feature type if available, otherwise determine from current zoom
-    let featureType: 'municipality' | 'hexagon' | 'county' | 'state';
-    if (this.savedFeatureType) {
-      featureType = this.savedFeatureType;
-    } else {
-      const zoom = map.getZoom();
-      featureType = this.mapService.getFeatureTypeFromZoom(zoom);
+    // Use saved feature type (must be set when feature is selected)
+    if (!this.savedFeatureType) {
+      console.error('Feature type not available - cannot load places');
+      this.placesError = this.translate.instant('analyze.placesDialog.errorLoadingPlaces');
+      return;
     }
+    const featureType = this.savedFeatureType;
     const profileCombinationId = this.filterConfigService.currentProfileCombinationID();
     
     if (!profileCombinationId) {
@@ -1044,14 +1056,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    // Use saved feature type if available, otherwise determine from current zoom
-    let featureType: 'municipality' | 'hexagon' | 'county' | 'state';
-    if (this.savedFeatureType) {
-      featureType = this.savedFeatureType;
-    } else {
-      const zoom = map.getZoom();
-      featureType = this.mapService.getFeatureTypeFromZoom(zoom);
+    // Use saved feature type (must be set when feature is selected)
+    if (!this.savedFeatureType) {
+      console.error('Feature type not available - cannot open all categories dialog');
+      return;
     }
+    const featureType = this.savedFeatureType;
     const profileCombinationId = this.filterConfigService.currentProfileCombinationID();
     
     if (!profileCombinationId) {
@@ -1109,14 +1119,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    // Use saved feature type if available, otherwise determine from current zoom
-    let featureType: 'municipality' | 'hexagon' | 'county' | 'state';
-    if (this.savedFeatureType) {
-      featureType = this.savedFeatureType;
-    } else {
-      const zoom = map.getZoom();
-      featureType = this.mapService.getFeatureTypeFromZoom(zoom);
+    // Use saved feature type (must be set when feature is selected)
+    if (!this.savedFeatureType) {
+      console.error('Feature type not available - cannot open places dialog');
+      return;
     }
+    const featureType = this.savedFeatureType;
     const profileCombinationId = this.filterConfigService.currentProfileCombinationID();
     
     if (!profileCombinationId) {

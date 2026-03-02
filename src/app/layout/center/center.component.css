@@ -159,6 +159,14 @@
   overflow: hidden !important;
 }
 
+/* Hide minimap on mobile */
+@media (max-width: 767px) {
+  :host ::ng-deep .custom-ctrl-minimap,
+  :host ::ng-deep #miniMap {
+    display: none !important;
+  }
+}
+
 /* Ensure minimap canvas respects border-radius */
 :host ::ng-deep .custom-ctrl-minimap .maplibregl-canvas-container,
 :host ::ng-deep #miniMap .maplibregl-canvas-container {
@@ -172,41 +180,70 @@
   margin: 0 !important;
 }
 
-/* Legend styling - bottom left, similar to minimap */
+/* Legend styling - responsive positioning */
 .map-legend {
   position: absolute;
-  bottom: 0;
+  /* Mobile: top-left */
+  top: 0;
   left: 0;
+  border-radius: 0 0 0.75rem 0; /* top-left rounded, others sharp */
+  /* Desktop: bottom-left (overridden by md: classes in HTML) */
   background-color: var(--background-color);
-  border-radius:  0 0.75rem 0 0.75rem; /* top-left rounded, top-right pointy, bottom-right rounded, bottom-left pointy */
   border-color: var(--light-primary-color);
   border-width: 1px;
   border-style: solid;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
-  padding: 12px;
+  padding: 8px;
   z-index: 1000;
-  min-width: 200px;
+  min-width: auto;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+/* Desktop: bottom-left positioning */
+@media (min-width: 768px) {
+  .map-legend {
+    bottom: 0;
+    left: 0;
+    top: auto;
+    right: auto;
+    border-radius: 0 0.75rem 0 0.75rem; /* top-left rounded, top-right pointy, bottom-right rounded, bottom-left pointy */
+    padding: 12px;
+    min-width: 200px;
+  }
 }
 
 .map-legend:hover {
   opacity: 0.9;
 }
 
-/* Quality legend (A-F letters) */
+/* Quality legend (A-F letters) - vertical on mobile */
 .legend-quality {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
+}
+
+@media (min-width: 768px) {
+  .legend-quality {
+    flex-direction: column;
+    gap: 8px;
+  }
 }
 
 .legend-items {
   display: flex;
-  flex-direction: row;
-  gap: 8px;
+  flex-direction: column;
+  gap: 4px;
   align-items: center;
   justify-content: center;
+}
+
+@media (min-width: 768px) {
+  .legend-items {
+    flex-direction: row;
+    gap: 8px;
+  }
 }
 
 .legend-item-quality {
@@ -216,8 +253,8 @@
 }
 
 .legend-circle {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -225,27 +262,49 @@
   border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
+@media (min-width: 768px) {
+  .legend-circle {
+    width: 32px;
+    height: 32px;
+  }
+}
+
 .legend-letter {
   color: white;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 11px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+@media (min-width: 768px) {
+  .legend-letter {
+    font-size: 14px;
+  }
 }
 
 /* Time legend (discrete color steps) */
 .legend-time {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .legend-steps {
   display: flex;
   width: 100%;
-  height: 20px;
+  height: 16px;
   border-radius: 4px;
   overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+@media (min-width: 768px) {
+  .legend-time {
+    gap: 6px;
+  }
+  .legend-steps {
+    height: 20px;
+  }
 }
 
 .legend-step {
@@ -256,9 +315,15 @@
 .legend-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 9px;
   color: var(--primary-color);
   font-weight: 500;
+}
+
+@media (min-width: 768px) {
+  .legend-labels {
+    font-size: 11px;
+  }
 }
 
 .legend-label {

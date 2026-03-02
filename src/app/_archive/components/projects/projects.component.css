@@ -1,6 +1,0 @@
-/* Minimal custom styles - relying on PrimeNG defaults and Tailwind */
-
-.selected-row {
-    font-weight: bold !important;
-    color: var(--primary-color) !important;
-}

@@ -1,8 +1,18 @@
 <div class="h-full p-4">
-  <div class="h-[40%] pb-4 pt-4 pl-5"> 
-    <app-stats></app-stats>
+  <!-- Mobile: Stats with 75% height and primary colored rounded border -->
+  <div class="h-[75%] pb-4 pt-4 pl-4 md:h-[40%]"> 
+    <div class="h-full border border-[var(--primary-color)] rounded-lg">
+      <app-stats></app-stats>
+    </div>
   </div>
-  <div class="h-[60%] pt-4 pb-4 pl-5"> 
+  <!-- Desktop: Analyze component -->
+  <div class="hidden md:block h-[60%] pt-4 pb-4 pl-4"> 
     <app-analyze></app-analyze>
+  </div>
+  <!-- Mobile: Hint message instead of analyze -->
+  <div class="h-[25%] pt-4 pb-4 pl-4 md:hidden flex items-center justify-center ">
+    <div class="text-center text-sm text-[var(--primary-color)] opacity-75 px-4 py-2 border border-[var(--primary-color)] rounded-lg">
+      <p>{{ 'right.mobile.hint' | translate }}</p>
+    </div>
   </div>
 </div>

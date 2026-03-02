@@ -1,0 +1,96 @@
+<div class="w-full bg-[var(--background-color)] rounded-t-3xl transition-all duration-300 ease-in-out overflow-hidden shadow-lg"
+     [style.max-height]="isExpanded() ? 'calc(100vh - 4rem)' : 'auto'"
+     [style.height]="!isExpanded() ? 'auto' : 'auto'">
+  <!-- Searchbar - Always visible -->
+  <div class="p-4 flex items-center gap-2">
+    <mat-form-field appearance="fill" class="search-form-field flex-1 rounded-full">
+      <mat-label>{{ 'map.search.label' | translate }}</mat-label>
+      <input 
+        matInput 
+        type="text" 
+        [(ngModel)]="searchQuery"
+        (input)="onSearchInput($event)"
+        (keydown.enter)="onSearchSubmit()"
+        [placeholder]="'map.search.placeholder' | translate">
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+    @if (!isExpanded()) {
+      <button 
+        mat-icon-button
+        (click)="close()"
+        class="bg-[var(--primary-color)] text-[var(--background-color)] shadow-lg flex-shrink-0"
+        [attr.aria-label]="'dashboard.openFilters' | translate">
+        <mat-icon>tune</mat-icon>
+      </button>
+    }
+  </div>
+
+  <!-- Filter Content - Only visible when expanded -->
+  @if (isExpanded()) {
+    <div class="px-6 pb-6 space-y-6 overflow-y-auto max-h-[calc(100vh-12rem)]">
+      <!-- Header -->
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold text-[var(--primary-color)]">{{ 'left.filters' | translate }}</h2>
+        <button 
+          mat-icon-button
+          (click)="close()"
+          class="text-[var(--primary-color)]"
+          [attr.aria-label]="'dashboard.closeFilters' | translate">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <!-- Verkehrsmittel Filter -->
+      <div class="space-y-2">
+        <h3 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.transportModes.title' | translate }}</h3>
+        <div class="flex items-center gap-2">
+          @for (option of modeOptions(); track option.id) {
+            <button 
+              class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
+              [style.background-color]="isSelected(option.id) ? 'var(--primary-color)' : 'var(--background-color)'"
+              [style.border]="!isSelected(option.id) ? '1px solid var(--light-primary-color)' : 'none'"
+              [style.cursor]="(isPedestrianMode(option.id) && isSelected(option.id)) || isModeDisabled(option.id) ? 'not-allowed' : 'pointer'"
+              [style.opacity]="isModeDisabled(option.id) ? '0.5' : '1'"
+              [disabled]="isModeDisabled(option.id)"
+              (click)="toggleVerkehrsmittel(option.id)"
+              [attr.aria-label]="option.display_name"
+              [attr.aria-pressed]="isSelected(option.id)"
+              [attr.aria-disabled]="isModeDisabled(option.id)"
+              [title]="getModeTooltip(option)">
+              <mat-icon 
+                class="text-lg leading-none"
+                [style.color]="isSelected(option.id) ? 'var(--background-color)' : 'var(--light-primary-color)'">
+                {{ option.icon }}
+              </mat-icon>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Mobilitätsbewertung Toggle -->
+      <div class="space-y-2">
+        <h3 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.mobilityRating.title' | translate }}</h3>
+        <div class="flex border border-[var(--light-primary-color)] rounded-full overflow-hidden bg-[var(--background-color)] w-full">
+          <button 
+            class="flex-1 px-6 py-3 border-none border-r border-[var(--light-primary-color)] text-sm cursor-pointer transition-all duration-200 rounded-l-full"
+            [class.font-medium]="isMobilitatsbewertungSelected('zeit')"
+            [class.font-light]="!isMobilitatsbewertungSelected('zeit')"
+            [style.background-color]="isMobilitatsbewertungSelected('zeit') ? 'var(--primary-color)' : 'var(--background-color)'"
+            [style.color]="isMobilitatsbewertungSelected('zeit') ? 'var(--background-color)' : 'var(--light-primary-color)'"
+            (click)="selectMobilitatsbewertung('zeit')">
+            {{ 'left.mobilityRating.time.label' | translate }}
+          </button>
+          <button 
+            class="flex-1 px-6 py-3 border-none text-sm cursor-pointer transition-all duration-200 rounded-r-full"
+            [class.font-medium]="isMobilitatsbewertungSelected('qualitaet')"
+            [class.font-light]="!isMobilitatsbewertungSelected('qualitaet')"
+            [style.background-color]="isMobilitatsbewertungSelected('qualitaet') ? 'var(--primary-color)' : 'var(--background-color)'"
+            [style.color]="isMobilitatsbewertungSelected('qualitaet') ? 'var(--background-color)' : 'var(--light-primary-color)'"
+            (click)="selectMobilitatsbewertung('qualitaet')">
+            {{ 'left.mobilityRating.quality.label' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

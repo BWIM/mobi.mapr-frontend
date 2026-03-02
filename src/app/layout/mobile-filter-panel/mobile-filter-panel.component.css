@@ -1,0 +1,43 @@
+/* Search form field styling - pill shaped with primary background */
+:host ::ng-deep .search-form-field {
+  border-radius: 9999px !important; /* pill shape */
+}
+
+:host ::ng-deep .search-form-field .mdc-text-field {
+  background-color: var(--primary-color) !important;
+  border: 2px solid var(--background-color) !important;
+  border-radius: 9999px !important; /* pill shape */
+}
+
+:host ::ng-deep .search-form-field .mdc-text-field--filled {
+  background-color: var(--primary-color) !important;
+}
+
+:host ::ng-deep .search-form-field .mdc-text-field__input {
+  color: var(--background-color) !important;
+}
+
+:host ::ng-deep .search-form-field .mdc-floating-label {
+  color: var(--background-color) !important;
+}
+
+:host ::ng-deep .search-form-field .mdc-floating-label--float-above {
+  color: var(--background-color) !important;
+}
+
+:host ::ng-deep .search-form-field mat-icon {
+  color: var(--background-color) !important;
+}
+
+:host ::ng-deep .search-form-field .mat-mdc-form-field-icon-prefix {
+  color: var(--background-color) !important;
+}
+
+/* Focus state */
+:host ::ng-deep .search-form-field .mdc-text-field--focused {
+  border-color: var(--background-color) !important;
+}
+
+:host ::ng-deep .search-form-field .mdc-line-ripple {
+  display: none !important; /* Hide default underline */
+}

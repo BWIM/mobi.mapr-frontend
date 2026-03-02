@@ -1,8 +1,8 @@
 <!-- map.component.html -->
 <div class="rounded-xl overflow-hidden h-full w-full relative">
   <div #mapContainer class="h-full w-full rounded-xl"></div>
-  <!-- Nominatim Search -->
-  <div class="absolute top-0 left-0 z-[1000] p-3 min-w-[300px] max-w-[400px] flex items-center gap-2">
+  <!-- Nominatim Search - Hidden on mobile, shown on desktop -->
+  <div class="hidden md:flex absolute top-0 left-0 right-auto bottom-auto z-[1000] p-3 min-w-[300px] max-w-[400px] items-center gap-2">
     <mat-form-field appearance="fill" class="search-form-field w-full rounded-full" >
       <mat-label>{{ 'map.search.label' | translate }}</mat-label>
       <input 
@@ -30,7 +30,7 @@
     </div>
   </div>
   <!-- Legend -->
-  <div class="map-legend" (click)="openLegendDialog()" [title]="'map.search.clickForInfo' | translate">
+  <div class="map-legend absolute top-0 left-0 md:bottom-0 md:left-0 md:right-auto md:top-auto" (click)="openLegendDialog()" [title]="'map.search.clickForInfo' | translate">
     <!-- Quality legend (A-F letters) -->
     <div class="legend-quality" *ngIf="isQualityMode">
       <div class="legend-items">
@@ -56,6 +56,11 @@
         <span class="legend-label">{{ 'map.legend.time.min60Plus' | translate }}</span>
       </div>
     </div>
+  </div>
+
+  <!-- Mobile Footer -->
+  <div class="absolute bottom-0 left-0 right-0 md:hidden z-[999] bg-[var(--secondary-color)] border-t border-[var(--background-color)] py-2">
+    <app-bottom></app-bottom>
   </div>
 
   <!-- Legend Info Dialog Content Template -->
