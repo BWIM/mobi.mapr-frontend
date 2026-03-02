@@ -320,10 +320,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
   }
 
   openPlacesOverlay(categoryId?: number, categoryName?: string): void {
-    if (!this.isPlacesButtonEnabled()) {
-      return;
-    }
-
+    // Always open the places dialog - it will show a hint for unsupported feature types (state/county)
     const placesData: PlacesDialogData = {
       featureType: this.data.featureType,
       featureId: this.data.featureId,

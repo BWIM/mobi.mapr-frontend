@@ -64,15 +64,25 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
     try {
       console.log('Loading places for category:', this.data);
-      // Load places data and feature shape in parallel
-      const featureType = this.data.featureType === 'municipality' || this.data.featureType === 'hexagon' 
-        ? this.data.featureType 
-        : 'municipality'; // Fallback for county/state
+      
+      // Check if places are available for this feature type
+      // Places API only supports 'municipality' and 'hexagon'
+      if (this.data.featureType !== 'municipality' && this.data.featureType !== 'hexagon') {
+        // Show error message for unsupported feature types (state/county)
+        this.error = this.translate.instant('analyze.placesDialog.disabledForCountiesStates');
+        this.isLoading = false;
+        
+        return;
+      }
 
+      // At this point, TypeScript knows featureType is 'municipality' | 'hexagon'
+      const featureTypeForPlaces = this.data.featureType as 'municipality' | 'hexagon';
+
+      // Load places data and feature shape in parallel for supported feature types
       const [placesResponse, featureShape] = await Promise.all([
         firstValueFrom(
           this.placesService.getPlaces({
-            feature_type: featureType,
+            feature_type: featureTypeForPlaces,
             feature_id: this.data.featureId,
             profile_combination_id: this.data.profileCombinationId,
             category_ids: this.data.categoryIds

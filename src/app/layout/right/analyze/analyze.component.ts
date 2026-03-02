@@ -430,19 +430,55 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isLoadingPlaces = true;
     this.placesError = null;
 
+    // Check if places are available for this feature type
+    // Places API only supports 'municipality' and 'hexagon'
+    const isPlacesSupported = featureType === 'municipality' || featureType === 'hexagon';
+
+    if (!isPlacesSupported) {
+      // Show error message for unsupported feature types (state/county)
+      this.placesError = this.translate.instant('analyze.placesDialog.disabledForCountiesStates');
+      this.isLoadingPlaces = false;
+      
+      // Still load feature shape and initialize map to show the feature boundary
+      try {
+        const featureShape = await firstValueFrom(
+          this.placesService.getFeatureShape({
+            feature_type: featureType,
+            feature_id: featureId
+          }).pipe(
+            catchError((error) => {
+              console.warn('Could not load feature shape:', error);
+              return of(null);
+            })
+          )
+        );
+        
+        // Initialize map to show feature shape even without places
+        if (!this.map && this.mapContainerMini) {
+          this.initializeMap();
+        } else if (this.map) {
+          if (featureShape) {
+            this.addFeatureShapeToMap(featureShape);
+          }
+        } else {
+          this.pendingFeatureShape = featureShape;
+        }
+      } catch (err: any) {
+        console.error('Error loading feature shape:', err);
+      }
+      
+      return;
+    }
+
     try {
       // Get category IDs from analyzeData
       const categoryIds = this.analyzeData.categories.map(cat => cat.category_id);
 
       // Load places and feature shape in parallel
-      const featureTypeForPlaces = featureType === 'municipality' || featureType === 'hexagon' 
-        ? featureType 
-        : 'municipality';
-
       const [placesResponse, featureShape] = await Promise.all([
         firstValueFrom(
           this.placesService.getPlaces({
-            feature_type: featureTypeForPlaces,
+            feature_type: featureType,
             feature_id: featureId,
             profile_combination_id: profileCombinationId,
             category_ids: categoryIds.length > 0 ? categoryIds : undefined
