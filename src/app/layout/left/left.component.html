@@ -64,118 +64,88 @@
       </div>
       <app-info-overlay>
         <div class="space-y-6">
-          <!-- Introduction -->
+          <!-- Allgemeines -->
           <div class="pb-4 border-b border-[var(--primary-color)] border-opacity-20">
-            <h3 class="text-lg font-semibold mb-3 text-[var(--primary-color)]">{{ 'left.transportModes.title' | translate }}</h3>
+            <h3 class="text-lg font-semibold mb-3 text-[var(--primary-color)]">{{ 'left.transportModes.info.title' | translate }}</h3>
+            <h4 class="font-semibold text-base mb-2 text-[var(--primary-color)]">{{ 'left.transportModes.info.general.title' | translate }}</h4>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.general.intro' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.general.pedestrianBase' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.general.questionIntro' | translate }}
+            </p>
+            <div class="bg-[var(--background-color)] rounded-lg p-3 my-3 border-l-4 border-[var(--primary-color)]">
+              <p class="text-sm opacity-90 leading-relaxed italic">
+                {{ 'left.transportModes.info.general.question' | translate }}
+              </p>
+            </div>
             <p class="text-sm opacity-90 leading-relaxed">
-              {{ 'left.transportModes.introduction' | translate }}
+              {{ 'left.transportModes.info.general.approach' | translate }}
             </p>
           </div>
 
-          <!-- Transport Modes Grid -->
-          <div class="space-y-4">
-            <h4 class="font-semibold text-base mb-3">{{ 'left.transportModes.modes.title' | translate }}</h4>
-            
-            <!-- Pedestrian -->
-            <div class="bg-[var(--secondary-color)] rounded-lg p-4 border-l-4 border-[var(--primary-color)]">
-              <div class="flex items-start gap-3">
-                <mat-icon class="text-2xl text-[var(--primary-color)] mt-0.5">directions_walk</mat-icon>
-                <div class="flex-1">
-                  <h5 class="font-semibold mb-1">{{ 'left.transportModes.modes.pedestrian.title' | translate }}</h5>
-                  <p class="text-sm opacity-90 leading-relaxed mb-2">
-                    {{ 'left.transportModes.modes.pedestrian.description' | translate }}
-                  </p>
-                  <div class="flex items-center gap-2 text-xs opacity-75">
-                    <mat-icon class="text-base">lock</mat-icon>
-                    <span>{{ 'left.transportModes.modes.pedestrian.alwaysEnabled' | translate }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Bicycle -->
-            <div class="bg-[var(--secondary-color)] rounded-lg p-4 border-l-4 border-[var(--primary-color)]">
-              <div class="flex items-start gap-3">
-                <mat-icon class="text-2xl text-[var(--primary-color)] mt-0.5">directions_bike</mat-icon>
-                <div class="flex-1">
-                  <h5 class="font-semibold mb-1">{{ 'left.transportModes.modes.bicycle.title' | translate }}</h5>
-                  <p class="text-sm opacity-90 leading-relaxed">
-                    {{ 'left.transportModes.modes.bicycle.description' | translate }}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Car -->
-            <div class="bg-[var(--secondary-color)] rounded-lg p-4 border-l-4 border-[var(--primary-color)]">
-              <div class="flex items-start gap-3">
-                <mat-icon class="text-2xl text-[var(--primary-color)] mt-0.5">directions_car</mat-icon>
-                <div class="flex-1">
-                  <h5 class="font-semibold mb-1">{{ 'left.transportModes.modes.car.title' | translate }}</h5>
-                  <p class="text-sm opacity-90 leading-relaxed">
-                    {{ 'left.transportModes.modes.car.description' | translate }}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Transit -->
-            <div class="bg-[var(--secondary-color)] rounded-lg p-4 border-l-4 border-[var(--primary-color)]">
-              <div class="flex items-start gap-3">
-                <mat-icon class="text-2xl text-[var(--primary-color)] mt-0.5">train</mat-icon>
-                <div class="flex-1">
-                  <h5 class="font-semibold mb-1">{{ 'left.transportModes.modes.transit.title' | translate }}</h5>
-                  <p class="text-sm opacity-90 leading-relaxed">
-                    {{ 'left.transportModes.modes.transit.description' | translate }}
-                  </p>
-                </div>
-              </div>
-            </div>
+          <!-- Penalties -->
+          <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+            <h4 class="font-semibold text-base mb-3 text-[var(--primary-color)]">{{ 'left.transportModes.info.penalties.title' | translate }}</h4>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.penalties.intro' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-2">{{ 'left.transportModes.info.penalties.examplesLabel' | translate }}</p>
+            <ul class="text-sm opacity-90 space-y-2 ml-4 list-disc mb-3">
+              <li>{{ 'left.transportModes.info.penalties.example1' | translate }}</li>
+              <li>{{ 'left.transportModes.info.penalties.example2' | translate }}</li>
+              <li>{{ 'left.transportModes.info.penalties.example3' | translate }}</li>
+            </ul>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.penalties.subjective' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed">
+              {{ 'left.transportModes.info.penalties.adfc' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mt-3">
+              {{ 'left.transportModes.info.penalties.documentation' | translate }}
+            </p>
           </div>
 
-          <!-- Routing Information -->
-          <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20 space-y-4">
-            <h4 class="font-semibold text-base mb-3">{{ 'left.transportModes.routing.title' | translate }}</h4>
-            
-            <!-- Valhalla Routing -->
-            <div class="bg-[var(--secondary-color)] rounded-lg p-4">
-              <div class="flex items-start gap-3">
-                <div class="w-10 h-10 rounded-full bg-[var(--primary-color)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                  <mat-icon class="text-[var(--primary-color)]">route</mat-icon>
-                </div>
-                <div class="flex-1">
-                  <h5 class="font-semibold mb-2">{{ 'left.transportModes.routing.valhalla.title' | translate }}</h5>
-                  <p class="text-sm opacity-90 leading-relaxed mb-2">
-                    {{ 'left.transportModes.routing.valhalla.description' | translate }}
-                  </p>
-                  <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc">
-                    <li>{{ 'left.transportModes.routing.valhalla.feature1' | translate }}</li>
-                    <li>{{ 'left.transportModes.routing.valhalla.feature2' | translate }}</li>
-                    <li>{{ 'left.transportModes.routing.valhalla.feature3' | translate }}</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+          <!-- Mobilitätsprofile -->
+          <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+            <h4 class="font-semibold text-base mb-3 text-[var(--primary-color)]">{{ 'left.transportModes.info.profiles.title' | translate }}</h4>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.profiles.variation' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.profiles.mapping' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed">
+              {{ 'left.transportModes.info.profiles.future' | translate }}
+            </p>
+          </div>
 
-            <!-- Motis Transit -->
-            <div class="bg-[var(--secondary-color)] rounded-lg p-4">
-              <div class="flex items-start gap-3">
-                <div class="w-10 h-10 rounded-full bg-[var(--primary-color)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                  <mat-icon class="text-[var(--primary-color)]">alt_route</mat-icon>
-                </div>
-                <div class="flex-1">
-                  <h5 class="font-semibold mb-2">{{ 'left.transportModes.routing.motis.title' | translate }}</h5>
-                  <p class="text-sm opacity-90 leading-relaxed mb-2">
-                    {{ 'left.transportModes.routing.motis.description' | translate }}
-                  </p>
-                  <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc">
-                    <li>{{ 'left.transportModes.routing.motis.feature1' | translate }}</li>
-                    <li>{{ 'left.transportModes.routing.motis.feature2' | translate }}</li>
-                    <li>{{ 'left.transportModes.routing.motis.feature3' | translate }}</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+          <!-- Routing -->
+          <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+            <h4 class="font-semibold text-base mb-3 text-[var(--primary-color)]">{{ 'left.transportModes.info.routing.title' | translate }}</h4>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.routing.complexity' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.routing.fullRouting' | translate }}
+            </p>
+            <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc mb-3">
+              <li>{{ 'left.transportModes.info.routing.startPoint' | translate }}</li>
+              <li>{{ 'left.transportModes.info.routing.destination' | translate }}</li>
+            </ul>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.routing.engines' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.routing.transitDay' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed">
+              {{ 'left.transportModes.info.routing.waitingTime' | translate }}
+            </p>
           </div>
         </div>
       </app-info-overlay>
@@ -218,80 +188,103 @@
             </p>
           </div>
 
-          <!-- Time Rating -->
-          <div class="space-y-4">
-            <div class="bg-[var(--secondary-color)] rounded-lg p-4 border-l-4 border-[var(--primary-color)]">
+          <!-- Mobilitätszeit -->
+          <div class="pt-4">
+            <h4 class="font-semibold text-base mb-3 text-[var(--primary-color)]">{{ 'left.mobilityRating.mobilityTime.title' | translate }}</h4>
+            <p class="text-sm opacity-90 leading-relaxed mb-4">
+              {{ 'left.mobilityRating.mobilityTime.approach' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-4">
+              {{ 'left.mobilityRating.mobilityTime.exampleIntro' | translate }}
+            </p>
+            
+            <div class="space-y-3 mb-4">
               <div class="flex items-start gap-3">
-                <div class="w-10 h-10 rounded-full bg-[var(--primary-color)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                  <mat-icon class="text-[var(--primary-color)]">schedule</mat-icon>
+                <div class="w-6 h-6 rounded-full bg-[var(--background-color)] bg-opacity-20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span class="text-xs font-semibold text-[var(--primary-color)]">1</span>
                 </div>
                 <div class="flex-1">
-                  <h4 class="font-semibold mb-2 text-base">{{ 'left.mobilityRating.time.title' | translate }}</h4>
-                  <p class="text-sm opacity-90 leading-relaxed mb-3">
-                    {{ 'left.mobilityRating.time.description' | translate }}
+                  <p class="text-sm opacity-90 leading-relaxed font-semibold mb-1">{{ 'left.mobilityRating.mobilityTime.step1.title' | translate }}</p>
+                  <p class="text-sm opacity-90 leading-relaxed">
+                    {{ 'left.mobilityRating.mobilityTime.step1.description' | translate }}
                   </p>
-                  
-                  <div class="space-y-2 mt-3">
-                    <div class="flex items-start gap-2">
-                      <mat-icon class="text-base text-[var(--primary-color)] mt-0.5">looks_one</mat-icon>
-                      <p class="text-sm opacity-90 leading-relaxed">
-                        {{ 'left.mobilityRating.time.step1' | translate }}
-                      </p>
-                    </div>
-                    <div class="flex items-start gap-2">
-                      <mat-icon class="text-base text-[var(--primary-color)] mt-0.5">looks_two</mat-icon>
-                      <p class="text-sm opacity-90 leading-relaxed">
-                        {{ 'left.mobilityRating.time.step2' | translate }}
-                      </p>
-                    </div>
-                    <div class="flex items-start gap-2">
-                      <mat-icon class="text-base text-[var(--primary-color)] mt-0.5">looks_3</mat-icon>
-                      <p class="text-sm opacity-90 leading-relaxed">
-                        {{ 'left.mobilityRating.time.step3' | translate }}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div class="mt-4 p-3 bg-[var(--background-color)] rounded-lg">
-                    <p class="text-xs opacity-75 italic">
-                      {{ 'left.mobilityRating.time.example' | translate }}
-                    </p>
-                  </div>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-3">
+                <div class="w-6 h-6 rounded-full bg-[var(--background-color)] bg-opacity-20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span class="text-xs font-semibold text-[var(--primary-color)]">2</span>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm opacity-90 leading-relaxed font-semibold mb-1">{{ 'left.mobilityRating.mobilityTime.step2.title' | translate }}</p>
+                  <p class="text-sm opacity-90 leading-relaxed">
+                    {{ 'left.mobilityRating.mobilityTime.step2.description' | translate }}
+                  </p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-3">
+                <div class="w-6 h-6 rounded-full bg-[var(--background-color)] bg-opacity-20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span class="text-xs font-semibold text-[var(--primary-color)]">3</span>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm opacity-90 leading-relaxed font-semibold mb-1">{{ 'left.mobilityRating.mobilityTime.step3.title' | translate }}</p>
+                  <p class="text-sm opacity-90 leading-relaxed mb-2">
+                    {{ 'left.mobilityRating.mobilityTime.step3.description' | translate }}
+                  </p>
+                  <p class="text-sm opacity-90 leading-relaxed mb-2">{{ 'left.mobilityRating.mobilityTime.step3.exampleLabel' | translate }}</p>
+                  <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc mb-2">
+                    <li>{{ 'left.mobilityRating.mobilityTime.step3.example1' | translate }}</li>
+                    <li>{{ 'left.mobilityRating.mobilityTime.step3.example2' | translate }}</li>
+                    <li>{{ 'left.mobilityRating.mobilityTime.step3.example3' | translate }}</li>
+                  </ul>
+                  <p class="text-sm opacity-90 leading-relaxed">
+                    {{ 'left.mobilityRating.mobilityTime.step3.explanation' | translate }}
+                  </p>
                 </div>
               </div>
             </div>
+            
+            <p class="text-sm opacity-90 leading-relaxed">
+              {{ 'left.mobilityRating.mobilityTime.conclusion' | translate }}
+            </p>
           </div>
 
-          <!-- Quality Rating -->
-          <div class="space-y-4 pt-4 border-t border-[var(--primary-color)] border-opacity-20">
-            <div class="bg-[var(--secondary-color)] rounded-lg p-4 border-l-4 border-[var(--primary-color)]">
-              <div class="flex items-start gap-3">
-                <div class="w-10 h-10 rounded-full bg-[var(--primary-color)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
-                  <mat-icon class="text-[var(--primary-color)]">bar_chart</mat-icon>
-                </div>
-                <div class="flex-1">
-                  <h4 class="font-semibold mb-2 text-base">{{ 'left.mobilityRating.quality.title' | translate }}</h4>
-                  <p class="text-sm opacity-90 leading-relaxed mb-3">
-                    {{ 'left.mobilityRating.quality.description' | translate }}
-                  </p>
-                  
-                  <div class="mt-4 p-3 bg-[var(--background-color)] rounded-lg mb-4">
-                    <p class="text-xs opacity-75 italic mb-2">
-                      {{ 'left.mobilityRating.quality.example' | translate }}
-                    </p>
-                  </div>
+          <!-- Mobilitätsqualität -->
+          <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+            <h4 class="font-semibold text-base mb-3 text-[var(--primary-color)]">{{ 'left.mobilityRating.mobilityQuality.title' | translate }}</h4>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.mobilityRating.mobilityQuality.weakness' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-2">{{ 'left.mobilityRating.mobilityQuality.exampleLabel' | translate }}</p>
+            <div class="bg-[var(--background-color)] rounded-lg p-3 mb-3 border-l-4 border-[var(--primary-color)]">
+              <p class="text-sm opacity-90 leading-relaxed italic">
+                {{ 'left.mobilityRating.mobilityQuality.example' | translate }}
+              </p>
+            </div>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.mobilityRating.mobilityQuality.introduction' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.mobilityRating.mobilityQuality.calculation' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.mobilityRating.mobilityQuality.gradeIntro' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-2">{{ 'left.mobilityRating.mobilityQuality.scaleIntro' | translate }}</p>
+            <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc mb-4">
+              <li>{{ 'left.mobilityRating.mobilityQuality.scale1' | translate }}</li>
+              <li>{{ 'left.mobilityRating.mobilityQuality.scale2' | translate }}</li>
+            </ul>
+            <p class="text-sm opacity-90 leading-relaxed mb-4">
+              {{ 'left.mobilityRating.mobilityQuality.conclusion' | translate }}
+            </p>
 
-                  <!-- Quality Graph -->
-                  <div class="mt-4">
-                    <h5 class="font-semibold mb-2 text-sm">{{ 'left.mobilityRating.quality.graphTitle' | translate }}</h5>
-                    <div class="w-full h-64 bg-[var(--background-color)] rounded-lg p-4">
-                      <p-chart type="line" [data]="qualityChartData" [options]="qualityChartOptions" [width]="'100%'" [height]="'100%'"></p-chart>
-                    </div>
-                    <p class="text-xs opacity-75 mt-2">
-                      {{ 'left.mobilityRating.quality.graphDescription' | translate }}
-                    </p>
-                  </div>
-                </div>
+            <!-- Quality Graph -->
+            <div class="mt-4">
+              <h5 class="font-semibold mb-2 text-sm">{{ 'left.mobilityRating.mobilityQuality.graphTitle' | translate }}</h5>
+              <div class="w-full h-64 bg-[var(--background-color)] rounded-lg p-4">
+                <p-chart type="line" [data]="qualityChartData" [options]="qualityChartOptions" [width]="'100%'" [height]="'100%'"></p-chart>
               </div>
             </div>
           </div>

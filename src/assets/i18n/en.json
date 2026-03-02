@@ -223,12 +223,50 @@
           "feature2": "Each activity has a default time assigned (e.g., restaurants at 19:00), and transit is calculated to arrive at the optimal time",
           "feature3": "The best connection is selected automatically, with no waiting time at the destination counted"
         }
+      },
+      "info": {
+        "title": "Transport Modes",
+        "general": {
+          "title": "General",
+          "intro": "To reach an activity, you need a means of transport – this can be your own feet, a bicycle, a car, or public transport.",
+          "pedestrianBase": "Pedestrian traffic forms the base transport mode, as without it, all other options cannot be meaningfully used. Therefore, it cannot be disabled.",
+          "questionIntro": "By selecting transport modes, you essentially answer the following question:",
+          "question": "How good is my mobility quality when I'm traveling on foot or have a bicycle available?",
+          "approach": "mobi.mapr follows a realistic approach: The transport mode is always chosen that is overall fastest considering all factors – including parking, parking bicycles, or other additional times. Even if a car is available, one usually prefers to walk to a bakery 200 meters away, even if the pure driving time would be shorter. The additional effort for parking and unparking makes the car unattractive in this case."
+        },
+        "penalties": {
+          "title": "Penalties",
+          "intro": "To fairly compare transport modes with each other, so-called penalties (time surcharges) are applied to the pure travel time.",
+          "examplesLabel": "Examples:",
+          "example1": "For cars, depending on the time of the activity, a small time penalty is considered to realistically represent parking search.",
+          "example2": "For bicycles, one minute is added flat.",
+          "example3": "For cargo bikes, three minutes are added, as parking space search is usually more complex here.",
+          "subjective": "In addition, routes can feel subjectively longer or shorter. In a city with well-developed bicycle infrastructure, a route often feels shorter than on a heavily trafficked main road.",
+          "adfc": "To evaluate such factors, we include, among other things, the ADFC bicycle climate test.",
+          "documentation": "You can find a detailed explanation in our documentation."
+        },
+        "profiles": {
+          "title": "Mobility Profiles",
+          "variation": "A transport mode can vary greatly. A cargo bike, a trekking bike, or a racing bike all belong to the \"bicycle\" category, but differ significantly in their behavior and usage.",
+          "mapping": "In mobi.mapr, these differences are mapped through so-called mobility profiles. In the freely available view, the most commonly used profile is used by default.",
+          "future": "In the future, it will be possible to create and use individual profiles. Stay tuned!"
+        },
+        "routing": {
+          "title": "Routing",
+          "complexity": "Finding a route between start and destination is significantly more complex than simply following a street. Inclines, traffic lights, or intersections can significantly extend the actual travel time.",
+          "fullRouting": "To consider as many influencing factors as possible, each route is fully routed.",
+          "startPoint": "The starting point is the center of the respective hexagon.",
+          "destination": "The destination is the specific activity.",
+          "engines": "For routing of foot, bicycle, and car traffic, we use the FOSS routing engine Valhalla. For public transport, we use the MOTIS project.",
+          "transitDay": "Public transport routing is performed on a representative Tuesday. Each activity has a defined time at which the route is calculated.",
+          "waitingTime": "Waiting time at the destination is not taken into account. Example: If a meeting is planned for 19:00, but the train arrives at 18:40, the journey is considered complete upon arrival – the remaining waiting time is not included in the evaluation."
+        }
       }
     },
     "mobilityRating": {
-      "title": "Mobility Rating",
+      "title": "Rating",
       "description": "Choose between two rating methods for mobility analysis.",
-      "introduction": "The mobility rating system offers two different evaluation approaches: Time-based rating measures absolute travel times, while Quality-based rating compares your municipality's performance relative to similar regions.",
+      "introduction": "To evaluate mobility in a neutral and comparable way, a clear and comprehensible methodology is needed.",
       "time": {
         "label": "Time",
         "title": "Time-Based Rating",
@@ -245,6 +283,43 @@
         "example": "Example: If your municipality needs 15 minutes to reach a supermarket, but similar municipalities (by RegioStar) need 20 minutes on average, you only need 75% of the time. This relative performance is then translated into a quality grade.",
         "graphTitle": "Quality Translation Graph",
         "graphDescription": "The relative time percentage (e.g., 75%) is mapped to a quality grade (A+ to F-) using an exponential function. Lower percentages (better performance) result in higher grades."
+      },
+      "mobilityTime": {
+        "title": "Mobility Time",
+        "approach": "The fundamental approach is always the same.",
+        "exampleIntro": "For example, to calculate the mobility quality for the activity \"Supermarket\" using a transport mode combination (e.g., foot + bicycle), the following steps are performed:",
+        "step1": {
+          "title": "Routing to all relevant destinations",
+          "description": "From a defined starting point, the route to all supermarkets in the area is calculated for each available transport mode."
+        },
+        "step2": {
+          "title": "Adding penalties",
+          "description": "Additional time penalties are added to the pure travel time, such as for parking search or infrastructure quality."
+        },
+        "step3": {
+          "title": "Selection and weighting of the best options",
+          "description": "From all calculated routes, the three best connections are selected and weighted together.",
+          "exampleLabel": "Example:",
+          "example1": "1. Supermarket: 65 %",
+          "example2": "2. Supermarket: 20 %",
+          "example3": "3. Supermarket: 15 %",
+          "explanation": "The background is that not only the nearest destination counts – a certain choice increases the actual mobility quality. The specific weighting depends on the respective activity. For restaurants, choice is more important than, for example, for a parcel station."
+        },
+        "conclusion": "For this reason, we deliberately do not speak of travel time, but of mobility time."
+      },
+      "mobilityQuality": {
+        "title": "Mobility Quality",
+        "weakness": "Mobility time is intuitively understandable, but has a weakness: It only allows limited comparisons between different regions or activity types.",
+        "exampleLabel": "Example:",
+        "example": "Is 20 minutes travel time to a hairdresser in a rural area good or bad?",
+        "introduction": "To answer such questions, mobility quality is introduced. Here, the calculated mobility time is set in relation to a reference value.",
+        "calculation": "Thanks to comparison data available throughout Germany, it can be determined, for example, that in rural areas an average of 30 minutes is needed to reach a hairdresser. If your own mobility time is 20 minutes, this results in a mobility quality of 66%.",
+        "gradeIntro": "To make this abstract percentage value more understandable, it is additionally translated into a grade.",
+        "scaleIntro": "This scale is structured exponentially:",
+        "scale1": "In the lower range, fine-grained distinctions are made.",
+        "scale2": "In the upper range, a coarser differentiation takes place.",
+        "conclusion": "This creates a comparable, intuitively comprehensible rating standard.",
+        "graphTitle": "Graph"
       }
     },
     "activeFilters": {

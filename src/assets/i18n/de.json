@@ -223,12 +223,50 @@
           "feature2": "Jede Aktivität hat eine Standardzeit zugewiesen (z.B. Restaurants um 19:00 Uhr), und der ÖPNV wird so berechnet, dass die optimale Ankunftszeit erreicht wird",
           "feature3": "Die beste Verbindung wird automatisch ausgewählt, wobei keine Wartezeit am Ziel berücksichtigt wird"
         }
+      },
+      "info": {
+        "title": "Verkehrsmittel",
+        "general": {
+          "title": "Allgemeines",
+          "intro": "Um eine Aktivität zu erreichen, benötigst du ein Verkehrsmittel – das können deine eigenen Füße, ein Fahrrad, das Auto oder der ÖPNV sein.",
+          "pedestrianBase": "Der Fußverkehr bildet dabei das Basis-Verkehrsmittel, denn ohne ihn lassen sich auch alle anderen Optionen nicht sinnvoll nutzen. Deshalb kann er nicht deaktiviert werden.",
+          "questionIntro": "Mit der Auswahl der Verkehrsmittel beantwortest du im Grunde folgende Frage:",
+          "question": "Wie gut ist meine Mobilitätsqualität, wenn ich zu Fuß unterwegs bin oder ein Fahrrad zur Verfügung habe?",
+          "approach": "Der mobi.mapr verfolgt dabei einen realitätsnahen Ansatz: Es wird stets das Verkehrsmittel gewählt, das unter Berücksichtigung aller Faktoren insgesamt am schnellsten ist – inklusive Parken, Abstellen oder sonstiger Nebenzeiten. Selbst wenn ein Auto verfügbar ist, geht man für einen 200 Meter entfernten Bäcker meist lieber zu Fuß, auch wenn die reine Fahrzeit kürzer wäre. Der zusätzliche Aufwand für Ein- und Ausparken macht das Auto in diesem Fall unattraktiv."
+        },
+        "penalties": {
+          "title": "Penalties",
+          "intro": "Um die Verkehrsmittel fair miteinander zu vergleichen, werden auf die reine Reisezeit sogenannte Penalties (Zeitaufschläge) angewendet.",
+          "examplesLabel": "Beispiele:",
+          "example1": "Beim Auto wird – abhängig von der Uhrzeit der Aktivität – eine kleine Zeitstrafe berücksichtigt, um die Parkplatzsuche realistisch abzubilden.",
+          "example2": "Beim Fahrrad wird pauschal eine Minute ergänzt.",
+          "example3": "Beim Lastenrad werden drei Minuten addiert, da hier die Stellplatzsuche in der Regel aufwendiger ist.",
+          "subjective": "Darüber hinaus können sich Wege subjektiv länger oder kürzer anfühlen. In einer Stadt mit gut ausgebauter Fahrradinfrastruktur wirkt eine Strecke oft kürzer als auf einer stark befahrenen Hauptstraße.",
+          "adfc": "Zur Bewertung solcher Faktoren beziehen wir unter anderem den ADFC-Fahrradklimatest mit ein.",
+          "documentation": "Eine ausführliche Erklärung findest du in unserer Dokumentation."
+        },
+        "profiles": {
+          "title": "Mobilitätsprofile",
+          "variation": "Ein Verkehrsmittel kann stark variieren. Ein Lastenrad, ein Trekkingrad oder ein Rennrad gehören zwar alle zur Kategorie \"Fahrrad\", unterscheiden sich jedoch deutlich in ihrem Verhalten und ihrer Nutzung.",
+          "mapping": "Im mobi.mapr werden diese Unterschiede über sogenannte Mobilitätsprofile abgebildet. In der frei verfügbaren Ansicht wird standardmäßig das am häufigsten genutzte Profil verwendet.",
+          "future": "Zukünftig wird es möglich sein, individuelle Profile zu erstellen und zu verwenden. Stay tuned!"
+        },
+        "routing": {
+          "title": "Routing",
+          "complexity": "Die Wegfindung zwischen Start und Ziel ist deutlich komplexer, als einfach einer Straße zu folgen. Steigungen, Ampeln oder Kreuzungen können die tatsächliche Reisezeit erheblich verlängern.",
+          "fullRouting": "Um möglichst viele Einflussfaktoren zu berücksichtigen, wird jede Strecke vollständig geroutet.",
+          "startPoint": "Startpunkt ist das Zentrum des jeweiligen Hexagons.",
+          "destination": "Ziel ist die konkrete Aktivität.",
+          "engines": "Für das Routing von Fuß-, Rad- und Autoverkehr nutzen wir die FOSS-Routing-Engine Valhalla. Für den ÖPNV verwenden wir das Projekt MOTIS.",
+          "transitDay": "Das ÖPNV-Routing erfolgt an einem repräsentativen Dienstag. Jede Aktivität besitzt eine definierte Uhrzeit, zu der die Route berechnet wird.",
+          "waitingTime": "Die Wartezeit am Ziel wird dabei nicht berücksichtigt. Beispiel: Wenn ein Treffen um 19:00 Uhr geplant ist, der Zug jedoch bereits um 18:40 Uhr ankommt, gilt die Reise mit der Ankunft als beendet – die verbleibende Wartezeit fließt nicht in die Bewertung ein."
+        }
       }
     },
     "mobilityRating": {
-      "title": "Mobilitätsbewertung",
+      "title": "Bewertung",
       "description": "Wähle zwischen zwei Bewertungsmethoden für die Mobilitätsanalyse.",
-      "introduction": "Das Mobilitätsbewertungssystem bietet zwei verschiedene Bewertungsansätze: Die zeitbasierte Bewertung misst absolute Reisezeiten, während die qualitätsbasierte Bewertung die Leistung deiner Gemeinde im Vergleich zu ähnlichen Regionen betrachtet.",
+      "introduction": "Um Mobilität neutral und vergleichbar bewerten zu können, braucht es eine klare und nachvollziehbare Methodik.",
       "time": {
         "label": "Zeit",
         "title": "Zeitbasierte Bewertung",
@@ -245,6 +283,43 @@
         "example": "Beispiel: Wenn deine Gemeinde 15 Minuten benötigt, um einen Supermarkt zu erreichen, ähnliche Gemeinden (nach RegioStar) aber durchschnittlich 20 Minuten benötigen, benötigst du nur 75% der Zeit. Diese relative Leistung wird dann in eine Qualitätsnote übersetzt.",
         "graphTitle": "Qualitätsübersetzungsgraph",
         "graphDescription": "Der relative Zeitprozentsatz (z.B. 75%) wird mithilfe einer Exponentialfunktion auf eine Qualitätsnote (A+ bis F-) abgebildet. Niedrigere Prozentsätze (bessere Leistung) führen zu höheren Noten."
+      },
+      "mobilityTime": {
+        "title": "Mobilitätszeit",
+        "approach": "Der grundlegende Ansatz ist dabei immer derselbe.",
+        "exampleIntro": "Um beispielsweise mit einer Verkehrsmittelkombination (z. B. Fuß + Rad) die Mobilitätsqualität für die Aktivität \"Supermarkt\" zu berechnen, werden folgende Schritte durchgeführt:",
+        "step1": {
+          "title": "Routing zu allen relevanten Zielen",
+          "description": "Von einem definierten Startpunkt aus wird für jedes verfügbare Verkehrsmittel die Route zu allen Supermärkten in der Umgebung berechnet."
+        },
+        "step2": {
+          "title": "Hinzufügen von Penalties",
+          "description": "Auf die reine Reisezeit werden zusätzliche Zeitaufschläge addiert, etwa für Parkplatzsuche oder infrastrukturelle Qualität."
+        },
+        "step3": {
+          "title": "Auswahl und Gewichtung der besten Optionen",
+          "description": "Aus allen berechneten Routen werden die drei besten Verbindungen ausgewählt und gewichtet miteinander verrechnet.",
+          "exampleLabel": "Beispiel:",
+          "example1": "1. Supermarkt: 65 %",
+          "example2": "2. Supermarkt: 20 %",
+          "example3": "3. Supermarkt: 15 %",
+          "explanation": "Hintergrund ist, dass nicht nur das nächstgelegene Ziel zählt – eine gewisse Auswahl erhöht die tatsächliche Mobilitätsqualität. Die konkrete Gewichtung hängt von der jeweiligen Aktivität ab. Bei Restaurants ist Auswahl wichtiger als beispielsweise bei einer Paketstation."
+        },
+        "conclusion": "Aus diesem Grund sprechen wir bewusst nicht von Reisezeit, sondern von Mobilitätszeit."
+      },
+      "mobilityQuality": {
+        "title": "Mobilitätsqualität",
+        "weakness": "Die Mobilitätszeit ist zwar intuitiv verständlich, hat jedoch eine Schwäche: Sie erlaubt nur eingeschränkt Vergleiche zwischen unterschiedlichen Regionen oder Aktivitätstypen.",
+        "exampleLabel": "Beispiel:",
+        "example": "Sind 20 Minuten Fahrtzeit zu einem Friseur im ländlichen Raum gut oder schlecht?",
+        "introduction": "Um solche Fragen beantworten zu können, wird die Mobilitätsqualität eingeführt. Hierbei wird die berechnete Mobilitätszeit ins Verhältnis zu einem Referenzwert gesetzt.",
+        "calculation": "Dank deutschlandweit verfügbarer Vergleichsdaten lässt sich beispielsweise ermitteln, dass man im ländlichen Raum durchschnittlich 30 Minuten zu einem Friseur benötigt. Liegt die eigene Mobilitätszeit bei 20 Minuten, ergibt sich daraus eine Mobilitätsqualität von 66 %.",
+        "gradeIntro": "Um diesen abstrakten Prozentwert verständlicher zu machen, wird er zusätzlich in eine Note übersetzt.",
+        "scaleIntro": "Diese Skala ist exponentiell aufgebaut:",
+        "scale1": "Im unteren Bereich wird feingranular unterschieden.",
+        "scale2": "Im oberen Bereich erfolgt eine gröbere Differenzierung.",
+        "conclusion": "So entsteht ein vergleichbarer, intuitiv erfassbarer Bewertungsmaßstab.",
+        "graphTitle": "Graph"
       }
     },
     "activeFilters": {

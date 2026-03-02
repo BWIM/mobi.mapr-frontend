@@ -40,6 +40,17 @@ export interface FeatureInfoParams {
   state_ids?: number[];
 }
 
+export interface GeoLocationResponse {
+  city?: string;
+  region?: string;
+  country?: string;
+  country_code?: string;
+  lat?: number;
+  lng?: number;
+  ip?: string;
+  error?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -373,6 +384,31 @@ export class MapService {
   }
 
   /**
+   * Fetches the user's geo location from the API
+   */
+  private async fetchGeoLocation(): Promise<{ lat: number; lng: number } | null> {
+    try {
+      const url = `${environment.apiUrl}/geo`;
+      const response = await firstValueFrom(
+        this.http.get<GeoLocationResponse>(url)
+      );
+      
+      // Check if response has error or missing lat/lng
+      if (response.error || !response.lat || !response.lng) {
+        return null;
+      }
+      
+      return {
+        lat: response.lat,
+        lng: response.lng
+      };
+    } catch (error) {
+      console.warn('Could not fetch geo location from API:', error);
+      return null;
+    }
+  }
+
+  /**
    * Fetches bounds for the content layer from the API
    */
   private async fetchContentLayerBounds(filters: ContentLayerFilters): Promise<{ min_lon: number; min_lat: number; max_lon: number; max_lat: number } | null> {
@@ -410,12 +446,27 @@ export class MapService {
 
   /**
    * Zooms the map to the bounds of the content layer
+   * First tries to get user's geo location, then falls back to content layer bounds
    */
   private async zoomToContentLayerBounds(filters: ContentLayerFilters): Promise<void> {
     if (!this.map) {
       return;
     }
 
+    // First, try to get user's geo location
+    const geoLocation = await this.fetchGeoLocation();
+    
+    if (geoLocation) {
+      // Move map to user's location
+      this.map.flyTo({
+        center: [geoLocation.lng, geoLocation.lat],
+        zoom: 10,
+        duration: 1000
+      });
+      return;
+    }
+
+    // Fall back to content layer bounds if geo location is not available
     const apiBounds = await this.fetchContentLayerBounds(filters);
     
     if (apiBounds) {
@@ -629,14 +680,12 @@ export class MapService {
     return [
       'step',
       ['get', 'score'],
-      'rgb(23,25,63)',     // 0-5 min (default for < 300) - darkest
-      300, 'rgb(23,25,63)',     // 5-10 min (300-600s) - darkest
-      600, 'rgb(43,40,105)',   // 10-15 min (600-900s) - very dark
-      900, 'rgb(74,89,160)',    // 15-20 min (900-1200s) - darker
-      1200, 'rgb(90,135,185)',  // 20-30 min (1200-1800s) - medium
-      1800, 'rgb(121,194,230)', // 30-45 min (1800-2700s) - medium-light
-      2700, 'rgb(162,210,235)', // 45-60 min (2700-3600s) - light
-      3600, 'rgb(162,210,235)'  // > 60 min (>3600s) - lightest
+      'rgb(23,25,63)',     // 0-10 min (default for < 600) - darkest
+      600, 'rgb(43,40,105)',   // 11-15 min (600-900s) - very dark
+      900, 'rgb(74,89,160)',    // 16-20 min (900-1200s) - darker
+      1200, 'rgb(90,135,185)',  // 21-30 min (1200-1800s) - medium
+      1800, 'rgb(121,194,230)', // 31-45 min (1800-2700s) - medium-light
+      2700, 'rgb(162,210,235)'  // 45+ min (2700+s) - lightest
     ];
   }
 

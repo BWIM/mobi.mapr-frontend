@@ -4,6 +4,13 @@
   position: relative;
 }
 
+/* Remove rounded corners on mobile - override Tailwind rounded-xl class */
+@media (max-width: 767px) {
+  :host .rounded-xl {
+    border-radius: 0 !important;
+  }
+}
+
 /* Ensure map canvas has rounded corners */
 :host ::ng-deep .maplibregl-canvas-container {
   border-radius: 0.75rem; /* matches rounded-xl */
@@ -13,6 +20,17 @@
 :host ::ng-deep .maplibregl-map {
   border-radius: 0.75rem; /* matches rounded-xl */
   overflow: hidden;
+}
+
+/* Remove rounded corners on mobile */
+@media (max-width: 767px) {
+  :host ::ng-deep .maplibregl-canvas-container {
+    border-radius: 0 !important;
+  }
+
+  :host ::ng-deep .maplibregl-map {
+    border-radius: 0 !important;
+  }
 }
 
 /* Map Controls Styling - Move everything 20px down */
@@ -102,6 +120,13 @@
   z-index: 1000;
   border-radius: 0.75rem;
   pointer-events: none;
+}
+
+/* Remove rounded corners on mobile */
+@media (max-width: 767px) {
+  .map-loading-overlay {
+    border-radius: 0 !important;
+  }
 }
 
 .map-loading-content {
