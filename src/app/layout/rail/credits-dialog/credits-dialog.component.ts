@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { SharedModule } from '../../../shared/shared.module';
+import { TranslateService } from '@ngx-translate/core';
 
 interface InfoComponent {
   name: string;
@@ -77,13 +78,11 @@ export class CreditsDialogComponent {
 
 
 
+  translate = inject(TranslateService);
+
   constructor(
     public dialogRef: MatDialogRef<CreditsDialogComponent>
   ) {}
-
-  openLink(url: string) {
-    window.open(url, '_blank');
-  }
 
   onClose() {
     this.dialogRef.close();

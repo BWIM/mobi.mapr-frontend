@@ -96,7 +96,64 @@
       "errorLoadingPlaces": "Error loading places",
       "activities": "Activities",
       "qualityRating": "Quality rating: The quality rating shows the mobility quality in different categories from A (best quality) to F (lowest quality).",
-      "placesMap": "Map with activity places"
+      "placesMap": "Map with activity places",
+      "info": {
+        "title": "Activities",
+        "introduction": {
+          "title": "Understanding Activities",
+          "description": "Every journey ends with an activity. This could be visiting a restaurant, spending time at a museum, or going shopping. Activities represent the actual purpose of mobility.",
+          "focus": "mobi.mapr focuses on everyday mobility. Commutes to educational institutions and workplaces are intentionally not considered. Instead, the focus is on everyday destinations such as shopping, leisure activities, or social visits."
+        },
+        "dataSource": {
+          "title": "Data Source: Mobility in Germany (MiD)",
+          "description": "The activities used in mobi.mapr are based on the \"Mobilität in Deutschland\" (Mobility in Germany) study. Data from 2023 is used.",
+          "survey": "In this nationwide survey, people are asked, among other things:",
+          "survey1": "Which routes they take in everyday life",
+          "survey2": "Which destinations they aim for",
+          "survey3": "What occasion these routes occur for",
+          "result": "The result is a list of approximately 30 activity categories. These categories are deliberately formulated in general terms to be statistically evaluable."
+        },
+        "translation": {
+          "title": "Translation into Concrete Everyday Activities",
+          "description": "The activity categories collected in MiD are relatively abstract. Therefore, they are translated into concrete everyday destinations in mobi.mapr based on scientific literature and empirical assumptions.",
+          "example": "Example:",
+          "exampleTitle": "\"Daily Needs\" is concretized to:",
+          "example1": "Supermarket",
+          "example2": "Bakery",
+          "example3": "Drugstore",
+          "example4": "Other daily shopping facilities",
+          "details": "For each activity, the following is stored:",
+          "details1": "Which concrete destination locations are assigned to it",
+          "details2": "How these destination locations are weighted",
+          "viewInfo": "This information can be viewed by clicking on the respective activity."
+        },
+        "ambiguities": {
+          "title": "Dealing with Ambiguities",
+          "description": "Not every activity can be translated unambiguously and precisely.",
+          "example": "An example is the activity \"Walking the dog\" from the MiD study. This actually describes movement in public space without a clear destination. In mobi.mapr, it is currently approximated through destinations such as:",
+          "example1": "Stores for dog supplies",
+          "example2": "Similar facilities",
+          "validation": "Validations show, however, that such ambiguities often balance out in the overall view. This means: Even if individual activities can only be approximated, the overall picture of everyday mobility remains stable and reliable."
+        },
+        "weighting": {
+          "title": "Weighting of Activities",
+          "description": "The importance of individual activities depends strongly on the respective person group.",
+          "examples": "Examples:",
+          "example1": "Children visit playgrounds more frequently.",
+          "example2": "Adults have a stronger focus on shopping or errands.",
+          "example3": "Older people show different activity patterns again.",
+          "standardView": "In the standard view of mobi.mapr, all person groups are initially considered together. This creates an average activity profile."
+        },
+        "regional": {
+          "title": "Regional Differentiation",
+          "description": "In addition to differentiation by person groups, activities are also weighted regionally.",
+          "meaning": "This means:",
+          "meaning1": "In metropolitan regions, destination structures and preferences differ significantly from those in rural areas.",
+          "meaning2": "City dwellers seek urban offerings such as gastronomy, culture, or specialized services more frequently.",
+          "meaning3": "In rural areas, other facilities and supply structures are prioritized.",
+          "consideration": "These regional differences are taken into account in mobi.mapr to make realistic statements about everyday mobility."
+        }
+      }
     }
   },
   "errors": {
@@ -133,9 +190,20 @@
       "error": "Error"
     },
     "legend": {
+      "title": "Legend",
+      "introduction": "Mobility can be viewed in two different ways: as mobility time or as mobility quality. Both perspectives complement each other – one is concrete and tangible, the other comparative and contextual.",
       "quality": {
-        "title": "Quality Rating (A-F)",
-        "description": "The quality rating shows the mobility quality in different categories from A (best quality) to F (lowest quality).",
+        "title": "Mobility Quality",
+        "description": "Mobility quality sets the calculated mobility time in relation to a structurally comparable region.",
+        "comparison": "A travel time in a city is thus compared with other cities – not with rural areas. Similarly, a rural region is compared with other rural regions.",
+        "fair": "This creates a fair and context-based assessment.",
+        "perception": "Another important aspect: Time differences in the lower range are perceived much more sensitively than in the upper range. The difference between 5 and 10 minutes feels more significant than the difference between 45 and 50 minutes.",
+        "scaleIntro": "Therefore, the mobility quality scale is structured exponentially:",
+        "scaleLower": "In the lower range, finer differentiation occurs.",
+        "scaleUpper": "In the upper range, a coarser one.",
+        "result": "The result is an index value that is additionally translated into an understandable grade. This transforms an abstract number into an intuitive assessment of the mobility situation.",
+        "scale": "Scale",
+        "howToRead": "The colors on the map show mobility quality from A (best quality) to F (lowest quality). The darker the color, the better the mobility quality.",
         "a": {
           "title": "A - Best Quality",
           "description": "Very good mobility quality (Index: 0 - 0.35)"
@@ -162,11 +230,15 @@
         }
       },
       "time": {
-        "title": "Time Rating (Travel Time)",
-        "description": "The time rating shows the average travel time in minutes. Colors range from light blue (short travel times) to dark blue (long travel times).",
-        "scale": "Travel Time Scale",
-        "scaleDescription": "0 minutes (light blue) to 60+ minutes (dark blue)",
-        "detailedDescription": "Travel time is measured in minutes and shows how quickly different destinations can be reached. Shorter travel times are displayed in lighter shades of blue, while longer travel times appear in darker shades of blue.",
+        "title": "Mobility Time",
+        "description": "Mobility time describes the actually evaluated travel time in minutes – including all penalties (see info box transport modes and rating) as well as the weighting of multiple reachable destinations.",
+        "result": "The result is a time specification in minutes. However, this is not a purely technical measurement, but rather a perceived time.",
+        "perceived": "This may differ from the actual driven or walked time – but it reflects the actual decision-making reality much better.",
+        "example": "Example: For bicycles, depending on the municipality, a certain \"initial resistance\" is taken into account. In practice, you don't get on the bike for every short distance. \"For me to take the bike, the destination must be at least 15 minutes away – otherwise I'd rather walk here given the traffic.\"",
+        "conclusion": "Mobility time thus reflects which means of transport is actually chosen under realistic conditions.",
+        "scale": "Scale",
+        "scaleDescription": "The scale is structured linearly and is given in minutes.",
+        "howToRead": "The colors on the map show mobility time from dark blue (short times, 0-15 minutes) to light blue (long times, over 60 minutes). The darker the color, the shorter the mobility time.",
         "min0": "0 min",
         "min60Plus": "60+ min"
       }
@@ -370,6 +442,48 @@
       "moreOnWebsite": "For more comprehensive information and background, feel free to visit our website.",
       "faq": "Frequently asked questions can be found in our FAQ:",
       "faqUrl": "https://bw-im.de/mobimapr-faq"
+    },
+    "credits": {
+      "title": "Credits & Licenses",
+      "acknowledgment": {
+        "title": "Acknowledgments",
+        "intro": "This application is made possible through the use of numerous exceptional open-source projects and data sources. Without these foundational technologies and the dedicated communities behind them, this tool would not have been feasible.",
+        "osm": {
+          "title": "OpenStreetMap",
+          "description": "We extend our sincere gratitude to all contributors of OpenStreetMap, who continuously maintain and update the geographic database that forms the foundation of this project. The comprehensive and freely accessible map data provided by the OpenStreetMap community is essential to our work."
+        },
+        "motis": {
+          "title": "MOTIS",
+          "description": "Public transit routing capabilities are powered by the MOTIS project, an open-source multi-modal journey planner. Without MOTIS, this application would not be able to provide accurate public transportation routing and analysis."
+        },
+        "components": {
+          "title": "Additional Components",
+          "description": "In addition to the projects mentioned above, this application utilizes numerous other open-source libraries, frameworks, and tools. A comprehensive list of these components is provided below."
+        }
+      },
+      "license": {
+        "title": "Licensing Information",
+        "frontend": {
+          "title": "Frontend Application",
+          "description": "The frontend application of mobi.mapr is licensed under the GNU Affero General Public License version 3.0 (AGPL-3.0). The complete source code is publicly available on GitHub and may be freely used, modified, and distributed in accordance with the terms of the AGPL-3.0 license."
+        },
+        "data": {
+          "title": "Data Published by mobi.mapr",
+          "description": "All data generated and published by the mobi.mapr team in publicly available projects are licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0). This license applies exclusively to data published by the mobi.mapr team in public projects."
+        },
+        "thirdParty": {
+          "title": "Third-Party Data",
+          "description": "Please note that additional data sources may be subject to different licensing terms. In particular, geographic data such as city district boundaries (shapefiles) obtained from municipal and regional authorities must be credited appropriately when used. The specific licensing terms for each data source are indicated in the component listings below."
+        }
+      },
+      "sections": {
+        "visualization": "Visualization",
+        "data": "Data Sources",
+        "backend": "Backend Infrastructure",
+        "routing": "Routing Engines",
+        "cityData": "City District Data"
+      },
+      "close": "Close"
     }
   },
   "dashboard": {

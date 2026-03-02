@@ -96,7 +96,64 @@
       "errorLoadingPlaces": "Fehler beim Laden der Orte",
       "activities": "Aktivitäten",
       "qualityRating": "Qualitätsbewertung: Die Qualitätsbewertung zeigt die Mobilitätsqualität in verschiedenen Kategorien von A (beste Qualität) bis F (niedrigste Qualität).",
-      "placesMap": "Karte mit Orten der Aktivitäten"
+      "placesMap": "Karte mit Orten der Aktivitäten",
+      "info": {
+        "title": "Aktivitäten",
+        "introduction": {
+          "title": "Grundverständnis",
+          "description": "Am Ende jedes Weges steht eine Aktivität. Dies kann beispielsweise ein Restaurantbesuch, ein Museumsaufenthalt oder ein Einkauf sein. Aktivitäten bilden somit den eigentlichen Zweck von Mobilität.",
+          "focus": "Der mobi.mapr konzentriert sich auf die Alltagsmobilität. Dabei werden Wege zu Ausbildungs- und Arbeitsorten bewusst nicht berücksichtigt. Im Fokus stehen vielmehr alltägliche Ziele des täglichen Lebens, wie Einkäufe, Freizeitaktivitäten oder soziale Besuche."
+        },
+        "dataSource": {
+          "title": "Datengrundlage: Mobilität in Deutschland (MiD)",
+          "description": "Die im mobi.mapr verwendeten Aktivitäten basieren auf der Studie \"Mobilität in Deutschland\" (MiD). Es werden die Daten aus dem Jahr 2023 genutzt.",
+          "survey": "In dieser bundesweiten Erhebung werden Menschen unter anderem dazu befragt:",
+          "survey1": "Welche Wege sie im Alltag zurücklegen",
+          "survey2": "Welche Ziele sie dabei ansteuern",
+          "survey3": "Aus welchem Anlass diese Wege erfolgen",
+          "result": "Das Ergebnis ist eine Liste von rund 30 Aktivitätskategorien. Diese Kategorien sind bewusst allgemein formuliert, um statistisch auswertbar zu sein."
+        },
+        "translation": {
+          "title": "Übersetzung in konkrete Alltagsaktivitäten",
+          "description": "Die in der MiD erhobenen Aktivitätskategorien sind relativ abstrakt. Daher werden sie im mobi.mapr auf Basis wissenschaftlicher Literatur und empirischer Annahmen in konkrete Alltagsziele übersetzt.",
+          "example": "Beispiel:",
+          "exampleTitle": "\"Täglicher Bedarf\" wird konkretisiert zu:",
+          "example1": "Supermarkt",
+          "example2": "Bäckerei",
+          "example3": "Drogerie",
+          "example4": "weitere Einrichtungen des täglichen Einkaufs",
+          "details": "Für jede Aktivität ist hinterlegt:",
+          "details1": "Welche konkreten Zielorte ihr zugeordnet sind",
+          "details2": "Wie diese Zielorte gewichtet werden",
+          "viewInfo": "Diese Informationen können durch einen Klick auf die jeweilige Aktivität eingesehen werden."
+        },
+        "ambiguities": {
+          "title": "Umgang mit Unschärfen",
+          "description": "Nicht jede Aktivität lässt sich eindeutig und zielscharf übersetzen.",
+          "example": "Ein Beispiel ist die Aktivität \"Hund ausführen\" aus der MiD-Studie. Diese beschreibt eigentlich eine Bewegung im öffentlichen Raum ohne klares Ziel. Im mobi.mapr wird sie derzeit näherungsweise über Ziele wie:",
+          "example1": "Geschäfte für Hundezubehör",
+          "example2": "ähnliche Einrichtungen",
+          "validation": "abgebildet. Validierungen zeigen jedoch, dass sich solche Unschärfen in der Gesamtbetrachtung häufig ausgleichen. Das bedeutet: Auch wenn einzelne Aktivitäten nur näherungsweise übersetzt werden können, bleibt das Gesamtbild der Alltagsmobilität stabil und belastbar."
+        },
+        "weighting": {
+          "title": "Gewichtung der Aktivitäten",
+          "description": "Die Bedeutung einzelner Aktivitäten hängt stark von der jeweiligen Personengruppe ab.",
+          "examples": "Beispiele:",
+          "example1": "Kinder besuchen häufiger Spielplätze.",
+          "example2": "Erwachsene haben einen stärkeren Fokus auf Einkauf oder Besorgungen.",
+          "example3": "Ältere Menschen weisen wiederum andere Aktivitätsmuster auf.",
+          "standardView": "In der Standardansicht des mobi.mapr werden zunächst alle Personengruppen gemeinsam betrachtet. Dadurch entsteht ein durchschnittliches Aktivitätsprofil."
+        },
+        "regional": {
+          "title": "Regionale Differenzierung",
+          "description": "Zusätzlich zur Differenzierung nach Personengruppen werden Aktivitäten auch regional gewichtet.",
+          "meaning": "Das bedeutet:",
+          "meaning1": "In Metropolregionen unterscheiden sich Zielstrukturen und Präferenzen deutlich von denen im ländlichen Raum.",
+          "meaning2": "Stadtbewohner suchen häufiger urbane Angebote wie Gastronomie, Kultur oder spezialisierte Dienstleistungen.",
+          "meaning3": "Im ländlichen Raum stehen andere Einrichtungen und Versorgungsstrukturen im Vordergrund.",
+          "consideration": "Diese regionalen Unterschiede werden im mobi.mapr berücksichtigt, um realitätsnahe Aussagen zur Alltagsmobilität treffen zu können."
+        }
+      }
     }
   },
   "errors": {
@@ -133,9 +190,20 @@
       "error": "Fehler"
     },
     "legend": {
+      "title": "Legende",
+      "introduction": "Mobilität lässt sich auf zwei unterschiedliche Arten betrachten: als Mobilitätszeit oder als Mobilitätsqualität. Beide Perspektiven ergänzen sich – die eine ist konkret und greifbar, die andere vergleichend und einordnend.",
       "quality": {
-        "title": "Qualitätsbewertung (A-F)",
-        "description": "Die Qualitätsbewertung zeigt die Mobilitätsqualität in verschiedenen Kategorien von A (beste Qualität) bis F (niedrigste Qualität).",
+        "title": "Mobilitätsqualität",
+        "description": "Die Mobilitätsqualität setzt die berechnete Mobilitätszeit ins Verhältnis zu einer strukturell vergleichbaren Region.",
+        "comparison": "Eine Reisezeit in einer Stadt wird also mit anderen Städten verglichen – nicht mit dem ländlichen Raum. Ebenso wird eine ländliche Region mit anderen ländlichen Regionen verglichen.",
+        "fair": "Dadurch entsteht eine faire und kontextbezogene Bewertung.",
+        "perception": "Ein weiterer wichtiger Aspekt: Zeitunterschiede im unteren Bereich werden deutlich sensibler wahrgenommen als im oberen Bereich. Der Unterschied zwischen 5 und 10 Minuten fühlt sich gravierender an als der Unterschied zwischen 45 und 50 Minuten.",
+        "scaleIntro": "Deshalb ist die Skala der Mobilitätsqualität exponentiell aufgebaut:",
+        "scaleLower": "Im unteren Bereich erfolgt eine feinere Differenzierung.",
+        "scaleUpper": "Im oberen Bereich eine gröbere.",
+        "result": "Das Ergebnis ist ein Indexwert, der zusätzlich in eine verständliche Note übersetzt wird. So entsteht aus einer abstrakten Zahl eine intuitive Einschätzung der Mobilitätssituation.",
+        "scale": "Skala",
+        "howToRead": "Die Farben auf der Karte zeigen die Mobilitätsqualität von A (beste Qualität) bis F (niedrigste Qualität). Je dunkler die Farbe, desto besser die Mobilitätsqualität.",
         "a": {
           "title": "A - Beste Qualität",
           "description": "Sehr gute Mobilitätsqualität (Index: 0 - 0.35)"
@@ -162,11 +230,15 @@
         }
       },
       "time": {
-        "title": "Zeitbewertung (Reisezeit)",
-        "description": "Die Zeitbewertung zeigt die durchschnittliche Reisezeit in Minuten. Die Farben reichen von hellblau (kurze Reisezeiten) bis dunkelblau (lange Reisezeiten).",
-        "scale": "Reisezeit-Skala",
-        "scaleDescription": "0 Minuten (hellblau) bis 60+ Minuten (dunkelblau)",
-        "detailedDescription": "Die Reisezeit wird in Minuten gemessen und zeigt, wie schnell verschiedene Ziele erreicht werden können. Kürzere Reisezeiten werden in helleren Blautönen dargestellt, während längere Reisezeiten in dunkleren Blautönen erscheinen.",
+        "title": "Mobilitätszeit",
+        "description": "Die Mobilitätszeit beschreibt die tatsächlich bewertete Reisezeit in Minuten – inklusive aller Penalties (siehe Infobox Verkehrsmittel und Bewertung) sowie der Gewichtung mehrerer erreichbarer Ziele.",
+        "result": "Das Ergebnis ist eine Zeitangabe in Minuten. Allerdings handelt es sich dabei nicht um eine rein technische Messung, sondern um eine gefühlte Zeit.",
+        "perceived": "Diese kann von der real gefahrenen oder gelaufenen Zeit abweichen – bildet jedoch die tatsächliche Entscheidungsrealität deutlich besser ab.",
+        "example": "Beispiel: Für das Fahrrad wird – abhängig von der Gemeinde – ein gewisser \"Anfangswiderstand\" berücksichtigt. Denn in der Praxis steigt man nicht für jede noch so kurze Strecke aufs Rad. \"Damit ich das Fahrrad nehme, muss das Ziel mindestens 15 Minuten entfernt sein – sonst gehe ich bei dem Verkehr hier lieber zu Fuß.\"",
+        "conclusion": "Die Mobilitätszeit bildet also ab, welches Verkehrsmittel unter realistischen Bedingungen tatsächlich gewählt wird.",
+        "scale": "Skala",
+        "scaleDescription": "Die Skala ist dabei linear aufgebaut und wird in Minuten angegeben.",
+        "howToRead": "Die Farben auf der Karte zeigen die Mobilitätszeit von dunkelblau (kurze Zeiten, 0-15 Minuten) bis hellblau (lange Zeiten, über 60 Minuten). Je dunkler die Farbe, desto kürzer die Mobilitätszeit.",
         "min0": "0 min",
         "min60Plus": "60+ min"
       }
@@ -370,6 +442,48 @@
       "moreOnWebsite": "Für umfassendere Informationen und Hintergründe schau gerne auf unserer Website vorbei.",
       "faq": "Häufig gestellte Fragen findest du in unserem FAQ:",
       "faqUrl": "https://bw-im.de/mobimapr-faq"
+    },
+    "credits": {
+      "title": "Credits & Lizenzen",
+      "acknowledgment": {
+        "title": "Danksagungen",
+        "intro": "Diese Anwendung ist nur durch die Nutzung zahlreicher herausragender Open-Source-Projekte und Datenquellen möglich. Ohne diese grundlegenden Technologien und die engagierten Communities dahinter wäre dieses Tool nicht realisierbar gewesen.",
+        "osm": {
+          "title": "OpenStreetMap",
+          "description": "Wir danken allen Mitwirkenden von OpenStreetMap, die kontinuierlich die geografische Datenbank pflegen und aktualisieren, auf der dieses Projekt basiert. Die umfassenden und frei zugänglichen Kartendaten der OpenStreetMap-Community sind für unsere Arbeit unverzichtbar."
+        },
+        "motis": {
+          "title": "MOTIS",
+          "description": "Die Fähigkeiten zur ÖPNV-Routenplanung werden durch das MOTIS-Projekt ermöglicht, einen Open-Source-Multi-Modal-Journey-Planner. Ohne MOTIS könnte diese Anwendung keine präzisen ÖPNV-Routen und Analysen bereitstellen."
+        },
+        "components": {
+          "title": "Weitere Komponenten",
+          "description": "Zusätzlich zu den oben genannten Projekten nutzt diese Anwendung zahlreiche weitere Open-Source-Bibliotheken, Frameworks und Tools. Eine vollständige Liste dieser Komponenten finden Sie unten."
+        }
+      },
+      "license": {
+        "title": "Lizenzinformationen",
+        "frontend": {
+          "title": "Frontend-Anwendung",
+          "description": "Die Frontend-Anwendung von mobi.mapr ist unter der GNU Affero General Public License Version 3.0 (AGPL-3.0) lizenziert. Der vollständige Quellcode ist öffentlich auf GitHub verfügbar und kann gemäß den Bedingungen der AGPL-3.0-Lizenz frei verwendet, modifiziert und verteilt werden."
+        },
+        "data": {
+          "title": "Von mobi.mapr veröffentlichte Daten",
+          "description": "Alle vom mobi.mapr-Team generierten und in öffentlich zugänglichen Projekten veröffentlichten Daten sind unter der Creative Commons Namensnennung 4.0 International Lizenz (CC BY 4.0) lizenziert. Diese Lizenz gilt ausschließlich für Daten, die vom mobi.mapr-Team in öffentlichen Projekten veröffentlicht werden."
+        },
+        "thirdParty": {
+          "title": "Drittanbieter-Daten",
+          "description": "Bitte beachten Sie, dass zusätzliche Datenquellen anderen Lizenzbedingungen unterliegen können. Insbesondere geografische Daten wie Stadtteilgrenzen (Shapefiles), die von kommunalen und regionalen Behörden bezogen werden, müssen bei Verwendung angemessen angegeben werden. Die spezifischen Lizenzbedingungen für jede Datenquelle sind in den Komponentenlisten unten angegeben."
+        }
+      },
+      "sections": {
+        "visualization": "Visualisierung",
+        "data": "Datenquellen",
+        "backend": "Backend-Infrastruktur",
+        "routing": "Routing-Engines",
+        "cityData": "Stadtteil- und Bezirksdaten"
+      },
+      "close": "Schließen"
     }
   },
   "dashboard": {

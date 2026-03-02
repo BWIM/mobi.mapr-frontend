@@ -18,6 +18,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
+import { MatCardModule } from '@angular/material/card';
 
 
 
@@ -43,6 +44,7 @@ import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
     MatAutocompleteModule,
     MatTooltipModule,
     MatBottomSheetModule,
+    MatCardModule,
   ],
   exports: [
     MatDialogModule,
@@ -65,6 +67,7 @@ import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
     MatAutocompleteModule,
     MatTooltipModule,
     MatBottomSheetModule,
+    MatCardModule,
   ],
   providers: []
 })

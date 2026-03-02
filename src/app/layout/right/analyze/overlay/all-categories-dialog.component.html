@@ -8,9 +8,120 @@
     <span class="text-[var(--secondary-color)] text-[28px] font-bold leading-none m-0 p-0">×</span>
   </button>
   
-  <h2 mat-dialog-title class="text-2xl font-bold text-white mb-4 flex-shrink-0">
-    {{ data.featureName || ('analyze.activities' | translate) }}
-  </h2>
+  <div class="mb-4 flex-shrink-0">
+    <h2 mat-dialog-title class="text-2xl font-bold text-white">{{ data.featureName || ('analyze.activities' | translate) }}</h2>
+  </div>
+  
+  <app-info-overlay>
+    <div class="space-y-6">
+      <!-- Introduction -->
+      <div class="pb-4 border-b border-[var(--primary-color)] border-opacity-20">
+        <h3 class="text-lg font-semibold mb-3 text-[var(--primary-color)]">{{ 'analyze.analysis.info.title' | translate }}</h3>
+        <div class="mb-4">
+          <h4 class="font-semibold text-base mb-2 text-[var(--primary-color)]">{{ 'analyze.analysis.info.introduction.title' | translate }}</h4>
+          <p class="text-sm opacity-90 leading-relaxed mb-3">
+            {{ 'analyze.analysis.info.introduction.description' | translate }}
+          </p>
+          <p class="text-sm opacity-90 leading-relaxed">
+            {{ 'analyze.analysis.info.introduction.focus' | translate }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Data Source -->
+      <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+        <h4 class="font-semibold text-base mb-3 text-[var(--primary-color)]">{{ 'analyze.analysis.info.dataSource.title' | translate }}</h4>
+        <p class="text-sm opacity-90 leading-relaxed mb-3">
+          {{ 'analyze.analysis.info.dataSource.description' | translate }}
+        </p>
+        <p class="text-sm opacity-90 leading-relaxed mb-2">{{ 'analyze.analysis.info.dataSource.survey' | translate }}</p>
+        <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc mb-3">
+          <li>{{ 'analyze.analysis.info.dataSource.survey1' | translate }}</li>
+          <li>{{ 'analyze.analysis.info.dataSource.survey2' | translate }}</li>
+          <li>{{ 'analyze.analysis.info.dataSource.survey3' | translate }}</li>
+        </ul>
+        <p class="text-sm opacity-90 leading-relaxed">
+          {{ 'analyze.analysis.info.dataSource.result' | translate }}
+        </p>
+      </div>
+
+      <!-- Translation -->
+      <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+        <h4 class="font-semibold text-base mb-3 text-[var(--primary-color)]">{{ 'analyze.analysis.info.translation.title' | translate }}</h4>
+        <p class="text-sm opacity-90 leading-relaxed mb-3">
+          {{ 'analyze.analysis.info.translation.description' | translate }}
+        </p>
+        <p class="text-sm opacity-90 leading-relaxed mb-2 font-semibold">{{ 'analyze.analysis.info.translation.example' | translate }}</p>
+        <div class="bg-[var(--background-color)] rounded-lg p-3 mb-3 border-l-4 border-[var(--primary-color)]">
+          <p class="text-sm opacity-90 leading-relaxed font-semibold mb-2">{{ 'analyze.analysis.info.translation.exampleTitle' | translate }}</p>
+          <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc">
+            <li>{{ 'analyze.analysis.info.translation.example1' | translate }}</li>
+            <li>{{ 'analyze.analysis.info.translation.example2' | translate }}</li>
+            <li>{{ 'analyze.analysis.info.translation.example3' | translate }}</li>
+            <li>{{ 'analyze.analysis.info.translation.example4' | translate }}</li>
+          </ul>
+        </div>
+        <p class="text-sm opacity-90 leading-relaxed mb-2">{{ 'analyze.analysis.info.translation.details' | translate }}</p>
+        <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc mb-3">
+          <li>{{ 'analyze.analysis.info.translation.details1' | translate }}</li>
+          <li>{{ 'analyze.analysis.info.translation.details2' | translate }}</li>
+        </ul>
+        <p class="text-sm opacity-90 leading-relaxed">
+          {{ 'analyze.analysis.info.translation.viewInfo' | translate }}
+        </p>
+      </div>
+
+      <!-- Ambiguities -->
+      <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+        <h4 class="font-semibold text-base mb-3 text-[var(--primary-color)]">{{ 'analyze.analysis.info.ambiguities.title' | translate }}</h4>
+        <p class="text-sm opacity-90 leading-relaxed mb-3">
+          {{ 'analyze.analysis.info.ambiguities.description' | translate }}
+        </p>
+        <p class="text-sm opacity-90 leading-relaxed mb-2">{{ 'analyze.analysis.info.ambiguities.example' | translate }}</p>
+        <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc mb-3">
+          <li>{{ 'analyze.analysis.info.ambiguities.example1' | translate }}</li>
+          <li>{{ 'analyze.analysis.info.ambiguities.example2' | translate }}</li>
+        </ul>
+        <p class="text-sm opacity-90 leading-relaxed">
+          {{ 'analyze.analysis.info.ambiguities.validation' | translate }}
+        </p>
+      </div>
+
+      <!-- Weighting -->
+      <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+        <h4 class="font-semibold text-base mb-3 text-[var(--primary-color)]">{{ 'analyze.analysis.info.weighting.title' | translate }}</h4>
+        <p class="text-sm opacity-90 leading-relaxed mb-3">
+          {{ 'analyze.analysis.info.weighting.description' | translate }}
+        </p>
+        <p class="text-sm opacity-90 leading-relaxed mb-2 font-semibold">{{ 'analyze.analysis.info.weighting.examples' | translate }}</p>
+        <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc mb-3">
+          <li>{{ 'analyze.analysis.info.weighting.example1' | translate }}</li>
+          <li>{{ 'analyze.analysis.info.weighting.example2' | translate }}</li>
+          <li>{{ 'analyze.analysis.info.weighting.example3' | translate }}</li>
+        </ul>
+        <p class="text-sm opacity-90 leading-relaxed">
+          {{ 'analyze.analysis.info.weighting.standardView' | translate }}
+        </p>
+      </div>
+
+      <!-- Regional -->
+      <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+        <h4 class="font-semibold text-base mb-3 text-[var(--primary-color)]">{{ 'analyze.analysis.info.regional.title' | translate }}</h4>
+        <p class="text-sm opacity-90 leading-relaxed mb-3">
+          {{ 'analyze.analysis.info.regional.description' | translate }}
+        </p>
+        <p class="text-sm opacity-90 leading-relaxed mb-2">{{ 'analyze.analysis.info.regional.meaning' | translate }}</p>
+        <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc mb-3">
+          <li>{{ 'analyze.analysis.info.regional.meaning1' | translate }}</li>
+          <li>{{ 'analyze.analysis.info.regional.meaning2' | translate }}</li>
+          <li>{{ 'analyze.analysis.info.regional.meaning3' | translate }}</li>
+        </ul>
+        <p class="text-sm opacity-90 leading-relaxed">
+          {{ 'analyze.analysis.info.regional.consideration' | translate }}
+        </p>
+      </div>
+    </div>
+  </app-info-overlay>
   
   <mat-dialog-content class="mat-typography flex-[4] min-h-0 overflow-hidden py-4 px-4 flex flex-col">
     <!-- Loading State -->
@@ -59,6 +170,7 @@
                 <span class="legend-letter">{{ item.letter }}</span>
               </div>
             </div>
+          </div>
         </div>
         <!-- Time legend (discrete color steps) -->
         <div class="legend-time w-full" *ngIf="data.isScoreMode">

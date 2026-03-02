@@ -1,6 +1,7 @@
 import { Component, Inject, OnInit, AfterViewInit, ViewChild, ChangeDetectorRef, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialog } from '@angular/material/dialog';
 import { SharedModule } from '../../../../shared/shared.module';
+import { InfoOverlayComponent } from '../../../../shared/info-overlay/info-overlay.component';
 import { CommonModule } from '@angular/common';
 import { AnalyzeService, CategoryScore } from '../../../../services/analyze.service';
 import { catchError, of } from 'rxjs';
@@ -28,6 +29,7 @@ export interface AllCategoriesDialogData {
     CommonModule,
     ChartModule,
     TranslateModule,
+    InfoOverlayComponent,
   ],
   templateUrl: './all-categories-dialog.component.html',
   styleUrl: './all-categories-dialog.component.css'
@@ -51,14 +53,14 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
     { letter: 'F', color: 'rgb(197, 136, 187)' }
   ];
 
-  // Time (score) colors - discrete 10-minute steps
+  // Time (score) colors - match exact colors from map.service.ts getScoreFillColorExpression()
   timeColors = [
-    { value: '0-10', color: 'rgb(162, 210, 235)' },
-    { value: '10-20', color: 'rgb(121, 194, 230)' },
-    { value: '20-30', color: 'rgb(90, 135, 185)' },
-    { value: '30-40', color: 'rgb(74, 89, 160)' },
-    { value: '40-50', color: 'rgb(43, 40, 105)' },
-    { value: '50-60+', color: 'rgb(23, 25, 63)' }
+    { value: '0-10', color: 'rgb(23, 25, 63)' },      // 0-10 min (default for < 600) - darkest
+    { value: '10-15', color: 'rgb(43, 40, 105)' },   // 11-15 min (600-900s) - very dark
+    { value: '15-20', color: 'rgb(74, 89, 160)' },    // 16-20 min (900-1200s) - darker
+    { value: '20-30', color: 'rgb(90, 135, 185)' },   // 21-30 min (1200-1800s) - medium
+    { value: '30-45', color: 'rgb(121, 194, 230)' },  // 31-45 min (1800-2700s) - medium-light
+    { value: '45+', color: 'rgb(162, 210, 235)' }     // 45+ min (2700+s) - lightest
   ];
 
   private translate = inject(TranslateService);
@@ -134,40 +136,43 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
     const weights = categories.map(cat => cat.weight * 100);
 
     // Get colors based on current map visualization type
+    // Colors match exactly with map.service.ts getScoreFillColorExpression() and getIndexFillColorExpression()
     const colors = categories.map((cat) => {
       if (this.data.isScoreMode) {
-        // Use score-based colors
+        // Use score-based colors (blue colors for zeit bewertung from getScoreFillColorExpression)
+        // Match exact color breaks from map.service.ts
         const scoreValue = cat.score;
-        if (scoreValue <= 600) {
-          return 'rgb(162, 210, 235)'; // 0-10 min
-        } else if (scoreValue <= 1200) {
-          return 'rgb(121, 194, 230)'; // 10-20 min
-        } else if (scoreValue <= 1800) {
-          return 'rgb(90, 135, 185)'; // 20-30 min
-        } else if (scoreValue <= 2400) {
-          return 'rgb(74, 89, 160)'; // 30-40 min
-        } else if (scoreValue <= 3000) {
-          return 'rgb(43, 40, 105)'; // 40-50 min
+        if (scoreValue < 600) {
+          return 'rgb(23, 25, 63)'; // 0-10 min (default for < 600) - darkest
+        } else if (scoreValue < 900) {
+          return 'rgb(43, 40, 105)'; // 11-15 min (600-900s) - very dark
+        } else if (scoreValue < 1200) {
+          return 'rgb(74, 89, 160)'; // 16-20 min (900-1200s) - darker
+        } else if (scoreValue < 1800) {
+          return 'rgb(90, 135, 185)'; // 21-30 min (1200-1800s) - medium
+        } else if (scoreValue < 2700) {
+          return 'rgb(121, 194, 230)'; // 31-45 min (1800-2700s) - medium-light
         } else {
-          return 'rgb(23, 25, 63)'; // 50-60+ min
+          return 'rgb(162, 210, 235)'; // 45+ min (2700+s) - lightest
         }
       } else {
-        // Use index-based colors
+        // Use index-based colors (from getIndexFillColorExpression)
+        // Match exact color breaks from map.service.ts
         const indexValue = cat.index / 100;
         if (indexValue <= 0) {
-          return 'rgb(128, 128, 128)'; // Transparent gray
-        } else if (indexValue <= 0.35) {
-          return 'rgb(50, 97, 45)'; // Dark green
-        } else if (indexValue <= 0.5) {
-          return 'rgb(60, 176, 67)'; // Green
-        } else if (indexValue <= 0.71) {
-          return 'rgb(238, 210, 2)'; // Yellow
-        } else if (indexValue <= 1) {
-          return 'rgb(237, 112, 20)'; // Orange
-        } else if (indexValue <= 1.41) {
-          return 'rgb(194, 24, 7)'; // Red
+          return 'rgba(128, 128, 128, 0.7)'; // NaN or invalid
+        } else if (indexValue < 0.35) {
+          return 'rgba(50, 97, 45, 0.7)'; // Grade A (A+, A, A-)
+        } else if (indexValue < 0.5) {
+          return 'rgba(60, 176, 67, 0.7)'; // Grade B (B+, B, B-)
+        } else if (indexValue < 0.71) {
+          return 'rgba(238, 210, 2, 0.7)'; // Grade C (C+, C, C-)
+        } else if (indexValue < 1.0) {
+          return 'rgba(237, 112, 20, 0.7)'; // Grade D (D+, D, D-)
+        } else if (indexValue < 1.41) {
+          return 'rgba(194, 24, 7, 0.7)'; // Grade E (E+, E, E-)
         } else {
-          return 'rgb(150, 86, 162)'; // Purple
+          return 'rgba(150, 86, 162, 0.7)'; // Grade F (F+, F, F-)
         }
       }
     });
@@ -213,13 +218,30 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
             title: () => '',
             label: (context: any) => {
               const index = context.dataIndex;
-              const grade = this.getGrade(categories[index].index);
               const activityLabel = this.translate.instant('analyze.activity');
-              const ratingLabel = this.translate.instant('analyze.rating');
               const relevanceLabel = this.translate.instant('analyze.relevance');
+              const minutesLabel = this.translate.instant('map.popup.minutes');
+              
+              // Use appropriate label based on mode
+              const ratingLabel = this.data.isScoreMode 
+                ? this.translate.instant('map.popup.score')
+                : this.translate.instant('map.popup.index');
+              
+              let ratingValue: string;
+              if (this.data.isScoreMode) {
+                // Convert score from seconds to minutes
+                const scoreValue = categories[index].score;
+                const minutes = Math.round(scoreValue / 60);
+                ratingValue = `${minutes} ${minutesLabel}`;
+              } else {
+                // Use grade for quality mode
+                const grade = this.getGrade(categories[index].index);
+                ratingValue = grade;
+              }
+              
               return [
                 `${activityLabel}: ${categories[index].category_name}`,
-                `${ratingLabel}: ${grade}`,
+                `${ratingLabel} ${ratingValue}`,
                 `${relevanceLabel}: ${weights[index].toFixed(1)}%`
               ];
             }

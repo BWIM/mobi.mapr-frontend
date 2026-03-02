@@ -547,49 +547,48 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Convert weights from decimals (0-1) to percentages (0-100)
     const weights = sortedCategories.map(cat => cat.weight * 100);
 
-    // Get current map visualization type (index or score)
-    const filters = this.filterConfigService.contentLayerFilters();
-    const isScoreMode = filters?.feature_type === 'score';
+    // Get current bewertung setting (qualitaet = index, zeit = score)
+    const bewertung = this.filterConfigService.selectedBewertung();
+    const isScoreMode = bewertung === 'zeit';
     
     // Get colors based on current map visualization type
+    // Colors match exactly with map.service.ts getScoreFillColorExpression() and getIndexFillColorExpression()
     const colors = sortedCategories.map((cat) => {
       if (isScoreMode) {
         // Use score-based colors (blue colors for zeit bewertung from getScoreFillColorExpression)
+        // Match exact color breaks from map.service.ts
         const scoreValue = cat.score;
-        if (scoreValue <= 300) {
-          return 'rgb(23, 25, 63)'; // Darkest blue - 0-5 min
-        } else if (scoreValue <= 600) {
-          return 'rgb(23, 25, 63)'; // Darkest blue - 5-10 min
-        } else if (scoreValue <= 900) {
-          return 'rgb(43, 40, 105)'; // Very dark blue - 10-15 min
-        } else if (scoreValue <= 1200) {
-          return 'rgb(74, 89, 160)'; // Darker blue - 15-20 min
-        } else if (scoreValue <= 1800) {
-          return 'rgb(90, 135, 185)'; // Medium blue - 20-30 min
-        } else if (scoreValue <= 2700) {
-          return 'rgb(121, 194, 230)'; // Medium-light blue - 30-45 min
-        } else if (scoreValue <= 3600) {
-          return 'rgb(162, 210, 235)'; // Light blue - 45-60 min
+        if (scoreValue < 600) {
+          return 'rgb(23, 25, 63)'; // 0-10 min (default for < 600) - darkest
+        } else if (scoreValue < 900) {
+          return 'rgb(43, 40, 105)'; // 11-15 min (600-900s) - very dark
+        } else if (scoreValue < 1200) {
+          return 'rgb(74, 89, 160)'; // 16-20 min (900-1200s) - darker
+        } else if (scoreValue < 1800) {
+          return 'rgb(90, 135, 185)'; // 21-30 min (1200-1800s) - medium
+        } else if (scoreValue < 2700) {
+          return 'rgb(121, 194, 230)'; // 31-45 min (1800-2700s) - medium-light
         } else {
-          return 'rgb(162, 210, 235)'; // Lightest blue - >60 min
+          return 'rgb(162, 210, 235)'; // 45+ min (2700+s) - lightest
         }
       } else {
         // Use index-based colors (from getIndexFillColorExpression)
+        // Match exact color breaks from map.service.ts
         const indexValue = cat.index / 100;
         if (indexValue <= 0) {
-          return 'rgba(128, 128, 128)'; // Transparent gray
-        } else if (indexValue <= 0.35) {
-          return 'rgba(50, 97, 45)'; // Dark green
-        } else if (indexValue <= 0.5) {
-          return 'rgba(60, 176, 67)'; // Green
-        } else if (indexValue <= 0.71) {
-          return 'rgba(238, 210, 2)'; // Yellow
-        } else if (indexValue <= 1) {
-          return 'rgba(237, 112, 20)'; // Orange
-        } else if (indexValue <= 1.41) {
-          return 'rgba(194, 24, 7)'; // Red
+          return 'rgba(128, 128, 128, 0.7)'; // NaN or invalid
+        } else if (indexValue < 0.35) {
+          return 'rgba(50, 97, 45, 0.7)'; // Grade A (A+, A, A-)
+        } else if (indexValue < 0.5) {
+          return 'rgba(60, 176, 67, 0.7)'; // Grade B (B+, B, B-)
+        } else if (indexValue < 0.71) {
+          return 'rgba(238, 210, 2, 0.7)'; // Grade C (C+, C, C-)
+        } else if (indexValue < 1.0) {
+          return 'rgba(237, 112, 20, 0.7)'; // Grade D (D+, D, D-)
+        } else if (indexValue < 1.41) {
+          return 'rgba(194, 24, 7, 0.7)'; // Grade E (E+, E, E-)
         } else {
-          return 'rgba(150, 86, 162)'; // Purple
+          return 'rgba(150, 86, 162, 0.7)'; // Grade F (F+, F, F-)
         }
       }
     });
