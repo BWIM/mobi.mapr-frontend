@@ -64,6 +64,7 @@ export class MapService {
   private websocketService = inject(WebsocketService);
   private projectService = inject(ProjectsService);
   private currentFilters: ContentLayerFilters | null = null;
+  private hasInitialZoom = false; // Track if initial zoom to geolocation has occurred
   
   // Signal to share current profile combination ID with other components
   private _currentProfileCombinationID = signal<number | null>(null);
@@ -446,27 +447,33 @@ export class MapService {
 
   /**
    * Zooms the map to the bounds of the content layer
-   * First tries to get user's geo location, then falls back to content layer bounds
+   * On initial load, tries to get user's geo location first, then falls back to content layer bounds
+   * After initial load, always uses content layer bounds
    */
   private async zoomToContentLayerBounds(filters: ContentLayerFilters): Promise<void> {
     if (!this.map) {
       return;
     }
 
-    // First, try to get user's geo location
-    const geoLocation = await this.fetchGeoLocation();
-    
-    if (geoLocation) {
-      // Move map to user's location
-      this.map.flyTo({
-        center: [geoLocation.lng, geoLocation.lat],
-        zoom: 10,
-        duration: 1000
-      });
-      return;
+    // Only try geolocation on initial load
+    if (!this.hasInitialZoom) {
+      const geoLocation = await this.fetchGeoLocation();
+      
+      if (geoLocation) {
+        // Move map to user's location
+        this.map.flyTo({
+          center: [geoLocation.lng, geoLocation.lat],
+          zoom: 10,
+          duration: 1000
+        });
+        this.hasInitialZoom = true;
+        return;
+      }
+      // Mark as initial zoom attempted even if geolocation failed
+      this.hasInitialZoom = true;
     }
 
-    // Fall back to content layer bounds if geo location is not available
+    // After initial load, or if geolocation failed, use content layer bounds
     const apiBounds = await this.fetchContentLayerBounds(filters);
     
     if (apiBounds) {
@@ -655,6 +662,8 @@ export class MapService {
     this.currentFilters = null;
     // Reset ready check state when content layer is removed
     this._isReadyCheckComplete.set(false);
+    // Reset initial zoom flag so geolocation is attempted again on next load
+    this.hasInitialZoom = false;
     this.updateStyle(updatedStyle);
   }
 

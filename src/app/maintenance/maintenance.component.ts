@@ -7,6 +7,7 @@ import { environment } from '../../environments/environment';
 import { interval, Subscription } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { LanguageService } from '../services/language.service';
 
 @Component({
     selector: 'app-maintenance',
@@ -23,10 +24,12 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
     constructor(
         private router: Router,
         public translate: TranslateService,
-        private http: HttpClient
+        private http: HttpClient,
+        private languageService: LanguageService
     ) {
-        // Get saved language preference or default to German
-        const savedLang = localStorage.getItem('language') || 'de';
+        // Initialize language using LanguageService
+        this.translate.setDefaultLang('de');
+        const savedLang = this.languageService.getSavedLanguage() || 'de';
         this.translate.use(savedLang);
     }
 

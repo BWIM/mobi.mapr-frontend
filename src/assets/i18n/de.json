@@ -169,6 +169,38 @@
     "title": "Wartung",
     "message": "Die Anwendung wird derzeit gewartet. Bitte versuche es später erneut."
   },
+  "LANDING": {
+    "TITLE": "Willkommen bei mobi.mapr",
+    "SUBTITLE": "Entdecke die Mobilitätsqualität in deiner Region",
+    "CARDS": {
+      "PROJECT_MAIN_SITE": {
+        "TITLE": "Projekt-Hauptseite",
+        "DESCRIPTION": "Besuche die offizielle Projektseite für weitere Informationen"
+      },
+      "FAQ": {
+        "TITLE": "Häufig gestellte Fragen",
+        "DESCRIPTION": "Finde Antworten auf häufige Fragen zum Projekt"
+      },
+      "TECHNICAL_DOCS": {
+        "TITLE": "Technische Dokumentation",
+        "DESCRIPTION": "Detaillierte technische Informationen und API-Dokumentation"
+      },
+      "CONTACT": {
+        "TITLE": "Kontakt",
+        "DESCRIPTION": "Nimm Kontakt mit uns auf für Fragen und Feedback"
+      },
+      "LOGIN": {
+        "BUTTON": "Zur Anmeldung"
+      }
+    },
+    "FOOTER": "© mobi.mapr - Baden-Württemberg Institut für Nachhaltige Mobilität"
+  },
+  "MAINTENANCE": {
+    "TITLE": "Wartung",
+    "MESSAGE": "Die Anwendung wird derzeit gewartet. Bitte versuche es später erneut.",
+    "CHECKING": "Prüfe Systemstatus...",
+    "INFO": "Wir arbeiten daran, die Anwendung so schnell wie möglich wieder verfügbar zu machen."
+  },
   "language": {
     "de": "Deutsch",
     "en": "English",

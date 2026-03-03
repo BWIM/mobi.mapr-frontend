@@ -169,6 +169,38 @@
     "title": "Maintenance",
     "message": "The application is currently under maintenance. Please try again later."
   },
+  "LANDING": {
+    "TITLE": "Welcome to mobi.mapr",
+    "SUBTITLE": "Discover mobility quality in your region",
+    "CARDS": {
+      "PROJECT_MAIN_SITE": {
+        "TITLE": "Project Main Site",
+        "DESCRIPTION": "Visit the official project page for more information"
+      },
+      "FAQ": {
+        "TITLE": "Frequently Asked Questions",
+        "DESCRIPTION": "Find answers to common questions about the project"
+      },
+      "TECHNICAL_DOCS": {
+        "TITLE": "Technical Documentation",
+        "DESCRIPTION": "Detailed technical information and API documentation"
+      },
+      "CONTACT": {
+        "TITLE": "Contact",
+        "DESCRIPTION": "Get in touch with us for questions and feedback"
+      },
+      "LOGIN": {
+        "BUTTON": "Go to Login"
+      }
+    },
+    "FOOTER": "© mobi.mapr - Baden-Württemberg Institute for Sustainable Mobility"
+  },
+  "MAINTENANCE": {
+    "TITLE": "Maintenance",
+    "MESSAGE": "The application is currently under maintenance. Please try again later.",
+    "CHECKING": "Checking system status...",
+    "INFO": "We are working to make the application available again as soon as possible."
+  },
   "language": {
     "de": "German",
     "en": "English",

@@ -28,11 +28,11 @@
       </div>
       
       <div *ngIf="!isLoading() && !error" class="flex-1 overflow-auto pr-4">
-        <table class="w-full border-collapse border-0 text-[var(--primary-color)]">
+        <table class="w-full border-collapse border-0 text-[var(--primary-color)]" style="table-layout: fixed;">
           <tbody>
             <tr *ngFor="let county of filteredCounties" class="leading-[1.8]">
-              <td class="pr-3 align-top border-0 w-auto">{{ county.rank }}</td>
-              <td class="pr-3 align-top border-0 w-auto">
+              <td class="pr-3 align-top border-0 w-[35px]">{{ county.rank }}</td>
+              <td class="pr-3 align-top border-0">
                 <span 
                   (click)="onFeatureNameClick(county)" 
                   class="cursor-pointer hover:underline"
@@ -40,7 +40,7 @@
                   {{ county.name }}
                 </span>
               </td>
-              <td class="align-top font-medium text-left border-0 w-auto">{{ formatDisplayValue(county) }}</td>
+              <td class="align-top font-medium text-left border-0 whitespace-nowrap w-[75px]">{{ formatDisplayValue(county) }}</td>
             </tr>
             <tr *ngIf="filteredCounties.length === 0">
               <td colspan="3" class="text-sm text-[var(--primary-color)] opacity-70 py-2 border-0">

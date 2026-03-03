@@ -1,4 +1,5 @@
 import { Injectable, inject, signal, computed, effect } from '@angular/core';
+import { Router } from '@angular/router';
 import { ProfileService } from './profile.service';
 import { ProjectsService } from './project.service';
 import { SettingsService } from './settings.service';
@@ -52,6 +53,7 @@ export class FilterConfigService {
   private regiostarService = inject(RegioStarService);
   private stateService = inject(StateService);
   private categoryService = inject(CategoryService);
+  private router = inject(Router);
 
   // Internal state signals
   private _isExpanded = signal<boolean>(false);
@@ -77,6 +79,9 @@ export class FilterConfigService {
   
   // Track when filter data is loaded (for initialization order)
   private _isFilterDataLoaded = signal<boolean>(false);
+  
+  // Track if URL params have been applied (to prevent re-applying on every effect run)
+  private _urlParamsApplied = signal<boolean>(false);
 
   // Public readonly signals
   readonly isExpanded = this._isExpanded.asReadonly();
@@ -241,6 +246,8 @@ export class FilterConfigService {
           this._selectedPersonas.set(null);
           // Reset filter data loaded flag when project changes
           this._isFilterDataLoaded.set(false);
+          // Reset URL params applied flag to allow re-applying on project change
+          this._urlParamsApplied.set(false);
         }
         previousProjectId = currentProject.id;
 
@@ -251,6 +258,7 @@ export class FilterConfigService {
         this.loadAllFilterData(currentProject.is_mid);
         
         // Update mode selection if profiles are already loaded
+        // This will update mode options and validate selection (including URL params)
         if (this._allProfiles().length > 0) {
           this.updateModeSelection(currentProject.base_profiles);
         }
@@ -258,6 +266,8 @@ export class FilterConfigService {
         // Reset when project is cleared
         previousProjectId = null;
         this._isFilterDataLoaded.set(false);
+        // Reset URL params applied flag when project is cleared
+        this._urlParamsApplied.set(false);
         // Reset ready check state when project is cleared
         this.mapService.setReadyCheckComplete(false);
       }
@@ -354,7 +364,13 @@ export class FilterConfigService {
       next: (response) => {
         this._allProfiles.set(response.results);
         this.extractModes();
-        this.updateModeSelectionFromProject();
+        // Apply URL params - this will set modes if profile_combination_id is in URL
+        this.applyUrlParams();
+        // Update mode selection from project only if URL params didn't set modes
+        // (check if modes are still empty or if URL params weren't applied)
+        if (this._selectedModes().length === 0 || !this._urlParamsApplied()) {
+          this.updateModeSelectionFromProject();
+        }
         // Validate and update mode selection after modes are loaded
         this.validateModeSelection();
       },
@@ -371,11 +387,79 @@ export class FilterConfigService {
     this.profileService.getProfileCombinations(1, 1000).subscribe({
       next: (response) => {
         this._allProfileCombinations.set(response.results);
+        // Apply URL params after profile combinations are loaded
+        this.applyUrlParams();
       },
       error: (error) => {
         console.error('Error loading profile combinations:', error);
       }
     });
+  }
+
+  /**
+   * Apply URL parameters for profile_combination_id and bewertung
+   * This should be called after profiles and profile combinations are loaded
+   */
+  private applyUrlParams(): void {
+    // Only apply URL params once
+    if (this._urlParamsApplied()) {
+      return;
+    }
+
+    // Check if profiles and profile combinations are loaded
+    if (this._allProfiles().length === 0 || this._allProfileCombinations().length === 0) {
+      return;
+    }
+
+    // Read URL query parameters
+    const urlTree = this.router.parseUrl(this.router.url);
+    const queryParams = urlTree.queryParams;
+
+    // Apply bewertung parameter
+    if (queryParams['bewertung']) {
+      const bewertung = queryParams['bewertung'];
+      if (bewertung === 'zeit' || bewertung === 'qualitaet') {
+        this._selectedBewertung.set(bewertung);
+        this.saveSettings();
+      }
+    }
+
+    // Apply profile_combination_id parameter
+    if (queryParams['profile_combination_id']) {
+      const profileCombinationId = Number(queryParams['profile_combination_id']);
+      if (!isNaN(profileCombinationId)) {
+        const combination = this._allProfileCombinations().find(c => c.id === profileCombinationId);
+        if (combination) {
+          // Get profiles for this combination
+          const profiles = this._allProfiles().filter(p => 
+            combination.profile_ids.includes(p.id)
+          );
+
+          // Extract unique mode IDs from these profiles
+          const modeIds = new Set<number>();
+          profiles.forEach(profile => {
+            if (profile.mode) {
+              modeIds.add(profile.mode.id);
+            }
+          });
+
+          // Set the selected modes
+          if (modeIds.size > 0) {
+            this._selectedModes.set(Array.from(modeIds));
+            this.saveSettings();
+            
+            // Validate against current project if loaded
+            const currentProject = this.projectService.project();
+            if (currentProject && currentProject.base_profiles) {
+              this.validateModeSelection();
+            }
+          }
+        }
+      }
+    }
+
+    // Mark URL params as applied
+    this._urlParamsApplied.set(true);
   }
 
   /**
