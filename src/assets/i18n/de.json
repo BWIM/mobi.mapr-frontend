@@ -410,7 +410,142 @@
       "regioStarsDescription": "Wenn du nur bestimmte Regionen in Deutschland betrachten möchtest, z.B. ländliche Gebiete, kannst du dies hier filtern. Es ändert die Daten selbst nicht, wie Bundesländer, filtert aber auch die Ergebnisse. Dies spiegelt sich auch in den Top-10-Rankings wider.",
       "states": "Bundesländer",
       "statesDescription": "Bundesländer ermöglichen es dir, Regionen auf der Karte zu filtern. Während dies die Daten überhaupt nicht beeinflusst, ermöglicht es einen besseren Vergleich sowie die Filterung der Top-10-Rankings.",
-      "filterButton": "Filtern"
+      "filterButton": "Filtern",
+      "filterButtonDisabledHint": "Nur für registrierte Nutzer verfügbar",
+      "infoTabs": {
+        "general": "Allgemein",
+        "generalContent": {
+          "title": "Filter-Übersicht",
+          "intro": "Neben der Auswahl der Verkehrsmittel ist die Wahl der Ziele, also der Aktivitäten entscheidend. Diese können mittels des \"Filtern\"-Buttons angepasst werden.",
+          "mid23": "Die Aktivitäten basieren auf der Studie \"Mobilität in Deutschland 2023\" (MiD23) und werden mit freundlicher Genehmigung verwendet.",
+          "personas": "Zusätzlich können die Aktivitäten für einzelne Personengruppen eingeschränkt werden. Um jeweils mehr darüber zu erfahren, klicke auf die jeweiligen Tabs.",
+          "combinations": "Durch 29! Aktivitäten in Kombination mit 8! Personengruppen für die 4! Verkehrsmittel-Kombinationen gibt es mehrere hundert Milliarden Möglichkeiten, die Karte zu erstellen.",
+          "beta": "Um die Rechenkapazitäten nicht zu überlasten sowie Missbrauch zu vermeiden, sind diese Funktionen nur für angemeldete Nutzer verfügbar. Dieses Feature befindet sich aktuell in der Beta-Phase.",
+          "regionalFilters": "Zusätzlich können Bundesländer und Regionalklassen ausgewählt werden. Diese sind keine inhaltliche, sondern oberflächliche Filterung.",
+          "example": "Möchte man beispielsweise wissen, was die besten Kommunen im ländlichen Raum in Baden-Württemberg sind, kann man das hier filtern und es wird dann rechts angezeigt."
+        },
+        "activities": "Aktivitäten",
+        "activitiesContent": {
+          "introduction": {
+            "title": "Grundverständnis",
+            "description": "Am Ende jedes Weges steht eine Aktivität. Dies kann beispielsweise ein Restaurantbesuch, ein Museumsaufenthalt oder ein Einkauf sein. Aktivitäten bilden somit den eigentlichen Zweck von Mobilität.",
+            "focus": "Der mobi.mapr konzentriert sich auf die Alltagsmobilität. Dabei werden Wege zu Ausbildungs- und Arbeitsorten bewusst nicht berücksichtigt. Im Fokus stehen vielmehr alltägliche Ziele des täglichen Lebens, wie Einkäufe, Freizeitaktivitäten oder soziale Besuche."
+          },
+          "dataSource": {
+            "title": "Datengrundlage: Mobilität in Deutschland (MiD)",
+            "description": "Die im mobi.mapr verwendeten Aktivitäten basieren auf der Studie \"Mobilität in Deutschland\" (MiD). Es werden die Daten aus dem Jahr 2023 genutzt.",
+            "survey": "In dieser bundesweiten Erhebung werden Menschen unter anderem dazu befragt:",
+            "survey1": "Welche Wege sie im Alltag zurücklegen",
+            "survey2": "Welche Ziele sie dabei ansteuern",
+            "survey3": "Aus welchem Anlass diese Wege erfolgen",
+            "result": "Das Ergebnis ist eine Liste von rund 30 Aktivitätskategorien. Diese Kategorien sind bewusst allgemein formuliert, um statistisch auswertbar zu sein."
+          },
+          "translation": {
+            "title": "Übersetzung in konkrete Alltagsaktivitäten",
+            "description": "Die in der MiD erhobenen Aktivitätskategorien sind relativ abstrakt. Daher werden sie im mobi.mapr auf Basis wissenschaftlicher Literatur und empirischer Annahmen in konkrete Alltagsziele übersetzt.",
+            "example": "Beispiel:",
+            "exampleTitle": "\"Täglicher Bedarf\" wird konkretisiert zu:",
+            "example1": "Supermarkt",
+            "example2": "Bäckerei",
+            "example3": "Drogerie",
+            "example4": "weitere Einrichtungen des täglichen Einkaufs",
+            "details": "Für jede Aktivität ist hinterlegt:",
+            "details1": "Welche konkreten Zielorte ihr zugeordnet sind",
+            "details2": "Wie diese Zielorte gewichtet werden",
+            "viewInfo": "Diese Informationen können durch einen Klick auf die jeweilige Aktivität eingesehen werden."
+          },
+          "ambiguities": {
+            "title": "Umgang mit Unschärfen",
+            "description": "Nicht jede Aktivität lässt sich eindeutig und zielscharf übersetzen.",
+            "example": "Ein Beispiel ist die Aktivität \"Hund ausführen\" aus der MiD-Studie. Diese beschreibt eigentlich eine Bewegung im öffentlichen Raum ohne klares Ziel. Im mobi.mapr wird sie derzeit näherungsweise über Ziele wie:",
+            "example1": "Geschäfte für Hundezubehör",
+            "example2": "ähnliche Einrichtungen",
+            "validation": "abgebildet. Validierungen zeigen jedoch, dass sich solche Unschärfen in der Gesamtbetrachtung häufig ausgleichen. Das bedeutet: Auch wenn einzelne Aktivitäten nur näherungsweise übersetzt werden können, bleibt das Gesamtbild der Alltagsmobilität stabil und belastbar."
+          },
+          "regional": {
+            "title": "Regionale Differenzierung",
+            "description": "Zusätzlich zur Differenzierung nach Personengruppen werden Aktivitäten auch regional gewichtet.",
+            "meaning": "Das bedeutet:",
+            "meaning1": "In Metropolregionen unterscheiden sich Zielstrukturen und Präferenzen deutlich von denen im ländlichen Raum.",
+            "meaning2": "Stadtbewohner suchen häufiger urbane Angebote wie Gastronomie, Kultur oder spezialisierte Dienstleistungen.",
+            "meaning3": "Im ländlichen Raum stehen andere Einrichtungen und Versorgungsstrukturen im Vordergrund.",
+            "consideration": "Diese regionalen Unterschiede werden im mobi.mapr berücksichtigt, um realitätsnahe Aussagen zur Alltagsmobilität treffen zu können."
+          }
+        },
+        "personas": "Personas",
+        "personasContent": {
+          "introduction": {
+            "title": "Über Personas",
+            "description": "Über Personas werden unterschiedliche Alltagsperspektiven auf Mobilität abgebildet. Die genutzten Personas basieren auf den 12 Personengruppen der Studie \"Mobilität in Deutschland (MiD)\" und ermöglichen es, Mobilitätszeiten und Bewertungen getrennt nach Nutzungsgruppen darzustellen. Durch die Aus- und Abwahl einzelner Personas lassen sich Unterschiede zwischen Lebensrealitäten unmittelbar sichtbar machen."
+          },
+          "personGroups": {
+            "title": "Personengruppen laut MiD:",
+            "group1": "Erwerbstätige/r mit verfügbarem Pkw",
+            "group2": "Erwerbstätige/r ohne verfügbaren Pkw",
+            "group3": "Nicht-Erwerbstätige/r mit verfügbarem Pkw",
+            "group4": "Nicht-Erwerbstätige/r ohne verfügbaren Pkw",
+            "group5": "Student/in mit verfügbarem Pkw",
+            "group6": "Student/in ohne verfügbaren Pkw",
+            "group7": "Auszubildende/r mit verfügbarem Pkw",
+            "group8": "Auszubildende/r ohne verfügbaren Pkw",
+            "group9": "Kind 0-6 Jahre",
+            "group10": "Schüler/in 7-10 Jahre",
+            "group11": "Schüler/in 11-21 Jahre mit verfügbarem Pkw",
+            "group12": "Schüler/in 11-21 Jahre ohne verfügbaren Pkw"
+          },
+          "weighting": {
+            "title": "Gewichtung der Aktivitäten",
+            "description": "Die Bedeutung einzelner Aktivitäten hängt stark von der jeweiligen Personengruppe ab.",
+            "examples": "Beispiele:",
+            "example1": "Kinder besuchen häufiger Spielplätze.",
+            "example2": "Erwachsene haben einen stärkeren Fokus auf Einkauf oder Besorgungen.",
+            "example3": "Ältere Menschen weisen wiederum andere Aktivitätsmuster auf.",
+            "standardView": "In der Standardansicht des mobi.mapr werden zunächst alle Personengruppen gemeinsam betrachtet. Dadurch entsteht ein durchschnittliches Aktivitätsprofil."
+          }
+        },
+        "regioStars": "Regionalklassen",
+        "regioStarsContent": {
+          "introduction": {
+            "title": "RegioStaR7: Der Schlüssel zum fairen Vergleich",
+            "description": "Um die Mobilitätsqualität realistisch und differenziert darzustellen, greift mobi.mapr auf die RegioStaR7-Klassifizierung (Regionalstatistische Raumtypologie) des Bundesministeriums für Digitales und Verkehr (BMDV) zurück. Diese Typologie teilt Deutschland in sieben Raumtypen ein."
+          },
+          "types": {
+            "title": "Die sieben Raumtypen:",
+            "type1": "Stadtregion – Metropole",
+            "type2": "Stadtregion – Regiopole und Großstadt",
+            "type3": "Stadtregion – Mittelstadt, städtischer Raum",
+            "type4": "Stadtregion – kleinstädtischer, dörflicher Raum",
+            "type5": "Ländliche Region – zentrale Stadt",
+            "type6": "Ländliche Region – Mittelstadt, städtischer Raum",
+            "type7": "Ländliche Region – kleinstädtischer, dörflicher Raum"
+          },
+          "usage": {
+            "title": "Wie mobi.mapr RegioStaR nutzt",
+            "description": "Die RegioStaR-Klassifizierung fließt in zwei zentrale Bereiche der Analyse ein:",
+            "point1": "Durchschnittliche Wegzeiten: Der benötigte Zeitaufwand, um eine Alltagsaktivität in unterschiedlichen Raumtypen auszuüben",
+            "point2": "Aktivitäten einer Persona: Die Bedeutung einzelner Aktivitäten je nach Raumtyp",
+            "example": "Durch die Einbindung der RegioStaR-Klassen wird sichergestellt, dass regionale Unterschiede ausgeglichen werden und Vergleiche immer regional fair bleiben – also nicht eine Metropole mit einer Landgemeinde verglichen wird, sondern nur Regionen ähnlicher Struktur miteinander."
+          },
+          "dataBasis": {
+            "title": "Die Datenbasis",
+            "description": "Für die Berechnungen nutzt mobi.mapr zwei zentrale Datenquellen:",
+            "source1": "MiD-Daten (Mobilität in Deutschland) für typische Aktivitäten wie Einkaufen oder Freizeit",
+            "source2": "OpenStreetMap-Daten, um z. B. die Erreichbarkeit von Supermärkten oder anderen Orten darzustellen",
+            "fallback": "Fehlen für bestimmte Regionen Daten, greift mobi.mapr auf den Durchschnitt der übrigen Regionalklassen zurück."
+          },
+          "notes": {
+            "title": "Anmerkungen",
+            "description": "Die RegioStaR-Klassifizierung war ursprünglich ein präzises Instrument, um Räume in verschiedene Kategorien einzuteilen. Heute wissen wir jedoch, dass ihre aktuelle Anwendung nicht in allen Fällen vollständig passt oder auf dem neuesten Stand ist. Wie bei allen Bestandteilen von mobi.mapr entwickeln wir uns kontinuierlich weiter und integrieren laufend aktuelle Daten und neue Klassifizierungen."
+          },
+          "imagePlaceholder": "RegioStaR7-Karte"
+        },
+        "states": "Bundesländer",
+        "statesContent": {
+          "title": "Bundesländer",
+          "description": "Der Filter für Bundesländer umfasst die 16 deutschen Bundesländer und ermöglicht es, die Analyse nach einzelnen Bundesländern zu filtern.",
+          "influence": "Diese Filterung beeinflusst die Rankings und ermöglicht es, Mobilitätsqualitäten gezielt nach Bundesländern zu vergleichen."
+        }
+      }
     }
   },
   "filterDialog": {
@@ -501,7 +636,7 @@
   },
   "right": {
     "mobile": {
-      "hint": "Für eine detaillierte Analyse öffnen Sie diese Seite bitte auf dem Desktop."
+      "hint": "Für eine detaillierte Analyse öffne diese Seite bitte auf dem Desktop."
     }
   },
   "stats": {

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, computed } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, computed } from '@angular/core';
 import { ProjectsService } from '../../services/project.service';
 import { FilterConfigService } from '../../services/filter-config.service';
 import { DashboardSessionService } from '../../services/dashboard-session.service';
@@ -8,6 +8,7 @@ import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.compo
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ChartModule } from 'primeng/chart';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-left',
@@ -15,12 +16,13 @@ import { ChartModule } from 'primeng/chart';
   templateUrl: './left.component.html',
   styleUrl: './left.component.css',
 })
-export class LeftComponent implements OnInit {
+export class LeftComponent implements OnInit, OnDestroy {
   private projectService = inject(ProjectsService);
   private filterConfigService = inject(FilterConfigService);
   private dashboardSessionService = inject(DashboardSessionService);
   private dialog = inject(MatDialog);
   private translate = inject(TranslateService);
+  private languageSubscription?: Subscription;
 
   // Use the project signal directly - it will reactively update when the project loads
   project = this.projectService.project;
@@ -34,6 +36,10 @@ export class LeftComponent implements OnInit {
   // Quality graph data
   qualityChartData: any;
   qualityChartOptions: any;
+  
+  // Personas pie chart data
+  personasChartData: any;
+  personasChartOptions: any;
   
   // Expose filter config service signals for template
   isExpanded = this.filterConfigService.isExpanded;
@@ -58,6 +64,18 @@ export class LeftComponent implements OnInit {
 
   ngOnInit() {
     this.initializeQualityChart();
+    this.initializePersonasChart();
+    
+    // Subscribe to language changes to update chart labels
+    this.languageSubscription = this.translate.onLangChange.subscribe(() => {
+      this.initializePersonasChart();
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.languageSubscription) {
+      this.languageSubscription.unsubscribe();
+    }
   }
 
   private getPrimaryColor(): string {
@@ -305,6 +323,10 @@ export class LeftComponent implements OnInit {
   }
 
   openFilterDialog() {
+    // Prevent opening filter dialog if user is only authenticated via share key
+    if (this.isShareKeyOnly()) {
+      return;
+    }
     this.filterConfigService.openFilterDialog();
   }
 
@@ -336,6 +358,113 @@ export class LeftComponent implements OnInit {
     const month = String(createdDate.getMonth() + 1).padStart(2, '0');
     const year = createdDate.getFullYear();
     return `${day}.${month}.${year}`;
+  }
+
+  private initializePersonasChart(): void {
+    // 12 persona groups with specific percentages from MiD study
+    const labels = [
+      this.translate.instant('left.activeFilters.infoTabs.personasContent.personGroups.group1'),
+      this.translate.instant('left.activeFilters.infoTabs.personasContent.personGroups.group2'),
+      this.translate.instant('left.activeFilters.infoTabs.personasContent.personGroups.group3'),
+      this.translate.instant('left.activeFilters.infoTabs.personasContent.personGroups.group4'),
+      this.translate.instant('left.activeFilters.infoTabs.personasContent.personGroups.group5'),
+      this.translate.instant('left.activeFilters.infoTabs.personasContent.personGroups.group6'),
+      this.translate.instant('left.activeFilters.infoTabs.personasContent.personGroups.group7'),
+      this.translate.instant('left.activeFilters.infoTabs.personasContent.personGroups.group8'),
+      this.translate.instant('left.activeFilters.infoTabs.personasContent.personGroups.group9'),
+      this.translate.instant('left.activeFilters.infoTabs.personasContent.personGroups.group10'),
+      this.translate.instant('left.activeFilters.infoTabs.personasContent.personGroups.group11'),
+      this.translate.instant('left.activeFilters.infoTabs.personasContent.personGroups.group12')
+    ];
+
+    // Specific percentages from MiD study
+    const data = [
+      32, // Erwerbstätige/r mit verfügbarem Pkw
+      15, // Erwerbstätige/r ohne verfügbaren Pkw
+      15, // Nicht-Erwerbstätige/r mit verfügbarem Pkw
+      14, // Nicht-Erwerbstätige/r ohne verfügbaren Pkw
+      1,  // Student/in mit verfügbarem Pkw
+      1,  // Student/in ohne verfügbaren Pkw
+      1,  // Auszubildende/r mit verfügbarem Pkw
+      1,  // Auszubildende/r ohne verfügbaren Pkw
+      7,  // Kind 0-6 Jahre
+      4,  // Schüler/in 7-10 Jahre
+      3,  // Schüler/in 11-21 Jahre mit verfügbarem Pkw
+      3   // Schüler/in 11-21 Jahre ohne verfügbaren Pkw
+    ];
+
+    // Color palette - using variations of primary color and complementary colors
+    const colors = [
+      '#482683', // Primary color
+      '#6B4C93', // Lighter purple
+      '#8E6BA8', // Even lighter purple
+      '#B18FC2', // Light purple
+      '#3A5F8F', // Blue-purple
+      '#4A7BA7', // Lighter blue-purple
+      '#5C97BF', // Light blue-purple
+      '#6EB3D7', // Very light blue-purple
+      '#2D4A6B', // Dark blue
+      '#3D6B8F', // Medium blue
+      '#4D8CB3', // Light blue
+      '#5DADD7'  // Very light blue
+    ];
+
+    // Create array of objects with all data, then sort by weight (descending)
+    const chartItems = labels.map((label, index) => ({
+      label,
+      data: data[index],
+      color: colors[index]
+    }));
+
+    // Sort by weight (data) in descending order
+    chartItems.sort((a, b) => b.data - a.data);
+
+    // Extract sorted arrays
+    const sortedLabels = chartItems.map(item => item.label);
+    const sortedData = chartItems.map(item => item.data);
+    const sortedColors = chartItems.map(item => item.color);
+
+    // Create new object reference to ensure change detection works
+    this.personasChartData = {
+      labels: [...sortedLabels], // Create new array with sorted labels
+      datasets: [
+        {
+          data: [...sortedData], // Create new array with sorted data
+          backgroundColor: [...sortedColors], // Create new array with sorted colors
+          borderColor: 'var(--background-color)',
+          borderWidth: 2
+        }
+      ]
+    };
+
+    this.personasChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'right',
+          labels: {
+            color: 'var(--primary-color)',
+            font: {
+              size: 11
+            },
+            padding: 8,
+            usePointStyle: true,
+            pointStyle: 'circle'
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: (context: any) => {
+              const label = context.label || '';
+              const value = context.parsed || 0;
+              return `${label}: ${value.toFixed(1)}%`;
+            }
+          }
+        }
+      }
+    };
   }
 
 }

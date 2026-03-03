@@ -422,6 +422,15 @@ export class FilterConfigService {
           this._allCategories.set(responses.categories.results);
           this._allPersonas.set(responses.personas.results);
 
+          // Map categories to activities (categories are used as activities)
+          const activities: Activity[] = responses.categories.results.map(category => ({
+            id: category.id,
+            name: category.name,
+            display_name: category.display_name,
+            description: category.description
+          }));
+          this._allActivities.set(activities);
+
           // Preselect all items
           this.preselectAllRegioStars();
           this.preselectAllStates();

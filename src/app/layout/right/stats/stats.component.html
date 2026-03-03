@@ -32,7 +32,7 @@
           <tbody>
             <tr *ngFor="let county of filteredCounties" class="leading-[1.8]">
               <td class="pr-3 align-top border-0 w-auto">{{ county.rank }}</td>
-              <td class="pr-3 align-top border-0">
+              <td class="pr-3 align-top border-0 w-auto">
                 <span 
                   (click)="onFeatureNameClick(county)" 
                   class="cursor-pointer hover:underline"
@@ -40,7 +40,7 @@
                   {{ county.name }}
                 </span>
               </td>
-              <td class="align-top font-medium text-left border-0 w-[3ch]">{{ formatDisplayValue(county) }}</td>
+              <td class="align-top font-medium text-left border-0 w-auto">{{ formatDisplayValue(county) }}</td>
             </tr>
             <tr *ngIf="filteredCounties.length === 0">
               <td colspan="3" class="text-sm text-[var(--primary-color)] opacity-70 py-2 border-0">

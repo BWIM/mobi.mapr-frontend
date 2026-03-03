@@ -410,7 +410,142 @@
       "regioStarsDescription": "If you only want to look at certain regions in Germany, for example rural areas, you can filter this here. It does not change the data itself, like states, but also filters the results. It is also reflected in the Top rankings.",
       "states": "States",
       "statesDescription": "States allow you to filter for regions on the map. While this does not influence the data at all, it allows for better comparison, as well as filtering the Top rankings.",
-      "filterButton": "Filter"
+      "filterButton": "Filter",
+      "filterButtonDisabledHint": "Only available for registered users",
+      "infoTabs": {
+        "general": "General",
+        "generalContent": {
+          "title": "Filter Overview",
+          "intro": "In addition to selecting transport modes, choosing destinations, i.e., activities, is crucial. These can be adjusted using the \"Filter\" button.",
+          "mid23": "The activities are based on the \"Mobilität in Deutschland 2023\" (MiD23) study and are used with kind permission.",
+          "personas": "Additionally, activities can be restricted for individual persona groups. To learn more about each, click on the respective tabs.",
+          "combinations": "Through 29! activities in combination with 8! persona groups for the 4! transport mode combinations, there are several hundred billion possibilities to create the map.",
+          "beta": "To avoid overloading computing capacity and prevent misuse, these functions are only available for registered users. This feature is currently in the beta phase.",
+          "regionalFilters": "Additionally, states and regional classes can be selected. These are not content-based but superficial filtering.",
+          "example": "For example, if you want to know what the best municipalities in rural areas in Baden-Württemberg are, you can filter here and it will be displayed on the right."
+        },
+        "activities": "Activities",
+        "activitiesContent": {
+          "introduction": {
+            "title": "Understanding Activities",
+            "description": "Every journey ends with an activity. This could be visiting a restaurant, spending time at a museum, or going shopping. Activities represent the actual purpose of mobility.",
+            "focus": "mobi.mapr focuses on everyday mobility. Commutes to educational institutions and workplaces are intentionally not considered. Instead, the focus is on everyday destinations such as shopping, leisure activities, or social visits."
+          },
+          "dataSource": {
+            "title": "Data Source: Mobility in Germany (MiD)",
+            "description": "The activities used in mobi.mapr are based on the \"Mobilität in Deutschland\" (Mobility in Germany) study. Data from 2023 is used.",
+            "survey": "In this nationwide survey, people are asked, among other things:",
+            "survey1": "Which routes they take in everyday life",
+            "survey2": "Which destinations they aim for",
+            "survey3": "What occasion these routes occur for",
+            "result": "The result is a list of approximately 30 activity categories. These categories are deliberately formulated in general terms to be statistically evaluable."
+          },
+          "translation": {
+            "title": "Translation into Concrete Everyday Activities",
+            "description": "The activity categories collected in MiD are relatively abstract. Therefore, they are translated into concrete everyday destinations in mobi.mapr based on scientific literature and empirical assumptions.",
+            "example": "Example:",
+            "exampleTitle": "\"Daily Needs\" is concretized to:",
+            "example1": "Supermarket",
+            "example2": "Bakery",
+            "example3": "Drugstore",
+            "example4": "Other daily shopping facilities",
+            "details": "For each activity, the following is stored:",
+            "details1": "Which concrete destination locations are assigned to it",
+            "details2": "How these destination locations are weighted",
+            "viewInfo": "This information can be viewed by clicking on the respective activity."
+          },
+          "ambiguities": {
+            "title": "Dealing with Ambiguities",
+            "description": "Not every activity can be translated unambiguously and precisely.",
+            "example": "An example is the activity \"Walking the dog\" from the MiD study. This actually describes movement in public space without a clear destination. In mobi.mapr, it is currently approximated through destinations such as:",
+            "example1": "Stores for dog supplies",
+            "example2": "Similar facilities",
+            "validation": "Validations show, however, that such ambiguities often balance out in the overall view. This means: Even if individual activities can only be approximated, the overall picture of everyday mobility remains stable and reliable."
+          },
+          "regional": {
+            "title": "Regional Differentiation",
+            "description": "In addition to differentiation by person groups, activities are also weighted regionally.",
+            "meaning": "This means:",
+            "meaning1": "In metropolitan regions, destination structures and preferences differ significantly from those in rural areas.",
+            "meaning2": "City dwellers seek urban offerings such as gastronomy, culture, or specialized services more frequently.",
+            "meaning3": "In rural areas, other facilities and supply structures are prioritized.",
+            "consideration": "These regional differences are taken into account in mobi.mapr to make realistic statements about everyday mobility."
+          }
+        },
+        "personas": "Personas",
+        "personasContent": {
+          "introduction": {
+            "title": "About Personas",
+            "description": "Personas map different everyday perspectives on mobility. The personas used are based on the 12 person groups from the \"Mobilität in Deutschland (MiD)\" study and enable mobility times and ratings to be displayed separately by user groups. By selecting and deselecting individual personas, differences between life realities can be made immediately visible."
+          },
+          "personGroups": {
+            "title": "Person Groups according to MiD:",
+            "group1": "Working person with available car",
+            "group2": "Working person without available car",
+            "group3": "Non-working person with available car",
+            "group4": "Non-working person without available car",
+            "group5": "Student with available car",
+            "group6": "Student without available car",
+            "group7": "Apprentice with available car",
+            "group8": "Apprentice without available car",
+            "group9": "Child 0-6 years",
+            "group10": "Pupil 7-10 years",
+            "group11": "Pupil 11-21 years with available car",
+            "group12": "Pupil 11-21 years without available car"
+          },
+          "weighting": {
+            "title": "Weighting of Activities",
+            "description": "The importance of individual activities depends strongly on the respective person group.",
+            "examples": "Examples:",
+            "example1": "Children visit playgrounds more frequently.",
+            "example2": "Adults have a stronger focus on shopping or errands.",
+            "example3": "Older people show different activity patterns again.",
+            "standardView": "In the standard view of mobi.mapr, all person groups are initially considered together. This creates an average activity profile."
+          }
+        },
+        "regioStars": "RegioStars",
+        "regioStarsContent": {
+          "introduction": {
+            "title": "RegioStaR7: The Key to Fair Comparison",
+            "description": "To realistically and differentiatedly represent mobility quality, mobi.mapr uses the RegioStaR7 classification (Regional Statistical Spatial Typology) from the Federal Ministry for Digital and Transport (BMDV). This typology divides Germany into seven spatial types."
+          },
+          "types": {
+            "title": "The seven spatial types:",
+            "type1": "Urban region – Metropolis",
+            "type2": "Urban region – Regiopolis and large city",
+            "type3": "Urban region – Medium-sized city, urban space",
+            "type4": "Urban region – Small town, rural space",
+            "type5": "Rural region – Central city",
+            "type6": "Rural region – Medium-sized city, urban space",
+            "type7": "Rural region – Small town, rural space"
+          },
+          "usage": {
+            "title": "How mobi.mapr uses RegioStaR",
+            "description": "The RegioStaR classification flows into two central areas of analysis:",
+            "point1": "Average travel times: The time required to perform an everyday activity in different spatial types",
+            "point2": "Activities of a persona: The importance of individual activities depending on spatial type",
+            "example": "By integrating RegioStaR classes, it is ensured that regional differences are balanced and comparisons always remain regionally fair – so a metropolis is not compared with a rural municipality, but only regions of similar structure with each other."
+          },
+          "dataBasis": {
+            "title": "The Data Basis",
+            "description": "For the calculations, mobi.mapr uses two central data sources:",
+            "source1": "MiD data (Mobility in Germany) for typical activities such as shopping or leisure",
+            "source2": "OpenStreetMap data to represent, for example, the accessibility of supermarkets or other locations",
+            "fallback": "If data is missing for certain regions, mobi.mapr falls back to the average of the other regional classes."
+          },
+          "notes": {
+            "title": "Notes",
+            "description": "The RegioStaR classification was originally a precise instrument for dividing spaces into different categories. Today, however, we know that its current application does not fully fit or is up to date in all cases. As with all components of mobi.mapr, we continuously develop and integrate current data and new classifications."
+          },
+          "imagePlaceholder": "RegioStaR7 Map"
+        },
+        "states": "States",
+        "statesContent": {
+          "title": "Federal States",
+          "description": "The federal states filter includes the 16 German federal states and allows filtering the analysis by individual states.",
+          "influence": "This filtering influences the rankings and enables targeted comparison of mobility qualities by federal states."
+        }
+      }
     }
   },
   "filterDialog": {

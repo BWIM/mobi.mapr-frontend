@@ -1,7 +1,6 @@
 import { Component, Inject, OnInit, AfterViewInit, ViewChild, ChangeDetectorRef, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialog } from '@angular/material/dialog';
 import { SharedModule } from '../../../../shared/shared.module';
-import { InfoOverlayComponent } from '../../../../shared/info-overlay/info-overlay.component';
 import { CommonModule } from '@angular/common';
 import { AnalyzeService, CategoryScore } from '../../../../services/analyze.service';
 import { catchError, of } from 'rxjs';
@@ -29,7 +28,6 @@ export interface AllCategoriesDialogData {
     CommonModule,
     ChartModule,
     TranslateModule,
-    InfoOverlayComponent,
   ],
   templateUrl: './all-categories-dialog.component.html',
   styleUrl: './all-categories-dialog.component.css'
