@@ -10,7 +10,7 @@
     <!-- Language Selector Button with Menu -->
     <button 
       [matMenuTriggerFor]="languageMenu"
-      class="flex items-center gap-2">
+      class="flex items-center gap-2 border border-[var(--primary-color)] rounded-full p-2 hover:bg-[var(--primary-color)] hover:text-[var(--background-color)] transition-colors">
       <span class="text-xl font-bold">{{ currentLang().toUpperCase() }}</span>
     </button>
     <mat-menu #languageMenu="matMenu">
