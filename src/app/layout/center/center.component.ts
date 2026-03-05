@@ -107,16 +107,14 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   // 74, 89, 160
   // 43, 40, 105
   // 23, 25, 63
-  // Time (score) colors - updated ranges with inverted colors
+  // Time (score) colors - updated ranges
   timeColors = [
-    { value: '0-5', color: 'rgb(23, 25, 63)' },
-    { value: '5-10', color: 'rgb(23, 25, 63)' },
-    { value: '10-15', color: 'rgb(43, 40, 105)' },
-    { value: '15-20', color: 'rgb(74, 89, 160)' },
-    { value: '20-30', color: 'rgb(90, 135, 185)' },
-    { value: '30-45', color: 'rgb(121, 194, 230)' },
-    { value: '45-60', color: 'rgb(162, 210, 235)' },
-    { value: '>60', color: 'rgb(162, 210, 235)' }
+    { value: '0-7', color: 'rgb(23, 25, 63)' },
+    { value: '8-15', color: 'rgb(43, 40, 105)' },
+    { value: '16-23', color: 'rgb(74, 89, 160)' },
+    { value: '24-30', color: 'rgb(90, 135, 185)' },
+    { value: '31-45', color: 'rgb(121, 194, 230)' },
+    { value: '45+', color: 'rgb(162, 210, 235)' }
   ];
 
   getIndexName(index: number): string {

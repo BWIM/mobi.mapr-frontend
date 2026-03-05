@@ -53,11 +53,11 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
 
   // Time (score) colors - match exact colors from map.service.ts getScoreFillColorExpression()
   timeColors = [
-    { value: '0-10', color: 'rgb(23, 25, 63)' },      // 0-10 min (default for < 600) - darkest
-    { value: '10-15', color: 'rgb(43, 40, 105)' },   // 11-15 min (600-900s) - very dark
-    { value: '15-20', color: 'rgb(74, 89, 160)' },    // 16-20 min (900-1200s) - darker
-    { value: '20-30', color: 'rgb(90, 135, 185)' },   // 21-30 min (1200-1800s) - medium
-    { value: '30-45', color: 'rgb(121, 194, 230)' },  // 31-45 min (1800-2700s) - medium-light
+    { value: '0-7', color: 'rgb(23, 25, 63)' },      // 0-7 min (default for < 480) - darkest
+    { value: '8-15', color: 'rgb(43, 40, 105)' },   // 8-15 min (480-960s) - very dark
+    { value: '16-23', color: 'rgb(74, 89, 160)' },    // 16-23 min (960-1440s) - darker
+    { value: '24-30', color: 'rgb(90, 135, 185)' },   // 24-30 min (1440-1800s) - medium
+    { value: '31-45', color: 'rgb(121, 194, 230)' },  // 31-45 min (1800-2700s) - medium-light
     { value: '45+', color: 'rgb(162, 210, 235)' }     // 45+ min (2700+s) - lightest
   ];
 
@@ -140,14 +140,14 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
         // Use score-based colors (blue colors for zeit bewertung from getScoreFillColorExpression)
         // Match exact color breaks from map.service.ts
         const scoreValue = cat.score;
-        if (scoreValue < 600) {
-          return 'rgb(23, 25, 63)'; // 0-10 min (default for < 600) - darkest
-        } else if (scoreValue < 900) {
-          return 'rgb(43, 40, 105)'; // 11-15 min (600-900s) - very dark
-        } else if (scoreValue < 1200) {
-          return 'rgb(74, 89, 160)'; // 16-20 min (900-1200s) - darker
+        if (scoreValue < 480) {
+          return 'rgb(23, 25, 63)'; // 0-7 min (default for < 480) - darkest
+        } else if (scoreValue < 960) {
+          return 'rgb(43, 40, 105)'; // 8-15 min (480-960s) - very dark
+        } else if (scoreValue < 1440) {
+          return 'rgb(74, 89, 160)'; // 16-23 min (960-1440s) - darker
         } else if (scoreValue < 1800) {
-          return 'rgb(90, 135, 185)'; // 21-30 min (1200-1800s) - medium
+          return 'rgb(90, 135, 185)'; // 24-30 min (1440-1800s) - medium
         } else if (scoreValue < 2700) {
           return 'rgb(121, 194, 230)'; // 31-45 min (1800-2700s) - medium-light
         } else {

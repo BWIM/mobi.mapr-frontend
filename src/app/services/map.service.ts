@@ -689,10 +689,10 @@ export class MapService {
     return [
       'step',
       ['get', 'score'],
-      'rgb(23,25,63)',     // 0-10 min (default for < 600) - darkest
-      600, 'rgb(43,40,105)',   // 11-15 min (600-900s) - very dark
-      900, 'rgb(74,89,160)',    // 16-20 min (900-1200s) - darker
-      1200, 'rgb(90,135,185)',  // 21-30 min (1200-1800s) - medium
+      'rgb(23,25,63)',     // 0-7 min (default for < 480) - darkest
+      480, 'rgb(43,40,105)',   // 8-15 min (480-960s) - very dark
+      960, 'rgb(74,89,160)',    // 16-23 min (960-1440s) - darker
+      1440, 'rgb(90,135,185)',  // 24-30 min (1440-1800s) - medium
       1800, 'rgb(121,194,230)', // 31-45 min (1800-2700s) - medium-light
       2700, 'rgb(162,210,235)'  // 45+ min (2700+s) - lightest
     ];
