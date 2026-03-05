@@ -1,0 +1,55 @@
+<div class="w-full max-w-full h-[80vh] flex flex-col relative">
+  <!-- Overlay Close Button -->
+  <button 
+    type="button"
+    class="absolute -top-4 -right-4 w-10 h-10 rounded-full bg-[var(--primary-color)] cursor-pointer flex items-center justify-center z-[1000] shadow-lg transition-all duration-200 ease-in-out hover:scale-110 hover:shadow-xl active:scale-95 border-[var(--background-color)] border-2"
+    (click)="onClose()"
+    aria-label="Close">
+    <span class="text-[var(--secondary-color)] text-[28px] font-bold leading-none m-0 p-0">×</span>
+  </button>
+  
+  <div class="mb-4 flex-shrink-0">
+    <h2 mat-dialog-title class="text-2xl font-bold text-white">
+      <span *ngIf="!data.isComparisonMode">{{ data.featureName || ('analyze.analysis.personas' | translate) }}</span>
+      <span *ngIf="data.isComparisonMode" class="flex gap-4">
+        <span>{{ data.featureName || ('analyze.feature1' | translate) }}</span>
+        <span class="text-lg opacity-75">vs</span>
+        <span>{{ data.featureName2 || ('analyze.feature2' | translate) }}</span>
+      </span>
+    </h2>
+  </div>
+  
+  <mat-dialog-content class="mat-typography flex-[4] min-h-0 overflow-hidden py-4 px-4 flex flex-col">
+    <!-- Loading State -->
+    <div *ngIf="isLoading || isLoading2" class="text-sm text-[var(--primary-color)] py-4 text-center flex-shrink-0">
+      <mat-spinner diameter="40" class="mx-auto mb-4"></mat-spinner>
+      {{ 'analyze.loading' | translate }}
+    </div>
+    
+    <!-- Error State -->
+    <div *ngIf="(error || error2) && !isLoading && !isLoading2" class="text-sm text-red-600 py-4 text-center flex-shrink-0">
+      {{ error || error2 }}
+    </div>
+    
+    <!-- Chart and Personas -->
+    <div *ngIf="(allPersonas.length > 0 || (data.isComparisonMode && allPersonas2.length > 0)) && !isLoading && !isLoading2 && !error && !error2" class="w-full flex flex-col flex-1 min-h-0">
+      <!-- Chart Container - Takes most of the space -->
+      <div class="flex-[4] min-h-0 mb-3 w-full chart-wrapper">
+        <div class="relative w-full h-full">
+          <p-chart #personasChart type="bar" [data]="chartData" [options]="chartOptions" style="cursor: pointer;"></p-chart>
+        </div>
+      </div>
+      
+      <!-- Personas List - Multicolumn Layout with scroll -->
+      <div class="personas-labels-container flex-[3] min-h-0 overflow-y-auto">
+        <div class="personas-labels columns-2 md:columns-3 lg:columns-4 space-y-2">
+          <div *ngFor="let persona of allPersonas; let i = index" 
+               class="persona-item text-sm text-white flex items-center mb-2">
+            <span class="font-bold mr-2">{{ i + 1 }}.</span>
+            <span>{{ persona.name }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+</div>

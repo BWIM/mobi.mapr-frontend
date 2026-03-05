@@ -66,8 +66,14 @@
     "featureInfo": {
       "notFound": "Feature-Informationen nicht gefunden",
       "dataNotPreloaded": "Daten noch nicht vorgeladen",
-      "errorLoading": "Fehler beim Laden der Feature-Informationen"
+      "errorLoading": "Fehler beim Laden der Feature-Informationen",
+      "typeMismatch": "Feature-Typen stimmen nicht überein"
     },
+    "addToComparison": "Als Vergleich hinzufügen",
+    "clearComparison": "Vergleich beenden",
+    "feature1": "Feature 1",
+    "feature2": "Feature 2",
+    "comparisonMode": "Vergleichsmodus",
     "analyzeData": {
       "notFound": "Analyse-Daten nicht gefunden",
       "dataNotPreloaded": "Daten noch nicht vorgeladen",
@@ -91,6 +97,7 @@
     "analysis": {
       "title": "Analyse Top 5 Aktivitäten",
       "showAllCategories": "Alle Aktivitäten anzeigen",
+      "expandPersonas": "Personengruppen vergrößern",
       "categoriesNotFound": "Kategorien nicht gefunden",
       "dataNotLoaded": "Daten noch nicht geladen",
       "errorLoadingCategories": "Fehler beim Laden der Kategorien",

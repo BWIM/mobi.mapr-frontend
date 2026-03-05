@@ -5,7 +5,246 @@
     </p>
   </div>
 </div>
-<div class="h-full p-4 bg-[var(--background-color)] text-[var(--primary-color)] relative flex flex-col rounded-2xl overflow-y-auto" *ngIf="selectedFeature">
+
+<!-- Comparison Mode Layout -->
+<div class="h-full p-4 bg-[var(--background-color)] text-[var(--primary-color)] relative flex flex-col rounded-2xl overflow-y-auto" *ngIf="selectedFeature && isComparisonMode">
+  <!-- Single Loading Spinner -->
+  <div *ngIf="isLoading()" class="absolute inset-0 flex items-center justify-center bg-[var(--background-color)] bg-opacity-75 z-10 rounded-2xl">
+    <div class="flex flex-col items-center">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p class="text-sm text-[var(--primary-color)] mt-4">{{ 'analyze.loading' | translate }}</p>
+    </div>
+  </div>
+  
+  <!-- Clear Comparison Button -->
+  <div class="mb-4 flex justify-end">
+    <button 
+      matButton
+      color="primary"
+      (click)="clearComparison()"
+      [attr.aria-label]="'analyze.clearComparison' | translate">
+      <mat-icon>close</mat-icon>
+      <span class="ml-2">{{ 'analyze.clearComparison' | translate }}</span>
+    </button>
+  </div>
+
+  <!-- Two Column Layout -->
+  <div class="flex gap-4 mb-4">
+    <!-- Left Column: Feature 1 -->
+    <div class="flex-1">
+      <!-- Error State -->
+      <div *ngIf="featureInfoError" class="text-sm text-red-600 py-4">
+        {{ featureInfoError }}
+      </div>
+      
+      <!-- Feature Info -->
+      <div *ngIf="featureInfo && !isLoading() && !featureInfoError" class="rounded-lg overflow-hidden pb-5">
+        <!-- Title with Grade -->
+        <div class="px-2 py-2 border-b border-white">
+          <h3 class="text-xl font-bold text-white flex items-center flex-wrap">
+            <span class="flex-1">{{ featureInfo.name }}</span>
+            <span 
+              class="ml-2 px-2 py-1 rounded text-sm font-semibold whitespace-nowrap"
+              [style.background-color]="getRatingColor(featureInfo)"
+              [title]="getPopulationTooltip(featureInfo.population)"
+              style="cursor: help;">
+              {{ getRatingDisplay(featureInfo) }}
+            </span>
+          </h3>
+        </div>
+        
+        <!-- Rank Info -->
+        <div class="flex">
+          <ng-container *ngIf="featureInfo.regiostar_rank">
+            <div class="flex-1 px-2 py-2 border-r border-white">
+              <div><span class="text-m text-white font-bold">{{ 'analyze.rank.overall' | translate }} </span><span class="text-xs text-white">{{ 'analyze.rank.overallLabel' | translate }}</span></div>
+              <div class="text-3xl font-bold text-white">{{ featureInfo.rank }} <span class="text-sm text-white">/ {{ featureInfo.total_ranks }}</span></div>
+              <div class="text-sm text-white mt-1">{{ getRankPercentage(featureInfo.rank, featureInfo.total_ranks) }}</div>
+            </div>
+            <div class="flex-1 px-2 py-2">
+              <div><span class="text-m text-white font-bold">{{ 'analyze.rank.regionalClass' | translate }} </span><span class="text-xs text-white">{{ 'analyze.rank.regionalClassLabel' | translate }}</span></div>
+              <div class="text-3xl font-bold text-white">{{ featureInfo.regiostar_rank }} <span class="text-sm text-white">/ {{ featureInfo.regiostar_total_ranks }}</span></div>
+              <div class="text-sm text-white mt-1">{{ getRankPercentage(featureInfo.regiostar_rank, featureInfo.regiostar_total_ranks) }}</div>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="!featureInfo.regiostar_rank">
+            <div class="flex-1 px-2 py-2">
+              <div><span class="text-m text-white font-bold">{{ 'analyze.rank.overall' | translate }} </span><span class="text-xs text-white">{{ 'analyze.rank.overallLabel' | translate }}</span></div>
+              <div><span class="text-4xl font-bold text-white mr-1">{{ featureInfo.rank }}</span><span class="text-sm text-white mt-1">/ {{ featureInfo.total_ranks }}</span></div>
+              <div class="text-sm text-white mt-1">{{ getRankPercentage(featureInfo.rank, featureInfo.total_ranks) }}</div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Feature 2 -->
+    <div class="flex-1">
+      <!-- Error State -->
+      <div *ngIf="featureInfoError2" class="text-sm text-red-600 py-4">
+        {{ featureInfoError2 }}
+      </div>
+      
+      <!-- Feature Info -->
+      <div *ngIf="featureInfo2 && !isLoading() && !featureInfoError2" class="rounded-lg overflow-hidden pb-5">
+        <!-- Title with Grade -->
+        <div class="px-2 py-2 border-b border-white">
+          <h3 class="text-xl font-bold text-white flex items-center flex-wrap">
+            <span class="flex-1">{{ featureInfo2.name }}</span>
+            <span 
+              class="ml-2 px-2 py-1 rounded text-sm font-semibold whitespace-nowrap"
+              [style.background-color]="getRatingColor(featureInfo2)"
+              [title]="getPopulationTooltip(featureInfo2.population)"
+              style="cursor: help;">
+              {{ getRatingDisplay(featureInfo2) }}
+            </span>
+          </h3>
+        </div>
+        
+        <!-- Rank Info -->
+        <div class="flex">
+          <ng-container *ngIf="featureInfo2.regiostar_rank">
+            <div class="flex-1 px-2 py-2 border-r border-white">
+              <div><span class="text-m text-white font-bold">{{ 'analyze.rank.overall' | translate }} </span><span class="text-xs text-white">{{ 'analyze.rank.overallLabel' | translate }}</span></div>
+              <div class="text-3xl font-bold text-white">{{ featureInfo2.rank }} <span class="text-sm text-white">/ {{ featureInfo2.total_ranks }}</span></div>
+              <div class="text-sm text-white mt-1">{{ getRankPercentage(featureInfo2.rank, featureInfo2.total_ranks) }}</div>
+            </div>
+            <div class="flex-1 px-2 py-2">
+              <div><span class="text-m text-white font-bold">{{ 'analyze.rank.regionalClass' | translate }} </span><span class="text-xs text-white">{{ 'analyze.rank.regionalClassLabel' | translate }}</span></div>
+              <div class="text-3xl font-bold text-white">{{ featureInfo2.regiostar_rank }} <span class="text-sm text-white">/ {{ featureInfo2.regiostar_total_ranks }}</span></div>
+              <div class="text-sm text-white mt-1">{{ getRankPercentage(featureInfo2.regiostar_rank, featureInfo2.regiostar_total_ranks) }}</div>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="!featureInfo2.regiostar_rank">
+            <div class="flex-1 px-2 py-2">
+              <div><span class="text-m text-white font-bold">{{ 'analyze.rank.overall' | translate }} </span><span class="text-xs text-white">{{ 'analyze.rank.overallLabel' | translate }}</span></div>
+              <div><span class="text-4xl font-bold text-white mr-1">{{ featureInfo2.rank }}</span><span class="text-sm text-white mt-1">/ {{ featureInfo2.total_ranks }}</span></div>
+              <div class="text-sm text-white mt-1">{{ getRankPercentage(featureInfo2.rank, featureInfo2.total_ranks) }}</div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Charts Section -->
+  <div class="mb-4 flex-shrink-0">
+    <!-- Error State -->
+    <div *ngIf="analyzeError || analyzeError2" class="text-sm text-red-600 py-4">
+      {{ analyzeError || analyzeError2 }}
+    </div>
+    
+    <!-- Tabs when persona_id is 54 (all personas) -->
+    <div *ngIf="isAllPersonas() && !isLoading() && !analyzeError && !analyzeError2">
+      <mat-tab-group>
+        <!-- Activities Tab -->
+        <mat-tab [label]="'analyze.analysis.activities' | translate">
+          <div *ngIf="activitiesChartData">
+            <!-- Chart Container -->
+            <div class="relative mt-4">
+              <p-chart #activitiesChart type="bar" [data]="activitiesChartData" [options]="activitiesChartOptions" (onDataSelect)="onChartDataSelect($event)" style="cursor: pointer;"></p-chart>
+            </div>
+            
+            <!-- Activity List -->
+            <div class="mt-4">
+              <div *ngFor="let category of getSortedCategories(); let i = index" 
+                   class="text-sm text-white flex items-center">
+                <span class="font-bold mr-2">{{ i + 1 }}.</span>
+                <span class="cursor-pointer hover:underline" (click)="onCategoryNameClick(category)">{{ category.category_name }}</span>
+              </div>
+            </div>
+            
+            <!-- Plus Button -->
+            <div class="mt-4 flex justify-center">
+              <button 
+                matButton
+                color="primary"
+                (click)="openAllCategoriesOverlay()"
+                [attr.aria-label]="'analyze.analysis.showAllCategories' | translate">
+                <mat-icon>add</mat-icon>
+                <span class="ml-2">{{ 'analyze.analysis.showAllCategories' | translate }}</span>
+              </button>
+            </div>
+          </div>
+        </mat-tab>
+        
+        <!-- Personas Tab -->
+        <mat-tab [label]="'analyze.analysis.personas' | translate">
+          <!-- Error State -->
+          <div *ngIf="personasError || personasError2" class="text-sm text-red-600 py-4">
+            {{ personasError || personasError2 }}
+          </div>
+          
+          <!-- Chart -->
+          <div *ngIf="personasChartData && !personasError && !personasError2">
+            <!-- Chart Container -->
+            <div class="relative mt-4">
+              <p-chart #personasChart type="bar" [data]="personasChartData" [options]="personasChartOptions" style="cursor: pointer;"></p-chart>
+            </div>
+            
+            <!-- Personas List -->
+            <div class="mt-4">
+              <div *ngFor="let persona of getSortedPersonas(); let i = index" 
+                   class="text-sm text-white flex items-center">
+                <span class="font-bold mr-2">{{ i + 1 }}.</span>
+                <span>{{ persona.name }}</span>
+              </div>
+            </div>
+            
+            <!-- Expand Button -->
+            <div class="mt-4 flex justify-center">
+              <button 
+                matButton
+                color="primary"
+                (click)="openPersonasDialog()"
+                [attr.aria-label]="'analyze.analysis.expandPersonas' | translate">
+                <mat-icon>open_in_full</mat-icon>
+                <span class="ml-2">{{ 'analyze.analysis.expandPersonas' | translate }}</span>
+              </button>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+    
+    <!-- Single Chart when persona_id is not 54 -->
+    <div *ngIf="!isAllPersonas() && activitiesChartData && !isLoading() && !analyzeError && !analyzeError2">
+      <!-- Title -->
+      <div class="mb-4">
+        <h3 class="text-lg font-bold text-white">{{ 'analyze.analysis.title' | translate }}</h3>
+      </div>
+      
+      <!-- Chart Container -->
+      <div class="relative">
+        <p-chart #activitiesChart type="bar" [data]="activitiesChartData" [options]="activitiesChartOptions" (onDataSelect)="onChartDataSelect($event)" style="cursor: pointer;"></p-chart>
+      </div>
+      
+      <!-- Activity List -->
+      <div class="">
+        <div *ngFor="let category of getSortedCategories(); let i = index" 
+             class="text-sm text-white flex items-center">
+          <span class="font-bold mr-2">{{ i + 1 }}.</span>
+          <span class="cursor-pointer hover:underline" (click)="onCategoryNameClick(category)">{{ category.category_name }}</span>
+        </div>
+      </div>
+      
+      <!-- Plus Button -->
+      <div class="mt-4 flex justify-center">
+        <button 
+          matButton
+          color="primary"
+          (click)="openAllCategoriesOverlay()"
+          [attr.aria-label]="'analyze.analysis.showAllCategories' | translate">
+          <mat-icon>add</mat-icon>
+          <span class="ml-2">{{ 'analyze.analysis.showAllCategories' | translate }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Normal Mode Layout (Single Feature) -->
+<div class="h-full p-4 bg-[var(--background-color)] text-[var(--primary-color)] relative flex flex-col rounded-2xl overflow-y-auto" *ngIf="selectedFeature && !isComparisonMode">
   <!-- Single Loading Spinner -->
   <div *ngIf="isLoading()" class="absolute inset-0 flex items-center justify-center bg-[var(--background-color)] bg-opacity-75 z-10 rounded-2xl">
     <div class="flex flex-col items-center">
@@ -160,6 +399,18 @@
                 <span class="font-bold mr-2">{{ i + 1 }}.</span>
                 <span>{{ persona.name }}</span>
               </div>
+            </div>
+            
+            <!-- Expand Button -->
+            <div class="mt-4 flex justify-center">
+              <button 
+                matButton
+                color="primary"
+                (click)="openPersonasDialog()"
+                [attr.aria-label]="'analyze.analysis.expandPersonas' | translate">
+                <mat-icon>open_in_full</mat-icon>
+                <span class="ml-2">{{ 'analyze.analysis.expandPersonas' | translate }}</span>
+              </button>
             </div>
           </div>
         </mat-tab>

@@ -66,8 +66,14 @@
     "featureInfo": {
       "notFound": "Feature information not found",
       "dataNotPreloaded": "Data not preloaded yet",
-      "errorLoading": "Error loading feature information"
+      "errorLoading": "Error loading feature information",
+      "typeMismatch": "Feature types do not match"
     },
+    "addToComparison": "Add to comparison",
+    "clearComparison": "End comparison",
+    "feature1": "Feature 1",
+    "feature2": "Feature 2",
+    "comparisonMode": "Comparison mode",
     "analyzeData": {
       "notFound": "Analyze data not found",
       "dataNotPreloaded": "Data not preloaded yet",
@@ -91,6 +97,7 @@
     "analysis": {
       "title": "Analysis Top 5 Activities",
       "showAllCategories": "Show all activities",
+      "expandPersonas": "Expand persona groups",
       "categoriesNotFound": "Categories not found",
       "dataNotLoaded": "Data not yet loaded",
       "errorLoadingCategories": "Error loading categories",

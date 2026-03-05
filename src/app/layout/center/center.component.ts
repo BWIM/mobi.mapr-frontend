@@ -34,6 +34,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private map?: Map;
   private mapStyleSubscription?: Subscription;
   private searchQuerySubscription?: Subscription;
+  private featureSelectionSubscription?: Subscription;
   mapStyle: any;
   zoom: number = 7;
   center: [number, number] = [9.2156505, 49.320099];
@@ -44,6 +45,9 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private translate = inject(TranslateService);
   private searchService = inject(SearchService);
   private popup?: Popup;
+  private contextMenuPopup?: Popup;
+  private contextMenuFeature: any = null;
+  private hasSelectedFeature: boolean = false;
 
   // Nominatim search properties
   searchQuery: string = '';
@@ -166,6 +170,11 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         });
       }
     });
+
+    // Track if a feature is currently selected
+    this.featureSelectionSubscription = this.featureSelectionService.selectedMapLibreFeature$.subscribe(feature => {
+      this.hasSelectedFeature = feature !== null;
+    });
   }
 
   ngAfterViewInit() {
@@ -230,6 +239,12 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     if (this.searchQuerySubscription) {
       this.searchQuerySubscription.unsubscribe();
+    }
+    if (this.featureSelectionSubscription) {
+      this.featureSelectionSubscription.unsubscribe();
+    }
+    if (this.contextMenuPopup) {
+      this.contextMenuPopup.remove();
     }
     this.searchSubject.complete();
   }
@@ -391,6 +406,13 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
 
+      // Close context menu if open
+      if (this.contextMenuPopup) {
+        this.contextMenuPopup.remove();
+        this.contextMenuPopup = undefined;
+        this.contextMenuFeature = null;
+      }
+
       const feature = e.features[0];
       const properties = feature.properties;
       
@@ -406,8 +428,113 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         id: feature.id
       };
 
-      // Send to feature selection service
-      this.featureSelectionService.setSelectedMapLibreFeature(featureData);
+      // Check if Ctrl key is pressed (for comparison mode)
+      const isCtrlPressed = e.originalEvent && (e.originalEvent.ctrlKey || e.originalEvent.metaKey);
+      
+      if (isCtrlPressed) {
+        // Only allow adding to comparison if a feature is already selected
+        if (this.hasSelectedFeature) {
+          // Set as second feature for comparison
+          this.featureSelectionService.setSelectedMapLibreFeature2(featureData);
+        } else {
+          // If no feature is selected, treat as normal click
+          this.featureSelectionService.setSelectedMapLibreFeature(featureData);
+        }
+      } else {
+        // Set as primary feature
+        this.featureSelectionService.setSelectedMapLibreFeature(featureData);
+      }
+    });
+
+    // Handle right-click (context menu)
+    this.map.on('contextmenu', 'content-layer-fill', (e) => {
+      if (!e.features || e.features.length === 0) {
+        return;
+      }
+
+      e.preventDefault(); // Prevent default browser context menu
+
+      // Only show context menu if a feature is already selected
+      if (!this.hasSelectedFeature) {
+        return;
+      }
+
+      const feature = e.features[0];
+      const properties = feature.properties;
+      
+      const unnamedText = this.translate.instant('map.popup.unnamed');
+      this.contextMenuFeature = {
+        properties: {
+          name: properties['name'] || properties['NAME'] || unnamedText,
+          score: properties['score'],
+          index: properties['index'],
+          ...properties
+        },
+        geometry: feature.geometry,
+        id: feature.id
+      };
+
+      // Create context menu popup
+      const addToComparisonLabel = this.translate.instant('analyze.addToComparison');
+      // Get primary color from CSS variable
+      const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#333';
+      const menuContent = `
+        <div style="padding: 8px 0;">
+          <button id="add-to-comparison-btn" style="
+            width: 100%;
+            padding: 8px 16px;
+            text-align: left;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: ${primaryColor};
+            font-size: 14px;
+            transition: background-color 0.2s;
+          " onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'" onmouseout="this.style.backgroundColor='transparent'">
+            ${addToComparisonLabel}
+          </button>
+        </div>
+      `;
+
+      if (!this.contextMenuPopup) {
+        this.contextMenuPopup = new Popup({
+          closeButton: true,
+          closeOnClick: true,
+          anchor: 'top-left',
+          offset: [0, -5]
+        });
+      }
+
+      this.contextMenuPopup
+        .setLngLat(e.lngLat)
+        .setHTML(menuContent)
+        .addTo(this.map!);
+
+      // Add click handler after popup is added to DOM
+      setTimeout(() => {
+        const btn = document.getElementById('add-to-comparison-btn');
+        if (btn) {
+          btn.addEventListener('click', () => {
+            if (this.contextMenuFeature) {
+              this.featureSelectionService.setSelectedMapLibreFeature2(this.contextMenuFeature);
+            }
+            if (this.contextMenuPopup) {
+              this.contextMenuPopup.remove();
+              this.contextMenuPopup = undefined;
+            }
+            this.contextMenuFeature = null;
+          });
+        }
+      }, 0);
+    });
+
+    // Close context menu when clicking elsewhere
+    this.map.on('click', () => {
+      if (this.contextMenuPopup) {
+        this.contextMenuPopup.remove();
+        this.contextMenuPopup = undefined;
+        this.contextMenuFeature = null;
+      }
     });
   }
 

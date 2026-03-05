@@ -13,6 +13,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { SharedModule } from '../../../shared/shared.module';
 import { AllCategoriesDialogComponent, AllCategoriesDialogData } from './overlay/all-categories-dialog.component';
 import { PlacesDialogComponent, PlacesDialogData } from './places/places-dialog.component';
+import { PersonasDialogComponent, PersonasDialogData } from './overlay/personas-dialog.component';
 import { Map as MapLibreMap, NavigationControl, FullscreenControl, Popup, GeoJSONSource } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -29,6 +30,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   isLoadingFeatureInfo: boolean = false;
   featureInfoError: string | null = null;
   
+  // Second feature for comparison
+  selectedFeature2: any | null = null;
+  featureInfo2: FeatureInfoResponse | null = null;
+  isLoadingFeatureInfo2: boolean = false;
+  featureInfoError2: string | null = null;
+  
   // Analyze chart data
   analyzeData: AnalyzeResponse | null = null;
   isLoadingAnalyze: boolean = false;
@@ -36,12 +43,22 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   activitiesChartData: any = null;
   activitiesChartOptions: any = null;
   
+  // Analyze chart data for feature 2
+  analyzeData2: AnalyzeResponse | null = null;
+  isLoadingAnalyze2: boolean = false;
+  analyzeError2: string | null = null;
+  
   // Personas chart data
   personasData: PersonaBreakdown[] | null = null;
   isLoadingPersonas: boolean = false;
   personasError: string | null = null;
   personasChartData: any = null;
   personasChartOptions: any = null;
+  
+  // Personas chart data for feature 2
+  personasData2: PersonaBreakdown[] | null = null;
+  isLoadingPersonas2: boolean = false;
+  personasError2: string | null = null;
   
   // Map data
   @ViewChild('mapContainerMini') mapContainerMini?: ElementRef;
@@ -71,13 +88,23 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private dialog = inject(MatDialog);
   private translate = inject(TranslateService);
   private featureSubscription?: Subscription;
+  private featureSubscription2?: Subscription;
   private featureInfoSubscription?: Subscription;
+  private featureInfoSubscription2?: Subscription;
   private analyzeSubscription?: Subscription;
+  private analyzeSubscription2?: Subscription;
   private languageSubscription?: Subscription;
   private currentLoadingFeatureId: number | null = null;
+  private currentLoadingFeatureId2: number | null = null;
   private previousFilters: ContentLayerFilters | null = null;
   private isInitialFilterLoad = true;
   private savedFeatureType: 'municipality' | 'hexagon' | 'county' | 'state' | null = null;
+  private savedFeatureType2: 'municipality' | 'hexagon' | 'county' | 'state' | null = null;
+  
+  // Comparison mode computed property
+  get isComparisonMode(): boolean {
+    return this.selectedFeature !== null && this.selectedFeature2 !== null;
+  }
 
   constructor() {
     // Watch for filter changes and reset the component
@@ -131,7 +158,55 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
             this.isLoadingAnalyze = false;
           }
         } else {
-          this.resetComponent();
+          // Only reset if feature 2 is also null (complete reset)
+          if (!this.selectedFeature2) {
+            this.resetComponent();
+          } else {
+            // Clear only feature 1 data
+            this.selectedFeature = null;
+            this.featureInfo = null;
+            this.analyzeData = null;
+            this.personasData = null;
+            this.activitiesChartData = null;
+            this.personasChartData = null;
+          }
+        }
+      }
+    );
+
+    // Subscribe to second feature selection changes
+    this.featureSubscription2 = this.featureSelectionService.selectedMapLibreFeature2$.subscribe(
+      (feature) => {
+        if (feature) {
+          this.selectedFeature2 = feature;
+          // Extract and save feature type from tile property 't' immediately when feature is selected
+          const featureType = this.mapService.getFeatureTypeFromTileProperty(feature);
+          if (featureType) {
+            this.savedFeatureType2 = featureType;
+            // Validate that both features have the same type
+            if (this.savedFeatureType && this.savedFeatureType !== featureType) {
+              console.warn('Feature types do not match. Comparison may not work correctly.');
+              this.featureInfoError2 = this.translate.instant('analyze.featureInfo.typeMismatch');
+            } else {
+              this.loadFeatureInfo2(feature);
+            }
+          } else {
+            console.error('Feature type could not be determined from tile property "t"');
+            this.featureInfoError2 = this.translate.instant('analyze.featureInfo.errorLoading');
+            this.isLoadingFeatureInfo2 = false;
+            this.isLoadingAnalyze2 = false;
+          }
+        } else {
+          // Clear feature 2 data
+          this.selectedFeature2 = null;
+          this.featureInfo2 = null;
+          this.analyzeData2 = null;
+          this.personasData2 = null;
+          this.savedFeatureType2 = null;
+          // If feature 1 is also null, do full reset
+          if (!this.selectedFeature) {
+            this.resetComponent();
+          }
         }
       }
     );
@@ -165,11 +240,20 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.featureSubscription) {
       this.featureSubscription.unsubscribe();
     }
+    if (this.featureSubscription2) {
+      this.featureSubscription2.unsubscribe();
+    }
     if (this.featureInfoSubscription) {
       this.featureInfoSubscription.unsubscribe();
     }
+    if (this.featureInfoSubscription2) {
+      this.featureInfoSubscription2.unsubscribe();
+    }
     if (this.analyzeSubscription) {
       this.analyzeSubscription.unsubscribe();
+    }
+    if (this.analyzeSubscription2) {
+      this.analyzeSubscription2.unsubscribe();
     }
     if (this.languageSubscription) {
       this.languageSubscription.unsubscribe();
@@ -189,9 +273,17 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.featureInfoSubscription.unsubscribe();
       this.featureInfoSubscription = undefined;
     }
+    if (this.featureInfoSubscription2) {
+      this.featureInfoSubscription2.unsubscribe();
+      this.featureInfoSubscription2 = undefined;
+    }
     if (this.analyzeSubscription) {
       this.analyzeSubscription.unsubscribe();
       this.analyzeSubscription = undefined;
+    }
+    if (this.analyzeSubscription2) {
+      this.analyzeSubscription2.unsubscribe();
+      this.analyzeSubscription2 = undefined;
     }
     // Clean up map
     if (this.map) {
@@ -219,12 +311,36 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isLoadingPlaces = false;
     this.placesError = null;
     this.savedFeatureType = null;
+    // Reset feature 2
+    this.selectedFeature2 = null;
+    this.featureInfo2 = null;
+    this.featureInfoError2 = null;
+    this.isLoadingFeatureInfo2 = false;
+    this.currentLoadingFeatureId2 = null;
+    this.analyzeData2 = null;
+    this.isLoadingAnalyze2 = false;
+    this.analyzeError2 = null;
+    this.personasData2 = null;
+    this.isLoadingPersonas2 = false;
+    this.personasError2 = null;
+    this.savedFeatureType2 = null;
+  }
+  
+  /**
+   * Clear comparison mode (remove feature 2)
+   */
+  clearComparison(): void {
+    this.featureSelectionService.clearComparison();
   }
 
   /**
    * Determines if we should show the map instead of the chart
    */
   shouldShowMap(): boolean {
+    // Never show map in comparison mode
+    if (this.isComparisonMode) {
+      return false;
+    }
     const project = this.projectsService.project();
     const isNotMid = project ? !project.is_mid : false;
     const hasSingleCategory = this.analyzeData?.categories?.length === 1;
@@ -254,12 +370,82 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     return "F-";
   }
 
+  getGradeColor(index: number): string {
+    const indexValue = index / 100;
+    if (indexValue <= 0) {
+      return 'rgba(128, 128, 128, 0.7)'; // NaN or invalid
+    } else if (indexValue < 0.35) {
+      return 'rgba(50, 97, 45, 0.7)'; // Grade A (A+, A, A-)
+    } else if (indexValue < 0.5) {
+      return 'rgba(60, 176, 67, 0.7)'; // Grade B (B+, B, B-)
+    } else if (indexValue < 0.71) {
+      return 'rgba(238, 210, 2, 0.7)'; // Grade C (C+, C, C-)
+    } else if (indexValue < 1.0) {
+      return 'rgba(237, 112, 20, 0.7)'; // Grade D (D+, D, D-)
+    } else if (indexValue < 1.41) {
+      return 'rgba(194, 24, 7, 0.7)'; // Grade E (E+, E, E-)
+    } else {
+      return 'rgba(150, 86, 162, 0.7)'; // Grade F (F+, F, F-)
+    }
+  }
+
+  getScoreColor(score: number): string {
+    if (score < 600) {
+      return 'rgb(23, 25, 63)'; // 0-10 min (default for < 600) - darkest
+    } else if (score < 900) {
+      return 'rgb(43, 40, 105)'; // 11-15 min (600-900s) - very dark
+    } else if (score < 1200) {
+      return 'rgb(74, 89, 160)'; // 16-20 min (900-1200s) - darker
+    } else if (score < 1800) {
+      return 'rgb(90, 135, 185)'; // 21-30 min (1200-1800s) - medium
+    } else if (score < 2700) {
+      return 'rgb(121, 194, 230)'; // 31-45 min (1800-2700s) - medium-light
+    } else {
+      return 'rgb(162, 210, 235)'; // 45+ min (2700+s) - lightest
+    }
+  }
+
+  getRatingDisplay(featureInfo: FeatureInfoResponse | null): string {
+    if (!featureInfo) {
+      return '';
+    }
+    const bewertung = this.filterConfigService.selectedBewertung();
+    if (bewertung === 'zeit') {
+      // Convert score from seconds to minutes
+      const minutes = (featureInfo.score / 60).toFixed(1);
+      const minLabel = this.translate.instant('map.popup.minutes');
+      return `${minutes} ${minLabel}`;
+    } else {
+      return this.getGrade(featureInfo.index);
+    }
+  }
+
+  getRatingColor(featureInfo: FeatureInfoResponse | null): string {
+    if (!featureInfo) {
+      return 'rgba(128, 128, 128, 0.7)';
+    }
+    const bewertung = this.filterConfigService.selectedBewertung();
+    if (bewertung === 'zeit') {
+      return this.getScoreColor(featureInfo.score);
+    } else {
+      return this.getGradeColor(featureInfo.index);
+    }
+  }
+
   getRankPercentage(rank: number | null, totalRanks: number | null): string {
     if (!rank || !totalRanks || totalRanks === 0) {
       return 'N/A';
     }
     const percentage = Math.ceil((rank / totalRanks) * 100);
     return `Top ${percentage}%`;
+  }
+
+  getPopulationTooltip(population: number | null | undefined): string {
+    if (population === null || population === undefined) {
+      return '';
+    }
+    const populationLabel = this.translate.instant('analyze.population');
+    return `${populationLabel}: ${population.toLocaleString()}`;
   }
 
   private loadFeatureInfo(feature: any): void {
@@ -444,15 +630,21 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         // Load places for the map
         this.loadPlacesForMap();
       } else {
-        // Show chart as usual
-        if (result.analyzeData && result.analyzeData.categories) {
+        // Show chart as usual or comparison chart if in comparison mode
+        if (this.isComparisonMode && this.analyzeData2 && this.analyzeData2.categories) {
+          // Both features loaded, show comparison chart
+          this.initializeComparisonActivitiesChart();
+        } else if (result.analyzeData && result.analyzeData.categories) {
           this.initializeActivitiesChart(result.analyzeData.categories);
         } else {
           this.activitiesChartData = null;
         }
         
         // Initialize personas chart if data is available
-        if (shouldLoadPersonas && result.personasData) {
+        if (this.isComparisonMode && shouldLoadPersonas && this.personasData2) {
+          // Both features loaded, show comparison chart
+          this.initializeComparisonPersonasChart();
+        } else if (shouldLoadPersonas && result.personasData) {
           this.initializePersonasChart(result.personasData);
         } else {
           this.personasChartData = null;
@@ -460,6 +652,185 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       
       this.featureInfoSubscription = undefined;
+    });
+  }
+
+  private loadFeatureInfo2(feature: any): void {
+    const map = this.mapService.getMap();
+    if (!map) {
+      console.warn('Map not available for feature info 2');
+      return;
+    }
+
+    const featureIdRaw = feature.properties.id || feature.id;
+    if (!featureIdRaw) {
+      console.warn('Feature ID not available for feature 2');
+      return;
+    }
+
+    // Convert to number if needed
+    const featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
+    if (isNaN(featureId)) {
+      console.warn('Invalid feature ID for feature 2:', featureIdRaw);
+      return;
+    }
+
+    // Prevent duplicate requests for the same feature
+    if ((this.isLoadingFeatureInfo2 || this.isLoadingAnalyze2) && this.currentLoadingFeatureId2 === featureId) {
+      console.log('Feature 2 data request already in progress for feature:', featureId);
+      return;
+    }
+
+    // Cancel any existing requests
+    if (this.featureInfoSubscription2) {
+      this.featureInfoSubscription2.unsubscribe();
+      this.featureInfoSubscription2 = undefined;
+    }
+    if (this.analyzeSubscription2) {
+      this.analyzeSubscription2.unsubscribe();
+      this.analyzeSubscription2 = undefined;
+    }
+
+    // Use saved feature type (already extracted when feature was selected)
+    if (!this.savedFeatureType2) {
+      console.error('Feature type not available for feature 2 - should have been set when feature was selected');
+      this.featureInfoError2 = this.translate.instant('analyze.featureInfo.errorLoading');
+      return;
+    }
+    const featureType = this.savedFeatureType2;
+
+    // Get profile combination ID
+    const profileCombinationId = this.filterConfigService.currentProfileCombinationID();
+    if (!profileCombinationId) {
+      console.warn('Profile combination ID not available for feature 2');
+      return;
+    }
+
+    // Get current filters
+    const filters = this.filterConfigService.contentLayerFilters();
+    if (!filters) {
+      console.warn('Content layer filters not available for feature 2');
+      return;
+    }
+
+    // Mark that we're loading this feature
+    this.currentLoadingFeatureId2 = featureId;
+    this.isLoadingFeatureInfo2 = true;
+    this.isLoadingAnalyze2 = true;
+    this.featureInfoError2 = null;
+    this.analyzeError2 = null;
+
+    // Prepare both API calls
+    const featureInfoRequest = this.mapService.getFeatureInfo({
+      feature_type: featureType,
+      feature_id: featureId,
+      profile_combination_id: profileCombinationId,
+      category_ids: filters.category_ids,
+      persona_id: filters.persona_id,
+      regiostar_ids: filters.regiostar_ids,
+      state_ids: filters.state_ids
+    }).pipe(
+      catchError((error) => {
+        console.error('Error loading feature info 2:', error);
+        if (error.status === 404) {
+          this.featureInfoError2 = this.translate.instant('analyze.featureInfo.notFound');
+        } else if (error.status === 503) {
+          this.featureInfoError2 = this.translate.instant('analyze.featureInfo.dataNotPreloaded');
+        } else {
+          this.featureInfoError2 = this.translate.instant('analyze.featureInfo.errorLoading');
+        }
+        return of(null);
+      })
+    );
+
+    const analyzeRequest = this.analyzeService.getAnalyze({
+      feature_type: featureType,
+      feature_id: featureId,
+      profile_combination_id: profileCombinationId,
+      category_ids: filters.category_ids,
+      persona_id: filters.persona_id,
+      top5: true
+    }).pipe(
+      catchError((error) => {
+        console.error('Error loading analyze data 2:', error);
+        if (error.status === 404) {
+          this.analyzeError2 = this.translate.instant('analyze.analyzeData.notFound');
+        } else if (error.status === 503) {
+          this.analyzeError2 = this.translate.instant('analyze.analyzeData.dataNotPreloaded');
+        } else {
+          this.analyzeError2 = this.translate.instant('analyze.analyzeData.errorLoading');
+        }
+        return of(null);
+      })
+    );
+
+    // Prepare personas request if persona_id is 54
+    const shouldLoadPersonas = filters.persona_id === 54;
+    const personasRequest = shouldLoadPersonas ? this.analyzeService.getPersonas({
+      feature_type: featureType,
+      feature_id: featureId,
+      profile_combination_id: profileCombinationId,
+      category_ids: filters.category_ids,
+      persona_id: 54
+    }).pipe(
+      catchError((error) => {
+        console.error('Error loading personas data 2:', error);
+        if (error.status === 404) {
+          this.personasError2 = this.translate.instant('analyze.analyzeData.notFound');
+        } else if (error.status === 503) {
+          this.personasError2 = this.translate.instant('analyze.analyzeData.dataNotPreloaded');
+        } else {
+          this.personasError2 = this.translate.instant('analyze.analyzeData.errorLoading');
+        }
+        return of(null);
+      })
+    ) : of(null);
+
+    // Mark that we're loading personas if needed
+    if (shouldLoadPersonas) {
+      this.isLoadingPersonas2 = true;
+      this.personasError2 = null;
+    }
+
+    // Run requests in parallel
+    const requests: any = {
+      featureInfo: featureInfoRequest,
+      analyzeData: analyzeRequest
+    };
+    
+    if (shouldLoadPersonas) {
+      requests.personasData = personasRequest;
+    }
+
+    this.featureInfoSubscription2 = forkJoin(requests).subscribe((result: any) => {
+      this.isLoadingFeatureInfo2 = false;
+      this.isLoadingAnalyze2 = false;
+      this.isLoadingPersonas2 = false;
+      this.currentLoadingFeatureId2 = null;
+      
+      // Update feature info
+      this.featureInfo2 = result.featureInfo;
+      
+      // Update analyze data
+      this.analyzeData2 = result.analyzeData;
+      
+      // Update personas data if loaded
+      if (shouldLoadPersonas) {
+        this.personasData2 = result.personasData;
+      }
+      
+      // In comparison mode, update charts with both features
+      if (this.isComparisonMode) {
+        if (this.analyzeData && this.analyzeData.categories && this.analyzeData2 && this.analyzeData2.categories) {
+          this.initializeComparisonActivitiesChart();
+        }
+        
+        if (shouldLoadPersonas && this.personasData && this.personasData2) {
+          this.initializeComparisonPersonasChart();
+        }
+      }
+      
+      this.featureInfoSubscription2 = undefined;
     });
   }
 
@@ -674,7 +1045,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           label: relevanceLabel,
           data: weights,
           backgroundColor: colors,
-          borderColor: colors,
+          borderColor: '#ffffff',
           borderWidth: 1
         }
       ]
@@ -876,7 +1247,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           label: populationLabel,
           data: weights,
           backgroundColor: colors,
-          borderColor: colors,
+          borderColor: '#ffffff',
           borderWidth: 1
         }
       ]
@@ -969,6 +1340,381 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     }, 0);
   }
 
+  private initializeComparisonActivitiesChart(): void {
+    if (!this.analyzeData || !this.analyzeData.categories || !this.analyzeData2 || !this.analyzeData2.categories) {
+      this.activitiesChartData = null;
+      return;
+    }
+
+    // Get all unique categories from both features, sorted by combined weight
+    const categoryMap = new Map<number, { name: string; weight1: number; weight2: number; index1: number; index2: number; score1: number; score2: number }>();
+    
+    this.analyzeData.categories.forEach(cat => {
+      categoryMap.set(cat.category_id, {
+        name: cat.category_name,
+        weight1: cat.weight,
+        weight2: 0,
+        index1: cat.index,
+        index2: 0,
+        score1: cat.score,
+        score2: 0
+      });
+    });
+    
+    this.analyzeData2.categories.forEach(cat => {
+      const existing = categoryMap.get(cat.category_id);
+      if (existing) {
+        existing.weight2 = cat.weight;
+        existing.index2 = cat.index;
+        existing.score2 = cat.score;
+      } else {
+        categoryMap.set(cat.category_id, {
+          name: cat.category_name,
+          weight1: 0,
+          weight2: cat.weight,
+          index1: 0,
+          index2: cat.index,
+          score1: 0,
+          score2: cat.score
+        });
+      }
+    });
+
+    // Sort by combined weight and take top 5
+    const sortedCategories = Array.from(categoryMap.values())
+      .sort((a, b) => Math.max(b.weight1, b.weight2) - Math.max(a.weight1, a.weight2))
+      .slice(0, 5);
+
+    const feature1Name = this.featureInfo?.name || this.translate.instant('analyze.feature1');
+    const feature2Name = this.featureInfo2?.name || this.translate.instant('analyze.feature2');
+    
+    // Labels are just numbers
+    const labels = sortedCategories.map((_, index) => (index + 1).toString());
+    const weights1 = sortedCategories.map(cat => cat.weight1 * 100);
+    const weights2 = sortedCategories.map(cat => cat.weight2 * 100);
+
+    // Get current bewertung setting
+    const bewertung = this.filterConfigService.selectedBewertung();
+    const isScoreMode = bewertung === 'zeit';
+
+    // Get colors based on current map visualization type - same colors as before
+    const colors1 = sortedCategories.map((cat) => {
+      if (isScoreMode) {
+        return this.getScoreColor(cat.score1);
+      } else {
+        return this.getGradeColor(cat.index1);
+      }
+    });
+
+    const colors2 = sortedCategories.map((cat) => {
+      if (isScoreMode) {
+        return this.getScoreColor(cat.score2);
+      } else {
+        return this.getGradeColor(cat.index2);
+      }
+    });
+
+    const relevanceLabel = this.translate.instant('analyze.relevancePercent');
+
+    this.activitiesChartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: relevanceLabel,
+          data: weights1,
+          backgroundColor: colors1,
+          borderColor: '#ffffff',
+          borderWidth: 1
+        },
+        {
+          label: relevanceLabel,
+          data: weights2,
+          backgroundColor: colors2,
+          borderColor: '#ffffff',
+          borderWidth: 1
+        }
+      ]
+    };
+
+    this.activitiesChartOptions = {
+      indexAxis: 'x',
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            title: (context: any) => {
+              const index = context[0].dataIndex;
+              return sortedCategories[index].name || '';
+            },
+            label: (context: any) => {
+              const index = context.dataIndex;
+              const datasetIndex = context.datasetIndex;
+              const category = sortedCategories[index];
+              const weight = datasetIndex === 0 ? category.weight1 : category.weight2;
+              const indexValue = datasetIndex === 0 ? category.index1 : category.index2;
+              const grade = this.getGradeFromIndex(indexValue);
+              const featureName = datasetIndex === 0 ? feature1Name : feature2Name;
+              const ratingLabel = this.translate.instant('analyze.rating');
+              const relevanceLabel = this.translate.instant('analyze.relevance');
+              return [
+                `${featureName}`,
+                `${ratingLabel}: ${grade}`,
+                `${relevanceLabel}: ${(weight * 100).toFixed(1)}%`
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#ffffff',
+            font: {
+              size: 12
+            }
+          },
+          grid: {
+            display: false
+          }
+        },
+        y: {
+          beginAtZero: true,
+          max: 25,
+          ticks: {
+            stepSize: 5,
+            color: '#ffffff',
+            font: {
+              size: 12
+            },
+            padding: 5
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)',
+            drawBorder: false
+          },
+          title: {
+            display: true,
+            text: this.translate.instant('analyze.relevancePercent'),
+            color: '#ffffff',
+            font: {
+              size: 12
+            },
+            padding: {
+              top: 0,
+              bottom: 0
+            }
+          }
+        }
+      }
+    };
+
+    // Refresh chart
+    setTimeout(() => {
+      if (this.activitiesChart) {
+        this.activitiesChart.refresh();
+      }
+    }, 0);
+  }
+
+  private initializeComparisonPersonasChart(): void {
+    if (!this.personasData || this.personasData.length === 0 || !this.personasData2 || this.personasData2.length === 0) {
+      this.personasChartData = null;
+      return;
+    }
+
+    // Get all unique personas from both features
+    const personaMap = new Map<string, { name: string; weight1: number; weight2: number; index1: number; index2: number }>();
+    
+    this.personasData.forEach(persona => {
+      personaMap.set(persona.name, {
+        name: persona.name,
+        weight1: persona.weight,
+        weight2: 0,
+        index1: persona.index,
+        index2: 0
+      });
+    });
+    
+    this.personasData2.forEach(persona => {
+      const existing = personaMap.get(persona.name);
+      if (existing) {
+        existing.weight2 = persona.weight;
+        existing.index2 = persona.index;
+      } else {
+        personaMap.set(persona.name, {
+          name: persona.name,
+          weight1: 0,
+          weight2: persona.weight,
+          index1: 0,
+          index2: persona.index
+        });
+      }
+    });
+
+    // Sort by combined weight
+    const sortedPersonas = Array.from(personaMap.values())
+      .sort((a, b) => Math.max(b.weight1, b.weight2) - Math.max(a.weight1, a.weight2));
+
+    const feature1Name = this.featureInfo?.name || this.translate.instant('analyze.feature1');
+    const feature2Name = this.featureInfo2?.name || this.translate.instant('analyze.feature2');
+    
+    // Labels are just numbers
+    const labels = sortedPersonas.map((_, index) => (index + 1).toString());
+    const weights1 = sortedPersonas.map(p => p.weight1 * 100);
+    const weights2 = sortedPersonas.map(p => p.weight2 * 100);
+
+    // Get current bewertung setting
+    const bewertung = this.filterConfigService.selectedBewertung();
+    const isScoreMode = bewertung === 'zeit';
+
+    // Get colors based on current map visualization type - same colors as before
+    const colors1 = sortedPersonas.map((persona) => {
+      if (isScoreMode) {
+        // For personas, we need to get score from analyzeData if available
+        // Since personas don't have score directly, we use index as fallback
+        return this.getScoreColor(persona.index1);
+      } else {
+        return this.getGradeColor(persona.index1);
+      }
+    });
+
+    const colors2 = sortedPersonas.map((persona) => {
+      if (isScoreMode) {
+        return this.getScoreColor(persona.index2);
+      } else {
+        return this.getGradeColor(persona.index2);
+      }
+    });
+
+    const populationLabel = this.translate.instant('analyze.populationPercent');
+
+    this.personasChartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: populationLabel,
+          data: weights1,
+          backgroundColor: colors1,
+          borderColor: '#ffffff',
+          borderWidth: 1
+        },
+        {
+          label: populationLabel,
+          data: weights2,
+          backgroundColor: colors2,
+          borderColor: '#ffffff',
+          borderWidth: 1
+        }
+      ]
+    };
+
+    this.personasChartOptions = {
+      indexAxis: 'x',
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            title: (context: any) => {
+              const index = context[0].dataIndex;
+              return sortedPersonas[index].name || '';
+            },
+            label: (context: any) => {
+              const index = context.dataIndex;
+              const datasetIndex = context.datasetIndex;
+              const persona = sortedPersonas[index];
+              const weight = datasetIndex === 0 ? persona.weight1 : persona.weight2;
+              const indexValue = datasetIndex === 0 ? persona.index1 : persona.index2;
+              const grade = this.getGradeFromIndex(indexValue);
+              const featureName = datasetIndex === 0 ? feature1Name : feature2Name;
+              const ratingLabel = this.translate.instant('analyze.rating');
+              const populationLabel = this.translate.instant('analyze.populationPercent');
+              return [
+                `${featureName}`,
+                `${ratingLabel}: ${grade}`,
+                `${populationLabel}: ${(weight * 100).toFixed(1)}%`
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#ffffff',
+            font: {
+              size: 12
+            }
+          },
+          grid: {
+            display: false
+          }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 5,
+            color: '#ffffff',
+            font: {
+              size: 12
+            },
+            padding: 5
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)',
+            drawBorder: false
+          },
+          title: {
+            display: true,
+            text: this.translate.instant('analyze.populationPercent'),
+            color: '#ffffff',
+            font: {
+              size: 12
+            },
+            padding: {
+              top: 0,
+              bottom: 0
+            }
+          }
+        }
+      }
+    };
+
+    // Refresh chart
+    setTimeout(() => {
+      if (this.personasChart) {
+        this.personasChart.refresh();
+      }
+    }, 0);
+  }
+
   getSortedPersonas(): PersonaBreakdown[] {
     if (!this.personasData || this.personasData.length === 0) {
       return [];
@@ -1020,6 +1766,30 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getSortedCategories(): CategoryScore[] {
+    if (this.isComparisonMode) {
+      // In comparison mode, return categories from both features combined
+      const categoryMap = new Map<number, CategoryScore>();
+      
+      if (this.analyzeData?.categories) {
+        this.analyzeData.categories.forEach(cat => {
+          categoryMap.set(cat.category_id, cat);
+        });
+      }
+      
+      if (this.analyzeData2?.categories) {
+        this.analyzeData2.categories.forEach(cat => {
+          const existing = categoryMap.get(cat.category_id);
+          if (!existing || cat.weight > existing.weight) {
+            categoryMap.set(cat.category_id, cat);
+          }
+        });
+      }
+      
+      return Array.from(categoryMap.values())
+        .sort((a, b) => b.weight - a.weight)
+        .slice(0, 5);
+    }
+    
     if (!this.analyzeData || !this.analyzeData.categories) {
       return [];
     }
@@ -1032,7 +1802,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
    * Returns true if any content is currently loading
    */
   isLoading(): boolean {
-    return this.isLoadingFeatureInfo || this.isLoadingAnalyze || this.isLoadingPersonas || this.isLoadingPlaces;
+    return this.isLoadingFeatureInfo || this.isLoadingAnalyze || this.isLoadingPersonas || this.isLoadingPlaces ||
+           this.isLoadingFeatureInfo2 || this.isLoadingAnalyze2 || this.isLoadingPersonas2;
   }
 
   /**
@@ -1405,6 +2176,22 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const isScoreMode = filters?.feature_type === 'score';
     
+    // Check if we're in comparison mode
+    const isComparisonMode = this.isComparisonMode;
+    let featureId2: number | undefined;
+    let featureName2: string | undefined;
+    
+    if (isComparisonMode && this.selectedFeature2) {
+      const featureIdRaw2 = this.selectedFeature2.properties.id || this.selectedFeature2.id;
+      if (featureIdRaw2) {
+        const id2 = typeof featureIdRaw2 === 'string' ? parseInt(featureIdRaw2, 10) : featureIdRaw2;
+        if (!isNaN(id2)) {
+          featureId2 = id2;
+          featureName2 = this.featureInfo2?.name;
+        }
+      }
+    }
+    
     const dialogData: AllCategoriesDialogData = {
       featureType: featureType,
       featureId: featureId,
@@ -1412,7 +2199,11 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       categoryIds: filters.category_ids,
       personaId: filters.persona_id,
       isScoreMode: isScoreMode,
+      featureName: this.featureInfo?.name,
       getGrade: (index: number) => this.getGrade(index),
+      isComparisonMode: isComparisonMode,
+      featureId2: featureId2,
+      featureName2: featureName2
     };
 
     this.dialog.open(AllCategoriesDialogComponent, {
@@ -1481,6 +2272,88 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       maxHeight: '85vh',
       panelClass: 'places-dialog-panel',
       data: placesData
+    });
+  }
+
+  openPersonasDialog(): void {
+    if (!this.selectedFeature) {
+      return;
+    }
+
+    const map = this.mapService.getMap();
+    if (!map) {
+      console.warn('Map not available for personas dialog');
+      return;
+    }
+
+    const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
+    if (!featureIdRaw) {
+      console.warn('Feature ID not available');
+      return;
+    }
+
+    const featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
+    if (isNaN(featureId)) {
+      console.warn('Invalid feature ID:', featureIdRaw);
+      return;
+    }
+
+    // Use saved feature type (must be set when feature is selected)
+    if (!this.savedFeatureType) {
+      console.error('Feature type not available - cannot open personas dialog');
+      return;
+    }
+    const featureType = this.savedFeatureType;
+    const profileCombinationId = this.filterConfigService.currentProfileCombinationID();
+    
+    if (!profileCombinationId) {
+      console.warn('Profile combination ID not available');
+      return;
+    }
+
+    const filters = this.filterConfigService.contentLayerFilters();
+    if (!filters) {
+      console.warn('Content layer filters not available');
+      return;
+    }
+
+    const bewertung = this.filterConfigService.selectedBewertung();
+    const isScoreMode = bewertung === 'zeit';
+    const isComparisonMode = this.isComparisonMode;
+    let featureId2: number | undefined;
+    let featureName2: string | undefined;
+    
+    if (isComparisonMode && this.selectedFeature2) {
+      const featureIdRaw2 = this.selectedFeature2.properties.id || this.selectedFeature2.id;
+      if (featureIdRaw2) {
+        const id2 = typeof featureIdRaw2 === 'string' ? parseInt(featureIdRaw2, 10) : featureIdRaw2;
+        if (!isNaN(id2)) {
+          featureId2 = id2;
+          featureName2 = this.featureInfo2?.name;
+        }
+      }
+    }
+    
+    const personasData: PersonasDialogData = {
+      featureType: featureType,
+      featureId: featureId,
+      profileCombinationId: profileCombinationId,
+      categoryIds: filters.category_ids,
+      personaId: filters.persona_id,
+      isScoreMode: isScoreMode,
+      featureName: this.featureInfo?.name,
+      getGrade: (index: number) => this.getGrade(index),
+      isComparisonMode: isComparisonMode,
+      featureId2: featureId2,
+      featureName2: featureName2
+    };
+
+    this.dialog.open(PersonasDialogComponent, {
+      width: '95vw',
+      maxWidth: '1400px',
+      maxHeight: '90vh',
+      panelClass: 'personas-dialog-panel',
+      data: personasData
     });
   }
 }

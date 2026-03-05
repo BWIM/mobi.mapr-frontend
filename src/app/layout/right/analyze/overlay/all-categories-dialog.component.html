@@ -9,23 +9,30 @@
   </button>
   
   <div class="mb-4 flex-shrink-0">
-    <h2 mat-dialog-title class="text-2xl font-bold text-white">{{ data.featureName || ('analyze.activities' | translate) }}</h2>
+    <h2 mat-dialog-title class="text-2xl font-bold text-white">
+      <span *ngIf="!data.isComparisonMode">{{ data.featureName || ('analyze.activities' | translate) }}</span>
+      <span *ngIf="data.isComparisonMode" class="flex gap-4">
+        <span>{{ data.featureName || ('analyze.feature1' | translate) }}</span>
+        <span class="text-lg opacity-75">vs</span>
+        <span>{{ data.featureName2 || ('analyze.feature2' | translate) }}</span>
+      </span>
+    </h2>
   </div>
   
   <mat-dialog-content class="mat-typography flex-[4] min-h-0 overflow-hidden py-4 px-4 flex flex-col">
     <!-- Loading State -->
-    <div *ngIf="isLoading" class="text-sm text-[var(--primary-color)] py-4 text-center flex-shrink-0">
+    <div *ngIf="isLoading || isLoading2" class="text-sm text-[var(--primary-color)] py-4 text-center flex-shrink-0">
       <mat-spinner diameter="40" class="mx-auto mb-4"></mat-spinner>
       {{ 'analyze.allCategoriesDialog.loading' | translate }}
     </div>
     
     <!-- Error State -->
-    <div *ngIf="error && !isLoading" class="text-sm text-red-600 py-4 text-center flex-shrink-0">
-      {{ error }}
+    <div *ngIf="(error || error2) && !isLoading && !isLoading2" class="text-sm text-red-600 py-4 text-center flex-shrink-0">
+      {{ error || error2 }}
     </div>
     
     <!-- Chart and Categories -->
-    <div *ngIf="allCategories.length > 0 && !isLoading && !error" class="w-full flex flex-col flex-1 min-h-0">
+    <div *ngIf="(allCategories.length > 0 || (data.isComparisonMode && allCategories2.length > 0)) && !isLoading && !isLoading2 && !error && !error2" class="w-full flex flex-col flex-1 min-h-0">
       <!-- Chart Container - Takes most of the space (about 70%) -->
       <div class="flex-[4] min-h-0 mb-3 w-full chart-wrapper">
         <div class="relative w-full h-full">

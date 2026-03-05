@@ -18,6 +18,10 @@ export interface AllCategoriesDialogData {
   isScoreMode: boolean;
   featureName?: string;
   getGrade: (index: number) => string;
+  // Comparison mode fields
+  featureId2?: number;
+  featureName2?: string;
+  isComparisonMode?: boolean;
 }
 
 @Component({
@@ -34,8 +38,11 @@ export interface AllCategoriesDialogData {
 })
 export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
   allCategories: CategoryScore[] = [];
+  allCategories2: CategoryScore[] = [];
   isLoading: boolean = false;
+  isLoading2: boolean = false;
   error: string | null = null;
+  error2: string | null = null;
   chartData: any = null;
   chartOptions: any = null;
   
@@ -73,6 +80,9 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.loadAllCategories();
+    if (this.data.isComparisonMode && this.data.featureId2) {
+      this.loadAllCategories2();
+    }
   }
 
   ngAfterViewInit() {
@@ -112,7 +122,56 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
       if (response && response.categories) {
         this.allCategories = [...response.categories]
           .sort((a, b) => b.weight - a.weight);
-        this.initializeChart(this.allCategories);
+        if (this.data.isComparisonMode && this.allCategories2.length > 0) {
+          this.initializeComparisonChart();
+        } else if (!this.data.isComparisonMode) {
+          this.initializeChart(this.allCategories);
+        }
+        // Resize chart after data is loaded
+        setTimeout(() => {
+          if (this.allCategoriesChart) {
+            this.allCategoriesChart.reinit();
+          }
+        }, 100);
+      }
+    });
+  }
+
+  private loadAllCategories2(): void {
+    if (!this.data.featureId2) {
+      return;
+    }
+
+    this.isLoading2 = true;
+    this.error2 = null;
+
+    this.analyzeService.getAnalyze({
+      feature_type: this.data.featureType,
+      feature_id: this.data.featureId2,
+      profile_combination_id: this.data.profileCombinationId,
+      category_ids: this.data.categoryIds,
+      persona_id: this.data.personaId,
+      top5: false
+    }).pipe(
+      catchError((error) => {
+        console.error('Error loading all categories 2:', error);
+        if (error.status === 404) {
+          this.error2 = this.translate.instant('analyze.allCategoriesDialog.categoriesNotFound');
+        } else if (error.status === 503) {
+          this.error2 = this.translate.instant('analyze.allCategoriesDialog.dataNotLoaded');
+        } else {
+          this.error2 = this.translate.instant('analyze.allCategoriesDialog.errorLoadingCategories');
+        }
+        return of(null);
+      })
+    ).subscribe((response) => {
+      this.isLoading2 = false;
+      if (response && response.categories) {
+        this.allCategories2 = [...response.categories]
+          .sort((a, b) => b.weight - a.weight);
+        if (this.allCategories.length > 0) {
+          this.initializeComparisonChart();
+        }
         // Resize chart after data is loaded
         setTimeout(() => {
           if (this.allCategoriesChart) {
@@ -187,7 +246,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
           label: relevanceLabel,
           data: weights,
           backgroundColor: colors,
-          borderColor: colors,
+          borderColor: '#ffffff',
           borderWidth: 1
         }
       ]
@@ -292,6 +351,250 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
 
   getGrade(index: number): string {
     return this.data.getGrade(index);
+  }
+
+  private getScoreColor(score: number): string {
+    if (score < 480) {
+      return 'rgb(23, 25, 63)'; // 0-7 min (default for < 480) - darkest
+    } else if (score < 960) {
+      return 'rgb(43, 40, 105)'; // 8-15 min (480-960s) - very dark
+    } else if (score < 1440) {
+      return 'rgb(74, 89, 160)'; // 16-23 min (960-1440s) - darker
+    } else if (score < 1800) {
+      return 'rgb(90, 135, 185)'; // 24-30 min (1440-1800s) - medium
+    } else if (score < 2700) {
+      return 'rgb(121, 194, 230)'; // 31-45 min (1800-2700s) - medium-light
+    } else {
+      return 'rgb(162, 210, 235)'; // 45+ min (2700+s) - lightest
+    }
+  }
+
+  private getGradeColor(index: number): string {
+    const indexValue = index / 100;
+    if (indexValue <= 0) {
+      return 'rgba(128, 128, 128, 0.7)'; // NaN or invalid
+    } else if (indexValue < 0.35) {
+      return 'rgba(50, 97, 45, 0.7)'; // Grade A (A+, A, A-)
+    } else if (indexValue < 0.5) {
+      return 'rgba(60, 176, 67, 0.7)'; // Grade B (B+, B, B-)
+    } else if (indexValue < 0.71) {
+      return 'rgba(238, 210, 2, 0.7)'; // Grade C (C+, C, C-)
+    } else if (indexValue < 1.0) {
+      return 'rgba(237, 112, 20, 0.7)'; // Grade D (D+, D, D-)
+    } else if (indexValue < 1.41) {
+      return 'rgba(194, 24, 7, 0.7)'; // Grade E (E+, E, E-)
+    } else {
+      return 'rgba(150, 86, 162, 0.7)'; // Grade F (F+, F, F-)
+    }
+  }
+
+  private initializeComparisonChart(): void {
+    if (!this.allCategories || this.allCategories.length === 0 || 
+        !this.allCategories2 || this.allCategories2.length === 0) {
+      this.chartData = null;
+      return;
+    }
+
+    // Get all unique categories from both features, sorted by combined weight
+    const categoryMap = new Map<number, { category_id: number; name: string; weight1: number; weight2: number; index1: number; index2: number; score1: number; score2: number }>();
+    
+    this.allCategories.forEach(cat => {
+      categoryMap.set(cat.category_id, {
+        category_id: cat.category_id,
+        name: cat.category_name,
+        weight1: cat.weight,
+        weight2: 0,
+        index1: cat.index,
+        index2: 0,
+        score1: cat.score,
+        score2: 0
+      });
+    });
+    
+    this.allCategories2.forEach(cat => {
+      const existing = categoryMap.get(cat.category_id);
+      if (existing) {
+        existing.weight2 = cat.weight;
+        existing.index2 = cat.index;
+        existing.score2 = cat.score;
+      } else {
+        categoryMap.set(cat.category_id, {
+          category_id: cat.category_id,
+          name: cat.category_name,
+          weight1: 0,
+          weight2: cat.weight,
+          index1: 0,
+          index2: cat.index,
+          score1: 0,
+          score2: cat.score
+        });
+      }
+    });
+
+    // Sort by combined weight
+    const sortedCategories = Array.from(categoryMap.values())
+      .sort((a, b) => Math.max(b.weight1, b.weight2) - Math.max(a.weight1, a.weight2));
+
+    const labels = sortedCategories.map((_, index) => (index + 1).toString());
+    const weights1 = sortedCategories.map(cat => cat.weight1 * 100);
+    const weights2 = sortedCategories.map(cat => cat.weight2 * 100);
+
+    // Get colors based on current map visualization type - same colors as before
+    const colors1 = sortedCategories.map((cat) => {
+      if (this.data.isScoreMode) {
+        return this.getScoreColor(cat.score1);
+      } else {
+        return this.getGradeColor(cat.index1);
+      }
+    });
+
+    const colors2 = sortedCategories.map((cat) => {
+      if (this.data.isScoreMode) {
+        return this.getScoreColor(cat.score2);
+      } else {
+        return this.getGradeColor(cat.index2);
+      }
+    });
+
+    // Find max weight to set appropriate y-axis max
+    const maxWeight = Math.max(...weights1, ...weights2);
+    const yAxisMax = Math.ceil(maxWeight / 5) * 5; // Round up to nearest 5
+
+    const feature1Name = this.data.featureName || this.translate.instant('analyze.feature1');
+    const feature2Name = this.data.featureName2 || this.translate.instant('analyze.feature2');
+    const relevanceLabel = this.translate.instant('analyze.relevancePercent');
+
+    this.chartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: relevanceLabel,
+          data: weights1,
+          backgroundColor: colors1,
+          borderColor: '#ffffff',
+          borderWidth: 1
+        },
+        {
+          label: relevanceLabel,
+          data: weights2,
+          backgroundColor: colors2,
+          borderColor: '#ffffff',
+          borderWidth: 1
+        }
+      ]
+    };
+
+    this.chartOptions = {
+      indexAxis: 'x',
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            title: (context: any) => {
+              const index = context[0].dataIndex;
+              return sortedCategories[index].name || '';
+            },
+            label: (context: any) => {
+              const index = context.dataIndex;
+              const datasetIndex = context.datasetIndex;
+              const category = sortedCategories[index];
+              const weight = datasetIndex === 0 ? category.weight1 : category.weight2;
+              const indexValue = datasetIndex === 0 ? category.index1 : category.index2;
+              const scoreValue = datasetIndex === 0 ? category.score1 : category.score2;
+              const featureName = datasetIndex === 0 ? feature1Name : feature2Name;
+              const relevanceLabel = this.translate.instant('analyze.relevance');
+              const minutesLabel = this.translate.instant('map.popup.minutes');
+              
+              // Use appropriate label based on mode
+              const ratingLabel = this.data.isScoreMode 
+                ? this.translate.instant('map.popup.score')
+                : this.translate.instant('map.popup.index');
+              
+              let ratingValue: string;
+              if (this.data.isScoreMode) {
+                // Convert score from seconds to minutes
+                const minutes = Math.round(scoreValue / 60);
+                ratingValue = `${minutes} ${minutesLabel}`;
+              } else {
+                // Use grade for quality mode
+                const grade = this.getGrade(indexValue);
+                ratingValue = grade;
+              }
+              
+              return [
+                `${featureName}`,
+                `${ratingLabel} ${ratingValue}`,
+                `${relevanceLabel}: ${(weight * 100).toFixed(1)}%`
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#ffffff',
+            font: {
+              size: 12
+            }
+          },
+          grid: {
+            display: false
+          }
+        },
+        y: {
+          beginAtZero: true,
+          max: yAxisMax,
+          ticks: {
+            stepSize: yAxisMax <= 25 ? 5 : Math.ceil(yAxisMax / 10),
+            color: '#ffffff',
+            font: {
+              size: 12
+            },
+            padding: 5
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)',
+            drawBorder: false
+          },
+          title: {
+            display: true,
+            text: this.translate.instant('analyze.relevancePercent'),
+            color: '#ffffff',
+            font: {
+              size: 12
+            },
+            padding: {
+              top: 0,
+              bottom: 0
+            }
+          }
+        }
+      }
+    };
+
+    // Update allCategories to include all categories from both features for the list
+    this.allCategories = sortedCategories.map(cat => ({
+      category_id: cat.category_id,
+      category_name: cat.name,
+      weight: Math.max(cat.weight1, cat.weight2),
+      index: cat.index1 || cat.index2,
+      score: cat.score1 || cat.score2
+    } as CategoryScore));
   }
 
 
