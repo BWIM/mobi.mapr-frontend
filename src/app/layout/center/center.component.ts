@@ -360,10 +360,22 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       }
 
+      // Optional population display if available on the feature (but not for hexagons)
+      const tileType = properties['t'];
+      const isHexagon = tileType === 'h';
+      const population = properties['population'];
+      let populationHtml = '';
+      if (!isHexagon && population !== undefined && population !== null) {
+        const populationLabel = this.translate.instant('analyze.population');
+        const formattedPopulation = Number(population).toLocaleString();
+        populationHtml = `<div>${populationLabel}: ${formattedPopulation}</div>`;
+      }
+
       const popupContent = `
         <div>
           <div style="font-weight: 600; margin-bottom: 4px;">${name}</div>
           <div>${valueText}</div>
+          ${populationHtml}
         </div>
       `;
 

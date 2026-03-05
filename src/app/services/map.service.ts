@@ -389,9 +389,17 @@ export class MapService {
    */
   private async fetchGeoLocation(): Promise<{ lat: number; lng: number } | null> {
     try {
+      let params = new HttpParams();
+
+      // Add share key if available (for unauthenticated access)
+      const shareKey = this.dashboardSessionService.getShareKey();
+      if (shareKey) {
+        params = params.set('key', shareKey);
+      }
+
       const url = `${environment.apiUrl}/geo`;
       const response = await firstValueFrom(
-        this.http.get<GeoLocationResponse>(url)
+        this.http.get<GeoLocationResponse>(url, { params })
       );
       
       // Check if response has error or missing lat/lng
@@ -579,6 +587,35 @@ export class MapService {
       ? this.getScoreFillColorExpression()
       : this.getIndexFillColorExpression();
 
+    // Opacity expression for hexagons (t='h'):
+    // - Use population in the range [0, 1000]
+    // - Map to opacity [0.2, 0.9] using exponential interpolation
+    // - Clamp values outside [0, 1000] to the nearest bound
+    const hexOpacityExpression: any = [
+      'interpolate',
+      ['cubic-bezier', 0.26, 0.38, 0.82, 0.36],
+      ['get', 'population'],
+      0, 0.2,
+      100, 0.5,
+      1000, 0.8,
+      5000, 0.9
+    ];
+
+    // For non-hex features, keep a constant opacity
+    const fillOpacityExpression: any = [
+      'case',
+      ['==', ['get', 't'], 'h'],  // If hexagon
+      hexOpacityExpression,
+      0.7
+    ];
+
+    const lineOpacityExpression: any = [
+      'case',
+      ['==', ['get', 't'], 'h'],  // If hexagon
+      hexOpacityExpression,
+      0.8
+    ];
+
     // Add fill layer
     updatedStyle.layers.push({
       id: 'content-layer-fill',
@@ -587,7 +624,7 @@ export class MapService {
       'source-layer': 'geodata',
       paint: {
         'fill-color': fillColorExpression,
-        'fill-opacity': 0.7
+        'fill-opacity': fillOpacityExpression
       }
     } as LayerSpecification);
 
@@ -600,7 +637,7 @@ export class MapService {
       paint: {
         'line-color': fillColorExpression,
         'line-width': 1,
-        'line-opacity': 0.8
+        'line-opacity': lineOpacityExpression
       }
     } as LayerSpecification);
 
