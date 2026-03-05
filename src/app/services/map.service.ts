@@ -391,26 +391,27 @@ export class MapService {
     try {
       let params = new HttpParams();
 
-      // Add share key if available (for unauthenticated access)
+      // Add share key only (for unauthenticated access)
       const shareKey = this.dashboardSessionService.getShareKey();
       if (shareKey) {
-        params = params.set('key', shareKey);
-      }
 
-      const url = `${environment.apiUrl}/geo`;
-      const response = await firstValueFrom(
-        this.http.get<GeoLocationResponse>(url, { params })
-      );
-      
-      // Check if response has error or missing lat/lng
-      if (response.error || !response.lat || !response.lng) {
-        return null;
+        params = params.set('key', shareKey);
+        const url = `${environment.apiUrl}/geo`;
+        const response = await firstValueFrom(
+          this.http.get<GeoLocationResponse>(url, { params })
+        );
+        
+        // Check if response has error or missing lat/lng
+        if (response.error || !response.lat || !response.lng) {
+          return null;
+        }
+        
+        return {
+          lat: response.lat,
+          lng: response.lng
+        }
       }
-      
-      return {
-        lat: response.lat,
-        lng: response.lng
-      };
+      return null;
     } catch (error) {
       console.warn('Could not fetch geo location from API:', error);
       return null;

@@ -71,6 +71,7 @@
     },
     "addToComparison": "Add to comparison",
     "clearComparison": "End comparison",
+    "startComparisonHint": "Select another area on the map with a right-click to start comparing!",
     "feature1": "Feature 1",
     "feature2": "Feature 2",
     "comparisonMode": "Comparison mode",

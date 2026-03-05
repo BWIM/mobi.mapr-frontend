@@ -71,6 +71,7 @@
     },
     "addToComparison": "Als Vergleich hinzufügen",
     "clearComparison": "Vergleich beenden",
+    "startComparisonHint": "Wähle eine weitere Region auf der Karte mit einem Rechtsklick aus, um einen Vergleich zu starten!",
     "feature1": "Feature 1",
     "feature2": "Feature 2",
     "comparisonMode": "Vergleichsmodus",

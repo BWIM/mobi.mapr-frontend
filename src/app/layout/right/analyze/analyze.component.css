@@ -38,3 +38,21 @@
 .grade-badge:hover {
   opacity: 0.9;
 }
+
+/* Comparison button icon styling */
+.comparison-add-button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.comparison-add-button mat-icon {
+  font-weight: 700 !important;
+  font-size: 28px !important;
+  line-height: 1 !important;
+  width: 28px !important;
+  height: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
