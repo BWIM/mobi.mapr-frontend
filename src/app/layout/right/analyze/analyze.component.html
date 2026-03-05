@@ -105,8 +105,69 @@
       {{ analyzeError }}
     </div>
     
-    <!-- Chart -->
-    <div *ngIf="activitiesChartData && !isLoading() && !analyzeError">
+    <!-- Tabs when persona_id is 54 (all personas) -->
+    <div *ngIf="isAllPersonas() && !isLoading() && !analyzeError">
+      <mat-tab-group>
+        <!-- Activities Tab -->
+        <mat-tab [label]="'analyze.analysis.activities' | translate">
+          <div *ngIf="activitiesChartData">
+            <!-- Chart Container -->
+            <div class="relative mt-4">
+              <p-chart #activitiesChart type="bar" [data]="activitiesChartData" [options]="activitiesChartOptions" (onDataSelect)="onChartDataSelect($event)" style="cursor: pointer;"></p-chart>
+            </div>
+            
+            <!-- Activity List -->
+            <div class="mt-4">
+              <div *ngFor="let category of getSortedCategories(); let i = index" 
+                   class="text-sm text-white flex items-center">
+                <span class="font-bold mr-2">{{ i + 1 }}.</span>
+                <span class="cursor-pointer hover:underline" (click)="onCategoryNameClick(category)">{{ category.category_name }}</span>
+              </div>
+            </div>
+            
+            <!-- Plus Button -->
+            <div class="mt-4 flex justify-center">
+              <button 
+                matButton
+                color="primary"
+                (click)="openAllCategoriesOverlay()"
+                [attr.aria-label]="'analyze.analysis.showAllCategories' | translate">
+                <mat-icon>add</mat-icon>
+                <span class="ml-2">{{ 'analyze.analysis.showAllCategories' | translate }}</span>
+              </button>
+            </div>
+          </div>
+        </mat-tab>
+        
+        <!-- Personas Tab -->
+        <mat-tab [label]="'analyze.analysis.personas' | translate">
+          <!-- Error State -->
+          <div *ngIf="personasError" class="text-sm text-red-600 py-4">
+            {{ personasError }}
+          </div>
+          
+          <!-- Chart -->
+          <div *ngIf="personasChartData && !personasError">
+            <!-- Chart Container -->
+            <div class="relative mt-4">
+              <p-chart #personasChart type="bar" [data]="personasChartData" [options]="personasChartOptions" style="cursor: pointer;"></p-chart>
+            </div>
+            
+            <!-- Personas List -->
+            <div class="mt-4">
+              <div *ngFor="let persona of getSortedPersonas(); let i = index" 
+                   class="text-sm text-white flex items-center">
+                <span class="font-bold mr-2">{{ i + 1 }}.</span>
+                <span>{{ persona.name }}</span>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+    
+    <!-- Single Chart when persona_id is not 54 -->
+    <div *ngIf="!isAllPersonas() && activitiesChartData && !isLoading() && !analyzeError">
       <!-- Title -->
       <div class="mb-4">
         <h3 class="text-lg font-bold text-white">{{ 'analyze.analysis.title' | translate }}</h3>

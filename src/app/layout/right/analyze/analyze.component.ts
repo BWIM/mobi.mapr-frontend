@@ -4,7 +4,7 @@ import { Subscription, catchError, of, forkJoin, firstValueFrom } from 'rxjs';
 import { FeatureSelectionService } from '../../../shared/services/feature-selection.service';
 import { MapService, FeatureInfoResponse, ContentLayerFilters } from '../../../services/map.service';
 import { FilterConfigService } from '../../../services/filter-config.service';
-import { AnalyzeService, AnalyzeResponse, CategoryScore } from '../../../services/analyze.service';
+import { AnalyzeService, AnalyzeResponse, CategoryScore, PersonaBreakdown } from '../../../services/analyze.service';
 import { ProjectsService } from '../../../services/project.service';
 import { PlacesService, Place } from '../../../services/places.service';
 import { UIChart } from 'primeng/chart';
@@ -36,6 +36,13 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   activitiesChartData: any = null;
   activitiesChartOptions: any = null;
   
+  // Personas chart data
+  personasData: PersonaBreakdown[] | null = null;
+  isLoadingPersonas: boolean = false;
+  personasError: string | null = null;
+  personasChartData: any = null;
+  personasChartOptions: any = null;
+  
   // Map data
   @ViewChild('mapContainerMini') mapContainerMini?: ElementRef;
   private map?: MapLibreMap;
@@ -53,6 +60,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   ];
   
   @ViewChild('activitiesChart') activitiesChart?: UIChart;
+  @ViewChild('personasChart') personasChart?: UIChart;
   
   private featureSelectionService = inject(FeatureSelectionService);
   private mapService = inject(MapService);
@@ -65,6 +73,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private featureSubscription?: Subscription;
   private featureInfoSubscription?: Subscription;
   private analyzeSubscription?: Subscription;
+  private languageSubscription?: Subscription;
   private currentLoadingFeatureId: number | null = null;
   private previousFilters: ContentLayerFilters | null = null;
   private isInitialFilterLoad = true;
@@ -126,6 +135,16 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       }
     );
+
+    // Subscribe to language changes to update chart labels
+    this.languageSubscription = this.translate.onLangChange.subscribe(() => {
+      if (this.activitiesChartData && this.activitiesChartOptions) {
+        this.updateActivitiesChartLabels();
+      }
+      if (this.personasChartData && this.personasChartOptions) {
+        this.updatePersonasChartLabels();
+      }
+    });
   }
 
   ngAfterViewInit() {
@@ -151,6 +170,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     if (this.analyzeSubscription) {
       this.analyzeSubscription.unsubscribe();
+    }
+    if (this.languageSubscription) {
+      this.languageSubscription.unsubscribe();
     }
     if (this.map) {
       this.map.remove();
@@ -190,6 +212,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.activitiesChartData = null;
     this.isLoadingAnalyze = false;
     this.analyzeError = null;
+    this.personasData = null;
+    this.personasChartData = null;
+    this.isLoadingPersonas = false;
+    this.personasError = null;
     this.isLoadingPlaces = false;
     this.placesError = null;
     this.savedFeatureType = null;
@@ -358,20 +384,60 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       })
     );
 
-    // Run both requests in parallel
-    this.featureInfoSubscription = forkJoin({
+    // Prepare personas request if persona_id is 54
+    const shouldLoadPersonas = filters.persona_id === 54;
+    const personasRequest = shouldLoadPersonas ? this.analyzeService.getPersonas({
+      feature_type: featureType,
+      feature_id: featureId,
+      profile_combination_id: profileCombinationId,
+      category_ids: filters.category_ids,
+      persona_id: 54
+    }).pipe(
+      catchError((error) => {
+        console.error('Error loading personas data:', error);
+        if (error.status === 404) {
+          this.personasError = this.translate.instant('analyze.analyzeData.notFound');
+        } else if (error.status === 503) {
+          this.personasError = this.translate.instant('analyze.analyzeData.dataNotPreloaded');
+        } else {
+          this.personasError = this.translate.instant('analyze.analyzeData.errorLoading');
+        }
+        return of(null);
+      })
+    ) : of(null);
+
+    // Mark that we're loading personas if needed
+    if (shouldLoadPersonas) {
+      this.isLoadingPersonas = true;
+      this.personasError = null;
+    }
+
+    // Run requests in parallel
+    const requests: any = {
       featureInfo: featureInfoRequest,
       analyzeData: analyzeRequest
-    }).subscribe(({ featureInfo, analyzeData }) => {
+    };
+    
+    if (shouldLoadPersonas) {
+      requests.personasData = personasRequest;
+    }
+
+    this.featureInfoSubscription = forkJoin(requests).subscribe((result: any) => {
       this.isLoadingFeatureInfo = false;
       this.isLoadingAnalyze = false;
+      this.isLoadingPersonas = false;
       this.currentLoadingFeatureId = null;
       
       // Update feature info
-      this.featureInfo = featureInfo;
+      this.featureInfo = result.featureInfo;
       
       // Update analyze data
-      this.analyzeData = analyzeData;
+      this.analyzeData = result.analyzeData;
+      
+      // Update personas data if loaded
+      if (shouldLoadPersonas) {
+        this.personasData = result.personasData;
+      }
       
       // Check if we should show map instead of chart
       if (this.shouldShowMap()) {
@@ -379,10 +445,17 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.loadPlacesForMap();
       } else {
         // Show chart as usual
-        if (analyzeData && analyzeData.categories) {
-          this.initializeActivitiesChart(analyzeData.categories);
+        if (result.analyzeData && result.analyzeData.categories) {
+          this.initializeActivitiesChart(result.analyzeData.categories);
         } else {
           this.activitiesChartData = null;
+        }
+        
+        // Initialize personas chart if data is available
+        if (shouldLoadPersonas && result.personasData) {
+          this.initializePersonasChart(result.personasData);
+        } else {
+          this.personasChartData = null;
         }
       }
       
@@ -686,10 +759,222 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       }
     };
+
+    // Refresh chart to ensure translations are applied
+    setTimeout(() => {
+      if (this.activitiesChart) {
+        this.activitiesChart.refresh();
+      }
+    }, 0);
   }
 
   private getGradeFromIndex(index: number): string {
     return this.getGrade(index);
+  }
+
+  private updateActivitiesChartLabels(): void {
+    if (!this.activitiesChartOptions) {
+      return;
+    }
+    // Update Y-axis title
+    if (this.activitiesChartOptions.scales?.y?.title) {
+      this.activitiesChartOptions.scales.y.title.text = this.translate.instant('analyze.relevancePercent');
+    }
+    // Update dataset label
+    if (this.activitiesChartData?.datasets?.[0]) {
+      this.activitiesChartData.datasets[0].label = this.translate.instant('analyze.relevancePercent');
+    }
+    // Refresh chart
+    if (this.activitiesChart) {
+      this.activitiesChart.refresh();
+    }
+  }
+
+  private updatePersonasChartLabels(): void {
+    if (!this.personasChartOptions) {
+      return;
+    }
+    // Update Y-axis title
+    if (this.personasChartOptions.scales?.y?.title) {
+      this.personasChartOptions.scales.y.title.text = this.translate.instant('analyze.populationPercent');
+    }
+    // Update dataset label
+    if (this.personasChartData?.datasets?.[0]) {
+      this.personasChartData.datasets[0].label = this.translate.instant('analyze.populationPercent');
+    }
+    // Refresh chart
+    if (this.personasChart) {
+      this.personasChart.refresh();
+    }
+  }
+
+  private initializePersonasChart(personas: PersonaBreakdown[]): void {
+    if (!personas || personas.length === 0) {
+      this.personasChartData = null;
+      return;
+    }
+
+    // Sort by weight descending
+    const sortedPersonas = [...personas]
+      .sort((a, b) => b.weight - a.weight);
+
+    const labels = sortedPersonas.map((_, index) => (index + 1).toString());
+    // Convert weights from decimals (0-1) to percentages (0-100)
+    const weights = sortedPersonas.map(p => p.weight * 100);
+
+    // Get current bewertung setting (qualitaet = index, zeit = score)
+    const bewertung = this.filterConfigService.selectedBewertung();
+    const isScoreMode = bewertung === 'zeit';
+    
+    // Get colors based on current map visualization type
+    // Colors match exactly with map.service.ts getScoreFillColorExpression() and getIndexFillColorExpression()
+    const colors = sortedPersonas.map((persona) => {
+      if (isScoreMode) {
+        // Use score-based colors (blue colors for zeit bewertung from getScoreFillColorExpression)
+        // Match exact color breaks from map.service.ts
+        const scoreValue = persona.score;
+        if (scoreValue < 600) {
+          return 'rgb(23, 25, 63)'; // 0-10 min (default for < 600) - darkest
+        } else if (scoreValue < 900) {
+          return 'rgb(43, 40, 105)'; // 11-15 min (600-900s) - very dark
+        } else if (scoreValue < 1200) {
+          return 'rgb(74, 89, 160)'; // 16-20 min (900-1200s) - darker
+        } else if (scoreValue < 1800) {
+          return 'rgb(90, 135, 185)'; // 21-30 min (1200-1800s) - medium
+        } else if (scoreValue < 2700) {
+          return 'rgb(121, 194, 230)'; // 31-45 min (1800-2700s) - medium-light
+        } else {
+          return 'rgb(162, 210, 235)'; // 45+ min (2700+s) - lightest
+        }
+      } else {
+        // Use index-based colors (from getIndexFillColorExpression)
+        // Match exact color breaks from map.service.ts
+        const indexValue = persona.index / 100;
+        if (indexValue <= 0) {
+          return 'rgba(128, 128, 128, 0.7)'; // NaN or invalid
+        } else if (indexValue < 0.35) {
+          return 'rgba(50, 97, 45, 0.7)'; // Grade A (A+, A, A-)
+        } else if (indexValue < 0.5) {
+          return 'rgba(60, 176, 67, 0.7)'; // Grade B (B+, B, B-)
+        } else if (indexValue < 0.71) {
+          return 'rgba(238, 210, 2, 0.7)'; // Grade C (C+, C, C-)
+        } else if (indexValue < 1.0) {
+          return 'rgba(237, 112, 20, 0.7)'; // Grade D (D+, D, D-)
+        } else if (indexValue < 1.41) {
+          return 'rgba(194, 24, 7, 0.7)'; // Grade E (E+, E, E-)
+        } else {
+          return 'rgba(150, 86, 162, 0.7)'; // Grade F (F+, F, F-)
+        }
+      }
+    });
+
+    const populationLabel = this.translate.instant('analyze.populationPercent');
+    this.personasChartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: populationLabel,
+          data: weights,
+          backgroundColor: colors,
+          borderColor: colors,
+          borderWidth: 1
+        }
+      ]
+    };
+
+    this.personasChartOptions = {
+      indexAxis: 'x',
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            title: (context: any) => {
+              const index = context[0].dataIndex;
+              return sortedPersonas[index].name || '';
+            },
+            label: (context: any) => {
+              const index = context.dataIndex;
+              const grade = this.getGradeFromIndex(sortedPersonas[index].index);
+              const ratingLabel = this.translate.instant('analyze.rating');
+              const populationLabel = this.translate.instant('analyze.populationPercent');
+              return [
+                `${ratingLabel}: ${grade}`,
+                `${populationLabel}: ${weights[index].toFixed(1)}%`
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#ffffff',
+            font: {
+              size: 12
+            }
+          },
+          grid: {
+            display: false
+          }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 5,
+            color: '#ffffff',
+            font: {
+              size: 12
+            },
+            padding: 5
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)',
+            drawBorder: false
+          },
+          title: {
+            display: true,
+            text: this.translate.instant('analyze.populationPercent'),
+            color: '#ffffff',
+            font: {
+              size: 12
+            },
+            padding: {
+              top: 0,
+              bottom: 0
+            }
+          }
+        }
+      }
+    };
+
+    // Refresh chart to ensure translations are applied
+    setTimeout(() => {
+      if (this.personasChart) {
+        this.personasChart.refresh();
+      }
+    }, 0);
+  }
+
+  getSortedPersonas(): PersonaBreakdown[] {
+    if (!this.personasData || this.personasData.length === 0) {
+      return [];
+    }
+    return [...this.personasData]
+      .sort((a, b) => b.weight - a.weight);
   }
 
   onChartDataSelect(event: any): void {
@@ -747,7 +1032,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
    * Returns true if any content is currently loading
    */
   isLoading(): boolean {
-    return this.isLoadingFeatureInfo || this.isLoadingAnalyze || this.isLoadingPlaces;
+    return this.isLoadingFeatureInfo || this.isLoadingAnalyze || this.isLoadingPersonas || this.isLoadingPlaces;
+  }
+
+  /**
+   * Returns true if persona_id is 54 (all personas)
+   */
+  isAllPersonas(): boolean {
+    const filters = this.filterConfigService.contentLayerFilters();
+    return filters?.persona_id === 54;
   }
 
   private initializeMap(): void {

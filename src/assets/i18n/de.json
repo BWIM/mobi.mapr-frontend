@@ -51,6 +51,7 @@
     "categories": "Kategorien",
     "relevance": "Relevanz",
     "relevancePercent": "Relevanz (%)",
+    "populationPercent": "Bevölkerung (%)",
     "activity": "Aktivität",
     "rating": "Bewertung",
     "moreInfo": "Mehr Informationen",
@@ -95,6 +96,7 @@
       "errorLoadingCategories": "Fehler beim Laden der Kategorien",
       "errorLoadingPlaces": "Fehler beim Laden der Orte",
       "activities": "Aktivitäten",
+      "personas": "Personengruppen",
       "qualityRating": "Qualitätsbewertung: Die Qualitätsbewertung zeigt die Mobilitätsqualität in verschiedenen Kategorien von A (beste Qualität) bis F (niedrigste Qualität).",
       "placesMap": "Karte mit Orten der Aktivitäten",
       "info": {
@@ -289,7 +291,7 @@
       "availableOptions": "Verfügbare Optionen",
       "availableOptionsDescription": "Jedes Verkehrsmittel kann einzeln ein- oder ausgeschaltet werden, um die Analyse entsprechend deinen Anforderungen anzupassen.",
       "cannotDisable": "Kann nicht deaktiviert werden",
-      "cannotUseCar": "Für ausgewählte Persona nicht verfügbar",
+      "cannotUseCar": "Für ausgewählte Personengruppe nicht verfügbar",
       "introduction": "Wähle aus vier Verkehrsmitteln, um die Mobilität in deiner Region zu analysieren. Jeder Modus verwendet ausgeklügelte Routing-Algorithmen, um realistische Reisezeiten zu berechnen.",
       "modes": {
         "title": "Verfügbare Verkehrsmittel",
@@ -429,15 +431,15 @@
     "activeFilters": {
       "title": "Aktive Filter",
       "description": "Diese Übersicht zeigt die aktuell aktiven Filter und deren Anzahl. Die Zahlen zeigen, wie viele Filter in jeder Kategorie ausgewählt sind.",
-      "introduction": "Filter ermöglichen es dir, die Analyse anzupassen, indem du bestimmte Aktivitäten, Personas, Regionen und Regionaltypen auswählst. Verwende die Filter-Schaltfläche, um diese Einstellungen anzupassen.",
+      "introduction": "Filter ermöglichen es dir, die Analyse anzupassen, indem du bestimmte Aktivitäten, Personengruppen, Regionen und Regionaltypen auswählst. Verwende die Filter-Schaltfläche, um diese Einstellungen anzupassen.",
       "adjustFilters": "Filter anpassen",
-      "adjustFiltersDescription": "Klicke auf \"Filtern\", um die Filtereinstellungen zu öffnen und anzupassen. Dort kannst du Aktivitäten, Personas, Regionalklassen und Bundesländer auswählen.",
+      "adjustFiltersDescription": "Klicke auf \"Filtern\", um die Filtereinstellungen zu öffnen und anzupassen. Dort kannst du Aktivitäten, Personengruppen, Regionalklassen und Bundesländer auswählen.",
       "midProject": "MID-Projekt",
-      "midProjectDescription": "Da dies ein MID-Projekt ist, kannst du zusätzlich Aktivitäten und Personas filtern, um die Analyse weiter zu verfeinern.",
+      "midProjectDescription": "Da dies ein MID-Projekt ist, kannst du zusätzlich Aktivitäten und Personengruppen filtern, um die Analyse weiter zu verfeinern.",
       "activities": "Aktivitäten",
       "activitiesDescription": "Die Aktivitäten basieren auf der Studie \"Mobilität in Deutschland\". Sie gruppieren verschiedene reale Aktivitäten (z.B. Supermarkt) in abstrakte Kategorien des täglichen Bedarfs.",
-      "personas": "Personas",
-      "personasDescription": "Eine Persona definiert, wie relevant bestimmte Aktivitäten für verschiedene Nutzergruppen sind. Für ein Kind ist beispielsweise der Besuch eines Spielplatzes normalerweise relevanter als für einen Erwachsenen. Die Personas stammen ebenfalls aus der MID-Studie.",
+      "personas": "Personengruppen",
+      "personasDescription": "Eine Personengruppe definiert, wie relevant bestimmte Aktivitäten für verschiedene Nutzergruppen sind. Für ein Kind ist beispielsweise der Besuch eines Spielplatzes normalerweise relevanter als für einen Erwachsenen. Die Personengruppen stammen ebenfalls aus der MID-Studie.",
       "regioStars": "Regionalklassen",
       "regioStarsDescription": "Wenn du nur bestimmte Regionen in Deutschland betrachten möchtest, z.B. ländliche Gebiete, kannst du dies hier filtern. Es ändert die Daten selbst nicht, wie Bundesländer, filtert aber auch die Ergebnisse. Dies spiegelt sich auch in den Top-10-Rankings wider.",
       "states": "Bundesländer",
@@ -504,11 +506,11 @@
             "consideration": "Diese regionalen Unterschiede werden im mobi.mapr berücksichtigt, um realitätsnahe Aussagen zur Alltagsmobilität treffen zu können."
           }
         },
-        "personas": "Personas",
+        "personas": "Personengruppen",
         "personasContent": {
           "introduction": {
-            "title": "Über Personas",
-            "description": "Über Personas werden unterschiedliche Alltagsperspektiven auf Mobilität abgebildet. Die genutzten Personas basieren auf den 12 Personengruppen der Studie \"Mobilität in Deutschland (MiD)\" und ermöglichen es, Mobilitätszeiten und Bewertungen getrennt nach Nutzungsgruppen darzustellen. Durch die Aus- und Abwahl einzelner Personas lassen sich Unterschiede zwischen Lebensrealitäten unmittelbar sichtbar machen."
+            "title": "Über Personengruppen",
+            "description": "Über Personengruppen werden unterschiedliche Alltagsperspektiven auf Mobilität abgebildet. Die genutzten Personengruppen basieren auf den 12 Personengruppen der Studie \"Mobilität in Deutschland (MiD)\" und ermöglichen es, Mobilitätszeiten und Bewertungen getrennt nach Nutzungsgruppen darzustellen. Durch die Aus- und Abwahl einzelner Personengruppen lassen sich Unterschiede zwischen Lebensrealitäten unmittelbar sichtbar machen."
           },
           "personGroups": {
             "title": "Personengruppen laut MiD:",
@@ -555,7 +557,7 @@
             "title": "Wie mobi.mapr RegioStaR nutzt",
             "description": "Die RegioStaR-Klassifizierung fließt in zwei zentrale Bereiche der Analyse ein:",
             "point1": "Durchschnittliche Wegzeiten: Der benötigte Zeitaufwand, um eine Alltagsaktivität in unterschiedlichen Raumtypen auszuüben",
-            "point2": "Aktivitäten einer Persona: Die Bedeutung einzelner Aktivitäten je nach Raumtyp",
+            "point2": "Aktivitäten einer Personengruppe: Die Bedeutung einzelner Aktivitäten je nach Raumtyp",
             "example": "Durch die Einbindung der RegioStaR-Klassen wird sichergestellt, dass regionale Unterschiede ausgeglichen werden und Vergleiche immer regional fair bleiben – also nicht eine Metropole mit einer Landgemeinde verglichen wird, sondern nur Regionen ähnlicher Struktur miteinander."
           },
           "dataBasis": {
@@ -584,7 +586,7 @@
     "title": "Filter konfigurieren",
     "tabs": {
       "activities": "Aktivitäten",
-      "personas": "Personas",
+      "personas": "Personengruppen",
       "regioStars": "RegioStars",
       "states": "States"
     },
@@ -732,7 +734,7 @@
       "UNIQUE_TITLE": "Einzigartige Karte",
       "UNIQUE_TEXT": "Wenn du diesen Bildschirm siehst, hat noch niemand eine solche Karte erstellt (zumindest in den letzten 30 Tagen).",
       "STATS_TITLE": "Über 15 Milliarden Möglichkeiten",
-      "STATS_TEXT": "Du kannst die 28 Aktivitäten frei kombinieren, für 8 verschiedene Modus-Kombinationen und 7 Personas bedeutet dies mehr als 15 Milliarden verschiedene Karten."
+      "STATS_TEXT": "Du kannst die 28 Aktivitäten frei kombinieren, für 8 verschiedene Modus-Kombinationen und 7 Personengruppen bedeutet dies mehr als 15 Milliarden verschiedene Karten."
     }
   }
 }

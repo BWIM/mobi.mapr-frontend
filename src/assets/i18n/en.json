@@ -51,6 +51,7 @@
     "categories": "Categories",
     "relevance": "Relevance",
     "relevancePercent": "Relevance (%)",
+    "populationPercent": "Population (%)",
     "activity": "Activity",
     "rating": "Rating",
     "moreInfo": "More information",
@@ -95,6 +96,7 @@
       "errorLoadingCategories": "Error loading categories",
       "errorLoadingPlaces": "Error loading places",
       "activities": "Activities",
+      "personas": "Personas",
       "qualityRating": "Quality rating: The quality rating shows the mobility quality in different categories from A (best quality) to F (lowest quality).",
       "placesMap": "Map with activity places",
       "info": {
