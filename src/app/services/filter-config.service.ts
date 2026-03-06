@@ -932,6 +932,39 @@ export class FilterConfigService {
     });
   }
 
+  /**
+   * Reset advanced filters to default (all selected)
+   * Does not reset modes, only resets: activities, personas, regiostars, states
+   */
+  resetAdvancedFilters(): void {
+    // Reset RegioStars to all selected
+    const allRegioStarIds = this._allRegioStars().map(r => r.id);
+    this._selectedRegioStars.set([...allRegioStarIds]);
+
+    // Reset States to all selected
+    const allStateIds = this._allStates().map(s => s.id);
+    this._selectedStates.set([...allStateIds]);
+
+    // Reset Activities to all selected (only if MID project)
+    const currentProject = this.projectService.project();
+    if (currentProject?.is_mid) {
+      const allActivityIds = this._allActivities().map(a => a.id);
+      this._selectedActivities.set([...allActivityIds]);
+
+      // Reset Personas to default
+      const defaultPersona = this._allPersonas().find(p => p.default === true);
+      if (defaultPersona) {
+        this._selectedPersonas.set(defaultPersona.id);
+      } else if (this._allPersonas().length > 0) {
+        this._selectedPersonas.set(this._allPersonas()[0].id);
+      } else {
+        this._selectedPersonas.set(null);
+      }
+    }
+
+    // Save settings after reset
+    this.saveSettings();
+  }
 
   /**
    * Update map layer with current filters

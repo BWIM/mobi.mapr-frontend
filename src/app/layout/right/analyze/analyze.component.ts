@@ -183,13 +183,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           const featureType = this.mapService.getFeatureTypeFromTileProperty(feature);
           if (featureType) {
             this.savedFeatureType2 = featureType;
-            // Validate that both features have the same type
-            if (this.savedFeatureType && this.savedFeatureType !== featureType) {
-              console.warn('Feature types do not match. Comparison may not work correctly.');
-              this.featureInfoError2 = this.translate.instant('analyze.featureInfo.typeMismatch');
-            } else {
-              this.loadFeatureInfo2(feature);
-            }
+            this.loadFeatureInfo2(feature);
           } else {
             console.error('Feature type could not be determined from tile property "t"');
             this.featureInfoError2 = this.translate.instant('analyze.featureInfo.errorLoading');

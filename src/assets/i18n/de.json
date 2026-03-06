@@ -462,6 +462,7 @@
       "statesDescription": "Bundesländer ermöglichen es dir, Regionen auf der Karte zu filtern. Während dies die Daten überhaupt nicht beeinflusst, ermöglicht es einen besseren Vergleich sowie die Filterung der Top-10-Rankings.",
       "filterButton": "Filtern",
       "filterButtonDisabledHint": "Nur für registrierte Nutzer verfügbar",
+      "resetButton": "Filter zurücksetzen",
       "infoTabs": {
         "general": "Allgemein",
         "generalContent": {

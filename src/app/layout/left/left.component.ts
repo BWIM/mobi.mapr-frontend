@@ -353,6 +353,14 @@ export class LeftComponent implements OnInit, OnDestroy {
     this.filterConfigService.openFilterDialog();
   }
 
+  resetFilters() {
+    // Prevent resetting filters if user is only authenticated via share key
+    if (this.isShareKeyOnly()) {
+      return;
+    }
+    this.filterConfigService.resetAdvancedFilters();
+  }
+
   openDialog() {
     this.dialog.open(InfoDialogComponent, {
       width: '80vw',
