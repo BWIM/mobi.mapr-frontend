@@ -436,6 +436,14 @@
         "graphTitle": "Graph"
       }
     },
+    "adminLevel": {
+      "title": "Administrative Level",
+      "automatic": "Automatic",
+      "hexagon": "Hexagon",
+      "municipality": "Municipality",
+      "county": "County",
+      "state": "State"
+    },
     "activeFilters": {
       "title": "Active Filters",
       "description": "This overview shows the currently active filters and their count. The numbers show how many filters are selected in each category.",

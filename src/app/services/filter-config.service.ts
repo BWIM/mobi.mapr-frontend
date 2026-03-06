@@ -63,6 +63,7 @@ export class FilterConfigService {
   private _selectedPersonas = signal<number | null>(null);
   private _selectedRegioStars = signal<number[]>([]);
   private _selectedStates = signal<number[]>([]);
+  private _selectedAdminLevel = signal<'state' | 'county' | 'municipality' | 'hexagon' | null>(null);
 
   // Metadata for mode selection
   private _allModes = signal<Mode[]>([]);
@@ -82,6 +83,12 @@ export class FilterConfigService {
   
   // Track if URL params have been applied (to prevent re-applying on every effect run)
   private _urlParamsApplied = signal<boolean>(false);
+  
+  // Track which projects have had filters initialized (to only preselect on first load)
+  private _initializedProjectIds = new Set<number>();
+  
+  // Track if settings have been loaded from localStorage (to distinguish first load from reload)
+  private _settingsLoaded = false;
 
   // Public readonly signals
   readonly isExpanded = this._isExpanded.asReadonly();
@@ -91,6 +98,7 @@ export class FilterConfigService {
   readonly selectedPersonas = this._selectedPersonas.asReadonly();
   readonly selectedRegioStars = this._selectedRegioStars.asReadonly();
   readonly selectedStates = this._selectedStates.asReadonly();
+  readonly selectedAdminLevel = this._selectedAdminLevel.asReadonly();
   readonly modeOptions = this._modeOptions.asReadonly();
   readonly allModes = this._allModes.asReadonly();
   readonly allProfiles = this._allProfiles.asReadonly();
@@ -201,6 +209,8 @@ export class FilterConfigService {
     const selectedPersonas = this._selectedPersonas();
     const selectedRegioStars = this._selectedRegioStars();
 
+    const selectedAdminLevel = this._selectedAdminLevel();
+    
     return {
       profile_combination_id: profileCombinationID,
       feature_type: featureType,
@@ -210,7 +220,9 @@ export class FilterConfigService {
       persona_id: (isMid && selectedPersonas !== null) ? selectedPersonas : undefined,
       regiotyp_id: selectedRegioStars.length === 1 ? selectedRegioStars[0] :
         (selectedRegioStars.length > 1 ? selectedRegioStars[0] : undefined),
-      regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined
+      regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined,
+      // Only include admin_level if it's not null (null means "automatic" - don't add param)
+      admin_level: selectedAdminLevel !== null ? selectedAdminLevel : undefined
     };
   });
 
@@ -248,6 +260,8 @@ export class FilterConfigService {
           this._isFilterDataLoaded.set(false);
           // Reset URL params applied flag to allow re-applying on project change
           this._urlParamsApplied.set(false);
+          // Remove old project from initialized set (new project needs initialization)
+          this._initializedProjectIds.delete(previousProjectId);
         }
         previousProjectId = currentProject.id;
 
@@ -255,7 +269,7 @@ export class FilterConfigService {
         this.mapService.setMapLoading(true);
         
         // Load all filter data when project is loaded
-        this.loadAllFilterData(currentProject.is_mid);
+        this.loadAllFilterData(currentProject.is_mid, currentProject.id);
         
         // Update mode selection if profiles are already loaded
         // This will update mode options and validate selection (including URL params)
@@ -270,6 +284,8 @@ export class FilterConfigService {
         this._urlParamsApplied.set(false);
         // Reset ready check state when project is cleared
         this.mapService.setReadyCheckComplete(false);
+        // Clear initialized project IDs when project is cleared
+        this._initializedProjectIds.clear();
       }
     });
 
@@ -297,7 +313,8 @@ export class FilterConfigService {
           JSON.stringify(previousFilters.state_ids?.sort()) !== JSON.stringify(filters.state_ids?.sort()) ||
           JSON.stringify(previousFilters.category_ids?.sort()) !== JSON.stringify(filters.category_ids?.sort()) ||
           previousFilters.persona_id !== filters.persona_id ||
-          previousFilters.regiotyp_id !== filters.regiotyp_id
+          previousFilters.regiotyp_id !== filters.regiotyp_id ||
+          previousFilters.admin_level !== filters.admin_level
         ));
         
         if (isFullReload) {
@@ -465,8 +482,10 @@ export class FilterConfigService {
   /**
    * Load all filter data (RegioStars, States, Categories and Personas if mid)
    * For share_key-only users, skip loading and use defaults (empty arrays = undefined in API = all items)
+   * @param isMid - Whether the project is MID
+   * @param projectId - The current project ID to track initialization
    */
-  private loadAllFilterData(isMid: boolean): void {
+  private loadAllFilterData(isMid: boolean, projectId?: number): void {
     // For share_key-only users, skip loading filter data and use defaults
     if (this.dashboardSessionService.accessMethod() === 'share_key') {
       // Set empty arrays - this will result in undefined being passed to API (meaning "use all defaults")
@@ -515,11 +534,26 @@ export class FilterConfigService {
           }));
           this._allActivities.set(activities);
 
-          // Preselect all items
-          this.preselectAllRegioStars();
-          this.preselectAllStates();
-          this.preselectAllCategories();
-          this.preselectAllPersonas();
+          // Check if this is first load (not initialized) and if settings were loaded from localStorage
+          const isFirstLoad = projectId !== undefined && !this._initializedProjectIds.has(projectId);
+          const hasLoadedSettings = this._settingsLoaded;
+          
+          if (isFirstLoad && !hasLoadedSettings) {
+            // First load with no saved settings - preselect all items
+            this.preselectAllRegioStars();
+            this.preselectAllStates();
+            this.preselectAllCategories();
+            this.preselectAllPersonas();
+            // Mark this project as initialized
+            this._initializedProjectIds.add(projectId);
+          } else {
+            // Either not first load or settings were loaded - validate existing selections
+            this.validateFilterSelections();
+            // Mark as initialized if not already
+            if (projectId !== undefined) {
+              this._initializedProjectIds.add(projectId);
+            }
+          }
           
           // Mark filter data as loaded (step 1 complete)
           this._isFilterDataLoaded.set(true);
@@ -540,16 +574,34 @@ export class FilterConfigService {
           this._allRegioStars.set(responses.regiostars.results);
           this._allStates.set(responses.states.results);
 
-          // Preselect all RegioStars and States
-          this.preselectAllRegioStars();
-          this.preselectAllStates();
+          // Check if this is first load (not initialized) and if settings were loaded from localStorage
+          const isFirstLoad = projectId !== undefined && !this._initializedProjectIds.has(projectId);
+          const hasLoadedSettings = this._settingsLoaded;
+          
+          if (isFirstLoad && !hasLoadedSettings) {
+            // First load with no saved settings - preselect all RegioStars and States
+            this.preselectAllRegioStars();
+            this.preselectAllStates();
+            // Mark this project as initialized
+            this._initializedProjectIds.add(projectId);
+          } else {
+            // Either not first load or settings were loaded - validate existing selections
+            this.validateFilterSelections();
+            // Mark as initialized if not already
+            if (projectId !== undefined) {
+              this._initializedProjectIds.add(projectId);
+            }
+          }
 
           // Clear categories, activities and personas if not mid
           this._allCategories.set([]);
           this._allActivities.set([]);
           this._allPersonas.set([]);
-          this._selectedActivities.set([]);
-          this._selectedPersonas.set(null);
+          // Only clear selections if this is first load with no saved settings
+          if (isFirstLoad && !hasLoadedSettings) {
+            this._selectedActivities.set([]);
+            this._selectedPersonas.set(null);
+          }
           
           // Mark filter data as loaded (step 1 complete)
           this._isFilterDataLoaded.set(true);
@@ -621,6 +673,51 @@ export class FilterConfigService {
   private preselectAllStates(): void {
     const allStateIds = this._allStates().map(s => s.id);
     this._selectedStates.set([...allStateIds]);
+  }
+
+  /**
+   * Validate existing filter selections against loaded data
+   * Removes invalid selections but preserves valid ones
+   */
+  private validateFilterSelections(): void {
+    // Validate RegioStars
+    const allRegioStarIds = new Set(this._allRegioStars().map(r => r.id));
+    const currentRegioStars = this._selectedRegioStars();
+    const validRegioStars = currentRegioStars.filter(id => allRegioStarIds.has(id));
+    if (validRegioStars.length !== currentRegioStars.length) {
+      // Some selections were invalid, update to only valid ones
+      // If all were invalid, preselect all (fallback)
+      this._selectedRegioStars.set(validRegioStars.length > 0 ? validRegioStars : Array.from(allRegioStarIds));
+    }
+
+    // Validate States
+    const allStateIds = new Set(this._allStates().map(s => s.id));
+    const currentStates = this._selectedStates();
+    const validStates = currentStates.filter(id => allStateIds.has(id));
+    if (validStates.length !== currentStates.length) {
+      // Some selections were invalid, update to only valid ones
+      // If all were invalid, preselect all (fallback)
+      this._selectedStates.set(validStates.length > 0 ? validStates : Array.from(allStateIds));
+    }
+
+    // Validate Activities (only if MID)
+    const allActivityIds = new Set(this._allActivities().map(a => a.id));
+    const currentActivities = this._selectedActivities();
+    const validActivities = currentActivities.filter(id => allActivityIds.has(id));
+    if (validActivities.length !== currentActivities.length) {
+      // Some selections were invalid, update to only valid ones
+      // If all were invalid, preselect all (fallback)
+      this._selectedActivities.set(validActivities.length > 0 ? validActivities : Array.from(allActivityIds));
+    }
+
+    // Validate Personas (only if MID)
+    const allPersonaIds = new Set(this._allPersonas().map(p => p.id));
+    const currentPersona = this._selectedPersonas();
+    if (currentPersona !== null && !allPersonaIds.has(currentPersona)) {
+      // Current persona is invalid, try to find default or first available
+      const defaultPersona = this._allPersonas().find(p => p.default === true);
+      this._selectedPersonas.set(defaultPersona ? defaultPersona.id : (this._allPersonas().length > 0 ? this._allPersonas()[0].id : null));
+    }
   }
 
   /**
@@ -787,6 +884,11 @@ export class FilterConfigService {
     this.saveSettings();
   }
 
+  setAdminLevel(adminLevel: 'state' | 'county' | 'municipality' | 'hexagon' | null): void {
+    this._selectedAdminLevel.set(adminLevel);
+    this.saveSettings();
+  }
+
   /**
    * Check if bewertung is selected
    */
@@ -943,9 +1045,15 @@ export class FilterConfigService {
    */
   private loadSettings(): void {
     const settings = this.settingsService.loadSettings();
+    this._settingsLoaded = settings !== null && settings !== undefined;
     if (settings) {
       this._isExpanded.set(settings.expanded ?? false);
       this._selectedBewertung.set((settings.bewertung === 'zeit' ? 'zeit' : 'qualitaet') as 'qualitaet' | 'zeit');
+      
+      // Load admin level
+      if (settings.adminLevel !== undefined) {
+        this._selectedAdminLevel.set(settings.adminLevel);
+      }
 
       // Load filter settings
       if (settings.filters) {
@@ -980,6 +1088,7 @@ export class FilterConfigService {
       expanded: this._isExpanded(),
       verkehrsmittel: [...this._selectedModes()],
       bewertung: this._selectedBewertung(),
+      adminLevel: this._selectedAdminLevel(),
       filters: {
         activities: [...this._selectedActivities()],
         personas: selectedPersonas !== null ? selectedPersonas : null,

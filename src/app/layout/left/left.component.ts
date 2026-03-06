@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, computed } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, computed, signal } from '@angular/core';
 import { ProjectsService } from '../../services/project.service';
 import { FilterConfigService } from '../../services/filter-config.service';
 import { DashboardSessionService } from '../../services/dashboard-session.service';
@@ -23,6 +23,7 @@ export class LeftComponent implements OnInit, OnDestroy {
   private dialog = inject(MatDialog);
   private translate = inject(TranslateService);
   private languageSubscription?: Subscription;
+  private currentLang = signal<string>(this.translate.currentLang || 'de');
 
   // Use the project signal directly - it will reactively update when the project loads
   project = this.projectService.project;
@@ -41,11 +42,24 @@ export class LeftComponent implements OnInit, OnDestroy {
   personasChartData: any;
   personasChartOptions: any;
   
+  // Admin level options - reactive to language changes
+  adminLevelOptions = computed(() => {
+    const lang = this.currentLang(); // Track language changes
+    return [
+      { value: null as 'state' | 'county' | 'municipality' | 'hexagon' | null, label: this.translate.instant('left.adminLevel.automatic') },
+      { value: 'hexagon' as const, label: this.translate.instant('left.adminLevel.hexagon') },
+      { value: 'municipality' as const, label: this.translate.instant('left.adminLevel.municipality') },
+      { value: 'county' as const, label: this.translate.instant('left.adminLevel.county') },
+      { value: 'state' as const, label: this.translate.instant('left.adminLevel.state') }
+    ];
+  });
+  
   // Expose filter config service signals for template
   isExpanded = this.filterConfigService.isExpanded;
   modeOptions = this.filterConfigService.modeOptions;
   selectedModes = this.filterConfigService.selectedModes;
   selectedBewertung = this.filterConfigService.selectedBewertung;
+  selectedAdminLevel = this.filterConfigService.selectedAdminLevel;
   selectedActivities = this.filterConfigService.selectedActivities;
   selectedPersonas = this.filterConfigService.selectedPersonas;
   selectedRegioStars = this.filterConfigService.selectedRegioStars;
@@ -66,8 +80,9 @@ export class LeftComponent implements OnInit, OnDestroy {
     this.initializeQualityChart();
     this.initializePersonasChart();
     
-    // Subscribe to language changes to update chart labels
-    this.languageSubscription = this.translate.onLangChange.subscribe(() => {
+    // Subscribe to language changes to update chart labels and admin level options
+    this.languageSubscription = this.translate.onLangChange.subscribe((event) => {
+      this.currentLang.set(event.lang);
       this.initializePersonasChart();
     });
   }
@@ -320,6 +335,14 @@ export class LeftComponent implements OnInit, OnDestroy {
 
   isMobilitatsbewertungSelected(bewertung: 'qualitaet' | 'zeit'): boolean {
     return this.filterConfigService.isBewertungSelected(bewertung);
+  }
+
+  selectAdminLevel(adminLevel: 'state' | 'county' | 'municipality' | 'hexagon' | null): void {
+    this.filterConfigService.setAdminLevel(adminLevel);
+  }
+
+  isAdminLevelSelected(adminLevel: 'state' | 'county' | 'municipality' | 'hexagon' | null): boolean {
+    return this.selectedAdminLevel() === adminLevel;
   }
 
   openFilterDialog() {

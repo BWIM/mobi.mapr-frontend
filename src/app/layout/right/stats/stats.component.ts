@@ -10,6 +10,7 @@ import { InfoOverlayComponent } from '../../../shared/info-overlay/info-overlay.
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../services/language.service';
 import { SearchService } from '../../../services/search.service';
+import { FeatureSelectionService, MapLibreFeatureData } from '../../../shared/services/feature-selection.service';
 
 @Component({
   selector: 'app-stats',
@@ -26,6 +27,7 @@ export class StatsComponent implements OnDestroy {
   private translate = inject(TranslateService);
   private languageService = inject(LanguageService);
   private searchService = inject(SearchService);
+  private featureSelectionService = inject(FeatureSelectionService);
 
   counties: County[] = [];
   isLoading = signal(true); // Start with loading state true by default (step 0)
@@ -396,11 +398,47 @@ export class StatsComponent implements OnDestroy {
   }
 
   /**
-   * Handle clicking on a feature name - copy it to the search bar
+   * Handle clicking on a feature name - copy it to the search bar and select it in the analyze component
    */
   onFeatureNameClick(county: County): void {
     if (county.name) {
+      // Copy to search bar (existing behavior)
       this.searchService.setSearchQuery(county.name);
+      
+      // Map selectedLevel to the 't' property used by MapLibre features
+      // 'h' = hexagon, 'm' = municipality, 'c' = county, 's' = state
+      let tileType: string;
+      if (this.selectedLevel === 'county') {
+        tileType = 'c';
+      } else if (this.selectedLevel === 'state') {
+        tileType = 's';
+      } else if (this.selectedLevel === 'municipality') {
+        tileType = 'm';
+      } else {
+        // Default to county if unknown
+        tileType = 'c';
+      }
+      
+      // Create a MapLibreFeatureData object to select the feature in the analyze component
+      const featureData: MapLibreFeatureData = {
+        properties: {
+          id: county.id,
+          name: county.name,
+          score: county.score,
+          index: county.index,
+          t: tileType // Required for getFeatureTypeFromTileProperty to work
+        },
+        id: county.id
+      };
+      
+      // Select the feature in the analyze component
+      this.featureSelectionService.setSelectedMapLibreFeature(featureData);
+      // Zoom to the feature
+      // this.mapService.flyTo({
+      //   center: [county.lng, county.lat],
+      //   zoom: 10,
+      //   duration: 1000
+      // });
     }
   }
 

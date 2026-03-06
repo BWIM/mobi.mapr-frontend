@@ -217,19 +217,19 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
         // Match exact color breaks from map.service.ts
         const indexValue = cat.index / 100;
         if (indexValue <= 0) {
-          return 'rgba(128, 128, 128, 0.7)'; // NaN or invalid
+          return 'rgba(128, 128, 128, 1)'; // NaN or invalid
         } else if (indexValue < 0.35) {
-          return 'rgba(50, 97, 45, 0.7)'; // Grade A (A+, A, A-)
+          return 'rgba(50, 97, 45, 1)'; // Grade A (A+, A, A-)
         } else if (indexValue < 0.5) {
-          return 'rgba(60, 176, 67, 0.7)'; // Grade B (B+, B, B-)
+          return 'rgba(60, 176, 67, 1)'; // Grade B (B+, B, B-)
         } else if (indexValue < 0.71) {
-          return 'rgba(238, 210, 2, 0.7)'; // Grade C (C+, C, C-)
+          return 'rgba(238, 210, 2, 1)'; // Grade C (C+, C, C-)
         } else if (indexValue < 1.0) {
-          return 'rgba(237, 112, 20, 0.7)'; // Grade D (D+, D, D-)
+          return 'rgba(237, 112, 20, 1)'; // Grade D (D+, D, D-)
         } else if (indexValue < 1.41) {
-          return 'rgba(194, 24, 7, 0.7)'; // Grade E (E+, E, E-)
+          return 'rgba(194, 24, 7, 1)'; // Grade E (E+, E, E-)
         } else {
-          return 'rgba(150, 86, 162, 0.7)'; // Grade F (F+, F, F-)
+          return 'rgba(150, 86, 162, 1)'; // Grade F (F+, F, F-)
         }
       }
     });
@@ -372,19 +372,19 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
   private getGradeColor(index: number): string {
     const indexValue = index / 100;
     if (indexValue <= 0) {
-      return 'rgba(128, 128, 128, 0.7)'; // NaN or invalid
+      return 'rgba(128, 128, 128, 1)'; // NaN or invalid
     } else if (indexValue < 0.35) {
-      return 'rgba(50, 97, 45, 0.7)'; // Grade A (A+, A, A-)
+      return 'rgba(50, 97, 45, 1)'; // Grade A (A+, A, A-)
     } else if (indexValue < 0.5) {
-      return 'rgba(60, 176, 67, 0.7)'; // Grade B (B+, B, B-)
+      return 'rgba(60, 176, 67, 1)'; // Grade B (B+, B, B-)
     } else if (indexValue < 0.71) {
-      return 'rgba(238, 210, 2, 0.7)'; // Grade C (C+, C, C-)
+      return 'rgba(238, 210, 2, 1)'; // Grade C (C+, C, C-)
     } else if (indexValue < 1.0) {
-      return 'rgba(237, 112, 20, 0.7)'; // Grade D (D+, D, D-)
+      return 'rgba(237, 112, 20, 1)'; // Grade D (D+, D, D-)
     } else if (indexValue < 1.41) {
-      return 'rgba(194, 24, 7, 0.7)'; // Grade E (E+, E, E-)
+      return 'rgba(194, 24, 7, 1)'; // Grade E (E+, E, E-)
     } else {
-      return 'rgba(150, 86, 162, 0.7)'; // Grade F (F+, F, F-)
+      return 'rgba(150, 86, 162, 1)'; // Grade F (F+, F, F-)
     }
   }
 

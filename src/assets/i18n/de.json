@@ -436,6 +436,14 @@
         "graphTitle": "Graph"
       }
     },
+    "adminLevel": {
+      "title": "Administrative Ebene",
+      "automatic": "Automatisch",
+      "hexagon": "Hexagon",
+      "municipality": "Gemeinde",
+      "county": "Kreis",
+      "state": "Bundesland"
+    },
     "activeFilters": {
       "title": "Aktive Filter",
       "description": "Diese Übersicht zeigt die aktuell aktiven Filter und deren Anzahl. Die Zahlen zeigen, wie viele Filter in jeder Kategorie ausgewählt sind.",

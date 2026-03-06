@@ -5,6 +5,7 @@ export interface UserSettings {
   verkehrsmittel: number[];
   bewertung: string | null;
   statsLevel?: 'municipality' | 'county' | 'state';
+  adminLevel?: 'state' | 'county' | 'municipality' | 'hexagon' | null;
   filters: {
     activities: number[];
     personas: number | number[] | null; // Support both old array format and new single value format

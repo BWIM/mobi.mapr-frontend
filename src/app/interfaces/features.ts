@@ -5,6 +5,8 @@ export interface State {
     population: number;
     index: number;
     score: number;
+    lat: number;
+    lng: number;
 }
 
 export interface County {
@@ -14,6 +16,8 @@ export interface County {
     population: number;
     index: number;
     score: number;
+    lat: number;
+    lng: number;
 }
 
 export interface Municipality {
@@ -23,4 +27,6 @@ export interface Municipality {
     population: number;
     index: number;
     score: number;
+    lat: number;
+    lng: number;
 }

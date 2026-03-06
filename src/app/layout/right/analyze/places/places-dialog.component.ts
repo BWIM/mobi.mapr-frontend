@@ -44,7 +44,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   categoryLegendItems: Array<{ name: string; color: string; weight: number; relevance: number; enabled: boolean }> = [];
   private pendingFeatureShape: any = null;
   private colorPalette = [
-    '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+    '#FF0000', '#00FF00', '#0066FF', '#FFA07A', '#98D8C8',
     '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52BE80',
     '#EC7063', '#5DADE2', '#58D68D', '#F4D03F', '#AF7AC5'
   ];
