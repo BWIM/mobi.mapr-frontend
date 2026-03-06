@@ -109,6 +109,10 @@ export class FilterConfigService {
   readonly allRegioStars = this._allRegioStars.asReadonly();
   readonly allStates = this._allStates.asReadonly();
 
+  // Computed signal to check if project is MID (replaces is_mid check)
+  // A project is MID if category length != 1 (i.e., 0 or 2+ categories)
+  readonly hasCategories = computed(() => this._allCategories().length !== 1);
+
   // Grouped data for nested selects
   readonly groupedCategories = computed(() => {
     const categories = this._allCategories();
@@ -200,8 +204,7 @@ export class FilterConfigService {
       return null;
     }
 
-    const currentProject = this.projectService.project();
-    const isMid = currentProject?.is_mid ?? false;
+    const hasCategories = this.hasCategories();
 
     const featureType: 'index' | 'score' = this._selectedBewertung() === 'zeit' ? 'score' : 'index';
     const selectedStates = this._selectedStates();
@@ -215,9 +218,9 @@ export class FilterConfigService {
       profile_combination_id: profileCombinationID,
       feature_type: featureType,
       state_ids: selectedStates.length > 0 ? selectedStates : undefined,
-      // Only include category_ids and persona_id if project is MID
-      category_ids: (isMid && selectedActivities.length > 0) ? selectedActivities : undefined,
-      persona_id: (isMid && selectedPersonas !== null) ? selectedPersonas : undefined,
+      // Only include category_ids and persona_id if project has categories
+      category_ids: (hasCategories && selectedActivities.length > 0) ? selectedActivities : undefined,
+      persona_id: (hasCategories && selectedPersonas !== null) ? selectedPersonas : undefined,
       regiotyp_id: selectedRegioStars.length === 1 ? selectedRegioStars[0] :
         (selectedRegioStars.length > 1 ? selectedRegioStars[0] : undefined),
       regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined,
@@ -269,7 +272,7 @@ export class FilterConfigService {
         this.mapService.setMapLoading(true);
         
         // Load all filter data when project is loaded
-        this.loadAllFilterData(currentProject.is_mid, currentProject.id);
+        this.loadAllFilterData(currentProject.id);
         
         // Update mode selection if profiles are already loaded
         // This will update mode options and validate selection (including URL params)
@@ -480,12 +483,12 @@ export class FilterConfigService {
   }
 
   /**
-   * Load all filter data (RegioStars, States, Categories and Personas if mid)
+   * Load all filter data (RegioStars, States, Categories and Personas)
+   * Always tries to load categories - if none are returned, the project doesn't support categories
    * For share_key-only users, skip loading and use defaults (empty arrays = undefined in API = all items)
-   * @param isMid - Whether the project is MID
    * @param projectId - The current project ID to track initialization
    */
-  private loadAllFilterData(isMid: boolean, projectId?: number): void {
+  private loadAllFilterData(projectId?: number): void {
     // For share_key-only users, skip loading filter data and use defaults
     if (this.dashboardSessionService.accessMethod() === 'share_key') {
       // Set empty arrays - this will result in undefined being passed to API (meaning "use all defaults")
@@ -504,115 +507,69 @@ export class FilterConfigService {
       return;
     }
 
-    // Always load RegioStars and States
+    // Always load RegioStars, States, Categories and Personas
     const regiostars$ = this.regiostarService.getRegioStars(1, 100);
     const states$ = this.stateService.getStates(1, 100);
+    const categories$ = this.categoryService.getCategories(1, 100);
+    const personas$ = this.personaService.getPersonas(1, 100);
 
-    if (isMid) {
-      // Load Categories and Personas only if mid
-      const categories$ = this.categoryService.getCategories(1, 100, isMid);
-      const personas$ = this.personaService.getPersonas(1, 100);
+    forkJoin({
+      regiostars: regiostars$,
+      states: states$,
+      categories: categories$,
+      personas: personas$
+    }).subscribe({
+      next: (responses) => {
+        this._allRegioStars.set(responses.regiostars.results);
+        this._allStates.set(responses.states.results);
+        this._allCategories.set(responses.categories.results);
+        this._allPersonas.set(responses.personas.results);
 
-      forkJoin({
-        regiostars: regiostars$,
-        states: states$,
-        categories: categories$,
-        personas: personas$
-      }).subscribe({
-        next: (responses) => {
-          this._allRegioStars.set(responses.regiostars.results);
-          this._allStates.set(responses.states.results);
-          this._allCategories.set(responses.categories.results);
-          this._allPersonas.set(responses.personas.results);
+        // Map categories to activities (categories are used as activities)
+        const activities: Activity[] = responses.categories.results.map(category => ({
+          id: category.id,
+          name: category.name,
+          display_name: category.display_name,
+          description: category.description
+        }));
+        this._allActivities.set(activities);
 
-          // Map categories to activities (categories are used as activities)
-          const activities: Activity[] = responses.categories.results.map(category => ({
-            id: category.id,
-            name: category.name,
-            display_name: category.display_name,
-            description: category.description
-          }));
-          this._allActivities.set(activities);
-
-          // Check if this is first load (not initialized) and if settings were loaded from localStorage
-          const isFirstLoad = projectId !== undefined && !this._initializedProjectIds.has(projectId);
-          const hasLoadedSettings = this._settingsLoaded;
-          
-          if (isFirstLoad && !hasLoadedSettings) {
-            // First load with no saved settings - preselect all items
-            this.preselectAllRegioStars();
-            this.preselectAllStates();
+        // Check if this is first load (not initialized) and if settings were loaded from localStorage
+        const isFirstLoad = projectId !== undefined && !this._initializedProjectIds.has(projectId);
+        const hasLoadedSettings = this._settingsLoaded;
+        
+        if (isFirstLoad && !hasLoadedSettings) {
+          // First load with no saved settings - preselect all items (same logic for all filters)
+          // This ensures consistent behavior: preselect all unless URL params or localStorage say otherwise
+          if (responses.categories.results.length > 0) {
             this.preselectAllCategories();
+          }
+          if (responses.personas.results.length > 0) {
             this.preselectAllPersonas();
-            // Mark this project as initialized
+          }
+          this.preselectAllRegioStars();
+          this.preselectAllStates();
+          
+          // Mark this project as initialized
+          this._initializedProjectIds.add(projectId);
+        } else {
+          // Either not first load or settings were loaded - validate existing selections
+          this.validateFilterSelections();
+          // Mark as initialized if not already
+          if (projectId !== undefined) {
             this._initializedProjectIds.add(projectId);
-          } else {
-            // Either not first load or settings were loaded - validate existing selections
-            this.validateFilterSelections();
-            // Mark as initialized if not already
-            if (projectId !== undefined) {
-              this._initializedProjectIds.add(projectId);
-            }
           }
-          
-          // Mark filter data as loaded (step 1 complete)
-          this._isFilterDataLoaded.set(true);
-        },
-        error: (error) => {
-          console.error('Error loading filter data:', error);
-          // Still mark as loaded to allow the flow to continue
-          this._isFilterDataLoaded.set(true);
         }
-      });
-    } else {
-      // Load only RegioStars and States if not mid
-      forkJoin({
-        regiostars: regiostars$,
-        states: states$
-      }).subscribe({
-        next: (responses) => {
-          this._allRegioStars.set(responses.regiostars.results);
-          this._allStates.set(responses.states.results);
-
-          // Check if this is first load (not initialized) and if settings were loaded from localStorage
-          const isFirstLoad = projectId !== undefined && !this._initializedProjectIds.has(projectId);
-          const hasLoadedSettings = this._settingsLoaded;
-          
-          if (isFirstLoad && !hasLoadedSettings) {
-            // First load with no saved settings - preselect all RegioStars and States
-            this.preselectAllRegioStars();
-            this.preselectAllStates();
-            // Mark this project as initialized
-            this._initializedProjectIds.add(projectId);
-          } else {
-            // Either not first load or settings were loaded - validate existing selections
-            this.validateFilterSelections();
-            // Mark as initialized if not already
-            if (projectId !== undefined) {
-              this._initializedProjectIds.add(projectId);
-            }
-          }
-
-          // Clear categories, activities and personas if not mid
-          this._allCategories.set([]);
-          this._allActivities.set([]);
-          this._allPersonas.set([]);
-          // Only clear selections if this is first load with no saved settings
-          if (isFirstLoad && !hasLoadedSettings) {
-            this._selectedActivities.set([]);
-            this._selectedPersonas.set(null);
-          }
-          
-          // Mark filter data as loaded (step 1 complete)
-          this._isFilterDataLoaded.set(true);
-        },
-        error: (error) => {
-          console.error('Error loading filter data:', error);
-          // Still mark as loaded to allow the flow to continue
-          this._isFilterDataLoaded.set(true);
-        }
-      });
-    }
+        
+        // Mark filter data as loaded (step 1 complete)
+        this._isFilterDataLoaded.set(true);
+      },
+      error: (error) => {
+        console.error('Error loading filter data:', error);
+        // Still mark as loaded to allow the flow to continue
+        this._isFilterDataLoaded.set(true);
+      }
+    });
   }
 
   /**
@@ -678,42 +635,62 @@ export class FilterConfigService {
   /**
    * Validate existing filter selections against loaded data
    * Removes invalid selections but preserves valid ones
+   * If selections are empty, preselects all available items
    */
   private validateFilterSelections(): void {
     // Validate RegioStars
     const allRegioStarIds = new Set(this._allRegioStars().map(r => r.id));
     const currentRegioStars = this._selectedRegioStars();
-    const validRegioStars = currentRegioStars.filter(id => allRegioStarIds.has(id));
-    if (validRegioStars.length !== currentRegioStars.length) {
-      // Some selections were invalid, update to only valid ones
-      // If all were invalid, preselect all (fallback)
-      this._selectedRegioStars.set(validRegioStars.length > 0 ? validRegioStars : Array.from(allRegioStarIds));
+    // If no regiostars selected and regiostars are available, preselect all
+    if (currentRegioStars.length === 0 && allRegioStarIds.size > 0) {
+      this._selectedRegioStars.set(Array.from(allRegioStarIds));
+    } else {
+      const validRegioStars = currentRegioStars.filter(id => allRegioStarIds.has(id));
+      if (validRegioStars.length !== currentRegioStars.length) {
+        // Some selections were invalid, update to only valid ones
+        // If all were invalid, preselect all (fallback)
+        this._selectedRegioStars.set(validRegioStars.length > 0 ? validRegioStars : Array.from(allRegioStarIds));
+      }
     }
 
     // Validate States
     const allStateIds = new Set(this._allStates().map(s => s.id));
     const currentStates = this._selectedStates();
-    const validStates = currentStates.filter(id => allStateIds.has(id));
-    if (validStates.length !== currentStates.length) {
-      // Some selections were invalid, update to only valid ones
-      // If all were invalid, preselect all (fallback)
-      this._selectedStates.set(validStates.length > 0 ? validStates : Array.from(allStateIds));
+    // If no states selected and states are available, preselect all
+    if (currentStates.length === 0 && allStateIds.size > 0) {
+      this._selectedStates.set(Array.from(allStateIds));
+    } else {
+      const validStates = currentStates.filter(id => allStateIds.has(id));
+      if (validStates.length !== currentStates.length) {
+        // Some selections were invalid, update to only valid ones
+        // If all were invalid, preselect all (fallback)
+        this._selectedStates.set(validStates.length > 0 ? validStates : Array.from(allStateIds));
+      }
     }
 
     // Validate Activities (only if MID)
     const allActivityIds = new Set(this._allActivities().map(a => a.id));
     const currentActivities = this._selectedActivities();
-    const validActivities = currentActivities.filter(id => allActivityIds.has(id));
-    if (validActivities.length !== currentActivities.length) {
-      // Some selections were invalid, update to only valid ones
-      // If all were invalid, preselect all (fallback)
-      this._selectedActivities.set(validActivities.length > 0 ? validActivities : Array.from(allActivityIds));
+    // If no activities selected and activities are available, preselect all
+    if (currentActivities.length === 0 && allActivityIds.size > 0) {
+      this._selectedActivities.set(Array.from(allActivityIds));
+    } else {
+      const validActivities = currentActivities.filter(id => allActivityIds.has(id));
+      if (validActivities.length !== currentActivities.length) {
+        // Some selections were invalid, update to only valid ones
+        // If all were invalid, preselect all (fallback)
+        this._selectedActivities.set(validActivities.length > 0 ? validActivities : Array.from(allActivityIds));
+      }
     }
 
     // Validate Personas (only if MID)
     const allPersonaIds = new Set(this._allPersonas().map(p => p.id));
     const currentPersona = this._selectedPersonas();
-    if (currentPersona !== null && !allPersonaIds.has(currentPersona)) {
+    // If no persona selected and personas are available, preselect default
+    if (currentPersona === null && allPersonaIds.size > 0) {
+      const defaultPersona = this._allPersonas().find(p => p.default === true);
+      this._selectedPersonas.set(defaultPersona ? defaultPersona.id : (this._allPersonas().length > 0 ? this._allPersonas()[0].id : null));
+    } else if (currentPersona !== null && !allPersonaIds.has(currentPersona)) {
       // Current persona is invalid, try to find default or first available
       const defaultPersona = this._allPersonas().find(p => p.default === true);
       this._selectedPersonas.set(defaultPersona ? defaultPersona.id : (this._allPersonas().length > 0 ? this._allPersonas()[0].id : null));
@@ -906,13 +883,12 @@ export class FilterConfigService {
       return;
     }
 
-    const currentProject = this.projectService.project();
     const dialogData: FilterDialogData = {
       selectedActivities: this._selectedActivities(),
       selectedPersonas: this._selectedPersonas(),
       selectedRegioStars: this._selectedRegioStars(),
       selectedStates: this._selectedStates(),
-      is_mid: currentProject?.is_mid ?? true
+      hasCategories: this.hasCategories()
     };
 
     const dialogRef = this.dialog.open(FilterDialogComponent, {
@@ -945,9 +921,8 @@ export class FilterConfigService {
     const allStateIds = this._allStates().map(s => s.id);
     this._selectedStates.set([...allStateIds]);
 
-    // Reset Activities to all selected (only if MID project)
-    const currentProject = this.projectService.project();
-    if (currentProject?.is_mid) {
+    // Reset Activities to all selected (only if project has categories)
+    if (this.hasCategories()) {
       const allActivityIds = this._allActivities().map(a => a.id);
       this._selectedActivities.set([...allActivityIds]);
 

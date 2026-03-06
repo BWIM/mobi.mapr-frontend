@@ -34,9 +34,6 @@
                 }
                 <div class="flex gap-4 text-xs text-[var(--primary-color)] opacity-60">
                   <span>Status: {{ project.status }}</span>
-                  @if (project.category) {
-                    <span>Kategorie: {{ project.category }}</span>
-                  }
                 </div>
               </div>
               @if (isProjectSelected(project.id)) {

@@ -335,10 +335,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.isComparisonMode) {
       return false;
     }
-    const project = this.projectsService.project();
-    const isNotMid = project ? !project.is_mid : false;
+    const hasCategories = this.filterConfigService.hasCategories();
     const hasSingleCategory = this.analyzeData?.categories?.length === 1;
-    return isNotMid || hasSingleCategory;
+    return !hasCategories || hasSingleCategory;
   }
 
   getGrade(index: number): string {
@@ -1740,8 +1739,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    // Open places dialog with the specific category_id
-    this.openPlacesDialog(clickedCategory.category_id, clickedCategory.category_name);
+    // In comparison mode, determine which feature was clicked based on datasetIndex
+    let featureNumber: 1 | 2 | undefined = undefined;
+    if (this.isComparisonMode && event.element.datasetIndex !== undefined) {
+      // datasetIndex 0 = feature 1, datasetIndex 1 = feature 2
+      featureNumber = (event.element.datasetIndex === 0) ? 1 : 2;
+    }
+
+    // Open places dialog with the specific category_id and feature number
+    this.openPlacesDialog(clickedCategory.category_id, clickedCategory.category_name, featureNumber);
   }
 
   onCategoryNameClick(category: CategoryScore): void {
@@ -1755,8 +1761,11 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    // Open places dialog with the specific category_id
-    this.openPlacesDialog(category.category_id, category.category_name);
+    // When clicking category name, always use the first feature
+    const featureNumber: 1 | undefined = this.isComparisonMode ? 1 : undefined;
+
+    // Open places dialog with the specific category_id and feature number
+    this.openPlacesDialog(category.category_id, category.category_name, featureNumber);
   }
 
   getSortedCategories(): CategoryScore[] {
@@ -2209,7 +2218,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  openPlacesDialog(categoryId?: number, categoryName?: string): void {
+  openPlacesDialog(categoryId?: number, categoryName?: string, featureNumber?: 1 | 2): void {
     if (!this.selectedFeature) {
       return;
     }
@@ -2220,24 +2229,113 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
-    if (!featureIdRaw) {
-      console.warn('Feature ID not available');
-      return;
+    // Determine which feature to use for places dialog
+    // Places are only supported for municipality/hexagon
+    let featureType: 'municipality' | 'hexagon' | 'county' | 'state';
+    let featureId: number;
+    
+    // If featureNumber is specified (from chart click), use that feature if supported
+    if (featureNumber === 1) {
+      if (!this.savedFeatureType) {
+        console.error('Feature type 1 not available - cannot open places dialog');
+        return;
+      }
+      featureType = this.savedFeatureType;
+      const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
+      if (!featureIdRaw) {
+        console.warn('Feature ID not available');
+        return;
+      }
+      featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
+      if (isNaN(featureId)) {
+        console.warn('Invalid feature ID:', featureIdRaw);
+        return;
+      }
+    } else if (featureNumber === 2) {
+      if (!this.savedFeatureType2 || !this.selectedFeature2) {
+        console.error('Feature type 2 not available - cannot open places dialog');
+        return;
+      }
+      featureType = this.savedFeatureType2;
+      const featureIdRaw2 = this.selectedFeature2.properties.id || this.selectedFeature2.id;
+      if (!featureIdRaw2) {
+        console.warn('Feature ID 2 not available');
+        return;
+      }
+      featureId = typeof featureIdRaw2 === 'string' ? parseInt(featureIdRaw2, 10) : featureIdRaw2;
+      if (isNaN(featureId)) {
+        console.warn('Invalid feature ID 2:', featureIdRaw2);
+        return;
+      }
+    } else {
+      // No specific feature requested - use smart fallback logic
+      // Check if first feature type is supported
+      if (!this.savedFeatureType) {
+        console.error('Feature type not available - cannot open places dialog');
+        return;
+      }
+      
+      const isFirstFeatureSupported = this.savedFeatureType === 'municipality' || this.savedFeatureType === 'hexagon';
+      
+      if (isFirstFeatureSupported) {
+        // Use first feature
+        featureType = this.savedFeatureType;
+        const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
+        if (!featureIdRaw) {
+          console.warn('Feature ID not available');
+          return;
+        }
+        featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
+        if (isNaN(featureId)) {
+          console.warn('Invalid feature ID:', featureIdRaw);
+          return;
+        }
+      } else if (this.isComparisonMode && this.selectedFeature2 && this.savedFeatureType2) {
+        // First feature not supported, check if second feature is supported
+        const isSecondFeatureSupported = this.savedFeatureType2 === 'municipality' || this.savedFeatureType2 === 'hexagon';
+        if (isSecondFeatureSupported) {
+          // Use second feature
+          featureType = this.savedFeatureType2;
+          const featureIdRaw2 = this.selectedFeature2.properties.id || this.selectedFeature2.id;
+          if (!featureIdRaw2) {
+            console.warn('Feature ID 2 not available');
+            return;
+          }
+          featureId = typeof featureIdRaw2 === 'string' ? parseInt(featureIdRaw2, 10) : featureIdRaw2;
+          if (isNaN(featureId)) {
+            console.warn('Invalid feature ID 2:', featureIdRaw2);
+            return;
+          }
+        } else {
+          // Neither feature is supported, use first feature (dialog will show error)
+          featureType = this.savedFeatureType;
+          const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
+          if (!featureIdRaw) {
+            console.warn('Feature ID not available');
+            return;
+          }
+          featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
+          if (isNaN(featureId)) {
+            console.warn('Invalid feature ID:', featureIdRaw);
+            return;
+          }
+        }
+      } else {
+        // Not in comparison mode or second feature not available, use first feature (dialog will show error)
+        featureType = this.savedFeatureType;
+        const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
+        if (!featureIdRaw) {
+          console.warn('Feature ID not available');
+          return;
+        }
+        featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
+        if (isNaN(featureId)) {
+          console.warn('Invalid feature ID:', featureIdRaw);
+          return;
+        }
+      }
     }
 
-    const featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
-    if (isNaN(featureId)) {
-      console.warn('Invalid feature ID:', featureIdRaw);
-      return;
-    }
-
-    // Use saved feature type (must be set when feature is selected)
-    if (!this.savedFeatureType) {
-      console.error('Feature type not available - cannot open places dialog');
-      return;
-    }
-    const featureType = this.savedFeatureType;
     const profileCombinationId = this.filterConfigService.currentProfileCombinationID();
     
     if (!profileCombinationId) {

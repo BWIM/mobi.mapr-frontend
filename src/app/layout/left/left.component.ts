@@ -68,6 +68,7 @@ export class LeftComponent implements OnInit, OnDestroy {
   allPersonas = this.filterConfigService.allPersonas;
   allRegioStars = this.filterConfigService.allRegioStars;
   allStates = this.filterConfigService.allStates;
+  hasCategories = this.filterConfigService.hasCategories;
 
   constructor() {
     // Initialize project if not already initialized

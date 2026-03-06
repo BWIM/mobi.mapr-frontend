@@ -313,7 +313,7 @@
     @if (isExpanded()) {
       <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4 relative" >
         <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.activeFilters.title' | translate }}</h2>
-        @if (project()?.is_mid) {
+        @if (hasCategories()) {
           <div class="flex items-center gap-2"  >
             <span class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.activities' | translate }}</span>
             <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedActivities().length }} / {{ allActivities().length }})</span>
@@ -398,7 +398,7 @@
             </mat-tab>
 
             <!-- Activities Tab -->
-            <ng-container *ngIf="project()?.is_mid">
+            <ng-container *ngIf="hasCategories()">
               <mat-tab [label]="'left.activeFilters.infoTabs.activities' | translate" class="text-[var(--primary-color)]">
                 <div class="p-6 space-y-6 text-[var(--primary-color)]">
                   <!-- Introduction -->
@@ -492,7 +492,7 @@
             </ng-container>
 
             <!-- Personas Tab -->
-            <ng-container *ngIf="project()?.is_mid">
+            <ng-container *ngIf="hasCategories()">
               <mat-tab [label]="'left.activeFilters.infoTabs.personas' | translate" class="text-[var(--primary-color)]">
                 <div class="p-6 space-y-6 text-[var(--primary-color)]">
                   <!-- Introduction -->

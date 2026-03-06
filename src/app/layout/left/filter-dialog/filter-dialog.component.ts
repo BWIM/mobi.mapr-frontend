@@ -10,7 +10,7 @@ export interface FilterDialogData {
   selectedPersonas: number | null;
   selectedRegioStars: number[];
   selectedStates: number[];
-  is_mid?: boolean;
+  hasCategories?: boolean;
 }
 
 @Component({
@@ -44,7 +44,7 @@ export class FilterDialogComponent implements OnInit {
   expandedCategoryGroups: Set<string> = new Set();
   expandedRegioStarGroups: Set<string> = new Set();
 
-  is_mid: boolean = true;
+  hasCategories: boolean = false;
 
   constructor(
     public dialogRef: MatDialogRef<FilterDialogComponent>,
@@ -60,7 +60,7 @@ export class FilterDialogComponent implements OnInit {
     }
     this.selectedRegioStars = new Set(data.selectedRegioStars || []);
     this.selectedStates = new Set(data.selectedStates || []);
-    this.is_mid = data.is_mid !== undefined ? data.is_mid : true;
+    this.hasCategories = data.hasCategories ?? false;
   }
 
   ngOnInit() {

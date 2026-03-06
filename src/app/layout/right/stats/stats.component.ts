@@ -266,8 +266,7 @@ export class StatsComponent implements OnDestroy {
 
     // Use the same filtering logic as filter-config.service.ts contentLayerFilters
     const filters = this.filterConfigService.contentLayerFilters();
-    const currentProject = this.projectService.project();
-    const isMid = currentProject?.is_mid ?? false;
+    const hasCategories = this.filterConfigService.hasCategories();
     
     // Apply the same filtering logic as contentLayerFilters
     const selectedStates = this.filterConfigService.selectedStates();
@@ -280,10 +279,10 @@ export class StatsComponent implements OnDestroy {
       profile_combination_id: profileCombinationID,
       // Only include state_ids if there are selected states (same logic as contentLayerFilters)
       state_ids: selectedStates.length > 0 ? selectedStates : undefined,
-      // Only include category_ids if project is MID and there are selected activities (same logic as contentLayerFilters)
-      category_ids: (isMid && selectedActivities.length > 0) ? selectedActivities : undefined,
-      // Only include persona_id if project is MID and there is a selected persona (same logic as contentLayerFilters)
-      persona_id: (isMid && selectedPersonas !== null) ? selectedPersonas : undefined,
+      // Only include category_ids if project has categories and there are selected activities (same logic as contentLayerFilters)
+      category_ids: (hasCategories && selectedActivities.length > 0) ? selectedActivities : undefined,
+      // Only include persona_id if project has categories and there is a selected persona (same logic as contentLayerFilters)
+      persona_id: (hasCategories && selectedPersonas !== null) ? selectedPersonas : undefined,
       // Only include regiostar_ids if there are selected regiostars (same logic as contentLayerFilters)
       regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined,
       bewertung: this.filterConfigService.selectedBewertung()

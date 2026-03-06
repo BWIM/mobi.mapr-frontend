@@ -6,7 +6,7 @@
   <mat-dialog-content class="mat-typography">
     <mat-tab-group>
       <!-- Categories Tab (labeled as Activities) -->
-      <mat-tab *ngIf="is_mid" [label]="'filterDialog.tabs.activities' | translate">
+      <mat-tab *ngIf="hasCategories" [label]="'filterDialog.tabs.activities' | translate">
         <div class="tab-content">
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold">{{ 'filterDialog.tabs.activities' | translate }} ({{ selectedActivities.size }} / {{ categoriesLength }})</h3>
@@ -47,7 +47,7 @@
       </mat-tab>
 
       <!-- Personas Tab -->
-      <mat-tab *ngIf="is_mid" [label]="'filterDialog.tabs.personas' | translate">
+      <mat-tab *ngIf="hasCategories" [label]="'filterDialog.tabs.personas' | translate">
         <div class="tab-content">
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold">{{ 'filterDialog.tabs.personas' | translate }}</h3>
