@@ -363,15 +363,6 @@ export class FilterConfigService {
       }
     });
 
-    // Ensure sidebar is collapsed for share_key-only users
-    effect(() => {
-      if (this.dashboardSessionService.accessMethod() === 'share_key') {
-        if (this._isExpanded()) {
-          this._isExpanded.set(false);
-        }
-      }
-    });
-
     // Load settings from localStorage
     this.loadSettings();
   }
@@ -489,25 +480,9 @@ export class FilterConfigService {
    * @param projectId - The current project ID to track initialization
    */
   private loadAllFilterData(projectId?: number): void {
-    // For share_key-only users, skip loading filter data and use defaults
-    if (this.dashboardSessionService.accessMethod() === 'share_key') {
-      // Set empty arrays - this will result in undefined being passed to API (meaning "use all defaults")
-      this._allRegioStars.set([]);
-      this._allStates.set([]);
-      this._allCategories.set([]);
-      this._allActivities.set([]);
-      this._allPersonas.set([]);
-      this._selectedActivities.set([]);
-      this._selectedPersonas.set(null);
-      this._selectedRegioStars.set([]);
-      this._selectedStates.set([]);
-      
-      // Mark filter data as loaded (step 1 complete) - no actual loading needed
-      this._isFilterDataLoaded.set(true);
-      return;
-    }
-
-    // Always load RegioStars, States, Categories and Personas
+    const isShareKeyOnly = this.dashboardSessionService.accessMethod() === 'share_key';
+    
+    // Always load RegioStars, States, Categories and Personas (including for share_key users so they can see the data)
     const regiostars$ = this.regiostarService.getRegioStars(1, 100);
     const states$ = this.stateService.getStates(1, 100);
     const categories$ = this.categoryService.getCategories(1, 100);
@@ -533,6 +508,25 @@ export class FilterConfigService {
           description: category.description
         }));
         this._allActivities.set(activities);
+
+        // For share_key users, always preselect all items (they can't modify anyway)
+        if (isShareKeyOnly) {
+          if (responses.categories.results.length > 0) {
+            this.preselectAllCategories();
+          }
+          if (responses.personas.results.length > 0) {
+            this.preselectAllPersonas();
+          }
+          this.preselectAllRegioStars();
+          this.preselectAllStates();
+          
+          // Mark filter data as loaded and project as initialized
+          this._isFilterDataLoaded.set(true);
+          if (projectId !== undefined) {
+            this._initializedProjectIds.add(projectId);
+          }
+          return;
+        }
 
         // Check if this is first load (not initialized) and if settings were loaded from localStorage
         const isFirstLoad = projectId !== undefined && !this._initializedProjectIds.has(projectId);
