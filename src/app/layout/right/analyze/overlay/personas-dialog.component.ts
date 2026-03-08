@@ -19,6 +19,7 @@ export interface PersonasDialogData {
   getGrade: (index: number) => string;
   // Comparison mode fields
   featureId2?: number;
+  featureType2?: 'municipality' | 'hexagon' | 'county' | 'state';
   featureName2?: string;
   isComparisonMode?: boolean;
 }
@@ -122,7 +123,7 @@ export class PersonasDialogComponent implements OnInit, AfterViewInit {
     this.error2 = null;
 
     this.analyzeService.getPersonas({
-      feature_type: this.data.featureType,
+      feature_type: this.data.featureType2 || this.data.featureType,
       feature_id: this.data.featureId2,
       profile_combination_id: this.data.profileCombinationId,
       category_ids: this.data.categoryIds,

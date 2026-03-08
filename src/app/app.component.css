@@ -11,19 +11,6 @@
     /* Wichtig für Firefox */
 }
 
-.build-date-hint {
-    position: fixed;
-    bottom: 8px;
-    right: 8px;
-    color: var(--primary-color);
-    font-size: 11px;
-    font-weight: 400;
-    opacity: 0.7;
-    z-index: 1000;
-    pointer-events: none;
-    font-family: var(--font-family, Arial, sans-serif);
-}
-
 :host ::ng-deep .p-menubar {
     border-radius: 0;
 }

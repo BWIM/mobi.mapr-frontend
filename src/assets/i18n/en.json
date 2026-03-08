@@ -98,7 +98,7 @@
     "analysis": {
       "title": "Analysis Top 5 Activities",
       "showAllCategories": "Show all activities",
-      "expandPersonas": "Expand persona groups",
+      "expandPersonas": "Show all groups",
       "categoriesNotFound": "Categories not found",
       "dataNotLoaded": "Data not yet loaded",
       "errorLoadingCategories": "Error loading categories",

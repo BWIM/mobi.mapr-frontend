@@ -98,7 +98,7 @@
     "analysis": {
       "title": "Analyse Top 5 Aktivitäten",
       "showAllCategories": "Alle Aktivitäten anzeigen",
-      "expandPersonas": "Personengruppen vergrößern",
+      "expandPersonas": "Alle Gruppen anzeigen",
       "categoriesNotFound": "Kategorien nicht gefunden",
       "dataNotLoaded": "Daten noch nicht geladen",
       "errorLoadingCategories": "Fehler beim Laden der Kategorien",

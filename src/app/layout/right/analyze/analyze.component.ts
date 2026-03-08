@@ -1178,9 +1178,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    // Sort by weight descending
+    // Sort by weight descending and take top 4
     const sortedPersonas = [...personas]
-      .sort((a, b) => b.weight - a.weight);
+      .sort((a, b) => b.weight - a.weight)
+      .slice(0, 4);
 
     const labels = sortedPersonas.map((_, index) => (index + 1).toString());
     // Convert weights from decimals (0-1) to percentages (0-100)
@@ -1558,9 +1559,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
 
-    // Sort by combined weight
+    // Sort by combined weight and take top 4
     const sortedPersonas = Array.from(personaMap.values())
-      .sort((a, b) => Math.max(b.weight1, b.weight2) - Math.max(a.weight1, a.weight2));
+      .sort((a, b) => Math.max(b.weight1, b.weight2) - Math.max(a.weight1, a.weight2))
+      .slice(0, 4);
 
     const feature1Name = this.featureInfo?.name || this.translate.instant('analyze.feature1');
     const feature2Name = this.featureInfo2?.name || this.translate.instant('analyze.feature2');
@@ -1713,7 +1715,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return [];
     }
     return [...this.personasData]
-      .sort((a, b) => b.weight - a.weight);
+      .sort((a, b) => b.weight - a.weight)
+      .slice(0, 4);
   }
 
   onChartDataSelect(event: any): void {
@@ -2182,6 +2185,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Check if we're in comparison mode
     const isComparisonMode = this.isComparisonMode;
     let featureId2: number | undefined;
+    let featureType2: 'municipality' | 'hexagon' | 'county' | 'state' | undefined;
     let featureName2: string | undefined;
     
     if (isComparisonMode && this.selectedFeature2) {
@@ -2190,6 +2194,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         const id2 = typeof featureIdRaw2 === 'string' ? parseInt(featureIdRaw2, 10) : featureIdRaw2;
         if (!isNaN(id2)) {
           featureId2 = id2;
+          featureType2 = this.savedFeatureType2 || undefined;
           featureName2 = this.featureInfo2?.name;
         }
       }
@@ -2206,6 +2211,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       getGrade: (index: number) => this.getGrade(index),
       isComparisonMode: isComparisonMode,
       featureId2: featureId2,
+      featureType2: featureType2,
       featureName2: featureName2
     };
 
@@ -2413,6 +2419,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const isScoreMode = bewertung === 'zeit';
     const isComparisonMode = this.isComparisonMode;
     let featureId2: number | undefined;
+    let featureType2: 'municipality' | 'hexagon' | 'county' | 'state' | undefined;
     let featureName2: string | undefined;
     
     if (isComparisonMode && this.selectedFeature2) {
@@ -2421,6 +2428,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         const id2 = typeof featureIdRaw2 === 'string' ? parseInt(featureIdRaw2, 10) : featureIdRaw2;
         if (!isNaN(id2)) {
           featureId2 = id2;
+          featureType2 = this.savedFeatureType2 || undefined;
           featureName2 = this.featureInfo2?.name;
         }
       }
@@ -2437,6 +2445,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       getGrade: (index: number) => this.getGrade(index),
       isComparisonMode: isComparisonMode,
       featureId2: featureId2,
+      featureType2: featureType2,
       featureName2: featureName2
     };
 
