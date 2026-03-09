@@ -98,7 +98,7 @@
     "analysis": {
       "title": "Analyse Top 5 Aktivitäten",
       "showAllCategories": "Alle Aktivitäten anzeigen",
-      "expandPersonas": "Alle Gruppen anzeigen",
+      "expandPersonas": "Personengruppen vergrößern",
       "categoriesNotFound": "Kategorien nicht gefunden",
       "dataNotLoaded": "Daten noch nicht geladen",
       "errorLoadingCategories": "Fehler beim Laden der Kategorien",
@@ -116,7 +116,7 @@
         },
         "dataSource": {
           "title": "Datengrundlage: Mobilität in Deutschland (MiD)",
-          "description": "Die im mobi.mapr verwendeten Aktivitäten basieren auf der Studie \"Mobilität in Deutschland\" (MiD). Es werden die Daten aus dem Jahr 2023 genutzt.",
+          "description": "Die im mobi.mapr verwendeten Aktivitäten basieren auf der Studie 'Mobilität in Deutschland (MiD). Es werden die Daten aus dem Jahr 2023 genutzt.",
           "survey": "In dieser bundesweiten Erhebung werden Menschen unter anderem dazu befragt:",
           "survey1": "Welche Wege sie im Alltag zurücklegen",
           "survey2": "Welche Ziele sie dabei ansteuern",
@@ -127,7 +127,7 @@
           "title": "Übersetzung in konkrete Alltagsaktivitäten",
           "description": "Die in der MiD erhobenen Aktivitätskategorien sind relativ abstrakt. Daher werden sie im mobi.mapr auf Basis wissenschaftlicher Literatur und empirischer Annahmen in konkrete Alltagsziele übersetzt.",
           "example": "Beispiel:",
-          "exampleTitle": "\"Täglicher Bedarf\" wird konkretisiert zu:",
+          "exampleTitle": "'Täglicher Bedarf' wird konkretisiert zu:",
           "example1": "Supermarkt",
           "example2": "Bäckerei",
           "example3": "Drogerie",
@@ -140,7 +140,7 @@
         "ambiguities": {
           "title": "Umgang mit Unschärfen",
           "description": "Nicht jede Aktivität lässt sich eindeutig und zielscharf übersetzen.",
-          "example": "Ein Beispiel ist die Aktivität \"Hund ausführen\" aus der MiD-Studie. Diese beschreibt eigentlich eine Bewegung im öffentlichen Raum ohne klares Ziel. Im mobi.mapr wird sie derzeit näherungsweise über Ziele wie:",
+          "example": "Ein Beispiel ist die Aktivität 'Hund ausführen' aus der MiD-Studie. Diese beschreibt eigentlich eine Bewegung im öffentlichen Raum ohne klares Ziel. Im mobi.mapr wird sie derzeit näherungsweise über Ziele wie:",
           "example1": "Geschäfte für Hundezubehör",
           "example2": "ähnliche Einrichtungen",
           "validation": "abgebildet. Validierungen zeigen jedoch, dass sich solche Unschärfen in der Gesamtbetrachtung häufig ausgleichen. Das bedeutet: Auch wenn einzelne Aktivitäten nur näherungsweise übersetzt werden können, bleibt das Gesamtbild der Alltagsmobilität stabil und belastbar."
@@ -245,7 +245,7 @@
         "scaleUpper": "Im oberen Bereich eine gröbere.",
         "result": "Das Ergebnis ist ein Indexwert, der zusätzlich in eine verständliche Note übersetzt wird. So entsteht aus einer abstrakten Zahl eine intuitive Einschätzung der Mobilitätssituation.",
         "scale": "Skala",
-        "howToRead": "Die Farben auf der Karte zeigen die Mobilitätsqualität von A (beste Qualität) bis F (niedrigste Qualität). Je dunkler die Farbe, desto besser die Mobilitätsqualität.",
+        "howToRead": "Die Farben auf der Karte zeigen die Mobilitätsqualität von A (beste Qualität) bis F (niedrigste Qualität).",
         "a": {
           "title": "A - Beste Qualität",
           "description": "Sehr gute Mobilitätsqualität (Index: 0 - 0.35)"
@@ -276,7 +276,7 @@
         "description": "Die Mobilitätszeit beschreibt die tatsächlich bewertete Reisezeit in Minuten – inklusive aller Penalties (siehe Infobox Verkehrsmittel und Bewertung) sowie der Gewichtung mehrerer erreichbarer Ziele.",
         "result": "Das Ergebnis ist eine Zeitangabe in Minuten. Allerdings handelt es sich dabei nicht um eine rein technische Messung, sondern um eine gefühlte Zeit.",
         "perceived": "Diese kann von der real gefahrenen oder gelaufenen Zeit abweichen – bildet jedoch die tatsächliche Entscheidungsrealität deutlich besser ab.",
-        "example": "Beispiel: Für das Fahrrad wird – abhängig von der Gemeinde – ein gewisser \"Anfangswiderstand\" berücksichtigt. Denn in der Praxis steigt man nicht für jede noch so kurze Strecke aufs Rad. \"Damit ich das Fahrrad nehme, muss das Ziel mindestens 15 Minuten entfernt sein – sonst gehe ich bei dem Verkehr hier lieber zu Fuß.\"",
+        "example": "Beispiel: Für das Fahrrad wird – abhängig von der Gemeinde – ein gewisser 'Anfangswiderstand' berücksichtigt. Denn in der Praxis steigt man nicht für jede noch so kurze Strecke aufs Rad. 'Damit ich das Fahrrad nehme, muss das Ziel mindestens 15 Minuten entfernt sein – sonst gehe ich bei dem Verkehr hier lieber zu Fuß.'",
         "conclusion": "Die Mobilitätszeit bildet also ab, welches Verkehrsmittel unter realistischen Bedingungen tatsächlich gewählt wird.",
         "scale": "Skala",
         "scaleDescription": "Die Skala ist dabei linear aufgebaut und wird in Minuten angegeben.",
@@ -361,7 +361,7 @@
         },
         "profiles": {
           "title": "Mobilitätsprofile",
-          "variation": "Ein Verkehrsmittel kann stark variieren. Ein Lastenrad, ein Trekkingrad oder ein Rennrad gehören zwar alle zur Kategorie \"Fahrrad\", unterscheiden sich jedoch deutlich in ihrem Verhalten und ihrer Nutzung.",
+          "variation": "Ein Verkehrsmittel kann stark variieren. Ein Lastenrad, ein Trekkingrad oder ein Rennrad gehören zwar alle zur Kategorie 'Fahrrad', unterscheiden sich jedoch deutlich in ihrem Verhalten und ihrer Nutzung.",
           "mapping": "Im mobi.mapr werden diese Unterschiede über sogenannte Mobilitätsprofile abgebildet. In der frei verfügbaren Ansicht wird standardmäßig das am häufigsten genutzte Profil verwendet.",
           "future": "Zukünftig wird es möglich sein, individuelle Profile zu erstellen und zu verwenden. Stay tuned!"
         },
@@ -401,7 +401,7 @@
       "mobilityTime": {
         "title": "Mobilitätszeit",
         "approach": "Der grundlegende Ansatz ist dabei immer derselbe.",
-        "exampleIntro": "Um beispielsweise mit einer Verkehrsmittelkombination (z. B. Fuß + Rad) die Mobilitätsqualität für die Aktivität \"Supermarkt\" zu berechnen, werden folgende Schritte durchgeführt:",
+        "exampleIntro": "Um beispielsweise mit einer Verkehrsmittelkombination (z. B. Fuß + Rad) die Mobilitätsqualität für die Aktivität 'Supermarkt' zu berechnen, werden folgende Schritte durchgeführt:",
         "step1": {
           "title": "Routing zu allen relevanten Zielen",
           "description": "Von einem definierten Startpunkt aus wird für jedes verfügbare Verkehrsmittel die Route zu allen Supermärkten in der Umgebung berechnet."
@@ -412,7 +412,7 @@
         },
         "step3": {
           "title": "Auswahl und Gewichtung der besten Optionen",
-          "description": "Aus allen berechneten Routen werden die drei besten Verbindungen ausgewählt und gewichtet miteinander verrechnet.",
+          "description": "Aus allen berechneten Routen werden die drei besten Verbindungen ausgewählt und gewichtet miteinander verrechnet. Die Gewichtung bedeutet, wie 'wichtig' das jeweilige Ziel für die Mobilitätsqualität ist bzw. wie wichtig es ist unterschiedlich viel Auswahl zu haben.",
           "exampleLabel": "Beispiel:",
           "example1": "1. Supermarkt: 65 %",
           "example2": "2. Supermarkt: 20 %",
@@ -449,17 +449,17 @@
       "description": "Diese Übersicht zeigt die aktuell aktiven Filter und deren Anzahl. Die Zahlen zeigen, wie viele Filter in jeder Kategorie ausgewählt sind.",
       "introduction": "Filter ermöglichen es dir, die Analyse anzupassen, indem du bestimmte Aktivitäten, Personengruppen, Regionen und Regionaltypen auswählst. Verwende die Filter-Schaltfläche, um diese Einstellungen anzupassen.",
       "adjustFilters": "Filter anpassen",
-      "adjustFiltersDescription": "Klicke auf \"Filtern\", um die Filtereinstellungen zu öffnen und anzupassen. Dort kannst du Aktivitäten, Personengruppen, Regionalklassen und Bundesländer auswählen.",
+      "adjustFiltersDescription": "Klicke auf 'Filtern', um die Filtereinstellungen zu öffnen und anzupassen. Dort kannst du Aktivitäten, Personengruppen, Regionalklassen und Bundesländer auswählen.",
       "midProject": "MID-Projekt",
       "midProjectDescription": "Da dies ein MID-Projekt ist, kannst du zusätzlich Aktivitäten und Personengruppen filtern, um die Analyse weiter zu verfeinern.",
       "activities": "Aktivitäten",
-      "activitiesDescription": "Die Aktivitäten basieren auf der Studie \"Mobilität in Deutschland\". Sie gruppieren verschiedene reale Aktivitäten (z.B. Supermarkt) in abstrakte Kategorien des täglichen Bedarfs.",
+      "activitiesDescription": "Die Aktivitäten basieren auf der Studie 'Mobilität in Deutschland'. Sie gruppieren verschiedene reale Aktivitäten (z.B. Supermarkt) in abstrakte Kategorien des täglichen Bedarfs.",
       "personas": "Personengruppen",
       "personasDescription": "Eine Personengruppe definiert, wie relevant bestimmte Aktivitäten für verschiedene Nutzergruppen sind. Für ein Kind ist beispielsweise der Besuch eines Spielplatzes normalerweise relevanter als für einen Erwachsenen. Die Personengruppen stammen ebenfalls aus der MID-Studie.",
       "regioStars": "Regionalklassen",
       "regioStarsDescription": "Wenn du nur bestimmte Regionen in Deutschland betrachten möchtest, z.B. ländliche Gebiete, kannst du dies hier filtern. Es ändert die Daten selbst nicht, wie Bundesländer, filtert aber auch die Ergebnisse. Dies spiegelt sich auch in den Top-10-Rankings wider.",
       "states": "Bundesländer",
-      "statesDescription": "Bundesländer ermöglichen es dir, Regionen auf der Karte zu filtern. Während dies die Daten überhaupt nicht beeinflusst, ermöglicht es einen besseren Vergleich sowie die Filterung der Top-10-Rankings.",
+      "statesDescription": "Bundesländer ermöglichen es dir, Regionen auf der Karte zu filtern. Während dies die Daten überhaupt nicht beeinflusst, ermöglicht es einen besseren Vergleich sowie die Filterung der Top-100-Rankings.",
       "filterButton": "Filtern",
       "filterButtonDisabledHint": "Nur für registrierte Nutzer verfügbar",
       "resetButton": "Filter zurücksetzen",
@@ -467,10 +467,10 @@
         "general": "Allgemein",
         "generalContent": {
           "title": "Filter-Übersicht",
-          "intro": "Neben der Auswahl der Verkehrsmittel ist die Wahl der Ziele, also der Aktivitäten entscheidend. Diese können mittels des \"Filtern\"-Buttons angepasst werden.",
-          "mid23": "Die Aktivitäten basieren auf der Studie \"Mobilität in Deutschland 2023\" (MiD23) und werden mit freundlicher Genehmigung verwendet.",
+          "intro": "Neben der Auswahl der Verkehrsmittel ist die Wahl der Ziele, also der Aktivitäten entscheidend. Diese können mittels des 'Filtern'-Buttons angepasst werden.",
+          "mid23": "Die Aktivitäten basieren auf der Studie 'Mobilität in Deutschland 2023' (MiD23) und werden mit freundlicher Genehmigung verwendet.",
           "personas": "Zusätzlich können die Aktivitäten für einzelne Personengruppen eingeschränkt werden. Um jeweils mehr darüber zu erfahren, klicke auf die jeweiligen Tabs.",
-          "combinations": "Durch 29! Aktivitäten in Kombination mit 8! Personengruppen für die 4! Verkehrsmittel-Kombinationen gibt es mehrere hundert Milliarden Möglichkeiten, die Karte zu erstellen.",
+          "combinations": "Die beliebige Kombination der 30 Aktiviten, 10 Persona und 4 Verkehrsmittel-Kombinationen ergibt eine exponentiell große Anzahl an Möglichkeiten, die Karte zu erstellen; am Ende sind es mehr als eine Billion Möglichkeiten.",
           "beta": "Um die Rechenkapazitäten nicht zu überlasten sowie Missbrauch zu vermeiden, sind diese Funktionen nur für angemeldete Nutzer verfügbar. Dieses Feature befindet sich aktuell in der Beta-Phase.",
           "regionalFilters": "Zusätzlich können Bundesländer und Regionalklassen ausgewählt werden. Diese sind keine inhaltliche, sondern oberflächliche Filterung.",
           "example": "Möchte man beispielsweise wissen, was die besten Kommunen im ländlichen Raum in Baden-Württemberg sind, kann man das hier filtern und es wird dann rechts angezeigt."
@@ -484,7 +484,7 @@
           },
           "dataSource": {
             "title": "Datengrundlage: Mobilität in Deutschland (MiD)",
-            "description": "Die im mobi.mapr verwendeten Aktivitäten basieren auf der Studie \"Mobilität in Deutschland\" (MiD). Es werden die Daten aus dem Jahr 2023 genutzt.",
+            "description": "Die im mobi.mapr verwendeten Aktivitäten basieren auf der Studie 'Mobilität in Deutschland' (MiD). Es werden die Daten aus dem Jahr 2023 genutzt.",
             "survey": "In dieser bundesweiten Erhebung werden Menschen unter anderem dazu befragt:",
             "survey1": "Welche Wege sie im Alltag zurücklegen",
             "survey2": "Welche Ziele sie dabei ansteuern",
@@ -495,7 +495,7 @@
             "title": "Übersetzung in konkrete Alltagsaktivitäten",
             "description": "Die in der MiD erhobenen Aktivitätskategorien sind relativ abstrakt. Daher werden sie im mobi.mapr auf Basis wissenschaftlicher Literatur und empirischer Annahmen in konkrete Alltagsziele übersetzt.",
             "example": "Beispiel:",
-            "exampleTitle": "\"Täglicher Bedarf\" wird konkretisiert zu:",
+            "exampleTitle": "'Täglicher Bedarf' wird konkretisiert zu:",
             "example1": "Supermarkt",
             "example2": "Bäckerei",
             "example3": "Drogerie",
@@ -508,7 +508,7 @@
           "ambiguities": {
             "title": "Umgang mit Unschärfen",
             "description": "Nicht jede Aktivität lässt sich eindeutig und zielscharf übersetzen.",
-            "example": "Ein Beispiel ist die Aktivität \"Hund ausführen\" aus der MiD-Studie. Diese beschreibt eigentlich eine Bewegung im öffentlichen Raum ohne klares Ziel. Im mobi.mapr wird sie derzeit näherungsweise über Ziele wie:",
+            "example": "Ein Beispiel ist die Aktivität 'Hund ausführen' aus der MiD-Studie. Diese beschreibt eigentlich eine Bewegung im öffentlichen Raum ohne klares Ziel. Im mobi.mapr wird sie derzeit näherungsweise über Ziele wie:",
             "example1": "Geschäfte für Hundezubehör",
             "example2": "ähnliche Einrichtungen",
             "validation": "abgebildet. Validierungen zeigen jedoch, dass sich solche Unschärfen in der Gesamtbetrachtung häufig ausgleichen. Das bedeutet: Auch wenn einzelne Aktivitäten nur näherungsweise übersetzt werden können, bleibt das Gesamtbild der Alltagsmobilität stabil und belastbar."
@@ -527,7 +527,7 @@
         "personasContent": {
           "introduction": {
             "title": "Über Personengruppen",
-            "description": "Über Personengruppen werden unterschiedliche Alltagsperspektiven auf Mobilität abgebildet. Die genutzten Personengruppen basieren auf den 12 Personengruppen der Studie \"Mobilität in Deutschland (MiD)\" und ermöglichen es, Mobilitätszeiten und Bewertungen getrennt nach Nutzungsgruppen darzustellen. Durch die Aus- und Abwahl einzelner Personengruppen lassen sich Unterschiede zwischen Lebensrealitäten unmittelbar sichtbar machen."
+            "description": "Über Personengruppen werden unterschiedliche Alltagsperspektiven auf Mobilität abgebildet. Die genutzten Personengruppen basieren auf den 10 Personengruppen der Studie 'Mobilität in Deutschland (MiD)' und ermöglichen es, Mobilitätszeiten und Bewertungen getrennt nach Nutzungsgruppen darzustellen. Durch die Aus- und Abwahl einzelner Personengruppen lassen sich Unterschiede zwischen Lebensrealitäten unmittelbar sichtbar machen."
           },
           "personGroups": {
             "title": "Personengruppen laut MiD:",
@@ -539,10 +539,8 @@
             "group6": "Student/in ohne verfügbaren Pkw",
             "group7": "Auszubildende/r mit verfügbarem Pkw",
             "group8": "Auszubildende/r ohne verfügbaren Pkw",
-            "group9": "Kind 0-6 Jahre",
-            "group10": "Schüler/in 7-10 Jahre",
-            "group11": "Schüler/in 11-21 Jahre mit verfügbarem Pkw",
-            "group12": "Schüler/in 11-21 Jahre ohne verfügbaren Pkw"
+            "group9": "Schüler/in ab 11 Jahre mit verfügbarem Pkw",
+            "group10": "Schüler/in ab 11 Jahre ohne verfügbaren Pkw"
           },
           "weighting": {
             "title": "Gewichtung der Aktivitäten",
@@ -614,20 +612,37 @@
     "manageProjects": "Projekte verwalten",
     "logoHint": "Zur Projektseite",
     "mail": {
-      "title": "Über das Projekt",
-      "developedBy": "Willkommen bei mobi.mapr! Dieses Projekt wird vom Baden-Württemberg Institut für Nachhaltige Mobilität (BWIM) entwickelt und kontinuierlich weiterentwickelt.",
-      "sourceCode": "Wir freuen uns über dein Interesse! Den Quellcode des Frontends haben wir als Open Source zur Verfügung gestellt:",
-      "sourceCodeUrl": "https://github.com/BWIM/mobi.mapr-frontend",
-      "apiDocumented": "Auch unsere API ist offen dokumentiert, sodass du die Daten und Funktionen für eigene Projekte nutzen kannst.",
-      "moreOnWebsite": "Auf unserer Website findest du weitere spannende Informationen über das Projekt, unsere Forschung und aktuelle Entwicklungen.",
-      "questions": "Hast du Fragen, Anregungen oder Feedback? Wir freuen uns über deine Nachricht:"
+      "title": "Über mobi.mapr",
+      "welcome": "Willkommen beim mobi.mapr! 🎉",
+      "developedBy": "Dieses Projekt wird vom Baden-Württemberg Institut für Nachhaltige Mobilität (BWIM) entwickelt und kontinuierlich weiterentwickelt.",
+      "background": {
+        "title": "Hintergrund",
+        "intro": "Mobilität ist ein komplexes Thema, das kaum messbar ist. Jede Person ist, reist und handelt individuell. Dennoch kann man insgesamt Trends feststellen. Menschen wollen unterschiedliche Aktivitäten erreichen, sei es ein Restaurant, der Supermarkt oder das Treffen von Freunden, denn Mobilität ist ein Grundbedürfnis.",
+        "approach": "Der mobi.mapr addressiert dieses Thema, indem die Aktivitäten ins Zentrum gestellt werden. Welche Aktivitäten kann man wie erreichen? Im Kern stehen dabei die offenen Daten von OpenStreetMap. Falls es um mehr als eine Aktivität geht, werden Studien betrachtet, um diese zu aggregieren.",
+        "humanCentric": "Der mobi.mapr ist dabei mehr als eine Erreichbarkeitsanalyse. Der Mensch steht im Mittelpunkt. Subjektive Faktoren ergänzen reine Reisezeiten, weitere Penalties, wie die Parkplatzsuche, nähern die Zeiten an die Realität an.",
+        "explore": "Schau dich gerne auf der Website um, entdecke die Mobilität und finde heraus, wo noch Chancen bestehen."
+      },
+      "license": {
+        "title": "Lizenz und Nutzung",
+        "frontend": "Der mobi.mapr verfolgt einen zweigleisigen Ansatz: Das Frontend ist Open Source unter der AGPL-3.0-Lizenz. Wir möchten die Open-Source-Community fördern, das bedeutet, dass jede Änderung auch Open Source gestellt werden muss. Eine kommerzielle Nutzung ist nicht möglich.",
+        "data": "Wir verstehen aber, dass Mobilität auch ein Geschäftsfeld ist. Wir verfolgen daher eine andere Open-Data-Strategie. Alle Daten, die vom mobi.mapr-Team veröffentlicht werden, stehen unter der CC-BY-4.0-Lizenz, können also kommerziell, ohne Offenlegung verwendet werden. Es muss lediglich das BWIM attributiert werden und wir freuen uns über einen Link auf die Anwendung.",
+        "note": "Bitte beachte: Für die GeoDaten in der Anwendung (z.B. für Stadtteilgrenzen) können weitere Lizenzen gelten. Weitere, detaillierte Informationen findest du links unten im Dashboard, sowie in der Lizenz-Datei der API."
+      },
+      "contact": {
+        "title": "Kontakt",
+        "website": "Weitere Informationen über das Projekt, sowie spannende Analysen findest du auf unserer Website:",
+        "email": "Wenn du Fragen oder Anregungen hast, freuen wir uns über deine Nachricht:",
+        "github": "Sollte etwas im Frontend nicht funktionieren oder du hast Anregungen, erstelle gerne ein neues Issue:"
+      },
+      "sourceCode": "Den Quellcode des Frontends findest du hier:",
+      "apiDocumented": "Auch unsere API ist offen dokumentiert, sodass du die Daten und Funktionen für eigene Projekte nutzen kannst."
     },
     "questionMark": {
       "title": "Hilfe",
       "infoButtons": "In den verschiedenen Panels findest du Info-Buttons, die dir detaillierte Informationen zu den jeweiligen Funktionen und Einstellungen bieten. Einfach auf das Info-Symbol klicken!",
-      "moreOnWebsite": "Für umfassendere Informationen und Hintergründe schau gerne auf unserer Website vorbei.",
+      "moreOnWebsite": "Für umfassendere Informationen und Hintergründe schau gerne auf unserer Website vorbei. Diese erreichst du durch Klick auf das Logo oben links.",
       "faq": "Häufig gestellte Fragen findest du in unserem FAQ:",
-      "faqUrl": "https://bw-im.de/mobimapr-faq"
+      "faqUrl": "<https://bw-im.de/mobimapr-faq>"
     },
     "credits": {
       "title": "Credits & Lizenzen",
@@ -705,7 +720,7 @@
       "title": "Statistiken",
       "description": "Diese Übersicht zeigt die Top 10 Rankings basierend auf der ausgewählten Ebene (Bundesländer, Landkreise oder Gemeinden) und den aktuellen Filtern und Bewertungskriterien.",
       "aboutDataTitle": "Über die Daten",
-      "aboutData": "Die angezeigten Daten repräsentieren die Top 10 Rankings basierend auf der ausgewählten Ebene und den aktuellen Filtern und Bewertungskriterien.",
+      "aboutData": "Die angezeigten Daten repräsentieren die Top Rankings basierend auf der ausgewählten Ebene und den aktuellen Filtern und Bewertungskriterien.",
       "layerSelection": "Ebenenauswahl",
       "layerSelectionDescription": "Wähle die geografische Ebene aus, für die die Rankings angezeigt werden sollen: Bundesländer, Landkreise oder Gemeinden.",
       "selectLayer": "Ebene auswählen",
@@ -717,7 +732,7 @@
       "tiedRanksRule1": "Gebiete mit identischem Wert erhalten den gleichen Rangplatz",
       "tiedRanksRule2": "Der nächste Rangplatz wird entsprechend übersprungen (z.B. wenn zwei Gebiete Rang 3 teilen, ist der nächste Rang 5)",
       "countyDefinition": "Mit Kreis sind Stadt und Landkreise gemeint. Da dies bundesweit nicht einheitlich geregelt wird unterscheiden wir nicht",
-      "largeCountySplit": "Für eine bessere Vergleichbarkeit sind Landkreise, die nur aus einer Gemeinde bestehen, mit mehr als 300 000 Einwohnenden in ihre Stadtteile aufgeteitl. Der Landkreis (z.B. Berlin) ist dann in \"Kreis\" und B-Spandau dementsprechend unter \"Gemeinde\"",
+      "largeCountySplit": "Für eine bessere Vergleichbarkeit sind Landkreise, die nur aus einer Gemeinde bestehen, mit mehr als 300 000 Einwohnenden in ihre Stadtteile aufgeteitl. Der Landkreis (z.B. Berlin) ist dann in 'Kreis' und B-Spandau dementsprechend unter 'Gemeinde'",
       "qualityViewHint": "In der Qualitäts-Ansicht werden die Gebietseinheiten nach ihrem Index gruppiert und bewertet (sh. Info zur Mobilitätsbewertung). So können Gebietseinheiten mit der selben Note (z.B. C+) auf einem unterschiedlichen Platz auf dem Treppchen sein."
     }
   },

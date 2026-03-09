@@ -40,7 +40,7 @@
     "logout": "Logout"
   },
   "analyze": {
-    "selectPlace": "Click on a place on the map to get further analysis",
+    "selectPlace": "Click on a place in the map to view additional information",
     "loading": "Loading...",
     "loadingFeatureInfo": "Loading feature information...",
     "loadingPlaces": "Loading map with activities...",
@@ -61,11 +61,11 @@
       "categoriesNotFound": "Categories not found",
       "dataNotLoaded": "Data not yet loaded",
       "errorLoadingCategories": "Error loading categories",
-      "clickHint": "Click on any activity to get detailed information"
+      "clickHint": "Click on any activity to view more detailed information"
     },
     "featureInfo": {
       "notFound": "Feature information not found",
-      "dataNotPreloaded": "Data not preloaded yet",
+      "dataNotPreloaded": "Data not yet preloaded",
       "errorLoading": "Error loading feature information",
       "typeMismatch": "Feature types do not match"
     },
@@ -77,14 +77,14 @@
     "comparisonMode": "Comparison mode",
     "analyzeData": {
       "notFound": "Analyze data not found",
-      "dataNotPreloaded": "Data not preloaded yet",
-      "errorLoading": "Error loading analyze data"
+      "dataNotPreloaded": "Data not yet preloaded",
+      "errorLoading": "Error loading analysis data"
     },
     "placesDialog": {
-      "title": "Map with activity places",
+      "title": "Map showing locations of activities",
       "loading": "Loading map...",
       "errorLoadingPlaces": "Error loading places",
-      "disabledForCountiesStates": "The places view is disabled for counties and states. To make a detailed analysis about an area, please select the municipality/Hexagon view"
+      "disabledForCountiesStates": "The places view is disabled for counties and states. Please select the municipality/hexagon view for a more detailed analysis about an area"
     },
     "rank": {
       "overall": "Rank",
@@ -98,36 +98,36 @@
     "analysis": {
       "title": "Analysis Top 5 Activities",
       "showAllCategories": "Show all activities",
-      "expandPersonas": "Show all groups",
+      "expandPersonas": "Expand persona groups",
       "categoriesNotFound": "Categories not found",
       "dataNotLoaded": "Data not yet loaded",
       "errorLoadingCategories": "Error loading categories",
-      "errorLoadingPlaces": "Error loading places",
+      "errorLoadingPlaces": "Error loading locations",
       "activities": "Activities",
       "personas": "Personas",
-      "qualityRating": "Quality rating: The quality rating shows the mobility quality in different categories from A (best quality) to F (lowest quality).",
-      "placesMap": "Map with activity places",
+      "qualityRating": "Quality rating: The quality rating shows the quality of mobility in different categories from A (best quality) to F (lowest quality).",
+      "placesMap": "Map with activity locations",
       "info": {
         "title": "Activities",
         "introduction": {
-          "title": "Understanding Activities",
-          "description": "Every journey ends with an activity. This could be visiting a restaurant, spending time at a museum, or going shopping. Activities represent the actual purpose of mobility.",
-          "focus": "mobi.mapr focuses on everyday mobility. Commutes to educational institutions and workplaces are intentionally not considered. Instead, the focus is on everyday destinations such as shopping, leisure activities, or social visits."
+          "title": "How to understanding activities",
+          "description": "Every trip ends with an activity. This could be the desire to visit a restaurant, to spend time at a museum, or to go shopping. Activities are thus the reason to start trips and where mobility comes into play.",
+          "focus": "mobi.mapr focuses on everyday mobility. Commutes to educational institutions and workplaces are intentionally not considered. Instead, the focus is on day-to-day destinations such as errands, leisure activities, or social visits."
         },
         "dataSource": {
           "title": "Data Source: Mobility in Germany (MiD)",
-          "description": "The activities used in mobi.mapr are based on the \"Mobilität in Deutschland\" (Mobility in Germany) study. Data from 2023 is used.",
+          "description": "The activities used in mobi.mapr are based on the 'Mobilität in Deutschland' (Mobility in Germany) study. Data from the 2023 survey is currently used.",
           "survey": "In this nationwide survey, people are asked, among other things:",
           "survey1": "Which routes they take in everyday life",
-          "survey2": "Which destinations they aim for",
-          "survey3": "What occasion these routes occur for",
-          "result": "The result is a list of approximately 30 activity categories. These categories are deliberately formulated in general terms to be statistically evaluable."
+          "survey2": "Which destinations they travel to",
+          "survey3": "What are the reasons for these journeys",
+          "result": "The result is a list of approximately 30 activity categories. These categories are deliberately formulated in general terms in order to be evaluated statistically."
         },
         "translation": {
-          "title": "Translation into Concrete Everyday Activities",
-          "description": "The activity categories collected in MiD are relatively abstract. Therefore, they are translated into concrete everyday destinations in mobi.mapr based on scientific literature and empirical assumptions.",
+          "title": "Translation into concrete everyday activities",
+          "description": "The activity categories collected by the MiD are relatively abstract. Therefore, they are translated into concrete everyday destinations in mobi.mapr based on scientific literature and empirical assumptions.",
           "example": "Example:",
-          "exampleTitle": "\"Daily Needs\" is concretized to:",
+          "exampleTitle": "'Daily Needs' is represented by:",
           "example1": "Supermarket",
           "example2": "Bakery",
           "example3": "Drugstore",
@@ -140,27 +140,27 @@
         "ambiguities": {
           "title": "Dealing with Ambiguities",
           "description": "Not every activity can be translated unambiguously and precisely.",
-          "example": "An example is the activity \"Walking the dog\" from the MiD study. This actually describes movement in public space without a clear destination. In mobi.mapr, it is currently approximated through destinations such as:",
+          "example": "An example is the activity 'Walking the dog' from the MiD study. This actually describes movement in public space without a clear destination. In mobi.mapr, it is currently approximated through destinations such as:",
           "example1": "Stores for dog supplies",
           "example2": "Similar facilities",
-          "validation": "Validations show, however, that such ambiguities often balance out in the overall view. This means: Even if individual activities can only be approximated, the overall picture of everyday mobility remains stable and reliable."
+          "validation": "Validations show, however, that such ambiguities often balance out in the bigger picture. This means: Even if individual activities can only be approximated, the overall picture of everyday mobility remains stable and reliable."
         },
         "weighting": {
           "title": "Weighting of Activities",
-          "description": "The importance of individual activities depends strongly on the respective person group.",
+          "description": "The importance of individual activities depends strongly on the respective group of people.",
           "examples": "Examples:",
           "example1": "Children visit playgrounds more frequently.",
           "example2": "Adults have a stronger focus on shopping or errands.",
-          "example3": "Older people show different activity patterns again.",
-          "standardView": "In the standard view of mobi.mapr, all person groups are initially considered together. This creates an average activity profile."
+          "example3": "Seniors have different activity patterns compared to other groups.",
+          "standardView": "In the standard view of mobi.mapr, all groups of people are initially considered together. This creates an average activity profile."
         },
         "regional": {
           "title": "Regional Differentiation",
-          "description": "In addition to differentiation by person groups, activities are also weighted regionally.",
+          "description": "In addition to differentiation per groups of people, activities are also weighted regionally.",
           "meaning": "This means:",
           "meaning1": "In metropolitan regions, destination structures and preferences differ significantly from those in rural areas.",
-          "meaning2": "City dwellers seek urban offerings such as gastronomy, culture, or specialized services more frequently.",
-          "meaning3": "In rural areas, other facilities and supply structures are prioritized.",
+          "meaning2": "City dwellers seek urban offerings such as gastronomy, cultural activities, or specialized services more frequently.",
+          "meaning3": "In rural areas, other facilities and provisions are prioritized.",
           "consideration": "These regional differences are taken into account in mobi.mapr to make realistic statements about everyday mobility."
         }
       }
@@ -181,10 +181,10 @@
   },
   "LANDING": {
     "TITLE": "Welcome to mobi.mapr",
-    "SUBTITLE": "Discover mobility quality in your region",
+    "SUBTITLE": "Discover the quality of mobility in your region",
     "CARDS": {
       "PROJECT_MAIN_SITE": {
-        "TITLE": "Project Main Site",
+        "TITLE": "Project Home Page",
         "DESCRIPTION": "Visit the official project page for more information"
       },
       "FAQ": {
@@ -212,7 +212,7 @@
     "INFO": "We are working to make the application available again as soon as possible."
   },
   "language": {
-    "de": "German",
+    "de": "Deutsch",
     "en": "English",
     "select": "Select language"
   },
@@ -228,16 +228,16 @@
       "score": "Mobility time:",
       "minutes": "min",
       "notAvailable": "N/A",
-      "unnamed": "Unnamed",
+      "unnamed": "Unknown",
       "error": "Error"
     },
     "legend": {
       "title": "Legend",
-      "introduction": "Mobility can be viewed in two different ways: as mobility time or as mobility quality. Both perspectives complement each other – one is concrete and tangible, the other comparative and contextual.",
+      "introduction": "Mobility can be viewed in two different ways: as mobility time or as mobility quality. Both perspectives complement one another – one is concrete and tangible, the other comparative and contextual.",
       "quality": {
         "title": "Mobility Quality",
         "description": "Mobility quality sets the calculated mobility time in relation to a structurally comparable region.",
-        "comparison": "A travel time in a city is thus compared with other cities – not with rural areas. Similarly, a rural region is compared with other rural regions.",
+        "comparison": "Travel time in a city is thus compared with other cities – not with rural areas. Similarly, a rural region is compared with other rural regions.",
         "fair": "This creates a fair and context-based assessment.",
         "perception": "Another important aspect: Time differences in the lower range are perceived much more sensitively than in the upper range. The difference between 5 and 10 minutes feels more significant than the difference between 45 and 50 minutes.",
         "scaleIntro": "Therefore, the mobility quality scale is structured exponentially:",
@@ -245,7 +245,7 @@
         "scaleUpper": "In the upper range, a coarser one.",
         "result": "The result is an index value that is additionally translated into an understandable grade. This transforms an abstract number into an intuitive assessment of the mobility situation.",
         "scale": "Scale",
-        "howToRead": "The colors on the map show mobility quality from A (best quality) to F (lowest quality). The darker the color, the better the mobility quality.",
+        "howToRead": "The colors on the map show the quality of mobility from A (best quality) to F (lowest quality).",
         "a": {
           "title": "A - Best Quality",
           "description": "Very good mobility quality (Index: 0 - 0.35)"
@@ -273,10 +273,10 @@
       },
       "time": {
         "title": "Mobility Time",
-        "description": "Mobility time describes the actually evaluated travel time in minutes – including all penalties (see info box transport modes and rating) as well as the weighting of multiple reachable destinations.",
+        "description": "Mobility time describes the actual evaluated travel time in minutes – including all penalties (see info box transport modes and rating) as well as the weighting of multiple reachable destinations.",
         "result": "The result is a time specification in minutes. However, this is not a purely technical measurement, but rather a perceived time.",
         "perceived": "This may differ from the actual driven or walked time – but it reflects the actual decision-making reality much better.",
-        "example": "Example: For bicycles, depending on the municipality, a certain \"initial resistance\" is taken into account. In practice, you don't get on the bike for every short distance. \"For me to take the bike, the destination must be at least 15 minutes away – otherwise I'd rather walk here given the traffic.\"",
+        "example": "Example: For bicycles, depending on the municipality, a certain 'initial resistance' is taken into account. In practice, you don't get on the bike for every short distance. 'For me to take the bike, the destination must be at least 15 minutes away – otherwise I'd rather walk here given the traffic.'",
         "conclusion": "Mobility time thus reflects which means of transport is actually chosen under realistic conditions.",
         "scale": "Scale",
         "scaleDescription": "The scale is structured linearly and is given in minutes.",
@@ -339,39 +339,39 @@
         }
       },
       "info": {
-        "title": "Transport Modes",
+        "title": "Modes",
         "general": {
           "title": "General",
-          "intro": "To reach an activity, you need a means of transport – this can be your own feet, a bicycle, a car, or public transport.",
-          "pedestrianBase": "Pedestrian traffic forms the base transport mode, as without it, all other options cannot be meaningfully used. Therefore, it cannot be disabled.",
+          "intro": "To reach an activity, you need a mode of transport – this can be your own feet, a bicycle, a car, or public transit.",
+          "pedestrianBase": "Walking is the default mode of transportation, because without it, none of the other options can be used effectively. Therefore, it cannot be disabled.",
           "questionIntro": "By selecting transport modes, you essentially answer the following question:",
-          "question": "How good is my mobility quality when I'm traveling on foot or have a bicycle available?",
-          "approach": "mobi.mapr follows a realistic approach: The transport mode is always chosen that is overall fastest considering all factors – including parking, parking bicycles, or other additional times. Even if a car is available, one usually prefers to walk to a bakery 200 meters away, even if the pure driving time would be shorter. The additional effort for parking and unparking makes the car unattractive in this case."
+          "question": "How good is my mobility quality when I'm traveling on foot versus when I have a bicycle available?",
+          "approach": "mobi.mapr takes a realistic approach: it always selects the mode of transport that is fastest overall, taking all factors into account—including parking, stopping, and other associated factors. Even if a car is available, people usually prefer to walk to a bakery 200 meters away, regardless if the actual driving time would be shorter. The additional effort required to find parking and get out and back to the location makes the car unattractive in this case."
         },
         "penalties": {
           "title": "Penalties",
-          "intro": "To fairly compare transport modes with each other, so-called penalties (time surcharges) are applied to the pure travel time.",
+          "intro": "In order to compare modes of transport fairly, penalties (time surcharges) are applied to the pure travel time.",
           "examplesLabel": "Examples:",
-          "example1": "For cars, depending on the time of the activity, a small time penalty is considered to realistically represent parking search.",
-          "example2": "For bicycles, one minute is added flat.",
-          "example3": "For cargo bikes, three minutes are added, as parking space search is usually more complex here.",
-          "subjective": "In addition, routes can feel subjectively longer or shorter. In a city with well-developed bicycle infrastructure, a route often feels shorter than on a heavily trafficked main road.",
-          "adfc": "To evaluate such factors, we include, among other things, the ADFC bicycle climate test.",
+          "example1": "For cars, depending on the time of the trip to an activity, a small time penalty is considered to realistically represent parking search.",
+          "example2": "For bicycles, one minute is always added for the locking/unlocking or carrying the bicycle to the road to begin the trip.",
+          "example3": "For cargo bikes, three minutes are added, as searching for parking for the larger vehicle becomes more complex.",
+          "subjective": "In addition, routes can feel subjectively longer or shorter. In a city with well-developed bicycle infrastructure, a route often feels shorter than while traveling on a heavily trafficked main road.",
+          "adfc": "To include such factors, we have integrated, among other things, the ADFC bicycle climate test.",
           "documentation": "You can find a detailed explanation in our documentation."
         },
         "profiles": {
           "title": "Mobility Profiles",
-          "variation": "A transport mode can vary greatly. A cargo bike, a trekking bike, or a racing bike all belong to the \"bicycle\" category, but differ significantly in their behavior and usage.",
-          "mapping": "In mobi.mapr, these differences are mapped through so-called mobility profiles. In the freely available view, the most commonly used profile is used by default.",
+          "variation": "A transport mode can vary greatly. A cargo bike, a trekking bike, or a road bike all belong to the 'bicycle' category, but differ significantly in their behavior and usage.",
+          "mapping": "In mobi.mapr, these differences are mapped through so-called mobility profiles. The most frequently used profile is used by default in the available view.",
           "future": "In the future, it will be possible to create and use individual profiles. Stay tuned!"
         },
         "routing": {
           "title": "Routing",
-          "complexity": "Finding a route between start and destination is significantly more complex than simply following a street. Inclines, traffic lights, or intersections can significantly extend the actual travel time.",
-          "fullRouting": "To consider as many influencing factors as possible, each route is fully routed.",
+          "complexity": "Finding a route between start and destination is significantly more complex than simply following a street. Inclines, traffic lights, or intersections can significantly prolong the actual travel time.",
+          "fullRouting": "In order to take as many influencing factors as possible into account, each route is routed in its entirety.",
           "startPoint": "The starting point is the center of the respective hexagon.",
           "destination": "The destination is the specific activity.",
-          "engines": "For routing of foot, bicycle, and car traffic, we use the FOSS routing engine Valhalla. For public transport, we use the MOTIS project.",
+          "engines": "We use the FOSS routing engine Valhalla for routing pedestrian, bicycle, and car traffic. For public transport, we use the MOTIS project.",
           "transitDay": "Public transport routing is performed on a representative Tuesday. Each activity has a defined time at which the route is calculated.",
           "waitingTime": "Waiting time at the destination is not taken into account. Example: If a meeting is planned for 19:00, but the train arrives at 18:40, the journey is considered complete upon arrival – the remaining waiting time is not included in the evaluation."
         }
@@ -379,29 +379,29 @@
     },
     "mobilityRating": {
       "title": "Rating",
-      "description": "Choose between two rating methods for mobility analysis.",
+      "description": "Choose between two valuation methods for mobility analysis.",
       "introduction": "To evaluate mobility in a neutral and comparable way, a clear and comprehensible methodology is needed.",
       "time": {
         "label": "Time",
         "title": "Time-Based Rating",
         "description": "Time-based rating calculates absolute travel times to destinations, taking into account route penalties and mode-specific factors.",
         "step1": "From a starting point, the next three instances of each activity (e.g., restaurants) are calculated for all enabled transport modes.",
-        "step2": "Each route receives penalties depending on the transport mode, such as parking search time for cars or bicycle infrastructure quality (ADFC-Fahrradklimatest) for bicycles.",
-        "step3": "For the chosen mode mix, the best three routes are selected and weighted together. The weighting depends on the activity type - you want more choices for a restaurant than for a post office.",
-        "example": "Example: The best route might be by foot, the second best by bicycle, and the third best by car. All three are combined with activity-specific weights."
+        "step2": "Each route receives penalties depending on the means of transport, such as parking search time for cars or bicycle infrastructure quality (ADFC-Fahrradklimatest) for bicycles.",
+        "step3": "For the chosen mode mix, the best three routes are selected and weighted together. The weighting depends on the activity type - one prefers more choices for a restaurant than for a post office.",
+        "example": "Example: The best route might be by foot, the second best by bicycle, and the third best by car. All three are combined with activity-specific weightings."
       },
       "quality": {
         "label": "Quality",
         "title": "Quality-Based Rating",
         "description": "Quality-based rating evaluates mobility performance relative to similar municipalities, providing a comparative perspective rather than absolute time values.",
-        "example": "Example: If your municipality needs 15 minutes to reach a supermarket, but similar municipalities (by RegioStar) need 20 minutes on average, you only need 75% of the time. This relative performance is then translated into a quality grade.",
+        "example": "Example: If one municipality needs 15 minutes to reach a supermarket, but similar municipalities (by RegioStar) need 20 minutes on average, they only need 75% of the time. This relative performance is then translated into a quality grade.",
         "graphTitle": "Quality Translation Graph",
-        "graphDescription": "The relative time percentage (e.g., 75%) is mapped to a quality grade (A+ to F-) using an exponential function. Lower percentages (better performance) result in higher grades."
+        "graphDescription": "The relative time percentage (e.g., 75%) is mapped to a quality grade (A+ to F-) using an exponential function. Lower percentages based on the average (better performance) result in higher grades."
       },
       "mobilityTime": {
         "title": "Mobility Time",
         "approach": "The fundamental approach is always the same.",
-        "exampleIntro": "For example, to calculate the mobility quality for the activity \"Supermarket\" using a transport mode combination (e.g., foot + bicycle), the following steps are performed:",
+        "exampleIntro": "For example, to calculate the mobility quality for the activity 'Supermarket' using a transport mode combination (e.g., foot + bicycle), the following steps are performed:",
         "step1": {
           "title": "Routing to all relevant destinations",
           "description": "From a defined starting point, the route to all supermarkets in the area is calculated for each available transport mode."
@@ -412,12 +412,12 @@
         },
         "step3": {
           "title": "Selection and weighting of the best options",
-          "description": "From all calculated routes, the three best connections are selected and weighted together.",
+          "description": "From all calculated routes, the three best connections are selected and weighted together. The weighting means how 'important' the respective destination is for the mobility quality or how important it is to have different choices.",
           "exampleLabel": "Example:",
           "example1": "1. Supermarket: 65 %",
           "example2": "2. Supermarket: 20 %",
           "example3": "3. Supermarket: 15 %",
-          "explanation": "The background is that not only the nearest destination counts – a certain choice increases the actual mobility quality. The specific weighting depends on the respective activity. For restaurants, choice is more important than, for example, for a parcel station."
+          "explanation": "The background is that not only does the nearest destination counts – a certain amount of choice increases the actual mobility quality. The specific weighting depends on the respective activity. For restaurants, choice is more important than, for example, a parcel station."
         },
         "conclusion": "For this reason, we deliberately do not speak of travel time, but of mobility time."
       },
@@ -425,7 +425,7 @@
         "title": "Mobility Quality",
         "weakness": "Mobility time is intuitively understandable, but has a weakness: It only allows limited comparisons between different regions or activity types.",
         "exampleLabel": "Example:",
-        "example": "Is 20 minutes travel time to a hairdresser in a rural area good or bad?",
+        "example": "Is a 20-minute travel time to a hairdresser in a rural area good or bad?",
         "introduction": "To answer such questions, mobility quality is introduced. Here, the calculated mobility time is set in relation to a reference value.",
         "calculation": "Thanks to comparison data available throughout Germany, it can be determined, for example, that in rural areas an average of 30 minutes is needed to reach a hairdresser. If your own mobility time is 20 minutes, this results in a mobility quality of 66%.",
         "gradeIntro": "To make this abstract percentage value more understandable, it is additionally translated into a grade.",
@@ -449,15 +449,15 @@
       "description": "This overview shows the currently active filters and their count. The numbers show how many filters are selected in each category.",
       "introduction": "Filters allow you to customize the analysis by selecting specific activities, personas, regions, and regional types. Use the filter button to adjust these settings.",
       "adjustFilters": "Adjust Filters",
-      "adjustFiltersDescription": "Click on \"Filter\" to open and adjust the filter settings. There you can select activities, personas, RegioStars, and states.",
+      "adjustFiltersDescription": "Click on 'Filter' to open and adjust the filter settings. There you can select activities, personas, RegioStars, and states.",
       "midProject": "MID Project",
       "midProjectDescription": "Since this is a MID project, you can additionally filter activities and personas to further refine the analysis.",
       "activities": "Activities",
-      "activitiesDescription": "Activities are based on the study \"Mobilität in Deutschland\" (Mobility in Germany). They group different real-life activities (e.g., supermarket) into abstract daily needs categories.",
+      "activitiesDescription": "Activities are based on the study 'Mobilität in Deutschland' (Mobility in Germany). They group different real-life activities (e.g., supermarket) into abstract daily needs categories, such as 'daily needs'.",
       "personas": "Personas",
-      "personasDescription": "A persona defines how relevant certain activities are for different user groups. For example, going to a playground is normally more relevant for a child than for an adult. Personas also come from the MID study.",
+      "personasDescription": "A persona defines how relevant certain activities are for different user groups. For example, going to a playground is normally more relevant for a child than for an adult without children. Personas also come from the MID study.",
       "regioStars": "RegioStars",
-      "regioStarsDescription": "If you only want to look at certain regions in Germany, for example rural areas, you can filter this here. It does not change the data itself, like states, but also filters the results. It is also reflected in the Top rankings.",
+      "regioStarsDescription": "If you only want to view certain regions in Germany, for example rural areas, you can filter this here. It does not change the data itself, such as states, but it does filter the results. This is then also reflected in the Top rankings.",
       "states": "States",
       "statesDescription": "States allow you to filter for regions on the map. While this does not influence the data at all, it allows for better comparison, as well as filtering the Top rankings.",
       "filterButton": "Filter",
@@ -467,35 +467,35 @@
         "general": "General",
         "generalContent": {
           "title": "Filter Overview",
-          "intro": "In addition to selecting transport modes, choosing destinations, i.e., activities, is crucial. These can be adjusted using the \"Filter\" button.",
-          "mid23": "The activities are based on the \"Mobilität in Deutschland 2023\" (MiD23) study and are used with kind permission.",
+          "intro": "In addition to selecting transport modes, choosing destinations, i.e., activities, is crucial. These can be adjusted using the 'Filter' button.",
+          "mid23": "The activities are based on the 'Mobilität in Deutschland 2023' (MiD23) study and are used with their kind permission.",
           "personas": "Additionally, activities can be restricted for individual persona groups. To learn more about each, click on the respective tabs.",
-          "combinations": "Through 29! activities in combination with 8! persona groups for the 4! transport mode combinations, there are several hundred billion possibilities to create the map.",
+          "combinations": "The arbitrary combination of 30 activities, 10 personas, and 4 transport mode combinations results in an exponentially large number of possibilities to create the map; at the end, there are more than one trillion possibilities.",
           "beta": "To avoid overloading computing capacity and prevent misuse, these functions are only available for registered users. This feature is currently in the beta phase.",
-          "regionalFilters": "Additionally, states and regional classes can be selected. These are not content-based but superficial filtering.",
-          "example": "For example, if you want to know what the best municipalities in rural areas in Baden-Württemberg are, you can filter here and it will be displayed on the right."
+          "regionalFilters": "Additionally, states and regional classes can be selected. These are not content-based but superficial filters.",
+          "example": "For example, if you want to know what the best municipalities in rural areas in Baden-Württemberg are, you can filter here and it will be displayed in the panel on the right."
         },
         "activities": "Activities",
         "activitiesContent": {
           "introduction": {
             "title": "Understanding Activities",
-            "description": "Every journey ends with an activity. This could be visiting a restaurant, spending time at a museum, or going shopping. Activities represent the actual purpose of mobility.",
-            "focus": "mobi.mapr focuses on everyday mobility. Commutes to educational institutions and workplaces are intentionally not considered. Instead, the focus is on everyday destinations such as shopping, leisure activities, or social visits."
+            "description": "Every trip ends with an activity. This could be visiting a restaurant, spending time at a museum, or going shopping. Activities represent the actual purpose of mobility.",
+            "focus": "mobi.mapr focuses on day-to-day mobility. Commutes to educational institutions and workplaces are intentionally not considered. Instead, the focus is on everyday destinations such as shopping, leisure activities, or social visits."
           },
           "dataSource": {
             "title": "Data Source: Mobility in Germany (MiD)",
-            "description": "The activities used in mobi.mapr are based on the \"Mobilität in Deutschland\" (Mobility in Germany) study. Data from 2023 is used.",
+            "description": "The activities used in mobi.mapr are based on the 'Mobilität in Deutschland' (Mobility in Germany) study. Data from 2023 are used.",
             "survey": "In this nationwide survey, people are asked, among other things:",
             "survey1": "Which routes they take in everyday life",
-            "survey2": "Which destinations they aim for",
-            "survey3": "What occasion these routes occur for",
+            "survey2": "Which destinations they travel to",
+            "survey3": "What are the reasons for these journeys",
             "result": "The result is a list of approximately 30 activity categories. These categories are deliberately formulated in general terms to be statistically evaluable."
           },
           "translation": {
             "title": "Translation into Concrete Everyday Activities",
             "description": "The activity categories collected in MiD are relatively abstract. Therefore, they are translated into concrete everyday destinations in mobi.mapr based on scientific literature and empirical assumptions.",
             "example": "Example:",
-            "exampleTitle": "\"Daily Needs\" is concretized to:",
+            "exampleTitle": "'Daily Needs' is concretized to:",
             "example1": "Supermarket",
             "example2": "Bakery",
             "example3": "Drugstore",
@@ -508,14 +508,14 @@
           "ambiguities": {
             "title": "Dealing with Ambiguities",
             "description": "Not every activity can be translated unambiguously and precisely.",
-            "example": "An example is the activity \"Walking the dog\" from the MiD study. This actually describes movement in public space without a clear destination. In mobi.mapr, it is currently approximated through destinations such as:",
+            "example": "An example is the activity 'Walking the dog' from the MiD study. This actually describes movement in public space without a clear destination. In mobi.mapr, it is currently approximated through destinations such as:",
             "example1": "Stores for dog supplies",
             "example2": "Similar facilities",
-            "validation": "Validations show, however, that such ambiguities often balance out in the overall view. This means: Even if individual activities can only be approximated, the overall picture of everyday mobility remains stable and reliable."
+            "validation": "Validations show, however, that such ambiguities often balance out in the bigger picture. This means: Even if individual activities can only be approximated, the overall picture of everyday mobility remains stable and reliable."
           },
           "regional": {
             "title": "Regional Differentiation",
-            "description": "In addition to differentiation by person groups, activities are also weighted regionally.",
+            "description": "In addition to differentiation by groups of people, activities are also weighted regionally.",
             "meaning": "This means:",
             "meaning1": "In metropolitan regions, destination structures and preferences differ significantly from those in rural areas.",
             "meaning2": "City dwellers seek urban offerings such as gastronomy, culture, or specialized services more frequently.",
@@ -527,48 +527,46 @@
         "personasContent": {
           "introduction": {
             "title": "About Personas",
-            "description": "Personas map different everyday perspectives on mobility. The personas used are based on the 12 person groups from the \"Mobilität in Deutschland (MiD)\" study and enable mobility times and ratings to be displayed separately by user groups. By selecting and deselecting individual personas, differences between life realities can be made immediately visible."
+            "description": "Personas map different everyday perspectives on mobility. The personas used are based on the 10 person groups from the 'Mobilität in Deutschland (MiD)' study and enable mobility times and ratings to be displayed separately by user groups. By selecting and deselecting individual personas, differences between life realities can be made immediately visible."
           },
           "personGroups": {
-            "title": "Person Groups according to MiD:",
-            "group1": "Working person with available car",
-            "group2": "Working person without available car",
-            "group3": "Non-working person with available car",
-            "group4": "Non-working person without available car",
-            "group5": "Student with available car",
-            "group6": "Student without available car",
-            "group7": "Apprentice with available car",
-            "group8": "Apprentice without available car",
-            "group9": "Child 0-6 years",
-            "group10": "Pupil 7-10 years",
-            "group11": "Pupil 11-21 years with available car",
-            "group12": "Pupil 11-21 years without available car"
+            "title": "Groups of people according to MiD:",
+            "group1": "Working person with an available car",
+            "group2": "Working person without an available car",
+            "group3": "Non-working person with an available car",
+            "group4": "Non-working person without an available car",
+            "group5": "Student with an available car",
+            "group6": "Student without an available car",
+            "group7": "Apprentice with an available car",
+            "group8": "Apprentice without an available car",
+            "group9": "Pupil aged 11 and older with an available car",
+            "group10": "Pupil aged 11 and older without an available car"
           },
           "weighting": {
             "title": "Weighting of Activities",
-            "description": "The importance of individual activities depends strongly on the respective person group.",
+            "description": "The importance of individual activities depends strongly on the respective group of people.",
             "examples": "Examples:",
             "example1": "Children visit playgrounds more frequently.",
             "example2": "Adults have a stronger focus on shopping or errands.",
-            "example3": "Older people show different activity patterns again.",
-            "standardView": "In the standard view of mobi.mapr, all person groups are initially considered together. This creates an average activity profile."
+            "example3": "Seniors have different activity patterns compared to other groups.",
+            "standardView": "In the standard view of mobi.mapr, all groups of people are initially considered together. This creates an average activity profile."
           }
         },
         "regioStars": "RegioStars",
         "regioStarsContent": {
           "introduction": {
             "title": "RegioStaR7: The Key to Fair Comparison",
-            "description": "To realistically and differentiatedly represent mobility quality, mobi.mapr uses the RegioStaR7 classification (Regional Statistical Spatial Typology) from the Federal Ministry for Digital and Transport (BMDV). This typology divides Germany into seven spatial types."
+            "description": "To realistically and differentiatedly represent mobility quality, mobi.mapr uses the RegioStaR7 classification (Regional Statistical Spatial Typology) from the Federal Ministry of Transport and Digital Infrastructure (BMDV). This typology divides Germany into seven spatial types."
           },
           "types": {
             "title": "The seven spatial types:",
             "type1": "Urban region – Metropolis",
             "type2": "Urban region – Regiopolis and large city",
-            "type3": "Urban region – Medium-sized city, urban space",
-            "type4": "Urban region – Small town, rural space",
+            "type3": "Urban region – Medium-sized city, urbanised area",
+            "type4": "Urban region – Small town area, village area",
             "type5": "Rural region – Central city",
-            "type6": "Rural region – Medium-sized city, urban space",
-            "type7": "Rural region – Small town, rural space"
+            "type6": "Rural region – Medium-sized city, urbanised area",
+            "type7": "Rural region – Small town, village area"
           },
           "usage": {
             "title": "How mobi.mapr uses RegioStaR",
@@ -582,19 +580,19 @@
             "description": "For the calculations, mobi.mapr uses two central data sources:",
             "source1": "MiD data (Mobility in Germany) for typical activities such as shopping or leisure",
             "source2": "OpenStreetMap data to represent, for example, the accessibility of supermarkets or other locations",
-            "fallback": "If data is missing for certain regions, mobi.mapr falls back to the average of the other regional classes."
+            "fallback": "If data for certain regions is missing, mobi.mapr uses the average of the the other regional classes."
           },
           "notes": {
             "title": "Notes",
-            "description": "The RegioStaR classification was originally a precise instrument for dividing spaces into different categories. Today, however, we know that its current application does not fully fit or is up to date in all cases. As with all components of mobi.mapr, we continuously develop and integrate current data and new classifications."
+            "description": "The RegioStaR classification was originally a precise tool for dividing areas into different categories. However, we now know that its current application is not entirely appropriate or up to date in all cases. As with all components of mobi.mapr, we are continuously developing and integrating current data and new classifications."
           },
           "imagePlaceholder": "RegioStaR7 Map"
         },
         "states": "States",
         "statesContent": {
           "title": "Federal States",
-          "description": "The federal states filter includes the 16 German federal states and allows filtering the analysis by individual states.",
-          "influence": "This filtering influences the rankings and enables targeted comparison of mobility qualities by federal states."
+          "description": "The filter for federal states covers the 16 German federal states and allows the analysis to be filtered by individual state.",
+          "influence": "This filtering influences the rankings and allows mobility qualities to be compared specifically by federal state."
         }
       }
     }
@@ -614,13 +612,30 @@
     "manageProjects": "Manage Projects",
     "logoHint": "To the project page",
     "mail": {
-      "title": "About the Project",
-      "developedBy": "Welcome to mobi.mapr! This project is developed and continuously improved by the Baden-Württemberg Institut für Nachhaltige Mobilität (BWIM).",
-      "sourceCode": "We're excited about your interest! The frontend source code is available as open source:",
-      "sourceCodeUrl": "https://github.com/BWIM/mobi.mapr-frontend",
-      "apiDocumented": "Our API is also openly documented, so you can use the data and functions for your own projects.",
-      "moreOnWebsite": "On our website, you'll find more exciting information about the project, our research, and current developments.",
-      "questions": "Do you have questions, suggestions, or feedback? We'd love to hear from you:"
+      "title": "About mobi.mapr",
+      "welcome": "Welcome to mobi.mapr! 🎉",
+      "developedBy": "This project is developed and continuously improved by the Baden-Württemberg Institute for Sustainable Mobility (BWIM).",
+      "background": {
+        "title": "Background",
+        "intro": "Mobility is a complex topic that is hardly measurable. Every person is, travels, and acts individually. Nevertheless, overall trends can be identified. People want to reach different activities, whether it's a restaurant, the supermarket, or meeting friends, because mobility is a basic need.",
+        "approach": "mobi.mapr addresses this topic by placing activities at the center. Which activities can be reached how? At the core are the open data from OpenStreetMap. If it's about more than one activity, studies are considered to aggregate them.",
+        "humanCentric": "mobi.mapr is more than an accessibility analysis. People are at the center. Subjective factors complement pure travel times, additional penalties, such as parking search, bring the times closer to reality.",
+        "explore": "Feel free to explore the website, discover mobility, and find out where opportunities still exist."
+      },
+      "license": {
+        "title": "License and Usage",
+        "frontend": "mobi.mapr follows a dual-track approach: The frontend is open source under the AGPL-3.0 license. We want to promote the open-source community, which means that every change must also be open source. Commercial use is not possible.",
+        "data": "However, we understand that mobility is also a business field. We therefore pursue a different open data strategy. All data published by the mobi.mapr team is licensed under CC-BY-4.0, so it can be used commercially without disclosure. Only the BWIM must be attributed and we appreciate a link to the application.",
+        "note": "Please note: For the geo data in the application (e.g., for district boundaries), additional licenses may apply. Further detailed information can be found in the bottom left of the dashboard, as well as in the API license file."
+      },
+      "contact": {
+        "title": "Contact",
+        "website": "You can find more information about the project, as well as exciting analyses, on our website:",
+        "email": "If you have questions or suggestions, we'd love to hear from you:",
+        "github": "If something in the frontend doesn't work or you have suggestions, feel free to create a new issue:"
+      },
+      "sourceCode": "You can find the frontend source code here:",
+      "apiDocumented": "Our API is also openly documented, so you can use the data and functions for your own projects."
     },
     "questionMark": {
       "title": "Help",
@@ -687,7 +702,7 @@
   },
   "right": {
     "mobile": {
-      "hint": "For a detailed analysis, please open this site on desktop."
+      "hint": "For a detailed analysis, please open this site on a desktop."
     }
   },
   "stats": {
@@ -705,7 +720,7 @@
       "title": "Statistics",
       "description": "This overview shows the best rankings based on the selected level (States, Counties, or Municipalities) and the current filters and evaluation criteria.",
       "aboutDataTitle": "About the Data",
-      "aboutData": "The data shown represents the best rankings based on the selected level and the current filters and evaluation criteria.",
+      "aboutData": "The data displayed represents the top rankings based on the selected level and the current filters and evaluation criteria.",
       "layerSelection": "Layer Selection",
       "layerSelectionDescription": "Select the geographic level for which rankings should be displayed: States, Counties, or Municipalities.",
       "selectLayer": "Select Layer",
@@ -715,9 +730,9 @@
       "rankingRules": "Ranking Rules",
       "tiedRanksDescription": "When multiple areas have the same value, they share the same rank:",
       "tiedRanksRule1": "Areas with identical values receive the same rank position",
-      "tiedRanksRule2": "The next rank position is skipped accordingly (e.g., if two areas share rank 3, the next rank is 5)",
+      "tiedRanksRule2": "The next rank position is skipped accordingly (e.g., if two areas share 3rd place, the next will be 5th place)",
       "countyDefinition": "With 'Kreis' (county) we mean both urban and rural districts. Since this is not uniformly regulated nationwide, we do not distinguish between them",
-      "largeCountySplit": "For better comparability, counties that consist of only one municipality with more than 300,000 inhabitants are divided into their districts. The county (e.g., Berlin) is then under \"Kreis\" and B-Spandau accordingly under \"Gemeinde\"",
+      "largeCountySplit": "For better comparability, counties that consist of only one municipality with more than 300,000 inhabitants are divided into their districts. The county (e.g., Berlin) is then under 'Kreis' and B-Spandau accordingly under 'Gemeinde'",
       "qualityViewHint": "In the quality view, area units are grouped and evaluated by their index (see info on mobility evaluation). This means area units with the same grade (e.g., C+) can be on different positions in the ranking."
     }
   },
@@ -750,7 +765,7 @@
       "FILTER_TEXT": "This dialogue only opens after changing some filter parameters.",
       "UNIQUE_TITLE": "Unique Map",
       "UNIQUE_TEXT": "If you see this screen, nobody has ever produced a map like this (at least in the last 30 days).",
-      "STATS_TITLE": "More than 15 Billion Possibilities",
+      "STATS_TITLE": "More than 15 billion possibilities",
       "STATS_TEXT": "You can combine the 28 activities freely, for 8 different mode combinations and 7 personas, this means more than 15 billion different maps to produce."
     }
   }
