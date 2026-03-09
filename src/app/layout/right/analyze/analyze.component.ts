@@ -169,6 +169,13 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
             this.personasData = null;
             this.activitiesChartData = null;
             this.personasChartData = null;
+            // Reinitialize charts with feature 2 data only
+            if (this.analyzeData2 && this.analyzeData2.categories) {
+              this.initializeActivitiesChart(this.analyzeData2.categories);
+            }
+            if (this.personasData2 && this.personasData2.length > 0) {
+              this.initializePersonasChart(this.personasData2);
+            }
           }
         }
       }
@@ -200,6 +207,14 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           // If feature 1 is also null, do full reset
           if (!this.selectedFeature) {
             this.resetComponent();
+          } else {
+            // Reinitialize charts with feature 1 data only
+            if (this.analyzeData && this.analyzeData.categories) {
+              this.initializeActivitiesChart(this.analyzeData.categories);
+            }
+            if (this.personasData && this.personasData.length > 0) {
+              this.initializePersonasChart(this.personasData);
+            }
           }
         }
       }

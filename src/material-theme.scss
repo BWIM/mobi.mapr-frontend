@@ -84,19 +84,19 @@ html {
   ));
 }
 
-/* Typography - using Archivo font family */
+/* Typography - using Corbel font family */
 :root, :host {
-  --mat-sys-brand-font-family: Archivo;
-  --mat-sys-plain-font-family: Archivo;
-  --mat-sys-bold-font-weight: 700;
+  --mat-sys-brand-font-family: Corbel;
+  --mat-sys-plain-font-family: Corbel;
+  --mat-sys-bold-font-weight: bold;
   --mat-sys-medium-font-weight: 500;
-  --mat-sys-regular-font-weight: 400;
+  --mat-sys-regular-font-weight: normal;
 
   @include mat.theme-overrides((
-    brand-family: Archivo,
-    plain-family: Archivo,
-    bold-weight: 700,
+    brand-family: Corbel,
+    plain-family: Corbel,
+    bold-weight: bold,
     medium-weight: 500,
-    regular-weight: 400,
+    regular-weight: normal,
   ));
 }

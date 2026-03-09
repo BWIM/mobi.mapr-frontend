@@ -3,13 +3,30 @@
 
 @import 'ol/ol.css';
 
+/* Font Face Declarations - CORBEL fonts */
+@font-face {
+    font-family: 'Corbel';
+    src: url('/assets/fonts/CORBEL.TTF') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap; /* Ensures text is visible while font loads */
+}
+
+@font-face {
+    font-family: 'Corbel';
+    src: url('/assets/fonts/CORBEL_BOLD.TTF') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap; /* Ensures text is visible while font loads */
+}
+
 /* Main color palette - only three colors used throughout the application */
 /* primary: #ffffff - white (text and primary elements) */
 /* background: #2C104C - dark violet (main background) */
 /* secondary: #482683 - light violet (secondary elements) */
 
 :root {
-    --font-family: 'Archivo', sans-serif;
+    --font-family: 'Corbel', Arial, sans-serif;
     --primary-color: #ffffff;
     --secondary-color: #482683;
     --background-color: #2C104C;
@@ -26,6 +43,11 @@ body {
     /* Use dynamic viewport height for mobile */
     overflow-x: hidden;
     /* Prevent horizontal scrolling */
+}
+
+/* Ensure all elements use Corbel font by default */
+* {
+    font-family: var(--font-family, 'Corbel', Arial, sans-serif);
 }
 
 /* Material Icons - Global configuration */
@@ -149,6 +171,48 @@ button[matButton]:hover,
     background-color: var(--secondary-color) !important;
     color: var(--primary-color) !important;
     opacity: 0.9;
+}
+
+/* Material Tabs - Global styling */
+.mat-mdc-tab-header {
+    border-bottom: 1px solid var(--light-primary-color);
+}
+
+/* Inactive tabs */
+.mat-mdc-tab:not(.mdc-tab--active) .mdc-tab__text-label {
+    color: var(--light-primary-color) !important;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+
+.mat-mdc-tab:not(.mdc-tab--active):hover .mdc-tab__text-label {
+    color: var(--primary-color) !important;
+    opacity: 0.9;
+}
+
+/* Active/Selected tab */
+.mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+    color: var(--primary-color) !important;
+    font-weight: 600;
+    opacity: 1;
+}
+
+/* Tab underline indicator */
+.mat-mdc-tab-header .mdc-tab-indicator__content--underline {
+    border-color: var(--primary-color) !important;
+    border-width: 2px !important;
+}
+
+/* Ensure active tab has visible indicator */
+.mat-mdc-tab.mdc-tab--active .mdc-tab-indicator {
+    opacity: 1 !important;
+}
+
+/* Tab ripple effect */
+.mat-mdc-tab .mdc-tab__ripple::before,
+.mat-mdc-tab .mdc-tab__ripple::after {
+    background-color: var(--primary-color);
+    opacity: 0.1;
 }
 
 /* Custom Scrollbar Styles - Rounded and matching design */
