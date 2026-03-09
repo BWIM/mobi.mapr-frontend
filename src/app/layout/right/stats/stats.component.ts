@@ -84,6 +84,8 @@ export class StatsComponent implements OnDestroy {
       
       // Detect when map transitions from loading to not loading
       const mapJustFinishedLoading = previousMapLoading && !isMapLoading;
+      // Detect when map transitions from not loading to loading (map starts reloading)
+      const mapJustStartedLoading = !previousMapLoading && isMapLoading;
       previousMapLoading = isMapLoading;
       
       // Compute current filter state once for reuse
@@ -182,12 +184,15 @@ export class StatsComponent implements OnDestroy {
           // No data to load, so set loading to false
           this.isLoading.set(false);
         } else if (isMapLoading || isPreparingProject) {
-          // Only set loading state if we don't already have data loaded
-          // If we have data and only bewertung might change, don't show loading
-          if (this.counties.length === 0) {
+          // Set loading state when map starts reloading or project is being prepared
+          // Always show loading when map starts reloading to provide user feedback
+          if (mapJustStartedLoading || isPreparingProject) {
+            this.isLoading.set(true);
+          } else if (this.counties.length === 0) {
+            // If map is loading but we don't have data yet, show loading
             this.isLoading.set(true);
           }
-          // If we already have data, keep it displayed (bewertung change doesn't need loading state)
+          // If we already have data and map is loading but didn't just start, keep it displayed
         }
       }
     });

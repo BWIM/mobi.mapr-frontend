@@ -100,6 +100,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private isInitialFilterLoad = true;
   private savedFeatureType: 'municipality' | 'hexagon' | 'county' | 'state' | null = null;
   private savedFeatureType2: 'municipality' | 'hexagon' | 'county' | 'state' | null = null;
+  private pendingReload = false; // Track if we're waiting for map to load before reloading
   
   // Comparison mode computed property
   get isComparisonMode(): boolean {
@@ -107,18 +108,18 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   constructor() {
-    // Watch for filter changes and reset the component
+    // Watch for filter changes and reload data instead of resetting
     effect(() => {
       const filters = this.filterConfigService.contentLayerFilters();
       
-      // Skip reset on initial load
+      // Skip reload on initial load
       if (this.isInitialFilterLoad) {
         this.previousFilters = filters ? { ...filters } : null;
         this.isInitialFilterLoad = false;
         return;
       }
       
-      // Only reset if filters actually changed
+      // Only reload if filters actually changed
       if (filters && this.previousFilters) {
         const filtersChanged = 
           this.previousFilters.profile_combination_id !== filters.profile_combination_id ||
@@ -129,14 +130,56 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           JSON.stringify(this.previousFilters.regiostar_ids?.sort()) !== JSON.stringify(filters.regiostar_ids?.sort());
         
         if (filtersChanged) {
-          this.resetComponent();
+          // Reload data for selected features instead of resetting
+          // Wait for map to finish loading first
+          this.reloadDataForSelectedFeatures();
         }
       } else if (filters !== this.previousFilters) {
-        // Filters changed from null to non-null or vice versa
+        // Filters changed from null to non-null or vice versa - reset component
         this.resetComponent();
       }
       
       this.previousFilters = filters ? { ...filters } : null;
+    });
+
+    // Watch for map loading state - execute pending reload when map finishes loading
+    // Also set loading state when map starts reloading
+    let previousMapLoading = false;
+    effect(() => {
+      const isMapLoading = this.mapService.isMapLoading();
+      
+      // Detect when map transitions from not loading to loading (map starts reloading)
+      const mapJustStartedLoading = !previousMapLoading && isMapLoading;
+      previousMapLoading = isMapLoading;
+      
+      // If map just started loading, set loading states
+      if (mapJustStartedLoading) {
+        // Set loading states for any selected features
+        if (this.selectedFeature) {
+          this.isLoadingFeatureInfo = true;
+          this.isLoadingAnalyze = true;
+        }
+        if (this.selectedFeature2) {
+          this.isLoadingFeatureInfo2 = true;
+          this.isLoadingAnalyze2 = true;
+        }
+        // Set personas loading if applicable
+        const filters = this.filterConfigService.contentLayerFilters();
+        if (filters?.persona_id === 54) {
+          if (this.selectedFeature) {
+            this.isLoadingPersonas = true;
+          }
+          if (this.selectedFeature2) {
+            this.isLoadingPersonas2 = true;
+          }
+        }
+      }
+      
+      // If map finished loading and we have a pending reload, execute it
+      if (!isMapLoading && this.pendingReload) {
+        this.pendingReload = false;
+        this.executeReload();
+      }
     });
   }
 
@@ -333,6 +376,90 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isLoadingPersonas2 = false;
     this.personasError2 = null;
     this.savedFeatureType2 = null;
+  }
+  
+  /**
+   * Reload data for currently selected features when filters change
+   * This preserves the selected features but refreshes their data with new filter values
+   * Waits for map to finish loading before executing the reload
+   */
+  private reloadDataForSelectedFeatures(): void {
+    // Check if map is currently loading
+    const isMapLoading = this.mapService.isMapLoading();
+    
+    if (isMapLoading) {
+      // Map is still loading, set flag to reload when it finishes
+      this.pendingReload = true;
+      return;
+    }
+    
+    // Map is not loading, execute reload immediately
+    this.executeReload();
+  }
+
+  /**
+   * Execute the actual reload of data for selected features
+   * This is called either immediately or after map finishes loading
+   */
+  private executeReload(): void {
+    // Cancel any ongoing requests
+    if (this.featureInfoSubscription) {
+      this.featureInfoSubscription.unsubscribe();
+      this.featureInfoSubscription = undefined;
+    }
+    if (this.featureInfoSubscription2) {
+      this.featureInfoSubscription2.unsubscribe();
+      this.featureInfoSubscription2 = undefined;
+    }
+    if (this.analyzeSubscription) {
+      this.analyzeSubscription.unsubscribe();
+      this.analyzeSubscription = undefined;
+    }
+    if (this.analyzeSubscription2) {
+      this.analyzeSubscription2.unsubscribe();
+      this.analyzeSubscription2 = undefined;
+    }
+    
+    // Clear error states but keep selected features
+    this.featureInfoError = null;
+    this.analyzeError = null;
+    this.personasError = null;
+    this.placesError = null;
+    this.featureInfoError2 = null;
+    this.analyzeError2 = null;
+    this.personasError2 = null;
+    
+    // Clear data that will be reloaded
+    this.featureInfo = null;
+    this.analyzeData = null;
+    this.personasData = null;
+    this.activitiesChartData = null;
+    this.personasChartData = null;
+    this.featureInfo2 = null;
+    this.analyzeData2 = null;
+    this.personasData2 = null;
+    
+    // Clear map data (will be reloaded if needed)
+    if (this.map) {
+      this.map.remove();
+      this.map = undefined;
+    }
+    this.popup = undefined;
+    this.places = [];
+    this.categoryData = [];
+    this.categoryColors.clear();
+    this.pendingFeatureShape = null;
+    this.isLoadingPlaces = false;
+    
+    // Reload data for feature 1 if selected
+    if (this.selectedFeature && this.savedFeatureType) {
+      this.loadFeatureInfo(this.selectedFeature);
+    }
+    
+    // Reload data for feature 2 if selected
+    if (this.selectedFeature2 && this.savedFeatureType2) {
+      this.loadFeatureInfo2(this.selectedFeature2);
+    }
   }
   
   /**

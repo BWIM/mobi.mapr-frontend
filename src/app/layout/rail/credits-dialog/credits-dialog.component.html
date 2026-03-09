@@ -4,6 +4,44 @@
   </h2>
   
   <mat-dialog-content class="mat-typography max-h-[70vh] overflow-y-auto py-4 px-2 sm:px-4 flex flex-col gap-8">
+
+     <!-- License Section -->
+     <mat-card class="flex flex-col gap-6 bg-black/5 rounded-lg border border-black/10 pb-4">
+      <h3 class="text-xl sm:text-2xl font-semibold text-[var(--primary-color)] m-0 pb-2 border-b-2 border-[var(--primary-color)]">
+        {{ 'rail.credits.license.title' | translate }}
+      </h3>
+
+      <!-- Frontend License -->
+      <div class="flex flex-col gap-2">
+        <h4 class="text-base sm:text-lg font-semibold text-[var(--primary-color)] m-0">
+          {{ 'rail.credits.license.frontend.title' | translate }}
+        </h4>
+        <p class="text-sm sm:text-[0.9375rem] leading-relaxed text-[var(--primary-color)] m-0">
+          {{ 'rail.credits.license.frontend.description' | translate }}
+        </p>
+      </div>
+
+      <!-- Data License -->
+      <div class="flex flex-col gap-2">
+        <h4 class="text-base sm:text-lg font-semibold text-[var(--primary-color)] m-0">
+          {{ 'rail.credits.license.data.title' | translate }}
+        </h4>
+        <p class="text-sm sm:text-[0.9375rem] leading-relaxed text-[var(--primary-color)] m-0">
+          {{ 'rail.credits.license.data.description' | translate }}
+        </p>
+      </div>
+
+      <!-- Third-Party Data License -->
+      <div class="flex flex-col gap-2">
+        <h4 class="text-base sm:text-lg font-semibold text-[var(--primary-color)] m-0">
+          {{ 'rail.credits.license.thirdParty.title' | translate }}
+        </h4>
+        <p class="text-sm sm:text-[0.9375rem] leading-relaxed text-[var(--primary-color)] m-0">
+          {{ 'rail.credits.license.thirdParty.description' | translate }}
+        </p>
+      </div>
+    </mat-card>
+
     <!-- Acknowledgments Section -->
     <section class="flex flex-col gap-6">
       <h3 class="text-xl sm:text-2xl font-semibold text-[var(--primary-color)] m-0 pb-2 border-b-2 border-[var(--primary-color)]">
@@ -148,43 +186,6 @@
         </div>
       </div>
     </section>
-
-    <!-- License Section -->
-    <mat-card class="flex flex-col gap-6 p-6 bg-black/5 rounded-lg border border-black/10">
-      <h3 class="text-xl sm:text-2xl font-semibold text-[var(--primary-color)] m-0 pb-2 border-b-2 border-[var(--primary-color)]">
-        {{ 'rail.credits.license.title' | translate }}
-      </h3>
-
-      <!-- Frontend License -->
-      <div class="flex flex-col gap-2">
-        <h4 class="text-base sm:text-lg font-semibold text-[var(--primary-color)] m-0">
-          {{ 'rail.credits.license.frontend.title' | translate }}
-        </h4>
-        <p class="text-sm sm:text-[0.9375rem] leading-relaxed text-[var(--primary-color)] m-0">
-          {{ 'rail.credits.license.frontend.description' | translate }}
-        </p>
-      </div>
-
-      <!-- Data License -->
-      <div class="flex flex-col gap-2">
-        <h4 class="text-base sm:text-lg font-semibold text-[var(--primary-color)] m-0">
-          {{ 'rail.credits.license.data.title' | translate }}
-        </h4>
-        <p class="text-sm sm:text-[0.9375rem] leading-relaxed text-[var(--primary-color)] m-0">
-          {{ 'rail.credits.license.data.description' | translate }}
-        </p>
-      </div>
-
-      <!-- Third-Party Data License -->
-      <div class="flex flex-col gap-2">
-        <h4 class="text-base sm:text-lg font-semibold text-[var(--primary-color)] m-0">
-          {{ 'rail.credits.license.thirdParty.title' | translate }}
-        </h4>
-        <p class="text-sm sm:text-[0.9375rem] leading-relaxed text-[var(--primary-color)] m-0">
-          {{ 'rail.credits.license.thirdParty.description' | translate }}
-        </p>
-      </div>
-    </mat-card>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end" class="px-2 sm:px-4 pt-4 mt-2 border-t border-black/12">

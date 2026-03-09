@@ -7,8 +7,10 @@
 }
 
 .admin-level-selector ::ng-deep .mat-mdc-text-field-wrapper {
-  background-color: var(--secondary-color);
+  background-color: var(--background-color);
   border-radius: 8px;
+  border: 1px solid var(--primary-color);
+  font-family: var(--font-family);
 }
 
 .admin-level-selector ::ng-deep .mat-mdc-form-field-flex {
@@ -46,10 +48,10 @@
 
 /* Style the dropdown panel */
 ::ng-deep .mat-mdc-select-panel {
-  background-color: var(--secondary-color) !important;
+  background-color: var(--background-color) !important;
   border: 1px solid var(--primary-color);
   border-color: var(--primary-color) !important;
-  opacity: 0.9;
+  opacity: 1;
 }
 
 ::ng-deep .mat-mdc-option {

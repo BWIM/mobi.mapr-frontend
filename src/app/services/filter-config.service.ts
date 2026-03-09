@@ -1,5 +1,7 @@
 import { Injectable, inject, signal, computed, effect } from '@angular/core';
 import { Router } from '@angular/router';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ProfileService } from './profile.service';
 import { ProjectsService } from './project.service';
 import { SettingsService } from './settings.service';
@@ -20,6 +22,7 @@ import { RegioStar } from '../interfaces/regiostar';
 import { Category } from '../interfaces/category';
 import { State } from '../interfaces/features';
 import { forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 export interface FilterState {
   // UI state
@@ -54,6 +57,14 @@ export class FilterConfigService {
   private stateService = inject(StateService);
   private categoryService = inject(CategoryService);
   private router = inject(Router);
+  private breakpointObserver = inject(BreakpointObserver);
+
+  // Mobile breakpoint detection (768px = md breakpoint)
+  private isMobile = toSignal(
+    this.breakpointObserver.observe([Breakpoints.XSmall, Breakpoints.Small])
+      .pipe(map(result => result.matches)),
+    { initialValue: false }
+  );
 
   // Internal state signals
   private _isExpanded = signal<boolean>(false);
@@ -320,9 +331,31 @@ export class FilterConfigService {
           previousFilters.admin_level !== filters.admin_level
         ));
         
+        // Check if only mode changed (profile_combination_id) and we're on mobile
+        const onlyModeChanged = previousFilters && 
+          previousFilters.profile_combination_id !== filters.profile_combination_id &&
+          JSON.stringify(previousFilters.state_ids?.sort()) === JSON.stringify(filters.state_ids?.sort()) &&
+          JSON.stringify(previousFilters.category_ids?.sort()) === JSON.stringify(filters.category_ids?.sort()) &&
+          previousFilters.persona_id === filters.persona_id &&
+          previousFilters.regiotyp_id === filters.regiotyp_id &&
+          previousFilters.admin_level === filters.admin_level &&
+          previousFilters.feature_type === filters.feature_type;
+        
+        // Check if only persona changed and we're on mobile
+        const onlyPersonaChanged = previousFilters && 
+          previousFilters.persona_id !== filters.persona_id &&
+          previousFilters.profile_combination_id === filters.profile_combination_id &&
+          JSON.stringify(previousFilters.state_ids?.sort()) === JSON.stringify(filters.state_ids?.sort()) &&
+          JSON.stringify(previousFilters.category_ids?.sort()) === JSON.stringify(filters.category_ids?.sort()) &&
+          previousFilters.regiotyp_id === filters.regiotyp_id &&
+          previousFilters.admin_level === filters.admin_level &&
+          previousFilters.feature_type === filters.feature_type;
+        
         if (isFullReload) {
-          // Full reload with zoom to bounds
-          this.updateMapLayer(filters, true).catch(error => {
+          // On mobile, if only mode or persona changed, don't zoom to bounds to keep map position static
+          const shouldZoomToBounds = !(this.isMobile() && (onlyModeChanged || onlyPersonaChanged));
+          // Full reload with zoom to bounds (unless mobile mode-only or persona-only change)
+          this.updateMapLayer(filters, shouldZoomToBounds).catch(error => {
             console.error('Error in updateMapLayer (full reload):', error);
           });
         } else {
