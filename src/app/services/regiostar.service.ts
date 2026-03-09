@@ -1,28 +1,40 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { RegioStar } from '../projects/project.interface';
+import { RegioStar } from '../interfaces/regiostar';
+import { PaginatedResponse } from '../interfaces/http';
+import { DashboardSessionService } from './dashboard-session.service';
 
-interface PaginatedResponse<T> {
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: T[];
-}
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
 export class RegioStarService {
-    private apiUrl = environment.apiUrl;
+  private apiUrl = environment.apiUrl;
+  private http = inject(HttpClient);
+  private dashboardSessionService = inject(DashboardSessionService);
 
-    constructor(private http: HttpClient) { }
+  // RegioStar CRUD Operations
+  getRegioStars(page: number = 1, pageSize: number = 10): Observable<PaginatedResponse<RegioStar>> {
+    const projectId = this.dashboardSessionService.getProjectId();
+    const shareKey = this.dashboardSessionService.getShareKey();
+    
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('page_size', pageSize.toString());
 
-    getRegioStars(): Observable<RegioStar[]> {
-        return this.http.get<PaginatedResponse<RegioStar>>(`${this.apiUrl}/regiostar/`).pipe(
-            map(response => response.results)
-        );
+    // Add project or key
+    if (projectId) {
+      params = params.set('project', projectId.toString());
+    } else if (shareKey) {
+      params = params.set('key', shareKey);
     }
+
+    return this.http.get<PaginatedResponse<RegioStar>>(`${this.apiUrl}/regiostar/`, { params });
+  }
+
+  getRegioStarById(id: number): Observable<RegioStar> {
+    return this.http.get<RegioStar>(`${this.apiUrl}/regiostar/${id}/`);
+  }
 }

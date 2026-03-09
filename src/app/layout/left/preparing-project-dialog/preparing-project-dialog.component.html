@@ -1,0 +1,85 @@
+<div class="p-6 md:p-8 w-full">
+  <div class="flex flex-col items-center gap-5">
+    <!-- Title -->
+    <h2 class="m-0 text-2xl font-semibold text-center text-[var(--primary-color)]">
+      {{ 'PREPARING_PROJECT.TITLE' | translate }}
+    </h2>
+    
+    <!-- Info Section Above Picture -->
+    <div class="w-full mb-3">
+      <mat-card class="bg-[var(--secondary-color)] border border-[var(--primary-color)] border-opacity-20">
+        <mat-card-content class="p-4">
+          <div class="flex flex-col gap-2">
+            <p class="m-0 text-sm font-medium text-[var(--primary-color)]">
+              {{ 'PREPARING_PROJECT.INFO.PREPARING' | translate }}
+            </p>
+            <div *ngIf="statusMessage" class="text-xs text-[var(--light-primary-color)]">
+              {{ statusMessage | translate }}
+            </div>
+            <div *ngIf="showProgress" class="mt-1">
+              <mat-progress-bar 
+                mode="determinate" 
+                [value]="progress"
+                class="w-full h-1.5">
+              </mat-progress-bar>
+              <div class="mt-1 text-xs text-[var(--primary-color)] text-right opacity-70">
+                {{ progress | number:'1.0-0' }}%
+              </div>
+            </div>
+            <p class="m-0 text-xs text-[var(--light-primary-color)] mt-1">
+              ☕ {{ 'PREPARING_PROJECT.COFFEE_MESSAGE' | translate }}
+            </p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- GIF Section -->
+    <div class="w-full bg-[var(--primary-color)] rounded-lg p-3 my-2">
+      <img 
+        src="assets/video/loading.gif" 
+        alt="Loading animation" 
+        class="w-full h-auto aspect-[21/9] object-contain rounded block" 
+      />
+    </div>
+
+    <!-- Achievement Cards Slider -->
+    <div class="w-full max-w-full">
+      <div class="relative w-full">
+        <!-- Slider Container -->
+        <div class="overflow-hidden rounded-lg w-full">
+          <div 
+            class="flex transition-transform duration-300 ease-in-out w-full"
+            [style.transform]="'translateX(-' + (currentCardIndex * 100) + '%)'">
+            <div 
+              *ngFor="let card of achievementCards" 
+              class="min-w-full flex-shrink-0 px-1 w-full max-w-full box-border">
+              <mat-card class="achievement-card bg-[var(--secondary-color)] border border-[var(--primary-color)] border-opacity-20">
+                <mat-card-content class="p-4 text-center">
+                  <div class="text-3xl mb-2">{{ card.icon }}</div>
+                  <h3 class="m-0 mb-2 text-sm font-semibold text-[var(--primary-color)] break-words">
+                    {{ card.title | translate }}
+                  </h3>
+                  <p class="m-0 text-xs text-[var(--light-primary-color)] leading-relaxed break-words whitespace-normal">
+                    {{ card.text | translate }}
+                  </p>
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slider Indicators -->
+      <div class="flex justify-center gap-2 mt-3">
+        <span 
+          *ngFor="let card of achievementCards; let i = index" 
+          (click)="goToCard(i)"
+          [class.opacity-100]="i === currentCardIndex"
+          [class.scale-125]="i === currentCardIndex"
+          class="w-2 h-2 rounded-full bg-[var(--primary-color)] opacity-30 transition-all duration-300 cursor-pointer">
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

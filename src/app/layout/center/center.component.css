@@ -1,0 +1,418 @@
+.map-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Remove rounded corners on mobile - override Tailwind rounded-xl class */
+@media (max-width: 767px) {
+  :host .rounded-xl {
+    border-radius: 0 !important;
+  }
+}
+
+/* Ensure map canvas has rounded corners */
+:host ::ng-deep .maplibregl-canvas-container {
+  border-radius: 0.75rem; /* matches rounded-xl */
+  overflow: hidden;
+}
+
+:host ::ng-deep .maplibregl-map {
+  border-radius: 0.75rem; /* matches rounded-xl */
+  overflow: hidden;
+}
+
+/* Remove rounded corners on mobile */
+@media (max-width: 767px) {
+  :host ::ng-deep .maplibregl-canvas-container {
+    border-radius: 0 !important;
+  }
+
+  :host ::ng-deep .maplibregl-map {
+    border-radius: 0 !important;
+  }
+}
+
+/* Map Controls Styling - Move everything 20px down */
+:host ::ng-deep .maplibregl-ctrl {
+  margin-top: 20px !important;
+}
+
+
+:host ::ng-deep .maplibregl-ctrl-group:has(.maplibregl-ctrl-zoom-in) {
+  background-color: var(--background-color) !important;
+  border-radius: 9999px !important;
+  padding: 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  border: none !important;
+}
+
+/* Individual zoom buttons - make round with primary-color background */
+:host ::ng-deep .maplibregl-ctrl-zoom-in,
+:host ::ng-deep .maplibregl-ctrl-zoom-out {
+  background-color: var(--primary-color) !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-shadow: none !important;
+}
+
+
+/* Zoom button icons - background-color */
+:host ::ng-deep .maplibregl-ctrl-zoom-in svg,
+:host ::ng-deep .maplibregl-ctrl-zoom-out svg {
+  fill: var(--background-color) !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+/* Target all child elements inside the SVG (path, circle, etc.) */
+:host ::ng-deep .maplibregl-ctrl-zoom-in svg *,
+:host ::ng-deep .maplibregl-ctrl-zoom-out svg * {
+  fill: var(--background-color) !important;
+}
+
+:host ::ng-deep .maplibregl-ctrl-group:has(.maplibregl-ctrl-fullscreen) {
+  background-color: var(--primary-color) !important;
+  border-radius: 9999px !important;
+  border: 1px solid var(--background-color) !important;
+  padding: 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  border: none !important;
+}
+
+:host ::ng-deep .maplibregl-ctrl-group:has(.maplibregl-ctrl-shrink) {
+  background-color: var(--primary-color) !important;
+  border-radius: 9999px !important;
+  border: 1px solid var(--background-color) !important;
+  padding: 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  border: none !important;
+}
+
+/* Map loading overlay */
+.map-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  border-radius: 0.75rem;
+  pointer-events: none;
+}
+
+/* Remove rounded corners on mobile */
+@media (max-width: 767px) {
+  .map-loading-overlay {
+    border-radius: 0 !important;
+  }
+}
+
+.map-loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.map-loading-text {
+  color: var(--primary-color);
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Fullscreen button - primary color background */
+:host ::ng-deep .maplibregl-ctrl-fullscreen,
+:host ::ng-deep .maplibregl-ctrl-shrink {
+  background-color: var(--primary-color) !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-shadow: none !important;
+}
+:host ::ng-deep .maplibregl-ctrl-fullscreen .maplibregl-ctrl-icon svg,
+:host ::ng-deep .maplibregl-ctrl-shrink .maplibregl-ctrl-icon svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+/* Minimap styling - bottom right, no padding, rounded top-left and bottom-right corners */
+:host ::ng-deep .custom-ctrl-minimap,
+:host ::ng-deep #miniMap {
+  margin-top: 0 !important;
+  margin-right: 0 !important;
+  margin-bottom: 0 !important;
+  margin-left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  border-radius: 0.75rem 0 0.75rem 0 !important; /* top-left rounded, top-right pointy, bottom-right rounded, bottom-left pointy */
+  border: none !important;
+  border-top: 4px solid var(--background-color) !important;
+  border-left: 4px solid var(--background-color) !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65) !important;
+  overflow: hidden !important;
+}
+
+/* Hide minimap on mobile */
+@media (max-width: 767px) {
+  :host ::ng-deep .custom-ctrl-minimap,
+  :host ::ng-deep #miniMap {
+    display: none !important;
+  }
+}
+
+/* Ensure minimap canvas respects border-radius */
+:host ::ng-deep .custom-ctrl-minimap .maplibregl-canvas-container,
+:host ::ng-deep #miniMap .maplibregl-canvas-container {
+  border-radius: 0.75rem 0 0.75rem 0 !important;
+  overflow: hidden !important;
+}
+
+/* Remove padding from bottom-right control container */
+:host ::ng-deep .maplibregl-ctrl-bottom-right {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Legend styling - responsive positioning */
+.map-legend {
+  position: absolute;
+  /* Mobile: top-left */
+  top: 0;
+  left: 0;
+  border-radius: 0 0 0.75rem 0; /* top-left rounded, others sharp */
+  /* Desktop: bottom-left (overridden by md: classes in HTML) */
+  background-color: var(--background-color);
+  border-color: var(--light-primary-color);
+  border-width: 1px;
+  border-style: solid;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+  padding: 8px;
+  z-index: 1000;
+  min-width: auto;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Desktop: bottom-left positioning */
+@media (min-width: 768px) {
+  .map-legend {
+    bottom: 0;
+    left: 0;
+    top: auto;
+    right: auto;
+    border-radius: 0 0.75rem 0 0.75rem; /* top-left rounded, top-right pointy, bottom-right rounded, bottom-left pointy */
+    padding: 12px;
+    min-width: 200px;
+  }
+}
+
+.map-legend:hover {
+  opacity: 0.9;
+}
+
+/* Quality legend (A-F letters) - vertical on mobile */
+.legend-quality {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+@media (min-width: 768px) {
+  .legend-quality {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  .legend-items {
+    flex-direction: row;
+    gap: 8px;
+  }
+}
+
+.legend-item-quality {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.legend-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+@media (min-width: 768px) {
+  .legend-circle {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+.legend-letter {
+  color: white;
+  font-weight: 600;
+  font-size: 11px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+@media (min-width: 768px) {
+  .legend-letter {
+    font-size: 14px;
+  }
+}
+
+/* Time legend (discrete color steps) */
+.legend-time {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.legend-steps {
+  display: flex;
+  width: 100%;
+  height: 16px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+@media (min-width: 768px) {
+  .legend-time {
+    gap: 6px;
+  }
+  .legend-steps {
+    height: 20px;
+  }
+}
+
+.legend-step {
+  flex: 1;
+  height: 100%;
+}
+
+.legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+@media (min-width: 768px) {
+  .legend-labels {
+    font-size: 11px;
+  }
+}
+
+.legend-label {
+  color: var(--primary-color);
+}
+
+/* Search form field styling - pill shaped with primary background */
+:host ::ng-deep .search-form-field {
+  border-radius: 9999px !important; /* pill shape */
+}
+
+:host ::ng-deep .search-form-field .mdc-text-field {
+  background-color: var(--primary-color) !important;
+  border: 2px solid var(--background-color) !important;
+  border-radius: 9999px !important; /* pill shape */
+}
+
+:host ::ng-deep .search-form-field .mdc-text-field--filled {
+  background-color: var(--primary-color) !important;
+}
+
+:host ::ng-deep .search-form-field .mdc-text-field__input {
+  color: var(--background-color) !important;
+}
+
+:host ::ng-deep .search-form-field .mdc-floating-label {
+  color: var(--background-color) !important;
+}
+
+:host ::ng-deep .search-form-field .mdc-floating-label--float-above {
+  color: var(--background-color) !important;
+}
+
+:host ::ng-deep .search-form-field mat-icon {
+  color: var(--background-color) !important;
+}
+
+:host ::ng-deep .search-form-field .mat-mdc-form-field-icon-prefix {
+  color: var(--background-color) !important;
+}
+
+/* Focus state */
+:host ::ng-deep .search-form-field .mdc-text-field--focused {
+  border-color: var(--background-color) !important;
+}
+
+:host ::ng-deep .search-form-field .mdc-line-ripple {
+  display: none !important; /* Hide default underline */
+}
+
+/* MapLibre popup styling */
+:host ::ng-deep .maplibregl-popup {
+  max-width: 300px;
+}
+
+:host ::ng-deep .maplibregl-popup-content {
+  background-color: var(--background-color) !important;
+  color: var(--primary-color) !important;
+  padding: 8px 12px !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  font-family: inherit !important;
+}
+
+:host ::ng-deep .maplibregl-popup-tip {
+  border-top-color: var(--background-color) !important;
+}

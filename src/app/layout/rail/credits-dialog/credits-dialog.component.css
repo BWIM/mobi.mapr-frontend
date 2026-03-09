@@ -1,0 +1,14 @@
+/* Minimal custom styles - most styling handled by Tailwind CSS */
+/* Print styles for better printing experience */
+@media print {
+  .mat-dialog-content {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.75rem;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}

@@ -1,0 +1,102 @@
+/* Simplified Angular Material theme using only three colors */
+/* Colors: primary: #ffffff (white), background: #2C104C (dark violet), secondary: #482683 (light violet) */
+
+@use "@angular/material" as mat;
+
+html {
+  color-scheme: light dark;
+  @include mat.theme((
+    color: mat.$violet-palette,
+    typography: Roboto,
+    density: 0
+  ));
+}
+/* Main Theme - using simplified color palette */
+:root, :host {
+  @include mat.theme-overrides((
+    /* Primary color: white (#ffffff) */
+    primary: #482683,
+    on-primary: #ffffff,
+    primary-container: #482683,
+    on-primary-container: #ffffff,
+    
+    /* Secondary color: light violet (#482683) */
+    secondary: #482683,
+    on-secondary: #ffffff,
+    secondary-container: #482683,
+    on-secondary-container: #ffffff,
+    
+    /* Background: dark violet (#2C104C) */
+    background: #2C104C,
+    on-background: #ffffff,
+    surface: #2C104C,
+    on-surface: #ffffff,
+    surface-container: #2C104C,
+    surface-container-low: #2C104C,
+    surface-container-high: #2C104C,
+    surface-container-highest: #2C104C,
+    
+    /* Error colors (kept minimal for Material components) */
+    error: #ba1a1a,
+    on-error: #ffffff,
+    error-container: #ffdad6,
+    on-error-container: #410002,
+    
+    /* Outline and neutral (minimal) */
+    outline: #482683,
+    outline-variant: #482683,
+    shadow: #000000,
+    scrim: #000000,
+  ));
+}
+
+/* Dark Theme - same colors, inverted contrast where needed */
+.dark {
+  @include mat.theme-overrides((
+    primary: #ffffff,
+    on-primary: #2C104C,
+    primary-container: #482683,
+    on-primary-container: #ffffff,
+    
+    secondary: #482683,
+    on-secondary: #ffffff,
+    secondary-container: #482683,
+    on-secondary-container: #ffffff,
+    
+    background: #2C104C,
+    on-background: #ffffff,
+    surface: #2C104C,
+    on-surface: #ffffff,
+    surface-container: #2C104C,
+    surface-container-low: #2C104C,
+    surface-container-high: #2C104C,
+    surface-container-highest: #2C104C,
+    
+    error: #ffb4ab,
+    on-error: #690005,
+    error-container: #93000a,
+    on-error-container: #ffdad6,
+    
+    outline: #482683,
+    outline-variant: #482683,
+    shadow: #000000,
+    scrim: #000000,
+  ));
+}
+
+/* Typography - using Corbel font family */
+:root, :host {
+  --mat-sys-brand-font-family: Corbel;
+  --mat-sys-plain-font-family: Corbel;
+  --mat-sys-bold-font-weight: bold;
+  --mat-sys-medium-font-weight: 500;
+  --mat-sys-regular-font-weight: normal;
+
+  @include mat.theme-overrides((
+    brand-family: Corbel,
+    plain-family: Corbel,
+    bold-weight: bold,
+    medium-weight: 500,
+    regular-weight: normal,
+  ));
+}

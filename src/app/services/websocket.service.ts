@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { SessionService } from './session.service';
-import * as uuid from 'uuid';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +10,8 @@ export class WebsocketService {
   private connections: Map<string, WebSocketSubject<any>> = new Map();
 
   constructor(private sessionService: SessionService) {
-    this.sessionId = localStorage.getItem('session_id') || uuid.v4();
+    // Use SessionService to ensure session_id is generated and saved if it doesn't exist
+    this.sessionId = this.sessionService.getSessionId();
   }
 
   connect<T>(url: string): WebSocketSubject<T> {

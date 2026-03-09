@@ -1,0 +1,134 @@
+<div class="filter-dialog">
+  <h2 mat-dialog-title class="text-2xl font-semibold text-[var(--primary-color)] mb-4">
+    {{ 'filterDialog.title' | translate }}
+  </h2>
+
+  <mat-dialog-content class="mat-typography">
+    <mat-tab-group>
+      <!-- Categories Tab (labeled as Activities) -->
+      <mat-tab *ngIf="hasCategories" [label]="'filterDialog.tabs.activities' | translate">
+        <div class="tab-content">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-[var(--primary-color)]">{{ 'filterDialog.tabs.activities' | translate }} ({{ selectedActivities.size }} / {{ categoriesLength }})</h3>
+            <button mat-button (click)="selectAllCategories()" class="text-sm">
+              {{ selectedActivities.size === categoriesLength ? ('filterDialog.deselectAll' | translate) : ('filterDialog.selectAll' | translate) }}
+            </button>
+          </div>
+          <div class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
+            <div *ngFor="let group of groupedCategories()" class="border-b border-gray-200 pb-2 mb-2">
+              <div class="flex items-center">
+                <button 
+                  mat-icon-button 
+                  (click)="toggleCategoryGroupExpanded(group.wegezweck)"
+                  class="mr-2">
+                  <mat-icon>{{ isCategoryGroupExpanded(group.wegezweck) ? 'expand_more' : 'chevron_right' }}</mat-icon>
+                </button>
+                <mat-checkbox
+                  [checked]="getCategoryGroupState(group.wegezweck) === 'all'"
+                  [indeterminate]="getCategoryGroupState(group.wegezweck) === 'some'"
+                  (change)="toggleCategoryGroup(group.wegezweck)"
+                  class="flex-1">
+                  {{ group.wegezweck }}
+                </mat-checkbox>
+              </div>
+              <div *ngIf="isCategoryGroupExpanded(group.wegezweck)" class="ml-10 mt-2 space-y-1">
+                <div *ngFor="let category of group.categories" class="flex items-center">
+                  <mat-checkbox
+                    [checked]="isCategorySelected(category.id)"
+                    (change)="toggleCategory(category.id)"
+                    class="w-full">
+                    {{ category.display_name || category.name }}
+                  </mat-checkbox>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Personas Tab -->
+      <mat-tab *ngIf="hasCategories" [label]="'filterDialog.tabs.personas' | translate">
+        <div class="tab-content">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-[var(--primary-color)]">{{ 'filterDialog.tabs.personas' | translate }}</h3>
+          </div>
+          <mat-radio-group [value]="selectedPersonas" (change)="selectedPersonas = $event.value" class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
+            <div *ngFor="let persona of personas()" class="flex items-center">
+              <mat-radio-button [value]="persona.id" class="w-full">
+                {{ persona.display_name || persona.name }}
+              </mat-radio-button>
+            </div>
+          </mat-radio-group>
+        </div>
+      </mat-tab>
+
+      <!-- RegioStars Tab -->
+      <mat-tab [label]="'filterDialog.tabs.regioStars' | translate">
+        <div class="tab-content">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-[var(--primary-color)]">{{ 'filterDialog.tabs.regioStars' | translate }} ({{ selectedRegioStars.size }} / {{ regiostarsLength }})</h3>
+            <button mat-button (click)="selectAllRegioStars()" class="text-sm">
+              {{ selectedRegioStars.size === regiostarsLength ? ('filterDialog.deselectAll' | translate) : ('filterDialog.selectAll' | translate) }}
+            </button>
+          </div>
+          <div class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
+            <div *ngFor="let group of groupedRegioStars()" class="border-b border-gray-200 pb-2 mb-2">
+              <div class="flex items-center">
+                <button 
+                  mat-icon-button 
+                  (click)="toggleRegioStarGroupExpanded(group.class_name)"
+                  class="mr-2">
+                  <mat-icon>{{ isRegioStarGroupExpanded(group.class_name) ? 'expand_more' : 'chevron_right' }}</mat-icon>
+                </button>
+                <mat-checkbox
+                  [checked]="getRegioStarGroupState(group.class_name) === 'all'"
+                  [indeterminate]="getRegioStarGroupState(group.class_name) === 'some'"
+                  (change)="toggleRegioStarGroup(group.class_name)"
+                  class="flex-1">
+                  {{ group.class_name }}
+                </mat-checkbox>
+              </div>
+              <div *ngIf="isRegioStarGroupExpanded(group.class_name)" class="ml-10 mt-2 space-y-1">
+                <div *ngFor="let regiostar of group.regiostars" class="flex items-center">
+                  <mat-checkbox
+                    [checked]="isRegioStarSelected(regiostar.id)"
+                    (change)="toggleRegioStar(regiostar.id)"
+                    class="w-full">
+                    {{ regiostar.name }}
+                  </mat-checkbox>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- States Tab -->
+      <mat-tab [label]="'filterDialog.tabs.states' | translate">
+        <div class="tab-content">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-[var(--primary-color)]">{{ 'filterDialog.tabs.states' | translate }} ({{ selectedStates.size }} / {{ statesLength }})</h3>
+            <button mat-button (click)="selectAllStates()" class="text-sm">
+              {{ selectedStates.size === statesLength ? ('filterDialog.deselectAll' | translate) : ('filterDialog.selectAll' | translate) }}
+            </button>
+          </div>
+          <div class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
+            <div *ngFor="let state of states()" class="flex items-center">
+              <mat-checkbox
+                [checked]="isStateSelected(state.id)"
+                (change)="toggleState(state.id)"
+                class="w-full">
+                {{ state.name }}
+              </mat-checkbox>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="mt-4">
+    <button mat-button (click)="onCancel()">{{ 'common.cancel' | translate }}</button>
+    <button mat-raised-button color="primary" (click)="onApply()">{{ 'common.apply' | translate }}</button>
+  </mat-dialog-actions>
+</div>

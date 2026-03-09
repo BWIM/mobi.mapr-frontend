@@ -1,0 +1,98 @@
+<div class="w-full max-w-full h-[80vh] flex flex-col relative">
+  <!-- Overlay Close Button -->
+  <button 
+    type="button"
+    class="absolute -top-4 -right-4 w-10 h-10 rounded-full bg-[var(--primary-color)] cursor-pointer flex items-center justify-center z-[1000] shadow-lg transition-all duration-200 ease-in-out hover:scale-110 hover:shadow-xl active:scale-95 border-[var(--background-color)] border-2"
+    (click)="onClose()"
+    aria-label="Close">
+    <span class="text-[var(--secondary-color)] text-[28px] font-bold leading-none m-0 p-0">×</span>
+  </button>
+  
+  <div class="mb-4 flex-shrink-0">
+    <h2 mat-dialog-title class="text-2xl font-bold text-white">
+      <span *ngIf="!data.isComparisonMode">{{ data.featureName || ('analyze.activities' | translate) }}</span>
+      <span *ngIf="data.isComparisonMode" class="flex gap-4">
+        <span>{{ data.featureName || ('analyze.feature1' | translate) }}</span>
+        <span class="text-lg opacity-75">vs</span>
+        <span>{{ data.featureName2 || ('analyze.feature2' | translate) }}</span>
+      </span>
+    </h2>
+  </div>
+  
+  <mat-dialog-content class="mat-typography flex-[4] min-h-0 overflow-hidden py-4 px-4 flex flex-col">
+    <!-- Loading State -->
+    <div *ngIf="isLoading || isLoading2" class="text-sm text-[var(--primary-color)] py-4 text-center flex-shrink-0">
+      <mat-spinner diameter="40" class="mx-auto mb-4"></mat-spinner>
+      {{ 'analyze.allCategoriesDialog.loading' | translate }}
+    </div>
+    
+    <!-- Error State -->
+    <div *ngIf="(error || error2) && !isLoading && !isLoading2" class="text-sm text-red-600 py-4 text-center flex-shrink-0">
+      {{ error || error2 }}
+    </div>
+    
+    <!-- Chart and Categories -->
+    <div *ngIf="(allCategories.length > 0 || (data.isComparisonMode && allCategories2.length > 0)) && !isLoading && !isLoading2 && !error && !error2" class="w-full flex flex-col flex-1 min-h-0">
+      <!-- Chart Container - Takes most of the space (about 70%) -->
+      <div class="flex-[4] min-h-0 mb-3 w-full chart-wrapper">
+        <div class="relative w-full h-full">
+          <p-chart #allCategoriesChart type="bar" [data]="chartData" [options]="chartOptions" (onDataSelect)="onChartDataSelect($event)" style="cursor: pointer;"></p-chart>
+        </div>
+      </div>
+      
+      <!-- Category Labels List - Multicolumn Layout with scroll (about 10%) -->
+      <div class="category-labels-container flex-[3] min-h-0 overflow-y-auto">
+        <div class="category-labels columns-2 md:columns-3 lg:columns-4 space-y-2">
+          <div *ngFor="let category of allCategories; let i = index" 
+               class="category-item text-sm text-white flex items-center mb-2">
+            <span class="font-bold mr-2">{{ i + 1 }}.</span>
+              <span class="cursor-pointer hover:underline" (click)="onCategoryNameClick(category)">{{ category.category_name }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <!-- Bottom Section - 20% with Legend -->
+  <div class="flex-[0] flex-shrink-0 border-t border-[var(--primary-color)] border-opacity-30 pt-4 px-4 pb-2 min-h-[100px]">
+    <div class="flex h-full gap-6 items-center">
+      <!-- Legend -->
+      <div class="flex-1 flex items-center">
+        <!-- Quality legend (A-F letters) -->
+        <div class="legend-quality w-full" *ngIf="!data.isScoreMode">
+          <div class="flex items-center gap-2">
+            <div class="legend-item-quality" *ngFor="let item of qualityColors">
+              <div class="legend-circle" [style.background-color]="item.color">
+                <span class="legend-letter">{{ item.letter }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Time legend (discrete color steps) -->
+        <div class="legend-time w-full" *ngIf="data.isScoreMode">
+          <div class="flex flex-col gap-2">
+            <div class="legend-steps">
+              <div class="legend-step" *ngFor="let item of timeColors" [style.background-color]="item.color"></div>
+            </div>
+            <div class="legend-labels flex justify-between">
+              <span class="legend-label text-xs text-white">{{ 'map.legend.time.min0' | translate }}</span>
+              <span class="legend-label text-xs text-white">7</span>
+              <span class="legend-label text-xs text-white">15</span>
+              <span class="legend-label text-xs text-white">23</span>
+              <span class="legend-label text-xs text-white">30</span>
+              <span class="legend-label text-xs text-white">45</span>
+              <span class="legend-label text-xs text-white">45+</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hint -->
+      <div class="flex items-center">
+        <p class="text-sm text-white opacity-75 italic border-[var(--primary-color)] border-2 rounded-md p-2">
+          {{ 'analyze.allCategoriesDialog.clickHint' | translate }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

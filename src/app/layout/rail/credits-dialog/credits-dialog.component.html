@@ -1,0 +1,196 @@
+<div class="flex flex-col min-w-[90vw] sm:min-w-[500px] max-w-[95vw] sm:max-w-[900px]">
+  <h2 mat-dialog-title class="text-2xl sm:text-3xl font-semibold text-[var(--primary-color)] mb-6 px-2">
+    {{ 'rail.credits.title' | translate }}
+  </h2>
+  
+  <mat-dialog-content class="mat-typography max-h-[70vh] overflow-y-auto py-4 px-2 sm:px-4 flex flex-col gap-8">
+
+     <!-- License Section -->
+     <mat-card class="flex flex-col gap-6 bg-black/5 rounded-lg border border-black/10 pb-4">
+      <h3 class="text-xl sm:text-2xl font-semibold text-[var(--primary-color)] m-0 pb-2 border-b-2 border-[var(--primary-color)]">
+        {{ 'rail.credits.license.title' | translate }}
+      </h3>
+
+      <!-- Frontend License -->
+      <div class="flex flex-col gap-2">
+        <h4 class="text-base sm:text-lg font-semibold text-[var(--primary-color)] m-0">
+          {{ 'rail.credits.license.frontend.title' | translate }}
+        </h4>
+        <p class="text-sm sm:text-[0.9375rem] leading-relaxed text-[var(--primary-color)] m-0">
+          {{ 'rail.credits.license.frontend.description' | translate }}
+        </p>
+      </div>
+
+      <!-- Data License -->
+      <div class="flex flex-col gap-2">
+        <h4 class="text-base sm:text-lg font-semibold text-[var(--primary-color)] m-0">
+          {{ 'rail.credits.license.data.title' | translate }}
+        </h4>
+        <p class="text-sm sm:text-[0.9375rem] leading-relaxed text-[var(--primary-color)] m-0">
+          {{ 'rail.credits.license.data.description' | translate }}
+        </p>
+      </div>
+
+      <!-- Third-Party Data License -->
+      <div class="flex flex-col gap-2">
+        <h4 class="text-base sm:text-lg font-semibold text-[var(--primary-color)] m-0">
+          {{ 'rail.credits.license.thirdParty.title' | translate }}
+        </h4>
+        <p class="text-sm sm:text-[0.9375rem] leading-relaxed text-[var(--primary-color)] m-0">
+          {{ 'rail.credits.license.thirdParty.description' | translate }}
+        </p>
+      </div>
+    </mat-card>
+
+    <!-- Acknowledgments Section -->
+    <section class="flex flex-col gap-6">
+      <h3 class="text-xl sm:text-2xl font-semibold text-[var(--primary-color)] m-0 pb-2 border-b-2 border-[var(--primary-color)]">
+        {{ 'rail.credits.acknowledgment.title' | translate }}
+      </h3>
+      
+      <p class="text-sm sm:text-base leading-relaxed text-[var(--primary-color)] m-0 text-justify sm:text-left">
+        {{ 'rail.credits.acknowledgment.intro' | translate }}
+      </p>
+
+      <!-- OpenStreetMap -->
+      <mat-card class="flex flex-col gap-3 p-4 bg-black/5 rounded-lg border-l-4 border-[var(--primary-color)] shadow-sm">
+        <h4 class="text-base sm:text-lg font-semibold text-[var(--primary-color)] m-0 flex items-center gap-2">
+          <mat-icon class="text-xl">map</mat-icon>
+          {{ 'rail.credits.acknowledgment.osm.title' | translate }}
+        </h4>
+        <p class="text-sm sm:text-[0.9375rem] leading-relaxed text-[var(--primary-color)] m-0">
+          {{ 'rail.credits.acknowledgment.osm.description' | translate }}
+        </p>
+      </mat-card>
+
+      <!-- MOTIS -->
+      <mat-card class="flex flex-col gap-3 p-4 bg-black/5 rounded-lg border-l-4 border-[var(--primary-color)] shadow-sm">
+        <h4 class="text-base sm:text-lg font-semibold text-[var(--primary-color)] m-0 flex items-center gap-2">
+          <mat-icon class="text-xl">directions_transit</mat-icon>
+          {{ 'rail.credits.acknowledgment.motis.title' | translate }}
+        </h4>
+        <p class="text-sm sm:text-[0.9375rem] leading-relaxed text-[var(--primary-color)] m-0">
+          {{ 'rail.credits.acknowledgment.motis.description' | translate }}
+        </p>
+      </mat-card>
+
+      <!-- Additional Components -->
+      <mat-card class="flex flex-col gap-3 p-4 bg-black/5 rounded-lg border-l-4 border-[var(--primary-color)] shadow-sm">
+        <h4 class="text-base sm:text-lg font-semibold text-[var(--primary-color)] m-0 flex items-center gap-2">
+          <mat-icon class="text-xl">extension</mat-icon>
+          {{ 'rail.credits.acknowledgment.components.title' | translate }}
+        </h4>
+        <p class="text-sm sm:text-[0.9375rem] leading-relaxed text-[var(--primary-color)] m-0">
+          {{ 'rail.credits.acknowledgment.components.description' | translate }}
+        </p>
+      </mat-card>
+    </section>
+
+    <!-- Components Lists -->
+    <section class="flex flex-col gap-6">
+      <!-- Visualization Components -->
+      <div class="flex flex-col gap-3">
+        <h3 class="text-base sm:text-lg font-semibold text-[var(--primary-color)] m-0 flex items-center gap-2 pb-2 border-b border-black/12">
+          <mat-icon class="text-lg">visibility</mat-icon>
+          {{ 'rail.credits.sections.visualization' | translate }}
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 py-2">
+          <a *ngFor="let item of visualComponents" 
+             [href]="item.url" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             class="flex items-center gap-3 p-3 rounded-md no-underline text-[var(--primary-color)] bg-black/5 hover:bg-black/10 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer border border-transparent hover:border-[var(--primary-color)]">
+            <mat-icon class="text-lg flex-shrink-0">{{ item.icon }}</mat-icon>
+            <span class="text-sm sm:text-[0.9375rem] font-medium flex-1 truncate">{{ item.name }}</span>
+            <mat-icon class="text-sm opacity-60 flex-shrink-0">open_in_new</mat-icon>
+          </a>
+        </div>
+      </div>
+
+      <!-- Data Components -->
+      <div class="flex flex-col gap-3">
+        <h3 class="text-base sm:text-lg font-semibold text-[var(--primary-color)] m-0 flex items-center gap-2 pb-2 border-b border-black/12">
+          <mat-icon class="text-lg">storage</mat-icon>
+          {{ 'rail.credits.sections.data' | translate }}
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 py-2">
+          <a *ngFor="let item of dataComponents" 
+             [href]="item.url" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             class="flex items-center gap-3 p-3 rounded-md no-underline text-[var(--primary-color)] bg-black/5 hover:bg-black/10 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer border border-transparent hover:border-[var(--primary-color)]">
+            <mat-icon class="text-lg flex-shrink-0">{{ item.icon }}</mat-icon>
+            <span class="text-sm sm:text-[0.9375rem] font-medium flex-1 truncate">{{ item.name }}</span>
+            <mat-icon class="text-sm opacity-60 flex-shrink-0">open_in_new</mat-icon>
+          </a>
+        </div>
+      </div>
+
+      <!-- Backend Components -->
+      <div class="flex flex-col gap-3">
+        <h3 class="text-base sm:text-lg font-semibold text-[var(--primary-color)] m-0 flex items-center gap-2 pb-2 border-b border-black/12">
+          <mat-icon class="text-lg">dns</mat-icon>
+          {{ 'rail.credits.sections.backend' | translate }}
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 py-2">
+          <a *ngFor="let item of backendComponents" 
+             [href]="item.url" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             class="flex items-center gap-3 p-3 rounded-md no-underline text-[var(--primary-color)] bg-black/5 hover:bg-black/10 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer border border-transparent hover:border-[var(--primary-color)]">
+            <mat-icon class="text-lg flex-shrink-0">{{ item.icon }}</mat-icon>
+            <span class="text-sm sm:text-[0.9375rem] font-medium flex-1 truncate">{{ item.name }}</span>
+            <mat-icon class="text-sm opacity-60 flex-shrink-0">open_in_new</mat-icon>
+          </a>
+        </div>
+      </div>
+
+      <!-- Routing Components -->
+      <div class="flex flex-col gap-3">
+        <h3 class="text-base sm:text-lg font-semibold text-[var(--primary-color)] m-0 flex items-center gap-2 pb-2 border-b border-black/12">
+          <mat-icon class="text-lg">directions</mat-icon>
+          {{ 'rail.credits.sections.routing' | translate }}
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 py-2">
+          <a *ngFor="let item of routingComponents" 
+             [href]="item.url" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             class="flex items-center gap-3 p-3 rounded-md no-underline text-[var(--primary-color)] bg-black/5 hover:bg-black/10 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer border border-transparent hover:border-[var(--primary-color)]">
+            <mat-icon class="text-lg flex-shrink-0">{{ item.icon }}</mat-icon>
+            <span class="text-sm sm:text-[0.9375rem] font-medium flex-1 truncate">{{ item.name }}</span>
+            <mat-icon class="text-sm opacity-60 flex-shrink-0">open_in_new</mat-icon>
+          </a>
+        </div>
+      </div>
+
+      <!-- City Data Components -->
+      <div class="flex flex-col gap-3">
+        <h3 class="text-base sm:text-lg font-semibold text-[var(--primary-color)] m-0 flex items-center gap-2 pb-2 border-b border-black/12">
+          <mat-icon class="text-lg">location_city</mat-icon>
+          {{ 'rail.credits.sections.cityData' | translate }}
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 py-2">
+          <a *ngFor="let item of citiesComponents" 
+             [href]="item.url" 
+             target="_blank" 
+             rel="noopener noreferrer"
+             class="flex items-center gap-3 p-3 rounded-md no-underline text-[var(--primary-color)] bg-black/5 hover:bg-black/10 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer border border-transparent hover:border-[var(--primary-color)]">
+            <mat-icon class="text-lg flex-shrink-0">{{ item.icon }}</mat-icon>
+            <div class="flex flex-col gap-1 flex-1 min-w-0">
+              <span class="text-sm sm:text-[0.9375rem] font-medium truncate">{{ item.name }}</span>
+              <span *ngIf="item.license" class="text-xs sm:text-[0.8125rem] text-[var(--primary-color)] opacity-75 italic">{{ item.license }}</span>
+            </div>
+            <mat-icon class="text-sm opacity-60 flex-shrink-0">open_in_new</mat-icon>
+          </a>
+        </div>
+      </div>
+    </section>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="px-2 sm:px-4 pt-4 mt-2 border-t border-black/12">
+    <button mat-button (click)="onClose()">
+      {{ 'rail.credits.close' | translate }}
+    </button>
+  </mat-dialog-actions>
+</div>

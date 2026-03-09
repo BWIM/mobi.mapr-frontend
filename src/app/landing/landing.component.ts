@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../auth/auth.service';
+import { LanguageService } from '../services/language.service';
 
 @Component({
     selector: 'app-landing',
@@ -18,20 +19,23 @@ export class LandingComponent implements OnInit {
         { code: 'en', name: 'English' }
     ];
 
-    constructor(public router: Router, public translate: TranslateService, private authService: AuthService) {
-        // Get saved language preference or default to German
-        const savedLang = localStorage.getItem('language') || 'de';
+    constructor(public router: Router, public translate: TranslateService, private authService: AuthService, private languageService: LanguageService) {
+        // Initialize language using LanguageService
+        this.translate.setDefaultLang('de');
+        const savedLang = this.languageService.getSavedLanguage() || 'de';
         this.currentLang = savedLang;
         this.translate.use(savedLang);
     }
 
     ngOnInit(): void {
-        // Check if user is already logged in and redirect to dashboard
+        // Check if user is already logged in and redirect to users-area
         if (this.authService.isLoggedIn()) {
             if (this.router.url.includes('redirect=false')) {
 
             } else {
-                this.router.navigate(['/dashboard']);
+                // Logged-in users arriving without a specific project/share-key
+                // are sent to the users-area to choose a project.
+                this.router.navigate(['/users-area']);
             }
         }
     }
@@ -58,7 +62,6 @@ export class LandingComponent implements OnInit {
     // Switch language
     switchLanguage(lang: string) {
         this.currentLang = lang;
-        this.translate.use(lang);
-        localStorage.setItem('language', lang);
+        this.languageService.setLanguage(lang);
     }
 }

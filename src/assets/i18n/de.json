@@ -1,667 +1,772 @@
 {
-  "PROJECTS": {
-    "TITLE": "Projekte",
-    "LIST": {
-      "TITLE": "Projekte",
-      "NO_PROJECTS": "Es sind keine Projekte verfügbar",
-      "DELETED": "Alle Informationen zum Projekt erfolgreich gelöscht"
-    },
-    "DETAILS": {
-      "NAME": "Name",
-      "DESCRIPTION": "Beschreibung",
-      "CREATED": "Erstellt am",
-      "UPDATED": "Aktualisiert am"
-    },
-    "FIELDS": {
-      "NAME": "Name",
-      "DESCRIPTION": "Beschreibung",
-      "TYPE": "Typ",
-      "CREATED": "Erstellt am",
-      "STATUS": "Status",
-      "GROUP": "Gruppe",
-      "SELECT_GROUP": "Gruppe auswählen"
-    },
-    "ACTIONS": {
-      "CREATE": "Neues Projekt",
-      "CREATE_GROUP": "Neue Gruppe",
-      "CANCEL_TOOLTIP": "Abbrechen",
-      "SAVE_TOOLTIP": "Speichern",
-      "MORE_OPTIONS": "Weitere Optionen",
-      "EDIT_GROUP": "Gruppe bearbeiten",
-      "SHOW_RESULTS": "Ergebnisse anzeigen",
-      "CREATE_GROUP_TOOLTIP": "Gruppe erstellen",
-      "CREATE_TOOLTIP": "Erstellen"
-    },
-    "STATUS": {
-      "FINISHED": "Abgeschlossen",
-      "IN_PROGRESS": "In Bearbeitung",
-      "QUEUED": "Warteschlange"
-    },
-    "QUEUED_MESSAGE": "Projekt ist in der Warteschlange für die Verarbeitung...",
-    "EDIT": {
-      "TITLE": "Projekt bearbeiten"
-    },
-    "UNGROUPED": "Nicht gruppierte Projekte",
-    "TABS": {
-      "PERSONAL": "Persönlich",
-      "SHARED": "Geteilt",
-      "PUBLIC": "Öffentlich"
-    },
-    "READ_ONLY": "Nur Lesen",
-    "SHARED": "Geteilt",
-    "TYPE": {
-      "DEFAULT": "Standard",
-      "PERSONAL": "Persönlich"
-    },
-    "MESSAGES": {
-      "UPDATE_SUCCESS": "Projekt erfolgreich aktualisiert",
-      "UPDATE_ERROR": "Fehler beim Aktualisieren des Projekts",
-      "CONFIRM_DELETE": "Möchtest du dieses Projekt wirklich löschen?",
-      "UNFINISHED_PROJECTS": "Es gibt noch nicht abgeschlossene Projekte",
-      "UNFINISHED_PROJECTS_DETAIL": "Die folgenden Projekte müssen noch abgeschlossen werden: {projects}",
-      "CHECK_PROJECTS_ERROR": "Fehler beim Überprüfen der Projekte",
-      "FORM_INVALID": "Formular ist ungültig",
-      "CREATE_ERROR": "Fehler beim Erstellen",
-      "CREATE_SUCCESS": "Erfolgreich erstellt",
-      "INVALID_DATA": "Ungülgtige Daten",
-      "PERMISSION_DENIED": "Keine Berechtigung",
-      "SERVER_ERROR": "Es gab einen Fehler im Backend",
-      "LOAD_GROUPS_ERROR": "Gruppen konnten nicht geladen werden",
-      "CONFIRM_DELETE_GROUP": "Willst du die Gruppe wirklich löschen?",
-      "DELETE_GROUP_SUCCESS": "Gruppe erfolgreich gelöscht",
-      "DELETE_GROUP_ERROR": "Gruppe kann nicht gelöscht werden",
-      "LOAD_AREAS_ERROR": "Gebiete können nicht geladen werden"
-    },
-    "DELETE": {
-      "TITLE": "Projekt löschen",
-      "CONFIRMATION": "Bist du sicher, dass du dieses Projekt löschen möchtest?"
-    },
-    "PROGRESS_TOOLTIP": "Fortschritt",
-    "WIZARD": {
-      "SELECT_ALL_ACTIVITIES": "Alle auswählen",
-      "SELECT_ALL_PERSONAS": "Alle Personas auswählen",
-      "DESELECT_ALL_PERSONAS": "Alle Personas abwählen",
-      "SELECT_ALL_MODES": "Alle Modi auswählen",
-      "DESELECT_ALL_MODES": "Alle Modi abwählen",
-      "DESELECT_ALL_ACTIVITIES": "Alle abwählen"
-    },
-    "RESULTS": {
-      "LOAD_ERROR": "Ergebnisse können nicht geladen werden"
-    },
-    "DEFAULT_GROUP": "Vorberechnete Karten",
-    "AUTO_CLOSE_SIDEBAR": "Sidebar pinnen",
-    "HINT": {
-      "UPGRADE": "Aufgrund von Änderungen der Datenstruktur mussten alle Projekte, die vor dem 4.6.25 erstellt wurden, gelöscht werden."
-    },
-    "COMPARE": "Vergleichen"
+  "common": {
+    "loading": "Lade...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "yes": "Ja",
+    "no": "Nein",
+    "ok": "OK",
+    "search": "Suchen",
+    "filter": "Filter",
+    "reset": "Zurücksetzen",
+    "apply": "Anwenden",
+    "back": "Zurück",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "submit": "Absenden",
+    "required": "Erforderlich",
+    "optional": "Optional"
   },
-  "PROJECT_GROUPS": {
-    "CREATE": {
-      "TITLE": "Neue Gruppe"
+  "auth": {
+    "login": {
+      "title": "Anmeldung",
+      "username": "Benutzername",
+      "password": "Passwort",
+      "loginButton": "Anmelden",
+      "loginFailed": "Anmeldung fehlgeschlagen. Bitte überprüfe deine Eingaben.",
+      "usernameRequired": "Benutzername ist erforderlich",
+      "passwordRequired": "Passwort ist erforderlich",
+      "usernameMinLength": "Benutzername muss mindestens 3 Zeichen lang sein",
+      "passwordMinLength": "Passwort muss mindestens 6 Zeichen lang sein",
+      "selectLanguage": "Sprache auswählen",
+      "login": "Anmelden"
     },
-    "EDIT": {
-      "TITLE": "Gruppe bearbeiten"
-    },
-    "FIELDS": {
-      "NAME": "Name"
-    },
-    "MESSAGES": {
-      "UPDATE_SUCCESS": "Projektgruppe erfolgreich aktualisiert",
-      "UPDATE_ERROR": "Fehler beim Aktualisieren der Projektgruppe",
-      "CONFIRM_DELETE": "Bist du sicher, dass du diese Projektgruppe löschen möchtest?",
-      "CREATE_SUCCESS": "Das Erstellen einer neuen Gruppe war erfolgreich",
-      "CREATE_ERROR": "Fehler beim erstellen einer neuen Gruppe",
-      "CONFIRM_DELETE_MULTIPLE": "Alle ausgewählten Gruppen löschen?",
-      "DELETE_SUCCESS": "Erlfogreich gelöscht",
-      "DELETE_ERROR": "Fehler beim löschen"
-    },
-    "DELETE_WARNING": "Die Projektgruppe wird gelöscht",
-    "DELETE": "Projektgruppe löschen",
-    "DELETE_TOOLTIP": "Gruppe löschen",
-    "MANAGE_UNUSED": "Ungenutze Projektgruppen verwalten",
-    "UNUSED_GROUPS": "Ungenutze Projektgruppen",
-    "NO_UNUSED_GROUPS": "Es gibt keine ungenutzten Gruppen",
-    "DELETE_SELECTED": "Ausgewählte Gruppen löschen"
+    "logout": "Abmelden"
   },
-  "COMMON": {
-    "ACTIONS": {
-      "SAVE": "Speichern",
-      "CANCEL": "Abbrechen",
-      "EDIT": "Bearbeiten",
-      "DELETE": "Löschen",
-      "LABEL": "Aktionen",
-      "CLOSE": "Schließen",
-      "CONFIRM": "Bestätigen",
-      "SHARE": "Teilen",
-      "DOWNLOAD": "Herunterladen",
-      "CANCEL_TOOLTIP": "Abbrechen",
-      "SAVE_TOOLTIP": "Speichern",
-      "EXPORT": "Exportieren",
-      "EXPORTING": "Exportieren..."
+  "analyze": {
+    "selectPlace": "Klicke auf einen Ort in der Karte, um weitere Analysen zu erhalten",
+    "loading": "Lade...",
+    "loadingFeatureInfo": "Lade Feature-Informationen...",
+    "loadingPlaces": "Lade Karte mit Aktivitäten...",
+    "loadingAnalysis": "Lade Aktivitäts-Analyse...",
+    "loadingCategories": "Lade alle Kategorien...",
+    "loadingMap": "Lade Karte...",
+    "activities": "Aktivitäten",
+    "categories": "Kategorien",
+    "relevance": "Relevanz",
+    "relevancePercent": "Relevanz (%)",
+    "populationPercent": "Bevölkerung (%)",
+    "activity": "Aktivität",
+    "rating": "Bewertung",
+    "moreInfo": "Mehr Informationen",
+    "allCategoriesDialog": {
+      "title": "Aktivitäten",
+      "loading": "Lade alle Kategorien...",
+      "categoriesNotFound": "Kategorien nicht gefunden",
+      "dataNotLoaded": "Daten noch nicht geladen",
+      "errorLoadingCategories": "Fehler beim Laden der Kategorien",
+      "clickHint": "Klicken Sie auf eine beliebige Aktivität, um detaillierte Informationen zu erhalten"
     },
-    "MESSAGES": {
-      "ERROR": {
-        "LOAD": "Fehler beim Laden der Daten",
-        "DELETE": "Fehler beim Löschen",
-        "CREATE": "Fehler beim Erstellen",
-        "UPDATE": "Fehler beim Aktualisieren"
-      },
-      "SUCCESS": {
-        "DELETE": "Erfolgreich gelöscht",
-        "CREATE": "Erfolgreich erstellt",
-        "UPDATE": "Aktualisiert"
-      },
-      "CONFIRM_DELETE": "Bist du sicher, dass du dieses Projekt löschen möchtest?",
-      "CONFIRM_DELETE_GROUP": "Bist du sicher, dass du diese Projektgruppe löschen möchtest?"
+    "featureInfo": {
+      "notFound": "Feature-Informationen nicht gefunden",
+      "dataNotPreloaded": "Daten noch nicht vorgeladen",
+      "errorLoading": "Fehler beim Laden der Feature-Informationen",
+      "typeMismatch": "Feature-Typen stimmen nicht überein"
     },
-    "CANCEL": "Abbrechen",
-    "EXPORT": "Export"
-  },
-  "LEGEND": {
-    "TITLE": "Legende",
-    "LVLA": "Die erforderliche Mobilitätszeit beträgt maximal 35 % im lokalen Vergleich.",
-    "LVLB": "Die erforderliche Mobilitätszeit liegt zwischen 36 % und 50 % im lokalen Vergleich.",
-    "LVLC": "Die erforderliche Mobilitätszeit liegt zwischen 51 % und 71 % im lokalen Vergleich.",
-    "LVLD": "Die erforderliche Mobilitätszeit liegt zwischen 72 % und 100 % im lokalen Vergleich.",
-    "LVLE": "Die erforderliche Mobilitätszeit liegt zwischen 101 % und 140 % im lokalen Vergleich.",
-    "LVLF": "Die erforderliche Mobilitätszeit beträgt mindestens 141 % im lokalen Vergleich.",
-    "DIFFERENCE_HEADER": "Legende für Differenzkarten",
-    "SCORE_HEADER": "Reisezeit (Minuten)",
-    "SCORE": "Score",
-    "MINUTES": "Min"
-  },
-  "MAP": {
-    "ACTIONS": {
-      "HEXAGON": "Hexagon",
-      "GEMEINDE": "Gemeinde",
-      "LANDKREIS": "Landkreis",
-      "LAND": "Land"
+    "addToComparison": "Als Vergleich hinzufügen",
+    "clearComparison": "Vergleich beenden",
+    "startComparisonHint": "Wähle eine weitere Region auf der Karte mit einem Rechtsklick aus, um einen Vergleich zu starten!",
+    "feature1": "Feature 1",
+    "feature2": "Feature 2",
+    "comparisonMode": "Vergleichsmodus",
+    "analyzeData": {
+      "notFound": "Analyse-Daten nicht gefunden",
+      "dataNotPreloaded": "Daten noch nicht vorgeladen",
+      "errorLoading": "Fehler beim Laden der Analyse-Daten"
     },
-    "CONTROLS": {
-      "ZOOM_IN": "Hineinzoomen",
-      "ZOOM_OUT": "Herauszoomen"
+    "placesDialog": {
+      "title": "Karte mit Orten der Aktivitäten",
+      "loading": "Lade Karte...",
+      "errorLoadingPlaces": "Fehler beim Laden der Orte",
+      "disabledForCountiesStates": "Die Ortsansicht ist für Landkreise und Bundesländer deaktiviert. Um eine detaillierte Analyse eines Gebiets durchzuführen, wähle bitte die Gemeinde/Hexagon-Ansicht, indem du in die Karte zoomst."
     },
-    "VISUALIZATION": {
-      "MEAN": "Durchschnitt",
-      "MEDIAN": "Median",
-      "POP": "Bevölkerung",
-      "AREA": "Fläche"
+    "rank": {
+      "overall": "Platz",
+      "overallLabel": "gesamt",
+      "regionalClass": "Platz",
+      "regionalClassLabel": "Regioklasse",
+      "total": "Gesamt"
     },
-    "TOOLTIP": {
-      "BASELINE": "Baseline",
-      "COMPARISON": "Vergleich",
-      "BETTER_THAN": "{{project1}} ist <strong>{{percentage}}%</strong> besser als {{project2}}",
-      "EQUAL": "Beide Projekte sind gleich"
+    "population": "Einwohnende",
+    "grade": "Note:",
+    "analysis": {
+      "title": "Analyse Top 5 Aktivitäten",
+      "showAllCategories": "Alle Aktivitäten anzeigen",
+      "expandPersonas": "Personengruppen vergrößern",
+      "categoriesNotFound": "Kategorien nicht gefunden",
+      "dataNotLoaded": "Daten noch nicht geladen",
+      "errorLoadingCategories": "Fehler beim Laden der Kategorien",
+      "errorLoadingPlaces": "Fehler beim Laden der Orte",
+      "activities": "Aktivitäten",
+      "personas": "Personengruppen",
+      "qualityRating": "Qualitätsbewertung: Die Qualitätsbewertung zeigt die Mobilitätsqualität in verschiedenen Kategorien von A (beste Qualität) bis F (niedrigste Qualität).",
+      "placesMap": "Karte mit Orten der Aktivitäten",
+      "info": {
+        "title": "Aktivitäten",
+        "introduction": {
+          "title": "Grundverständnis",
+          "description": "Am Ende jedes Weges steht eine Aktivität. Dies kann beispielsweise ein Restaurantbesuch, ein Museumsaufenthalt oder ein Einkauf sein. Aktivitäten bilden somit den eigentlichen Zweck von Mobilität.",
+          "focus": "Der mobi.mapr konzentriert sich auf die Alltagsmobilität. Dabei werden Wege zu Ausbildungs- und Arbeitsorten bewusst nicht berücksichtigt. Im Fokus stehen vielmehr alltägliche Ziele des täglichen Lebens, wie Einkäufe, Freizeitaktivitäten oder soziale Besuche."
+        },
+        "dataSource": {
+          "title": "Datengrundlage: Mobilität in Deutschland (MiD)",
+          "description": "Die im mobi.mapr verwendeten Aktivitäten basieren auf der Studie 'Mobilität in Deutschland (MiD). Es werden die Daten aus dem Jahr 2023 genutzt.",
+          "survey": "In dieser bundesweiten Erhebung werden Menschen unter anderem dazu befragt:",
+          "survey1": "Welche Wege sie im Alltag zurücklegen",
+          "survey2": "Welche Ziele sie dabei ansteuern",
+          "survey3": "Aus welchem Anlass diese Wege erfolgen",
+          "result": "Das Ergebnis ist eine Liste von rund 30 Aktivitätskategorien. Diese Kategorien sind bewusst allgemein formuliert, um statistisch auswertbar zu sein."
+        },
+        "translation": {
+          "title": "Übersetzung in konkrete Alltagsaktivitäten",
+          "description": "Die in der MiD erhobenen Aktivitätskategorien sind relativ abstrakt. Daher werden sie im mobi.mapr auf Basis wissenschaftlicher Literatur und empirischer Annahmen in konkrete Alltagsziele übersetzt.",
+          "example": "Beispiel:",
+          "exampleTitle": "'Täglicher Bedarf' wird konkretisiert zu:",
+          "example1": "Supermarkt",
+          "example2": "Bäckerei",
+          "example3": "Drogerie",
+          "example4": "weitere Einrichtungen des täglichen Einkaufs",
+          "details": "Für jede Aktivität ist hinterlegt:",
+          "details1": "Welche konkreten Zielorte ihr zugeordnet sind",
+          "details2": "Wie diese Zielorte gewichtet werden",
+          "viewInfo": "Diese Informationen können durch einen Klick auf die jeweilige Aktivität eingesehen werden."
+        },
+        "ambiguities": {
+          "title": "Umgang mit Unschärfen",
+          "description": "Nicht jede Aktivität lässt sich eindeutig und zielscharf übersetzen.",
+          "example": "Ein Beispiel ist die Aktivität 'Hund ausführen' aus der MiD-Studie. Diese beschreibt eigentlich eine Bewegung im öffentlichen Raum ohne klares Ziel. Im mobi.mapr wird sie derzeit näherungsweise über Ziele wie:",
+          "example1": "Geschäfte für Hundezubehör",
+          "example2": "ähnliche Einrichtungen",
+          "validation": "abgebildet. Validierungen zeigen jedoch, dass sich solche Unschärfen in der Gesamtbetrachtung häufig ausgleichen. Das bedeutet: Auch wenn einzelne Aktivitäten nur näherungsweise übersetzt werden können, bleibt das Gesamtbild der Alltagsmobilität stabil und belastbar."
+        },
+        "weighting": {
+          "title": "Gewichtung der Aktivitäten",
+          "description": "Die Bedeutung einzelner Aktivitäten hängt stark von der jeweiligen Personengruppe ab.",
+          "examples": "Beispiele:",
+          "example1": "Kinder besuchen häufiger Spielplätze.",
+          "example2": "Erwachsene haben einen stärkeren Fokus auf Einkauf oder Besorgungen.",
+          "example3": "Ältere Menschen weisen wiederum andere Aktivitätsmuster auf.",
+          "standardView": "In der Standardansicht des mobi.mapr werden zunächst alle Personengruppen gemeinsam betrachtet. Dadurch entsteht ein durchschnittliches Aktivitätsprofil."
+        },
+        "regional": {
+          "title": "Regionale Differenzierung",
+          "description": "Zusätzlich zur Differenzierung nach Personengruppen werden Aktivitäten auch regional gewichtet.",
+          "meaning": "Das bedeutet:",
+          "meaning1": "In Metropolregionen unterscheiden sich Zielstrukturen und Präferenzen deutlich von denen im ländlichen Raum.",
+          "meaning2": "Stadtbewohner suchen häufiger urbane Angebote wie Gastronomie, Kultur oder spezialisierte Dienstleistungen.",
+          "meaning3": "Im ländlichen Raum stehen andere Einrichtungen und Versorgungsstrukturen im Vordergrund.",
+          "consideration": "Diese regionalen Unterschiede werden im mobi.mapr berücksichtigt, um realitätsnahe Aussagen zur Alltagsmobilität treffen zu können."
+        }
+      }
     }
   },
-  "PROJECT_WIZARD": {
-    "CREATE_NEW_PROJECT": "Neues Projekt erstellen",
-    "SELECT_ACTIVITIES": "Relevante Aktivitäten auswählen",
-    "SELECT_PERSONAS": "Relevante Personas auswählen",
-    "SELECT_MODES": "Relevante Modi auswählen",
-    "CREATE_PROJECT": "Projekt erstellen",
-    "PROJECT_NAME": "Projektname",
-    "DESCRIPTION": "Beschreibung",
-    "PROJECT_SETTINGS": "Projekteinstellungen",
-    "MAKE_PUBLIC": "Projekt öffentlich machen",
-    "ALLOW_SHARING": "Freigabe erlauben",
-    "SEND_EMAIL": "E-Mail nach Abschluss senden",
-    "LOAD_AREAS_ON_MAP": "Berechnete Gemeinden direkt auf der Karte anzeigen",
-    "AVAILABLE_PERSONAS": "Verfügbare Personas",
-    "AVAILABLE_MODES": "Verfügbare Modi",
-    "NON_MID_ACTIVITIES": "Nicht-MID Aktivitäten",
-    "CANCEL": "Abbrechen",
-    "BACK": "Zurück",
-    "NEXT": "Weiter",
-    "FINISH": "Fertigstellen",
-    "ERRORS": {
-      "NAME_REQUIRED": "Bitte einen Projektnamen eingeben.",
-      "SELECT_MID_ACTIVITIES": "Bitte wähle mindestens eine MID-Aktivität aus.",
-      "SELECT_NON_MID_ACTIVITY": "Bitte wähle eine Nicht-MID-Aktivität aus.",
-      "SELECT_PERSONAS": "Bitte wähle mindestens eine Persona aus.",
-      "SELECT_MODES": "Bitte wähle mindestens einen Modus aus.",
-      "SELECT_OSM_ACTIVITY": "Wähle eine Aktivität aus"
-    },
-    "ACTIVITIES": {
-      "MID": "Aktivitäten",
-      "NON_MID": "Standardaktivitäten",
-      "TOGGLE_TOOLTIP": "umschalten",
-      "NO_MID_ACTIVITIES": "Fehler bei den Aktivitäten. Lade die Seite neu.",
-      "OSM": "Aktivitäten wechseln"
-    },
-    "PROJECT_NAME_TOOLTIP": "Projektname",
-    "DESCRIPTION_TOOLTIP": "Projektbeschreibung",
-    "PROJECT_GROUP_TOOLTIP": "Projektgruppe auswählen",
-    "SEND_EMAIL_TOOLTIP": "E-Mail nach Abschluss senden",
-    "LOAD_AREAS_ON_MAP_TOOLTIP": "Bereiche direkt laden",
-    "CANCEL_TOOLTIP": "Erstellung des Projekts abbrechen",
-    "BACK_TOOLTIP": "Einen Schritt zurückgehen",
-    "FINISH_TOOLTIP": "Fertigstellen",
-    "NEXT_TOOLTIP": "Weiter",
-    "STEPS_TOOLTIP": "Schritte",
-    "STEPS": {
-      "STEP": "Schritt",
-      "OF": "von",
-      "ACTIVITIES": "Aktivitäten",
-      "PERSONAS": "Personas",
-      "MODES": "Modi",
-      "AREA": "Gebiet auswählen",
-      "PROJECT_INFO": "Projektinformationen"
-    },
-    "START_ACTIVITY": "Start Aktivität",
-    "START_ACTIVITY_TOOLTIP": "Berechnet den score nur für Hexagone, in denen ein Ort dieser Aktivität ist",
-    "OSM_ACTIVITIES": "Openstreetmap Aktivitäten",
-    "REGIOSTAR": "RegioStar",
-    "REGIOSTAR_TOOLTIP": "RegioStar-Kategorien auswählen",
-    "SELECT_REGIOSTAR": "RegioStar auswählen",
-    "PERSONA_GROUP": "Persona-Gruppe",
-    "PERSONA_GROUP_TOOLTIP": "Persona-Gruppe auswählen, um Personas zu filtern",
-    "SELECT_PERSONA_GROUP": "Persona-Gruppe auswählen"
+  "errors": {
+    "generic": "Ein Fehler ist aufgetreten",
+    "network": "Netzwerkfehler. Bitte versuche es später erneut.",
+    "notFound": "Nicht gefunden",
+    "unauthorized": "Nicht autorisiert",
+    "forbidden": "Zugriff verweigert",
+    "serverError": "Serverfehler",
+    "unknown": "Unbekannter Fehler"
   },
-  "SIDEBAR": {
-    "TITLE": "Details",
-    "DESCRIPTION": "Beschreibung",
-    "STATUS": "Status",
-    "NO_SELECTION": "Keine Auswahl",
-    "CLICK_HINT": "Klicke auf eine Karte, um Details anzuzeigen",
-    "PROJECT_INFO": "Projektinformationen",
-    "ACTIVITIES": "Aktivitäten",
-    "MODES": "Modi",
-    "PERSONAS": "Personas",
-    "NO_PROJECT_SELECTED": "Kein Projekt ausgewählt",
-    "EXPORT_PDF_LANDSCAPE": "PDF im Querformat exportieren",
-    "EXPORT_PDF_PORTRAIT": "PDF im Hochformat exportieren",
-    "SHARE_LINK": "Link teilen",
-    "SHARE_LINK_DESCRIPTION": "Teile diesen Link, damit andere das Projekt ohne Konto anzeigen können.",
-    "SHARE": "Teilen",
-    "COPY_LINK": "Link kopieren",
-    "COPY_LINK_SUCCESS": "Link erfolgreich kopiert",
-    "COPY_LINK_SUCCESS_TITLE": "Erfolg",
-    "COPY_LINK_SUCCESS_MESSAGE": "Share-Link in Zwischenablage kopiert",
-    "COPY_LINK_ERROR_TITLE": "Fehler",
-    "COPY_LINK_ERROR_MESSAGE": "Link konnte nicht in Zwischenablage kopiert werden",
-    "SHARE_TOOLTIP": "Teilen",
-    "EXPORT_PDF_LANDSCAPE_TOOLTIP": "Im Querformat exportieren",
-    "EXPORT_PDF_PORTRAIT_TOOLTIP": "Im Hochformat exportieren",
-    "AVERAGE_TYPE": "Mittelwerttyp",
-    "POPULATION_AREA": "Bevölkerung/Fläche",
-    "MEDIAN": "Median",
-    "AVERAGE": "Durchschnitt",
-    "AREA": "Fläche",
-    "POPULATION": "Bevölkerung",
-    "OPACITY_THRESHOLDS": "Farb-Dichte",
-    "COUNTY_THRESHOLD": "Landkreise",
-    "MUNICIPALITY_THRESHOLD": "Kommunen",
-    "HEXAGON_THRESHOLD": "Hexagon",
-    "REDUCE_OPACITY": "Knopf halten, um Basis-Karte besser zu sehen.",
-    "REDUCE_OPACITY_TOOLTIP": "Features weniger intensiv anzeigen",
-    "RESTORE_OPACITY": "Karte wiederherstellen",
-    "ZOOM_TO_FEATURES": "Karte zentrieren",
-    "ZOOM_TO_FEATURES_TOOLTIP": "Zentriert die Karte wieder zum Initialzustand",
-    "EXPORT_PDF_TOOLTIP": "PDF exportieren",
-    "EXPORT_PDF": "PDF exportieren",
-    "COMPARISON_DIALOG_TITLE": "Projekt wählen",
-    "CREATED": "Erstellt",
-    "COMPARISON_ERROR_TITLE": "Kein Projekt verfügbar",
-    "COMPARISON_DIALOG_NO_PROJECTS": "Keine ähnliche Projekte verfügbar",
-    "EXIT_COMPARISON": "Vergleich beenden",
-    "VISUALIZATION_TYPE": "Visualisierung",
-    "INDEX": "Index",
-    "INDEX_TOOLTIP": "Zeigt die bewertete Mobilitätszeit in Relation zur jw. Regionalklasse.",
-    "SCORE": "Score",
-    "SCORE_TOOLTIP": "Zeigt die Reisezeit in Minuten, angereichert mit subjektiven Faktoren."
-  },
-  "ANALYZE": {
-    "PERSONA": {
-      "TITLE": "Persona",
-      "NO_DATA": "Keine Daten verfügbar",
-      "HINT": "Hinweis: Die Werte der Persona können bei einer limitieren Anzahl an Modi sehr ähnlich sein.",
-      "LOADING": "Lade Persona-Daten..."
-    },
-    "ACTIVITIES": {
-      "TITLE": "Aktivitäten",
-      "NO_DATA": "Keine Daten verfügbar",
-      "SWITCH_TO_DOUGHNUT": "Ansicht wechseln",
-      "EXPLANATION": "Die Aktivitäten gewichtet nach lokaler Relevanz",
-      "HINT": "💡 Klicke auf einen Balken im Diagramm, um eine Karte mit den Orten dieser Aktivität anzuzeigen!",
-      "SUBACTIVITIES_HINT": "💡 Klicke auf einen Balken im Diagramm, um Orte auf der Karte anzuzeigen!",
-      "NO_PLACES": "Keine Orte gefunden",
-      "DISABLE_PLACES": "Die Orts-Ansicht ist nur für Gemeinde-Ebene oder Hexagone aktiviert. Um mehr Details zu bekommen, zoome in die Karte hinein!",
-      "OSM_HINT": "Fehlt ein Ort? Du kannst ihn direkt zu OpenStreetMap hinzufügen:",
-      "OSM_LINK": "Den OpenStreetMap Editor öffnen",
-      "LOADING": "Lade Aktivitäten...",
-      "LOADING_SUBACTIVITIES": "Lade Unteraktivitäten...",
-      "LOADING_MAP": "Lade Karte..."
-    },
-    "MODES": {
-      "TITLE": "Modi",
-      "NO_DATA": "Keine Daten verfügbar",
-      "LOADING": "Lade Modi..."
-    },
-    "PROFILES": {
-      "TITLE": "Modi",
-      "NO_DATA": "Keine Daten verfügbar",
-      "HINT": "Hinweis: Die Werte der Modi können bei einer limitieren Anzahl an Personas sehr ähnlich sein.",
-      "LOADING": "Lade Profile...",
-      "EXPLANATION": "Die Abbildung oben zeigt, wie gut jedes einzelne Verkehrsmittel performt."
-    },
-    "TITLE": "Details",
-    "START": "Start",
-    "END": "Ende",
-    "PROPERTIES": {
-      "POPULATION": "Bevölkerung"
-    },
-    "WEIGHTING": {
-      "POPULATION": "Gewichten nach Bevölkerung",
-      "AREA": "Gewichten nach Fläche"
-    },
-    "LOADING": {
-      "HINT": "Hinweis: Umso mehr Fläche, die angeklickte Verwaltungseinheit hat, desto länger dauert der Ladevorgang!"
-    },
-    "POPULATION_WEIGHTING_HINT": "Hinweis: Die angezeigten Werte sind immer nach Bevölkerung gewichtet, nicht nach Fläche",
-    "COMPARISON_MODE": {
-      "DISABLED_TITLE": "Analyse deaktiviert",
-      "DISABLED_MESSAGE": "Die Analyse-Funktion ist für Vergleichsprojekte deaktiviert. Bitte verwenden Sie ein Standard-Projekt, um die Analyse zu nutzen."
-    }
-  },
-  "EXPORT": {
-    "IS_EXPORTING": "Export läuft...",
-    "GENERATING_PDF": "PDF wird generiert..."
-  },
-  "SHARE": {
-    "NO_PROJECT_SELECTED": "Kein Projekt ausgewählt",
-    "CREATED_BY": "Erstellt von",
-    "EXPIRES": "Läuft ab am",
-    "DETAILS": "Infos",
-    "LINKED_MAPS": "Verknüpfte Karten",
-    "PROJECTS": "Projekte",
-    "DESCRIPTION": "Beschreibung",
-    "ACTIVITIES": "Aktivitäten",
-    "PERSONAS": "Personas",
-    "NO_ACTIVITIES": "Keine Aktivitäten",
-    "NO_PERSONAS": "Keine Personas",
-    "NO_DESCRIPTION": "Keine Beschreibung",
-    "MODES": "Modi",
-    "NO_PROFILES": "Keine Profile gefunden"
-  },
-  "DETAILS": {
-    "FIELDS": {
-      "OVERVIEW": "Übersicht",
-      "ACTIVITIES": "Aktivitäten"
-    },
-    "TITLE": "Details"
-  },
-  "EDIT": {
-    "TITLE": "Projekt bearbeiten"
-  },
-  "AUTH": {
-    "LOGIN": {
-      "LOGIN": "Anmelden"
-    }
-  },
-  "RATE_LIMIT": {
-    "TITLE": "Zu viele Benutzer",
-    "MESSAGE": "Die maximale Anzahl gleichzeitiger Benutzer wurde erreicht",
-    "DESCRIPTION": "Leider sind derzeit zu viele Benutzer gleichzeitig auf der Plattform. Bitte versuche es später erneut.",
-    "CURRENT_STATUS": "Aktueller Status",
-    "CAPACITY_REACHED": "Kapazität erreicht",
-    "CAPACITY_MESSAGE": "Die Plattform ist derzeit voll ausgelastet",
-    "SYSTEM_BUSY": "System ausgelastet",
-    "NEXT_CHECK": "Nächste Überprüfung in",
-    "AUTO_RETRY": "Die Seite wird automatisch überprüft und du wirst weitergeleitet, sobald ein Platz verfügbar ist.",
-    "RETRY_NOW": "Jetzt erneut versuchen",
-    "BACK_TO_SHARE": "Zurück zum geteilten Projekt",
-    "GO_TO_LANDING": "Zur Startseite",
-    "HELP_TEXT": "Bitte habe Verständnis, dass wir die Qualität des Services für alle Benutzer sicherstellen möchten. Bei dauerhaften Problemen kannst du uns per E-Mail an mobimapr@bw-im.de kontaktieren.",
-    "TO_PROJECT_PAGE": "Zur Projektseite"
-  },
-  "CREDITS": {
-    "VISIT_WEBSITE": "Besuche unsere Website",
-    "INFO_BUTTON_TOOLTIP": "Informationen und Hilfe",
-    "VISUALIZATION_SECTION_TOOLTIP": "Verwendete Komponenten für die Visualisierung",
-    "DATA_SECTION_TOOLTIP": "Verwendete Datenquellen und -verarbeitung",
-    "BACKEND_SECTION_TOOLTIP": "Verwendete Backend-Technologien",
-    "ROUTING_SECTION_TOOLTIP": "Verwendete Routing-Dienste",
-    "VISIT_COMPONENT_WEBSITE": "Besuche die {{name}} Website",
-    "LANGUAGE_BUTTON_TOOLTIP": "Sprache ändern",
-    "SHORTCUTS": {
-      "CENTER_MAP": "Karte zentrieren",
-      "FREEZE_MAP": "Kartenoverlay einfrieren (für Screenshots)",
-      "SHOW_STATISTICS": "Statistiken anzeigen",
-      "EXPORT_PDF_PORTRAIT": "PDF im Hochformat exportieren",
-      "EXPORT_PDF_LANDSCAPE": "PDF im Querformat exportieren",
-      "SHARE": "Teilen",
-      "TOGGLE_HEXAGON_VIEW": "Hexagon Ansicht togglen",
-      "EXPORT_PDF": "Karte als PDF exportieren"
-    },
-    "LOGOUT": "Abmelden",
-    "SHOW_CREDITS": "Infos anzeigen",
-    "SHOW_HELP": "Hilfe anzeigen",
-    "START_TUTORIAL": "Tutorial starten",
-    "CHANGE_LANGUAGE": "Sprache wechseln",
-    "SHOW_SHORTCUTS": "Tastaturkürzel",
-    "TOGGLE_TUTORIAL": "Tutorial anzeigen"
-  },
-  "HELP": {
-    "GETTING_STARTED_TOOLTIP": "Erste Schritte mit der Anwendung",
-    "FAQ_TOOLTIP": "Häufig gestellte Fragen und Antworten",
-    "CONTACT_TOOLTIP": "Kontaktinformationen für Support"
-  },
-  "STATISTICS": {
-    "TITLE": "Rangliste",
-    "SHOW_STATISTICS_TOOLTIP": "Detaillierte Statistiken für dieses Projekt anzeigen",
-    "STATES": "Bundesländer",
-    "COUNTIES": "Land-/ Stadtkreise",
-    "MUNICIPALITIES": "Gemeinden",
-    "RANK": "Rang",
-    "NAME": "Name",
-    "SCORE": "Score",
-    "GRADE": "Note",
-    "CURRENT_SETTINGS": "Aktuelle Einstellungen",
-    "POPULATION_WEIGHTED": "Bevölkerung gewichtet",
-    "AREA_WEIGHTED": "Fläche gewichtet",
-    "FILTER_BY_CITY_SIZE": "Nach Bevölkerung filtern",
-    "FILTER_BY_NAME": "Gemeinden nach Name filtern",
-    "ENTER_MUNICIPALITY_NAME": "Gemeindename eingeben...",
-    "SHOW_BEZIRKE": "Bezirke anzeigen",
-    "LOADING_MORE_DATA": "Lade weitere Daten im Hintergrund...",
-    "PROJECT_VERSION_INVALID": "Die Version des Projektes ist zu alt. Erstelle es neu, um Statistiken angezeigt zu bekommen!",
-    "POPULATION": "Bevölkerung",
-    "MUNICIPALITY_SUBDIVISION_HINT": "Hinweis: Gemeinden, die allein den jeweiligen Stadt- oder Landkreis bilden, werden nicht noch einmal unter 'Gemeinden' aufgeführt, sondern nur unter 'Stadt- bzw. Landkreise'.",
-    "NO_MUNICIPALITIES_FOUND": "Keine Gemeinden gefunden",
-    "NO_MUNICIPALITIES_HINT": "Keine Gemeinden entsprechen den ausgewählten Kriterien. Versuchen Sie, die Bevölkerungsfilter anzupassen oder eine andere Gemeinde auszuwählen.",
-    "SEARCH_KEYWORD_STATE": "Gib zum filtern ein Bundesland ein....",
-    "SEARCH_KEYWORD_COUNTY": "Gib zum filtern eine Stadt/ Landkreis an"
-  },
-  "PDF_EXPORT": {
-    "TITLE": "PDF Export",
-    "ORIENTATION": "Ausrichtung",
-    "PORTRAIT": "Hochformat",
-    "LANDSCAPE": "Querformat",
-    "PAPER_SIZE": "Papiergröße",
-    "RESOLUTION": "Auflösung (DPI)",
-    "MAP_EXTENT": "Kartenausschnitt",
-    "CURRENT_VIEW": "Aktuelle Ansicht",
-    "FULL_MAP": "Gesamte Karte",
-    "EXPORT_INFO": "Export-Informationen",
-    "SELECTED_SIZE": "Ausgewählte Größe",
-    "ESTIMATED_SIZE": "Hinweis: Die Dateigröße hängt von der Kartenkomplexität und den gewählten Optionen ab"
-  },
-  "SEARCH_OVERLAY": {
-    "SEARCH_PLACEHOLDER": "Orte suchen",
-    "SEARCH_HINT": "Suche nach einem Ort, um ihn direkt auf der Karte anzuzeigen"
+  "maintenance": {
+    "title": "Wartung",
+    "message": "Die Anwendung wird derzeit gewartet. Bitte versuche es später erneut."
   },
   "LANDING": {
-    "TITLE": "Willkommen beim mobi.mapr",
-    "SUBTITLE": "Deine umfassende Mobilitätskartierungs- und Analyseplattform. Greife auf alle Tools und Ressourcen von einem zentralen Ort aus zu.",
+    "TITLE": "Willkommen bei mobi.mapr",
+    "SUBTITLE": "Entdecke die Mobilitätsqualität in deiner Region",
     "CARDS": {
       "PROJECT_MAIN_SITE": {
-        "TITLE": "Projektseite",
-        "DESCRIPTION": "Auf unserer Hauptseite findest du alles zum mobi.mapr. Dort findest du aktelle Projekte und weitere spannende Informationen.",
-        "BUTTON": "Hauptseite besuchen"
+        "TITLE": "Projekt-Hauptseite",
+        "DESCRIPTION": "Besuche die offizielle Projektseite für weitere Informationen"
       },
-      "CONTACT": {
-        "TITLE": "Kontakt",
-        "DESCRIPTION": "Bei Fragen oder Problemen kontaktiere uns!",
-        "BUTTON": "Projekt öffnen"
+      "FAQ": {
+        "TITLE": "Häufig gestellte Fragen",
+        "DESCRIPTION": "Finde Antworten auf häufige Fragen zum Projekt"
       },
       "TECHNICAL_DOCS": {
         "TITLE": "Technische Dokumentation",
-        "DESCRIPTION": "Umfassende technische Dokumentation, die den mobi.mapr genauer beschreibt.",
-        "BUTTON": "Dokumentation anzeigen"
+        "DESCRIPTION": "Detaillierte technische Informationen und API-Dokumentation"
       },
-      "FAQ": {
-        "TITLE": "FAQ",
-        "DESCRIPTION": "Finde Antworten auf häufig gestellte Fragen rund um das Projekt.",
-        "BUTTON": "FAQ anzeigen"
+      "CONTACT": {
+        "TITLE": "Kontakt",
+        "DESCRIPTION": "Nimm Kontakt mit uns auf für Fragen und Feedback"
       },
       "LOGIN": {
-        "TITLE": "Anmelden",
-        "DESCRIPTION": "Zugriff auf das Anwendungsdashboard und alle verfügbaren Funktionen.",
-        "BUTTON": "In App anmelden"
-      },
-      "DASHBOARD": {
-        "TITLE": "Dashboard",
-        "DESCRIPTION": "Zugriff auf das Hauptanwendungsdashboard mit allen Kartierungs- und Analysetools.",
-        "BUTTON": "Zum Dashboard"
+        "BUTTON": "Zur Anmeldung"
       }
     },
-    "FOOTER": "© 2025 bwim. Alle Rechte vorbehalten."
+    "FOOTER": "© mobi.mapr - Baden-Württemberg Institut für Nachhaltige Mobilität"
   },
-  "ADVERTISING": {
-    "TITLE": "Entdecke Weitere Projekte",
-    "DESCRIPTION": "Erkunde alle unsere Mobilitätskartierungsprojekte und bleibe über die neuesten Entwicklungen informiert.",
-    "VISIT_MAIN_SITE": "Hauptseite besuchen",
-    "NEWSLETTER_TEXT": "Abonniere unseren Newsletter für Projektupdates und neue Funktionen!"
+  "MAINTENANCE": {
+    "TITLE": "Wartung",
+    "MESSAGE": "Die Anwendung wird derzeit gewartet. Bitte versuche es später erneut.",
+    "CHECKING": "Prüfe Systemstatus...",
+    "INFO": "Wir arbeiten daran, die Anwendung so schnell wie möglich wieder verfügbar zu machen."
   },
-  "TUTORIAL": {
-    "STEP": "Schritt",
-    "OF": "von",
-    "PREVIOUS": "Zurück",
-    "NEXT": "Weiter",
-    "FINISH": "Fertig",
-    "SKIP": "Überspringen",
-    "SELECT_TUTORIAL": "Tutorial auswählen",
-    "CLICK_TO_CONTINUE": "Klicke auf das hervorgehobene Element, um fortzufahren",
-    "DASHBOARD": {
-      "NAME": "Willkommen Tutorial",
-      "DESCRIPTION": "Lerne die wichtigsten Funktionen der Anwendung kennen",
-      "STEP1": {
-        "TITLE": "Willkommen!",
-        "CONTENT": "Willkommen beim mobi.mapr! Mit diesem kleinen Tutorial zeigen wir dir die wichtigsten Funktionen des Tools. Du kannst das Tutorial jederzeit überspringen und später erneut starten. Um neu zu starten, klicke auf das gelbe i unten rechts und dann auf den obersten Knopf.",
-        "NEXT_HINT": "Klicke auf den Knopf unten in der Mitte, um loszulegen."
-      },
-      "STEP2": {
-        "TITLE": "Projekt-Übersicht",
-        "CONTENT": "Hier sind verschiedene vorberechnete Karten gelistet. Weiter unten findest du die Projekte, die du selbst erstellt hast."
-      },
-      "STEP3": {
-        "TITLE": "Karte anzeigen",
-        "CONTENT": "Um eine Karte anzuzeigen, klicke auf das kleine Symbol. Je nach Größe der Karte, dauert es ein paar Sekunden, bis die Karte geladen ist.",
-        "NEXT_HINT": "Klicke auf den Knopf, um die Karte anzuzeigen."
-      },
-      "STEP4": {
-        "TITLE": "Die Karte",
-        "CONTENT": "In der Mitte ist die Karte für Mobilitätsqualität. Du kannst zoomen, um andere Auflösungen zu erhalten. Du kannst direkt nach dem Tutorial anfangen zu spielen.",
-        "NEXT_HINT": "Klicke unten auf den Weiter-Knopf, wenn du bereit bist."
-      },
-      "STEP5": {
-        "TITLE": "Die Legende",
-        "CONTENT": "Unten links siehst du die Legende. Mit einem Klick erfährst du, was die einzelnen Farben bedeuten.",
-        "NEXT_HINT": "Klicke auf die Legende, um mehr Informationen zu erhalten."
-      },
-      "STEP6": {
-        "TITLE": "Details anzeigen",
-        "CONTENT": "Hier findest du alle Informationen zu dem Projekt, wie die Aktivitäten, Personas und Modi. Hier kannst du auch die Gewichtung auf der Karte umschalten oder die Karte exportieren.",
-        "NEXT_HINT": "Unten geht es wieder weiter."
-      },
-      "STEP7": {
-        "TITLE": "Karte analysieren",
-        "CONTENT": "Wenn du auf ein Gebiet auf der Karte klickst, bekommst du detaillierte Informationen, wie sich der Score zusammensetzt.",
-        "NEXT_HINT": "Klicke auf ein farbiges Gebiet auf der Karte, das du gerade siehst."
-      },
-      "STEP8": {
-        "TITLE": "Fokus auf Karte",
-        "CONTENT": "Um zur Karte zurückzukehren, klicke auf das schließen Symbol oben rechts.",
-        "NEXT_HINT": "Klicke auf das schließen Symbol oben rechts, um zur Karte zurückzukehren."
-      },
-      "STEP9": {
-        "TITLE": "Projekte anzeigen",
-        "CONTENT": "Klicke links auf die Projekte, um wieder alle Projekte anzuzeigen.",
-        "NEXT_HINT": "Klicke links auf das Seitenelement."
-      },
-      "STEP10": {
-        "TITLE": "Mehr Informationen",
-        "CONTENT": "Unten rechts, kannst du mehr Informationen über die Anwendung erhalten, die Sprache einstellen, Tastaturkürzel anzeigen und dieses Tutorial erneut starten.",
-        "NEXT_HINT": "Unten geht es wieder weiter."
-      },
-      "STEP11": {
-        "TITLE": "Viel Spaß!",
-        "CONTENT": "Wir hoffen, dass dir das Tutorial gefallen hat und du viel Spaß mit mobi.mapr hast!",
-        "NEXT_HINT": "Du kannst unten das Tutorial beenden!"
-      }
+  "language": {
+    "de": "Deutsch",
+    "en": "English",
+    "select": "Sprache auswählen"
+  },
+  "map": {
+    "search": {
+      "label": "Ort suchen",
+      "placeholder": "z.B. Berlin, München...",
+      "loading": "Lade Kartendaten...",
+      "clickForInfo": "Klicke für weitere Informationen"
     },
-    "SHARE": {
-      "NAME": "Teilen",
-      "LANGUAGE_HINT": "You can change the language in the top right corner!",
-      "DESCRIPTION": "Lerne die wichtigsten Funktionen des Teilens kennen",
-      "STEP1": {
-        "TITLE": "Willkommen!",
-        "CONTENT": "Willkommen beim mobi.mapr! Mit diesem kleinen Tutorial zeigen wir dir die wichtigsten Funktionen deiner geteilten Karte.",
-        "NEXT_HINT": "Klicke auf den Knopf unten in der Mitte, um loszulegen."
+    "popup": {
+      "index": "Mobilitätsqualität:",
+      "score": "Mobilitätszeit:",
+      "minutes": "min",
+      "notAvailable": "N/A",
+      "unnamed": "Unbenannt",
+      "error": "Fehler"
+    },
+    "legend": {
+      "title": "Legende",
+      "introduction": "Mobilität lässt sich auf zwei unterschiedliche Arten betrachten: als Mobilitätszeit oder als Mobilitätsqualität. Beide Perspektiven ergänzen sich – die eine ist konkret und greifbar, die andere vergleichend und einordnend.",
+      "quality": {
+        "title": "Mobilitätsqualität",
+        "description": "Die Mobilitätsqualität setzt die berechnete Mobilitätszeit ins Verhältnis zu einer strukturell vergleichbaren Region.",
+        "comparison": "Eine Reisezeit in einer Stadt wird also mit anderen Städten verglichen – nicht mit dem ländlichen Raum. Ebenso wird eine ländliche Region mit anderen ländlichen Regionen verglichen.",
+        "fair": "Dadurch entsteht eine faire und kontextbezogene Bewertung.",
+        "perception": "Ein weiterer wichtiger Aspekt: Zeitunterschiede im unteren Bereich werden deutlich sensibler wahrgenommen als im oberen Bereich. Der Unterschied zwischen 5 und 10 Minuten fühlt sich gravierender an als der Unterschied zwischen 45 und 50 Minuten.",
+        "scaleIntro": "Deshalb ist die Skala der Mobilitätsqualität exponentiell aufgebaut:",
+        "scaleLower": "Im unteren Bereich erfolgt eine feinere Differenzierung.",
+        "scaleUpper": "Im oberen Bereich eine gröbere.",
+        "result": "Das Ergebnis ist ein Indexwert, der zusätzlich in eine verständliche Note übersetzt wird. So entsteht aus einer abstrakten Zahl eine intuitive Einschätzung der Mobilitätssituation.",
+        "scale": "Skala",
+        "howToRead": "Die Farben auf der Karte zeigen die Mobilitätsqualität von A (beste Qualität) bis F (niedrigste Qualität).",
+        "a": {
+          "title": "A - Beste Qualität",
+          "description": "Sehr gute Mobilitätsqualität (Index: 0 - 0.35)"
+        },
+        "b": {
+          "title": "B - Gute Qualität",
+          "description": "Gute Mobilitätsqualität (Index: 0.35 - 0.5)"
+        },
+        "c": {
+          "title": "C - Mittlere Qualität",
+          "description": "Mittlere Mobilitätsqualität (Index: 0.5 - 0.71)"
+        },
+        "d": {
+          "title": "D - Unterdurchschnittliche Qualität",
+          "description": "Unterdurchschnittliche Mobilitätsqualität (Index: 0.71 - 1.0)"
+        },
+        "e": {
+          "title": "E - Schlechte Qualität",
+          "description": "Schlechte Mobilitätsqualität (Index: 1.0 - 1.41)"
+        },
+        "f": {
+          "title": "F - Sehr schlechte Qualität",
+          "description": "Sehr schlechte Mobilitätsqualität (Index: > 1.41)"
+        }
       },
-      "STEP2": {
-        "TITLE": "Die Karte",
-        "CONTENT": "In der Mitte ist die Karte für Mobilitätsqualität. Du kannst zoomen, um andere Auflösungen zu erhalten. Du kannst direkt nach dem Tutorial anfangen zu spielen.",
-        "NEXT_HINT": "Klicke unten auf den Weiter-Knopf, wenn du bereit bist."
-      },
-      "STEP3": {
-        "TITLE": "Die Legende",
-        "CONTENT": "Unten links siehst du die Legende. Mit einem Klick darauf, öffnet sich die Beschreibung.",
-        "NEXT_HINT": "Klicke irgendwo auf die Legende."
-      },
-      "STEP3-1": {
-        "TITLE": "Übersicht",
-        "CONTENT": "Du kannst die Legende jederzeit schließen, indem du erneut auf diese klickst.",
-        "NEXT_HINT": "Klicke irgendwo auf die Legende, um diese zu schließen."
-      },
-      "STEP4": {
-        "TITLE": "Details anzeigen",
-        "CONTENT": "Hier findest du alle Informationen zu dem Projekt, wie die Aktivitäten, Personas und Modi.",
-        "NEXT_HINT": "Schließe die Details, um fortzufahren."
-      },
-      "STEP5": {
-        "TITLE": "Karte analysieren",
-        "CONTENT": "Wenn du auf ein Gebiet auf der Karte klickst, bekommst du detaillierte Informationen, wie sich der Score zusammensetzt.",
-        "NEXT_HINT": "Klicke auf ein farbiges Gebiet auf der Karte, das du gerade siehst."
-      },
-      "STEP6": {
-        "TITLE": "Fokus auf Karte",
-        "CONTENT": "Um zur Karte zurückzukehren, klicke auf das schließen Symbol oben rechts.",
-        "NEXT_HINT": "Klicke auf das schließen Symbol oben rechts, um zur Karte zurückzukehren."
-      },
-      "STEP7": {
-        "TITLE": "Mehr Informationen",
-        "CONTENT": "Unten rechts, kannst du mehr Informationen über die Anwendung erhalten, wie z.B. die Tastaturkürzel anzeigen lassen.",
-        "NEXT_HINT": "Unten geht es wieder weiter."
-      },
-      "STEP8": {
-        "TITLE": "Viel Spaß!",
-        "CONTENT": "Wir hoffen, dass dir das Tutorial gefallen hat und du viel Spaß mit mobi.mapr hast!",
-        "NEXT_HINT": "Du kannst unten das Tutorial beenden!"
+      "time": {
+        "title": "Mobilitätszeit",
+        "description": "Die Mobilitätszeit beschreibt die tatsächlich bewertete Reisezeit in Minuten – inklusive aller Penalties (siehe Infobox Verkehrsmittel und Bewertung) sowie der Gewichtung mehrerer erreichbarer Ziele.",
+        "result": "Das Ergebnis ist eine Zeitangabe in Minuten. Allerdings handelt es sich dabei nicht um eine rein technische Messung, sondern um eine gefühlte Zeit.",
+        "perceived": "Diese kann von der real gefahrenen oder gelaufenen Zeit abweichen – bildet jedoch die tatsächliche Entscheidungsrealität deutlich besser ab.",
+        "example": "Beispiel: Für das Fahrrad wird – abhängig von der Gemeinde – ein gewisser 'Anfangswiderstand' berücksichtigt. Denn in der Praxis steigt man nicht für jede noch so kurze Strecke aufs Rad. 'Damit ich das Fahrrad nehme, muss das Ziel mindestens 15 Minuten entfernt sein – sonst gehe ich bei dem Verkehr hier lieber zu Fuß.'",
+        "conclusion": "Die Mobilitätszeit bildet also ab, welches Verkehrsmittel unter realistischen Bedingungen tatsächlich gewählt wird.",
+        "scale": "Skala",
+        "scaleDescription": "Die Skala ist dabei linear aufgebaut und wird in Minuten angegeben.",
+        "howToRead": "Die Farben auf der Karte zeigen die Mobilitätszeit von dunkelblau (kurze Zeiten, 0-15 Minuten) bis hellblau (lange Zeiten, über 60 Minuten). Je dunkler die Farbe, desto kürzer die Mobilitätszeit.",
+        "min0": "0 min",
+        "min60Plus": "60+ min"
       }
     }
   },
-  "MAINTENANCE": {
-    "TITLE": "Wartungsarbeiten",
-    "MESSAGE": "Derzeit werden Wartungsarbeiten durchgeführt. Bitte versuchen Sie es später erneut. Die Seite wird automatisch aktualisiert, sobald der Service wieder verfügbar ist.",
-    "CHECKING": "Service wird überprüft...",
-    "INFO": "Diese Seite wird automatisch aktualisiert, sobald der Service wieder verfügbar ist."
+  "left": {
+    "extendedMode": "erweiterter Modus",
+    "information": "Information",
+    "expanded": "Erweitert",
+    "normal": "Normal",
+    "createdDate": "Erstellungsdatum des Projekts",
+    "filters": "Filter",
+    "transportModes": {
+      "title": "Verkehrsmittel",
+      "description": "Wähle die Verkehrsmittel aus, die in der Berechnung berücksichtigt werden sollen. Du kannst mehrere Verkehrsmittel gleichzeitig aktivieren oder deaktivieren.",
+      "availableOptions": "Verfügbare Optionen",
+      "availableOptionsDescription": "Jedes Verkehrsmittel kann einzeln ein- oder ausgeschaltet werden, um die Analyse entsprechend deinen Anforderungen anzupassen.",
+      "cannotDisable": "Kann nicht deaktiviert werden",
+      "cannotUseCar": "Für ausgewählte Personengruppe nicht verfügbar",
+      "introduction": "Wähle aus vier Verkehrsmitteln, um die Mobilität in deiner Region zu analysieren. Jeder Modus verwendet ausgeklügelte Routing-Algorithmen, um realistische Reisezeiten zu berechnen.",
+      "modes": {
+        "title": "Verfügbare Verkehrsmittel",
+        "pedestrian": {
+          "title": "Fußgänger",
+          "description": "Fußgänger-Routen werden unter Berücksichtigung von Gehwegen, Fußgängerzonen und fußgängerfreundlicher Infrastruktur berechnet.",
+          "alwaysEnabled": "Immer aktiviert und kann nicht deaktiviert werden"
+        },
+        "bicycle": {
+          "title": "Fahrrad",
+          "description": "Die Fahrrad-Routing ist für durchschnittliche Stadtfahrräder optimiert und priorisiert dedizierte Fahrradwege und -spuren für sicherere und effizientere Radrouten."
+        },
+        "car": {
+          "title": "Auto",
+          "description": "Die Auto-Routing berücksichtigt Straßennetze, Verkehrsmuster und realistische Fahrbedingungen, um genaue Reisezeiten zu berechnen."
+        },
+        "transit": {
+          "title": "Öffentlicher Verkehr",
+          "description": "Die Routing für öffentliche Verkehrsmittel nutzt echte Fahrpläne und Verbindungen, um die besten Routen mit Bussen, Zügen, Straßenbahnen und anderen öffentlichen Verkehrsmitteln zu finden."
+        }
+      },
+      "routing": {
+        "title": "Routing-Technologie",
+        "valhalla": {
+          "title": "Valhalla Routing (Fuß, Rad, Auto)",
+          "description": "Fußgänger-, Fahrrad- und Auto-Routen werden mit Valhalla berechnet, einer leistungsstarken Open-Source-Routing-Engine, die realistische und genaue Wegfindung bietet.",
+          "feature1": "Hügel, Höhenunterschiede und Gelände werden in die Routenberechnungen einbezogen",
+          "feature2": "Fahrradrouten priorisieren dedizierte Fahrradwege und -spuren, wenn verfügbar",
+          "feature3": "Realistisches Routing berücksichtigt tatsächliche Straßenbedingungen und Infrastruktur"
+        },
+        "motis": {
+          "title": "Motis Transit Routing",
+          "description": "Öffentliche Verkehrsrouten werden mit Motis berechnet, das echte Fahrpläne und Zeitpläne verarbeitet, um optimale Verbindungen zu finden.",
+          "feature1": "Berechnungen basieren auf einem Referenz-Dienstag-Fahrplan für konsistente Ergebnisse",
+          "feature2": "Jede Aktivität hat eine Standardzeit zugewiesen (z.B. Restaurants um 19:00 Uhr), und der ÖPNV wird so berechnet, dass die optimale Ankunftszeit erreicht wird",
+          "feature3": "Die beste Verbindung wird automatisch ausgewählt, wobei keine Wartezeit am Ziel berücksichtigt wird"
+        }
+      },
+      "info": {
+        "title": "Verkehrsmittel",
+        "general": {
+          "title": "Allgemeines",
+          "intro": "Um eine Aktivität zu erreichen, benötigst du ein Verkehrsmittel – das können deine eigenen Füße, ein Fahrrad, das Auto oder der ÖPNV sein.",
+          "pedestrianBase": "Der Fußverkehr bildet dabei das Basis-Verkehrsmittel, denn ohne ihn lassen sich auch alle anderen Optionen nicht sinnvoll nutzen. Deshalb kann er nicht deaktiviert werden.",
+          "questionIntro": "Mit der Auswahl der Verkehrsmittel beantwortest du im Grunde folgende Frage:",
+          "question": "Wie gut ist meine Mobilitätsqualität, wenn ich zu Fuß unterwegs bin oder ein Fahrrad zur Verfügung habe?",
+          "approach": "Der mobi.mapr verfolgt dabei einen realitätsnahen Ansatz: Es wird stets das Verkehrsmittel gewählt, das unter Berücksichtigung aller Faktoren insgesamt am schnellsten ist – inklusive Parken, Abstellen oder sonstiger Nebenzeiten. Selbst wenn ein Auto verfügbar ist, geht man für einen 200 Meter entfernten Bäcker meist lieber zu Fuß, auch wenn die reine Fahrzeit kürzer wäre. Der zusätzliche Aufwand für Ein- und Ausparken macht das Auto in diesem Fall unattraktiv."
+        },
+        "penalties": {
+          "title": "Penalties",
+          "intro": "Um die Verkehrsmittel fair miteinander zu vergleichen, werden auf die reine Reisezeit sogenannte Penalties (Zeitaufschläge) angewendet.",
+          "examplesLabel": "Beispiele:",
+          "example1": "Beim Auto wird – abhängig von der Uhrzeit der Aktivität – eine kleine Zeitstrafe berücksichtigt, um die Parkplatzsuche realistisch abzubilden.",
+          "example2": "Beim Fahrrad wird pauschal eine Minute ergänzt.",
+          "example3": "Beim Lastenrad werden drei Minuten addiert, da hier die Stellplatzsuche in der Regel aufwendiger ist.",
+          "subjective": "Darüber hinaus können sich Wege subjektiv länger oder kürzer anfühlen. In einer Stadt mit gut ausgebauter Fahrradinfrastruktur wirkt eine Strecke oft kürzer als auf einer stark befahrenen Hauptstraße.",
+          "adfc": "Zur Bewertung solcher Faktoren beziehen wir unter anderem den ADFC-Fahrradklimatest mit ein.",
+          "documentation": "Eine ausführliche Erklärung findest du in unserer Dokumentation."
+        },
+        "profiles": {
+          "title": "Mobilitätsprofile",
+          "variation": "Ein Verkehrsmittel kann stark variieren. Ein Lastenrad, ein Trekkingrad oder ein Rennrad gehören zwar alle zur Kategorie 'Fahrrad', unterscheiden sich jedoch deutlich in ihrem Verhalten und ihrer Nutzung.",
+          "mapping": "Im mobi.mapr werden diese Unterschiede über sogenannte Mobilitätsprofile abgebildet. In der frei verfügbaren Ansicht wird standardmäßig das am häufigsten genutzte Profil verwendet.",
+          "future": "Zukünftig wird es möglich sein, individuelle Profile zu erstellen und zu verwenden. Stay tuned!"
+        },
+        "routing": {
+          "title": "Routing",
+          "complexity": "Die Wegfindung zwischen Start und Ziel ist deutlich komplexer, als einfach einer Straße zu folgen. Steigungen, Ampeln oder Kreuzungen können die tatsächliche Reisezeit erheblich verlängern.",
+          "fullRouting": "Um möglichst viele Einflussfaktoren zu berücksichtigen, wird jede Strecke vollständig geroutet.",
+          "startPoint": "Startpunkt ist das Zentrum des jeweiligen Hexagons.",
+          "destination": "Ziel ist die konkrete Aktivität.",
+          "engines": "Für das Routing von Fuß-, Rad- und Autoverkehr nutzen wir die FOSS-Routing-Engine Valhalla. Für den ÖPNV verwenden wir das Projekt MOTIS.",
+          "transitDay": "Das ÖPNV-Routing erfolgt an einem repräsentativen Dienstag. Jede Aktivität besitzt eine definierte Uhrzeit, zu der die Route berechnet wird.",
+          "waitingTime": "Die Wartezeit am Ziel wird dabei nicht berücksichtigt. Beispiel: Wenn ein Treffen um 19:00 Uhr geplant ist, der Zug jedoch bereits um 18:40 Uhr ankommt, gilt die Reise mit der Ankunft als beendet – die verbleibende Wartezeit fließt nicht in die Bewertung ein."
+        }
+      }
+    },
+    "mobilityRating": {
+      "title": "Bewertung",
+      "description": "Wähle zwischen zwei Bewertungsmethoden für die Mobilitätsanalyse.",
+      "introduction": "Um Mobilität neutral und vergleichbar bewerten zu können, braucht es eine klare und nachvollziehbare Methodik.",
+      "time": {
+        "label": "Zeit",
+        "title": "Zeitbasierte Bewertung",
+        "description": "Die zeitbasierte Bewertung berechnet absolute Reisezeiten zu Zielen unter Berücksichtigung von Routenstrafen und modusspezifischen Faktoren.",
+        "step1": "Von einem Ausgangspunkt werden die nächsten drei Instanzen jeder Aktivität (z.B. Restaurants) für alle aktivierten Verkehrsmittel berechnet.",
+        "step2": "Jede Route erhält Strafen je nach Verkehrsmittel, wie z.B. Parkplatzsuche für Autos oder Fahrradinfrastruktur-Qualität (ADFC-Fahrradklimatest) für Fahrräder.",
+        "step3": "Für die gewählte Verkehrsmittel-Mischung werden die besten drei Routen ausgewählt und gewichtet. Die Gewichtung hängt vom Aktivitätstyp ab - für ein Restaurant möchte man mehr Auswahlmöglichkeiten als für ein Postamt.",
+        "example": "Beispiel: Die beste Route könnte zu Fuß sein, die zweitbeste mit dem Fahrrad und die drittbeste mit dem Auto. Alle drei werden mit aktivitätsspezifischen Gewichtungen kombiniert."
+      },
+      "quality": {
+        "label": "Qualität",
+        "title": "Qualitätsbasierte Bewertung",
+        "description": "Die qualitätsbasierte Bewertung bewertet die Mobilitätsleistung relativ zu ähnlichen Gemeinden und bietet eine vergleichende Perspektive statt absoluter Zeitwerte.",
+        "example": "Beispiel: Wenn deine Gemeinde 15 Minuten benötigt, um einen Supermarkt zu erreichen, ähnliche Gemeinden (nach RegioStar) aber durchschnittlich 20 Minuten benötigen, benötigst du nur 75% der Zeit. Diese relative Leistung wird dann in eine Qualitätsnote übersetzt.",
+        "graphTitle": "Qualitätsübersetzungsgraph",
+        "graphDescription": "Der relative Zeitprozentsatz (z.B. 75%) wird mithilfe einer Exponentialfunktion auf eine Qualitätsnote (A+ bis F-) abgebildet. Niedrigere Prozentsätze (bessere Leistung) führen zu höheren Noten."
+      },
+      "mobilityTime": {
+        "title": "Mobilitätszeit",
+        "approach": "Der grundlegende Ansatz ist dabei immer derselbe.",
+        "exampleIntro": "Um beispielsweise mit einer Verkehrsmittelkombination (z. B. Fuß + Rad) die Mobilitätsqualität für die Aktivität 'Supermarkt' zu berechnen, werden folgende Schritte durchgeführt:",
+        "step1": {
+          "title": "Routing zu allen relevanten Zielen",
+          "description": "Von einem definierten Startpunkt aus wird für jedes verfügbare Verkehrsmittel die Route zu allen Supermärkten in der Umgebung berechnet."
+        },
+        "step2": {
+          "title": "Hinzufügen von Penalties",
+          "description": "Auf die reine Reisezeit werden zusätzliche Zeitaufschläge addiert, etwa für Parkplatzsuche oder infrastrukturelle Qualität."
+        },
+        "step3": {
+          "title": "Auswahl und Gewichtung der besten Optionen",
+          "description": "Aus allen berechneten Routen werden die drei besten Verbindungen ausgewählt und gewichtet miteinander verrechnet. Die Gewichtung bedeutet, wie 'wichtig' das jeweilige Ziel für die Mobilitätsqualität ist bzw. wie wichtig es ist unterschiedlich viel Auswahl zu haben.",
+          "exampleLabel": "Beispiel:",
+          "example1": "1. Supermarkt: 65 %",
+          "example2": "2. Supermarkt: 20 %",
+          "example3": "3. Supermarkt: 15 %",
+          "explanation": "Hintergrund ist, dass nicht nur das nächstgelegene Ziel zählt – eine gewisse Auswahl erhöht die tatsächliche Mobilitätsqualität. Die konkrete Gewichtung hängt von der jeweiligen Aktivität ab. Bei Restaurants ist Auswahl wichtiger als beispielsweise bei einer Paketstation."
+        },
+        "conclusion": "Aus diesem Grund sprechen wir bewusst nicht von Reisezeit, sondern von Mobilitätszeit."
+      },
+      "mobilityQuality": {
+        "title": "Mobilitätsqualität",
+        "weakness": "Die Mobilitätszeit ist zwar intuitiv verständlich, hat jedoch eine Schwäche: Sie erlaubt nur eingeschränkt Vergleiche zwischen unterschiedlichen Regionen oder Aktivitätstypen.",
+        "exampleLabel": "Beispiel:",
+        "example": "Sind 20 Minuten Fahrtzeit zu einem Friseur im ländlichen Raum gut oder schlecht?",
+        "introduction": "Um solche Fragen beantworten zu können, wird die Mobilitätsqualität eingeführt. Hierbei wird die berechnete Mobilitätszeit ins Verhältnis zu einem Referenzwert gesetzt.",
+        "calculation": "Dank deutschlandweit verfügbarer Vergleichsdaten lässt sich beispielsweise ermitteln, dass man im ländlichen Raum durchschnittlich 30 Minuten zu einem Friseur benötigt. Liegt die eigene Mobilitätszeit bei 20 Minuten, ergibt sich daraus eine Mobilitätsqualität von 66 %.",
+        "gradeIntro": "Um diesen abstrakten Prozentwert verständlicher zu machen, wird er zusätzlich in eine Note übersetzt.",
+        "scaleIntro": "Diese Skala ist exponentiell aufgebaut:",
+        "scale1": "Im unteren Bereich wird feingranular unterschieden.",
+        "scale2": "Im oberen Bereich erfolgt eine gröbere Differenzierung.",
+        "conclusion": "So entsteht ein vergleichbarer, intuitiv erfassbarer Bewertungsmaßstab.",
+        "graphTitle": "Graph"
+      }
+    },
+    "adminLevel": {
+      "title": "Administrative Ebene",
+      "automatic": "Automatisch",
+      "hexagon": "Hexagon",
+      "municipality": "Gemeinde",
+      "county": "Kreis",
+      "state": "Bundesland"
+    },
+    "activeFilters": {
+      "title": "Aktive Filter",
+      "description": "Diese Übersicht zeigt die aktuell aktiven Filter und deren Anzahl. Die Zahlen zeigen, wie viele Filter in jeder Kategorie ausgewählt sind.",
+      "introduction": "Filter ermöglichen es dir, die Analyse anzupassen, indem du bestimmte Aktivitäten, Personengruppen, Regionen und Regionaltypen auswählst. Verwende die Filter-Schaltfläche, um diese Einstellungen anzupassen.",
+      "adjustFilters": "Filter anpassen",
+      "adjustFiltersDescription": "Klicke auf 'Filtern', um die Filtereinstellungen zu öffnen und anzupassen. Dort kannst du Aktivitäten, Personengruppen, Regionalklassen und Bundesländer auswählen.",
+      "midProject": "MID-Projekt",
+      "midProjectDescription": "Da dies ein MID-Projekt ist, kannst du zusätzlich Aktivitäten und Personengruppen filtern, um die Analyse weiter zu verfeinern.",
+      "activities": "Aktivitäten",
+      "activitiesDescription": "Die Aktivitäten basieren auf der Studie 'Mobilität in Deutschland'. Sie gruppieren verschiedene reale Aktivitäten (z.B. Supermarkt) in abstrakte Kategorien des täglichen Bedarfs.",
+      "personas": "Personengruppen",
+      "personasDescription": "Eine Personengruppe definiert, wie relevant bestimmte Aktivitäten für verschiedene Nutzergruppen sind. Für ein Kind ist beispielsweise der Besuch eines Spielplatzes normalerweise relevanter als für einen Erwachsenen. Die Personengruppen stammen ebenfalls aus der MID-Studie.",
+      "regioStars": "Regionalklassen",
+      "regioStarsDescription": "Wenn du nur bestimmte Regionen in Deutschland betrachten möchtest, z.B. ländliche Gebiete, kannst du dies hier filtern. Es ändert die Daten selbst nicht, wie Bundesländer, filtert aber auch die Ergebnisse. Dies spiegelt sich auch in den Top-10-Rankings wider.",
+      "states": "Bundesländer",
+      "statesDescription": "Bundesländer ermöglichen es dir, Regionen auf der Karte zu filtern. Während dies die Daten überhaupt nicht beeinflusst, ermöglicht es einen besseren Vergleich sowie die Filterung der Top-100-Rankings.",
+      "filterButton": "Filtern",
+      "filterButtonDisabledHint": "Nur für registrierte Nutzer verfügbar",
+      "resetButton": "Filter zurücksetzen",
+      "infoTabs": {
+        "general": "Allgemein",
+        "generalContent": {
+          "title": "Filter-Übersicht",
+          "intro": "Neben der Auswahl der Verkehrsmittel ist die Wahl der Ziele, also der Aktivitäten entscheidend. Diese können mittels des 'Filtern'-Buttons angepasst werden.",
+          "mid23": "Die Aktivitäten basieren auf der Studie 'Mobilität in Deutschland 2023' (MiD23) und werden mit freundlicher Genehmigung verwendet.",
+          "personas": "Zusätzlich können die Aktivitäten für einzelne Personengruppen eingeschränkt werden. Um jeweils mehr darüber zu erfahren, klicke auf die jeweiligen Tabs.",
+          "combinations": "Die beliebige Kombination der 30 Aktiviten, 10 Persona und 4 Verkehrsmittel-Kombinationen ergibt eine exponentiell große Anzahl an Möglichkeiten, die Karte zu erstellen; am Ende sind es mehr als eine Billion Möglichkeiten.",
+          "beta": "Um die Rechenkapazitäten nicht zu überlasten sowie Missbrauch zu vermeiden, sind diese Funktionen nur für angemeldete Nutzer verfügbar. Dieses Feature befindet sich aktuell in der Beta-Phase.",
+          "regionalFilters": "Zusätzlich können Bundesländer und Regionalklassen ausgewählt werden. Diese sind keine inhaltliche, sondern oberflächliche Filterung.",
+          "example": "Möchte man beispielsweise wissen, was die besten Kommunen im ländlichen Raum in Baden-Württemberg sind, kann man das hier filtern und es wird dann rechts angezeigt."
+        },
+        "activities": "Aktivitäten",
+        "activitiesContent": {
+          "introduction": {
+            "title": "Grundverständnis",
+            "description": "Am Ende jedes Weges steht eine Aktivität. Dies kann beispielsweise ein Restaurantbesuch, ein Museumsaufenthalt oder ein Einkauf sein. Aktivitäten bilden somit den eigentlichen Zweck von Mobilität.",
+            "focus": "Der mobi.mapr konzentriert sich auf die Alltagsmobilität. Dabei werden Wege zu Ausbildungs- und Arbeitsorten bewusst nicht berücksichtigt. Im Fokus stehen vielmehr alltägliche Ziele des täglichen Lebens, wie Einkäufe, Freizeitaktivitäten oder soziale Besuche."
+          },
+          "dataSource": {
+            "title": "Datengrundlage: Mobilität in Deutschland (MiD)",
+            "description": "Die im mobi.mapr verwendeten Aktivitäten basieren auf der Studie 'Mobilität in Deutschland' (MiD). Es werden die Daten aus dem Jahr 2023 genutzt.",
+            "survey": "In dieser bundesweiten Erhebung werden Menschen unter anderem dazu befragt:",
+            "survey1": "Welche Wege sie im Alltag zurücklegen",
+            "survey2": "Welche Ziele sie dabei ansteuern",
+            "survey3": "Aus welchem Anlass diese Wege erfolgen",
+            "result": "Das Ergebnis ist eine Liste von rund 30 Aktivitätskategorien. Diese Kategorien sind bewusst allgemein formuliert, um statistisch auswertbar zu sein."
+          },
+          "translation": {
+            "title": "Übersetzung in konkrete Alltagsaktivitäten",
+            "description": "Die in der MiD erhobenen Aktivitätskategorien sind relativ abstrakt. Daher werden sie im mobi.mapr auf Basis wissenschaftlicher Literatur und empirischer Annahmen in konkrete Alltagsziele übersetzt.",
+            "example": "Beispiel:",
+            "exampleTitle": "'Täglicher Bedarf' wird konkretisiert zu:",
+            "example1": "Supermarkt",
+            "example2": "Bäckerei",
+            "example3": "Drogerie",
+            "example4": "weitere Einrichtungen des täglichen Einkaufs",
+            "details": "Für jede Aktivität ist hinterlegt:",
+            "details1": "Welche konkreten Zielorte ihr zugeordnet sind",
+            "details2": "Wie diese Zielorte gewichtet werden",
+            "viewInfo": "Diese Informationen können durch einen Klick auf die jeweilige Aktivität eingesehen werden."
+          },
+          "ambiguities": {
+            "title": "Umgang mit Unschärfen",
+            "description": "Nicht jede Aktivität lässt sich eindeutig und zielscharf übersetzen.",
+            "example": "Ein Beispiel ist die Aktivität 'Hund ausführen' aus der MiD-Studie. Diese beschreibt eigentlich eine Bewegung im öffentlichen Raum ohne klares Ziel. Im mobi.mapr wird sie derzeit näherungsweise über Ziele wie:",
+            "example1": "Geschäfte für Hundezubehör",
+            "example2": "ähnliche Einrichtungen",
+            "validation": "abgebildet. Validierungen zeigen jedoch, dass sich solche Unschärfen in der Gesamtbetrachtung häufig ausgleichen. Das bedeutet: Auch wenn einzelne Aktivitäten nur näherungsweise übersetzt werden können, bleibt das Gesamtbild der Alltagsmobilität stabil und belastbar."
+          },
+          "regional": {
+            "title": "Regionale Differenzierung",
+            "description": "Zusätzlich zur Differenzierung nach Personengruppen werden Aktivitäten auch regional gewichtet.",
+            "meaning": "Das bedeutet:",
+            "meaning1": "In Metropolregionen unterscheiden sich Zielstrukturen und Präferenzen deutlich von denen im ländlichen Raum.",
+            "meaning2": "Stadtbewohner suchen häufiger urbane Angebote wie Gastronomie, Kultur oder spezialisierte Dienstleistungen.",
+            "meaning3": "Im ländlichen Raum stehen andere Einrichtungen und Versorgungsstrukturen im Vordergrund.",
+            "consideration": "Diese regionalen Unterschiede werden im mobi.mapr berücksichtigt, um realitätsnahe Aussagen zur Alltagsmobilität treffen zu können."
+          }
+        },
+        "personas": "Personengruppen",
+        "personasContent": {
+          "introduction": {
+            "title": "Über Personengruppen",
+            "description": "Über Personengruppen werden unterschiedliche Alltagsperspektiven auf Mobilität abgebildet. Die genutzten Personengruppen basieren auf den 10 Personengruppen der Studie 'Mobilität in Deutschland (MiD)' und ermöglichen es, Mobilitätszeiten und Bewertungen getrennt nach Nutzungsgruppen darzustellen. Durch die Aus- und Abwahl einzelner Personengruppen lassen sich Unterschiede zwischen Lebensrealitäten unmittelbar sichtbar machen."
+          },
+          "personGroups": {
+            "title": "Personengruppen laut MiD:",
+            "group1": "Erwerbstätige/r mit verfügbarem Pkw",
+            "group2": "Erwerbstätige/r ohne verfügbaren Pkw",
+            "group3": "Nicht-Erwerbstätige/r mit verfügbarem Pkw",
+            "group4": "Nicht-Erwerbstätige/r ohne verfügbaren Pkw",
+            "group5": "Student/in mit verfügbarem Pkw",
+            "group6": "Student/in ohne verfügbaren Pkw",
+            "group7": "Auszubildende/r mit verfügbarem Pkw",
+            "group8": "Auszubildende/r ohne verfügbaren Pkw",
+            "group9": "Schüler/in ab 11 Jahre mit verfügbarem Pkw",
+            "group10": "Schüler/in ab 11 Jahre ohne verfügbaren Pkw"
+          },
+          "weighting": {
+            "title": "Gewichtung der Aktivitäten",
+            "description": "Die Bedeutung einzelner Aktivitäten hängt stark von der jeweiligen Personengruppe ab.",
+            "examples": "Beispiele:",
+            "example1": "Kinder besuchen häufiger Spielplätze.",
+            "example2": "Erwachsene haben einen stärkeren Fokus auf Einkauf oder Besorgungen.",
+            "example3": "Ältere Menschen weisen wiederum andere Aktivitätsmuster auf.",
+            "standardView": "In der Standardansicht des mobi.mapr werden zunächst alle Personengruppen gemeinsam betrachtet. Dadurch entsteht ein durchschnittliches Aktivitätsprofil."
+          }
+        },
+        "regioStars": "Regionalklassen",
+        "regioStarsContent": {
+          "introduction": {
+            "title": "RegioStaR7: Der Schlüssel zum fairen Vergleich",
+            "description": "Um die Mobilitätsqualität realistisch und differenziert darzustellen, greift mobi.mapr auf die RegioStaR7-Klassifizierung (Regionalstatistische Raumtypologie) des Bundesministeriums für Digitales und Verkehr (BMDV) zurück. Diese Typologie teilt Deutschland in sieben Raumtypen ein."
+          },
+          "types": {
+            "title": "Die sieben Raumtypen:",
+            "type1": "Stadtregion – Metropole",
+            "type2": "Stadtregion – Regiopole und Großstadt",
+            "type3": "Stadtregion – Mittelstadt, städtischer Raum",
+            "type4": "Stadtregion – kleinstädtischer, dörflicher Raum",
+            "type5": "Ländliche Region – zentrale Stadt",
+            "type6": "Ländliche Region – Mittelstadt, städtischer Raum",
+            "type7": "Ländliche Region – kleinstädtischer, dörflicher Raum"
+          },
+          "usage": {
+            "title": "Wie mobi.mapr RegioStaR nutzt",
+            "description": "Die RegioStaR-Klassifizierung fließt in zwei zentrale Bereiche der Analyse ein:",
+            "point1": "Durchschnittliche Wegzeiten: Der benötigte Zeitaufwand, um eine Alltagsaktivität in unterschiedlichen Raumtypen auszuüben",
+            "point2": "Aktivitäten einer Personengruppe: Die Bedeutung einzelner Aktivitäten je nach Raumtyp",
+            "example": "Durch die Einbindung der RegioStaR-Klassen wird sichergestellt, dass regionale Unterschiede ausgeglichen werden und Vergleiche immer regional fair bleiben – also nicht eine Metropole mit einer Landgemeinde verglichen wird, sondern nur Regionen ähnlicher Struktur miteinander."
+          },
+          "dataBasis": {
+            "title": "Die Datenbasis",
+            "description": "Für die Berechnungen nutzt mobi.mapr zwei zentrale Datenquellen:",
+            "source1": "MiD-Daten (Mobilität in Deutschland) für typische Aktivitäten wie Einkaufen oder Freizeit",
+            "source2": "OpenStreetMap-Daten, um z. B. die Erreichbarkeit von Supermärkten oder anderen Orten darzustellen",
+            "fallback": "Fehlen für bestimmte Regionen Daten, greift mobi.mapr auf den Durchschnitt der übrigen Regionalklassen zurück."
+          },
+          "notes": {
+            "title": "Anmerkungen",
+            "description": "Die RegioStaR-Klassifizierung war ursprünglich ein präzises Instrument, um Räume in verschiedene Kategorien einzuteilen. Heute wissen wir jedoch, dass ihre aktuelle Anwendung nicht in allen Fällen vollständig passt oder auf dem neuesten Stand ist. Wie bei allen Bestandteilen von mobi.mapr entwickeln wir uns kontinuierlich weiter und integrieren laufend aktuelle Daten und neue Klassifizierungen."
+          },
+          "imagePlaceholder": "RegioStaR7-Karte"
+        },
+        "states": "Bundesländer",
+        "statesContent": {
+          "title": "Bundesländer",
+          "description": "Der Filter für Bundesländer umfasst die 16 deutschen Bundesländer und ermöglicht es, die Analyse nach einzelnen Bundesländern zu filtern.",
+          "influence": "Diese Filterung beeinflusst die Rankings und ermöglicht es, Mobilitätsqualitäten gezielt nach Bundesländern zu vergleichen."
+        }
+      }
+    }
   },
-  "MAP_HINT": {
-    "ZOOM": "Zoome in die Karte, um Details zu sehen",
-    "ZOOM_DETAIL": "Reinzoomen, bis die Karte kleinere Gebiete zeigt",
-    "CLICK": "Klicke auf ein Gebiet, um mehr Informationen zu erhalten",
-    "CLICK_DETAIL": "Tippe auf ein farbiges Gebiet, um Details zu öffnen"
+  "filterDialog": {
+    "title": "Filter konfigurieren",
+    "tabs": {
+      "activities": "Aktivitäten",
+      "personas": "Personengruppen",
+      "regioStars": "RegioStars",
+      "states": "States"
+    },
+    "selectAll": "Alle auswählen",
+    "deselectAll": "Alle abwählen"
+  },
+  "rail": {
+    "manageProjects": "Projekte verwalten",
+    "logoHint": "Zur Projektseite",
+    "mail": {
+      "title": "Über mobi.mapr",
+      "welcome": "Willkommen beim mobi.mapr! 🎉",
+      "developedBy": "Dieses Projekt wird vom Baden-Württemberg Institut für Nachhaltige Mobilität (BWIM) entwickelt und kontinuierlich weiterentwickelt.",
+      "background": {
+        "title": "Hintergrund",
+        "intro": "Mobilität ist ein komplexes Thema, das kaum messbar ist. Jede Person ist, reist und handelt individuell. Dennoch kann man insgesamt Trends feststellen. Menschen wollen unterschiedliche Aktivitäten erreichen, sei es ein Restaurant, der Supermarkt oder das Treffen von Freunden, denn Mobilität ist ein Grundbedürfnis.",
+        "approach": "Der mobi.mapr addressiert dieses Thema, indem die Aktivitäten ins Zentrum gestellt werden. Welche Aktivitäten kann man wie erreichen? Im Kern stehen dabei die offenen Daten von OpenStreetMap. Falls es um mehr als eine Aktivität geht, werden Studien betrachtet, um diese zu aggregieren.",
+        "humanCentric": "Der mobi.mapr ist dabei mehr als eine Erreichbarkeitsanalyse. Der Mensch steht im Mittelpunkt. Subjektive Faktoren ergänzen reine Reisezeiten, weitere Penalties, wie die Parkplatzsuche, nähern die Zeiten an die Realität an.",
+        "explore": "Schau dich gerne auf der Website um, entdecke die Mobilität und finde heraus, wo noch Chancen bestehen."
+      },
+      "license": {
+        "title": "Lizenz und Nutzung",
+        "frontend": "Der mobi.mapr verfolgt einen zweigleisigen Ansatz: Das Frontend ist Open Source unter der AGPL-3.0-Lizenz. Wir möchten die Open-Source-Community fördern, das bedeutet, dass jede Änderung auch Open Source gestellt werden muss. Eine kommerzielle Nutzung ist nicht möglich.",
+        "data": "Wir verstehen aber, dass Mobilität auch ein Geschäftsfeld ist. Wir verfolgen daher eine andere Open-Data-Strategie. Alle Daten, die vom mobi.mapr-Team veröffentlicht werden, stehen unter der CC-BY-4.0-Lizenz, können also kommerziell, ohne Offenlegung verwendet werden. Es muss lediglich das BWIM attributiert werden und wir freuen uns über einen Link auf die Anwendung.",
+        "note": "Bitte beachte: Für die GeoDaten in der Anwendung (z.B. für Stadtteilgrenzen) können weitere Lizenzen gelten. Weitere, detaillierte Informationen findest du links unten im Dashboard, sowie in der Lizenz-Datei der API."
+      },
+      "contact": {
+        "title": "Kontakt",
+        "website": "Weitere Informationen über das Projekt, sowie spannende Analysen findest du auf unserer Website:",
+        "email": "Wenn du Fragen oder Anregungen hast, freuen wir uns über deine Nachricht:",
+        "github": "Sollte etwas im Frontend nicht funktionieren oder du hast Anregungen, erstelle gerne ein neues Issue:"
+      },
+      "sourceCode": "Den Quellcode des Frontends findest du hier:",
+      "apiDocumented": "Auch unsere API ist offen dokumentiert, sodass du die Daten und Funktionen für eigene Projekte nutzen kannst."
+    },
+    "questionMark": {
+      "title": "Hilfe",
+      "infoButtons": "In den verschiedenen Panels findest du Info-Buttons, die dir detaillierte Informationen zu den jeweiligen Funktionen und Einstellungen bieten. Einfach auf das Info-Symbol klicken!",
+      "moreOnWebsite": "Für umfassendere Informationen und Hintergründe schau gerne auf unserer Website vorbei. Diese erreichst du durch Klick auf das Logo oben links.",
+      "faq": "Häufig gestellte Fragen findest du in unserem FAQ:",
+      "faqUrl": "<https://bw-im.de/mobimapr-faq>"
+    },
+    "credits": {
+      "title": "Credits & Lizenzen",
+      "acknowledgment": {
+        "title": "Danksagungen",
+        "intro": "Diese Anwendung ist nur durch die Nutzung zahlreicher herausragender Open-Source-Projekte und Datenquellen möglich. Ohne diese grundlegenden Technologien und die engagierten Communities dahinter wäre dieses Tool nicht realisierbar gewesen.",
+        "osm": {
+          "title": "OpenStreetMap",
+          "description": "Wir danken allen Mitwirkenden von OpenStreetMap, die kontinuierlich die geografische Datenbank pflegen und aktualisieren, auf der dieses Projekt basiert. Die umfassenden und frei zugänglichen Kartendaten der OpenStreetMap-Community sind für unsere Arbeit unverzichtbar."
+        },
+        "motis": {
+          "title": "MOTIS",
+          "description": "Die Fähigkeiten zur ÖPNV-Routenplanung werden durch das MOTIS-Projekt ermöglicht, einen Open-Source-Multi-Modal-Journey-Planner. Ohne MOTIS könnte diese Anwendung keine präzisen ÖPNV-Routen und Analysen bereitstellen."
+        },
+        "components": {
+          "title": "Weitere Komponenten",
+          "description": "Zusätzlich zu den oben genannten Projekten nutzt diese Anwendung zahlreiche weitere Open-Source-Bibliotheken, Frameworks und Tools. Eine vollständige Liste dieser Komponenten finden Sie unten."
+        }
+      },
+      "license": {
+        "title": "Lizenzinformationen",
+        "frontend": {
+          "title": "Frontend-Anwendung",
+          "description": "Die Frontend-Anwendung von mobi.mapr ist unter der GNU Affero General Public License Version 3.0 (AGPL-3.0) lizenziert. Der vollständige Quellcode ist öffentlich auf GitHub verfügbar und kann gemäß den Bedingungen der AGPL-3.0-Lizenz frei verwendet, modifiziert und verteilt werden."
+        },
+        "data": {
+          "title": "Von mobi.mapr veröffentlichte Daten",
+          "description": "Alle vom mobi.mapr-Team generierten und in öffentlich zugänglichen Projekten veröffentlichten Daten sind unter der Creative Commons Namensnennung 4.0 International Lizenz (CC BY 4.0) lizenziert. Diese Lizenz gilt ausschließlich für Daten, die vom mobi.mapr-Team in öffentlichen Projekten veröffentlicht werden."
+        },
+        "thirdParty": {
+          "title": "Drittanbieter-Daten",
+          "description": "Bitte beachten Sie, dass zusätzliche Datenquellen anderen Lizenzbedingungen unterliegen können. Insbesondere geografische Daten wie Stadtteilgrenzen (Shapefiles), die von kommunalen und regionalen Behörden bezogen werden, müssen bei Verwendung angemessen angegeben werden. Die spezifischen Lizenzbedingungen für jede Datenquelle sind in den Komponentenlisten unten angegeben."
+        }
+      },
+      "sections": {
+        "visualization": "Visualisierung",
+        "data": "Datenquellen",
+        "backend": "Backend-Infrastruktur",
+        "routing": "Routing-Engines",
+        "cityData": "Stadtteil- und Bezirksdaten"
+      },
+      "close": "Schließen"
+    }
+  },
+  "dashboard": {
+    "collapseLeftPanel": "Linkes Panel einklappen",
+    "expandLeftPanel": "Linkes Panel ausklappen",
+    "collapseRightPanel": "Rechtes Panel einklappen",
+    "expandRightPanel": "Rechtes Panel ausklappen",
+    "openFilters": "Filter öffnen",
+    "toggleSidebar": "Sidebar umschalten",
+    "closeSidebar": "Sidebar schließen",
+    "closeFilters": "Filter schließen"
+  },
+  "mobileFilter": {
+    "licenseInfo": "Lizenzinfos"
+  },
+  "right": {
+    "mobile": {
+      "hint": "Für eine detaillierte Analyse öffne diese Seite bitte auf dem Desktop."
+    }
+  },
+  "stats": {
+    "title": "Die Besten",
+    "loading": "Laden...",
+    "errorLoading": "Fehler beim Laden der Daten",
+    "noDataAvailable": "Keine Daten verfügbar",
+    "clickToSearch": "Klicken zum Suchen",
+    "levels": {
+      "state": "Bundesländer",
+      "county": "Kreise",
+      "municipality": "Gemeinden"
+    },
+    "info": {
+      "title": "Statistiken",
+      "description": "Diese Übersicht zeigt die Top 10 Rankings basierend auf der ausgewählten Ebene (Bundesländer, Landkreise oder Gemeinden) und den aktuellen Filtern und Bewertungskriterien.",
+      "aboutDataTitle": "Über die Daten",
+      "aboutData": "Die angezeigten Daten repräsentieren die Top Rankings basierend auf der ausgewählten Ebene und den aktuellen Filtern und Bewertungskriterien.",
+      "layerSelection": "Ebenenauswahl",
+      "layerSelectionDescription": "Wähle die geografische Ebene aus, für die die Rankings angezeigt werden sollen: Bundesländer, Landkreise oder Gemeinden.",
+      "selectLayer": "Ebene auswählen",
+      "currentLayer": "Aktuelle Ebene",
+      "prefiltersNote": "Hinweis zu Filtern",
+      "prefiltersDescription": "Die Top 10 Rankings berücksichtigen automatisch alle aktiven Filter auf der linken Seite, einschließlich ausgewählter Bundesländer und RegioStars. Die Rankings werden entsprechend dieser Filter angepasst.",
+      "rankingRules": "Ranking-Regeln",
+      "tiedRanksDescription": "Wenn mehrere Gebiete den gleichen Wert haben, teilen sie sich den gleichen Rang:",
+      "tiedRanksRule1": "Gebiete mit identischem Wert erhalten den gleichen Rangplatz",
+      "tiedRanksRule2": "Der nächste Rangplatz wird entsprechend übersprungen (z.B. wenn zwei Gebiete Rang 3 teilen, ist der nächste Rang 5)",
+      "countyDefinition": "Mit Kreis sind Stadt und Landkreise gemeint. Da dies bundesweit nicht einheitlich geregelt wird unterscheiden wir nicht",
+      "largeCountySplit": "Für eine bessere Vergleichbarkeit sind Landkreise, die nur aus einer Gemeinde bestehen, mit mehr als 300 000 Einwohnenden in ihre Stadtteile aufgeteitl. Der Landkreis (z.B. Berlin) ist dann in 'Kreis' und B-Spandau dementsprechend unter 'Gemeinde'",
+      "qualityViewHint": "In der Qualitäts-Ansicht werden die Gebietseinheiten nach ihrem Index gruppiert und bewertet (sh. Info zur Mobilitätsbewertung). So können Gebietseinheiten mit der selben Note (z.B. C+) auf einem unterschiedlichen Platz auf dem Treppchen sein."
+    }
+  },
+  "PREPARING_PROJECT": {
+    "TITLE": "Projekt wird vorbereitet",
+    "MESSAGE": "Bitte warte, während das Projekt geladen wird...",
+    "COFFEE_MESSAGE": "Gönn dir einen Kaffee! Je nach Komplexität der Filter kann dies mehrere Minuten dauern.",
+    "INFO": {
+      "PREPARING": "Das Projekt wird vorbereitet..."
+    },
+    "FUN_FACTS": {
+      "TITLE": "Wusstest du schon?",
+      "FACT_1": "In Deutschland gibt es über 9.000 Bahnhöfe, die täglich von Millionen von Menschen genutzt werden.",
+      "FACT_2": "Das deutsche Schienennetz erstreckt sich über mehr als 38.000 Kilometer.",
+      "FACT_3": "Öffentliche Verkehrsmittel tragen erheblich zur Reduzierung des CO2-Ausstoßes bei.",
+      "FACT_4": "Die Mobilitätsanalyse hilft dabei, die beste Verkehrsinfrastruktur zu planen.",
+      "FACT_5": "Zu Fuß gehen ist die umweltfreundlichste Art der Fortbewegung."
+    },
+    "STATUS": {
+      "STARTING": "Projekt wird gestartet...",
+      "CALCULATING": "Berechnung läuft...",
+      "PROCESSING": "Daten werden verarbeitet...",
+      "COMPLETED": "Projekt erfolgreich geladen",
+      "ERROR": "Fehler beim Laden des Projekts"
+    },
+    "ACHIEVEMENTS": {
+      "ONE_TIME_TITLE": "Einmalige Vorbereitung",
+      "ONE_TIME_TEXT": "Die Projektvorbereitung muss nur einmal durchgeführt werden.",
+      "FILTER_TITLE": "Filter geändert",
+      "FILTER_TEXT": "Dieser Dialog öffnet sich nur, nachdem du einige Filterparameter geändert hast.",
+      "UNIQUE_TITLE": "Einzigartige Karte",
+      "UNIQUE_TEXT": "Wenn du diesen Bildschirm siehst, hat noch niemand eine solche Karte erstellt (zumindest in den letzten 30 Tagen).",
+      "STATS_TITLE": "Über 15 Milliarden Möglichkeiten",
+      "STATS_TEXT": "Du kannst die 28 Aktivitäten frei kombinieren, für 8 verschiedene Modus-Kombinationen und 7 Personengruppen bedeutet dies mehr als 15 Milliarden verschiedene Karten."
+    }
   }
 }

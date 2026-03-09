@@ -1,0 +1,58 @@
+/* Material Dialog Panel Styling */
+::ng-deep .all-categories-dialog-panel {
+  background-color: var(--background-color) !important;
+}
+
+::ng-deep .all-categories-dialog-panel .mat-mdc-dialog-container {
+  background-color: var(--background-color) !important;
+  color: var(--primary-color) !important;
+}
+
+::ng-deep .all-categories-dialog-panel .mat-mdc-dialog-surface {
+  background-color: var(--background-color) !important;
+}
+
+/* Comparison Mode Styles */
+.comparison-layout {
+  display: flex;
+  gap: 1rem;
+}
+
+.comparison-column {
+  flex: 1;
+}
+
+/* Grade Badge Styles */
+.grade-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  cursor: help;
+  transition: opacity 0.2s;
+}
+
+.grade-badge:hover {
+  opacity: 0.9;
+}
+
+/* Comparison button icon styling */
+.comparison-add-button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.comparison-add-button mat-icon {
+  font-weight: 700 !important;
+  font-size: 28px !important;
+  line-height: 1 !important;
+  width: 28px !important;
+  height: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}

@@ -1,0 +1,12 @@
+.filter-dialog {
+  min-width: 600px;
+  max-width: 800px;
+}
+
+.tab-content {
+  padding: 16px 0;
+}
+
+::ng-deep .mat-mdc-tab-body-content {
+  overflow: hidden !important;
+}

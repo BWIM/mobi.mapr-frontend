@@ -1,0 +1,41 @@
+/* Places dialog specific styles */
+::ng-deep .places-dialog-panel .mat-mdc-dialog-content {
+  padding: 24px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Legend overlay styles */
+.places-legend {
+  pointer-events: auto;
+  max-width: 200px;
+}
+
+.places-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.places-legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid white;
+  flex-shrink: 0;
+}
+
+
+::ng-deep .places-dialog-panel {
+  overflow: visible !important;
+}
+
+::ng-deep .places-dialog-panel .mat-mdc-dialog-container {
+  overflow: visible !important;
+}
+
+::ng-deep .places-dialog-panel .mat-mdc-dialog-surface {
+  overflow: visible !important;
+}

@@ -1,0 +1,710 @@
+<div class="h-full p-4">
+  @if (isLoading()) {
+    <div class="flex items-center justify-center h-full pt-[6rem]">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else {
+    <div class="pt-[6rem]">
+      <div class="text-2xl font-semibold text-[var(--primary-color)] mb-1">{{ project()?.display_name }}</div>
+      @if (getFormattedCreatedDate()) {
+        <div 
+          class="text-xs text-[var(--primary-color)] opacity-40 mb-4 cursor-help" 
+          [title]="'left.createdDate' | translate">
+          {{ getFormattedCreatedDate() }}
+        </div>
+      }
+    </div>
+    <div class="flex items-center justify-end gap-2 mb-4 relative mr-4">
+      <span class="text-sm text-[var(--primary-color)]">{{ 'left.extendedMode' | translate }}</span>
+      <!-- <button 
+        class="w-7 h-7 rounded-full bg-[var(--background-color)] text-[var(--primary-color)] border-none cursor-pointer flex items-center justify-center transition-all duration-200 text-sm hover:opacity-80 hover:scale-105" 
+        [title]="'left.information' | translate"
+        (click)="openDialog()">
+        <span class="material-icons text-sm leading-none text-[var(--primary-color)]">info</span>
+      </button> -->
+      <button 
+        class="relative w-10 h-5 border border-[var(--light-primary-color)] rounded-full bg-[var(--secondary-color)] cursor-pointer transition-all duration-200 overflow-hidden"
+        [style.background-color]="isExpanded() ? 'var(--primary-color)' : 'var(--secondary-color)'"
+        (click)="toggleSidebar()"
+        [title]="isExpanded() ? ('left.expanded' | translate) : ('left.normal' | translate)">
+        <div 
+          class="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[var(--light-primary-color)] transition-all duration-200"
+          [style.left]="isExpanded() ? 'calc(100% - 1.125rem)' : '0.125rem'"
+          [style.background-color]="isExpanded() ? 'var(--secondary-color)' : 'var(--light-primary-color)'">
+        </div>
+      </button>
+    </div>
+    <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4 relative">
+      <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.transportModes.title' | translate }}</h2>
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center gap-2">
+          @for (option of modeOptions(); track option.id) {
+            <button 
+              class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200"
+              [style.background-color]="isSelected(option.id) ? 'var(--primary-color)' : 'var(--secondary-color)'"
+              [style.border]="!isSelected(option.id) ? '1px solid var(--light-primary-color)' : 'none'"
+              [style.cursor]="(isPedestrianMode(option.id) && isSelected(option.id)) || isModeDisabled(option.id) ? 'not-allowed' : 'pointer'"
+              [style.opacity]="isModeDisabled(option.id) ? '0.5' : '1'"
+              [disabled]="isModeDisabled(option.id)"
+              (click)="toggleVerkehrsmittel(option.id)"
+              [attr.aria-label]="option.display_name"
+              [attr.aria-pressed]="isSelected(option.id)"
+              [attr.aria-disabled]="isModeDisabled(option.id)"
+              [title]="getModeTooltip(option)">
+              <mat-icon 
+                class="text-base leading-none"
+                [style.color]="isSelected(option.id) ? 'var(--background-color)' : 'var(--light-primary-color)'">
+                {{ option.icon }}
+              </mat-icon>
+            </button>
+          }
+        </div>
+      </div>
+      <app-info-overlay>
+        <div class="space-y-6">
+          <!-- Allgemeines -->
+          <div class="pb-4 border-b border-[var(--primary-color)] border-opacity-20">
+            <h3 class="text-lg font-semibold mb-3 text-[var(--primary-color)]">{{ 'left.transportModes.info.title' | translate }}</h3>
+            <h4 class="font-semibold text-base mb-2 text-[var(--primary-color)]">{{ 'left.transportModes.info.general.title' | translate }}</h4>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.general.intro' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.general.pedestrianBase' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.general.questionIntro' | translate }}
+            </p>
+            <div class="bg-[var(--background-color)] rounded-lg p-3 my-3 border-l-4 border-[var(--primary-color)]">
+              <p class="text-sm opacity-90 leading-relaxed italic">
+                {{ 'left.transportModes.info.general.question' | translate }}
+              </p>
+            </div>
+            <p class="text-sm opacity-90 leading-relaxed">
+              {{ 'left.transportModes.info.general.approach' | translate }}
+            </p>
+          </div>
+
+          <!-- Penalties -->
+          <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+            <h4 class="font-semibold text-base mb-3 text-[var(--primary-color)]">{{ 'left.transportModes.info.penalties.title' | translate }}</h4>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.penalties.intro' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-2">{{ 'left.transportModes.info.penalties.examplesLabel' | translate }}</p>
+            <ul class="text-sm opacity-90 space-y-2 ml-4 list-disc mb-3">
+              <li>{{ 'left.transportModes.info.penalties.example1' | translate }}</li>
+              <li>{{ 'left.transportModes.info.penalties.example2' | translate }}</li>
+              <li>{{ 'left.transportModes.info.penalties.example3' | translate }}</li>
+            </ul>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.penalties.subjective' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed">
+              {{ 'left.transportModes.info.penalties.adfc' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mt-3">
+              {{ 'left.transportModes.info.penalties.documentation' | translate }}
+            </p>
+          </div>
+
+          <!-- Mobilitätsprofile -->
+          <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+            <h4 class="font-semibold text-base mb-3 text-[var(--primary-color)]">{{ 'left.transportModes.info.profiles.title' | translate }}</h4>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.profiles.variation' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.profiles.mapping' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed">
+              {{ 'left.transportModes.info.profiles.future' | translate }}
+            </p>
+          </div>
+
+          <!-- Routing -->
+          <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+            <h4 class="font-semibold text-base mb-3 text-[var(--primary-color)]">{{ 'left.transportModes.info.routing.title' | translate }}</h4>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.routing.complexity' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.routing.fullRouting' | translate }}
+            </p>
+            <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc mb-3">
+              <li>{{ 'left.transportModes.info.routing.startPoint' | translate }}</li>
+              <li>{{ 'left.transportModes.info.routing.destination' | translate }}</li>
+            </ul>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.routing.engines' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.transportModes.info.routing.transitDay' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed">
+              {{ 'left.transportModes.info.routing.waitingTime' | translate }}
+            </p>
+          </div>
+        </div>
+      </app-info-overlay>
+    </div>
+    <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4 relative">
+      <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.mobilityRating.title' | translate }}</h2>
+      <div class="flex flex-col gap-2">
+        <div class="flex border border-[var(--light-primary-color)] rounded-full overflow-hidden bg-[var(--secondary-color)] w-fit">
+          <button 
+            class="flex-1 px-8 py-1 border-none border-r border-[var(--light-primary-color)] text-sm cursor-pointer transition-all duration-200 rounded-l-full"
+            [class.font-medium]="isMobilitatsbewertungSelected('zeit')"
+            [class.font-light]="!isMobilitatsbewertungSelected('zeit')"
+            [style.background-color]="isMobilitatsbewertungSelected('zeit') ? 'var(--primary-color)' : 'var(--secondary-color)'"
+            [style.color]="isMobilitatsbewertungSelected('zeit') ? 'var(--secondary-color)' : 'var(--light-primary-color)'"
+            [class.hover:opacity-100]="isMobilitatsbewertungSelected('zeit')"
+            [class.hover:opacity-80]="!isMobilitatsbewertungSelected('zeit')"
+            (click)="selectMobilitatsbewertung('zeit')">
+            {{ 'left.mobilityRating.time.label' | translate }}
+          </button>
+          <button 
+            class="flex-1 px-8 py-1 border-none text-sm cursor-pointer transition-all duration-200 rounded-r-full"
+            [class.font-medium]="isMobilitatsbewertungSelected('qualitaet')"
+            [class.font-light]="!isMobilitatsbewertungSelected('qualitaet')"
+            [style.background-color]="isMobilitatsbewertungSelected('qualitaet') ? 'var(--primary-color)' : 'var(--secondary-color)'"
+            [style.color]="isMobilitatsbewertungSelected('qualitaet') ? 'var(--secondary-color)' : 'var(--light-primary-color)'"
+            [class.hover:opacity-100]="isMobilitatsbewertungSelected('qualitaet')"
+            [class.hover:opacity-80]="!isMobilitatsbewertungSelected('qualitaet')"
+            (click)="selectMobilitatsbewertung('qualitaet')">
+            {{ 'left.mobilityRating.quality.label' | translate }}
+          </button>
+        </div>
+      </div>
+      <app-info-overlay>
+        <div class="space-y-6">
+          <!-- Introduction -->
+          <div class="pb-4 border-b border-[var(--primary-color)] border-opacity-20">
+            <h3 class="text-lg font-semibold mb-3 text-[var(--primary-color)]">{{ 'left.mobilityRating.title' | translate }}</h3>
+            <p class="text-sm opacity-90 leading-relaxed">
+              {{ 'left.mobilityRating.introduction' | translate }}
+            </p>
+          </div>
+
+          <!-- Mobilitätszeit -->
+          <div class="pt-4">
+            <h4 class="font-semibold text-base mb-3 text-[var(--primary-color)]">{{ 'left.mobilityRating.mobilityTime.title' | translate }}</h4>
+            <p class="text-sm opacity-90 leading-relaxed mb-4">
+              {{ 'left.mobilityRating.mobilityTime.approach' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-4">
+              {{ 'left.mobilityRating.mobilityTime.exampleIntro' | translate }}
+            </p>
+            
+            <div class="space-y-3 mb-4">
+              <div class="flex items-start gap-3">
+                <div class="w-6 h-6 rounded-full bg-[var(--background-color)] bg-opacity-20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span class="text-xs font-semibold text-[var(--primary-color)]">1</span>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm opacity-90 leading-relaxed font-semibold mb-1">{{ 'left.mobilityRating.mobilityTime.step1.title' | translate }}</p>
+                  <p class="text-sm opacity-90 leading-relaxed">
+                    {{ 'left.mobilityRating.mobilityTime.step1.description' | translate }}
+                  </p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-3">
+                <div class="w-6 h-6 rounded-full bg-[var(--background-color)] bg-opacity-20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span class="text-xs font-semibold text-[var(--primary-color)]">2</span>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm opacity-90 leading-relaxed font-semibold mb-1">{{ 'left.mobilityRating.mobilityTime.step2.title' | translate }}</p>
+                  <p class="text-sm opacity-90 leading-relaxed">
+                    {{ 'left.mobilityRating.mobilityTime.step2.description' | translate }}
+                  </p>
+                </div>
+              </div>
+              
+              <div class="flex items-start gap-3">
+                <div class="w-6 h-6 rounded-full bg-[var(--background-color)] bg-opacity-20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span class="text-xs font-semibold text-[var(--primary-color)]">3</span>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm opacity-90 leading-relaxed font-semibold mb-1">{{ 'left.mobilityRating.mobilityTime.step3.title' | translate }}</p>
+                  <p class="text-sm opacity-90 leading-relaxed mb-2">
+                    {{ 'left.mobilityRating.mobilityTime.step3.description' | translate }}
+                  </p>
+                  <p class="text-sm opacity-90 leading-relaxed mb-2">{{ 'left.mobilityRating.mobilityTime.step3.exampleLabel' | translate }}</p>
+                  <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc mb-2">
+                    <li>{{ 'left.mobilityRating.mobilityTime.step3.example1' | translate }}</li>
+                    <li>{{ 'left.mobilityRating.mobilityTime.step3.example2' | translate }}</li>
+                    <li>{{ 'left.mobilityRating.mobilityTime.step3.example3' | translate }}</li>
+                  </ul>
+                  <p class="text-sm opacity-90 leading-relaxed">
+                    {{ 'left.mobilityRating.mobilityTime.step3.explanation' | translate }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <p class="text-sm opacity-90 leading-relaxed">
+              {{ 'left.mobilityRating.mobilityTime.conclusion' | translate }}
+            </p>
+          </div>
+
+          <!-- Mobilitätsqualität -->
+          <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+            <h4 class="font-semibold text-base mb-3 text-[var(--primary-color)]">{{ 'left.mobilityRating.mobilityQuality.title' | translate }}</h4>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.mobilityRating.mobilityQuality.weakness' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-2">{{ 'left.mobilityRating.mobilityQuality.exampleLabel' | translate }}</p>
+            <div class="bg-[var(--background-color)] rounded-lg p-3 mb-3 border-l-4 border-[var(--primary-color)]">
+              <p class="text-sm opacity-90 leading-relaxed italic">
+                {{ 'left.mobilityRating.mobilityQuality.example' | translate }}
+              </p>
+            </div>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.mobilityRating.mobilityQuality.introduction' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.mobilityRating.mobilityQuality.calculation' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-3">
+              {{ 'left.mobilityRating.mobilityQuality.gradeIntro' | translate }}
+            </p>
+            <p class="text-sm opacity-90 leading-relaxed mb-2">{{ 'left.mobilityRating.mobilityQuality.scaleIntro' | translate }}</p>
+            <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc mb-4">
+              <li>{{ 'left.mobilityRating.mobilityQuality.scale1' | translate }}</li>
+              <li>{{ 'left.mobilityRating.mobilityQuality.scale2' | translate }}</li>
+            </ul>
+            <p class="text-sm opacity-90 leading-relaxed mb-4">
+              {{ 'left.mobilityRating.mobilityQuality.conclusion' | translate }}
+            </p>
+
+            <!-- Quality Graph -->
+            <div class="mt-4">
+              <h5 class="font-semibold mb-2 text-sm">{{ 'left.mobilityRating.mobilityQuality.graphTitle' | translate }}</h5>
+              <div class="w-full h-64 bg-[var(--background-color)] rounded-lg p-4">
+                <p-chart type="line" [data]="qualityChartData" [options]="qualityChartOptions" [width]="'100%'" [height]="'100%'"></p-chart>
+              </div>
+            </div>
+          </div>
+        </div>
+      </app-info-overlay>
+    </div>
+
+    @if (!isShareKeyOnly()) {
+      <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4 relative">
+        <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.adminLevel.title' | translate }}</h2>
+        <div class="flex flex-col gap-2">
+          <mat-form-field appearance="outline" class="admin-level-selector">
+            <mat-select 
+              [value]="selectedAdminLevel()" 
+              (selectionChange)="selectAdminLevel($event.value)"
+              class="text-[var(--primary-color)]">
+              @for (option of adminLevelOptions(); track option.value) {
+                <mat-option [value]="option.value">
+                  {{ option.label }}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    }
+
+    @if (isExpanded()) {
+      <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4 relative" >
+        <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.activeFilters.title' | translate }}</h2>
+        @if (hasCategories()) {
+          <div class="flex items-center gap-2"  >
+            <span class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.activities' | translate }}</span>
+            <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedActivities().length }} / {{ allActivities().length }})</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.personas' | translate }}</span>
+            <span class="text-sm font-normal text-[var(--primary-color)] opacity-75" *ngIf="selectedPersonas() !== null">
+              ({{ getSelectedPersonaName() }})
+            </span>
+          </div>
+        }
+        <div class="flex items-center gap-2">
+          <span class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.regioStars' | translate }}</span>
+          <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedRegioStars().length }} / {{ allRegioStars().length }})</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.states' | translate }}</span>
+          <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedStates().length }} / {{ allStates().length }})</span>
+        </div>
+
+        <div class="flex flex-col gap-2 items-center">
+          <div class="flex gap-2 items-center">
+            <button 
+              class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full border transition-all duration-200 w-fit bg-[var(--primary-color)] text-[var(--background-color)] border-[var(--background-color)] font-bold"
+              [class.opacity-50]="isShareKeyOnly()"
+              [class.cursor-not-allowed]="isShareKeyOnly()"
+              [disabled]="isShareKeyOnly()"
+              [title]="isShareKeyOnly() ? ('left.activeFilters.filterButtonDisabledHint' | translate) : ''"
+              (click)="openFilterDialog()">
+              {{ 'left.activeFilters.filterButton' | translate }}
+              <mat-icon class="text-base leading-none">tune</mat-icon>
+            </button>
+            <button 
+              class="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-full border transition-all duration-200 w-fit bg-[var(--background-color)] text-[var(--primary-color)] border-[var(--primary-color)] font-bold hover:bg-[var(--secondary-color)]"
+              [class.opacity-50]="isShareKeyOnly()"
+              [class.cursor-not-allowed]="isShareKeyOnly()"
+              [disabled]="isShareKeyOnly()"
+              [title]="isShareKeyOnly() ? ('left.activeFilters.filterButtonDisabledHint' | translate) : ('left.activeFilters.resetButton' | translate)"
+              (click)="resetFilters()">
+              <mat-icon class="text-base leading-none">refresh</mat-icon>
+            </button>
+          </div>
+        </div>
+        <app-info-overlay>
+          <mat-tab-group class="filter-info-tabs">
+            <!-- General Tab (Default) -->
+            <mat-tab [label]="'left.activeFilters.infoTabs.general' | translate" class="text-[var(--primary-color)]">
+              <div class="p-6 space-y-4 text-[var(--primary-color)]">
+                <h3 class="text-xl font-semibold mb-4">{{ 'left.activeFilters.infoTabs.generalContent.title' | translate }}</h3>
+                
+                <p class="text-sm leading-relaxed opacity-90">
+                  {{ 'left.activeFilters.infoTabs.generalContent.intro' | translate }}
+                </p>
+
+                <div class="bg-[var(--background-color)] rounded-lg p-3 border-l-4 border-[var(--primary-color)] my-3">
+                  <p class="text-sm leading-relaxed opacity-90">
+                    {{ 'left.activeFilters.infoTabs.generalContent.mid23' | translate }}
+                  </p>
+                </div>
+
+                <p class="text-sm leading-relaxed opacity-90">
+                  {{ 'left.activeFilters.infoTabs.generalContent.personas' | translate }}
+                </p>
+
+                <div class="bg-[var(--background-color)] rounded-lg p-4 border-l-4 border-[var(--primary-color)] my-4">
+                  <p class="text-sm leading-relaxed opacity-90 mb-2">
+                    {{ 'left.activeFilters.infoTabs.generalContent.combinations' | translate }}
+                  </p>
+                  <p class="text-sm leading-relaxed opacity-90 italic">
+                    {{ 'left.activeFilters.infoTabs.generalContent.beta' | translate }}
+                  </p>
+                </div>
+
+                <p class="text-sm leading-relaxed opacity-90">
+                  {{ 'left.activeFilters.infoTabs.generalContent.regionalFilters' | translate }}
+                </p>
+
+                <p class="text-sm leading-relaxed opacity-90">
+                  {{ 'left.activeFilters.infoTabs.generalContent.example' | translate }}
+                </p>
+              </div>
+            </mat-tab>
+
+            <!-- Activities Tab -->
+            <ng-container *ngIf="hasCategories()">
+              <mat-tab [label]="'left.activeFilters.infoTabs.activities' | translate" class="text-[var(--primary-color)]">
+                <div class="p-6 space-y-6 text-[var(--primary-color)]">
+                  <!-- Introduction -->
+                  <div class="pb-4 border-b border-[var(--primary-color)] border-opacity-20">
+                    <h3 class="text-lg font-semibold mb-3">{{ 'left.activeFilters.infoTabs.activitiesContent.introduction.title' | translate }}</h3>
+                    <p class="text-sm opacity-90 leading-relaxed mb-3">
+                      {{ 'left.activeFilters.infoTabs.activitiesContent.introduction.description' | translate }}
+                    </p>
+                    <p class="text-sm opacity-90 leading-relaxed">
+                      {{ 'left.activeFilters.infoTabs.activitiesContent.introduction.focus' | translate }}
+                    </p>
+                  </div>
+
+                  <!-- Data Source -->
+                  <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+                    <h4 class="font-semibold text-base mb-3">{{ 'left.activeFilters.infoTabs.activitiesContent.dataSource.title' | translate }}</h4>
+                    <p class="text-sm opacity-90 leading-relaxed mb-3">
+                      {{ 'left.activeFilters.infoTabs.activitiesContent.dataSource.description' | translate }}
+                    </p>
+                    <p class="text-sm opacity-90 leading-relaxed mb-2">{{ 'left.activeFilters.infoTabs.activitiesContent.dataSource.survey' | translate }}</p>
+                    <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc mb-3">
+                      <li>{{ 'left.activeFilters.infoTabs.activitiesContent.dataSource.survey1' | translate }}</li>
+                      <li>{{ 'left.activeFilters.infoTabs.activitiesContent.dataSource.survey2' | translate }}</li>
+                      <li>{{ 'left.activeFilters.infoTabs.activitiesContent.dataSource.survey3' | translate }}</li>
+                    </ul>
+                    <p class="text-sm opacity-90 leading-relaxed">
+                      {{ 'left.activeFilters.infoTabs.activitiesContent.dataSource.result' | translate }}
+                    </p>
+                  </div>
+
+                  <!-- Translation -->
+                  <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+                    <h4 class="font-semibold text-base mb-3">{{ 'left.activeFilters.infoTabs.activitiesContent.translation.title' | translate }}</h4>
+                    <p class="text-sm opacity-90 leading-relaxed mb-3">
+                      {{ 'left.activeFilters.infoTabs.activitiesContent.translation.description' | translate }}
+                    </p>
+                    <p class="text-sm opacity-90 leading-relaxed mb-2 font-semibold">{{ 'left.activeFilters.infoTabs.activitiesContent.translation.example' | translate }}</p>
+                    <div class="bg-[var(--background-color)] rounded-lg p-3 mb-3 border-l-4 border-[var(--primary-color)]">
+                      <p class="text-sm opacity-90 leading-relaxed font-semibold mb-2">{{ 'left.activeFilters.infoTabs.activitiesContent.translation.exampleTitle' | translate }}</p>
+                      <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc">
+                        <li>{{ 'left.activeFilters.infoTabs.activitiesContent.translation.example1' | translate }}</li>
+                        <li>{{ 'left.activeFilters.infoTabs.activitiesContent.translation.example2' | translate }}</li>
+                        <li>{{ 'left.activeFilters.infoTabs.activitiesContent.translation.example3' | translate }}</li>
+                        <li>{{ 'left.activeFilters.infoTabs.activitiesContent.translation.example4' | translate }}</li>
+                      </ul>
+                    </div>
+                    <p class="text-sm opacity-90 leading-relaxed mb-2">{{ 'left.activeFilters.infoTabs.activitiesContent.translation.details' | translate }}</p>
+                    <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc mb-3">
+                      <li>{{ 'left.activeFilters.infoTabs.activitiesContent.translation.details1' | translate }}</li>
+                      <li>{{ 'left.activeFilters.infoTabs.activitiesContent.translation.details2' | translate }}</li>
+                    </ul>
+                    <p class="text-sm opacity-90 leading-relaxed">
+                      {{ 'left.activeFilters.infoTabs.activitiesContent.translation.viewInfo' | translate }}
+                    </p>
+                  </div>
+
+                  <!-- Ambiguities -->
+                  <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+                    <h4 class="font-semibold text-base mb-3">{{ 'left.activeFilters.infoTabs.activitiesContent.ambiguities.title' | translate }}</h4>
+                    <p class="text-sm opacity-90 leading-relaxed mb-3">
+                      {{ 'left.activeFilters.infoTabs.activitiesContent.ambiguities.description' | translate }}
+                    </p>
+                    <p class="text-sm opacity-90 leading-relaxed mb-2">{{ 'left.activeFilters.infoTabs.activitiesContent.ambiguities.example' | translate }}</p>
+                    <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc mb-3">
+                      <li>{{ 'left.activeFilters.infoTabs.activitiesContent.ambiguities.example1' | translate }}</li>
+                      <li>{{ 'left.activeFilters.infoTabs.activitiesContent.ambiguities.example2' | translate }}</li>
+                    </ul>
+                    <p class="text-sm opacity-90 leading-relaxed">
+                      {{ 'left.activeFilters.infoTabs.activitiesContent.ambiguities.validation' | translate }}
+                    </p>
+                  </div>
+
+                  <!-- Regional -->
+                  <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+                    <h4 class="font-semibold text-base mb-3">{{ 'left.activeFilters.infoTabs.activitiesContent.regional.title' | translate }}</h4>
+                    <p class="text-sm opacity-90 leading-relaxed mb-3">
+                      {{ 'left.activeFilters.infoTabs.activitiesContent.regional.description' | translate }}
+                    </p>
+                    <p class="text-sm opacity-90 leading-relaxed mb-2">{{ 'left.activeFilters.infoTabs.activitiesContent.regional.meaning' | translate }}</p>
+                    <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc mb-3">
+                      <li>{{ 'left.activeFilters.infoTabs.activitiesContent.regional.meaning1' | translate }}</li>
+                      <li>{{ 'left.activeFilters.infoTabs.activitiesContent.regional.meaning2' | translate }}</li>
+                      <li>{{ 'left.activeFilters.infoTabs.activitiesContent.regional.meaning3' | translate }}</li>
+                    </ul>
+                    <p class="text-sm opacity-90 leading-relaxed">
+                      {{ 'left.activeFilters.infoTabs.activitiesContent.regional.consideration' | translate }}
+                    </p>
+                  </div>
+                </div>
+              </mat-tab>
+            </ng-container>
+
+            <!-- Personas Tab -->
+            <ng-container *ngIf="hasCategories()">
+              <mat-tab [label]="'left.activeFilters.infoTabs.personas' | translate" class="text-[var(--primary-color)]">
+                <div class="p-6 space-y-6 text-[var(--primary-color)]">
+                  <!-- Introduction -->
+                  <div class="pb-4 border-b border-[var(--primary-color)] border-opacity-20">
+                    <h3 class="text-lg font-semibold mb-3">{{ 'left.activeFilters.infoTabs.personasContent.introduction.title' | translate }}</h3>
+                    <p class="text-sm opacity-90 leading-relaxed">
+                      {{ 'left.activeFilters.infoTabs.personasContent.introduction.description' | translate }}
+                    </p>
+                  </div>
+
+                  <!-- Person Groups and Chart -->
+                  <div class="flex flex-col lg:flex-row gap-6 pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+                    <!-- Person Groups List -->
+                    <div class="flex-1">
+                      <h4 class="font-semibold text-base mb-3">{{ 'left.activeFilters.infoTabs.personasContent.personGroups.title' | translate }}</h4>
+                      <ul class="text-sm opacity-90 space-y-2">
+                        <li class="flex items-start">
+                          <span class="mr-2">1.</span>
+                          <span>{{ 'left.activeFilters.infoTabs.personasContent.personGroups.group1' | translate }}</span>
+                        </li>
+                        <li class="flex items-start">
+                          <span class="mr-2">2.</span>
+                          <span>{{ 'left.activeFilters.infoTabs.personasContent.personGroups.group2' | translate }}</span>
+                        </li>
+                        <li class="flex items-start">
+                          <span class="mr-2">3.</span>
+                          <span>{{ 'left.activeFilters.infoTabs.personasContent.personGroups.group3' | translate }}</span>
+                        </li>
+                        <li class="flex items-start">
+                          <span class="mr-2">4.</span>
+                          <span>{{ 'left.activeFilters.infoTabs.personasContent.personGroups.group4' | translate }}</span>
+                        </li>
+                        <li class="flex items-start">
+                          <span class="mr-2">5.</span>
+                          <span>{{ 'left.activeFilters.infoTabs.personasContent.personGroups.group5' | translate }}</span>
+                        </li>
+                        <li class="flex items-start">
+                          <span class="mr-2">6.</span>
+                          <span>{{ 'left.activeFilters.infoTabs.personasContent.personGroups.group6' | translate }}</span>
+                        </li>
+                        <li class="flex items-start">
+                          <span class="mr-2">7.</span>
+                          <span>{{ 'left.activeFilters.infoTabs.personasContent.personGroups.group7' | translate }}</span>
+                        </li>
+                        <li class="flex items-start">
+                          <span class="mr-2">8.</span>
+                          <span>{{ 'left.activeFilters.infoTabs.personasContent.personGroups.group8' | translate }}</span>
+                        </li>
+                        <li class="flex items-start">
+                          <span class="mr-2">9.</span>
+                          <span>{{ 'left.activeFilters.infoTabs.personasContent.personGroups.group9' | translate }}</span>
+                        </li>
+                        <li class="flex items-start">
+                          <span class="mr-2">10.</span>
+                          <span>{{ 'left.activeFilters.infoTabs.personasContent.personGroups.group10' | translate }}</span>
+                        </li>
+                        <li class="flex items-start">
+                          <span class="mr-2">11.</span>
+                          <span>{{ 'left.activeFilters.infoTabs.personasContent.personGroups.group11' | translate }}</span>
+                        </li>
+                        <li class="flex items-start">
+                          <span class="mr-2">12.</span>
+                          <span>{{ 'left.activeFilters.infoTabs.personasContent.personGroups.group12' | translate }}</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <!-- Pie Chart -->
+                    <div class="flex-1 lg:max-w-md">
+                      <div class="w-full h-80 bg-[var(--background-color)] rounded-lg p-4">
+                        <p-chart type="pie" [data]="personasChartData" [options]="personasChartOptions" [width]="'100%'" [height]="'100%'"></p-chart>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Weighting -->
+                  <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+                    <h4 class="font-semibold text-base mb-3">{{ 'left.activeFilters.infoTabs.personasContent.weighting.title' | translate }}</h4>
+                    <p class="text-sm opacity-90 leading-relaxed mb-3">
+                      {{ 'left.activeFilters.infoTabs.personasContent.weighting.description' | translate }}
+                    </p>
+                    <p class="text-sm opacity-90 leading-relaxed mb-2 font-semibold">{{ 'left.activeFilters.infoTabs.personasContent.weighting.examples' | translate }}</p>
+                    <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc mb-3">
+                      <li>{{ 'left.activeFilters.infoTabs.personasContent.weighting.example1' | translate }}</li>
+                      <li>{{ 'left.activeFilters.infoTabs.personasContent.weighting.example2' | translate }}</li>
+                      <li>{{ 'left.activeFilters.infoTabs.personasContent.weighting.example3' | translate }}</li>
+                    </ul>
+                    <p class="text-sm opacity-90 leading-relaxed">
+                      {{ 'left.activeFilters.infoTabs.personasContent.weighting.standardView' | translate }}
+                    </p>
+                  </div>
+                </div>
+              </mat-tab>
+            </ng-container>
+
+            <!-- RegioStars Tab -->
+            <mat-tab [label]="'left.activeFilters.infoTabs.regioStars' | translate" class="text-[var(--primary-color)]">
+              <div class="p-6 space-y-6 text-[var(--primary-color)]">
+                <!-- Introduction -->
+                <div class="pb-4 border-b border-[var(--primary-color)] border-opacity-20">
+                  <h3 class="text-lg font-semibold mb-3">{{ 'left.activeFilters.infoTabs.regioStarsContent.introduction.title' | translate }}</h3>
+                  <p class="text-sm opacity-90 leading-relaxed">
+                    {{ 'left.activeFilters.infoTabs.regioStarsContent.introduction.description' | translate }}
+                  </p>
+                </div>
+
+                <!-- Types and Image -->
+                <div class="flex flex-col lg:flex-row gap-6 pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+                  <!-- Types List -->
+                  <div class="flex-1">
+                    <h4 class="font-semibold text-base mb-3">{{ 'left.activeFilters.infoTabs.regioStarsContent.types.title' | translate }}</h4>
+                    <ul class="text-sm opacity-90 space-y-2">
+                      <li class="flex items-start">
+                        <span class="mr-2 font-semibold">1.</span>
+                        <span>{{ 'left.activeFilters.infoTabs.regioStarsContent.types.type1' | translate }}</span>
+                      </li>
+                      <li class="flex items-start">
+                        <span class="mr-2 font-semibold">2.</span>
+                        <span>{{ 'left.activeFilters.infoTabs.regioStarsContent.types.type2' | translate }}</span>
+                      </li>
+                      <li class="flex items-start">
+                        <span class="mr-2 font-semibold">3.</span>
+                        <span>{{ 'left.activeFilters.infoTabs.regioStarsContent.types.type3' | translate }}</span>
+                      </li>
+                      <li class="flex items-start">
+                        <span class="mr-2 font-semibold">4.</span>
+                        <span>{{ 'left.activeFilters.infoTabs.regioStarsContent.types.type4' | translate }}</span>
+                      </li>
+                      <li class="flex items-start">
+                        <span class="mr-2 font-semibold">5.</span>
+                        <span>{{ 'left.activeFilters.infoTabs.regioStarsContent.types.type5' | translate }}</span>
+                      </li>
+                      <li class="flex items-start">
+                        <span class="mr-2 font-semibold">6.</span>
+                        <span>{{ 'left.activeFilters.infoTabs.regioStarsContent.types.type6' | translate }}</span>
+                      </li>
+                      <li class="flex items-start">
+                        <span class="mr-2 font-semibold">7.</span>
+                        <span>{{ 'left.activeFilters.infoTabs.regioStarsContent.types.type7' | translate }}</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <!-- Image -->
+                  <div class="flex-1 lg:max-w-md">
+                    <div class="w-full bg-[var(--background-color)] rounded-lg p-4">
+                      <!-- Replace the src path with your RegioStaR7 map image -->
+                      <img 
+                        src="/assets/images/regiostar.png" 
+                        alt="{{ 'left.activeFilters.infoTabs.regioStarsContent.imagePlaceholder' | translate }}"
+                        class="w-full h-auto rounded-lg">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Usage -->
+                <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+                  <h4 class="font-semibold text-base mb-3">{{ 'left.activeFilters.infoTabs.regioStarsContent.usage.title' | translate }}</h4>
+                  <p class="text-sm opacity-90 leading-relaxed mb-3">
+                    {{ 'left.activeFilters.infoTabs.regioStarsContent.usage.description' | translate }}
+                  </p>
+                  <ul class="text-sm opacity-90 space-y-2 ml-4 list-disc mb-3">
+                    <li>{{ 'left.activeFilters.infoTabs.regioStarsContent.usage.point1' | translate }}</li>
+                    <li>{{ 'left.activeFilters.infoTabs.regioStarsContent.usage.point2' | translate }}</li>
+                  </ul>
+                  <p class="text-sm opacity-90 leading-relaxed">
+                    {{ 'left.activeFilters.infoTabs.regioStarsContent.usage.example' | translate }}
+                  </p>
+                </div>
+
+                <!-- Data Basis -->
+                <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+                  <h4 class="font-semibold text-base mb-3">{{ 'left.activeFilters.infoTabs.regioStarsContent.dataBasis.title' | translate }}</h4>
+                  <p class="text-sm opacity-90 leading-relaxed mb-3">
+                    {{ 'left.activeFilters.infoTabs.regioStarsContent.dataBasis.description' | translate }}
+                  </p>
+                  <ul class="text-sm opacity-90 space-y-2 ml-4 list-disc mb-3">
+                    <li>{{ 'left.activeFilters.infoTabs.regioStarsContent.dataBasis.source1' | translate }}</li>
+                    <li>{{ 'left.activeFilters.infoTabs.regioStarsContent.dataBasis.source2' | translate }}</li>
+                  </ul>
+                  <p class="text-sm opacity-90 leading-relaxed">
+                    {{ 'left.activeFilters.infoTabs.regioStarsContent.dataBasis.fallback' | translate }}
+                  </p>
+                </div>
+
+                <!-- Notes -->
+                <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+                  <h4 class="font-semibold text-base mb-3">{{ 'left.activeFilters.infoTabs.regioStarsContent.notes.title' | translate }}</h4>
+                  <p class="text-sm opacity-90 leading-relaxed">
+                    {{ 'left.activeFilters.infoTabs.regioStarsContent.notes.description' | translate }}
+                  </p>
+                </div>
+              </div>
+            </mat-tab>
+
+            <!-- States Tab -->
+            <mat-tab [label]="'left.activeFilters.infoTabs.states' | translate" class="text-[var(--primary-color)]">
+              <div class="p-6 space-y-4 text-[var(--primary-color)]">
+                <h3 class="text-lg font-semibold mb-3">{{ 'left.activeFilters.infoTabs.statesContent.title' | translate }}</h3>
+                
+                <p class="text-sm opacity-90 leading-relaxed">
+                  {{ 'left.activeFilters.infoTabs.statesContent.description' | translate }}
+                </p>
+
+                <p class="text-sm opacity-90 leading-relaxed">
+                  {{ 'left.activeFilters.infoTabs.statesContent.influence' | translate }}
+                </p>
+              </div>
+            </mat-tab>
+          </mat-tab-group>
+        </app-info-overlay>
+      </div>
+    }
+  }
+</div>

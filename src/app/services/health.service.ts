@@ -7,12 +7,10 @@ import { environment } from '../../environments/environment';
     providedIn: 'root'
 })
 export class HealthService {
-    private apiUrl = environment.apiUrl;
-
     constructor(private http: HttpClient) { }
 
     checkHealth(): Observable<any> {
-        return this.http.get(`${this.apiUrl}/health`);
+        return this.http.get(`${environment.baseUrl}/health`);
     }
 }
 

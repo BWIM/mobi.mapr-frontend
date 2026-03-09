@@ -1,0 +1,301 @@
+<div class="w-full bg-[var(--background-color)] rounded-t-3xl transition-all duration-300 ease-in-out overflow-hidden shadow-lg"
+     [style.max-height]="isExpanded() ? 'calc(100vh - 4rem)' : 'auto'"
+     [style.height]="!isExpanded() ? 'auto' : 'auto'"
+     (touchstart)="onTouchStart($event)"
+     (touchend)="onTouchEnd($event)">
+  <!-- Project Name - Always visible -->
+  <div class="px-4 pt-2 pb-2 cursor-pointer"
+       (click)="togglePanel()">
+    <div class="flex items-center justify-center gap-2">
+      <div class="text-lg font-semibold text-[var(--primary-color)]">{{ project()?.display_name }}</div>
+      <mat-icon class="text-[var(--primary-color)] transition-transform duration-300"
+                [class.rotate-180]="isExpanded()">
+        keyboard_arrow_up
+      </mat-icon>
+    </div>
+  </div>
+  <!-- Searchbar - Always visible -->
+  <div class="p-4 flex items-center gap-2">
+    <mat-form-field appearance="fill" class="search-form-field flex-1 rounded-full pr-4 pl-4">
+      <mat-label>{{ 'map.search.label' | translate }}</mat-label>
+      <input 
+        matInput 
+        type="text" 
+        [(ngModel)]="searchQuery"
+        (input)="onSearchInput($event)"
+        (keydown.enter)="onSearchSubmit()"
+        [placeholder]="'map.search.placeholder' | translate">
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Filter Content - Only visible when expanded -->
+  @if (isExpanded()) {
+    <div class="px-6 pb-6 space-y-6 overflow-y-auto max-h-[calc(100vh-12rem)] relative">
+      <!-- Verkehrsmittel Filter -->
+      <div class="space-y-2">
+        <h3 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.transportModes.title' | translate }}</h3>
+        <div class="flex items-center gap-2">
+          @for (option of modeOptions(); track option.id) {
+            <button 
+              class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
+              [style.background-color]="isSelected(option.id) ? 'var(--primary-color)' : 'var(--background-color)'"
+              [style.border]="!isSelected(option.id) ? '1px solid var(--light-primary-color)' : 'none'"
+              [style.cursor]="(isPedestrianMode(option.id) && isSelected(option.id)) || isModeDisabled(option.id) ? 'not-allowed' : 'pointer'"
+              [style.opacity]="isModeDisabled(option.id) ? '0.5' : '1'"
+              [disabled]="isModeDisabled(option.id)"
+              (click)="toggleVerkehrsmittel(option.id)"
+              [attr.aria-label]="option.display_name"
+              [attr.aria-pressed]="isSelected(option.id)"
+              [attr.aria-disabled]="isModeDisabled(option.id)"
+              [title]="getModeTooltip(option)">
+              <mat-icon 
+                class="text-lg leading-none"
+                [style.color]="isSelected(option.id) ? 'var(--background-color)' : 'var(--light-primary-color)'">
+                {{ option.icon }}
+              </mat-icon>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Mobilitätsbewertung Toggle -->
+      <div class="space-y-2">
+        <h3 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.mobilityRating.title' | translate }}</h3>
+        <div class="flex border border-[var(--light-primary-color)] rounded-full overflow-hidden bg-[var(--background-color)] w-full">
+          <button 
+            class="flex-1 px-6 py-3 border-none border-r border-[var(--light-primary-color)] text-sm cursor-pointer transition-all duration-200 rounded-l-full"
+            [class.font-medium]="isMobilitatsbewertungSelected('zeit')"
+            [class.font-light]="!isMobilitatsbewertungSelected('zeit')"
+            [style.background-color]="isMobilitatsbewertungSelected('zeit') ? 'var(--primary-color)' : 'var(--background-color)'"
+            [style.color]="isMobilitatsbewertungSelected('zeit') ? 'var(--background-color)' : 'var(--light-primary-color)'"
+            (click)="selectMobilitatsbewertung('zeit')">
+            {{ 'left.mobilityRating.time.label' | translate }}
+          </button>
+          <button 
+            class="flex-1 px-6 py-3 border-none text-sm cursor-pointer transition-all duration-200 rounded-r-full"
+            [class.font-medium]="isMobilitatsbewertungSelected('qualitaet')"
+            [class.font-light]="!isMobilitatsbewertungSelected('qualitaet')"
+            [style.background-color]="isMobilitatsbewertungSelected('qualitaet') ? 'var(--primary-color)' : 'var(--background-color)'"
+            [style.color]="isMobilitatsbewertungSelected('qualitaet') ? 'var(--background-color)' : 'var(--light-primary-color)'"
+            (click)="selectMobilitatsbewertung('qualitaet')">
+            {{ 'left.mobilityRating.quality.label' | translate }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Shared Info Overlay -->
+      <app-info-overlay>
+        <div class="space-y-6">
+          <!-- Transport Modes Section -->
+          <div class="pb-4 border-b border-[var(--primary-color)] border-opacity-20">
+            <h3 class="text-lg font-semibold mb-3 text-[var(--primary-color)]">{{ 'left.transportModes.title' | translate }}</h3>
+            <p class="text-sm opacity-90 leading-relaxed">
+              {{ 'left.transportModes.introduction' | translate }}
+            </p>
+          </div>
+
+          <!-- Transport Modes Grid -->
+          <div class="space-y-4">
+            <h4 class="font-semibold text-base mb-3">{{ 'left.transportModes.modes.title' | translate }}</h4>
+            
+            <!-- Pedestrian -->
+            <div class="bg-[var(--secondary-color)] rounded-lg p-4 border-l-4 border-[var(--primary-color)]">
+              <div class="flex items-start gap-3">
+                <mat-icon class="text-2xl text-[var(--primary-color)] mt-0.5">directions_walk</mat-icon>
+                <div class="flex-1">
+                  <h5 class="font-semibold mb-1">{{ 'left.transportModes.modes.pedestrian.title' | translate }}</h5>
+                  <p class="text-sm opacity-90 leading-relaxed mb-2">
+                    {{ 'left.transportModes.modes.pedestrian.description' | translate }}
+                  </p>
+                  <div class="flex items-center gap-2 text-xs opacity-75">
+                    <mat-icon class="text-base">lock</mat-icon>
+                    <span>{{ 'left.transportModes.modes.pedestrian.alwaysEnabled' | translate }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bicycle -->
+            <div class="bg-[var(--secondary-color)] rounded-lg p-4 border-l-4 border-[var(--primary-color)]">
+              <div class="flex items-start gap-3">
+                <mat-icon class="text-2xl text-[var(--primary-color)] mt-0.5">directions_bike</mat-icon>
+                <div class="flex-1">
+                  <h5 class="font-semibold mb-1">{{ 'left.transportModes.modes.bicycle.title' | translate }}</h5>
+                  <p class="text-sm opacity-90 leading-relaxed">
+                    {{ 'left.transportModes.modes.bicycle.description' | translate }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Car -->
+            <div class="bg-[var(--secondary-color)] rounded-lg p-4 border-l-4 border-[var(--primary-color)]">
+              <div class="flex items-start gap-3">
+                <mat-icon class="text-2xl text-[var(--primary-color)] mt-0.5">directions_car</mat-icon>
+                <div class="flex-1">
+                  <h5 class="font-semibold mb-1">{{ 'left.transportModes.modes.car.title' | translate }}</h5>
+                  <p class="text-sm opacity-90 leading-relaxed">
+                    {{ 'left.transportModes.modes.car.description' | translate }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Transit -->
+            <div class="bg-[var(--secondary-color)] rounded-lg p-4 border-l-4 border-[var(--primary-color)]">
+              <div class="flex items-start gap-3">
+                <mat-icon class="text-2xl text-[var(--primary-color)] mt-0.5">train</mat-icon>
+                <div class="flex-1">
+                  <h5 class="font-semibold mb-1">{{ 'left.transportModes.modes.transit.title' | translate }}</h5>
+                  <p class="text-sm opacity-90 leading-relaxed">
+                    {{ 'left.transportModes.modes.transit.description' | translate }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Routing Information -->
+          <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20 space-y-4">
+            <h4 class="font-semibold text-base mb-3">{{ 'left.transportModes.routing.title' | translate }}</h4>
+            
+            <!-- Valhalla Routing -->
+            <div class="bg-[var(--secondary-color)] rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-[var(--primary-color)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
+                  <mat-icon class="text-[var(--primary-color)]">route</mat-icon>
+                </div>
+                <div class="flex-1">
+                  <h5 class="font-semibold mb-2">{{ 'left.transportModes.routing.valhalla.title' | translate }}</h5>
+                  <p class="text-sm opacity-90 leading-relaxed mb-2">
+                    {{ 'left.transportModes.routing.valhalla.description' | translate }}
+                  </p>
+                  <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc">
+                    <li>{{ 'left.transportModes.routing.valhalla.feature1' | translate }}</li>
+                    <li>{{ 'left.transportModes.routing.valhalla.feature2' | translate }}</li>
+                    <li>{{ 'left.transportModes.routing.valhalla.feature3' | translate }}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Motis Transit -->
+            <div class="bg-[var(--secondary-color)] rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-[var(--primary-color)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
+                  <mat-icon class="text-[var(--primary-color)]">alt_route</mat-icon>
+                </div>
+                <div class="flex-1">
+                  <h5 class="font-semibold mb-2">{{ 'left.transportModes.routing.motis.title' | translate }}</h5>
+                  <p class="text-sm opacity-90 leading-relaxed mb-2">
+                    {{ 'left.transportModes.routing.motis.description' | translate }}
+                  </p>
+                  <ul class="text-sm opacity-90 space-y-1 ml-4 list-disc">
+                    <li>{{ 'left.transportModes.routing.motis.feature1' | translate }}</li>
+                    <li>{{ 'left.transportModes.routing.motis.feature2' | translate }}</li>
+                    <li>{{ 'left.transportModes.routing.motis.feature3' | translate }}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mobility Rating Section -->
+          <div class="pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+            <div class="pb-4">
+              <h3 class="text-lg font-semibold mb-3 text-[var(--primary-color)]">{{ 'left.mobilityRating.title' | translate }}</h3>
+              <p class="text-sm opacity-90 leading-relaxed">
+                {{ 'left.mobilityRating.introduction' | translate }}
+              </p>
+            </div>
+
+            <!-- Time Rating -->
+            <div class="space-y-4">
+              <div class="bg-[var(--secondary-color)] rounded-lg p-4 border-l-4 border-[var(--primary-color)]">
+                <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 rounded-full bg-[var(--primary-color)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
+                    <mat-icon class="text-[var(--primary-color)]">schedule</mat-icon>
+                  </div>
+                  <div class="flex-1">
+                    <h4 class="font-semibold mb-2 text-base">{{ 'left.mobilityRating.time.title' | translate }}</h4>
+                    <p class="text-sm opacity-90 leading-relaxed mb-3">
+                      {{ 'left.mobilityRating.time.description' | translate }}
+                    </p>
+                    
+                    <div class="space-y-2 mt-3">
+                      <div class="flex items-start gap-2">
+                        <mat-icon class="text-base text-[var(--primary-color)] mt-0.5">looks_one</mat-icon>
+                        <p class="text-sm opacity-90 leading-relaxed">
+                          {{ 'left.mobilityRating.time.step1' | translate }}
+                        </p>
+                      </div>
+                      <div class="flex items-start gap-2">
+                        <mat-icon class="text-base text-[var(--primary-color)] mt-0.5">looks_two</mat-icon>
+                        <p class="text-sm opacity-90 leading-relaxed">
+                          {{ 'left.mobilityRating.time.step2' | translate }}
+                        </p>
+                      </div>
+                      <div class="flex items-start gap-2">
+                        <mat-icon class="text-base text-[var(--primary-color)] mt-0.5">looks_3</mat-icon>
+                        <p class="text-sm opacity-90 leading-relaxed">
+                          {{ 'left.mobilityRating.time.step3' | translate }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-[var(--background-color)] rounded-lg">
+                      <p class="text-xs opacity-75 italic">
+                        {{ 'left.mobilityRating.time.example' | translate }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quality Rating -->
+            <div class="space-y-4 pt-4 border-t border-[var(--primary-color)] border-opacity-20">
+              <div class="bg-[var(--secondary-color)] rounded-lg p-4 border-l-4 border-[var(--primary-color)]">
+                <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 rounded-full bg-[var(--primary-color)] bg-opacity-10 flex items-center justify-center flex-shrink-0">
+                    <mat-icon class="text-[var(--primary-color)]">bar_chart</mat-icon>
+                  </div>
+                  <div class="flex-1">
+                    <h4 class="font-semibold mb-2 text-base">{{ 'left.mobilityRating.quality.title' | translate }}</h4>
+                    <p class="text-sm opacity-90 leading-relaxed mb-3">
+                      {{ 'left.mobilityRating.quality.description' | translate }}
+                    </p>
+                    
+                    <div class="mt-4 p-3 bg-[var(--background-color)] rounded-lg mb-4">
+                      <p class="text-xs opacity-75 italic mb-2">
+                        {{ 'left.mobilityRating.quality.example' | translate }}
+                      </p>
+                    </div>
+
+                    <div class="mt-4">
+                      <h5 class="font-semibold mb-2 text-sm">{{ 'left.mobilityRating.quality.graphTitle' | translate }}</h5>
+                      <p class="text-xs opacity-75 mt-2">
+                        {{ 'left.mobilityRating.quality.graphDescription' | translate }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </app-info-overlay>
+    </div>
+  }
+
+  <!-- Static Footer Information -->
+  <div class="px-4 py-3 border-t border-[var(--primary-color)] flex items-center justify-between text-xs text-[var(--primary-color)] opacity-70">
+    <button 
+      (click)="openCreditsDialog()"
+      class="cursor-pointer hover:opacity-100 transition-opacity">
+      {{ 'mobileFilter.licenseInfo' | translate }}
+    </button>
+    <span>© BWIM {{ getFormattedCreatedDate() }}</span>
+  </div>
+</div>

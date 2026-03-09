@@ -1,0 +1,212 @@
+<!-- map.component.html -->
+<div class="rounded-xl overflow-hidden h-full w-full relative">
+  <div #mapContainer class="h-full w-full rounded-xl"></div>
+  <!-- Nominatim Search - Hidden on mobile, shown on desktop -->
+  <div class="hidden md:flex absolute top-0 left-0 right-auto bottom-auto z-[1000] p-3 min-w-[300px] max-w-[400px] items-center gap-2">
+    <mat-form-field appearance="fill" class="search-form-field w-full rounded-full" >
+      <mat-label>{{ 'map.search.label' | translate }}</mat-label>
+      <input 
+        #searchInput
+        matInput 
+        type="text" 
+        [(ngModel)]="searchQuery"
+        (input)="onSearchInput($event)"
+        (keydown.enter)="onSearchSubmit()"
+        [placeholder]="'map.search.placeholder' | translate"
+        [matAutocomplete]="auto">
+      <mat-icon matPrefix>search</mat-icon>
+      <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onLocationSelected($event)">
+        <mat-option *ngFor="let result of searchResults" [value]="result">
+          <span>{{ result.display_name }}</span>
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+  </div>
+  <!-- Loading indicator overlay -->
+  <div class="map-loading-overlay" *ngIf="isMapLoading()">
+    <div class="map-loading-content">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p class="map-loading-text">{{ 'map.search.loading' | translate }}</p>
+    </div>
+  </div>
+  <!-- Legend -->
+  <div class="map-legend absolute top-0 left-0 md:bottom-0 md:left-0 md:right-auto md:top-auto" (click)="openLegendDialog()" [title]="'map.search.clickForInfo' | translate">
+    <!-- Quality legend (A-F letters) -->
+    <div class="legend-quality" *ngIf="isQualityMode">
+      <div class="legend-items">
+        <div class="legend-item-quality" *ngFor="let item of qualityColors">
+          <div class="legend-circle" [style.background-color]="item.color">
+            <span class="legend-letter">{{ item.letter }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Time legend (discrete color steps) -->
+    <div class="legend-time" *ngIf="!isQualityMode">
+      <div class="legend-steps">
+        <div class="legend-step" *ngFor="let item of timeColors" [style.background-color]="item.color"></div>
+      </div>
+      <div class="legend-labels">
+        <span class="legend-label">{{ 'map.legend.time.min0' | translate }}</span>
+        <span class="legend-label">7</span>
+        <span class="legend-label">15</span>
+        <span class="legend-label">23</span>
+        <span class="legend-label">30</span>
+        <span class="legend-label">45</span>
+        <span class="legend-label">45+</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Footer -->
+  <div class="absolute bottom-0 left-0 right-0 md:hidden z-[999] bg-[var(--secondary-color)] border-t border-[var(--background-color)] py-2">
+    <app-bottom></app-bottom>
+  </div>
+
+  <!-- Legend Info Dialog Content Template -->
+  <ng-template #legendContentTemplate>
+    <div class="space-y-6">
+      <!-- Introduction -->
+      <div class="mb-6">
+        <h3 class="font-semibold text-lg text-[var(--primary-color)] mb-3">{{ 'map.legend.title' | translate }}</h3>
+        <p class="text-sm opacity-90 leading-relaxed">
+          {{ 'map.legend.introduction' | translate }}
+        </p>
+      </div>
+
+      <!-- Both Legends Side by Side on Desktop, Stacked on Mobile -->
+      <div class="flex flex-col md:flex-row gap-6 md:gap-8">
+        <!-- Time Legend (Left Side) -->
+        <div class="flex-1 space-y-4">
+          <h4 class="font-semibold text-base text-[var(--primary-color)]">{{ 'map.legend.time.title' | translate }}</h4>
+          <p class="text-sm opacity-90 leading-relaxed">
+            {{ 'map.legend.time.description' | translate }}
+          </p>
+          <p class="text-sm opacity-90 leading-relaxed">
+            {{ 'map.legend.time.result' | translate }}
+          </p>
+          <p class="text-sm opacity-90 leading-relaxed">
+            {{ 'map.legend.time.perceived' | translate }}
+          </p>
+          <div class="my-4 p-3 bg-gray-50 dark:bg-gray-800 rounded border-l-4 border-[var(--primary-color)]">
+            <p class="text-sm italic opacity-90">
+              {{ 'map.legend.time.example' | translate }}
+            </p>
+          </div>
+          <p class="text-sm opacity-90 leading-relaxed">
+            {{ 'map.legend.time.conclusion' | translate }}
+          </p>
+          <div class="mt-4">
+            <p class="text-sm font-medium mb-3">{{ 'map.legend.time.scale' | translate }}</p>
+            <div class="space-y-3">
+              <div class="legend-steps" style="width: 100%; height: 24px; border-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.2); display: flex; overflow: hidden;">
+                <div class="legend-step" *ngFor="let item of timeColors" [style.background-color]="item.color" style="flex: 1; height: 100%;"></div>
+              </div>
+              <div class="flex justify-between text-xs opacity-90">
+                <span>{{ 'map.legend.time.min0' | translate }}</span>
+                <span>7</span>
+                <span>15</span>
+                <span>23</span>
+                <span>30</span>
+                <span>45</span>
+                <span>45+</span>
+              </div>
+              <p class="text-sm opacity-90 mt-2">{{ 'map.legend.time.scaleDescription' | translate }}</p>
+              <p class="text-sm opacity-90">{{ 'map.legend.time.howToRead' | translate }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quality Legend (Right Side) -->
+        <div class="flex-1 space-y-4">
+          <h4 class="font-semibold text-base text-[var(--primary-color)]">{{ 'map.legend.quality.title' | translate }}</h4>
+          <p class="text-sm opacity-90 leading-relaxed">
+            {{ 'map.legend.quality.description' | translate }}
+          </p>
+          <p class="text-sm opacity-90 leading-relaxed">
+            {{ 'map.legend.quality.comparison' | translate }}
+          </p>
+          <p class="text-sm opacity-90 leading-relaxed">
+            {{ 'map.legend.quality.fair' | translate }}
+          </p>
+          <p class="text-sm opacity-90 leading-relaxed">
+            {{ 'map.legend.quality.perception' | translate }}
+          </p>
+          <p class="text-sm opacity-90 leading-relaxed">
+            {{ 'map.legend.quality.scaleIntro' | translate }}
+          </p>
+          <ul class="text-sm opacity-90 leading-relaxed list-disc list-inside space-y-1 ml-2">
+            <li>{{ 'map.legend.quality.scaleLower' | translate }}</li>
+            <li>{{ 'map.legend.quality.scaleUpper' | translate }}</li>
+          </ul>
+          <p class="text-sm opacity-90 leading-relaxed">
+            {{ 'map.legend.quality.result' | translate }}
+          </p>
+          <div class="mt-4">
+            <p class="text-sm font-medium mb-3">{{ 'map.legend.quality.scale' | translate }}</p>
+            <div class="space-y-3">
+              <div class="space-y-2">
+                <div class="flex items-start gap-2">
+                  <div class="legend-circle flex-shrink-0" style="background-color: rgba(50, 97, 45, 0.7); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
+                    <span class="legend-letter" style="color: white; font-weight: 600; font-size: 11px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">A</span>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium">{{ 'map.legend.quality.a.title' | translate }}</p>
+                    <p class="text-xs opacity-90">{{ 'map.legend.quality.a.description' | translate }}</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-2">
+                  <div class="legend-circle flex-shrink-0" style="background-color: rgba(60, 176, 67, 0.7); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
+                    <span class="legend-letter" style="color: white; font-weight: 600; font-size: 11px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">B</span>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium">{{ 'map.legend.quality.b.title' | translate }}</p>
+                    <p class="text-xs opacity-90">{{ 'map.legend.quality.b.description' | translate }}</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-2">
+                  <div class="legend-circle flex-shrink-0" style="background-color: rgba(238, 210, 2, 0.7); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
+                    <span class="legend-letter" style="color: white; font-weight: 600; font-size: 11px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">C</span>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium">{{ 'map.legend.quality.c.title' | translate }}</p>
+                    <p class="text-xs opacity-90">{{ 'map.legend.quality.c.description' | translate }}</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-2">
+                  <div class="legend-circle flex-shrink-0" style="background-color: rgba(237, 112, 20, 0.7); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
+                    <span class="legend-letter" style="color: white; font-weight: 600; font-size: 11px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">D</span>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium">{{ 'map.legend.quality.d.title' | translate }}</p>
+                    <p class="text-xs opacity-90">{{ 'map.legend.quality.d.description' | translate }}</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-2">
+                  <div class="legend-circle flex-shrink-0" style="background-color: rgba(194, 24, 7, 0.7); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
+                    <span class="legend-letter" style="color: white; font-weight: 600; font-size: 11px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">E</span>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium">{{ 'map.legend.quality.e.title' | translate }}</p>
+                    <p class="text-xs opacity-90">{{ 'map.legend.quality.e.description' | translate }}</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-2">
+                  <div class="legend-circle flex-shrink-0" style="background-color: rgba(197, 136, 187, 0.7); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.2);">
+                    <span class="legend-letter" style="color: white; font-weight: 600; font-size: 11px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">F</span>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium">{{ 'map.legend.quality.f.title' | translate }}</p>
+                    <p class="text-xs opacity-90">{{ 'map.legend.quality.f.description' | translate }}</p>
+                  </div>
+                </div>
+              </div>
+              <p class="text-sm opacity-90 mt-3">{{ 'map.legend.quality.howToRead' | translate }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</div>
+

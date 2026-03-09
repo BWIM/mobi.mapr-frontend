@@ -3,135 +3,41 @@
 
 @import 'ol/ol.css';
 
-/* Default theme (light theme) */
-:root {
-    /* New CI Color Palette */
-    --accent-color: #ffed00;
-    /* Akzentfarbe - Yellow accent */
-    --primary-color: #482683;
-    /* Hauptfarbe - Main dark purple */
-    --secondary-color: #d0bbdb;
-    /* Hauptfarbe - Main light purple */
-    --background-color: #f0ecec;
-    /* Hintergrundfarbe - Light background */
-    --second-background-color: #ffffff;
-    /* Hintergrundfarbe - White background */
-    --dark-background-color: #2c104c;
-    /* Hintergrundfarbe - Dark background */
-    --light-accent-background: #ffed99;
-    /* Hintergrundfarbe - Light yellow background */
-    --text-color: #000000;
-    /* Text - Black text */
-    --secondary-text-color: #ffffff;
-    /* Text - White text */
-    --highlight-color: #d0bbdb;
-    /* Using secondary color for highlights */
-    --title-color: #000000;
-    /* Text - Black for titles */
-    --surface-color: var(--second-background-color);
-    --error-color: #F44336;
-    --warning-color: #ffed00;
-    /* Using accent color for warnings */
-    --success-color: #4CAF50;
-    --border-radius: 4px;
-    --shadow-1: 0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 1px 0 rgba(0, 0, 0, .14), 0 1px 3px 0 rgba(0, 0, 0, .12);
-    --shadow-2: 0 3px 3px -2px rgba(0, 0, 0, .2), 0 3px 4px 0 rgba(0, 0, 0, .14), 0 1px 8px 0 rgba(0, 0, 0, .12);
-    font-family: Arial, sans-serif;
-
-    /* PrimeNG Theme Überschreibungen */
-    --surface-0: var(--second-background-color);
-    --surface-50: var(--background-color);
-    --surface-100: var(--background-color);
-    --surface-200: var(--background-color);
-    --surface-300: var(--background-color);
-    --surface-400: var(--background-color);
-    --surface-500: var(--background-color);
-    --surface-600: var(--background-color);
-    --surface-700: var(--background-color);
-    --surface-800: var(--background-color);
-    --surface-900: var(--background-color);
-
-    /* Text Colors */
-    --text-color: var(--text-color);
-    --text-color-secondary: var(--secondary-text-color);
-
-    /* Primary Colors */
-    --primary-50: var(--primary-color);
-    --primary-100: var(--primary-color);
-    --primary-200: var(--primary-color);
-    --primary-300: var(--primary-color);
-    --primary-400: var(--primary-color);
-    --primary-500: var(--primary-color);
-    --primary-600: var(--primary-color);
-    --primary-700: var(--primary-color);
-    --primary-800: var(--primary-color);
-    --primary-900: var(--primary-color);
-
-    /* Highlight Colors */
-    --highlight-bg: var(--highlight-color);
-    --highlight-text-color: var(--text-color);
-
-    /* Error, Warning, Success Colors */
-    --red-500: var(--error-color);
-    --yellow-500: var(--warning-color);
-    --green-500: var(--success-color);
-
-    /* PrimeNG specific variables */
-    --primary-color: #482683;
-    --secondary-color: #d0bbdb;
-    --primary-color-text: #ffffff;
-
-    /* PrimeNG Button variables */
-    --primary-button-bg: var(--primary-color);
-    --primary-button-text: #ffffff;
-    --primary-button-border: var(--primary-color);
-    --primary-button-hover-bg: var(--secondary-color);
-    --primary-button-hover-text: #ffffff;
-    --primary-button-hover-border: var(--secondary-color);
-    --primary-button-focus-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--accent-color);
+/* Font Face Declarations - CORBEL fonts */
+@font-face {
+    font-family: 'Corbel';
+    src: url('/assets/fonts/CORBEL.TTF') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap; /* Ensures text is visible while font loads */
 }
 
-/* Dark theme */
-[data-theme="dark"] {
-    --primary-color: #d0bbdb;
-    /* Light purple for dark theme primary */
-    --secondary-color: #482683;
-    /* Dark purple for dark theme secondary */
-    --primary-color-text: #ffffff;
-    /* White text for primary elements */
-    --accent-color: #ffed00;
-    /* Yellow accent remains the same */
-    --background-color: #2c104c;
-    /* Dark background from CI */
-    --second-background-color: #1a1a1a;
-    /* Even darker background */
-    --text-color: #ffffff;
-    /* White text for dark theme */
-    --secondary-text-color: #000000;
-    /* Black text for contrast */
-    --highlight-color: #482683;
-    /* Dark purple for highlights */
-    --title-color: #ffffff;
-    /* White titles */
-    --surface-color: var(--second-background-color);
-    --shadow-1: 0 2px 1px -1px rgba(255, 255, 255, .2), 0 1px 1px 0 rgba(255, 255, 255, .14), 0 1px 3px 0 rgba(255, 255, 255, .12);
-    --shadow-2: 0 3px 3px -2px rgba(255, 255, 255, .2), 0 3px 4px 0 rgba(255, 255, 255, .14), 0 1px 8px 0 rgba(255, 255, 255, .12);
+@font-face {
+    font-family: 'Corbel';
+    src: url('/assets/fonts/CORBEL_BOLD.TTF') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap; /* Ensures text is visible while font loads */
+}
 
-    /* PrimeNG Button variables */
-    --primary-button-bg: var(--primary-color);
-    --primary-button-text: #ffffff;
-    --primary-button-border: var(--primary-color);
-    --primary-button-hover-bg: var(--secondary-color);
-    --primary-button-hover-text: #ffffff;
-    --primary-button-hover-border: var(--secondary-color);
+/* Main color palette - only three colors used throughout the application */
+/* primary: #ffffff - white (text and primary elements) */
+/* background: #2C104C - dark violet (main background) */
+/* secondary: #482683 - light violet (secondary elements) */
+
+:root {
+    --font-family: 'Corbel', Arial, sans-serif;
+    --primary-color: #ffffff;
+    --secondary-color: #482683;
+    --background-color: #2C104C;
+    --light-primary-color: #ffffff80;
 }
 
 body {
     margin: 0;
     font-family: var(--font-family, Arial, sans-serif);
-    color: var(--text-color);
-    background-color: var(--background-color) !important;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    color: var(--primary-color);
+    background-color: var(--secondary-color);
     height: 100vh;
     height: 100dvh;
     /* Use dynamic viewport height for mobile */
@@ -139,748 +45,206 @@ body {
     /* Prevent horizontal scrolling */
 }
 
-/* Force light theme by overriding any dark theme styles */
-html:not([data-theme="dark"]) {
-    --background-color: #f0ecec !important;
-    --second-background-color: #ffffff !important;
-    --text-color: #000000 !important;
-    --title-color: #000000 !important;
-    --surface-color: #ffffff !important;
-}
-
-.p-component {
-    font-family: var(--font-family, Arial, sans-serif);
-    color: var(--text-color);
-}
-
-/* Force PrimeNG components to use light theme */
-.p-dialog,
-.p-card,
-.p-panel,
-.p-fieldset,
-.p-menubar,
-.p-tabview,
-.p-steps,
-.p-button {
-    background-color: var(--surface-color) !important;
-    color: var(--text-color) !important;
-}
-
-/* Ensure modals and overlays use light theme */
-.p-dialog .p-dialog-content,
-.p-dialog .p-dialog-header {
-    background-color: var(--surface-color) !important;
-    color: var(--text-color) !important;
-}
-
-/* Card-Styling */
-.p-card {
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-1);
-    transition: box-shadow 0.3s ease-in-out, background-color 0.3s ease;
-    background-color: var(--surface-color);
-}
-
-.p-card:hover {
-    box-shadow: var(--shadow-2);
-}
-
-/* Button-Styling */
-.p-button {
-    background: var(--primary-button-bg) !important;
-    border-color: var(--primary-button-border) !important;
-    color: var(--primary-button-text) !important;
-}
-
-.p-button:hover {
-    background: var(--primary-button-hover-bg) !important;
-    border-color: var(--primary-button-hover-border) !important;
-    color: var(--primary-button-hover-text) !important;
-}
-
-.p-button:focus {
-    box-shadow: var(--primary-button-focus-shadow) !important;
-}
-
-/* Ensure all buttons with primary colors have white text */
-button[class*="p-button"] {
-    color: #ffffff !important;
-}
-
-button[class*="p-button"]:hover {
-    color: #ffffff !important;
-}
-
-/* Custom button styling for purple buttons */
-button[style*="background-color: #482683"],
-button[style*="background-color: #d0bbdb"] {
-    color: #ffffff !important;
-}
-
-/* PrimeNG Checkbox CSS Custom Properties - Using correct tokens from documentation */
-:root {
-    --p-checkbox-border-color: var(--primary-color);
-    --p-checkbox-hover-border-color: var(--primary-color);
-    --p-checkbox-focus-border-color: var(--primary-color);
-    --p-checkbox-checked-border-color: var(--primary-color);
-    --p-checkbox-checked-hover-border-color: var(--secondary-color);
-    --p-checkbox-checked-focus-border-color: var(--primary-color);
-    --p-checkbox-background: transparent;
-    --p-checkbox-checked-background: var(--primary-color);
-    --p-checkbox-checked-hover-background: var(--secondary-color);
-    --p-checkbox-icon-color: var(--primary-color);
-    --p-checkbox-icon-checked-color: #ffffff;
-    --p-checkbox-icon-checked-hover-color: #ffffff;
-    --p-checkbox-focus-ring-color: var(--accent-color);
-}
-
-[data-theme="dark"] {
-    --p-checkbox-border-color: var(--primary-color);
-    --p-checkbox-hover-border-color: var(--primary-color);
-    --p-checkbox-focus-border-color: var(--primary-color);
-    --p-checkbox-checked-border-color: var(--primary-color);
-    --p-checkbox-checked-hover-border-color: var(--secondary-color);
-    --p-checkbox-checked-focus-border-color: var(--primary-color);
-    --p-checkbox-background: transparent;
-    --p-checkbox-checked-background: var(--primary-color);
-    --p-checkbox-checked-hover-background: var(--secondary-color);
-    --p-checkbox-icon-color: var(--primary-color);
-    --p-checkbox-icon-checked-color: #ffffff;
-    --p-checkbox-icon-checked-hover-color: #ffffff;
-    --p-checkbox-focus-ring-color: var(--accent-color);
-}
-
-/* PrimeNG RadioButton CSS Custom Properties - Inverted colors for white background with purple dot */
-:root {
-    --p-radiobutton-border-color: var(--primary-color);
-    --p-radiobutton-hover-border-color: var(--primary-color);
-    --p-radiobutton-focus-border-color: var(--primary-color);
-    --p-radiobutton-checked-border-color: var(--primary-color);
-    --p-radiobutton-checked-hover-border-color: var(--secondary-color);
-    --p-radiobutton-checked-focus-border-color: var(--primary-color);
-    --p-radiobutton-background: transparent;
-    --p-radiobutton-checked-background: #ffffff;
-    --p-radiobutton-checked-hover-background: #ffffff;
-    --p-radiobutton-icon-checked-color: var(--primary-color);
-    --p-radiobutton-icon-checked-hover-color: var(--secondary-color);
-    --p-radiobutton-focus-ring-color: var(--accent-color);
-}
-
-[data-theme="dark"] {
-    --p-radiobutton-border-color: var(--primary-color);
-    --p-radiobutton-hover-border-color: var(--primary-color);
-    --p-radiobutton-focus-border-color: var(--primary-color);
-    --p-radiobutton-checked-border-color: var(--primary-color);
-    --p-radiobutton-checked-hover-border-color: var(--secondary-color);
-    --p-radiobutton-checked-focus-border-color: var(--primary-color);
-    --p-radiobutton-background: transparent;
-    --p-radiobutton-checked-background: #ffffff;
-    --p-radiobutton-checked-hover-background: #ffffff;
-    --p-radiobutton-icon-checked-color: var(--primary-color);
-    --p-radiobutton-icon-checked-hover-color: var(--secondary-color);
-    --p-radiobutton-focus-ring-color: var(--accent-color);
-}
-
-/* PrimeNG MultiSelect CSS Custom Properties */
-:root {
-    --p-multiselect-border-color: var(--primary-color);
-    --p-multiselect-hover-border-color: var(--primary-color);
-    --p-multiselect-focus-border-color: var(--primary-color);
-    --p-multiselect-background: var(--surface-color);
-    --p-multiselect-text-color: var(--text-color);
-    --p-multiselect-placeholder-color: #6b7280;
-    --p-multiselect-chip-background: var(--primary-color);
-    --p-multiselect-chip-text-color: #ffffff;
-    --p-multiselect-chip-border-color: var(--primary-color);
-    --p-multiselect-overlay-background: var(--surface-color);
-    --p-multiselect-overlay-border-color: var(--primary-color);
-    --p-multiselect-overlay-shadow: var(--shadow-2);
-    --p-multiselect-option-hover-background: var(--highlight-color);
-    --p-multiselect-option-selected-background: var(--primary-color);
-    --p-multiselect-option-selected-text-color: #ffffff;
-    --p-multiselect-option-text-color: var(--text-color);
-    --p-multiselect-checkbox-border-color: var(--primary-color);
-    --p-multiselect-checkbox-checked-background: var(--primary-color);
-    --p-multiselect-checkbox-checked-border-color: var(--primary-color);
-    --p-multiselect-checkbox-icon-color: #ffffff;
-    --p-multiselect-focus-ring-color: var(--accent-color);
-}
-
-[data-theme="dark"] {
-    --p-multiselect-border-color: var(--primary-color);
-    --p-multiselect-hover-border-color: var(--primary-color);
-    --p-multiselect-focus-border-color: var(--primary-color);
-    --p-multiselect-background: var(--surface-color);
-    --p-multiselect-text-color: var(--text-color);
-    --p-multiselect-placeholder-color: #9ca3af;
-    --p-multiselect-chip-background: var(--primary-color);
-    --p-multiselect-chip-text-color: #ffffff;
-    --p-multiselect-chip-border-color: var(--primary-color);
-    --p-multiselect-overlay-background: var(--surface-color);
-    --p-multiselect-overlay-border-color: var(--primary-color);
-    --p-multiselect-overlay-shadow: var(--shadow-2);
-    --p-multiselect-option-hover-background: var(--highlight-color);
-    --p-multiselect-option-selected-background: var(--primary-color);
-    --p-multiselect-option-selected-text-color: #ffffff;
-    --p-multiselect-option-text-color: var(--text-color);
-    --p-multiselect-checkbox-border-color: var(--primary-color);
-    --p-multiselect-checkbox-checked-background: var(--primary-color);
-    --p-multiselect-checkbox-checked-border-color: var(--primary-color);
-    --p-multiselect-checkbox-icon-color: #ffffff;
-    --p-multiselect-focus-ring-color: var(--accent-color);
-}
-
-/* MultiSelect Styling - Using correct PrimeNG class names */
-.p-multiselect {
-    background: var(--p-multiselect-background) !important;
-    border-color: var(--p-multiselect-border-color) !important;
-    color: var(--p-multiselect-text-color) !important;
-    border-radius: var(--border-radius);
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.p-multiselect:hover {
-    border-color: var(--p-multiselect-hover-border-color) !important;
-}
-
-.p-multiselect.p-focus {
-    border-color: var(--p-multiselect-focus-border-color) !important;
-    box-shadow: 0 0 0 2px var(--p-multiselect-focus-ring-color) !important;
-}
-
-.p-multiselect .p-multiselect-label {
-    color: var(--p-multiselect-text-color) !important;
-}
-
-.p-multiselect .p-multiselect-label.p-placeholder {
-    color: var(--p-multiselect-placeholder-color) !important;
-}
-
-/* Chip styling for selected items */
-.p-multiselect .p-multiselect-chip {
-    background: var(--p-multiselect-chip-background) !important;
-    color: var(--p-multiselect-chip-text-color) !important;
-    border-color: var(--p-multiselect-chip-border-color) !important;
-    border-radius: calc(var(--border-radius) / 2);
-}
-
-.p-multiselect .p-multiselect-chip .p-multiselect-chip-icon {
-    color: var(--p-multiselect-chip-text-color) !important;
-}
-
-.p-multiselect .p-multiselect-chip .p-multiselect-chip-icon:hover {
-    color: var(--p-multiselect-chip-text-color) !important;
-}
-
-/* Overlay/Dropdown styling */
-.p-multiselect-overlay {
-    background: var(--p-multiselect-overlay-background) !important;
-    border-color: var(--p-multiselect-overlay-border-color) !important;
-    box-shadow: var(--p-multiselect-overlay-shadow) !important;
-    border-radius: var(--border-radius);
-}
-
-.p-multiselect-overlay .p-multiselect-list {
-    padding: 0.5rem;
-}
-
-.p-multiselect-overlay .p-multiselect-option {
-    color: var(--p-multiselect-option-text-color) !important;
-    border-radius: calc(var(--border-radius) / 2);
-    margin: 0.125rem 0;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.p-multiselect-overlay .p-multiselect-option:hover {
-    background: var(--p-multiselect-option-hover-background) !important;
-    color: var(--p-multiselect-option-text-color) !important;
-}
-
-.p-multiselect-overlay .p-multiselect-option.p-highlight {
-    background: var(--p-multiselect-option-selected-background) !important;
-    color: var(--p-multiselect-option-selected-text-color) !important;
-}
-
-.p-multiselect-overlay .p-multiselect-option .p-checkbox {
-    margin-right: 0.5rem;
-}
-
-.p-multiselect-overlay .p-multiselect-option .p-checkbox .p-checkbox-box {
-    border-color: var(--p-multiselect-checkbox-border-color) !important;
-    background: transparent;
-    border-radius: calc(var(--border-radius) / 4);
-}
-
-.p-multiselect-overlay .p-multiselect-option .p-checkbox .p-checkbox-box.p-highlight {
-    background: var(--p-multiselect-checkbox-checked-background) !important;
-    border-color: var(--p-multiselect-checkbox-checked-border-color) !important;
-}
-
-.p-multiselect-overlay .p-multiselect-option .p-checkbox .p-checkbox-box .p-checkbox-icon {
-    color: var(--p-multiselect-checkbox-icon-color) !important;
-}
-
-.p-multiselect-overlay .p-multiselect-filter-container {
-    padding: 0.5rem;
-    border-bottom: 1px solid var(--p-multiselect-overlay-border-color);
-}
-
-.p-multiselect-overlay .p-multiselect-filter-container .p-inputtext {
-    background: var(--p-multiselect-overlay-background) !important;
-    border-color: var(--p-multiselect-overlay-border-color) !important;
-    color: var(--p-multiselect-text-color) !important;
-    border-radius: calc(var(--border-radius) / 2);
-}
-
-.p-multiselect-overlay .p-multiselect-filter-container .p-inputtext:focus {
-    border-color: var(--p-multiselect-focus-border-color) !important;
-    box-shadow: 0 0 0 2px var(--p-multiselect-focus-ring-color) !important;
-}
-
-/* Additional MultiSelect styling for better coverage */
-.p-multiselect .p-multiselect-chip-item {
-    background: var(--p-multiselect-chip-background) !important;
-    color: var(--p-multiselect-chip-text-color) !important;
-    border-color: var(--p-multiselect-chip-border-color) !important;
-    border-radius: calc(var(--border-radius) / 2);
-}
-
-.p-multiselect .p-multiselect-chip-item .p-multiselect-chip-icon {
-    color: var(--p-multiselect-chip-text-color) !important;
-}
-
-.p-multiselect .p-multiselect-chip-item .p-multiselect-chip-icon:hover {
-    color: var(--p-multiselect-chip-text-color) !important;
-}
-
-/* Ensure dropdown icon uses correct colors */
-.p-multiselect .p-multiselect-dropdown-icon {
-    color: var(--p-multiselect-text-color) !important;
-}
-
-.p-multiselect .p-multiselect-dropdown-icon:hover {
-    color: var(--p-multiselect-text-color) !important;
-}
-
-/* Clear icon styling */
-.p-multiselect .p-autocomplete-clear-icon {
-    color: var(--p-multiselect-text-color) !important;
-}
-
-.p-multiselect .p-autocomplete-clear-icon:hover {
-    color: var(--p-multiselect-text-color) !important;
-}
-
-/* PrimeNG Select CSS Custom Properties */
-:root {
-    --p-select-border-color: var(--primary-color);
-    --p-select-hover-border-color: var(--primary-color);
-    --p-select-focus-border-color: var(--primary-color);
-    --p-select-background: var(--surface-color);
-    --p-select-text-color: var(--text-color);
-    --p-select-placeholder-color: #6b7280;
-    --p-select-dropdown-background: var(--surface-color);
-    --p-select-dropdown-border-color: var(--primary-color);
-    --p-select-dropdown-shadow: var(--shadow-2);
-    --p-select-option-hover-background: var(--highlight-color);
-    --p-select-option-selected-background: var(--primary-color);
-    --p-select-option-selected-text-color: #ffffff;
-    --p-select-option-text-color: var(--text-color);
-    --p-select-focus-ring-color: var(--accent-color);
-}
-
-[data-theme="dark"] {
-    --p-select-border-color: var(--primary-color);
-    --p-select-hover-border-color: var(--primary-color);
-    --p-select-focus-border-color: var(--primary-color);
-    --p-select-background: var(--surface-color);
-    --p-select-text-color: var(--text-color);
-    --p-select-placeholder-color: #9ca3af;
-    --p-select-dropdown-background: var(--surface-color);
-    --p-select-dropdown-border-color: var(--primary-color);
-    --p-select-dropdown-shadow: var(--shadow-2);
-    --p-select-option-hover-background: var(--highlight-color);
-    --p-select-option-selected-background: var(--primary-color);
-    --p-select-option-selected-text-color: #ffffff;
-    --p-select-option-text-color: var(--text-color);
-    --p-select-focus-ring-color: var(--accent-color);
-}
-
-/* Select Styling */
-.p-select {
-    background: var(--p-select-background) !important;
-    border-color: var(--p-select-border-color) !important;
-    color: var(--p-select-text-color) !important;
-    border-radius: var(--border-radius);
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.p-select:hover {
-    border-color: var(--p-select-hover-border-color) !important;
-}
-
-.p-select.p-focus {
-    border-color: var(--p-select-focus-border-color) !important;
-    box-shadow: 0 0 0 2px var(--p-select-focus-ring-color) !important;
-}
-
-.p-select .p-select-label {
-    color: var(--p-select-text-color) !important;
-}
-
-.p-select .p-select-label.p-placeholder {
-    color: var(--p-select-placeholder-color) !important;
-}
-
-.p-select .p-select-dropdown-icon {
-    color: var(--p-select-text-color) !important;
-}
-
-.p-select .p-select-dropdown-icon:hover {
-    color: var(--p-select-text-color) !important;
-}
-
-.p-select-overlay {
-    background: var(--p-select-dropdown-background) !important;
-    border-color: var(--p-select-dropdown-border-color) !important;
-    box-shadow: var(--p-select-dropdown-shadow) !important;
-    border-radius: var(--border-radius);
-}
-
-.p-select-overlay .p-select-option {
-    color: var(--p-select-option-text-color) !important;
-    border-radius: calc(var(--border-radius) / 2);
-    margin: 0.125rem 0;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.p-select-overlay .p-select-option:hover {
-    background: var(--p-select-option-hover-background) !important;
-    color: var(--p-select-option-text-color) !important;
-}
-
-.p-select-overlay .p-select-option.p-highlight {
-    background: var(--p-select-option-selected-background) !important;
-    color: var(--p-select-option-selected-text-color) !important;
-}
-
-/* PrimeNG InputText CSS Custom Properties */
-:root {
-    --p-inputtext-border-color: var(--primary-color);
-    --p-inputtext-hover-border-color: var(--primary-color);
-    --p-inputtext-focus-border-color: var(--primary-color);
-    --p-inputtext-background: var(--surface-color);
-    --p-inputtext-text-color: var(--text-color);
-    --p-inputtext-placeholder-color: #6b7280;
-    --p-inputtext-focus-ring-color: var(--accent-color);
-}
-
-[data-theme="dark"] {
-    --p-inputtext-border-color: var(--primary-color);
-    --p-inputtext-hover-border-color: var(--primary-color);
-    --p-inputtext-focus-border-color: var(--primary-color);
-    --p-inputtext-background: var(--surface-color);
-    --p-inputtext-text-color: var(--text-color);
-    --p-inputtext-placeholder-color: #9ca3af;
-    --p-inputtext-focus-ring-color: var(--accent-color);
-}
-
-/* InputText Styling */
-.p-inputtext {
-    background: var(--p-inputtext-background) !important;
-    border-color: var(--p-inputtext-border-color) !important;
-    color: var(--p-inputtext-text-color) !important;
-    border-radius: var(--border-radius);
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.p-inputtext:hover {
-    border-color: var(--p-inputtext-hover-border-color) !important;
-}
-
-.p-inputtext:focus {
-    border-color: var(--p-inputtext-focus-border-color) !important;
-    box-shadow: 0 0 0 2px var(--p-inputtext-focus-ring-color) !important;
-}
-
-.p-inputtext::placeholder {
-    color: var(--p-inputtext-placeholder-color) !important;
-}
-
-/* Password Styling */
-.p-password {
-    background: var(--p-inputtext-background) !important;
-    border-color: var(--p-inputtext-border-color) !important;
-    color: var(--p-inputtext-text-color) !important;
-    border-radius: var(--border-radius);
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.p-password:hover {
-    border-color: var(--p-inputtext-hover-border-color) !important;
-}
-
-.p-password.p-focus {
-    border-color: var(--p-inputtext-focus-border-color) !important;
-    box-shadow: 0 0 0 2px var(--p-inputtext-focus-ring-color) !important;
-}
-
-.p-password .p-password-input {
-    background: transparent !important;
-    border: none !important;
-    color: var(--p-inputtext-text-color) !important;
-}
-
-.p-password .p-password-input::placeholder {
-    color: var(--p-inputtext-placeholder-color) !important;
-}
-
-.p-password .p-password-toggle-icon {
-    color: var(--p-inputtext-text-color) !important;
-}
-
-.p-password .p-password-toggle-icon:hover {
-    color: var(--p-inputtext-text-color) !important;
-}
-
-/* Textarea Styling */
-.p-inputtextarea {
-    background: var(--p-inputtext-background) !important;
-    border-color: var(--p-inputtext-border-color) !important;
-    color: var(--p-inputtext-text-color) !important;
-    border-radius: var(--border-radius);
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.p-inputtextarea:hover {
-    border-color: var(--p-inputtext-hover-border-color) !important;
-}
-
-.p-inputtextarea:focus {
-    border-color: var(--p-inputtext-focus-border-color) !important;
-    box-shadow: 0 0 0 2px var(--p-inputtext-focus-ring-color) !important;
-}
-
-.p-inputtextarea::placeholder {
-    color: var(--p-inputtext-placeholder-color) !important;
-}
-
-/* Menubar-Styling */
-.p-menubar {
-    background: var(--surface-color);
-    box-shadow: var(--shadow-1);
-    color: var(--text-color);
-}
-
-.p-menubar .p-menuitem-link {
-    color: var(--text-color);
-}
-
-.p-menubar .p-menuitem-link:hover {
-    background-color: var(--highlight-color);
-}
-
-.p-steps-item-active .p-steps-item-label {
-    color: var(--text-color) !important;
-}
-
-.p-steps-item-active .p-steps-item-number {
-    color: var(--text-color) !important;
-}
-
-.p-tab-active {
-    color: var(--text-color) !important;
-
-}
-
-.p-tablist-active-bar {
+/* Ensure all elements use Corbel font by default */
+* {
+    font-family: var(--font-family, 'Corbel', Arial, sans-serif);
+}
+
+/* Material Icons - Global configuration */
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    font-feature-settings: 'liga';
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+}
+
+button {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.primary-button {
+    background-color: var(--primary-color);
+    color: var(--background-color);
+    border: none;
+    border-radius: 50%;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    &:hover {
+        background-color: var(--secondary-color);
+        color: var(--primary-color);
+    }
+}
+
+.secondary-button {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border: none;
+    border-radius: 50%;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    &:hover {
+        background-color: var(--primary-color);
+        color: var(--secondary-color);
+    }
+}
+
+.tertiary-button {
+    background-color: var(--background-color);
+    color: var(--primary-color);
+    border: none;
+    border-radius: 50%;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    &:hover {
+        background-color: var(--secondary-color);
+        color: var(--primary-color);
+    }
+}
+
+/* Material Icon Button - Global styling */
+button[mat-icon-button],
+button[matIconButton],
+.mat-mdc-icon-button {
+    border-radius: 50% !important;
     background-color: var(--primary-color) !important;
+    color: var(--background-color) !important;
 }
 
-/* Responsive Anpassungen */
-@media screen and (max-width: 768px) {
-    :root {
-        --border-radius: 2px;
-    }
-
-    /* Mobile-optimized typography */
-    body {
-        font-size: 14px;
-        line-height: 1.4;
-    }
-
-    /* Better touch targets for mobile */
-    .p-button {
-        min-width: 1.5rem;
-        min-height: 1.5rem;
-    }
-
-    /* Mobile-optimized dialogs */
-    .p-dialog {
-        margin: 0 !important;
-        border-radius: 0 !important;
-    }
-
-    .p-dialog .p-dialog-content {
-        padding: 1rem !important;
-    }
-
-    /* Mobile-optimized tables */
-    .p-datatable .p-datatable-thead>tr>th,
-    .p-datatable .p-datatable-tbody>tr>td {
-        padding: 0.75rem 0.5rem;
-    }
-
-    /* Mobile-optimized panels */
-    .p-panel .p-panel-content {
-        padding: 1rem;
-    }
-
-    /* Mobile-optimized fieldsets */
-    .p-fieldset .p-fieldset-content {
-        padding: 1rem;
-    }
-
-    /* Mobile-optimized scroll panels */
-    .p-scrollpanel {
-        border-radius: 0;
-    }
-
-    /* Better mobile navigation */
-    .p-menubar {
-        padding: 0.5rem;
-    }
-
-    .p-menubar .p-menuitem-link {
-        padding: 0.75rem;
-    }
-
-    /* Mobile MultiSelect optimizations */
-    .p-multiselect {
-        min-height: 2.5rem;
-        font-size: 16px;
-        /* Prevent zoom on iOS */
-    }
-
-    .p-multiselect .p-multiselect-chip {
-        min-height: 1.5rem;
-        padding: 0.25rem 0.5rem;
-        margin: 0.125rem;
-    }
-
-    .p-multiselect-overlay {
-        max-height: 50vh;
-        z-index: 1000;
-    }
-
-    .p-multiselect-overlay .p-multiselect-option {
-        min-height: 2.5rem;
-        padding: 0.75rem;
-        display: flex;
-        align-items: center;
-    }
-
-    .p-multiselect-overlay .p-multiselect-option .p-checkbox {
-        margin-right: 0.75rem;
-    }
-
-    .p-button,
-    button,
-    .clickable-tab,
-    [role="button"] {
-        touch-action: manipulation;
-    }
-
+button[mat-icon-button] mat-icon,
+button[matIconButton] mat-icon,
+.mat-mdc-icon-button mat-icon {
+    color: var(--background-color) !important;
 }
 
-/* Tablet-specific adjustments */
-@media screen and (min-width: 769px) and (max-width: 1024px) {
-    body {
-        font-size: 15px;
-    }
+button[mat-icon-button]:hover,
+button[matIconButton]:hover,
+.mat-mdc-icon-button:hover {
+    background-color: var(--primary-color) !important;
+    opacity: 0.9;
+}
 
-    .p-button {
-        min-width: 1.25rem;
-        min-height: 1.25rem;
+button[mat-icon-button]:hover mat-icon,
+button[matIconButton]:hover mat-icon,
+.mat-mdc-icon-button:hover mat-icon {
+    color: var(--secondary-color) !important;
+    opacity: 0.9;
+}
+
+button[mat-button],
+button[matButton],
+.mat-mdc-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 4px 8px;
+    border-radius: 9999px;
+    border: 1px solid var(--background-color);
+    background-color: var(--primary-color);
+    color: var(--background-color);
+    font-weight: bold;
+    transition: all 0.3s ease;
+    &:hover {
+        background-color: var(--secondary-color);
+        color: var(--primary-color);
     }
 }
 
-/* Touch-friendly improvements */
-@media (hover: none) and (pointer: coarse) {
-    .p-button {
-        min-width: 1.5rem;
-        min-height: 1.5rem;
-    }
 
-    .p-button.p-button-text {
-        min-width: 1.5rem;
-        min-height: 1.5rem;
-    }
-
-    /* Improve table row touch targets */
-    .p-datatable .p-datatable-tbody>tr {
-        min-height: 3.5rem;
-    }
-
-    .p-datatable .p-datatable-tbody>tr>td {
-        padding: 1rem 0.75rem;
-    }
-
-    /* Better link touch targets */
-    a {
-        min-height: 2.5rem;
-        display: inline-flex;
-        align-items: center;
-    }
-
-    button {
-        min-height: 2.5rem;
-        display: inline-flex;
-        align-items: center;
-    }
-
-    /* Touch-friendly MultiSelect improvements */
-    .p-multiselect {
-        min-height: 2.5rem;
-        touch-action: manipulation;
-    }
-
-    .p-multiselect .p-multiselect-chip {
-        min-height: 2rem;
-        padding: 0.5rem;
-        margin: 0.25rem;
-    }
-
-    .p-multiselect-overlay .p-multiselect-option {
-        min-height: 3rem;
-        padding: 1rem;
-    }
+button[mat-button]:hover,
+button[matButton]:hover,
+.mat-mdc-button:hover {
+    background-color: var(--secondary-color) !important;
+    color: var(--primary-color) !important;
+    opacity: 0.9;
 }
 
-/* High DPI display optimizations */
-@media (-webkit-min-device-pixel-ratio: 2),
-(min-resolution: 192dpi) {
-    .p-card {
-        border-width: 0.5px;
-    }
-
-    .p-fieldset {
-        border-width: 0.5px;
-    }
+/* Material Tabs - Global styling */
+.mat-mdc-tab-header {
+    border-bottom: 1px solid var(--light-primary-color);
 }
 
-button.ol-zoom-in {
-    display: none !important;
+/* Inactive tabs */
+.mat-mdc-tab:not(.mdc-tab--active) .mdc-tab__text-label {
+    color: var(--light-primary-color) !important;
+    opacity: 0.7;
+    transition: all 0.3s ease;
 }
 
-button.ol-zoom-out {
-    display: none !important;
+.mat-mdc-tab:not(.mdc-tab--active):hover .mdc-tab__text-label {
+    color: var(--primary-color) !important;
+    opacity: 0.9;
 }
 
-.ol-zoom-in {
-    display: none !important;
+/* Active/Selected tab */
+.mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+    color: var(--primary-color) !important;
+    font-weight: 600;
+    opacity: 1;
 }
 
-.ol-zoom-out {
-    display: none !important;
+/* Tab underline indicator */
+.mat-mdc-tab-header .mdc-tab-indicator__content--underline {
+    border-color: var(--primary-color) !important;
+    border-width: 2px !important;
+}
+
+/* Ensure active tab has visible indicator */
+.mat-mdc-tab.mdc-tab--active .mdc-tab-indicator {
+    opacity: 1 !important;
+}
+
+/* Tab ripple effect */
+.mat-mdc-tab .mdc-tab__ripple::before,
+.mat-mdc-tab .mdc-tab__ripple::after {
+    background-color: var(--primary-color);
+    opacity: 0.1;
+}
+
+/* Custom Scrollbar Styles - Rounded and matching design */
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--secondary-color);
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+    background: var(--secondary-color);
+    border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 10px;
+    border: 2px solid var(--secondary-color);
+    transition: background 0.3s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: var(--light-primary-color);
+}
+
+*::-webkit-scrollbar-corner {
+    background: var(--secondary-color);
+    border-radius: 10px;
 }

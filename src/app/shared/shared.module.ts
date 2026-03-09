@@ -3,129 +3,72 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
+import { MatCardModule } from '@angular/material/card';
 
-// PrimeNG Imports
-import { ToastModule } from 'primeng/toast';
-import { ButtonModule } from 'primeng/button';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { PanelModule } from 'primeng/panel';
-import { TableModule } from 'primeng/table';
-import { TagModule } from 'primeng/tag';
-import { MessageModule } from 'primeng/message';
-import { MessageService } from 'primeng/api';
-import { ProgressBarModule } from 'primeng/progressbar';
-import { TooltipModule } from 'primeng/tooltip';
-import { DrawerModule } from 'primeng/drawer';
-import { ScrollPanelModule } from 'primeng/scrollpanel';
-import { DialogModule } from 'primeng/dialog';
-import { SpeedDialModule } from 'primeng/speeddial';
-import { SplitButtonModule } from 'primeng/splitbutton';
-import { StepsModule } from 'primeng/steps';
-import { CheckboxModule } from 'primeng/checkbox';
-import { ChipModule } from 'primeng/chip';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { TabsModule } from 'primeng/tabs';
-import { ToggleButtonModule } from 'primeng/togglebutton';
-import { ChartModule } from 'primeng/chart';
-import { CardModule } from 'primeng/card';
-import { FieldsetModule } from 'primeng/fieldset';
-import { MenuModule } from 'primeng/menu';
-import { RadioButtonModule } from 'primeng/radiobutton';
-import { SelectButtonModule } from 'primeng/selectbutton';
-import { ListboxModule } from 'primeng/listbox';
-import { PopoverModule } from 'primeng/popover';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
-import { SliderModule } from 'primeng/slider';
-import { SelectModule } from 'primeng/select';
-import { MultiSelectModule } from 'primeng/multiselect';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { AccordionModule } from 'primeng/accordion';
+
 
 @NgModule({
   imports: [
+    MatDialogModule,
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
+    MatSlideToggleModule,
     CommonModule,
-    RouterModule,
-    TranslateModule,
     FormsModule,
     ReactiveFormsModule,
-    ToastModule,
-    ButtonModule,
-    ProgressSpinnerModule,
-    PanelModule,
-    TableModule,
-    TagModule,
-    ProgressBarModule,
-    MessageModule,
-    TooltipModule,
-    DrawerModule,
-    ScrollPanelModule,
-    DialogModule,
-    SpeedDialModule,
-    SplitButtonModule,
-    StepsModule,
-    CheckboxModule,
-    ChipModule,
-    ConfirmDialogModule,
-    TabsModule,
-    ToggleButtonModule,
-    ChartModule,
-    CardModule,
-    FieldsetModule,
-    MenuModule,
-    RadioButtonModule,
-    SelectButtonModule,
-    ListboxModule,
-    PopoverModule,
-    ToggleSwitchModule,
-    SliderModule,
-    ProgressSpinnerModule,
-    SelectModule,
-    MultiSelectModule,
-    InputNumberModule,
-    AccordionModule,
+    RouterModule,
+    TranslateModule,
+    MatCheckboxModule,
+    MatProgressSpinnerModule,
+    MatTabsModule,
+    MatSidenavModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatAutocompleteModule,
+    MatTooltipModule,
+    MatBottomSheetModule,
+    MatCardModule,
   ],
   exports: [
+    MatDialogModule,
+    MatButtonModule,
+    MatIconModule,
+    MatMenuModule,
+    MatSlideToggleModule,
     CommonModule,
-    RouterModule,
-    TranslateModule,
     FormsModule,
     ReactiveFormsModule,
-    ToastModule,
-    ButtonModule,
-    ProgressSpinnerModule,
-    PanelModule,
-    TableModule,
-    TagModule,
-    ProgressBarModule,
-    MessageModule,
-    TooltipModule,
-    DrawerModule,
-    ScrollPanelModule,
-    DialogModule,
-    SpeedDialModule,
-    SplitButtonModule,
-    StepsModule,
-    CheckboxModule,
-    ChipModule,
-    ConfirmDialogModule,
-    TabsModule,
-    ToggleButtonModule,
-    ChartModule,
-    CardModule,
-    FieldsetModule,
-    MenuModule,
-    RadioButtonModule,
-    SelectButtonModule,
-    ListboxModule,
-    PopoverModule,
-    ToggleSwitchModule,
-    SliderModule,
-    ProgressSpinnerModule,
-    SelectModule,
-    MultiSelectModule,
-    InputNumberModule,
-    AccordionModule,
+    RouterModule,
+    TranslateModule,
+    MatCheckboxModule,
+    MatProgressSpinnerModule,
+    MatTabsModule,
+    MatSidenavModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatAutocompleteModule,
+    MatTooltipModule,
+    MatBottomSheetModule,
+    MatCardModule,
   ],
-  providers: [MessageService]
+  providers: []
 })
 export class SharedModule { } 

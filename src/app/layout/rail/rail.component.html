@@ -1,0 +1,222 @@
+<div class="h-full flex flex-col items-center py-4">
+  <!-- Upper Section -->
+  <div class="flex flex-col items-center gap-4">
+    <!-- Logo and Logo Text stacked -->
+    <div class="flex flex-col items-center gap-2">
+      <a href="https://bw-im.de/mobimapr" target="_blank" [attr.title]="'rail.logoHint' | translate"><img src="assets/images/logo.png" alt="Logo" class="w-auto h-16"></a>
+      <a href="https://bw-im.de/mobimapr" target="_blank" [attr.title]="'rail.logoHint' | translate"><img src="assets/images/logo_name.png" alt="Logo Text" class="w-auto h-18"></a>
+    </div>
+    
+    <!-- Language Selector Button with Menu -->
+    <button 
+      [matMenuTriggerFor]="languageMenu"
+      class="flex items-center gap-2 border border-[var(--primary-color)] rounded-full p-2 hover:bg-[var(--primary-color)] hover:text-[var(--background-color)] transition-colors">
+      <span class="text-xl font-bold">{{ currentLang().toUpperCase() }}</span>
+    </button>
+    <mat-menu #languageMenu="matMenu">
+      <button mat-menu-item 
+              (click)="switchLanguage('de')"
+              [class.selected-language]="currentLang() === 'de'">
+        DE
+      </button>
+      <button mat-menu-item 
+              (click)="switchLanguage('en')"
+              [class.selected-language]="currentLang() === 'en'">
+        EN
+      </button>
+    </mat-menu>
+  </div>
+  
+  <!-- Filling Space -->
+  <div class="flex-1"></div>
+  
+  <!-- Lower Section - Button Group -->
+  <div class="flex flex-col items-center gap-2 bg-[var(--background-color)] rounded-full p-4 shadow-lg">
+    <button matIconButton (click)="openMailDialog()" [attr.aria-label]="'rail.mail.title' | translate">
+      <mat-icon>question_mark</mat-icon>
+    </button>
+    <button matIconButton (click)="openCredits()" [attr.aria-label]="'rail.credits.title' | translate">
+      <mat-icon>info_i</mat-icon>
+    </button>
+    @if (isLoggedIn()) {
+      <button matIconButton (click)="navigateToUsersArea()" [attr.aria-label]="'rail.manageProjects' | translate">
+        <mat-icon>person</mat-icon>
+      </button>
+    }
+  </div>
+
+  <!-- Mail Dialog Content Template -->
+  <ng-template #mailContentTemplate>
+    <div class="space-y-8">
+      <!-- Welcome Section -->
+      <div class="text-center pb-4 border-b-2 border-[var(--primary-color)] border-opacity-20">
+        <h2 class="text-2xl sm:text-3xl font-bold text-[var(--primary-color)] m-0 mb-2">
+          {{ 'rail.mail.welcome' | translate }}
+        </h2>
+        <p class="text-[var(--primary-color)] leading-relaxed text-base m-0 opacity-90">
+          {{ 'rail.mail.developedBy' | translate }}
+        </p>
+      </div>
+
+      <!-- Background Section -->
+      <section class="space-y-4">
+        <h3 class="text-xl font-semibold text-[var(--primary-color)] m-0 flex items-center gap-2">
+          <mat-icon class="text-2xl">explore</mat-icon>
+          {{ 'rail.mail.background.title' | translate }}
+        </h3>
+        <div class="space-y-3 pl-2">
+          <p class="text-[var(--primary-color)] leading-relaxed text-base m-0">
+            {{ 'rail.mail.background.intro' | translate }}
+          </p>
+          <p class="text-[var(--primary-color)] leading-relaxed text-base m-0">
+            {{ 'rail.mail.background.approach' | translate }}
+          </p>
+          <p class="text-[var(--primary-color)] leading-relaxed text-base m-0">
+            {{ 'rail.mail.background.humanCentric' | translate }}
+          </p>
+          <p class="text-[var(--primary-color)] leading-relaxed text-base m-0 font-medium italic">
+            {{ 'rail.mail.background.explore' | translate }}
+          </p>
+        </div>
+      </section>
+
+      <!-- License Section -->
+      <section class="space-y-4 p-4 rounded-lg bg-black/5 border-l-4 border-[var(--primary-color)]">
+        <h3 class="text-xl font-semibold text-[var(--primary-color)] m-0 flex items-center gap-2">
+          <mat-icon class="text-2xl">gavel</mat-icon>
+          {{ 'rail.mail.license.title' | translate }}
+        </h3>
+        <div class="space-y-3 pl-2">
+          <p class="text-[var(--primary-color)] leading-relaxed text-sm m-0">
+            {{ 'rail.mail.license.frontend' | translate }}
+          </p>
+          <p class="text-[var(--primary-color)] leading-relaxed text-sm m-0">
+            {{ 'rail.mail.license.data' | translate }}
+          </p>
+          <p class="text-[var(--primary-color)] leading-relaxed text-xs m-0 opacity-80 italic">
+            {{ 'rail.mail.license.note' | translate }}
+          </p>
+        </div>
+      </section>
+
+      <!-- Links Section -->
+      <section class="space-y-3">
+        <div class="flex items-start gap-3 p-3 rounded-lg bg-black/5 hover:bg-black/10 transition-colors">
+          <mat-icon class="text-[var(--primary-color)] mt-1 flex-shrink-0">code</mat-icon>
+          <div class="flex-1">
+            <p class="text-[var(--primary-color)] leading-relaxed text-sm m-0 mb-1">
+              {{ 'rail.mail.sourceCode' | translate }}
+            </p>
+            <a href="https://github.com/BWIM/mobi.mapr-frontend" target="_blank" 
+               class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline transition-colors font-medium text-sm">
+              <mat-icon class="text-sm">open_in_new</mat-icon>
+              <span>github.com/BWIM/mobi.mapr-frontend</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 p-3 rounded-lg bg-black/5 hover:bg-black/10 transition-colors">
+          <mat-icon class="text-[var(--primary-color)] mt-1 flex-shrink-0">description</mat-icon>
+          <div class="flex-1">
+            <p class="text-[var(--primary-color)] leading-relaxed text-sm m-0">
+              {{ 'rail.mail.apiDocumented' | translate }}
+            </p>
+            <a href="https://api.mapr.mobi/swagger<" target="_blank" 
+               class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline transition-colors font-medium text-sm">
+              <mat-icon class="text-sm">open_in_new</mat-icon>
+              <span>api.mapr.mobi/swagger</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact Section -->
+      <section class="space-y-4 pt-4 border-t-2 border-[var(--primary-color)] border-opacity-20">
+        <h3 class="text-xl font-semibold text-[var(--primary-color)] m-0 flex items-center gap-2">
+          <mat-icon class="text-2xl">contact_mail</mat-icon>
+          {{ 'rail.mail.contact.title' | translate }}
+        </h3>
+        <div class="space-y-3 pl-2">
+          <div class="flex items-start gap-3">
+            <mat-icon class="text-[var(--primary-color)] mt-1 flex-shrink-0 text-lg">language</mat-icon>
+            <div class="flex-1">
+              <p class="text-[var(--primary-color)] leading-relaxed text-sm m-0 mb-1">
+                {{ 'rail.mail.contact.website' | translate }}
+              </p>
+              <a href="https://bw-im.de/mobimapr" target="_blank" 
+                 class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline transition-colors font-medium text-sm">
+                <mat-icon class="text-sm">open_in_new</mat-icon>
+                <span>bw-im.de/mobimapr</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <mat-icon class="text-[var(--primary-color)] mt-1 flex-shrink-0 text-lg">email</mat-icon>
+            <div class="flex-1">
+              <p class="text-[var(--primary-color)] leading-relaxed text-sm m-0 mb-1">
+                {{ 'rail.mail.contact.email' | translate }}
+              </p>
+              <a href="mailto:mobimapr@bw-im.de" 
+                 class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline transition-colors font-medium text-sm">
+                <mat-icon class="text-sm">mail</mat-icon>
+                <span>mobimapr@bw-im.de</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <mat-icon class="text-[var(--primary-color)] mt-1 flex-shrink-0 text-lg">bug_report</mat-icon>
+            <div class="flex-1">
+              <p class="text-[var(--primary-color)] leading-relaxed text-sm m-0 mb-1">
+                {{ 'rail.mail.contact.github' | translate }}
+              </p>
+              <a href="https://github.com/BWIM/mobi.mapr-frontend/issues" target="_blank" 
+                 class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline transition-colors font-medium text-sm">
+                <mat-icon class="text-sm">open_in_new</mat-icon>
+                <span>github.com/BWIM/mobi.mapr-frontend/issues</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </ng-template>
+
+  <!-- Question Mark Dialog Content Template -->
+  <ng-template #questionMarkContentTemplate>
+    <div class="space-y-6">
+      <div class="flex items-start gap-4 p-4 rounded-lg bg-[var(--background-color)] border border-[var(--primary-color)] border-opacity-10">
+        <mat-icon class="text-[var(--primary-color)] mt-1">info</mat-icon>
+        <div class="flex-1">
+          <p class="text-[var(--primary-color)] leading-relaxed text-base m-0">
+            {{ 'rail.questionMark.infoButtons' | translate }}
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-4 p-4 rounded-lg bg-[var(--background-color)] border border-[var(--primary-color)] border-opacity-10">
+        <mat-icon class="text-[var(--primary-color)] mt-1">language</mat-icon>
+        <div class="flex-1">
+          <p class="text-[var(--primary-color)] leading-relaxed text-base m-0">
+            {{ 'rail.questionMark.moreOnWebsite' | translate }}
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-start gap-4 p-4 rounded-lg bg-[var(--background-color)] border border-[var(--primary-color)] border-opacity-10">
+        <mat-icon class="text-[var(--primary-color)] mt-1">help_outline</mat-icon>
+        <div class="flex-1">
+          <p class="text-[var(--primary-color)] leading-relaxed text-base m-0 mb-2">
+            {{ 'rail.questionMark.faq' | translate }}
+          </p>
+          <a href="https://bw-im.de/mobimapr-faq" target="_blank" 
+             class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline transition-colors font-medium">
+            <mat-icon class="text-sm">open_in_new</mat-icon>
+            <span>bw-im.de/mobimapr-faq</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</div>
