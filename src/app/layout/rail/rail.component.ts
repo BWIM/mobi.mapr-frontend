@@ -7,6 +7,7 @@ import { LanguageService } from '../../services/language.service';
 import { MatDialog } from '@angular/material/dialog';
 import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.component';
 import { CreditsDialogComponent } from './credits-dialog/credits-dialog.component';
+import { FeedbackDialogComponent } from './feedback-dialog/feedback-dialog.component';
 
 @Component({
   selector: 'app-rail',
@@ -78,5 +79,13 @@ export class RailComponent implements OnInit {
       maxWidth: '90vw',
       maxHeight: '90vh'
     });
-  } 
+  }
+
+  openFeedbackDialog() {
+    this.dialog.open(FeedbackDialogComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      maxHeight: '90vh'
+    });
+  }
 }

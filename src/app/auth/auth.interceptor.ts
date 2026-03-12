@@ -40,8 +40,8 @@ export const AuthInterceptor: HttpInterceptorFn = (
   const router = inject(Router);
   const sessionService = inject(SessionService);
 
-  // Check if it's a token request, public route, share route or explicitly allowed public asset
-  if (req.url.includes('/token/') || isPublicRoute(router) || isShareRoute(router) || isPublicAsset(req.url)) {
+  // Check if it's a token request, feedback request, public route, share route or explicitly allowed public asset
+  if (req.url.includes('/token/') || req.url.includes('/feedback') || isPublicRoute(router) || isShareRoute(router) || isPublicAsset(req.url)) {
     const url = addSessionParameters(req.url, sessionService);
     return next(req.clone({ url }));
   }
