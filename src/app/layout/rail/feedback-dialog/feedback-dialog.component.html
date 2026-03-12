@@ -12,6 +12,7 @@
           matInput 
           formControlName="problem"
           rows="6"
+          autocomplete="off"
           class="text-[var(--primary-color)]"
           [ngClass]="{'ng-invalid ng-dirty': isFieldInvalid('problem')}">
         </textarea>
@@ -27,6 +28,7 @@
           matInput 
           type="email"
           formControlName="email"
+          autocomplete="email"
           class="text-[var(--primary-color)]"
           [ngClass]="{'ng-invalid ng-dirty': isFieldInvalid('email')}">
         <mat-error *ngIf="isFieldInvalid('email')">
