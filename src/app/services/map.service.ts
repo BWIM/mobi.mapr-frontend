@@ -157,7 +157,6 @@ export class MapService {
             tiles: ["https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"],
             tileSize: 256,
             minzoom: 0,
-            maxzoom: 14
           } as SourceSpecification
         },
         layers: [
@@ -166,7 +165,6 @@ export class MapService {
             type: 'raster',
             source: 'carto-light',
             minzoom: 0,
-            maxzoom: 14
           } as LayerSpecification,
         ],
         glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf'
@@ -561,7 +559,9 @@ export class MapService {
     // Remove existing content and border layers from layers array
     updatedStyle.layers = updatedStyle.layers.filter(
       layer => layer.id !== 'content-layer-fill' && 
-               layer.id !== 'content-layer-outline'
+               layer.id !== 'content-layer-outline' &&
+               layer.id !== 'content-layer-highlight' &&
+               layer.id !== 'content-layer-selection'
     );
 
     // Add the new content layer source
@@ -569,7 +569,6 @@ export class MapService {
       type: 'vector',
       tiles: [tileUrl],
       minzoom: 0,
-      maxzoom: 14,
       tileSize: 512
     } as SourceSpecification;
 
@@ -642,6 +641,37 @@ export class MapService {
       }
     } as LayerSpecification);
 
+    // Add highlight layer for hover effects (initially hidden, will be filtered on hover)
+    // Uses a darkened version (10% black added) of the fill/outline color with full opacity
+    const darkenedColorExpression = this.getDarkenedColorExpression(fillColorExpression);
+    updatedStyle.layers.push({
+      id: 'content-layer-highlight',
+      type: 'line',
+      source: 'content-layer',
+      'source-layer': 'geodata',
+      paint: {
+        'line-color': darkenedColorExpression,
+        'line-width': 2,
+        'line-opacity': 1
+      },
+      filter: ['==', ['get', 'name'], '__never_match__'] // Initially filter out everything
+    } as LayerSpecification);
+
+    // Add selection border layer for selected features (initially hidden, will be filtered on selection)
+    // Positioned after highlight layer so it appears on top
+    updatedStyle.layers.push({
+      id: 'content-layer-selection',
+      type: 'line',
+      source: 'content-layer',
+      'source-layer': 'geodata',
+      paint: {
+        'line-color': '#000000',
+        'line-width': 1,
+        'line-opacity': 1
+      },
+      filter: ['==', ['get', 'name'], '__never_match__'] // Initially filter out everything (using name like highlight)
+    } as LayerSpecification);
+
     // Add border layer (between feature layers and labels)
     // updatedStyle.layers.push({
     //   id: 'border-layer',
@@ -693,7 +723,9 @@ export class MapService {
     // Remove content and border layers from layers array
     updatedStyle.layers = updatedStyle.layers.filter(
       layer => layer.id !== 'content-layer-fill' && 
-               layer.id !== 'content-layer-outline'
+               layer.id !== 'content-layer-outline' &&
+               layer.id !== 'content-layer-highlight' &&
+               layer.id !== 'content-layer-selection'
     );
 
     this._currentProfileCombinationID.set(null);
@@ -734,6 +766,52 @@ export class MapService {
       1800, 'rgb(121,194,230)', // 31-45 min (1800-2700s) - medium-light
       2700, 'rgb(162,210,235)'  // 45+ min (2700+s) - lightest
     ];
+  }
+
+  /**
+   * Returns a darkened version of the fill color expression (10% black added)
+   * Used for highlight borders to make them stand out better
+   */
+  private getDarkenedColorExpression(baseExpression: any): any {
+    if (baseExpression[0] === 'step') {
+      // Darken score color expression by 10% (multiply RGB by 0.9)
+      // Structure: ['step', input, default, threshold1, color1, threshold2, color2, ...]
+      return [
+        'step',
+        baseExpression[1], // ['get', 'score']
+        'rgb(21,23,57)',      // rgb(23,25,63) * 0.9 (rounded)
+        baseExpression[3], // 480
+        'rgb(39,36,95)',      // rgb(43,40,105) * 0.9 (rounded)
+        baseExpression[5], // 960
+        'rgb(67,80,144)',     // rgb(74,89,160) * 0.9 (rounded)
+        baseExpression[7], // 1440
+        'rgb(81,122,167)',    // rgb(90,135,185) * 0.9 (rounded)
+        baseExpression[9], // 1800
+        'rgb(109,175,207)',   // rgb(121,194,230) * 0.9 (rounded)
+        baseExpression[11], // 2700
+        'rgb(146,189,212)'    // rgb(162,210,235) * 0.9 (rounded)
+      ];
+    } else if (baseExpression[0] === 'case') {
+      // Darken index color expression by 10% (multiply RGB by 0.9)
+      // Structure: ['case', condition1, color1, condition2, color2, ..., defaultColor]
+      return [
+        'case',
+        baseExpression[1], // ['<=', ['/', ['get', 'index'], 100], 0]
+        'rgba(115, 115, 115, 0)', // rgba(128, 128, 128, 0) * 0.9 (rounded)
+        baseExpression[3], // ['<', ['/', ['get', 'index'], 100], 0.35]
+        'rgba(45, 87, 41, 1)',    // rgba(50, 97, 45, 0.7) * 0.9, full opacity
+        baseExpression[5], // ['<', ['/', ['get', 'index'], 100], 0.5]
+        'rgba(54, 158, 60, 1)',   // rgba(60, 176, 67, 0.7) * 0.9, full opacity
+        baseExpression[7], // ['<', ['/', ['get', 'index'], 100], 0.71]
+        'rgba(214, 189, 2, 1)',   // rgba(238, 210, 2, 0.7) * 0.9, full opacity
+        baseExpression[9], // ['<', ['/', ['get', 'index'], 100], 1.0]
+        'rgba(213, 101, 18, 1)',  // rgba(237, 112, 20, 0.7) * 0.9, full opacity
+        baseExpression[11], // ['<', ['/', ['get', 'index'], 100], 1.41]
+        'rgba(175, 22, 6, 1)',    // rgba(194, 24, 7, 0.7) * 0.9, full opacity
+        'rgba(135, 77, 146, 1)'   // rgba(150, 86, 162, 0.7) * 0.9, full opacity
+      ];
+    }
+    return baseExpression;
   }
 
   /**

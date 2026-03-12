@@ -48,6 +48,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private contextMenuPopup?: Popup;
   private contextMenuFeature: any = null;
   private hasSelectedFeature: boolean = false;
+  private currentSelectedFeature: any = null;
 
   // Nominatim search properties
   searchQuery: string = '';
@@ -167,13 +168,17 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         this.map.once('style.load', () => {
           this.setupFeatureInteractions();
           this.setupTileLoadingEvents();
+          // Re-apply selection border if a feature is selected
+          this.updateSelectionBorder();
         });
       }
     });
 
-    // Track if a feature is currently selected
+    // Track if a feature is currently selected and update selection border
     this.featureSelectionSubscription = this.featureSelectionService.selectedMapLibreFeature$.subscribe(feature => {
       this.hasSelectedFeature = feature !== null;
+      this.currentSelectedFeature = feature;
+      this.updateSelectionBorder();
     });
   }
 
@@ -185,7 +190,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         center: this.center,
         zoom: this.zoom,
         minZoom: 5,
-        maxZoom: 12,
+        maxZoom: 15,
         dragRotate: false,
         renderWorldCopies: false,
         attributionControl: false
@@ -215,6 +220,8 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
           this.setupFeatureInteractions();
           this.setupTileLoadingEvents();
           this.map.addControl(new AttributionControl({customAttribution:'Hintergrundkarte: © OpenStreetMap, CARTO', compact: true}), 'bottom-right');
+          // Re-apply selection border if a feature is selected
+          this.updateSelectionBorder();
 
           setTimeout(() => {
             const btn = this.map!
@@ -275,7 +282,8 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       .set('q', query)
       .set('format', 'json')
       .set('limit', '10')
-      .set('addressdetails', '1');
+      .set('addressdetails', '1')
+      .set('countrycodes', 'de'); // Restrict results to Germany
 
     // Nominatim requires a User-Agent header per their usage policy
     const headers = {
@@ -309,6 +317,35 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  /**
+   * Updates the selection border on the map based on currently selected feature
+   */
+  private updateSelectionBorder(): void {
+    if (!this.map || !this.map.getLayer('content-layer-selection')) {
+      return;
+    }
+
+    if (this.currentSelectedFeature) {
+      const featureName = this.currentSelectedFeature.properties?.name || this.currentSelectedFeature.properties?.NAME;
+      
+      if (featureName) {
+        // Use name-based filtering (like highlight does) - this works reliably
+        // For features with the same name (like hexagons), all will be highlighted
+        this.map.setFilter('content-layer-selection', [
+          'any',
+          ['==', ['get', 'name'], featureName],
+          ['==', ['get', 'NAME'], featureName]
+        ]);
+      } else {
+        // Hide selection border if no name available
+        this.map.setFilter('content-layer-selection', ['==', ['get', 'name'], '__never_match__']);
+      }
+    } else {
+      // Hide selection border when no feature is selected
+      this.map.setFilter('content-layer-selection', ['==', ['get', 'name'], '__never_match__']);
+    }
+  }
+
   private setupFeatureInteractions(): void {
     if (!this.map || !this.popup) {
       return;
@@ -317,16 +354,74 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     // Note: MapLibre automatically removes all event handlers when setStyle() is called,
     // so we don't need to manually remove them here. We just add them fresh each time.
 
+    // Track currently highlighted name to avoid unnecessary filter updates
+    let currentHighlightName: string | null = null;
+    let mouseleaveTimeout: any = null;
+
+    // Helper function to update highlight
+    const updateHighlight = (name: string | null, immediate: boolean = false) => {
+      if (!this.map || !this.map.getLayer('content-layer-highlight')) {
+        return;
+      }
+      
+      // Clear any pending mouseleave timeout since we're updating the highlight
+      if (mouseleaveTimeout) {
+        clearTimeout(mouseleaveTimeout);
+        mouseleaveTimeout = null;
+      }
+      
+      if (name) {
+        // Always update if name changed, or if immediate flag is set (for mouseenter)
+        if (name !== currentHighlightName || immediate) {
+          currentHighlightName = name;
+          // Set filter to show all features with the same name
+          // Handle both 'name' and 'NAME' properties
+          this.map.setFilter('content-layer-highlight', [
+            'any',
+            ['==', ['get', 'name'], name],
+            ['==', ['get', 'NAME'], name]
+          ]);
+        }
+      } else if (!name && currentHighlightName !== null) {
+        if (immediate) {
+          currentHighlightName = null;
+          // Hide highlight layer by filtering to an impossible condition
+          this.map.setFilter('content-layer-highlight', ['==', ['get', 'name'], '__never_match__']);
+        } else {
+          // Delay clearing to allow mouseenter of next feature to fire first
+          mouseleaveTimeout = setTimeout(() => {
+            if (currentHighlightName !== null) {
+              currentHighlightName = null;
+              if (this.map && this.map.getLayer('content-layer-highlight')) {
+                this.map.setFilter('content-layer-highlight', ['==', ['get', 'name'], '__never_match__']);
+              }
+            }
+            mouseleaveTimeout = null;
+          }, 50);
+        }
+      }
+    };
+
     // Change cursor to pointer when hovering over features
-    this.map.on('mouseenter', 'content-layer-fill', () => {
+    this.map.on('mouseenter', 'content-layer-fill', (e) => {
       if (this.map) {
         this.map.getCanvas().style.cursor = 'pointer';
+        
+        // Highlight all features with the same name (update immediately)
+        if (e.features && e.features.length > 0) {
+          const feature = e.features[0];
+          const properties = feature.properties;
+          const name = properties['name'] || properties['NAME'] || null;
+          updateHighlight(name, true); // Immediate update on mouseenter
+        }
       }
     });
 
     this.map.on('mouseleave', 'content-layer-fill', () => {
       if (this.map) {
         this.map.getCanvas().style.cursor = '';
+        // Don't clear immediately - delay to allow smooth transitions between features
+        updateHighlight(null, false);
       }
       if (this.popup) {
         this.popup.remove();
@@ -334,6 +429,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     // Show feature name and score/index on hover
+    // Also update highlight on mousemove to handle transitions between features
     this.map.on('mousemove', 'content-layer-fill', (e) => {
       if (!this.map || !this.popup || !e.features || e.features.length === 0) {
         return;
@@ -343,6 +439,10 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       const properties = feature.properties;
       const unnamedText = this.translate.instant('map.popup.unnamed');
       const name = properties['name'] || properties['NAME'] || unnamedText;
+      
+      // Update highlight when moving between features
+      const actualName = properties['name'] || properties['NAME'] || null;
+      updateHighlight(actualName);
       const isQualityMode = this.isQualityMode;
       
       let valueText = '';

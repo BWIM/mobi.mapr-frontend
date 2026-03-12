@@ -298,7 +298,7 @@
       "description": "Wähle die Verkehrsmittel aus, die in der Berechnung berücksichtigt werden sollen. Du kannst mehrere Verkehrsmittel gleichzeitig aktivieren oder deaktivieren.",
       "availableOptions": "Verfügbare Optionen",
       "availableOptionsDescription": "Jedes Verkehrsmittel kann einzeln ein- oder ausgeschaltet werden, um die Analyse entsprechend deinen Anforderungen anzupassen.",
-      "cannotDisable": "Kann nicht deaktiviert werden",
+      "cannotDisable": "Kann nicht deaktiviert werden, da ohne Fußgänger keine anderen Verkehrsmittel sinnvoll nutzbar sind.",
       "cannotUseCar": "Für ausgewählte Personengruppe nicht verfügbar",
       "introduction": "Wähle aus vier Verkehrsmitteln, um die Mobilität in deiner Region zu analysieren. Jeder Modus verwendet ausgeklügelte Routing-Algorithmen, um realistische Reisezeiten zu berechnen.",
       "modes": {
@@ -382,7 +382,7 @@
       "description": "Wähle zwischen zwei Bewertungsmethoden für die Mobilitätsanalyse.",
       "introduction": "Um Mobilität neutral und vergleichbar bewerten zu können, braucht es eine klare und nachvollziehbare Methodik.",
       "time": {
-        "label": "Zeit",
+        "label": "Mobilitätszeit",
         "title": "Zeitbasierte Bewertung",
         "description": "Die zeitbasierte Bewertung berechnet absolute Reisezeiten zu Zielen unter Berücksichtigung von Routenstrafen und modusspezifischen Faktoren.",
         "step1": "Von einem Ausgangspunkt werden die nächsten drei Instanzen jeder Aktivität (z.B. Restaurants) für alle aktivierten Verkehrsmittel berechnet.",

@@ -153,7 +153,7 @@
       <div class="flex flex-col gap-2">
         <div class="flex border border-[var(--light-primary-color)] rounded-full overflow-hidden bg-[var(--secondary-color)] w-fit">
           <button 
-            class="flex-1 px-8 py-1 border-none border-r border-[var(--light-primary-color)] text-sm cursor-pointer transition-all duration-200 rounded-l-full"
+            class="flex-1 px-4 py-1 border-none border-r border-[var(--light-primary-color)] text-sm cursor-pointer transition-all duration-200 rounded-l-full"
             [class.font-medium]="isMobilitatsbewertungSelected('zeit')"
             [class.font-light]="!isMobilitatsbewertungSelected('zeit')"
             [style.background-color]="isMobilitatsbewertungSelected('zeit') ? 'var(--primary-color)' : 'var(--secondary-color)'"
@@ -164,7 +164,7 @@
             {{ 'left.mobilityRating.time.label' | translate }}
           </button>
           <button 
-            class="flex-1 px-8 py-1 border-none text-sm cursor-pointer transition-all duration-200 rounded-r-full"
+            class="flex-1 px-4 py-1 border-none text-sm cursor-pointer transition-all duration-200 rounded-r-full"
             [class.font-medium]="isMobilitatsbewertungSelected('qualitaet')"
             [class.font-light]="!isMobilitatsbewertungSelected('qualitaet')"
             [style.background-color]="isMobilitatsbewertungSelected('qualitaet') ? 'var(--primary-color)' : 'var(--secondary-color)'"
