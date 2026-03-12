@@ -1,0 +1,102 @@
+:host ::ng-deep .mat-mdc-form-field {
+  width: 100%;
+}
+
+:host ::ng-deep .mat-mdc-text-field-wrapper {
+  background-color: var(--background-color);
+  color: var(--primary-color);
+}
+
+:host ::ng-deep textarea.mat-mdc-input-element {
+  min-height: 120px;
+  resize: vertical;
+  color: var(--primary-color);
+}
+
+:host ::ng-deep input.mat-mdc-input-element {
+  color: var(--primary-color);
+}
+
+:host ::ng-deep .mat-mdc-form-field .mat-mdc-text-field-wrapper .mat-mdc-form-field-input-control input,
+:host ::ng-deep .mat-mdc-form-field .mat-mdc-text-field-wrapper .mat-mdc-form-field-input-control textarea {
+  color: var(--primary-color);
+}
+
+:host ::ng-deep .mat-mdc-form-field-label {
+  color: var(--primary-color);
+}
+
+:host ::ng-deep .mat-mdc-form-field .mat-mdc-floating-label {
+  color: var(--primary-color);
+}
+
+:host ::ng-deep .mat-mdc-form-field-error {
+  color: var(--primary-color);
+}
+
+:host ::ng-deep mat-dialog-content {
+  color: var(--primary-color);
+}
+
+:host ::ng-deep input.mat-mdc-input-element::placeholder,
+:host ::ng-deep textarea.mat-mdc-input-element::placeholder {
+  color: var(--primary-color) !important;
+  opacity: 0.7 !important;
+}
+
+/* Hide placeholder when field is focused (to prevent overlap with floating label) */
+:host ::ng-deep .mat-mdc-form-field.mat-focused input.mat-mdc-input-element::placeholder,
+:host ::ng-deep .mat-mdc-form-field.mat-focused textarea.mat-mdc-input-element::placeholder {
+  opacity: 0 !important;
+}
+
+:host ::ng-deep .mat-mdc-form-field.mat-focused input.mat-mdc-input-element::-webkit-input-placeholder,
+:host ::ng-deep .mat-mdc-form-field.mat-focused textarea.mat-mdc-input-element::-webkit-input-placeholder {
+  opacity: 0 !important;
+}
+
+:host ::ng-deep .mat-mdc-form-field.mat-focused input.mat-mdc-input-element::-moz-placeholder,
+:host ::ng-deep .mat-mdc-form-field.mat-focused textarea.mat-mdc-input-element::-moz-placeholder {
+  opacity: 0 !important;
+}
+
+:host ::ng-deep .mat-mdc-form-field.mat-focused input.mat-mdc-input-element:-ms-input-placeholder,
+:host ::ng-deep .mat-mdc-form-field.mat-focused textarea.mat-mdc-input-element:-ms-input-placeholder {
+  opacity: 0 !important;
+}
+
+:host ::ng-deep input.mat-mdc-input-element::-webkit-input-placeholder,
+:host ::ng-deep textarea.mat-mdc-input-element::-webkit-input-placeholder {
+  color: var(--primary-color) !important;
+  opacity: 0.7 !important;
+}
+
+:host ::ng-deep input.mat-mdc-input-element:focus::-webkit-input-placeholder,
+:host ::ng-deep textarea.mat-mdc-input-element:focus::-webkit-input-placeholder {
+  color: var(--primary-color) !important;
+  opacity: 0.7 !important;
+}
+
+:host ::ng-deep input.mat-mdc-input-element::-moz-placeholder,
+:host ::ng-deep textarea.mat-mdc-input-element::-moz-placeholder {
+  color: var(--primary-color) !important;
+  opacity: 0.7 !important;
+}
+
+:host ::ng-deep input.mat-mdc-input-element:focus::-moz-placeholder,
+:host ::ng-deep textarea.mat-mdc-input-element:focus::-moz-placeholder {
+  color: var(--primary-color) !important;
+  opacity: 0.7 !important;
+}
+
+:host ::ng-deep input.mat-mdc-input-element:-ms-input-placeholder,
+:host ::ng-deep textarea.mat-mdc-input-element:-ms-input-placeholder {
+  color: var(--primary-color) !important;
+  opacity: 0.7 !important;
+}
+
+:host ::ng-deep input.mat-mdc-input-element:focus:-ms-input-placeholder,
+:host ::ng-deep textarea.mat-mdc-input-element:focus:-ms-input-placeholder {
+  color: var(--primary-color) !important;
+  opacity: 0.7 !important;
+}

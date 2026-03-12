@@ -32,6 +32,9 @@
   
   <!-- Lower Section - Button Group -->
   <div class="flex flex-col items-center gap-2 bg-[var(--background-color)] rounded-full p-4 shadow-lg">
+    <button matIconButton (click)="openFeedbackDialog()" [attr.aria-label]="'rail.feedback.title' | translate">
+      <mat-icon>feedback</mat-icon>
+    </button>
     <button matIconButton (click)="openMailDialog()" [attr.aria-label]="'rail.mail.title' | translate">
       <mat-icon>question_mark</mat-icon>
     </button>

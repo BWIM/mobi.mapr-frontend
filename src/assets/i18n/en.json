@@ -644,6 +644,20 @@
       "faq": "Frequently asked questions can be found in our FAQ:",
       "faqUrl": "https://bw-im.de/mobimapr-faq"
     },
+    "feedback": {
+      "title": "Send Feedback",
+      "problemLabel": "Describe Problem",
+      "problemPlaceholder": "Please describe the problem or share your feedback...",
+      "emailLabel": "Email (optional)",
+      "emailPlaceholder": "your@email.com",
+      "submit": "Submit",
+      "cancel": "Cancel",
+      "success": "Thank you for your feedback! It has been sent successfully.",
+      "error": "Error sending feedback. Please try again later.",
+      "problemRequired": "Problem description is required",
+      "emailInvalid": "Please enter a valid email address",
+      "sending": "Sending..."
+    },
     "credits": {
       "title": "Credits & Licenses",
       "acknowledgment": {
