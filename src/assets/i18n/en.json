@@ -298,7 +298,7 @@
       "description": "Select the transport modes that should be considered in the calculation. You can activate or deactivate multiple transport modes simultaneously.",
       "availableOptions": "Available Options",
       "availableOptionsDescription": "Each transport mode can be individually turned on or off to adapt the analysis to your requirements.",
-      "cannotDisable": "Cannot be disabled",
+      "cannotDisable": "Cannot be disabled, since without pedestrian no other transport modes can be used effectively.",
       "cannotUseCar": "Not available for selected persona",
       "introduction": "Choose from four transport modes to analyze mobility in your region. Each mode uses sophisticated routing algorithms to provide realistic travel time calculations.",
       "modes": {
@@ -382,7 +382,7 @@
       "description": "Choose between two valuation methods for mobility analysis.",
       "introduction": "To evaluate mobility in a neutral and comparable way, a clear and comprehensible methodology is needed.",
       "time": {
-        "label": "Time",
+        "label": "Mobility Time",
         "title": "Time-Based Rating",
         "description": "Time-based rating calculates absolute travel times to destinations, taking into account route penalties and mode-specific factors.",
         "step1": "From a starting point, the next three instances of each activity (e.g., restaurants) are calculated for all enabled transport modes.",
