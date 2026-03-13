@@ -67,11 +67,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private places: Place[] = [];
   private categoryData: Array<{ name: string; weight: number; places: Place[] }> = [];
   private categoryColors = new Map<string, string>();
+  categoryLegendItems: Array<{ name: string; color: string; weight: number; relevance: number; enabled: boolean }> = [];
   isLoadingPlaces: boolean = false;
   placesError: string | null = null;
   private pendingFeatureShape: any = null;
   private colorPalette = [
-    '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+    '#FF0000', '#00FF00', '#0066FF', '#FFA07A', '#98D8C8',
     '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52BE80',
     '#EC7063', '#5DADE2', '#58D68D', '#F4D03F', '#AF7AC5'
   ];
@@ -277,9 +278,14 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   ngAfterViewInit() {
     // Use setTimeout to ensure the view is fully rendered
     setTimeout(() => {
-      if (this.mapContainerMini && !this.map && this.shouldShowMap() && this.categoryData.length > 0) {
+      // Initialize map if we should show it, regardless of categoryData being loaded yet
+      // Places will be added when they're loaded in loadPlacesForMap()
+      if (this.mapContainerMini && !this.map && this.shouldShowMap()) {
         this.initializeMap();
-        this.addPlacesWhenReady();
+        // Only add places if categoryData is already available
+        if (this.categoryData.length > 0) {
+          this.addPlacesWhenReady();
+        }
         if (this.pendingFeatureShape) {
           this.addFeatureShapeToMap(this.pendingFeatureShape);
           this.pendingFeatureShape = null;
@@ -1092,16 +1098,23 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.assignCategoryColors();
 
       // Initialize map if not already done
-      if (!this.map && this.mapContainerMini) {
-        this.initializeMap();
-      } else if (this.map) {
-        this.addPlacesWhenReady();
-        if (featureShape) {
-          this.addFeatureShapeToMap(featureShape);
+      // Use setTimeout to ensure the DOM is fully updated
+      setTimeout(() => {
+        if (!this.map && this.mapContainerMini) {
+          this.initializeMap();
+          // Places will be added when map finishes loading (handled in initializeMap's 'load' event)
+          if (featureShape) {
+            this.pendingFeatureShape = featureShape;
+          }
+        } else if (this.map) {
+          this.addPlacesWhenReady();
+          if (featureShape) {
+            this.addFeatureShapeToMap(featureShape);
+          }
+        } else {
+          this.pendingFeatureShape = featureShape;
         }
-      } else {
-        this.pendingFeatureShape = featureShape;
-      }
+      }, 100);
 
       this.isLoadingPlaces = false;
     } catch (err: any) {
@@ -1964,6 +1977,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private initializeMap(): void {
     if (!this.mapContainerMini) {
+      console.warn('Cannot initialize map: mapContainerMini not available');
       return;
     }
 
@@ -1997,7 +2011,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.map.once('load', () => {
       if (this.map) {
-        this.map.resize();
+        // Ensure map resizes after container is properly rendered
+        setTimeout(() => {
+          if (this.map) {
+            this.map.resize();
+          }
+        }, 100);
       }
       this.addPlacesWhenReady();
       if (this.pendingFeatureShape) {
@@ -2017,6 +2036,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       console.warn('Cannot add places: no category data available');
       return;
     }
+    
+    console.log('Adding places to map, categoryData:', this.categoryData.length, 'categories');
+    const totalPlaces = this.categoryData.reduce((sum, cat) => sum + cat.places.length, 0);
+    console.log('Total places to add:', totalPlaces);
 
     if (this.map.loaded()) {
       this.addPlacesToMap();
@@ -2032,11 +2055,28 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private assignCategoryColors(): void {
     let colorIndex = 0;
     this.categoryColors.clear();
-
-    this.categoryData.forEach((category) => {
+    this.categoryLegendItems = [];
+    
+    // Calculate total weight for relevance calculation
+    const totalWeight = this.categoryData.reduce((sum, cat) => sum + cat.weight, 0);
+    
+    // Use categoryData which is already sorted by weight
+    // Show all categories, but only enable the first 3
+    this.categoryData.forEach((category, index) => {
       if (category.name && !this.categoryColors.has(category.name)) {
         const color = this.colorPalette[colorIndex % this.colorPalette.length];
         this.categoryColors.set(category.name, color);
+        
+        // Calculate relevance as percentage
+        const relevance = totalWeight > 0 ? (category.weight / totalWeight) * 100 : 0;
+        
+        this.categoryLegendItems.push({ 
+          name: category.name, 
+          color, 
+          weight: category.weight,
+          relevance: relevance,
+          enabled: index < 3 // Only first 3 enabled by default
+        });
         colorIndex++;
       }
     });
@@ -2044,12 +2084,24 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private addPlacesToMap(): void {
     if (!this.map || this.categoryData.length === 0) {
+      console.warn('addPlacesToMap: map or categoryData missing', { map: !!this.map, categoryDataLength: this.categoryData.length });
       return;
     }
 
+    console.log('addPlacesToMap: Adding places for', this.categoryData.length, 'categories');
     const beforeLayer = this.map.getLayer('carto-labels-layer') ? 'carto-labels-layer' : undefined;
 
-    this.categoryData.forEach((category) => {
+    // Create a separate layer for each enabled category
+    this.categoryData.forEach((category, index) => {
+      const legendItem = this.categoryLegendItems.find(item => item.name === category.name);
+      const isEnabled = legendItem?.enabled ?? (index < 3);
+      
+      // Only create layers for enabled categories initially
+      if (!isEnabled) {
+        return;
+      }
+      
+      console.log(`Adding category "${category.name}" with ${category.places.length} places`);
       const sourceId = `places-${category.name}`;
       const layerId = `places-circles-${category.name}`;
 
@@ -2105,6 +2157,14 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
               'circle-opacity': 1.0
             }
           }, beforeLayer);
+          
+          // Set up interactions for this layer
+          this.setupMarkerInteractionsForLayer(layerId);
+          
+          // Set up click handler for this layer
+          this.setupMarkerClickHandlerForLayer(layerId);
+          
+          console.log(`Layer added for category: ${category.name}`);
         } catch (error) {
           console.error(`Error adding layer for ${category.name}:`, error);
         }
@@ -2112,82 +2172,178 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.map!.setPaintProperty(layerId, 'circle-color', color);
       }
     });
-
-    this.setupMarkerInteractions();
-    this.setupMarkerClickHandlers();
+    
+    // Ensure map resizes after adding places
+    if (this.map) {
+      setTimeout(() => {
+        if (this.map) {
+          this.map.resize();
+        }
+      }, 100);
+    }
   }
 
-  private setupMarkerInteractions(): void {
+  toggleCategory(categoryName: string): void {
+    const legendItem = this.categoryLegendItems.find(item => item.name === categoryName);
+    if (!legendItem) {
+      return;
+    }
+
+    legendItem.enabled = !legendItem.enabled;
+    const layerId = `places-circles-${categoryName}`;
+    const sourceId = `places-${categoryName}`;
+
+    if (this.map) {
+      if (legendItem.enabled) {
+        // Enable category - create layer if it doesn't exist
+        if (!this.map.getLayer(layerId)) {
+          const category = this.categoryData.find(cat => cat.name === categoryName);
+          if (category) {
+            // Create GeoJSON features for this category
+            const features = category.places.map(place => ({
+              type: 'Feature' as const,
+              geometry: {
+                type: 'Point' as const,
+                coordinates: [place.lon, place.lat]
+              },
+              properties: {
+                id: place.id,
+                name: place.name,
+                category_id: place.category_id || 0,
+                category_name: place.category_name || this.translate.instant('map.popup.notAvailable'),
+                url: place['url'] || null
+              }
+            }));
+
+            const geoJsonData = {
+              type: 'FeatureCollection' as const,
+              features
+            };
+
+            const color = this.categoryColors.get(categoryName) || '#4ECDC4';
+
+            // Add source if it doesn't exist
+            if (!this.map.getSource(sourceId)) {
+              this.map.addSource(sourceId, {
+                type: 'geojson',
+                data: geoJsonData
+              });
+            } else {
+              (this.map.getSource(sourceId) as GeoJSONSource).setData(geoJsonData);
+            }
+
+            // Add layer
+            const beforeLayer = this.map.getLayer('carto-labels-layer') ? 'carto-labels-layer' : undefined;
+            try {
+              this.map.addLayer({
+                id: layerId,
+                type: 'circle',
+                source: sourceId,
+                paint: {
+                  'circle-radius': [
+                    'interpolate',
+                    ['linear'],
+                    ['zoom'],
+                    5, 4,
+                    10, 8,
+                    14, 12
+                  ],
+                  'circle-color': color,
+                  'circle-stroke-width': 2,
+                  'circle-stroke-color': '#ffffff',
+                  'circle-opacity': 1.0
+                }
+              }, beforeLayer);
+              
+              // Set up interactions for this layer
+              this.setupMarkerInteractionsForLayer(layerId);
+              
+              // Set up click handler for this layer
+              this.setupMarkerClickHandlerForLayer(layerId);
+              
+              console.log(`Layer created and enabled for category: ${categoryName}`);
+            } catch (error) {
+              console.error(`Error creating layer for ${categoryName}:`, error);
+            }
+          }
+        } else {
+          // Layer exists, just make it visible
+          this.map.setLayoutProperty(layerId, 'visibility', 'visible');
+        }
+      } else {
+        // Disable category - hide layer
+        if (this.map.getLayer(layerId)) {
+          this.map.setLayoutProperty(layerId, 'visibility', 'none');
+        }
+      }
+    }
+  }
+
+  private setupMarkerInteractionsForLayer(layerId: string): void {
     if (!this.map || !this.popup) {
       return;
     }
 
-    this.categoryData.forEach(category => {
-      const layerId = `places-circles-${category.name}`;
+    // Change cursor on hover
+    this.map.on('mouseenter', layerId, () => {
+      if (this.map) {
+        this.map.getCanvas().style.cursor = 'pointer';
+      }
+    });
 
-      this.map!.on('mouseenter', layerId, () => {
-        if (this.map) {
-          this.map.getCanvas().style.cursor = 'pointer';
-        }
-      });
+    this.map.on('mouseleave', layerId, () => {
+      if (this.map) {
+        this.map.getCanvas().style.cursor = '';
+      }
+      if (this.popup) {
+        this.popup.remove();
+      }
+    });
 
-      this.map!.on('mouseleave', layerId, () => {
-        if (this.map) {
-          this.map.getCanvas().style.cursor = '';
-        }
-        if (this.popup) {
-          this.popup.remove();
-        }
-      });
+    // Show popup on hover
+    this.map.on('mousemove', layerId, (e) => {
+      if (!this.map || !this.popup || !e.features || e.features.length === 0) {
+        return;
+      }
 
-      this.map!.on('mousemove', layerId, (e) => {
-        if (!this.map || !this.popup || !e.features || e.features.length === 0) {
-          return;
-        }
+      const feature = e.features[0];
+      const properties = feature.properties;
+      const unnamedText = this.translate.instant('map.popup.unnamed');
+      const notAvailableText = this.translate.instant('map.popup.notAvailable');
+      const name = properties['name'] || unnamedText;
+      const categoryName = properties['category_name'] || notAvailableText;
 
-        const feature = e.features[0];
-        const properties = feature.properties;
-        const unnamedText = this.translate.instant('map.popup.unnamed');
-        const notAvailableText = this.translate.instant('map.popup.notAvailable');
-        const name = properties['name'] || unnamedText;
-        const categoryName = properties['category_name'] || notAvailableText;
+      const popupContent = `
+        <div>
+          <div style="font-weight: 600; margin-bottom: 4px;">${name}</div>
+          <div style="font-size: 12px; color: #666;">${categoryName}</div>
+        </div>
+      `;
 
-        const popupContent = `
-          <div>
-            <div style="font-weight: 600; margin-bottom: 4px;">${name}</div>
-            <div style="font-size: 12px; color: #666;">${categoryName}</div>
-          </div>
-        `;
-
-        this.popup
-          .setLngLat(e.lngLat)
-          .setHTML(popupContent)
-          .addTo(this.map);
-      });
+      this.popup
+        .setLngLat(e.lngLat)
+        .setHTML(popupContent)
+        .addTo(this.map);
     });
   }
 
-  private setupMarkerClickHandlers(): void {
+  private setupMarkerClickHandlerForLayer(layerId: string): void {
     if (!this.map) {
       return;
     }
 
-    this.categoryData.forEach(category => {
-      const layerId = `places-circles-${category.name}`;
+    this.map.on('click', layerId, (e) => {
+      if (!e.features || e.features.length === 0) {
+        return;
+      }
 
-      this.map!.on('click', layerId, (e) => {
-        if (!e.features || e.features.length === 0) {
-          return;
-        }
+      const feature = e.features[0];
+      const properties = feature.properties;
+      const url = properties['url'];
 
-        const feature = e.features[0];
-        const properties = feature.properties;
-        const url = properties['url'];
-
-        if (url) {
-          window.open(url, '_blank', 'noopener,noreferrer');
-        }
-      });
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
     });
   }
 

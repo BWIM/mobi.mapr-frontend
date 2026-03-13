@@ -56,3 +56,21 @@
   align-items: center !important;
   justify-content: center !important;
 }
+
+/* MapLibre popup styling */
+:host ::ng-deep .maplibregl-popup {
+  max-width: 300px;
+}
+
+:host ::ng-deep .maplibregl-popup-content {
+  background-color: var(--background-color) !important;
+  color: var(--primary-color) !important;
+  padding: 8px 12px !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  font-family: inherit !important;
+}
+
+:host ::ng-deep .maplibregl-popup-tip {
+  border-top-color: var(--background-color) !important;
+}
