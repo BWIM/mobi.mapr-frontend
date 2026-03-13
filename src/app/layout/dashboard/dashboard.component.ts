@@ -11,13 +11,16 @@ import { AuthService } from '../../auth/auth.service';
 import { ProjectsService } from '../../services/project.service';
 import { ProfileService } from '../../services/profile.service';
 import { MapService, ContentLayerFilters } from '../../services/map.service';
+import { FilterConfigService } from '../../services/filter-config.service';
 import { Project } from '../../interfaces/project';
 import { firstValueFrom } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { TranslateModule } from '@ngx-translate/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIcon } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
 import { MobileFilterPanelComponent } from '../mobile-filter-panel/mobile-filter-panel.component';
+import { GeoJsonDownloadDialogComponent, GeoJsonDownloadDialogData } from '../left/geojson-download-dialog/geojson-download-dialog.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -33,6 +36,8 @@ export class DashboardComponent {
   private projectService = inject(ProjectsService);
   private profileService = inject(ProfileService);
   private mapService = inject(MapService);
+  private filterConfigService = inject(FilterConfigService);
+  private dialog = inject(MatDialog);
   private breakpointObserver = inject(BreakpointObserver);
 
   leftPanelExpanded = signal(true);
@@ -273,5 +278,22 @@ export class DashboardComponent {
 
   toggleMobileFilterPanel() {
     this.mobileFilterExpanded.update(value => !value);
+  }
+
+  openGeoJsonDownloadDialog() {
+    const dialogData: GeoJsonDownloadDialogData = {
+      selectedActivities: this.filterConfigService.selectedActivities(),
+      selectedPersonas: this.filterConfigService.selectedPersonas(),
+      profileCombinationId: this.filterConfigService.currentProfileCombinationID(),
+      hasCategories: this.filterConfigService.hasCategories(),
+    };
+
+    this.dialog.open(GeoJsonDownloadDialogComponent, {
+      width: '80vw',
+      maxWidth: '80vw',
+      height: '80vh',
+      maxHeight: '80vh',
+      data: dialogData,
+    });
   }
 }

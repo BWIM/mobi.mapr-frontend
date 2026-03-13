@@ -1,0 +1,164 @@
+<div>
+  <h2 mat-dialog-title class="text-2xl font-semibold text-[var(--primary-color)] mb-4">
+    {{ 'geojsonDownload.title' | translate }}
+  </h2>
+
+  <mat-dialog-content class="mat-typography">
+    <!-- Loading Indicator -->
+    @if (isDownloading) {
+      <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-4 rounded-lg mb-4">
+        <div class="flex items-center gap-3">
+          <mat-spinner diameter="24"></mat-spinner>
+          <div class="flex-1">
+            <div class="font-semibold">{{ 'geojsonDownload.downloading.title' | translate }}</div>
+            <div class="text-sm mt-1">{{ 'geojsonDownload.downloading.message' | translate }}</div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <div class="space-y-6" [class.opacity-50]="isDownloading" [class.pointer-events-none]="isDownloading">
+      <!-- Resolution Selector -->
+      <div>
+        <label class="block text-sm font-semibold text-[var(--primary-color)] mb-2">
+          {{ 'geojsonDownload.resolution.label' | translate }}
+        </label>
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-select 
+            [value]="selectedResolution" 
+            (selectionChange)="selectedResolution = $event.value"
+            [disabled]="isDownloading"
+            class="text-[var(--primary-color)]">
+            @for (option of resolutionOptions; track option.value) {
+              <mat-option [value]="option.value">
+                {{ option.label | translate }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- State Selector -->
+      <div>
+        <label class="block text-sm font-semibold text-[var(--primary-color)] mb-2">
+          {{ 'geojsonDownload.state.label' | translate }}
+        </label>
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-select 
+            [value]="selectedStateId" 
+            (selectionChange)="selectedStateId = $event.value"
+            [disabled]="isDownloading"
+            class="text-[var(--primary-color)]">
+            @for (state of states(); track state.id) {
+              <mat-option [value]="state.id">
+                {{ state.name }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- License Warning Banner -->
+      @if (shouldShowLicenseWarning()) {
+        <div class="bg-amber-50 border-l-4 border-amber-400 text-amber-800 px-4 py-3 rounded-r-lg">
+          <div class="flex items-start gap-2">
+            <mat-icon class="text-amber-600 mt-0.5">warning</mat-icon>
+            <div class="flex-1">
+              <div class="font-semibold mb-1">{{ 'geojsonDownload.license.title' | translate }}</div>
+              <div class="text-sm leading-relaxed">
+                <div>
+                  {{ 'geojsonDownload.license.prefix-bwim' | translate }}
+                  <a href="https://bw-im.de" target="_blank" rel="noopener noreferrer" class="text-amber-700 underline hover:text-amber-900 font-medium">
+                    {{ 'geojsonDownload.license.bwim' | translate }}
+                  </a>
+                </div>
+                <div>
+                  {{ 'geojsonDownload.license.prefix-bkg' | translate }}
+                  <a href="https://www.bkg.bund.de" target="_blank" rel="noopener noreferrer" class="text-amber-700 underline hover:text-amber-900 font-medium">
+                    {{ 'geojsonDownload.license.bkg' | translate }}
+                  </a>
+                </div>
+                @if (selectedResolution === 'municipality') {
+                  <div>{{ 'geojsonDownload.license.municipalityNote' | translate }}</div>
+                }
+                <div class="mt-1 text-xs">
+                  {{ 'geojsonDownload.license.ccBy' | translate }}
+                  <a
+                    [href]="getCcByUrl()"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-amber-700 underline hover:text-amber-900 font-medium"
+                  >
+                    CC&nbsp;BY&nbsp;4.0
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Current Settings (Read-only) -->
+      <div class="bg-[var(--secondary-color)] rounded-lg p-4 border border-[var(--light-primary-color)]">
+        <h3 class="text-lg font-semibold text-[var(--primary-color)] mb-3">
+          {{ 'geojsonDownload.currentSettings.title' | translate }}
+        </h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-[var(--primary-color)] opacity-75">{{ 'geojsonDownload.currentSettings.categories' | translate }}:</span>
+            <span class="text-[var(--primary-color)] font-medium">{{ getCurrentActivitiesDisplay() }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-[var(--primary-color)] opacity-75">{{ 'geojsonDownload.currentSettings.profileCombination' | translate }}:</span>
+            <span class="text-[var(--primary-color)] font-medium">{{ getCurrentProfileCombinationDisplay() }}</span>
+          </div>
+          @if (hasCategories) {
+            <div class="flex justify-between">
+              <span class="text-[var(--primary-color)] opacity-75">{{ 'geojsonDownload.currentSettings.persona' | translate }}:</span>
+              <span class="text-[var(--primary-color)] font-medium">{{ getCurrentPersonaDisplay() }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      @if (errorMessage) {
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {{ errorMessage | translate }}
+        </div>
+      }
+
+      <!-- Preloading Message -->
+      @if (preloadingMessage) {
+        <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
+          <div class="flex items-center gap-2">
+            <mat-spinner diameter="20"></mat-spinner>
+            <div>
+              <div>{{ preloadingMessage | translate }}</div>
+              @if (preloadingProgress !== null) {
+                <div class="text-xs mt-1">{{ 'geojsonDownload.preloading.progress' | translate }}: {{ preloadingProgress }}%</div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="mt-4">
+    <button mat-button (click)="onCancel()" [disabled]="isDownloading">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="onDownload()"
+      class="cursor-pointer"
+      [disabled]="!isFormValid() || isDownloading">
+      @if (isDownloading) {
+        <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+      }
+      {{ 'geojsonDownload.download' | translate }}
+    </button>
+  </mat-dialog-actions>
+</div>

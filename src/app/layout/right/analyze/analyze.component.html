@@ -171,7 +171,7 @@
         <!-- Personas Tab -->
         <mat-tab [label]="'analyze.analysis.personas' | translate">
           <!-- Error State -->
-          <div *ngIf="personasError || personasError2" class="text-sm text-red-600 py-4">
+          <div *ngIf="personasError || personasError2" class="text-sm text-[var(--primary-color)] py-4">
             {{ personasError || personasError2 }}
           </div>
           
@@ -185,7 +185,7 @@
             <!-- Personas List -->
             <div class="mt-4">
               <div *ngFor="let persona of getSortedPersonas(); let i = index" 
-                   class="text-sm text-white flex items-center">
+                   class="text-sm text-[var(--primary-color)] flex items-center">
                 <span class="font-bold mr-2">{{ i + 1 }}.</span>
                 <span>{{ persona.name }}</span>
               </div>
@@ -347,7 +347,7 @@
       </div>
       
       <!-- Error State Overlay -->
-      <div *ngIf="(placesError || analyzeError) && !isLoading()" class="absolute inset-0 bg-[var(--background-color)] bg-opacity-95 text-sm text-red-600 py-4 text-center flex items-center justify-center" style="z-index: 2000;">
+      <div *ngIf="(placesError || analyzeError) && !isLoading()" class="absolute inset-0 bg-[var(--background-color)] bg-opacity-95 text-sm text-[var(--primary-color)] py-4 text-center flex items-center justify-center" style="z-index: 2000;">
         <div class="px-4">{{ placesError || analyzeError }}</div>
       </div>
       

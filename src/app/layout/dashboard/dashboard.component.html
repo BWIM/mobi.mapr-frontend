@@ -146,4 +146,15 @@
       </div>
     </div>
   </div>
+
+  <!-- GeoJSON Download Button - Bottom Right (Desktop Only) -->
+  @if (!isMobile()) {
+    <button 
+      (click)="openGeoJsonDownloadDialog()"
+      class="fixed bottom-4 right-4 z-[1000] bg-[var(--background-color)] text-[var(--primary-color)] rounded-full w-14 h-14 shadow-lg flex items-center justify-center transition-all duration-200 hover:opacity-90 hover:scale-105 border border-[var(--primary-color)]"
+      [attr.aria-label]="'geojsonDownload.button.label' | translate"
+      [title]="'geojsonDownload.button.label' | translate">
+      <mat-icon class="text-2xl">download</mat-icon>
+    </button>
+  }
 </div>

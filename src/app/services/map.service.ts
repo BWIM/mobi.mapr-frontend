@@ -51,6 +51,21 @@ export interface GeoLocationResponse {
   error?: string;
 }
 
+export interface GeoJsonDownloadParams {
+  resolution: 'hexagon' | 'municipality' | 'county' | 'state';
+  state: string;
+  categories?: number[];
+  profile_combination: number;
+  persona_id?: number;
+}
+
+export interface GeoJsonDownloadResult {
+  status: 'success' | 'preloading';
+  message?: string;
+  progress?: number;
+  session_id?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -910,5 +925,122 @@ export class MapService {
     }
 
     return this.http.get<FeatureInfoResponse>(url, { params: httpParams });
+  }
+
+  /**
+   * Downloads GeoJSON data for a project
+   */
+  async downloadGeoJSON(params: GeoJsonDownloadParams): Promise<GeoJsonDownloadResult> {
+    const projectId = this.dashboardSessionService.getProjectId();
+    const shareKey = this.dashboardSessionService.getShareKey();
+
+    let httpParams = new HttpParams()
+      .set('resolution', params.resolution)
+      .set('state', params.state)
+      .set('profile_combination', params.profile_combination.toString());
+
+    // Add project or key
+    if (projectId) {
+      httpParams = httpParams.set('project', projectId.toString());
+    } else if (shareKey) {
+      httpParams = httpParams.set('key', shareKey);
+    }
+
+    // Optional parameters
+    if (params.categories && params.categories.length > 0) {
+      httpParams = httpParams.set('categories', params.categories.join(','));
+    }
+
+    if (params.persona_id !== undefined && params.persona_id !== null) {
+      httpParams = httpParams.set('persona_id', params.persona_id.toString());
+    }
+
+    const url = `${environment.apiUrl}/maps/geojson/`;
+
+    try {
+      // First, try to get response to check status
+      const response = await firstValueFrom(
+        this.http.get(url, { 
+          params: httpParams,
+          observe: 'response',
+          responseType: 'blob'
+        })
+      );
+
+      if (response.status === 200) {
+        // Success - trigger download
+        const blob = new Blob([response.body!], { type: 'application/json' });
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        
+        // Generate filename with timestamp
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+        link.download = `project-geojson-${timestamp}.geojson`;
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
+
+        return { status: 'success' };
+      } else if (response.status === 202) {
+        // Preloading - need to get JSON response instead
+        // Convert blob to text and parse
+        const text = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsText(response.body!);
+        });
+        
+        const preloadData = JSON.parse(text);
+        
+        return {
+          status: 'preloading',
+          message: preloadData.message || 'Data is being preloaded. Please try again later.',
+          progress: preloadData.progress ?? null,
+          session_id: preloadData.session_id ?? undefined,
+        };
+      } else {
+        throw new Error(`Unexpected status code: ${response.status}`);
+      }
+    } catch (error: any) {
+      // Handle HTTP errors
+      if (error.status === 202) {
+        // Preloading response - try to parse error body
+        try {
+          let preloadData: any = {};
+          if (error.error instanceof Blob) {
+            const text = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsText(error.error);
+            });
+            preloadData = JSON.parse(text);
+          } else {
+            preloadData = error.error || {};
+          }
+          
+          return {
+            status: 'preloading',
+            message: preloadData.message || 'Data is being preloaded. Please try again later.',
+            progress: preloadData.progress ?? null,
+            session_id: preloadData.session_id ?? undefined,
+          };
+        } catch (parseError) {
+          // Fall through to generic error
+        }
+      }
+      
+      if (error.status === 400) {
+        throw new Error('Invalid parameters provided');
+      } else if (error.status === 404) {
+        throw new Error('Project not found or invalid share key');
+      } else {
+        throw new Error(error.message || 'Failed to download GeoJSON');
+      }
+    }
   }
 }
