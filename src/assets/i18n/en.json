@@ -701,6 +701,51 @@
       "close": "Close"
     }
   },
+  "geojsonDownload": {
+    "title": "Download GeoJSON",
+    "button": {
+      "label": "Download GeoJSON"
+    },
+    "resolution": {
+      "label": "Resolution",
+      "hexagon": "Hexagon",
+      "municipality": "Municipality",
+      "county": "County",
+      "state": "State"
+    },
+    "state": {
+      "label": "State"
+    },
+    "currentSettings": {
+      "title": "Current Settings",
+      "categories": "Categories",
+      "profileCombination": "Profile Combination",
+      "persona": "Persona",
+      "none": "None",
+      "notApplicable": "Not Applicable"
+    },
+    "download": "Download",
+    "downloading": {
+      "title": "Downloading...",
+      "message": "Please wait while the GeoJSON file is being downloaded. This may take some time."
+    },
+    "license": {
+      "title": "License Notice",
+      "prefix-bwim": "CC BY 4.0. Score and Index: ",
+      "prefix-bkg": "CC BY 4.0. Geodata: ",
+      "bwim": "Baden-Württemberg Institute for Sustainable Mobility",
+      "bkg": "BKG",
+      "municipalityNote": "Please note that city borders must be credited accordingly as described in the license file.",
+      "ccBy": "What does this mean? CC BY 4.0 (Creative Commons Attribution 4.0 International):"
+    },
+    "preloading": {
+      "message": "Data is being preloaded. Please try again later.",
+      "progress": "Progress"
+    },
+    "error": {
+      "generic": "Error downloading GeoJSON file"
+    }
+  },
   "dashboard": {
     "collapseLeftPanel": "Collapse left panel",
     "expandLeftPanel": "Expand left panel",

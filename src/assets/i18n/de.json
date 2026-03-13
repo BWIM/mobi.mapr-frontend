@@ -701,6 +701,51 @@
       "close": "Schließen"
     }
   },
+  "geojsonDownload": {
+    "title": "GeoJSON herunterladen",
+    "button": {
+      "label": "GeoJSON herunterladen"
+    },
+    "resolution": {
+      "label": "Auflösung",
+      "hexagon": "Hexagon",
+      "municipality": "Gemeinde",
+      "county": "Kreis",
+      "state": "Bundesland"
+    },
+    "state": {
+      "label": "Bundesland"
+    },
+    "currentSettings": {
+      "title": "Aktuelle Einstellungen",
+      "categories": "Aktivitäten",
+      "profileCombination": "Profilkombination",
+      "persona": "Personengruppe",
+      "none": "Keine",
+      "notApplicable": "Nicht anwendbar"
+    },
+    "download": "Herunterladen",
+    "downloading": {
+      "title": "Download läuft...",
+      "message": "Bitte warte, während die GeoJSON-Datei heruntergeladen wird. Dies kann, je nach Größe der ausgewählten Daten, einige Zeit dauern."
+    },
+    "license": {
+      "title": "Lizenzhinweis",
+      "prefix-bwim": "CC BY 4.0. Score und Index: ",
+      "bwim": "Baden-Württemberg Institut für Nachhaltige Mobilität",
+      "prefix-bkg": "CC BY 4.0. Geodaten: ",
+      "bkg": "BKG",
+      "municipalityNote": "Bitte beachte , dass die Stadtgrenzen entsprechend den Angaben in der Lizenzdatei zu kennzeichnen sind.",
+      "ccBy": "Was bedeutet das? CC BY 4.0 (Creative Commons Namensnennung 4.0 International):"
+    },
+    "preloading": {
+      "message": "Daten werden vorgeladen. Bitte versuche es später erneut.",
+      "progress": "Fortschritt"
+    },
+    "error": {
+      "generic": "Fehler beim Herunterladen der GeoJSON-Datei"
+    }
+  },
   "dashboard": {
     "collapseLeftPanel": "Linkes Panel einklappen",
     "expandLeftPanel": "Linkes Panel ausklappen",

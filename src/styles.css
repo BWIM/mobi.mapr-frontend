@@ -173,6 +173,24 @@ button[matButton]:hover,
     opacity: 0.9;
 }
 
+button[mat-raised-button],
+button[matRaisedButton],
+.mat-mdc-raised-button {
+    background-color: var(--background-color) !important;
+    color: var(--primary-color) !important;
+    border: 1px solid var(--primary-color) !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+button[mat-raised-button]:hover,
+button[matRaisedButton]:hover,
+.mat-mdc-raised-button:hover {
+    background-color: var(--secondary-color) !important;
+    color: var(--primary-color) !important;
+    opacity: 0.9 !important;
+}
+
 /* Material Tabs - Global styling */
 .mat-mdc-tab-header {
     border-bottom: 1px solid var(--light-primary-color);
