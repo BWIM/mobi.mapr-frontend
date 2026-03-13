@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, TemplateRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject } from '@angular/core';
 import { Subscription, firstValueFrom, debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { Map, NavigationControl, FullscreenControl, Popup, AttributionControl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -8,6 +8,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { FilterConfigService } from '../../services/filter-config.service';
 import { MatDialog } from '@angular/material/dialog';
 import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.component';
+import { LegendInfoComponent } from '../../shared/legend-info/legend-info.component';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { FeatureSelectionService } from '../../shared/services/feature-selection.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -29,7 +30,6 @@ interface NominatimResult {
 })
 export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('mapContainer') mapContainer?: ElementRef;
-  @ViewChild('legendContentTemplate') legendContentTemplate!: TemplateRef<any>;
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
   private map?: Map;
   private mapStyleSubscription?: Subscription;
@@ -151,7 +151,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       maxWidth: '80vw',
       maxHeight: '80vh',
       panelClass: 'info-dialog-panel',
-      data: { content: this.legendContentTemplate }
+      data: { content: LegendInfoComponent }
     });
   }
 
