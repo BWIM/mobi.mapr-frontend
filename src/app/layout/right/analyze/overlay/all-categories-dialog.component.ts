@@ -8,6 +8,8 @@ import { ChartModule } from 'primeng/chart';
 import { UIChart } from 'primeng/chart';
 import { PlacesDialogComponent, PlacesDialogData } from '../places/places-dialog.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { InfoDialogComponent } from '../../../../shared/info-overlay/info-dialog.component';
+import { LegendInfoComponent } from '../../../../shared/legend-info/legend-info.component';
 
 export interface AllCategoriesDialogData {
   featureType: 'municipality' | 'hexagon' | 'county' | 'state';
@@ -664,13 +666,14 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
   }
 
   openLegendInfo(): void {
-    // Simple alert for now - can be enhanced with a proper dialog later
-    const message = this.data.isScoreMode
-      ? this.translate.instant('map.legend.time.description')
-      : this.translate.instant('map.legend.quality.description');
-    
-    // For now, just log - can be replaced with a proper dialog
-    console.log(message);
+    this.dialog.open(InfoDialogComponent, {
+      width: '80vw',
+      height: '80vh',
+      maxWidth: '80vw',
+      maxHeight: '80vh',
+      panelClass: 'info-dialog-panel',
+      data: { content: LegendInfoComponent }
+    });
   }
 
   onClose(): void {

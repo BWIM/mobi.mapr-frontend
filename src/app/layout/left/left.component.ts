@@ -5,6 +5,7 @@ import { DashboardSessionService } from '../../services/dashboard-session.servic
 import { SharedModule } from '../../shared/shared.module';
 import { InfoOverlayComponent } from '../../shared/info-overlay/info-overlay.component';
 import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.component';
+import { LegendInfoComponent } from '../../shared/legend-info/legend-info.component';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ChartModule } from 'primeng/chart';
@@ -368,6 +369,17 @@ export class LeftComponent implements OnInit, OnDestroy {
       height: '80vh',
       maxWidth: '80vw',
       maxHeight: '80vh',
+    });
+  }
+
+  openLegendInfoDialog(): void {
+    this.dialog.open(InfoDialogComponent, {
+      width: '80vw',
+      height: '80vh',
+      maxWidth: '80vw',
+      maxHeight: '80vh',
+      panelClass: 'info-dialog-panel',
+      data: { content: LegendInfoComponent }
     });
   }
 
