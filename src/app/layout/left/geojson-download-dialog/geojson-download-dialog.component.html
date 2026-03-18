@@ -72,12 +72,14 @@
                     {{ 'geojsonDownload.license.bwim' | translate }}
                   </a>
                 </div>
-                <div>
-                  {{ 'geojsonDownload.license.prefix-bkg' | translate }}
-                  <a href="https://www.bkg.bund.de" target="_blank" rel="noopener noreferrer" class="text-amber-700 underline hover:text-amber-900 font-medium">
-                    {{ 'geojsonDownload.license.bkg' | translate }}
-                  </a>
-                </div>
+                @if (selectedResolution !== 'hexagon') {
+                  <div>
+                    {{ 'geojsonDownload.license.prefix-bkg' | translate }}
+                    <a href="https://www.bkg.bund.de" target="_blank" rel="noopener noreferrer" class="text-amber-700 underline hover:text-amber-900 font-medium">
+                      {{ 'geojsonDownload.license.bkg' | translate }}
+                    </a>
+                  </div>
+                }
                 @if (selectedResolution === 'municipality') {
                   <div>{{ 'geojsonDownload.license.municipalityNote' | translate }}</div>
                 }
