@@ -26,6 +26,10 @@ export interface CategoryData {
   weight: number;
   places: Place[];
   category_name: string;
+  activityScore?: {
+    score: number;
+    index: number;
+  };
 }
 
 export interface PlacesResponse {
@@ -110,7 +114,13 @@ export class PlacesService {
             categories.push({
               weight: categoryData.weight || 0,
               places: categoryPlaces,
-              category_name: displayName
+              category_name: displayName,
+              activityScore: categoryData.activityScore && typeof categoryData.activityScore === 'object'
+                ? {
+                    score: Number(categoryData.activityScore.score ?? 0),
+                    index: Number(categoryData.activityScore.index ?? 0),
+                  }
+                : undefined
             });
           }
         }

@@ -136,9 +136,21 @@
     
     <!-- Tabs when persona_id is 54 (all personas) -->
     <div *ngIf="isAllPersonas() && !isLoading() && !analyzeError && !analyzeError2">
-      <mat-tab-group>
+      <mat-tab-group #comparisonAllPersonasTabs>
         <!-- Activities Tab -->
-        <mat-tab [label]="'analyze.analysis.activities' | translate">
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <span class="analyze-tab-label">
+              <span>{{ 'analyze.analysis.activities' | translate }}</span>
+              <button
+                *ngIf="comparisonAllPersonasTabs.selectedIndex === 0"
+                class="analyze-tab-expand-button"
+                (click)="$event.stopPropagation(); openAllCategoriesOverlay()"
+                [attr.aria-label]="'analyze.analysis.showAllCategories' | translate">
+                <mat-icon>arrow_outward</mat-icon>
+              </button>
+            </span>
+          </ng-template>
           <div *ngIf="activitiesChartData">
             <!-- Chart Container -->
             <div class="relative mt-4">
@@ -169,7 +181,20 @@
         </mat-tab>
         
         <!-- Personas Tab -->
-        <mat-tab [label]="'analyze.analysis.personas' | translate">
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <span class="analyze-tab-label">
+              <span>{{ 'analyze.analysis.personas' | translate }}</span>
+              <button
+                *ngIf="comparisonAllPersonasTabs.selectedIndex === 1"
+                mat-icon-button
+                class="analyze-tab-expand-button"
+                (click)="$event.stopPropagation(); openPersonasDialog()"
+                [attr.aria-label]="'analyze.analysis.expandPersonas' | translate">
+                <mat-icon>arrow_outward</mat-icon>
+              </button>
+            </span>
+          </ng-template>
           <!-- Error State -->
           <div *ngIf="personasError || personasError2" class="text-sm text-[var(--primary-color)] py-4">
             {{ personasError || personasError2 }}
@@ -359,15 +384,24 @@
                class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
                (click)="toggleCategory(item.name)"
                [class.opacity-50]="!item.enabled">
-            <div class="w-4 h-4 rounded-full border-2 border-[var(--primary-color)] flex-shrink-0" [style.background-color]="item.color"></div>
+            <div class="w-4 h-4 rounded-full flex-shrink-0" [style.background-color]="item.color"></div>
             <span class="text-[var(--primary-color)] text-xs">
-              {{ item.name }} ({{ item.relevance.toFixed(1) }}%)
+              {{ item.name }}
+              <span [style.color]="getPlacesMetricTextColor(item.score, item.index)">
+                <ng-container *ngIf="getPlacesIsScoreMode(); else placesIndexMode">
+                  · {{ (item.score / 60) | number:'1.1-1' }} {{ 'map.popup.minutes' | translate }}
+                </ng-container>
+                <ng-template #placesIndexMode>
+                  · {{ getGrade(item.index) }}
+                </ng-template>
+              </span>
             </span>
           </div>
         </div>
       </div>
     </div>
-  </div>
+    </div>
+
   
   <!-- Analyze Chart Section (for MID projects with multiple categories) -->
   <div class="mb-4 flex-shrink-0" *ngIf="selectedFeature && !shouldShowMap()">
@@ -378,9 +412,22 @@
     
     <!-- Tabs when persona_id is 54 (all personas) -->
     <div *ngIf="isAllPersonas() && !isLoading() && !analyzeError">
-      <mat-tab-group>
+      <mat-tab-group #singleAllPersonasTabs>
         <!-- Activities Tab -->
-        <mat-tab [label]="'analyze.analysis.activities' | translate">
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <span class="analyze-tab-label">
+              <span>{{ 'analyze.analysis.activities' | translate }}</span>
+              <button
+                *ngIf="singleAllPersonasTabs.selectedIndex === 0"
+                mat-icon-button
+                class="analyze-tab-expand-button"
+                (click)="$event.stopPropagation(); openAllCategoriesOverlay()"
+                [attr.aria-label]="'analyze.analysis.showAllCategories' | translate">
+                <mat-icon>arrow_outward</mat-icon>
+              </button>
+            </span>
+          </ng-template>
           <div *ngIf="activitiesChartData">
             <!-- Chart Container -->
             <div class="relative mt-4">
@@ -411,7 +458,20 @@
         </mat-tab>
         
         <!-- Personas Tab -->
-        <mat-tab [label]="'analyze.analysis.personas' | translate">
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <span class="analyze-tab-label">
+              <span>{{ 'analyze.analysis.personas' | translate }}</span>
+              <button
+                *ngIf="singleAllPersonasTabs.selectedIndex === 1"
+                mat-icon-button
+                class="analyze-tab-expand-button"
+                (click)="$event.stopPropagation(); openPersonasDialog()"
+                [attr.aria-label]="'analyze.analysis.expandPersonas' | translate">
+                <mat-icon>arrow_outward</mat-icon>
+              </button>
+            </span>
+          </ng-template>
           <!-- Error State -->
           <div *ngIf="personasError" class="text-sm text-red-600 py-4">
             {{ personasError }}

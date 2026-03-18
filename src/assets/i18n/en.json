@@ -61,7 +61,11 @@
       "categoriesNotFound": "Categories not found",
       "dataNotLoaded": "Data not yet loaded",
       "errorLoadingCategories": "Error loading categories",
-      "clickHint": "Click on any activity to view more detailed information"
+      "clickHint": "Click on any activity to view more detailed information",
+      "relevanceInfo": "Activity relevance indicates how frequently an activity is visited. The value is derived from the “Mobility in Germany 2023” study and varies by persona group and regional class. Note: At county and state level, the relevance may deviate slightly from the actual weighting."
+    },
+    "personasDialog": {
+      "info": "The persona groups originate from the “Mobility in Germany 2023” study and can feel a bit confusing at first. Each persona represents a typical mix of activities and how important they are for that group.\n\nThe note about car availability only indicates whether a car could in principle be used. If no car is chosen in the actual mode choice, the activity mix still remains unchanged and therefore differs from a person who never has a car available. What matters is not the car use on a specific day, but the general availability of a car.\n\nThe importance of the individual persona groups varies by region."
     },
     "featureInfo": {
       "notFound": "Feature information not found",

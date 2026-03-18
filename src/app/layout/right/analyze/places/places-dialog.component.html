@@ -38,13 +38,53 @@
                class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
                (click)="toggleCategory(item.name)"
                [class.opacity-50]="!item.enabled">
-            <div class="w-4 h-4 rounded-full border-2 border-[var(--primary-color)] flex-shrink-0" [style.background-color]="item.color"></div>
+            <div class="w-4 h-4 rounded-full flex-shrink-0" [style.background-color]="item.color"></div>
             <span class="text-[var(--primary-color)] text-xs">
-              {{ item.name }} ({{ item.relevance.toFixed(1) }}%)
+              {{ item.name }}
+              <span [style.color]="getPlacesMetricTextColor(item.score, item.index)">
+                <ng-container *ngIf="getPlacesIsScoreMode(); else dialogIndexMode">
+                  · {{ (item.score / 60) | number:'1.1-1' }} {{ 'map.popup.minutes' | translate }}
+                </ng-container>
+                <ng-template #dialogIndexMode>
+                  · {{ getGradeFromIndex(item.index) }}
+                </ng-template>
+              </span>
             </span>
           </div>
         </div>
       </div>
     </div>
   </mat-dialog-content>
+
+  <!-- Bottom Section - Color scale legend (like personas dialog) -->
+  <div class="flex-shrink-0 border-t border-[var(--primary-color)] border-opacity-30 pt-4 px-4 pb-2 min-h-[80px]" *ngIf="!isLoading && !error">
+    <div class="flex h-full items-center">
+      <!-- Quality legend (A-F letters) -->
+      <div class="w-full" *ngIf="!getPlacesIsScoreMode()">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-full flex items-center justify-center border border-white/40" *ngFor="let item of qualityColors" [style.background-color]="item.color">
+            <span class="text-xs font-bold text-white">{{ item.letter }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Time legend (discrete color steps) -->
+      <div class="w-full" *ngIf="getPlacesIsScoreMode()">
+        <div class="flex flex-col gap-2 w-full">
+          <div class="flex w-full h-3 overflow-hidden rounded">
+            <div class="flex-1" *ngFor="let item of timeColors" [style.background-color]="item.color"></div>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-xs text-white">{{ 'map.legend.time.min0' | translate }}</span>
+            <span class="text-xs text-white">7</span>
+            <span class="text-xs text-white">15</span>
+            <span class="text-xs text-white">23</span>
+            <span class="text-xs text-white">30</span>
+            <span class="text-xs text-white">45</span>
+            <span class="text-xs text-white">45+</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

@@ -680,8 +680,8 @@ export class MapService {
       source: 'content-layer',
       'source-layer': 'geodata',
       paint: {
-        'line-color': '#000000',
-        'line-width': 1,
+        'line-color': '#FFFFFF',
+        'line-width': 2,
         'line-opacity': 1
       },
       filter: ['==', ['get', 'name'], '__never_match__'] // Initially filter out everything (using name like highlight)
