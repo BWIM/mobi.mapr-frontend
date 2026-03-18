@@ -35,6 +35,8 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private mapStyleSubscription?: Subscription;
   private searchQuerySubscription?: Subscription;
   private featureSelectionSubscription?: Subscription;
+  private lastCanvasPointerMoveTs: number = 0;
+  private canvasPointerMoveListener?: (event: PointerEvent) => void;
   mapStyle: any;
   zoom: number = 7;
   center: [number, number] = [9.2156505, 49.320099];
@@ -239,6 +241,11 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnDestroy() {
     if (this.map) {
+      const canvas = this.map.getCanvas();
+      if (canvas && this.canvasPointerMoveListener) {
+        canvas.removeEventListener('pointermove', this.canvasPointerMoveListener);
+        this.canvasPointerMoveListener = undefined;
+      }
       this.map.remove();
     }
     if (this.mapStyleSubscription) {
@@ -357,6 +364,24 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     // Track currently highlighted name to avoid unnecessary filter updates
     let currentHighlightName: string | null = null;
     let mouseleaveTimeout: any = null;
+    let mousemoveHighlightTimeout: any = null;
+    let pendingMousemoveHighlightName: string | null = null;
+
+    // Prevent highlight from "following" the pointer when the user moves quickly.
+    // We only update the highlight after the pointer has been stable for a moment.
+    const HOVER_HIGHLIGHT_DEBOUNCE_MS = 120;
+
+    // Track actual pointer movement on the canvas (not just MapLibre's feature hover events).
+    // This is the main guard against "follow" when there are many nearby features.
+    const canvas = this.map.getCanvas();
+    if (this.canvasPointerMoveListener) {
+      canvas.removeEventListener('pointermove', this.canvasPointerMoveListener);
+    }
+    this.lastCanvasPointerMoveTs = Date.now();
+    this.canvasPointerMoveListener = () => {
+      this.lastCanvasPointerMoveTs = Date.now();
+    };
+    canvas.addEventListener('pointermove', this.canvasPointerMoveListener, { passive: true });
 
     // Helper function to update highlight
     const updateHighlight = (name: string | null, immediate: boolean = false) => {
@@ -406,13 +431,35 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     this.map.on('mouseenter', 'content-layer-fill', (e) => {
       if (this.map) {
         this.map.getCanvas().style.cursor = 'pointer';
+
+        // Cancel any pending debounced mousemove highlight update.
+        if (mousemoveHighlightTimeout) {
+          clearTimeout(mousemoveHighlightTimeout);
+          mousemoveHighlightTimeout = null;
+          pendingMousemoveHighlightName = null;
+        }
         
-        // Highlight all features with the same name (update immediately)
+        // Highlight all features with the same name, but only after the pointer
+        // has been stable for a moment.
         if (e.features && e.features.length > 0) {
           const feature = e.features[0];
           const properties = feature.properties;
           const name = properties['name'] || properties['NAME'] || null;
-          updateHighlight(name, true); // Immediate update on mouseenter
+          pendingMousemoveHighlightName = name;
+
+          mousemoveHighlightTimeout = setTimeout(() => {
+            const candidateName = pendingMousemoveHighlightName;
+            mousemoveHighlightTimeout = null;
+            pendingMousemoveHighlightName = null;
+            if (!this.map || !this.map.getLayer('content-layer-highlight')) {
+              return;
+            }
+            // Only commit highlight if the pointer has not moved on the canvas recently.
+            if (Date.now() - this.lastCanvasPointerMoveTs < HOVER_HIGHLIGHT_DEBOUNCE_MS) {
+              return;
+            }
+            updateHighlight(candidateName);
+          }, HOVER_HIGHLIGHT_DEBOUNCE_MS);
         }
       }
     });
@@ -420,6 +467,14 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     this.map.on('mouseleave', 'content-layer-fill', () => {
       if (this.map) {
         this.map.getCanvas().style.cursor = '';
+
+        // Cancel any pending debounced mousemove highlight update.
+        if (mousemoveHighlightTimeout) {
+          clearTimeout(mousemoveHighlightTimeout);
+          mousemoveHighlightTimeout = null;
+          pendingMousemoveHighlightName = null;
+        }
+
         // Don't clear immediately - delay to allow smooth transitions between features
         updateHighlight(null, false);
       }
@@ -442,7 +497,25 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       
       // Update highlight when moving between features
       const actualName = properties['name'] || properties['NAME'] || null;
-      updateHighlight(actualName);
+      pendingMousemoveHighlightName = actualName;
+
+      // Debounce highlight updates; this prevents rapid pointer movement from constantly
+      // switching the highlight filter and making it look like it "sticks to" the cursor.
+      if (mousemoveHighlightTimeout) {
+        clearTimeout(mousemoveHighlightTimeout);
+      }
+      mousemoveHighlightTimeout = setTimeout(() => {
+        const candidateName = pendingMousemoveHighlightName;
+        mousemoveHighlightTimeout = null;
+        pendingMousemoveHighlightName = null;
+        if (!this.map || !this.map.getLayer('content-layer-highlight')) {
+          return;
+        }
+        if (Date.now() - this.lastCanvasPointerMoveTs < HOVER_HIGHLIGHT_DEBOUNCE_MS) {
+          return;
+        }
+        updateHighlight(candidateName);
+      }, HOVER_HIGHLIGHT_DEBOUNCE_MS);
       const isQualityMode = this.isQualityMode;
       
       let valueText = '';

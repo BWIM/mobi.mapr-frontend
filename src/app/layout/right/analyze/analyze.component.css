@@ -74,3 +74,20 @@
 :host ::ng-deep .maplibregl-popup-tip {
   border-top-color: var(--background-color) !important;
 }
+.analyze-tab-expand-button {
+  background-color: var(--background-color) !important;
+  margin-left: 5px !important;
+}
+
+.analyze-tab-expand-button mat-icon {
+  width: 20px !important;
+  height: 20px !important;
+  font-size: 20px !important;
+  line-height: 20px !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  color: var(--primary-color) !important;
+}
+.analyze-tab-expand-button:hover mat-icon {
+  color: var(--secondary-color) !important;
+}

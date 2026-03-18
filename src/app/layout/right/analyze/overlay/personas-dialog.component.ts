@@ -6,7 +6,8 @@ import { AnalyzeService, PersonaBreakdown } from '../../../../services/analyze.s
 import { catchError, of, forkJoin } from 'rxjs';
 import { ChartModule } from 'primeng/chart';
 import { UIChart } from 'primeng/chart';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../../services/language.service';
 
 export interface PersonasDialogData {
   featureType: 'municipality' | 'hexagon' | 'county' | 'state';
@@ -48,7 +49,27 @@ export class PersonasDialogComponent implements OnInit, AfterViewInit {
   
   @ViewChild('personasChart') personasChart?: UIChart;
 
-  private translate = inject(TranslateService);
+  // Quality (index) colors - A through F
+  qualityColors = [
+    { letter: 'A', color: 'rgb(50, 97, 45)' },
+    { letter: 'B', color: 'rgb(60, 176, 67)' },
+    { letter: 'C', color: 'rgb(238, 210, 2)' },
+    { letter: 'D', color: 'rgb(237, 112, 20)' },
+    { letter: 'E', color: 'rgb(194, 24, 7)' },
+    { letter: 'F', color: 'rgb(197, 136, 187)' }
+  ];
+
+  // Time (score) colors - match exact colors from map.service.ts getScoreFillColorExpression()
+  timeColors = [
+    { value: '0-7', color: 'rgb(23, 25, 63)' },      // 0-7 min (default for < 480) - darkest
+    { value: '8-15', color: 'rgb(43, 40, 105)' },   // 8-15 min (480-960s) - very dark
+    { value: '16-23', color: 'rgb(74, 89, 160)' },    // 16-23 min (960-1440s) - darker
+    { value: '24-30', color: 'rgb(90, 135, 185)' },   // 24-30 min (1440-1800s) - medium
+    { value: '31-45', color: 'rgb(121, 194, 230)' },  // 31-45 min (1800-2700s) - medium-light
+    { value: '45+', color: 'rgb(162, 210, 235)' }     // 45+ min (2700+s) - lightest
+  ];
+
+  private languageService = inject(LanguageService);
   private analyzeService = inject(AnalyzeService);
 
   constructor(
@@ -86,11 +107,11 @@ export class PersonasDialogComponent implements OnInit, AfterViewInit {
       catchError((error) => {
         console.error('Error loading personas:', error);
         if (error.status === 404) {
-          this.error = this.translate.instant('analyze.analyzeData.notFound');
+          this.error = this.languageService.instant('analyze.analyzeData.notFound');
         } else if (error.status === 503) {
-          this.error = this.translate.instant('analyze.analyzeData.dataNotPreloaded');
+          this.error = this.languageService.instant('analyze.analyzeData.dataNotPreloaded');
         } else {
-          this.error = this.translate.instant('analyze.analyzeData.errorLoading');
+          this.error = this.languageService.instant('analyze.analyzeData.errorLoading');
         }
         return of(null);
       })
@@ -132,11 +153,11 @@ export class PersonasDialogComponent implements OnInit, AfterViewInit {
       catchError((error) => {
         console.error('Error loading personas 2:', error);
         if (error.status === 404) {
-          this.error2 = this.translate.instant('analyze.analyzeData.notFound');
+          this.error2 = this.languageService.instant('analyze.analyzeData.notFound');
         } else if (error.status === 503) {
-          this.error2 = this.translate.instant('analyze.analyzeData.dataNotPreloaded');
+          this.error2 = this.languageService.instant('analyze.analyzeData.dataNotPreloaded');
         } else {
-          this.error2 = this.translate.instant('analyze.analyzeData.errorLoading');
+          this.error2 = this.languageService.instant('analyze.analyzeData.errorLoading');
         }
         return of(null);
       })
@@ -180,7 +201,7 @@ export class PersonasDialogComponent implements OnInit, AfterViewInit {
     const maxWeight = Math.max(...weights);
     const yAxisMax = Math.ceil(maxWeight / 5) * 5; // Round up to nearest 5
 
-    const populationLabel = this.translate.instant('analyze.populationPercent');
+    const populationLabel = this.languageService.instant('analyze.populationPercent');
     this.chartData = {
       labels: labels,
       datasets: [
@@ -189,7 +210,7 @@ export class PersonasDialogComponent implements OnInit, AfterViewInit {
           data: weights,
           backgroundColor: colors,
           borderColor: '#ffffff',
-          borderWidth: 1
+          borderWidth: 2
         }
       ]
     };
@@ -222,8 +243,8 @@ export class PersonasDialogComponent implements OnInit, AfterViewInit {
               const index = context.dataIndex;
               const persona = personas[index];
               const grade = this.getGrade(persona.index);
-              const ratingLabel = this.translate.instant('analyze.rating');
-              const populationLabel = this.translate.instant('analyze.populationPercent');
+              const ratingLabel = this.languageService.instant('analyze.rating');
+              const populationLabel = this.languageService.instant('analyze.populationPercent');
               return [
                 `${ratingLabel}: ${grade}`,
                 `${populationLabel}: ${weights[index].toFixed(1)}%`
@@ -261,7 +282,7 @@ export class PersonasDialogComponent implements OnInit, AfterViewInit {
           },
           title: {
             display: true,
-            text: this.translate.instant('analyze.populationPercent'),
+            text: this.languageService.instant('analyze.populationPercent'),
             color: '#ffffff',
             font: {
               size: 14
@@ -346,9 +367,9 @@ export class PersonasDialogComponent implements OnInit, AfterViewInit {
     const maxWeight = Math.max(...weights1, ...weights2);
     const yAxisMax = Math.ceil(maxWeight / 5) * 5; // Round up to nearest 5
 
-    const feature1Name = this.data.featureName || this.translate.instant('analyze.feature1');
-    const feature2Name = this.data.featureName2 || this.translate.instant('analyze.feature2');
-    const populationLabel = this.translate.instant('analyze.populationPercent');
+    const feature1Name = this.data.featureName || this.languageService.instant('analyze.feature1');
+    const feature2Name = this.data.featureName2 || this.languageService.instant('analyze.feature2');
+    const populationLabel = this.languageService.instant('analyze.populationPercent');
 
     this.chartData = {
       labels: labels,
@@ -402,8 +423,8 @@ export class PersonasDialogComponent implements OnInit, AfterViewInit {
               const indexValue = datasetIndex === 0 ? persona.index1 : persona.index2;
               const grade = this.getGrade(indexValue);
               const featureName = datasetIndex === 0 ? feature1Name : feature2Name;
-              const ratingLabel = this.translate.instant('analyze.rating');
-              const populationLabel = this.translate.instant('analyze.populationPercent');
+              const ratingLabel = this.languageService.instant('analyze.rating');
+              const populationLabel = this.languageService.instant('analyze.populationPercent');
               return [
                 `${featureName}`,
                 `${ratingLabel}: ${grade}`,
@@ -442,7 +463,7 @@ export class PersonasDialogComponent implements OnInit, AfterViewInit {
           },
           title: {
             display: true,
-            text: this.translate.instant('analyze.populationPercent'),
+            text: this.languageService.instant('analyze.populationPercent'),
             color: '#ffffff',
             font: {
               size: 14
@@ -470,14 +491,14 @@ export class PersonasDialogComponent implements OnInit, AfterViewInit {
   }
 
   private getScoreColor(score: number): string {
-    if (score < 600) {
-      return 'rgb(23, 25, 63)'; // 0-10 min (default for < 600) - darkest
-    } else if (score < 900) {
-      return 'rgb(43, 40, 105)'; // 11-15 min (600-900s) - very dark
-    } else if (score < 1200) {
-      return 'rgb(74, 89, 160)'; // 16-20 min (900-1200s) - darker
+    if (score < 480) {
+      return 'rgb(23, 25, 63)'; // 0-7 min (default for < 480) - darkest
+    } else if (score < 960) {
+      return 'rgb(43, 40, 105)'; // 8-15 min (480-960s) - very dark
+    } else if (score < 1440) {
+      return 'rgb(74, 89, 160)'; // 16-23 min (960-1440s) - darker
     } else if (score < 1800) {
-      return 'rgb(90, 135, 185)'; // 21-30 min (1200-1800s) - medium
+      return 'rgb(90, 135, 185)'; // 24-30 min (1440-1800s) - medium
     } else if (score < 2700) {
       return 'rgb(121, 194, 230)'; // 31-45 min (1800-2700s) - medium-light
     } else {

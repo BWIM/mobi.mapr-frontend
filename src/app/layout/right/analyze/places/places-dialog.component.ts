@@ -16,6 +16,7 @@ export interface PlacesDialogData {
   categoryIds?: number[];
   categoryNames: string;
   personaId?: number;
+  isScoreMode: boolean;
 }
 
 @Component({
@@ -39,14 +40,44 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   private translate = inject(TranslateService);
   private popup?: Popup;
   private places: Place[] = [];
-  private categoryData: Array<{ name: string; weight: number; places: Place[] }> = [];
+  private categoryData: Array<{ name: string; weight: number; score: number; index: number; places: Place[] }> = [];
   private categoryColors = new Map<string, string>();
-  categoryLegendItems: Array<{ name: string; color: string; weight: number; relevance: number; enabled: boolean }> = [];
+  categoryLegendItems: Array<{ name: string; color: string; weight: number; relevance: number; enabled: boolean; score: number; index: number }> = [];
   private pendingFeatureShape: any = null;
-  private colorPalette = [
-    '#FF0000', '#00FF00', '#0066FF', '#FFA07A', '#98D8C8',
-    '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52BE80',
-    '#EC7063', '#5DADE2', '#58D68D', '#F4D03F', '#AF7AC5'
+  private viewInitialized = false;
+  private dataLoaded = false;
+  // Pastel colors for category dots and circle fills (NOT tied to score/index)
+  private pastelCategoryColors = [
+    '#FAD7A0',
+    '#AEC6CF',
+    '#C5E1A5',
+    '#FFCDD2',
+    '#B3E5FC',
+    '#E1BEE7',
+    '#FFE0B2',
+    '#C8E6C9',
+    '#D1C4E9',
+    '#FFECB3'
+  ];
+
+  // Quality (index) colors - A through F (must match map.service.ts getIndexFillColorExpression())
+  qualityColors = [
+    { letter: 'A', color: 'rgb(50, 97, 45)' },
+    { letter: 'B', color: 'rgb(60, 176, 67)' },
+    { letter: 'C', color: 'rgb(238, 210, 2)' },
+    { letter: 'D', color: 'rgb(237, 112, 20)' },
+    { letter: 'E', color: 'rgb(194, 24, 7)' },
+    { letter: 'F', color: 'rgb(197, 136, 187)' }
+  ];
+
+  // Time (score) colors - must match map.service.ts getScoreFillColorExpression()
+  timeColors = [
+    { value: '0-7', color: 'rgb(23, 25, 63)' },
+    { value: '8-15', color: 'rgb(43, 40, 105)' },
+    { value: '16-23', color: 'rgb(74, 89, 160)' },
+    { value: '24-30', color: 'rgb(90, 135, 185)' },
+    { value: '31-45', color: 'rgb(121, 194, 230)' },
+    { value: '45+', color: 'rgb(162, 210, 235)' }
   ];
 
   private placesService = inject(PlacesService);
@@ -114,37 +145,26 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       console.log('Places after filtering:', this.places.length);
       
       // Process category data from response - keep all categories
-      if (placesResponse.categories) {
+      if (placesResponse.categories && placesResponse.categories.length > 0) {
         this.categoryData = placesResponse.categories
           .map(cat => ({
             name: cat.category_name,
             weight: cat.weight,
+            score: cat.activityScore?.score ?? 0,
+            index: cat.activityScore?.index ?? 0,
             places: cat.places.filter(p => p.lat !== 0 && p.lon !== 0 && !isNaN(p.lat) && !isNaN(p.lon))
           }))
           .sort((a, b) => b.weight - a.weight); // Sort by weight descending, but keep all
-        
-        
       }
       
       // Assign colors to categories
       this.assignCategoryColors();
-      
-      // Initialize map if not already done (container might be available now)
-      if (!this.map && this.mapContainerPlaces) {
-        this.initializeMap();
-      } else if (this.map) {
-        // Map is already initialized, add places now
-        this.addPlacesWhenReady();
-        // Add feature shape if available
-        if (featureShape) {
-          this.addFeatureShapeToMap(featureShape);
-        }
-      } else {
-        // Store feature shape to add later
-        this.pendingFeatureShape = featureShape;
-      }
-      
-      this.isLoading = false;
+
+      // Defer map initialization until both (1) the view is ready and (2) the data is loaded.
+      // This avoids race conditions around MapLibre's `load` event.
+      this.pendingFeatureShape = featureShape;
+      this.dataLoaded = true;
+      this.tryInitializeMap();
     } catch (err: any) {
       console.error('Error loading places:', err);
       this.error = err?.message || this.translate.instant('analyze.placesDialog.errorLoadingPlaces');
@@ -153,13 +173,9 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // Use setTimeout to ensure the view is fully rendered
-    // This is especially important when the map container is conditionally rendered
-    setTimeout(() => {
-      if (this.mapContainerPlaces && !this.map) {
-        this.initializeMap();
-      }
-    }, 0);
+    this.viewInitialized = true;
+    // Keep a micro-delay for cases where the container is conditionally rendered.
+    setTimeout(() => this.tryInitializeMap(), 0);
   }
 
   ngOnDestroy() {
@@ -209,49 +225,35 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.map) {
         this.map.resize();
       }
-      // Add places if we have them
-      this.addPlacesWhenReady();
+      // Add places if we have them (styles are loaded at this point)
+      if (this.places.length > 0 && this.categoryData.length > 0) {
+        this.addPlacesToMap();
+        this.fitMapToPlaces();
+      }
       // Add feature shape if available
       if (this.pendingFeatureShape) {
         this.addFeatureShapeToMap(this.pendingFeatureShape);
         this.pendingFeatureShape = null;
       }
+
+      this.isLoading = false;
     });
   }
 
-  /**
-   * Adds places to the map when both map and places are ready
-   */
-  private addPlacesWhenReady(): void {
-    if (!this.map) {
-      console.warn('Cannot add places: map not initialized');
+  private tryInitializeMap(): void {
+    if (!this.viewInitialized || !this.dataLoaded) {
       return;
     }
-
-    if (this.places.length === 0) {
-      console.warn('Cannot add places: no places available');
+    if (this.map) {
       return;
     }
-
-    // If map is loaded, add places immediately
-    if (this.map.loaded()) {
-      console.log('Map is loaded, adding places now');
-      this.addPlacesToMap();
-      this.fitMapToPlaces();
-    } else {
-      // Map is still loading, wait for it
-      console.log('Map is still loading, waiting for load event');
-      this.map.once('load', () => {
-        console.log('Map finished loading, adding places');
-        this.addPlacesToMap();
-        this.fitMapToPlaces();
-      });
+    if (this.mapContainerPlaces) {
+      this.initializeMap();
     }
   }
 
   private assignCategoryColors(): void {
-    let colorIndex = 0;
-    
+    this.categoryColors.clear();
     this.categoryLegendItems = [];
     
     // Calculate total weight for relevance calculation
@@ -261,22 +263,106 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     // Show all categories, but only enable the first 3
     this.categoryData.forEach((category, index) => {
       if (category.name && !this.categoryColors.has(category.name)) {
-        const color = this.colorPalette[colorIndex % this.colorPalette.length];
-        this.categoryColors.set(category.name, color);
+        const pastelColor = this.pastelCategoryColors[index % this.pastelCategoryColors.length];
+        this.categoryColors.set(category.name, pastelColor);
         
         // Calculate relevance as percentage
         const relevance = totalWeight > 0 ? (category.weight / totalWeight) * 100 : 0;
         
         this.categoryLegendItems.push({ 
           name: category.name, 
-          color, 
+          color: pastelColor,
           weight: category.weight,
           relevance: relevance,
-          enabled: index < 3 // Only first 3 enabled by default
+          enabled: index < 3, // Only first 3 enabled by default
+          score: category.score,
+          index: category.index
         });
-        colorIndex++;
       }
     });
+  }
+
+  getPlacesIsScoreMode(): boolean {
+    return !!this.data.isScoreMode;
+  }
+
+  private getScoreColor(score: number): string {
+    if (score < 480) {
+      return 'rgb(23, 25, 63)';
+    } else if (score < 960) {
+      return 'rgb(43, 40, 105)';
+    } else if (score < 1440) {
+      return 'rgb(74, 89, 160)';
+    } else if (score < 1800) {
+      return 'rgb(90, 135, 185)';
+    } else if (score < 2700) {
+      return 'rgb(121, 194, 230)';
+    } else {
+      return 'rgb(162, 210, 235)';
+    }
+  }
+
+  private getIndexColor(index: number): string {
+    const indexValue = index / 100;
+    if (indexValue <= 0) {
+      return 'rgba(128, 128, 128, 0.7)';
+    } else if (indexValue < 0.35) {
+      return 'rgb(50, 97, 45)';
+    } else if (indexValue < 0.5) {
+      return 'rgb(60, 176, 67)';
+    } else if (indexValue < 0.71) {
+      return 'rgb(238, 210, 2)';
+    } else if (indexValue < 1.0) {
+      return 'rgb(237, 112, 20)';
+    } else if (indexValue < 1.41) {
+      return 'rgb(194, 24, 7)';
+    } else {
+      return 'rgb(197, 136, 187)';
+    }
+  }
+
+  private getPlacesScoreTextColor(score: number): string {
+    return this.getScoreColor(score);
+  }
+
+  private getPlacesIndexTextColor(index: number): string {
+    const indexValue = index / 100;
+    if (indexValue <= 0) return 'rgb(128, 128, 128)';
+    if (indexValue < 0.35) return 'rgb(50, 97, 45)';
+    if (indexValue < 0.5) return 'rgb(60, 176, 67)';
+    if (indexValue < 0.71) return 'rgb(238, 210, 2)';
+    if (indexValue < 1.0) return 'rgb(237, 112, 20)';
+    if (indexValue < 1.41) return 'rgb(194, 24, 7)';
+    return 'rgb(197, 136, 187)';
+  }
+
+  getPlacesMetricTextColor(score: number, index: number): string {
+    return this.getPlacesIsScoreMode()
+      ? this.getPlacesScoreTextColor(score)
+      : this.getPlacesIndexTextColor(index);
+  }
+
+  getGradeFromIndex(index: number): string {
+    const indexValue = index / 100;
+    if (indexValue <= 0 || !Number.isFinite(indexValue)) return 'N/A';
+    if (indexValue < 0.24) return 'A+';
+    if (indexValue < 0.27) return 'A';
+    if (indexValue < 0.35) return 'A-';
+    if (indexValue < 0.4) return 'B+';
+    if (indexValue < 0.45) return 'B';
+    if (indexValue < 0.5) return 'B-';
+    if (indexValue < 0.56) return 'C+';
+    if (indexValue < 0.63) return 'C';
+    if (indexValue < 0.71) return 'C-';
+    if (indexValue < 0.8) return 'D+';
+    if (indexValue < 0.9) return 'D';
+    if (indexValue < 1.0) return 'D-';
+    if (indexValue < 1.12) return 'E+';
+    if (indexValue < 1.26) return 'E';
+    if (indexValue < 1.41) return 'E-';
+    if (indexValue < 1.59) return 'F+';
+    if (indexValue < 1.78) return 'F';
+    return 'F-';
   }
 
   private addPlacesToMap(): void {
@@ -359,7 +445,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
               ],
               'circle-color': color,
               'circle-stroke-width': 2,
-              'circle-stroke-color': '#ffffff',
+              'circle-stroke-color': 'rgba(0, 0, 0, 0.45)',
               'circle-opacity': 1.0
             }
           }, beforeLayer);
@@ -445,7 +531,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
                   ],
                   'circle-color': color,
                   'circle-stroke-width': 2,
-                  'circle-stroke-color': '#ffffff',
+                  'circle-stroke-color': 'rgba(0, 0, 0, 0.45)',
                   'circle-opacity': 1.0
                 }
               }, beforeLayer);
@@ -479,10 +565,25 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    let mousemovePopupTimeout: any = null;
+    let pendingPopupFeature: any = null;
+    let pendingPopupLngLat: any = null;
+
+    // Show popup only after the pointer has been stable for a moment.
+    const HOVER_POPUP_DEBOUNCE_MS = 120;
+
     // Change cursor on hover
     this.map.on('mouseenter', layerId, () => {
       if (this.map) {
         this.map.getCanvas().style.cursor = 'pointer';
+      }
+
+      // Cancel any pending debounced popup update.
+      if (mousemovePopupTimeout) {
+        clearTimeout(mousemovePopupTimeout);
+        mousemovePopupTimeout = null;
+        pendingPopupFeature = null;
+        pendingPopupLngLat = null;
       }
     });
 
@@ -490,6 +591,14 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.map) {
         this.map.getCanvas().style.cursor = '';
       }
+
+      if (mousemovePopupTimeout) {
+        clearTimeout(mousemovePopupTimeout);
+        mousemovePopupTimeout = null;
+        pendingPopupFeature = null;
+        pendingPopupLngLat = null;
+      }
+
       if (this.popup) {
         this.popup.remove();
       }
@@ -501,24 +610,36 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
 
-      const feature = e.features[0];
-      const properties = feature.properties;
-      const unnamedText = this.translate.instant('map.popup.unnamed');
-      const notAvailableText = this.translate.instant('map.popup.notAvailable');
-      const name = properties['name'] || unnamedText;
-      const categoryName = properties['category_name'] || notAvailableText;
+      pendingPopupFeature = e.features[0];
+      pendingPopupLngLat = e.lngLat;
 
-      const popupContent = `
-        <div>
-          <div style="font-weight: 600; margin-bottom: 4px;">${name}</div>
-          <div style="font-size: 12px; color: #666;">${categoryName}</div>
-        </div>
-      `;
+      if (mousemovePopupTimeout) {
+        clearTimeout(mousemovePopupTimeout);
+      }
 
-      this.popup
-        .setLngLat(e.lngLat)
-        .setHTML(popupContent)
-        .addTo(this.map);
+      mousemovePopupTimeout = setTimeout(() => {
+        if (!this.map || !this.popup || !pendingPopupFeature || !pendingPopupLngLat) {
+          return;
+        }
+
+        const properties = pendingPopupFeature.properties;
+        const unnamedText = this.translate.instant('map.popup.unnamed');
+        const notAvailableText = this.translate.instant('map.popup.notAvailable');
+        const name = properties['name'] || unnamedText;
+        const categoryName = properties['category_name'] || notAvailableText;
+
+        const popupContent = `
+          <div>
+            <div style="font-weight: 600; margin-bottom: 4px;">${name}</div>
+            <div style="font-size: 12px; color: #666;">${categoryName}</div>
+          </div>
+        `;
+
+        this.popup
+          .setLngLat(pendingPopupLngLat)
+          .setHTML(popupContent)
+          .addTo(this.map);
+      }, HOVER_POPUP_DEBOUNCE_MS);
     });
   }
 
@@ -615,10 +736,22 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     this.categoryData.forEach(category => {
       const layerId = `places-circles-${category.name}`;
 
+      let mousemovePopupTimeout: any = null;
+      let pendingPopupFeature: any = null;
+      let pendingPopupLngLat: any = null;
+      const HOVER_POPUP_DEBOUNCE_MS = 120;
+
       // Change cursor on hover
       this.map!.on('mouseenter', layerId, () => {
         if (this.map) {
           this.map.getCanvas().style.cursor = 'pointer';
+        }
+
+        if (mousemovePopupTimeout) {
+          clearTimeout(mousemovePopupTimeout);
+          mousemovePopupTimeout = null;
+          pendingPopupFeature = null;
+          pendingPopupLngLat = null;
         }
       });
 
@@ -626,6 +759,14 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         if (this.map) {
           this.map.getCanvas().style.cursor = '';
         }
+
+        if (mousemovePopupTimeout) {
+          clearTimeout(mousemovePopupTimeout);
+          mousemovePopupTimeout = null;
+          pendingPopupFeature = null;
+          pendingPopupLngLat = null;
+        }
+
         if (this.popup) {
           this.popup.remove();
         }
@@ -637,22 +778,34 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
           return;
         }
 
-        const feature = e.features[0];
-        const properties = feature.properties;
-        const name = properties['name'] || 'Unnamed';
-        const categoryName = properties['category_name'] || 'Unknown';
+        pendingPopupFeature = e.features[0];
+        pendingPopupLngLat = e.lngLat;
 
-        const popupContent = `
-          <div>
-            <div style="font-weight: 600; margin-bottom: 4px;">${name}</div>
-            <div style="font-size: 12px; color: #666;">${categoryName}</div>
-          </div>
-        `;
+        if (mousemovePopupTimeout) {
+          clearTimeout(mousemovePopupTimeout);
+        }
 
-        this.popup
-          .setLngLat(e.lngLat)
-          .setHTML(popupContent)
-          .addTo(this.map);
+        mousemovePopupTimeout = setTimeout(() => {
+          if (!this.map || !this.popup || !pendingPopupFeature || !pendingPopupLngLat) {
+            return;
+          }
+
+          const properties = pendingPopupFeature.properties;
+          const name = properties['name'] || 'Unnamed';
+          const categoryName = properties['category_name'] || 'Unknown';
+
+          const popupContent = `
+            <div>
+              <div style="font-weight: 600; margin-bottom: 4px;">${name}</div>
+              <div style="font-size: 12px; color: #666;">${categoryName}</div>
+            </div>
+          `;
+
+          this.popup
+            .setLngLat(pendingPopupLngLat)
+            .setHTML(popupContent)
+            .addTo(this.map);
+        }, HOVER_POPUP_DEBOUNCE_MS);
       });
     });
   }

@@ -97,6 +97,13 @@ export class StatsComponent implements OnDestroy {
         personaId: selectedPersonas,
         regiostarIds: selectedRegioStars.length > 0 ? [...selectedRegioStars].sort() : undefined
       };
+
+      const rankingsAffectingFiltersChanged = !previousFilters ||
+        previousFilters.profileCombinationID !== currentFilterState.profileCombinationID ||
+        JSON.stringify(previousFilters.stateIds) !== JSON.stringify(currentFilterState.stateIds) ||
+        JSON.stringify(previousFilters.categoryIds) !== JSON.stringify(currentFilterState.categoryIds) ||
+        previousFilters.personaId !== currentFilterState.personaId ||
+        JSON.stringify(previousFilters.regiostarIds) !== JSON.stringify(currentFilterState.regiostarIds);
       
       // Check if only bewertung changed
       const onlyBewertungChanged = previousBewertung !== null && 
@@ -130,13 +137,11 @@ export class StatsComponent implements OnDestroy {
         return;
       }
       
-      // Only load stats when:
-      // - Map is ready (not loading)
-      // - Project is not being prepared
-      // - Ready check has completed (step 2 is done, so step 3 can proceed)
-      // - Profile combination is available
-      // This ensures rankings only load after ready check completes (step 3)
       if (profileCombinationID !== null && !isMapLoading && !isPreparingProject && isReadyCheckComplete && filters) {
+        if (mapJustFinishedLoading && !rankingsAffectingFiltersChanged) {
+          this.isLoading.set(false);
+        }
+
         // Check if filters actually changed (excluding bewertung which doesn't require API call)
         
         // Only reload if filters actually changed or this is the first load
@@ -187,7 +192,12 @@ export class StatsComponent implements OnDestroy {
           // Set loading state when map starts reloading or project is being prepared
           // Always show loading when map starts reloading to provide user feedback
           if (mapJustStartedLoading || isPreparingProject) {
-            this.isLoading.set(true);
+            // Only toggle loading if we actually need to refresh the rankings.
+            if (rankingsAffectingFiltersChanged) {
+              this.isLoading.set(true);
+            } else {
+              this.isLoading.set(false);
+            }
           } else if (this.counties.length === 0) {
             // If map is loading but we don't have data yet, show loading
             this.isLoading.set(true);

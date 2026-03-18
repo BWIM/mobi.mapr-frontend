@@ -266,16 +266,36 @@ export class FilterConfigService {
     effect(() => {
       const currentProject = this.projectService.project();
       if (currentProject) {
-        // Reset activities and personas when project changes
-        if (previousProjectId !== null && previousProjectId !== currentProject.id) {
+        // Reset filters when loading a (new) project so selections come from project data,
+        // not from previously stored localStorage settings.
+        if (previousProjectId === null || previousProjectId !== currentProject.id) {
+          // Force all advanced filter selections to be re-preselected from freshly loaded project data.
+          // validateFilterSelections preselects "all" when these signals are empty / null.
+          this._selectedModes.set([]);
           this._selectedActivities.set([]);
           this._selectedPersonas.set(null);
-          // Reset filter data loaded flag when project changes
+          this._selectedRegioStars.set([]);
+          this._selectedStates.set([]);
+
+          // "Automatic" admin level by default on project load.
+          this._selectedAdminLevel.set(null);
+
+          // Reset filter-data gating so the map waits for the new project's filter options.
           this._isFilterDataLoaded.set(false);
-          // Reset URL params applied flag to allow re-applying on project change
+
+          // Allow URL params to be re-applied when switching projects.
           this._urlParamsApplied.set(false);
+
           // Remove old project from initialized set (new project needs initialization)
-          this._initializedProjectIds.delete(previousProjectId);
+          if (previousProjectId !== null) {
+            this._initializedProjectIds.delete(previousProjectId);
+          }
+
+          // If profiles/profile-combinations are already loaded, re-apply URL params now.
+          // This preserves explicit URL-driven mode selection across project switches.
+          if (this._allProfiles().length > 0 && this._allProfileCombinations().length > 0) {
+            this.applyUrlParams();
+          }
         }
         previousProjectId = currentProject.id;
 

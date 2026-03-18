@@ -65,9 +65,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private map?: MapLibreMap;
   private popup?: Popup;
   private places: Place[] = [];
-  private categoryData: Array<{ name: string; weight: number; places: Place[] }> = [];
+  private categoryData: Array<{ name: string; weight: number; score: number; index: number; places: Place[] }> = [];
   private categoryColors = new Map<string, string>();
-  categoryLegendItems: Array<{ name: string; color: string; weight: number; relevance: number; enabled: boolean }> = [];
+  categoryLegendItems: Array<{ name: string; color: string; weight: number; relevance: number; enabled: boolean; score: number; index: number }> = [];
   isLoadingPlaces: boolean = false;
   placesError: string | null = null;
   private pendingFeatureShape: any = null;
@@ -75,6 +75,40 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     '#FF0000', '#00FF00', '#0066FF', '#FFA07A', '#98D8C8',
     '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52BE80',
     '#EC7063', '#5DADE2', '#58D68D', '#F4D03F', '#AF7AC5'
+  ];
+
+  // Pastel colors for category dots and circle fills (NOT tied to score/index)
+  private pastelCategoryColors = [
+    '#FAD7A0', // warm pastel
+    '#AEC6CF', // soft blue/gray
+    '#C5E1A5', // soft green
+    '#FFCDD2', // soft red/pink
+    '#B3E5FC', // light blue
+    '#E1BEE7', // light purple
+    '#FFE0B2', // light amber
+    '#C8E6C9', // pale green
+    '#D1C4E9', // pale violet
+    '#FFECB3'  // soft yellow
+  ];
+
+  // Quality (index) colors - A through F (must match map.service.ts getIndexFillColorExpression())
+  qualityColors = [
+    { letter: 'A', color: 'rgb(50, 97, 45)' },
+    { letter: 'B', color: 'rgb(60, 176, 67)' },
+    { letter: 'C', color: 'rgb(238, 210, 2)' },
+    { letter: 'D', color: 'rgb(237, 112, 20)' },
+    { letter: 'E', color: 'rgb(194, 24, 7)' },
+    { letter: 'F', color: 'rgb(197, 136, 187)' }
+  ];
+
+  // Time (score) colors - must match map.service.ts getScoreFillColorExpression()
+  timeColors = [
+    { value: '0-7', color: 'rgb(23, 25, 63)' },
+    { value: '8-15', color: 'rgb(43, 40, 105)' },
+    { value: '16-23', color: 'rgb(74, 89, 160)' },
+    { value: '24-30', color: 'rgb(90, 135, 185)' },
+    { value: '31-45', color: 'rgb(121, 194, 230)' },
+    { value: '45+', color: 'rgb(162, 210, 235)' }
   ];
   
   @ViewChild('activitiesChart') activitiesChart?: UIChart;
@@ -143,40 +177,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.previousFilters = filters ? { ...filters } : null;
     });
 
-    // Watch for map loading state - execute pending reload when map finishes loading
-    // Also set loading state when map starts reloading
-    let previousMapLoading = false;
     effect(() => {
       const isMapLoading = this.mapService.isMapLoading();
-      
-      // Detect when map transitions from not loading to loading (map starts reloading)
-      const mapJustStartedLoading = !previousMapLoading && isMapLoading;
-      previousMapLoading = isMapLoading;
-      
-      // If map just started loading, set loading states
-      if (mapJustStartedLoading) {
-        // Set loading states for any selected features
-        if (this.selectedFeature) {
-          this.isLoadingFeatureInfo = true;
-          this.isLoadingAnalyze = true;
-        }
-        if (this.selectedFeature2) {
-          this.isLoadingFeatureInfo2 = true;
-          this.isLoadingAnalyze2 = true;
-        }
-        // Set personas loading if applicable
-        const filters = this.filterConfigService.contentLayerFilters();
-        if (filters?.persona_id === 54) {
-          if (this.selectedFeature) {
-            this.isLoadingPersonas = true;
-          }
-          if (this.selectedFeature2) {
-            this.isLoadingPersonas2 = true;
-          }
-        }
-      }
-      
-      // If map finished loading and we have a pending reload, execute it
       if (!isMapLoading && this.pendingReload) {
         this.pendingReload = false;
         this.executeReload();
@@ -396,6 +398,27 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     if (isMapLoading) {
       // Map is still loading, set flag to reload when it finishes
       this.pendingReload = true;
+
+      // Set loading state only because we are going to reload after the map is ready.
+      // This prevents getting stuck in loading when `admin_level` changes but we don't reload.
+      if (this.selectedFeature) {
+        this.isLoadingFeatureInfo = true;
+        this.isLoadingAnalyze = true;
+      }
+      if (this.selectedFeature2) {
+        this.isLoadingFeatureInfo2 = true;
+        this.isLoadingAnalyze2 = true;
+      }
+
+      const filters = this.filterConfigService.contentLayerFilters();
+      if (filters?.persona_id === 54) {
+        if (this.selectedFeature) {
+          this.isLoadingPersonas = true;
+        }
+        if (this.selectedFeature2) {
+          this.isLoadingPersonas2 = true;
+        }
+      }
       return;
     }
     
@@ -1090,6 +1113,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           .map(cat => ({
             name: cat.category_name,
             weight: cat.weight,
+            score: cat.activityScore?.score ?? 0,
+            index: cat.activityScore?.index ?? 0,
             places: cat.places.filter(p => p.lat !== 0 && p.lon !== 0 && !isNaN(p.lat) && !isNaN(p.lon))
           }))
           .sort((a, b) => b.weight - a.weight);
@@ -1194,7 +1219,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           data: weights,
           backgroundColor: colors,
           borderColor: '#ffffff',
-          borderWidth: 1
+          borderWidth: 2
         }
       ]
     };
@@ -1397,7 +1422,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           data: weights,
           backgroundColor: colors,
           borderColor: '#ffffff',
-          borderWidth: 1
+          borderWidth: 2
         }
       ]
     };
@@ -2053,7 +2078,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private assignCategoryColors(): void {
-    let colorIndex = 0;
     this.categoryColors.clear();
     this.categoryLegendItems = [];
     
@@ -2064,22 +2088,85 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Show all categories, but only enable the first 3
     this.categoryData.forEach((category, index) => {
       if (category.name && !this.categoryColors.has(category.name)) {
-        const color = this.colorPalette[colorIndex % this.colorPalette.length];
-        this.categoryColors.set(category.name, color);
+        const pastelColor = this.pastelCategoryColors[index % this.pastelCategoryColors.length];
+        this.categoryColors.set(category.name, pastelColor);
         
         // Calculate relevance as percentage
         const relevance = totalWeight > 0 ? (category.weight / totalWeight) * 100 : 0;
         
         this.categoryLegendItems.push({ 
           name: category.name, 
-          color, 
+          color: pastelColor,
           weight: category.weight,
           relevance: relevance,
-          enabled: index < 3 // Only first 3 enabled by default
+          enabled: index < 3, // Only first 3 enabled by default
+          score: category.score,
+          index: category.index
         });
-        colorIndex++;
       }
     });
+  }
+
+  getPlacesIsScoreMode(): boolean {
+    const filters = this.filterConfigService.contentLayerFilters();
+    return filters?.feature_type === 'score';
+  }
+
+  private getPlacesScoreColor(score: number): string {
+    if (score < 480) {
+      return 'rgb(23, 25, 63)';
+    } else if (score < 960) {
+      return 'rgb(43, 40, 105)';
+    } else if (score < 1440) {
+      return 'rgb(74, 89, 160)';
+    } else if (score < 1800) {
+      return 'rgb(90, 135, 185)';
+    } else if (score < 2700) {
+      return 'rgb(121, 194, 230)';
+    } else {
+      return 'rgb(162, 210, 235)';
+    }
+  }
+
+  private getPlacesIndexColor(index: number): string {
+    const indexValue = index / 100;
+    if (indexValue <= 0) {
+      return 'rgba(128, 128, 128, 0.7)';
+    } else if (indexValue < 0.35) {
+      return 'rgb(50, 97, 45)';
+    } else if (indexValue < 0.5) {
+      return 'rgb(60, 176, 67)';
+    } else if (indexValue < 0.71) {
+      return 'rgb(238, 210, 2)';
+    } else if (indexValue < 1.0) {
+      return 'rgb(237, 112, 20)';
+    } else if (indexValue < 1.41) {
+      return 'rgb(194, 24, 7)';
+    } else {
+      return 'rgb(197, 136, 187)';
+    }
+  }
+
+  private getPlacesScoreTextColor(score: number): string {
+    // Same rgb breaks as the map/legend, but used for colored text
+    return this.getPlacesScoreColor(score);
+  }
+
+  private getPlacesIndexTextColor(index: number): string {
+    const indexValue = index / 100;
+    if (indexValue <= 0) return 'rgb(128, 128, 128)';
+    if (indexValue < 0.35) return 'rgb(50, 97, 45)';
+    if (indexValue < 0.5) return 'rgb(60, 176, 67)';
+    if (indexValue < 0.71) return 'rgb(238, 210, 2)';
+    if (indexValue < 1.0) return 'rgb(237, 112, 20)';
+    if (indexValue < 1.41) return 'rgb(194, 24, 7)';
+    return 'rgb(197, 136, 187)';
+  }
+
+  getPlacesMetricTextColor(score: number, index: number): string {
+    return this.getPlacesIsScoreMode()
+      ? this.getPlacesScoreTextColor(score)
+      : this.getPlacesIndexTextColor(index);
   }
 
   private addPlacesToMap(): void {
@@ -2153,7 +2240,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
               ],
               'circle-color': color,
               'circle-stroke-width': 2,
-              'circle-stroke-color': '#ffffff',
+              'circle-stroke-color': 'rgba(0, 0, 0, 0.45)',
               'circle-opacity': 1.0
             }
           }, beforeLayer);
@@ -2250,7 +2337,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
                   ],
                   'circle-color': color,
                   'circle-stroke-width': 2,
-                  'circle-stroke-color': '#ffffff',
+                  'circle-stroke-color': 'rgba(0, 0, 0, 0.45)',
                   'circle-opacity': 1.0
                 }
               }, beforeLayer);
@@ -2284,10 +2371,24 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    let mousemovePopupTimeout: any = null;
+    let pendingPopupFeature: any = null;
+    let pendingPopupLngLat: any = null;
+
+    // Prevent popup from constantly updating when the user moves the pointer quickly.
+    const HOVER_POPUP_DEBOUNCE_MS = 120;
+
     // Change cursor on hover
     this.map.on('mouseenter', layerId, () => {
       if (this.map) {
         this.map.getCanvas().style.cursor = 'pointer';
+      }
+
+      if (mousemovePopupTimeout) {
+        clearTimeout(mousemovePopupTimeout);
+        mousemovePopupTimeout = null;
+        pendingPopupFeature = null;
+        pendingPopupLngLat = null;
       }
     });
 
@@ -2295,6 +2396,14 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.map) {
         this.map.getCanvas().style.cursor = '';
       }
+
+      if (mousemovePopupTimeout) {
+        clearTimeout(mousemovePopupTimeout);
+        mousemovePopupTimeout = null;
+        pendingPopupFeature = null;
+        pendingPopupLngLat = null;
+      }
+
       if (this.popup) {
         this.popup.remove();
       }
@@ -2306,24 +2415,36 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
 
-      const feature = e.features[0];
-      const properties = feature.properties;
-      const unnamedText = this.translate.instant('map.popup.unnamed');
-      const notAvailableText = this.translate.instant('map.popup.notAvailable');
-      const name = properties['name'] || unnamedText;
-      const categoryName = properties['category_name'] || notAvailableText;
+      pendingPopupFeature = e.features[0];
+      pendingPopupLngLat = e.lngLat;
 
-      const popupContent = `
-        <div>
-          <div style="font-weight: 600; margin-bottom: 4px;">${name}</div>
-          <div style="font-size: 12px; color: #666;">${categoryName}</div>
-        </div>
-      `;
+      if (mousemovePopupTimeout) {
+        clearTimeout(mousemovePopupTimeout);
+      }
 
-      this.popup
-        .setLngLat(e.lngLat)
-        .setHTML(popupContent)
-        .addTo(this.map);
+      mousemovePopupTimeout = setTimeout(() => {
+        if (!this.map || !this.popup || !pendingPopupFeature || !pendingPopupLngLat) {
+          return;
+        }
+
+        const properties = pendingPopupFeature.properties;
+        const unnamedText = this.translate.instant('map.popup.unnamed');
+        const notAvailableText = this.translate.instant('map.popup.notAvailable');
+        const name = properties['name'] || unnamedText;
+        const categoryName = properties['category_name'] || notAvailableText;
+
+        const popupContent = `
+          <div>
+            <div style="font-weight: 600; margin-bottom: 4px;">${name}</div>
+            <div style="font-size: 12px; color: #666;">${categoryName}</div>
+          </div>
+        `;
+
+        this.popup
+          .setLngLat(pendingPopupLngLat)
+          .setHTML(popupContent)
+          .addTo(this.map);
+      }, HOVER_POPUP_DEBOUNCE_MS);
     });
   }
 
@@ -2659,7 +2780,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       profileCombinationId: profileCombinationId,
       categoryIds: categoryId ? [categoryId] : filters.category_ids,
       personaId: filters.persona_id,
-      categoryNames: categoryName || ''
+      categoryNames: categoryName || '',
+      isScoreMode: filters.feature_type === 'score'
     };
 
     this.dialog.open(PlacesDialogComponent, {

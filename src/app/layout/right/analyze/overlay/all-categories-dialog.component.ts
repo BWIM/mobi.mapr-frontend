@@ -7,9 +7,10 @@ import { catchError, of } from 'rxjs';
 import { ChartModule } from 'primeng/chart';
 import { UIChart } from 'primeng/chart';
 import { PlacesDialogComponent, PlacesDialogData } from '../places/places-dialog.component';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { InfoDialogComponent } from '../../../../shared/info-overlay/info-dialog.component';
 import { LegendInfoComponent } from '../../../../shared/legend-info/legend-info.component';
+import { LanguageService } from '../../../../services/language.service';
 
 export interface AllCategoriesDialogData {
   featureType: 'municipality' | 'hexagon' | 'county' | 'state';
@@ -71,7 +72,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
     { value: '45+', color: 'rgb(162, 210, 235)' }     // 45+ min (2700+s) - lightest
   ];
 
-  private translate = inject(TranslateService);
+  private languageService = inject(LanguageService);
 
   constructor(
     public dialogRef: MatDialogRef<AllCategoriesDialogComponent>,
@@ -112,11 +113,11 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
       catchError((error) => {
         console.error('Error loading all categories:', error);
         if (error.status === 404) {
-          this.error = this.translate.instant('analyze.allCategoriesDialog.categoriesNotFound');
+          this.error = this.languageService.instant('analyze.allCategoriesDialog.categoriesNotFound');
         } else if (error.status === 503) {
-          this.error = this.translate.instant('analyze.allCategoriesDialog.dataNotLoaded');
+          this.error = this.languageService.instant('analyze.allCategoriesDialog.dataNotLoaded');
         } else {
-          this.error = this.translate.instant('analyze.allCategoriesDialog.errorLoadingCategories');
+          this.error = this.languageService.instant('analyze.allCategoriesDialog.errorLoadingCategories');
         }
         return of(null);
       })
@@ -159,11 +160,11 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
       catchError((error) => {
         console.error('Error loading all categories 2:', error);
         if (error.status === 404) {
-          this.error2 = this.translate.instant('analyze.allCategoriesDialog.categoriesNotFound');
+          this.error2 = this.languageService.instant('analyze.allCategoriesDialog.categoriesNotFound');
         } else if (error.status === 503) {
-          this.error2 = this.translate.instant('analyze.allCategoriesDialog.dataNotLoaded');
+          this.error2 = this.languageService.instant('analyze.allCategoriesDialog.dataNotLoaded');
         } else {
-          this.error2 = this.translate.instant('analyze.allCategoriesDialog.errorLoadingCategories');
+          this.error2 = this.languageService.instant('analyze.allCategoriesDialog.errorLoadingCategories');
         }
         return of(null);
       })
@@ -241,7 +242,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
     const maxWeight = Math.max(...weights);
     const yAxisMax = Math.ceil(maxWeight / 5) * 5; // Round up to nearest 5
 
-    const relevanceLabel = this.translate.instant('analyze.relevancePercent');
+    const relevanceLabel = this.languageService.instant('analyze.relevancePercent');
     this.chartData = {
       labels: labels,
       datasets: [
@@ -250,7 +251,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
           data: weights,
           backgroundColor: colors,
           borderColor: '#ffffff',
-          borderWidth: 1
+          borderWidth: 2
         }
       ]
     };
@@ -278,14 +279,14 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
             title: () => '',
             label: (context: any) => {
               const index = context.dataIndex;
-              const activityLabel = this.translate.instant('analyze.activity');
-              const relevanceLabel = this.translate.instant('analyze.relevance');
-              const minutesLabel = this.translate.instant('map.popup.minutes');
+              const activityLabel = this.languageService.instant('analyze.activity');
+              const relevanceLabel = this.languageService.instant('analyze.relevance');
+              const minutesLabel = this.languageService.instant('map.popup.minutes');
               
               // Use appropriate label based on mode
               const ratingLabel = this.data.isScoreMode 
-                ? this.translate.instant('map.popup.score')
-                : this.translate.instant('map.popup.index');
+                ? this.languageService.instant('map.popup.score')
+                : this.languageService.instant('map.popup.index');
               
               let ratingValue: string;
               if (this.data.isScoreMode) {
@@ -337,7 +338,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
           },
           title: {
             display: true,
-            text: this.translate.instant('analyze.relevancePercent'),
+            text: this.languageService.instant('analyze.relevancePercent'),
             color: '#ffffff',
             font: {
               size: 12
@@ -463,9 +464,9 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
     const maxWeight = Math.max(...weights1, ...weights2);
     const yAxisMax = Math.ceil(maxWeight / 5) * 5; // Round up to nearest 5
 
-    const feature1Name = this.data.featureName || this.translate.instant('analyze.feature1');
-    const feature2Name = this.data.featureName2 || this.translate.instant('analyze.feature2');
-    const relevanceLabel = this.translate.instant('analyze.relevancePercent');
+    const feature1Name = this.data.featureName || this.languageService.instant('analyze.feature1');
+    const feature2Name = this.data.featureName2 || this.languageService.instant('analyze.feature2');
+    const relevanceLabel = this.languageService.instant('analyze.relevancePercent');
 
     this.chartData = {
       labels: labels,
@@ -475,14 +476,14 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
           data: weights1,
           backgroundColor: colors1,
           borderColor: '#ffffff',
-          borderWidth: 1
+          borderWidth: 2
         },
         {
           label: relevanceLabel,
           data: weights2,
           backgroundColor: colors2,
           borderColor: '#ffffff',
-          borderWidth: 1
+          borderWidth: 2
         }
       ]
     };
@@ -519,13 +520,13 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
               const indexValue = datasetIndex === 0 ? category.index1 : category.index2;
               const scoreValue = datasetIndex === 0 ? category.score1 : category.score2;
               const featureName = datasetIndex === 0 ? feature1Name : feature2Name;
-              const relevanceLabel = this.translate.instant('analyze.relevance');
-              const minutesLabel = this.translate.instant('map.popup.minutes');
+              const relevanceLabel = this.languageService.instant('analyze.relevance');
+              const minutesLabel = this.languageService.instant('map.popup.minutes');
               
               // Use appropriate label based on mode
               const ratingLabel = this.data.isScoreMode 
-                ? this.translate.instant('map.popup.score')
-                : this.translate.instant('map.popup.index');
+                ? this.languageService.instant('map.popup.score')
+                : this.languageService.instant('map.popup.index');
               
               let ratingValue: string;
               if (this.data.isScoreMode) {
@@ -576,7 +577,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
           },
           title: {
             display: true,
-            text: this.translate.instant('analyze.relevancePercent'),
+            text: this.languageService.instant('analyze.relevancePercent'),
             color: '#ffffff',
             font: {
               size: 12
@@ -653,7 +654,8 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
       profileCombinationId: this.data.profileCombinationId,
       categoryIds: categoryId ? [categoryId] : this.data.categoryIds,
       personaId: this.data.personaId,
-      categoryNames: categoryName || ''
+      categoryNames: categoryName || '',
+      isScoreMode: this.data.isScoreMode
     };
 
     this.dialog.open(PlacesDialogComponent, {

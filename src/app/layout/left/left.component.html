@@ -210,24 +210,24 @@
       <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4 relative" >
         <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.activeFilters.title' | translate }}</h2>
         @if (hasCategories()) {
-          <div class="flex items-center gap-2"  >
-            <span class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.activities' | translate }}</span>
-            <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedActivities().length }} / {{ allActivities().length }})</span>
+          <div class=""  >
+            <div class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.activities' | translate }}</div>
+            <div class="text-sm font-normal text-[var(--light-primary-color)] pl-2">({{ selectedActivities().length }} / {{ allActivities().length }})</div>
           </div>
-          <div class="flex items-center gap-2">
-            <span class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.personas' | translate }}</span>
-            <span class="text-sm font-normal text-[var(--primary-color)] opacity-75" *ngIf="selectedPersonas() !== null">
+          <div class="">
+            <div class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.personas' | translate }}</div>
+            <div class="text-sm font-normal text-[var(--light-primary-color)] pl-2" *ngIf="selectedPersonas() !== null">
               ({{ getSelectedPersonaName() }})
-            </span>
+            </div>
           </div>
         }
-        <div class="flex items-center gap-2">
-          <span class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.regioStars' | translate }}</span>
-          <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedRegioStars().length }} / {{ allRegioStars().length }})</span>
+        <div class="">
+          <div class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.regioStars' | translate }}</div>
+          <div class="text-sm font-normal text-[var(--light-primary-color)] pl-2">({{ selectedRegioStars().length }} / {{ allRegioStars().length }})</div>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.states' | translate }}</span>
-          <span class="text-sm font-normal text-[var(--primary-color)] opacity-75">({{ selectedStates().length }} / {{ allStates().length }})</span>
+        <div class="">
+          <div class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.states' | translate }}</div>
+          <div class="text-sm font-normal text-[var(--light-primary-color)] pl-2">({{ selectedStates().length }} / {{ allStates().length }})</div>
         </div>
 
         <div class="flex flex-col gap-2 items-center">
