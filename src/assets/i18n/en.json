@@ -450,7 +450,7 @@
       "state": "State"
     },
     "activeFilters": {
-      "title": "Active Filters",
+      "title": "Current Filters",
       "description": "This overview shows the currently active filters and their count. The numbers show how many filters are selected in each category.",
       "introduction": "Filters allow you to customize the analysis by selecting specific activities, personas, regions, and regional types. Use the filter button to adjust these settings.",
       "adjustFilters": "Adjust Filters",
@@ -466,7 +466,7 @@
       "states": "States",
       "statesDescription": "States allow you to filter for regions on the map. While this does not influence the data at all, it allows for better comparison, as well as filtering the Top rankings.",
       "filterButton": "Filter",
-      "filterButtonDisabledHint": "Only available for registered users",
+      "filterButtonDisabledHint": "The adjustment of filters is only available for registered users.",
       "resetButton": "Reset Filters",
       "infoTabs": {
         "general": "General",

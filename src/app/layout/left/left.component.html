@@ -14,15 +14,8 @@
         </div>
       }
     </div>
-    <div class="flex items-center justify-end gap-2 mb-4 relative mr-4">
+    <!-- <div class="flex items-center justify-end gap-2 mb-4 relative mr-4">
       <span class="text-sm text-[var(--primary-color)]">{{ 'left.extendedMode' | translate }}</span>
-      <!-- <button 
-        class="w-7 h-7 rounded-full bg-[var(--background-color)] text-[var(--primary-color)] border-none cursor-pointer flex items-center justify-center transition-all duration-200 text-sm hover:opacity-80 hover:scale-105" 
-        [title]="'left.information' | translate"
-        (click)="openDialog()">
-        <span class="material-icons text-sm leading-none text-[var(--primary-color)]">info</span>
-      </button> -->
-      <button 
         class="relative w-10 h-5 border border-[var(--light-primary-color)] rounded-full bg-[var(--secondary-color)] cursor-pointer transition-all duration-200 overflow-hidden"
         [style.background-color]="isExpanded() ? 'var(--primary-color)' : 'var(--secondary-color)'"
         (click)="toggleSidebar()"
@@ -33,7 +26,7 @@
           [style.background-color]="isExpanded() ? 'var(--secondary-color)' : 'var(--light-primary-color)'">
         </div>
       </button>
-    </div>
+    </div> -->
     <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4 relative">
       <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.transportModes.title' | translate }}</h2>
       <div class="flex flex-col gap-2">
@@ -231,67 +224,72 @@
         </div>
 
         <div class="flex flex-col gap-2 items-center">
-          <div class="flex gap-2 items-center">
-            <button 
-              class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full border transition-all duration-200 w-fit bg-[var(--primary-color)] text-[var(--background-color)] border-[var(--background-color)] font-bold"
-              [class.opacity-50]="isShareKeyOnly()"
-              [class.cursor-not-allowed]="isShareKeyOnly()"
-              [disabled]="isShareKeyOnly()"
-              [title]="isShareKeyOnly() ? ('left.activeFilters.filterButtonDisabledHint' | translate) : ''"
-              (click)="openFilterDialog()">
-              {{ 'left.activeFilters.filterButton' | translate }}
-              <mat-icon class="text-base leading-none">tune</mat-icon>
-            </button>
-            <button 
-              class="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-full border transition-all duration-200 w-fit bg-[var(--background-color)] text-[var(--primary-color)] border-[var(--primary-color)] font-bold hover:bg-[var(--secondary-color)]"
-              [class.opacity-50]="isShareKeyOnly()"
-              [class.cursor-not-allowed]="isShareKeyOnly()"
-              [disabled]="isShareKeyOnly()"
-              [title]="isShareKeyOnly() ? ('left.activeFilters.filterButtonDisabledHint' | translate) : ('left.activeFilters.resetButton' | translate)"
-              (click)="resetFilters()">
-              <mat-icon class="text-base leading-none">refresh</mat-icon>
-            </button>
-          </div>
+
+          @if (isShareKeyOnly()) {
+            <div class="text-sm text-[var(--light-primary-color)] border border-[var(--light-primary-color)] rounded-full px-3 py-2 mt-2">
+              {{ 'left.activeFilters.filterButtonDisabledHint' | translate }}
+            </div>
+          } @else {
+            <div class="flex gap-2 items-center">
+              <button 
+                class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full border transition-all duration-200 w-fit bg-[var(--primary-color)] text-[var(--background-color)] border-[var(--background-color)] font-bold"
+                (click)="openFilterDialog()">
+                {{ 'left.activeFilters.filterButton' | translate }}
+                <mat-icon class="text-base leading-none">tune</mat-icon>
+              </button>
+              <button 
+                class="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-full border transition-all duration-200 w-fit bg-[var(--background-color)] text-[var(--primary-color)] border-[var(--primary-color)] font-bold hover:bg-[var(--secondary-color)]"
+                [class.opacity-50]="isShareKeyOnly()"
+                [class.cursor-not-allowed]="isShareKeyOnly()"
+                [disabled]="isShareKeyOnly()"
+                [title]="isShareKeyOnly() ? ('left.activeFilters.filterButtonDisabledHint' | translate) : ('left.activeFilters.resetButton' | translate)"
+                (click)="resetFilters()">
+                <mat-icon class="text-base leading-none">refresh</mat-icon>
+              </button>
+            </div>
+          }
         </div>
         <app-info-overlay>
           <mat-tab-group class="filter-info-tabs">
             <!-- General Tab (Default) -->
-            <mat-tab [label]="'left.activeFilters.infoTabs.general' | translate" class="text-[var(--primary-color)]">
-              <div class="p-6 space-y-4 text-[var(--primary-color)]">
-                <h3 class="text-xl font-semibold mb-4">{{ 'left.activeFilters.infoTabs.generalContent.title' | translate }}</h3>
-                
-                <p class="text-sm leading-relaxed opacity-90">
-                  {{ 'left.activeFilters.infoTabs.generalContent.intro' | translate }}
-                </p>
-
-                <div class="bg-[var(--background-color)] rounded-lg p-3 border-l-4 border-[var(--primary-color)] my-3">
+             @if (!isShareKeyOnly()) {
+              <mat-tab [label]="'left.activeFilters.infoTabs.general' | translate" class="text-[var(--primary-color)]">
+                <div class="p-6 space-y-4 text-[var(--primary-color)]">
+                  <h3 class="text-xl font-semibold mb-4">{{ 'left.activeFilters.infoTabs.generalContent.title' | translate }}</h3>
+                  
                   <p class="text-sm leading-relaxed opacity-90">
-                    {{ 'left.activeFilters.infoTabs.generalContent.mid23' | translate }}
+                    {{ 'left.activeFilters.infoTabs.generalContent.intro' | translate }}
+                  </p>
+
+                  <div class="bg-[var(--background-color)] rounded-lg p-3 border-l-4 border-[var(--primary-color)] my-3">
+                    <p class="text-sm leading-relaxed opacity-90">
+                      {{ 'left.activeFilters.infoTabs.generalContent.mid23' | translate }}
+                    </p>
+                  </div>
+
+                  <p class="text-sm leading-relaxed opacity-90">
+                    {{ 'left.activeFilters.infoTabs.generalContent.personas' | translate }}
+                  </p>
+
+                  <div class="bg-[var(--background-color)] rounded-lg p-4 border-l-4 border-[var(--primary-color)] my-4">
+                    <p class="text-sm leading-relaxed opacity-90 mb-2">
+                      {{ 'left.activeFilters.infoTabs.generalContent.combinations' | translate }}
+                    </p>
+                    <p class="text-sm leading-relaxed opacity-90 italic">
+                      {{ 'left.activeFilters.infoTabs.generalContent.beta' | translate }}
+                    </p>
+                  </div>
+
+                  <p class="text-sm leading-relaxed opacity-90">
+                    {{ 'left.activeFilters.infoTabs.generalContent.regionalFilters' | translate }}
+                  </p>
+
+                  <p class="text-sm leading-relaxed opacity-90">
+                    {{ 'left.activeFilters.infoTabs.generalContent.example' | translate }}
                   </p>
                 </div>
-
-                <p class="text-sm leading-relaxed opacity-90">
-                  {{ 'left.activeFilters.infoTabs.generalContent.personas' | translate }}
-                </p>
-
-                <div class="bg-[var(--background-color)] rounded-lg p-4 border-l-4 border-[var(--primary-color)] my-4">
-                  <p class="text-sm leading-relaxed opacity-90 mb-2">
-                    {{ 'left.activeFilters.infoTabs.generalContent.combinations' | translate }}
-                  </p>
-                  <p class="text-sm leading-relaxed opacity-90 italic">
-                    {{ 'left.activeFilters.infoTabs.generalContent.beta' | translate }}
-                  </p>
-                </div>
-
-                <p class="text-sm leading-relaxed opacity-90">
-                  {{ 'left.activeFilters.infoTabs.generalContent.regionalFilters' | translate }}
-                </p>
-
-                <p class="text-sm leading-relaxed opacity-90">
-                  {{ 'left.activeFilters.infoTabs.generalContent.example' | translate }}
-                </p>
-              </div>
-            </mat-tab>
+              </mat-tab>
+            }
 
             <!-- Activities Tab -->
             <ng-container *ngIf="hasCategories()">

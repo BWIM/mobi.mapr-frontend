@@ -450,7 +450,7 @@
       "state": "Bundesland"
     },
     "activeFilters": {
-      "title": "Aktive Filter",
+      "title": "Aktuelle Filter",
       "description": "Diese Übersicht zeigt die aktuell aktiven Filter und deren Anzahl. Die Zahlen zeigen, wie viele Filter in jeder Kategorie ausgewählt sind.",
       "introduction": "Filter ermöglichen es dir, die Analyse anzupassen, indem du bestimmte Aktivitäten, Personengruppen, Regionen und Regionaltypen auswählst. Verwende die Filter-Schaltfläche, um diese Einstellungen anzupassen.",
       "adjustFilters": "Filter anpassen",
@@ -466,7 +466,7 @@
       "states": "Bundesländer",
       "statesDescription": "Bundesländer ermöglichen es dir, Regionen auf der Karte zu filtern. Während dies die Daten überhaupt nicht beeinflusst, ermöglicht es einen besseren Vergleich sowie die Filterung der Top-100-Rankings.",
       "filterButton": "Filtern",
-      "filterButtonDisabledHint": "Nur für registrierte Nutzer verfügbar",
+      "filterButtonDisabledHint": "Das Anpassen der Filter ist nur für registrierte Nutzer verfügbar.",
       "resetButton": "Filter zurücksetzen",
       "infoTabs": {
         "general": "Allgemein",
