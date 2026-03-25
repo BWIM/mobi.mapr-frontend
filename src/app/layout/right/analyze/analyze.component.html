@@ -387,6 +387,9 @@
             <div class="w-4 h-4 rounded-full flex-shrink-0" [style.background-color]="item.color"></div>
             <span class="text-[var(--primary-color)] text-xs">
               {{ item.name }}
+              <span class="opacity-90">
+                · {{ item.weight }} · {{ item.relevance | number:'1.0-1' }}%
+              </span>
               <span [style.color]="getPlacesMetricTextColor(item.score, item.index)">
                 <ng-container *ngIf="getPlacesIsScoreMode(); else placesIndexMode">
                   · {{ (item.score / 60) | number:'1.1-1' }} {{ 'map.popup.minutes' | translate }}

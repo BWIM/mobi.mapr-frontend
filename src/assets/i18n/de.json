@@ -61,7 +61,7 @@
       "categoriesNotFound": "Kategorien nicht gefunden",
       "dataNotLoaded": "Daten noch nicht geladen",
       "errorLoadingCategories": "Fehler beim Laden der Kategorien",
-      "clickHint": "Klicken Sie auf eine beliebige Aktivität, um detaillierte Informationen zu erhalten",
+      "clickHint": "Klicke auf eine beliebige Aktivität, um detaillierte Informationen zu erhalten",
       "relevanceInfo": "Die Relevanz einer Aktivität zeigt, wie häufig sie besucht wird. Der Wert basiert auf der Studie „Mobilität in Deutschland 2023“ und variiert je nach Personengruppe und Regionalklasse. Hinweis: Auf Landkreis- und Bundeslandebene kann die Relevanz leicht von der tatsächlichen Gewichtung abweichen."
     },
     "personasDialog": {
@@ -88,7 +88,8 @@
       "title": "Karte mit Orten der Aktivitäten",
       "loading": "Lade Karte...",
       "errorLoadingPlaces": "Fehler beim Laden der Orte",
-      "disabledForCountiesStates": "Die Ortsansicht ist für Landkreise und Bundesländer deaktiviert. Um eine detaillierte Analyse eines Gebiets durchzuführen, wähle bitte die Gemeinde/Hexagon-Ansicht, indem du in die Karte zoomst."
+      "disabledForCountiesStates": "Die Ortsansicht ist für Landkreise und Bundesländer deaktiviert. Um eine detaillierte Analyse eines Gebiets durchzuführen, wähle bitte die Gemeinde/Hexagon-Ansicht, indem du in die Karte zoomst.",
+      "categoryRelevanceInfo": "Der Prozentwert zeigt, wie relevant die einzelne Aktivität für die gesamte Kategorie ist."
     },
     "rank": {
       "overall": "Platz",

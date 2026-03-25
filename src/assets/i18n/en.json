@@ -88,7 +88,8 @@
       "title": "Map showing locations of activities",
       "loading": "Loading map...",
       "errorLoadingPlaces": "Error loading places",
-      "disabledForCountiesStates": "The places view is disabled for counties and states. Please select the municipality/hexagon view for a more detailed analysis about an area"
+      "disabledForCountiesStates": "The places view is disabled for counties and states. Please select the municipality/hexagon view for a more detailed analysis about an area",
+      "categoryRelevanceInfo": "The percentage shows how relevant the single Activity is for the whole Category."
     },
     "rank": {
       "overall": "Rank",

@@ -62,7 +62,7 @@
   <div class="flex-[0] flex-shrink-0 border-t border-[var(--primary-color)] border-opacity-30 pt-4 px-4 pb-2 min-h-[100px]">
     <div class="flex h-full gap-6 items-center">
       <!-- Legend -->
-      <div class="flex-1 flex items-center">
+      <div class="flex-1 flex items-center cursor-pointer" (click)="openLegendInfo()">
         <!-- Quality legend (A-F letters) -->
         <div class="legend-quality w-full" *ngIf="!data.isScoreMode">
           <div class="flex items-center gap-2">
