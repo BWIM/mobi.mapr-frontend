@@ -29,12 +29,18 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   featureInfo: FeatureInfoResponse | null = null;
   isLoadingFeatureInfo: boolean = false;
   featureInfoError: string | null = null;
+
+  // Selected feature id (used for subtle UI hints like "Hexagon {id}")
+  private selectedFeatureId: number | null = null;
   
   // Second feature for comparison
   selectedFeature2: any | null = null;
   featureInfo2: FeatureInfoResponse | null = null;
   isLoadingFeatureInfo2: boolean = false;
   featureInfoError2: string | null = null;
+
+  // Selected feature id for feature 2 (comparison mode)
+  private selectedFeatureId2: number | null = null;
   
   // Analyze chart data
   analyzeData: AnalyzeResponse | null = null;
@@ -142,6 +148,22 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.selectedFeature !== null && this.selectedFeature2 !== null;
   }
 
+  get isHexagonSelected(): boolean {
+    return this.savedFeatureType === 'hexagon';
+  }
+
+  get isHexagonSelected2(): boolean {
+    return this.savedFeatureType2 === 'hexagon';
+  }
+
+  get hexagonId(): number | null {
+    return this.selectedFeatureId;
+  }
+
+  get hexagonId2(): number | null {
+    return this.selectedFeatureId2;
+  }
+
   constructor() {
     // Watch for filter changes and reload data instead of resetting
     effect(() => {
@@ -211,6 +233,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
             // Clear only feature 1 data
             this.selectedFeature = null;
             this.featureInfo = null;
+          this.selectedFeatureId = null;
             this.analyzeData = null;
             this.personasData = null;
             this.activitiesChartData = null;
@@ -247,6 +270,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           // Clear feature 2 data
           this.selectedFeature2 = null;
           this.featureInfo2 = null;
+          this.selectedFeatureId2 = null;
           this.analyzeData2 = null;
           this.personasData2 = null;
           this.savedFeatureType2 = null;
@@ -356,6 +380,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.categoryColors.clear();
     this.pendingFeatureShape = null;
     this.selectedFeature = null;
+    this.selectedFeatureId = null;
     this.featureInfo = null;
     this.featureInfoError = null;
     this.isLoadingFeatureInfo = false;
@@ -373,6 +398,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.savedFeatureType = null;
     // Reset feature 2
     this.selectedFeature2 = null;
+    this.selectedFeatureId2 = null;
     this.featureInfo2 = null;
     this.featureInfoError2 = null;
     this.isLoadingFeatureInfo2 = false;
@@ -632,6 +658,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    // Keep the raw id for subtle UI hints (e.g. "Hexagon {id}")
+    this.selectedFeatureId = featureId;
+
     // Prevent duplicate requests for the same feature
     if ((this.isLoadingFeatureInfo || this.isLoadingAnalyze) && this.currentLoadingFeatureId === featureId) {
       console.log('Feature data request already in progress for feature:', featureId);
@@ -838,6 +867,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       console.warn('Invalid feature ID for feature 2:', featureIdRaw);
       return;
     }
+
+    // Keep the raw id for subtle UI hints (e.g. "Hexagon {id}")
+    this.selectedFeatureId2 = featureId;
 
     // Prevent duplicate requests for the same feature
     if ((this.isLoadingFeatureInfo2 || this.isLoadingAnalyze2) && this.currentLoadingFeatureId2 === featureId) {

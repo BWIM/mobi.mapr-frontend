@@ -41,8 +41,13 @@
       <div *ngIf="featureInfo && !isLoading() && !featureInfoError" class="rounded-lg overflow-hidden pb-5">
         <!-- Title with Grade -->
         <div class="px-2 py-2 border-b border-white">
-          <h3 class="text-xl font-bold text-white flex items-center flex-wrap">
-            <span class="flex-1">{{ featureInfo.name }}</span>
+          <h3 class="text-xl font-bold text-white flex items-start flex-wrap">
+            <div class="flex-1 min-w-0">
+              <span class="leading-tight">{{ featureInfo.name }}</span>
+              <div *ngIf="isHexagonSelected && hexagonId !== null" class="text-xs text-[var(--light-primary-color)] font-normal mt-1 leading-none">
+                Hexagon {{ hexagonId }}
+              </div>
+            </div>
             <span 
               class="ml-2 px-2 py-1 rounded text-sm font-semibold whitespace-nowrap"
               [style.background-color]="getRatingColor(featureInfo)"
@@ -89,8 +94,13 @@
       <div *ngIf="featureInfo2 && !isLoading() && !featureInfoError2" class="rounded-lg overflow-hidden pb-5">
         <!-- Title with Grade -->
         <div class="px-2 py-2 border-b border-white">
-          <h3 class="text-xl font-bold text-white flex items-center flex-wrap">
-            <span class="flex-1">{{ featureInfo2.name }}</span>
+          <h3 class="text-xl font-bold text-white flex items-start flex-wrap">
+            <div class="flex-1 min-w-0">
+              <span class="leading-tight">{{ featureInfo2.name }}</span>
+              <div *ngIf="isHexagonSelected2 && hexagonId2 !== null" class="text-xs text-[var(--light-primary-color)] font-normal mt-1 leading-none">
+                Hexagon {{ hexagonId2 }}
+              </div>
+            </div>
             <span 
               class="ml-2 px-2 py-1 rounded text-sm font-semibold whitespace-nowrap"
               [style.background-color]="getRatingColor(featureInfo2)"
@@ -288,8 +298,13 @@
     <!-- Feature Info Table Layout -->
     <div *ngIf="featureInfo && !isLoading() && !featureInfoError" class="rounded-lg overflow-hidden pb-5">
       <!-- Title -->
-      <div class="px-2 py-2 border-b border-white flex items-center justify-between">
-        <h3 class="text-xl font-bold text-white">{{ featureInfo.name }}</h3>
+      <div class="px-2 py-2 border-b border-white flex items-start justify-between">
+        <div class="flex flex-col">
+          <h3 class="text-xl font-bold text-white">{{ featureInfo.name }}</h3>
+          <div *ngIf="isHexagonSelected && hexagonId !== null" class="text-xs text-[var(--light-primary-color)] font-normal mt-1 leading-none">
+            Hexagon {{ hexagonId }}
+          </div>
+        </div>
         <button 
           mat-icon-button
           color="primary"
