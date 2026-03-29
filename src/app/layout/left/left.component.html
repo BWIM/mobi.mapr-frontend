@@ -143,16 +143,11 @@
     </div>
     <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-4 mt-4 mr-4 relative">
       <div class="flex items-center justify-between mb-2">
-        <h2 class="text-lg font-semibold text-[var(--primary-color)]">{{ 'left.mobilityRating.title' | translate }}</h2>
-        <button 
-          class="w-7 h-7 rounded-full bg-[var(--background-color)] text-[var(--primary-color)] border-none cursor-pointer flex items-center justify-center transition-all duration-200 text-sm hover:opacity-80 hover:scale-105" 
-          [title]="'map.search.clickForInfo' | translate"
-          (click)="openLegendInfoDialog()">
-          <span class="material-icons text-sm leading-none text-[var(--primary-color)]">info</span>
-        </button>
+        <h2 class="text-lg font-semibold text-[var(--primary-color)]">{{ 'left.mobilityRating.title' | translate }}</h2> 
       </div>
       <div class="flex flex-col gap-2">
-        <div class="flex border border-[var(--light-primary-color)] rounded-full overflow-hidden bg-[var(--secondary-color)] w-fit">
+        <div class="flex overflow-hidden w-fit">
+          <div class="flex border border-[var(--light-primary-color)] rounded-full overflow-hidden bg-[var(--secondary-color)]">
           <button 
             class="flex-1 px-4 py-1 border-none border-r border-[var(--light-primary-color)] text-sm cursor-pointer transition-all duration-200 rounded-l-full"
             [class.font-medium]="isMobilitatsbewertungSelected('zeit')"
@@ -175,8 +170,15 @@
             (click)="selectMobilitatsbewertung('qualitaet')">
             {{ 'left.mobilityRating.quality.label' | translate }}
           </button>
+          </div>
         </div>
       </div>
+      <button 
+        class="absolute bottom-2 right-2 w-7 h-7 rounded-full bg-[var(--background-color)] text-[var(--primary-color)] cursor-pointer flex items-center justify-center transition-all duration-200 text-md hover:opacity-80 hover:scale-105" 
+        [title]="'map.search.clickForInfo' | translate"
+        (click)="openLegendInfoDialog()">
+        <span class="material-icons text-md leading-none text-[var(--primary-color)]">info</span>
+      </button>
     </div>
 
     @if (!isShareKeyOnly()) {
