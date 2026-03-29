@@ -2,6 +2,17 @@
   width: 100%;
 }
 
+/* Info overlay: filter info tab headings */
+:host ::ng-deep .filter-info-tabs .mdc-tab__text-label {
+  color: var(--primary-color) !important;
+  opacity: 1 !important;
+  font-weight: 500;
+}
+
+:host ::ng-deep .filter-info-tabs .mdc-tab--active .mdc-tab__text-label {
+  font-weight: 700 !important;
+}
+
 .admin-level-selector ::ng-deep .mat-mdc-form-field-subscript-wrapper {
   display: none;
 }

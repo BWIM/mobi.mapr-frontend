@@ -56,7 +56,8 @@ export class LeftComponent implements OnInit, OnDestroy {
   });
   
   // Expose filter config service signals for template
-  isExpanded = this.filterConfigService.isExpanded;
+  // isExpanded = this.filterConfigService.isExpanded;
+  isExpanded = signal<boolean>(true); // Default to true for now
   modeOptions = this.filterConfigService.modeOptions;
   selectedModes = this.filterConfigService.selectedModes;
   selectedBewertung = this.filterConfigService.selectedBewertung;

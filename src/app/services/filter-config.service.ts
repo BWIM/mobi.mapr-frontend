@@ -67,7 +67,7 @@ export class FilterConfigService {
   );
 
   // Internal state signals
-  private _isExpanded = signal<boolean>(false);
+  private _isExpanded = signal<boolean>(true);
   private _selectedModes = signal<number[]>([]);
   private _selectedBewertung = signal<'qualitaet' | 'zeit'>('qualitaet');
   private _selectedActivities = signal<number[]>([]);

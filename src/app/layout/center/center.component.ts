@@ -332,25 +332,18 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    if (this.currentSelectedFeature) {
-      const featureName = this.currentSelectedFeature.properties?.name || this.currentSelectedFeature.properties?.NAME;
-      
-      if (featureName) {
-        // Use name-based filtering (like highlight does) - this works reliably
-        // For features with the same name (like hexagons), all will be highlighted
-        this.map.setFilter('content-layer-selection', [
-          'any',
-          ['==', ['get', 'name'], featureName],
-          ['==', ['get', 'NAME'], featureName]
-        ]);
-      } else {
-        // Hide selection border if no name available
-        this.map.setFilter('content-layer-selection', ['==', ['get', 'name'], '__never_match__']);
-      }
-    } else {
-      // Hide selection border when no feature is selected
-      this.map.setFilter('content-layer-selection', ['==', ['get', 'name'], '__never_match__']);
+    // Hide filter used when nothing is selected (or fallback fails).
+    // Using a non-matching `properties.id` value keeps the selection border invisible.
+    const neverMatchIdFilter: any = ['==', ['get', 'id'], -1];
+
+    if (!this.currentSelectedFeature) {
+      this.map.setFilter('content-layer-selection', neverMatchIdFilter);
+      return;
     }
+
+    // Always select by unique feature id (fixes "same-name" hexagon highlighting).
+    const selectedId = this.currentSelectedFeature.properties.id;
+    this.map.setFilter('content-layer-selection', ['==', ['get', 'id'], selectedId]);
   }
 
   private setupFeatureInteractions(): void {

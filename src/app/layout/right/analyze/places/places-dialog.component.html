@@ -41,6 +41,9 @@
             <div class="w-4 h-4 rounded-full flex-shrink-0" [style.background-color]="item.color"></div>
             <span class="text-[var(--primary-color)] text-xs">
               {{ item.name }}
+              <span class="opacity-90" title="{{ 'analyze.placesDialog.categoryRelevanceInfo' | translate }}">
+                · {{ item.weight }} · {{ item.relevance | number:'1.0-1' }}%
+              </span>
               <span [style.color]="getPlacesMetricTextColor(item.score, item.index)">
                 <ng-container *ngIf="getPlacesIsScoreMode(); else dialogIndexMode">
                   · {{ (item.score / 60) | number:'1.1-1' }} {{ 'map.popup.minutes' | translate }}
@@ -58,32 +61,39 @@
 
   <!-- Bottom Section - Color scale legend (like personas dialog) -->
   <div class="flex-shrink-0 border-t border-[var(--primary-color)] border-opacity-30 pt-4 px-4 pb-2 min-h-[80px]" *ngIf="!isLoading && !error">
-    <div class="flex h-full items-center">
-      <!-- Quality legend (A-F letters) -->
-      <div class="w-full" *ngIf="!getPlacesIsScoreMode()">
-        <div class="flex items-center gap-2">
-          <div class="w-7 h-7 rounded-full flex items-center justify-center border border-white/40" *ngFor="let item of qualityColors" [style.background-color]="item.color">
-            <span class="text-xs font-bold text-white">{{ item.letter }}</span>
+    <div class="flex h-full items-center gap-4">
+      <div class="flex-1 cursor-pointer" (click)="openLegendInfo()">
+        <!-- Quality legend (A-F letters) -->
+        <div class="w-full" *ngIf="!getPlacesIsScoreMode()">
+          <div class="flex items-center gap-2">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center border border-white/40" *ngFor="let item of qualityColors" [style.background-color]="item.color">
+              <span class="text-sm font-bold text-white">{{ item.letter }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Time legend (discrete color steps) -->
+        <div class="w-full" *ngIf="getPlacesIsScoreMode()">
+          <div class="flex flex-col gap-2 w-full">
+            <div class="flex w-full h-3 overflow-hidden rounded">
+              <div class="flex-1" *ngFor="let item of timeColors" [style.background-color]="item.color"></div>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-xs text-white">{{ 'map.legend.time.min0' | translate }}</span>
+              <span class="text-xs text-white">7</span>
+              <span class="text-xs text-white">15</span>
+              <span class="text-xs text-white">23</span>
+              <span class="text-xs text-white">30</span>
+              <span class="text-xs text-white">45</span>
+              <span class="text-xs text-white">45+</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Time legend (discrete color steps) -->
-      <div class="w-full" *ngIf="getPlacesIsScoreMode()">
-        <div class="flex flex-col gap-2 w-full">
-          <div class="flex w-full h-3 overflow-hidden rounded">
-            <div class="flex-1" *ngFor="let item of timeColors" [style.background-color]="item.color"></div>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-xs text-white">{{ 'map.legend.time.min0' | translate }}</span>
-            <span class="text-xs text-white">7</span>
-            <span class="text-xs text-white">15</span>
-            <span class="text-xs text-white">23</span>
-            <span class="text-xs text-white">30</span>
-            <span class="text-xs text-white">45</span>
-            <span class="text-xs text-white">45+</span>
-          </div>
-        </div>
+      <!-- Category relevance explanation -->
+      <div class="w-[260px] max-w-[40%] text-sm leading-snug text-white/90 bg-[var(--background-color)] bg-opacity-70 border border-[var(--primary-color)] border-opacity-30 rounded px-2 py-2">
+        {{ 'analyze.placesDialog.categoryRelevanceInfo' | translate }}
       </div>
     </div>
   </div>
