@@ -9,7 +9,7 @@ import { SessionService } from './session.service';
 export interface AnalyzeParams {
   feature_type: 'municipality' | 'hexagon' | 'county' | 'state';
   feature_id: number;
-  profile_combination_id: number;
+  profile_ids: number[];
   category_ids?: number[];
   persona_id?: number;
   top5?: boolean;
@@ -30,7 +30,7 @@ export interface AnalyzeResponse {
 export interface PersonaBreakdownParams {
   feature_type: 'municipality' | 'hexagon' | 'county' | 'state';
   feature_id: number;
-  profile_combination_id: number;
+  profile_ids: number[];
   category_ids?: number[];
   persona_id?: number;
   lang?: string;
@@ -67,7 +67,7 @@ export class AnalyzeService {
     let httpParams = new HttpParams()
       .set('feature_type', params.feature_type)
       .set('feature_id', params.feature_id.toString())
-      .set('profile_combination_id', params.profile_combination_id.toString())
+      .set('profile_ids', params.profile_ids.join(','))
       .set('top5', params.top5 !== false ? 'true' : 'false')
       .set('lang', this.sessionService.getCurrentLanguage());
 
@@ -105,7 +105,7 @@ export class AnalyzeService {
     let httpParams = new HttpParams()
       .set('feature_type', params.feature_type)
       .set('feature_id', params.feature_id.toString())
-      .set('profile_combination_id', params.profile_combination_id.toString())
+      .set('profile_ids', params.profile_ids.join(','))
       .set('persona_id', (params.persona_id ?? 54).toString())
       .set('lang', params.lang || this.sessionService.getCurrentLanguage());
 

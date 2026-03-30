@@ -19,11 +19,12 @@ export interface RankingsResponse {
 
 export interface TopRankingsParams {
   type: 'municipality' | 'county' | 'state';
-  profile_combination_id: number;
+  profile_ids: number[];
   category_ids?: number[];
   persona_id?: number;
   regiostar_ids?: number[];
   state_ids?: number[];
+  bewertung?: 'zeit' | 'qualitaet';
 }
 
 @Injectable({
@@ -51,7 +52,7 @@ export class StatsService {
     // Build query parameters
     let httpParams = new HttpParams()
       .set('type', params.type)
-      .set('profile_combination_id', params.profile_combination_id.toString());
+      .set('profile_ids', params.profile_ids.join(','));
 
     // Add project or key
     if (projectId) {
@@ -75,6 +76,10 @@ export class StatsService {
 
     if (params.state_ids && params.state_ids.length > 0) {
       httpParams = httpParams.set('state_ids', params.state_ids.join(','));
+    }
+
+    if (params.bewertung) {
+      httpParams = httpParams.set('bewertung', params.bewertung);
     }
 
     return this.http.get<RankingsResponse>(url, { params: httpParams }).pipe(

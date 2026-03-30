@@ -7,7 +7,7 @@ import { ProjectsService } from './project.service';
 import { SettingsService } from './settings.service';
 import { MapService, ContentLayerFilters } from './map.service';
 import { DashboardSessionService } from './dashboard-session.service';
-import { Profile, Mode, ProfileCombination } from '../interfaces/profile';
+import { Profile, Mode } from '../interfaces/profile';
 import { MatDialog } from '@angular/material/dialog';
 import { FilterDialogComponent, FilterDialogData } from '../layout/left/filter-dialog/filter-dialog.component';
 import { PreparingProjectDialogComponent } from '../layout/left/preparing-project-dialog/preparing-project-dialog.component';
@@ -79,7 +79,6 @@ export class FilterConfigService {
   // Metadata for mode selection
   private _allModes = signal<Mode[]>([]);
   private _allProfiles = signal<Profile[]>([]);
-  private _allProfileCombinations = signal<ProfileCombination[]>([]);
   private _modeOptions = signal<Array<{ id: number; name: string; display_name: string; icon: string }>>([]);
 
   // Filter data
@@ -113,7 +112,6 @@ export class FilterConfigService {
   readonly modeOptions = this._modeOptions.asReadonly();
   readonly allModes = this._allModes.asReadonly();
   readonly allProfiles = this._allProfiles.asReadonly();
-  readonly allProfileCombinations = this._allProfileCombinations.asReadonly();
   readonly allActivities = this._allActivities.asReadonly();
   readonly allCategories = this._allCategories.asReadonly();
   readonly allPersonas = this._allPersonas.asReadonly();
@@ -173,18 +171,16 @@ export class FilterConfigService {
     });
   });
 
-  // Computed signal for current profile combination ID
-  readonly currentProfileCombinationID = computed(() => {
+  /** Sorted profile IDs for selected modes within project base_profiles (API profile_ids). */
+  readonly currentProfileIds = computed((): number[] | null => {
     const project = this.projectService.project();
     const selectedModes = this._selectedModes();
     const allProfiles = this._allProfiles();
-    const allProfileCombinations = this._allProfileCombinations();
 
     if (!project || !project.base_profiles || selectedModes.length === 0) {
       return null;
     }
 
-    // Find all profiles that match the selected modes and are in base_profiles
     const selectedProfileIds = allProfiles
       .filter(profile =>
         profile.mode &&
@@ -194,24 +190,13 @@ export class FilterConfigService {
       .map(profile => profile.id)
       .sort((a, b) => a - b);
 
-    if (selectedProfileIds.length === 0) {
-      return null;
-    }
-
-    // Find the profile combination that matches exactly
-    const matchingCombination = allProfileCombinations.find(combination => {
-      const sortedProfileIds = [...combination.profile_ids].sort((a, b) => a - b);
-      return sortedProfileIds.length === selectedProfileIds.length &&
-        sortedProfileIds.every((id, index) => id === selectedProfileIds[index]);
-    });
-
-    return matchingCombination ? matchingCombination.id : null;
+    return selectedProfileIds.length > 0 ? selectedProfileIds : null;
   });
 
   // Computed signal for ContentLayerFilters
   readonly contentLayerFilters = computed<ContentLayerFilters | null>(() => {
-    const profileCombinationID = this.currentProfileCombinationID();
-    if (!profileCombinationID) {
+    const profileIds = this.currentProfileIds();
+    if (!profileIds || profileIds.length === 0) {
       return null;
     }
 
@@ -226,7 +211,7 @@ export class FilterConfigService {
     const selectedAdminLevel = this._selectedAdminLevel();
     
     return {
-      profile_combination_id: profileCombinationID,
+      profile_ids: profileIds,
       feature_type: featureType,
       state_ids: selectedStates.length > 0 ? selectedStates : undefined,
       // Only include category_ids and persona_id if project has categories
@@ -257,7 +242,6 @@ export class FilterConfigService {
   constructor() {
     // Initialize data loading
     this.loadProfilesAndModes();
-    this.loadProfileCombinations();
 
     // Track previous project ID to detect project changes
     let previousProjectId: number | null = null;
@@ -291,9 +275,8 @@ export class FilterConfigService {
             this._initializedProjectIds.delete(previousProjectId);
           }
 
-          // If profiles/profile-combinations are already loaded, re-apply URL params now.
-          // This preserves explicit URL-driven mode selection across project switches.
-          if (this._allProfiles().length > 0 && this._allProfileCombinations().length > 0) {
+          // If profiles are already loaded, re-apply URL params now.
+          if (this._allProfiles().length > 0) {
             this.applyUrlParams();
           }
         }
@@ -341,9 +324,9 @@ export class FilterConfigService {
         
         // On initial load, always do a full reload
         // Otherwise, determine if this is a full reload (filter settings changed) or tile-only update (bewertung changed)
-        // Note: profile_combination_id changes (from mode selection) require a full reload to call /ready endpoint
+        // Note: profile_ids changes (from mode selection) require a full reload to call /ready endpoint
         const isFullReload = isInitialLoad || (previousFilters && (
-          previousFilters.profile_combination_id !== filters.profile_combination_id ||
+          JSON.stringify([...previousFilters.profile_ids].sort((a, b) => a - b)) !== JSON.stringify([...filters.profile_ids].sort((a, b) => a - b)) ||
           JSON.stringify(previousFilters.state_ids?.sort()) !== JSON.stringify(filters.state_ids?.sort()) ||
           JSON.stringify(previousFilters.category_ids?.sort()) !== JSON.stringify(filters.category_ids?.sort()) ||
           previousFilters.persona_id !== filters.persona_id ||
@@ -351,9 +334,9 @@ export class FilterConfigService {
           previousFilters.admin_level !== filters.admin_level
         ));
         
-        // Check if only mode changed (profile_combination_id) and we're on mobile
+        // Check if only mode changed (profile_ids) and we're on mobile
         const onlyModeChanged = previousFilters && 
-          previousFilters.profile_combination_id !== filters.profile_combination_id &&
+          JSON.stringify([...previousFilters.profile_ids].sort((a, b) => a - b)) !== JSON.stringify([...filters.profile_ids].sort((a, b) => a - b)) &&
           JSON.stringify(previousFilters.state_ids?.sort()) === JSON.stringify(filters.state_ids?.sort()) &&
           JSON.stringify(previousFilters.category_ids?.sort()) === JSON.stringify(filters.category_ids?.sort()) &&
           previousFilters.persona_id === filters.persona_id &&
@@ -364,7 +347,7 @@ export class FilterConfigService {
         // Check if only persona changed and we're on mobile
         const onlyPersonaChanged = previousFilters && 
           previousFilters.persona_id !== filters.persona_id &&
-          previousFilters.profile_combination_id === filters.profile_combination_id &&
+          JSON.stringify([...previousFilters.profile_ids].sort((a, b) => a - b)) === JSON.stringify([...filters.profile_ids].sort((a, b) => a - b)) &&
           JSON.stringify(previousFilters.state_ids?.sort()) === JSON.stringify(filters.state_ids?.sort()) &&
           JSON.stringify(previousFilters.category_ids?.sort()) === JSON.stringify(filters.category_ids?.sort()) &&
           previousFilters.regiotyp_id === filters.regiotyp_id &&
@@ -408,8 +391,8 @@ export class FilterConfigService {
           const carMode = this._allModes().find(mode => mode.name.toLowerCase() === 'car');
           
           if (carMode && selectedModes.includes(carMode.id)) {
-            // Deselect car mode
             this._selectedModes.set(selectedModes.filter(id => id !== carMode.id));
+            this.validateModeSelection();
             this.saveSettings();
           }
         }
@@ -428,7 +411,7 @@ export class FilterConfigService {
       next: (response) => {
         this._allProfiles.set(response.results);
         this.extractModes();
-        // Apply URL params - this will set modes if profile_combination_id is in URL
+        // Apply URL params - this will set modes if profile_ids is in URL
         this.applyUrlParams();
         // Update mode selection from project only if URL params didn't set modes
         // (check if modes are still empty or if URL params weren't applied)
@@ -445,24 +428,8 @@ export class FilterConfigService {
   }
 
   /**
-   * Load profile combinations from API
-   */
-  private loadProfileCombinations(): void {
-    this.profileService.getProfileCombinations(1, 1000).subscribe({
-      next: (response) => {
-        this._allProfileCombinations.set(response.results);
-        // Apply URL params after profile combinations are loaded
-        this.applyUrlParams();
-      },
-      error: (error) => {
-        console.error('Error loading profile combinations:', error);
-      }
-    });
-  }
-
-  /**
-   * Apply URL parameters for profile_combination_id and bewertung
-   * This should be called after profiles and profile combinations are loaded
+   * Apply URL parameters for profile_ids and bewertung
+   * Called after profiles are loaded
    */
   private applyUrlParams(): void {
     // Only apply URL params once
@@ -470,8 +437,7 @@ export class FilterConfigService {
       return;
     }
 
-    // Check if profiles and profile combinations are loaded
-    if (this._allProfiles().length === 0 || this._allProfileCombinations().length === 0) {
+    if (this._allProfiles().length === 0) {
       return;
     }
 
@@ -488,35 +454,27 @@ export class FilterConfigService {
       }
     }
 
-    // Apply profile_combination_id parameter
-    if (queryParams['profile_combination_id']) {
-      const profileCombinationId = Number(queryParams['profile_combination_id']);
-      if (!isNaN(profileCombinationId)) {
-        const combination = this._allProfileCombinations().find(c => c.id === profileCombinationId);
-        if (combination) {
-          // Get profiles for this combination
-          const profiles = this._allProfiles().filter(p => 
-            combination.profile_ids.includes(p.id)
-          );
-
-          // Extract unique mode IDs from these profiles
-          const modeIds = new Set<number>();
-          profiles.forEach(profile => {
-            if (profile.mode) {
-              modeIds.add(profile.mode.id);
-            }
-          });
-
-          // Set the selected modes
-          if (modeIds.size > 0) {
-            this._selectedModes.set(Array.from(modeIds));
-            this.saveSettings();
-            
-            // Validate against current project if loaded
-            const currentProject = this.projectService.project();
-            if (currentProject && currentProject.base_profiles) {
-              this.validateModeSelection();
-            }
+    // Apply profile_ids parameter (comma-separated integers)
+    const profileIdsParam = queryParams['profile_ids'];
+    if (profileIdsParam && typeof profileIdsParam === 'string') {
+      const ids = profileIdsParam
+        .split(',')
+        .map(s => Number(s.trim()))
+        .filter(n => !isNaN(n));
+      if (ids.length > 0) {
+        const profiles = this._allProfiles().filter(p => ids.includes(p.id));
+        const modeIds = new Set<number>();
+        profiles.forEach(profile => {
+          if (profile.mode) {
+            modeIds.add(profile.mode.id);
+          }
+        });
+        if (modeIds.size > 0) {
+          this._selectedModes.set(Array.from(modeIds));
+          this.saveSettings();
+          const currentProject = this.projectService.project();
+          if (currentProject && currentProject.base_profiles) {
+            this.validateModeSelection();
           }
         }
       }
@@ -856,17 +814,28 @@ export class FilterConfigService {
   }
 
   /**
-   * Toggle mode selection
+   * Toggle mode selection. At least one mode must remain selected.
    */
   toggleMode(modeId: number): void {
     const currentModes = this._selectedModes();
     const index = currentModes.indexOf(modeId);
     if (index > -1) {
+      if (currentModes.length === 1) {
+        return;
+      }
       this._selectedModes.set(currentModes.filter(id => id !== modeId));
     } else {
       this._selectedModes.set([...currentModes, modeId]);
     }
     this.saveSettings();
+  }
+
+  /**
+   * True when this mode is selected and it is the only selected mode (cannot deselect).
+   */
+  isOnlySelectedMode(modeId: number): boolean {
+    const modes = this._selectedModes();
+    return modes.length === 1 && modes.includes(modeId);
   }
 
   /**

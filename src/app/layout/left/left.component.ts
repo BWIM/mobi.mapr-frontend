@@ -286,19 +286,12 @@ export class LeftComponent implements OnInit, OnDestroy {
   }
 
   toggleVerkehrsmittel(modeId: number) {
-    // Find the mode option to check if it's pedestrian or car
-    const modeOption = this.modeOptions().find(option => option.id === modeId);
-    
-    // Prevent deselecting pedestrian mode if it's currently selected
-    if (modeOption && modeOption.name.toLowerCase() === 'pedestrian' && this.isSelected(modeId)) {
-      return; // Don't allow deselecting pedestrian mode
+    if (this.filterConfigService.isOnlySelectedMode(modeId)) {
+      return;
     }
-    
-    // Prevent toggling car mode if it's disabled (persona cannot use car)
     if (this.isModeDisabled(modeId)) {
-      return; // Don't allow toggling car mode when disabled
+      return;
     }
-    
     this.filterConfigService.toggleMode(modeId);
   }
 
@@ -306,9 +299,8 @@ export class LeftComponent implements OnInit, OnDestroy {
     return this.filterConfigService.isModeSelected(modeId);
   }
 
-  isPedestrianMode(modeId: number): boolean {
-    const modeOption = this.modeOptions().find(option => option.id === modeId);
-    return modeOption?.name.toLowerCase() === 'pedestrian';
+  isOnlySelectedMode(modeId: number): boolean {
+    return this.filterConfigService.isOnlySelectedMode(modeId);
   }
 
   isCarMode(modeId: number): boolean {
@@ -321,9 +313,9 @@ export class LeftComponent implements OnInit, OnDestroy {
   }
 
   getModeTooltip(option: { id: number; display_name: string }): string {
-    if (this.isPedestrianMode(option.id) && this.isSelected(option.id)) {
-      const cannotDisable = this.translate.instant('left.transportModes.cannotDisable');
-      return `${option.display_name} - ${cannotDisable}`;
+    if (this.isOnlySelectedMode(option.id)) {
+      const cannotDeselectLast = this.translate.instant('left.transportModes.cannotDeselectLast');
+      return `${option.display_name} - ${cannotDeselectLast}`;
     }
     if (this.isCarMode(option.id) && this.isModeDisabled(option.id)) {
       const cannotUseCar = this.translate.instant('left.transportModes.cannotUseCar');

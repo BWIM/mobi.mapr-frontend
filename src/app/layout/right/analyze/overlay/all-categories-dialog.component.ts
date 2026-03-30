@@ -15,7 +15,7 @@ import { LanguageService } from '../../../../services/language.service';
 export interface AllCategoriesDialogData {
   featureType: 'municipality' | 'hexagon' | 'county' | 'state';
   featureId: number;
-  profileCombinationId: number;
+  profileIds: number[];
   categoryIds?: number[];
   personaId?: number;
   isScoreMode: boolean;
@@ -105,7 +105,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
     this.analyzeService.getAnalyze({
       feature_type: this.data.featureType,
       feature_id: this.data.featureId,
-      profile_combination_id: this.data.profileCombinationId,
+      profile_ids: this.data.profileIds,
       category_ids: this.data.categoryIds,
       persona_id: this.data.personaId,
       top5: false
@@ -152,7 +152,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
     this.analyzeService.getAnalyze({
       feature_type: this.data.featureType2 || this.data.featureType,
       feature_id: this.data.featureId2,
-      profile_combination_id: this.data.profileCombinationId,
+      profile_ids: this.data.profileIds,
       category_ids: this.data.categoryIds,
       persona_id: this.data.personaId,
       top5: false
@@ -651,7 +651,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
     const placesData: PlacesDialogData = {
       featureType: this.data.featureType,
       featureId: this.data.featureId,
-      profileCombinationId: this.data.profileCombinationId,
+      profileIds: this.data.profileIds,
       categoryIds: categoryId ? [categoryId] : this.data.categoryIds,
       personaId: this.data.personaId,
       categoryNames: categoryName || '',

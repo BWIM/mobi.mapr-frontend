@@ -9,7 +9,6 @@ import { CenterComponent } from '../center/center.component';
 import { DashboardSessionService } from '../../services/dashboard-session.service';
 import { AuthService } from '../../auth/auth.service';
 import { ProjectsService } from '../../services/project.service';
-import { ProfileService } from '../../services/profile.service';
 import { MapService, ContentLayerFilters } from '../../services/map.service';
 import { FilterConfigService } from '../../services/filter-config.service';
 import { Project } from '../../interfaces/project';
@@ -34,7 +33,6 @@ export class DashboardComponent {
   private dashboardSessionService = inject(DashboardSessionService);
   private authService = inject(AuthService);
   private projectService = inject(ProjectsService);
-  private profileService = inject(ProfileService);
   private mapService = inject(MapService);
   private filterConfigService = inject(FilterConfigService);
   private dialog = inject(MatDialog);
@@ -215,41 +213,13 @@ export class DashboardComponent {
       // Set the project in the service
       this.projectService.setProject(project);
 
-      // Get profile combinations to find a default one
-      let profileCombinationsResponse;
-      try {
-        profileCombinationsResponse = await firstValueFrom(
-          this.profileService.getProfileCombinations(1, 1000)
-        );
-      } catch (error) {
-        console.error('Error fetching profile combinations:', error);
-        // If we can't get profile combinations, we can't make preload call
-        // But the share key is valid, so we'll let the user continue
-        // The preload will happen later when they select a profile combination
+      if (!project.base_profiles?.length) {
         return;
       }
 
-      // Find a profile combination that matches the project's base_profiles
-      const matchingCombination = profileCombinationsResponse.results.find(combination => {
-        // Check if all profile_ids in the combination are in the project's base_profiles
-        return combination.profile_ids.every(profileId => 
-          project!.base_profiles.includes(profileId)
-        );
-      });
-
-      if (!matchingCombination) {
-        // No matching profile combination found
-        // The share key is valid, but we can't make a preload call yet
-        // This is okay - the user can still access the dashboard
-        // The preload will happen when they select a profile combination
-        console.warn('No matching profile combination found for project base_profiles');
-        return;
-      }
-
-      // Make preload call with defaults
       const defaultFilters: ContentLayerFilters = {
-        profile_combination_id: matchingCombination.id,
-        feature_type: 'index' // Default to index
+        profile_ids: [...project.base_profiles].sort((a, b) => a - b),
+        feature_type: 'index'
       };
 
       try {
@@ -284,7 +254,7 @@ export class DashboardComponent {
     const dialogData: GeoJsonDownloadDialogData = {
       selectedActivities: this.filterConfigService.selectedActivities(),
       selectedPersonas: this.filterConfigService.selectedPersonas(),
-      profileCombinationId: this.filterConfigService.currentProfileCombinationID(),
+      profileIds: this.filterConfigService.currentProfileIds(),
       hasCategories: this.filterConfigService.hasCategories(),
     };
 

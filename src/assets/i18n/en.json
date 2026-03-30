@@ -300,18 +300,17 @@
     "createdDate": "Project creation date",
     "transportModes": {
       "title": "Transport Modes",
-      "description": "Select the transport modes that should be considered in the calculation. You can activate or deactivate multiple transport modes simultaneously.",
+      "description": "Select the transport modes that should be considered in the calculation. You can activate multiple transport modes at once; at least one mode must always remain selected.",
       "availableOptions": "Available Options",
       "availableOptionsDescription": "Each transport mode can be individually turned on or off to adapt the analysis to your requirements.",
-      "cannotDisable": "Cannot be disabled, since without pedestrian no other transport modes can be used effectively.",
+      "cannotDeselectLast": "At least one transport mode must remain selected.",
       "cannotUseCar": "Not available for selected persona",
       "introduction": "Choose from four transport modes to analyze mobility in your region. Each mode uses sophisticated routing algorithms to provide realistic travel time calculations.",
       "modes": {
         "title": "Available Transport Modes",
-        "pedestrian": {
+          "pedestrian": {
           "title": "Pedestrian",
-          "description": "Walking routes are calculated using realistic pedestrian paths, taking into account sidewalks, pedestrian zones, and walking-friendly infrastructure.",
-          "alwaysEnabled": "Always enabled and cannot be disabled"
+          "description": "Walking routes are calculated using realistic pedestrian paths, taking into account sidewalks, pedestrian zones, and walking-friendly infrastructure."
         },
         "bicycle": {
           "title": "Bicycle",
@@ -348,7 +347,7 @@
         "general": {
           "title": "General",
           "intro": "To reach an activity, you need a mode of transport – this can be your own feet, a bicycle, a car, or public transit.",
-          "pedestrianBase": "Walking is the default mode of transportation, because without it, none of the other options can be used effectively. Therefore, it cannot be disabled.",
+          "pedestrianBase": "At least one transport mode must be selected for the analysis. You can choose any combination of modes that matches your scenario (for example only cycling and public transport, without walking as a separate profile).",
           "questionIntro": "By selecting transport modes, you essentially answer the following question:",
           "question": "How good is my mobility quality when I'm traveling on foot versus when I have a bicycle available?",
           "approach": "mobi.mapr takes a realistic approach: it always selects the mode of transport that is fastest overall, taking all factors into account—including parking, stopping, and other associated factors. Even if a car is available, people usually prefer to walk to a bakery 200 meters away, regardless if the actual driving time would be shorter. The additional effort required to find parking and get out and back to the location makes the car unattractive in this case."
@@ -724,7 +723,7 @@
     "currentSettings": {
       "title": "Current Settings",
       "categories": "Categories",
-      "profileCombination": "Profile Combination",
+      "profileCombination": "Profiles",
       "persona": "Persona",
       "none": "None",
       "notApplicable": "Not Applicable"

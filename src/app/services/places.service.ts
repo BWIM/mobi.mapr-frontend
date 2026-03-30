@@ -8,7 +8,7 @@ import { SessionService } from './session.service';
 export interface PlacesParams {
   feature_type: 'municipality' | 'hexagon';
   feature_id: number;
-  profile_combination_id: number;
+  profile_ids: number[];
   category_ids?: number[];
 }
 
@@ -60,9 +60,8 @@ export class PlacesService {
     let httpParams = new HttpParams()
       .set('feature_type', params.feature_type)
       .set('feature_id', params.feature_id.toString())
-      .set('profile_combination_id', params.profile_combination_id.toString())
-      .set('lang', this.sessionService.getCurrentLanguage())
-      .set('category_id', params.category_ids?.join(',') || '');
+      .set('profile_ids', params.profile_ids.join(','))
+      .set('lang', this.sessionService.getCurrentLanguage());
 
     // Add project or key
     if (projectId) {
@@ -71,7 +70,6 @@ export class PlacesService {
       httpParams = httpParams.set('key', shareKey);
     }
 
-    // Add optional category_ids parameter
     if (params.category_ids && params.category_ids.length > 0) {
       httpParams = httpParams.set('category_ids', params.category_ids.join(','));
     }
