@@ -11,9 +11,3 @@ export interface Profile {
     description?: string;
     mode: Mode;
 }
-
-export interface ProfileCombination {
-    id: number;
-    display_name: string;
-    profile_ids: number[];
-}

@@ -61,7 +61,7 @@ export class StatsComponent implements OnDestroy {
       this.updateLevelOptions();
     });
     // Track previous filter state to detect actual changes (excluding bewertung)
-    let previousFilters: { profileCombinationID: number | null; stateIds: number[] | undefined; categoryIds: number[] | undefined; personaId: number | null | undefined; regiostarIds: number[] | undefined } | null = null;
+    let previousFilters: { profileIdsKey: string | null; stateIds: number[] | undefined; categoryIds: number[] | undefined; personaId: number | null | undefined; regiostarIds: number[] | undefined } | null = null;
     let previousBewertung: 'qualitaet' | 'zeit' | null = null;
     let previousMapLoading = true;
     
@@ -70,7 +70,10 @@ export class StatsComponent implements OnDestroy {
     // The display methods (formatDisplayValue, getDisplayValue) handle showing the correct value
     // Watch individual filter signals to ensure we catch all changes
     effect(() => {
-      const profileCombinationID = this.filterConfigService.currentProfileCombinationID();
+      const profileIds = this.filterConfigService.currentProfileIds();
+      const profileIdsKey = profileIds?.length
+        ? JSON.stringify([...profileIds].sort((a, b) => a - b))
+        : null;
       const isMapLoading = this.mapService.isMapLoading();
       const isPreparingProject = this.mapService.isPreparingProject();
       const isReadyCheckComplete = this.mapService.isReadyCheckComplete();
@@ -91,7 +94,7 @@ export class StatsComponent implements OnDestroy {
       // Compute current filter state once for reuse
       // Use signal values for comparison to ensure we catch all changes
       const currentFilterState = {
-        profileCombinationID,
+        profileIdsKey,
         stateIds: selectedStates.length > 0 ? [...selectedStates].sort() : undefined,
         categoryIds: selectedActivities.length > 0 ? [...selectedActivities].sort() : undefined,
         personaId: selectedPersonas,
@@ -99,7 +102,7 @@ export class StatsComponent implements OnDestroy {
       };
 
       const rankingsAffectingFiltersChanged = !previousFilters ||
-        previousFilters.profileCombinationID !== currentFilterState.profileCombinationID ||
+        previousFilters.profileIdsKey !== currentFilterState.profileIdsKey ||
         JSON.stringify(previousFilters.stateIds) !== JSON.stringify(currentFilterState.stateIds) ||
         JSON.stringify(previousFilters.categoryIds) !== JSON.stringify(currentFilterState.categoryIds) ||
         previousFilters.personaId !== currentFilterState.personaId ||
@@ -109,7 +112,7 @@ export class StatsComponent implements OnDestroy {
       const onlyBewertungChanged = previousBewertung !== null && 
         previousBewertung !== currentBewertung &&
         previousFilters !== null &&
-        profileCombinationID === previousFilters.profileCombinationID &&
+        profileIdsKey === previousFilters.profileIdsKey &&
         JSON.stringify(previousFilters.stateIds) === JSON.stringify(currentFilterState.stateIds) &&
         JSON.stringify(previousFilters.categoryIds) === JSON.stringify(currentFilterState.categoryIds) &&
         previousFilters.personaId === currentFilterState.personaId &&
@@ -120,7 +123,7 @@ export class StatsComponent implements OnDestroy {
         // If changing from zeit to qualitaet, send a request to the backend
         if (previousBewertung === 'zeit' && currentBewertung === 'qualitaet') {
           // Only send request if conditions are met (map ready, project ready, etc.)
-          if (profileCombinationID !== null && !isMapLoading && !isPreparingProject && isReadyCheckComplete && filters) {
+          if (profileIdsKey !== null && !isMapLoading && !isPreparingProject && isReadyCheckComplete && filters) {
             // Clear any existing timeout
             if (this.loadRankingsTimeout) {
               clearTimeout(this.loadRankingsTimeout);
@@ -137,7 +140,7 @@ export class StatsComponent implements OnDestroy {
         return;
       }
       
-      if (profileCombinationID !== null && !isMapLoading && !isPreparingProject && isReadyCheckComplete && filters) {
+      if (profileIdsKey !== null && !isMapLoading && !isPreparingProject && isReadyCheckComplete && filters) {
         if (mapJustFinishedLoading && !rankingsAffectingFiltersChanged) {
           this.isLoading.set(false);
         }
@@ -147,7 +150,7 @@ export class StatsComponent implements OnDestroy {
         // Only reload if filters actually changed or this is the first load
         // Compare sorted arrays to handle order differences
         const filtersChanged = !previousFilters || 
-          previousFilters.profileCombinationID !== currentFilterState.profileCombinationID ||
+          previousFilters.profileIdsKey !== currentFilterState.profileIdsKey ||
           JSON.stringify(previousFilters.stateIds) !== JSON.stringify(currentFilterState.stateIds) ||
           JSON.stringify(previousFilters.categoryIds) !== JSON.stringify(currentFilterState.categoryIds) ||
           previousFilters.personaId !== currentFilterState.personaId ||
@@ -181,8 +184,8 @@ export class StatsComponent implements OnDestroy {
           this.loadRankingsTimeout = null;
         }
         
-        // Clear data if no profile combination is available
-        if (profileCombinationID === null) {
+        // Clear data if no profiles are available
+        if (profileIdsKey === null) {
           this.counties = [];
           previousFilters = null;
           previousBewertung = null;
@@ -213,13 +216,13 @@ export class StatsComponent implements OnDestroy {
     // Save the selection to localStorage
     this.saveLevel();
     // Trigger new API call when level changes (level is a parameter, not a filter)
-    const profileCombinationID = this.filterConfigService.currentProfileCombinationID();
+    const profileIds = this.filterConfigService.currentProfileIds();
     const isMapLoading = this.mapService.isMapLoading();
     const isPreparingProject = this.mapService.isPreparingProject();
     const filters = this.filterConfigService.contentLayerFilters();
     
     const isReadyCheckComplete = this.mapService.isReadyCheckComplete();
-    if (profileCombinationID !== null && !isMapLoading && !isPreparingProject && isReadyCheckComplete && filters) {
+    if (profileIds?.length && !isMapLoading && !isPreparingProject && isReadyCheckComplete && filters) {
       this.loadTopRankings();
     }
   }
@@ -263,8 +266,8 @@ export class StatsComponent implements OnDestroy {
   }
 
   private loadTopRankings(): void {
-    const profileCombinationID = this.filterConfigService.currentProfileCombinationID();
-    if (!profileCombinationID) {
+    const profileIds = this.filterConfigService.currentProfileIds();
+    if (!profileIds?.length) {
       return;
     }
 
@@ -279,8 +282,6 @@ export class StatsComponent implements OnDestroy {
     this.isLoading.set(true);
     this.error = null;
 
-    // Use the same filtering logic as filter-config.service.ts contentLayerFilters
-    const filters = this.filterConfigService.contentLayerFilters();
     const hasCategories = this.filterConfigService.hasCategories();
     
     // Apply the same filtering logic as contentLayerFilters
@@ -291,7 +292,7 @@ export class StatsComponent implements OnDestroy {
 
     const params = {
       type: this.selectedLevel,
-      profile_combination_id: profileCombinationID,
+      profile_ids: profileIds,
       // Only include state_ids if there are selected states (same logic as contentLayerFilters)
       state_ids: selectedStates.length > 0 ? selectedStates : undefined,
       // Only include category_ids if project has categories and there are selected activities (same logic as contentLayerFilters)

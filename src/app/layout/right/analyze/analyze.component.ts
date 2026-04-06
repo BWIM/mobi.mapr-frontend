@@ -179,7 +179,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       // Only reload if filters actually changed
       if (filters && this.previousFilters) {
         const filtersChanged = 
-          this.previousFilters.profile_combination_id !== filters.profile_combination_id ||
+          JSON.stringify([...this.previousFilters.profile_ids].sort((a, b) => a - b)) !== JSON.stringify([...filters.profile_ids].sort((a, b) => a - b)) ||
           JSON.stringify(this.previousFilters.state_ids?.sort()) !== JSON.stringify(filters.state_ids?.sort()) ||
           JSON.stringify(this.previousFilters.category_ids?.sort()) !== JSON.stringify(filters.category_ids?.sort()) ||
           this.previousFilters.persona_id !== filters.persona_id ||
@@ -699,8 +699,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const featureType = this.savedFeatureType;
 
     // Get profile combination ID
-    const profileCombinationId = this.filterConfigService.currentProfileCombinationID();
-    if (!profileCombinationId) {
+    const profileIds = this.filterConfigService.currentProfileIds();
+    if (!profileIds?.length) {
       console.warn('Profile combination ID not available');
       return;
     }
@@ -723,7 +723,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const featureInfoRequest = this.mapService.getFeatureInfo({
       feature_type: featureType,
       feature_id: featureId,
-      profile_combination_id: profileCombinationId,
+      profile_ids: profileIds,
       category_ids: filters.category_ids,
       persona_id: filters.persona_id,
       regiostar_ids: filters.regiostar_ids,
@@ -745,7 +745,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const analyzeRequest = this.analyzeService.getAnalyze({
       feature_type: featureType,
       feature_id: featureId,
-      profile_combination_id: profileCombinationId,
+      profile_ids: profileIds,
       category_ids: filters.category_ids,
       persona_id: filters.persona_id,
       top5: true
@@ -768,7 +768,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const personasRequest = shouldLoadPersonas ? this.analyzeService.getPersonas({
       feature_type: featureType,
       feature_id: featureId,
-      profile_combination_id: profileCombinationId,
+      profile_ids: profileIds,
       category_ids: filters.category_ids,
       persona_id: 54
     }).pipe(
@@ -896,8 +896,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const featureType = this.savedFeatureType2;
 
     // Get profile combination ID
-    const profileCombinationId = this.filterConfigService.currentProfileCombinationID();
-    if (!profileCombinationId) {
+    const profileIds = this.filterConfigService.currentProfileIds();
+    if (!profileIds?.length) {
       console.warn('Profile combination ID not available for feature 2');
       return;
     }
@@ -920,7 +920,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const featureInfoRequest = this.mapService.getFeatureInfo({
       feature_type: featureType,
       feature_id: featureId,
-      profile_combination_id: profileCombinationId,
+      profile_ids: profileIds,
       category_ids: filters.category_ids,
       persona_id: filters.persona_id,
       regiostar_ids: filters.regiostar_ids,
@@ -942,7 +942,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const analyzeRequest = this.analyzeService.getAnalyze({
       feature_type: featureType,
       feature_id: featureId,
-      profile_combination_id: profileCombinationId,
+      profile_ids: profileIds,
       category_ids: filters.category_ids,
       persona_id: filters.persona_id,
       top5: true
@@ -965,7 +965,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const personasRequest = shouldLoadPersonas ? this.analyzeService.getPersonas({
       feature_type: featureType,
       feature_id: featureId,
-      profile_combination_id: profileCombinationId,
+      profile_ids: profileIds,
       category_ids: filters.category_ids,
       persona_id: 54
     }).pipe(
@@ -1060,10 +1060,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     const featureType = this.savedFeatureType;
-    const profileCombinationId = this.filterConfigService.currentProfileCombinationID();
+    const profileIds = this.filterConfigService.currentProfileIds();
     
-    if (!profileCombinationId) {
-      console.warn('Profile combination ID not available');
+    if (!profileIds?.length) {
+      console.warn('Profile IDs not available');
       return;
     }
 
@@ -1120,7 +1120,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           this.placesService.getPlaces({
             feature_type: featureType,
             feature_id: featureId,
-            profile_combination_id: profileCombinationId,
+            profile_ids: profileIds,
             category_ids: categoryIds.length > 0 ? categoryIds : undefined
           })
         ),
@@ -2618,10 +2618,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     const featureType = this.savedFeatureType;
-    const profileCombinationId = this.filterConfigService.currentProfileCombinationID();
+    const profileIds = this.filterConfigService.currentProfileIds();
     
-    if (!profileCombinationId) {
-      console.warn('Profile combination ID not available');
+    if (!profileIds?.length) {
+      console.warn('Profile IDs not available');
       return;
     }
 
@@ -2654,7 +2654,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const dialogData: AllCategoriesDialogData = {
       featureType: featureType,
       featureId: featureId,
-      profileCombinationId: profileCombinationId,
+      profileIds: profileIds,
       categoryIds: filters.category_ids,
       personaId: filters.persona_id,
       isScoreMode: isScoreMode,
@@ -2793,10 +2793,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
 
-    const profileCombinationId = this.filterConfigService.currentProfileCombinationID();
+    const profileIds = this.filterConfigService.currentProfileIds();
     
-    if (!profileCombinationId) {
-      console.warn('Profile combination ID not available');
+    if (!profileIds?.length) {
+      console.warn('Profile IDs not available');
       return;
     }
 
@@ -2809,7 +2809,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const placesData: PlacesDialogData = {
       featureType: featureType,
       featureId: featureId,
-      profileCombinationId: profileCombinationId,
+      profileIds: profileIds,
       categoryIds: categoryId ? [categoryId] : filters.category_ids,
       personaId: filters.persona_id,
       categoryNames: categoryName || '',
@@ -2854,10 +2854,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     const featureType = this.savedFeatureType;
-    const profileCombinationId = this.filterConfigService.currentProfileCombinationID();
+    const profileIds = this.filterConfigService.currentProfileIds();
     
-    if (!profileCombinationId) {
-      console.warn('Profile combination ID not available');
+    if (!profileIds?.length) {
+      console.warn('Profile IDs not available');
       return;
     }
 
@@ -2889,7 +2889,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const personasData: PersonasDialogData = {
       featureType: featureType,
       featureId: featureId,
-      profileCombinationId: profileCombinationId,
+      profileIds: profileIds,
       categoryIds: filters.category_ids,
       personaId: filters.persona_id,
       isScoreMode: isScoreMode,

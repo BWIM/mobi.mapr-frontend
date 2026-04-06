@@ -36,13 +36,13 @@
               class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200"
               [style.background-color]="isSelected(option.id) ? 'var(--primary-color)' : 'var(--secondary-color)'"
               [style.border]="!isSelected(option.id) ? '1px solid var(--light-primary-color)' : 'none'"
-              [style.cursor]="(isPedestrianMode(option.id) && isSelected(option.id)) || isModeDisabled(option.id) ? 'not-allowed' : 'pointer'"
+              [style.cursor]="isOnlySelectedMode(option.id) || isModeDisabled(option.id) ? 'not-allowed' : 'pointer'"
               [style.opacity]="isModeDisabled(option.id) ? '0.5' : '1'"
               [disabled]="isModeDisabled(option.id)"
               (click)="toggleVerkehrsmittel(option.id)"
               [attr.aria-label]="option.display_name"
               [attr.aria-pressed]="isSelected(option.id)"
-              [attr.aria-disabled]="isModeDisabled(option.id)"
+              [attr.aria-disabled]="isModeDisabled(option.id) || isOnlySelectedMode(option.id)"
               [title]="getModeTooltip(option)">
               <mat-icon 
                 class="text-base leading-none"

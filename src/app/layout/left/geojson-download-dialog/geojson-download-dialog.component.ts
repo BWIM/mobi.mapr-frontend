@@ -9,7 +9,7 @@ import { MapService } from '../../../services/map.service';
 export interface GeoJsonDownloadDialogData {
   selectedActivities: number[];
   selectedPersonas: number | null;
-  profileCombinationId: number | null;
+  profileIds: number[] | null;
   hasCategories: boolean;
 }
 
@@ -42,7 +42,7 @@ export class GeoJsonDownloadDialogComponent implements OnInit {
   states = this.filterConfigService.allStates;
   activities = this.filterConfigService.allActivities;
   personas = this.filterConfigService.allPersonas;
-  allProfileCombinations = this.filterConfigService.allProfileCombinations;
+  allProfiles = this.filterConfigService.allProfiles;
 
   // Form values
   selectedResolution: 'hexagon' | 'municipality' | 'county' | 'state' | null = null;
@@ -51,7 +51,7 @@ export class GeoJsonDownloadDialogComponent implements OnInit {
   // Current settings (read-only)
   currentActivities: number[] = [];
   currentPersonaId: number | null = null;
-  currentProfileCombinationId: number | null = null;
+  currentProfileIds: number[] | null = null;
   hasCategories: boolean = false;
 
   // UI state
@@ -75,7 +75,7 @@ export class GeoJsonDownloadDialogComponent implements OnInit {
     // Initialize current settings from data
     this.currentActivities = data.selectedActivities || [];
     this.currentPersonaId = data.selectedPersonas ?? null;
-    this.currentProfileCombinationId = data.profileCombinationId ?? null;
+    this.currentProfileIds = data.profileIds?.length ? [...data.profileIds] : null;
     this.hasCategories = data.hasCategories ?? false;
 
     // Set default selected state to first state if available
@@ -125,16 +125,21 @@ export class GeoJsonDownloadDialogComponent implements OnInit {
     return persona ? (persona.display_name || persona.name) : this.translate.instant('geojsonDownload.currentSettings.none');
   }
 
-  getCurrentProfileCombinationDisplay(): string {
-    if (!this.currentProfileCombinationId) {
+  getCurrentProfilesDisplay(): string {
+    if (!this.currentProfileIds?.length) {
       return this.translate.instant('geojsonDownload.currentSettings.none');
     }
-    const combination = this.allProfileCombinations().find(c => c.id === this.currentProfileCombinationId);
-    return combination ? combination.display_name : this.translate.instant('geojsonDownload.currentSettings.none');
+    const names = this.currentProfileIds
+      .map(id => {
+        const p = this.allProfiles().find(pr => pr.id === id);
+        return p ? (p.display_name || p.name) : '';
+      })
+      .filter(n => n !== '');
+    return names.length > 0 ? names.join(', ') : this.translate.instant('geojsonDownload.currentSettings.none');
   }
 
   isFormValid(): boolean {
-    return this.selectedResolution !== null && this.selectedStateId !== null && this.currentProfileCombinationId !== null;
+    return this.selectedResolution !== null && this.selectedStateId !== null && !!this.currentProfileIds?.length;
   }
 
   getFormattedCreatedDate(): string {
@@ -202,7 +207,7 @@ export class GeoJsonDownloadDialogComponent implements OnInit {
         resolution: params.resolution,
         state: params.state,
         categories: this.currentActivities.length > 0 ? this.currentActivities : undefined,
-        profile_combination: this.currentProfileCombinationId!,
+        profile_ids: this.currentProfileIds!,
         persona_id: this.currentPersonaId ?? undefined,
       });
 

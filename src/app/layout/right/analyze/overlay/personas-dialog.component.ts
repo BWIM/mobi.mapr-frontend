@@ -12,7 +12,7 @@ import { LanguageService } from '../../../../services/language.service';
 export interface PersonasDialogData {
   featureType: 'municipality' | 'hexagon' | 'county' | 'state';
   featureId: number;
-  profileCombinationId: number;
+  profileIds: number[];
   categoryIds?: number[];
   personaId?: number;
   isScoreMode: boolean;
@@ -100,7 +100,7 @@ export class PersonasDialogComponent implements OnInit, AfterViewInit {
     this.analyzeService.getPersonas({
       feature_type: this.data.featureType,
       feature_id: this.data.featureId,
-      profile_combination_id: this.data.profileCombinationId,
+      profile_ids: this.data.profileIds,
       category_ids: this.data.categoryIds,
       persona_id: this.data.personaId || 54
     }).pipe(
@@ -146,7 +146,7 @@ export class PersonasDialogComponent implements OnInit, AfterViewInit {
     this.analyzeService.getPersonas({
       feature_type: this.data.featureType2 || this.data.featureType,
       feature_id: this.data.featureId2,
-      profile_combination_id: this.data.profileCombinationId,
+      profile_ids: this.data.profileIds,
       category_ids: this.data.categoryIds,
       persona_id: this.data.personaId || 54
     }).pipe(

@@ -14,7 +14,7 @@ import { LegendInfoComponent } from '../../../../shared/legend-info/legend-info.
 export interface PlacesDialogData {
   featureType: 'municipality' | 'hexagon' | 'county' | 'state';
   featureId: number;
-  profileCombinationId: number;
+  profileIds: number[];
   categoryIds?: number[];
   categoryNames: string;
   personaId?: number;
@@ -129,7 +129,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
           this.placesService.getPlaces({
             feature_type: featureTypeForPlaces,
             feature_id: this.data.featureId,
-            profile_combination_id: this.data.profileCombinationId,
+            profile_ids: this.data.profileIds,
             category_ids: this.data.categoryIds
           })
         ),

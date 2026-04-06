@@ -9,7 +9,7 @@ import { WebsocketService } from './websocket.service';
 import { ProjectsService } from './project.service';
 
 export interface ContentLayerFilters {
-  profile_combination_id: number | null;
+  profile_ids: number[];
   state_ids?: number[];
   category_ids?: number[];
   persona_id?: number;
@@ -33,7 +33,7 @@ export interface FeatureInfoResponse {
 export interface FeatureInfoParams {
   feature_type: 'municipality' | 'hexagon' | 'county' | 'state';
   feature_id: number;
-  profile_combination_id: number;
+  profile_ids: number[];
   category_ids?: number[];
   persona_id?: number;
   regiostar_ids?: number[];
@@ -55,7 +55,7 @@ export interface GeoJsonDownloadParams {
   resolution: 'hexagon' | 'municipality' | 'county' | 'state';
   state: string;
   categories?: number[];
-  profile_combination: number;
+  profile_ids: number[];
   persona_id?: number;
 }
 
@@ -81,9 +81,9 @@ export class MapService {
   private currentFilters: ContentLayerFilters | null = null;
   private hasInitialZoom = false; // Track if initial zoom to geolocation has occurred
   
-  // Signal to share current profile combination ID with other components
-  private _currentProfileCombinationID = signal<number | null>(null);
-  readonly currentProfileCombinationID = this._currentProfileCombinationID.asReadonly();
+  /** Current API profile_ids selection (subset of project base_profiles). */
+  private _currentProfileIds = signal<number[] | null>(null);
+  readonly currentProfileIds = this._currentProfileIds.asReadonly();
 
   // Signal to track map loading state
   private _isMapLoading = signal<boolean>(true);
@@ -198,12 +198,12 @@ export class MapService {
       throw new Error('Project ID or share key is required');
     }
 
-    if (!filters.profile_combination_id) {
-      throw new Error('profile_combination_id is required');
+    if (!filters.profile_ids?.length) {
+      throw new Error('profile_ids is required');
     }
 
     let params = new HttpParams()
-      .set('profile_combination_id', filters.profile_combination_id.toString());
+      .set('profile_ids', filters.profile_ids.join(','));
 
     // Add project or key
     if (projectId) {
@@ -327,15 +327,14 @@ export class MapService {
    * Builds the tile URL with query parameters for the content layer
    */
   private buildTileUrl(projectId: string, filters: ContentLayerFilters): string {
-    if (!projectId || !filters.profile_combination_id) {
+    if (!projectId || !filters.profile_ids?.length) {
       return '';
     }
 
     const baseUrl = `${environment.apiUrl}/projects/${projectId}/tiles/{z}/{x}/{y}.pbf`;
     const params: string[] = [];
 
-    // Required parameter
-    params.push(`profile_combination_id=${filters.profile_combination_id}`);
+    params.push(`profile_ids=${filters.profile_ids.join(',')}`);
 
     // Optional parameters - only add if they have values
     if (filters.state_ids && filters.state_ids.length > 0) {
@@ -536,14 +535,13 @@ export class MapService {
       return;
     }
 
-    if (!filters.profile_combination_id) {
-      console.warn('Cannot load content layer: profile_combination_id is required');
-      this._currentProfileCombinationID.set(null);
+    if (!filters.profile_ids?.length) {
+      console.warn('Cannot load content layer: profile_ids is required');
+      this._currentProfileIds.set(null);
       return;
     }
 
-    // Update the shared profile combination ID signal
-    this._currentProfileCombinationID.set(filters.profile_combination_id);
+    this._currentProfileIds.set([...filters.profile_ids]);
     this.currentFilters = filters;
 
     // Zoom to bounds only if requested (for full reloads)
@@ -743,7 +741,7 @@ export class MapService {
                layer.id !== 'content-layer-selection'
     );
 
-    this._currentProfileCombinationID.set(null);
+    this._currentProfileIds.set(null);
     this.currentFilters = null;
     // Reset ready check state when content layer is removed
     this._isReadyCheckComplete.set(false);
@@ -898,7 +896,7 @@ export class MapService {
     let httpParams = new HttpParams()
       .set('feature_type', params.feature_type)
       .set('feature_id', params.feature_id.toString())
-      .set('profile_combination_id', params.profile_combination_id.toString());
+      .set('profile_ids', params.profile_ids.join(','));
 
     // Add project or key
     if (projectId) {
@@ -937,7 +935,7 @@ export class MapService {
     let httpParams = new HttpParams()
       .set('resolution', params.resolution)
       .set('state', params.state)
-      .set('profile_combination', params.profile_combination.toString());
+      .set('profile_ids', params.profile_ids.join(','));
 
     // Add project or key
     if (projectId) {

@@ -300,18 +300,17 @@
     "filters": "Filter",
     "transportModes": {
       "title": "Verkehrsmittel",
-      "description": "Wähle die Verkehrsmittel aus, die in der Berechnung berücksichtigt werden sollen. Du kannst mehrere Verkehrsmittel gleichzeitig aktivieren oder deaktivieren.",
+      "description": "Wähle die Verkehrsmittel aus, die in der Berechnung berücksichtigt werden sollen. Du kannst mehrere Verkehrsmittel gleichzeitig aktivieren; mindestens eines muss immer ausgewählt bleiben.",
       "availableOptions": "Verfügbare Optionen",
       "availableOptionsDescription": "Jedes Verkehrsmittel kann einzeln ein- oder ausgeschaltet werden, um die Analyse entsprechend deinen Anforderungen anzupassen.",
-      "cannotDisable": "Kann nicht deaktiviert werden, da ohne Fußgänger keine anderen Verkehrsmittel sinnvoll nutzbar sind.",
+      "cannotDeselectLast": "Mindestens ein Verkehrsmittel muss ausgewählt bleiben.",
       "cannotUseCar": "Für ausgewählte Personengruppe nicht verfügbar",
       "introduction": "Wähle aus vier Verkehrsmitteln, um die Mobilität in deiner Region zu analysieren. Jeder Modus verwendet ausgeklügelte Routing-Algorithmen, um realistische Reisezeiten zu berechnen.",
       "modes": {
         "title": "Verfügbare Verkehrsmittel",
         "pedestrian": {
           "title": "Fußgänger",
-          "description": "Fußgänger-Routen werden unter Berücksichtigung von Gehwegen, Fußgängerzonen und fußgängerfreundlicher Infrastruktur berechnet.",
-          "alwaysEnabled": "Immer aktiviert und kann nicht deaktiviert werden"
+          "description": "Fußgänger-Routen werden unter Berücksichtigung von Gehwegen, Fußgängerzonen und fußgängerfreundlicher Infrastruktur berechnet."
         },
         "bicycle": {
           "title": "Fahrrad",
@@ -348,7 +347,7 @@
         "general": {
           "title": "Allgemeines",
           "intro": "Um eine Aktivität zu erreichen, benötigst du ein Verkehrsmittel – das können deine eigenen Füße, ein Fahrrad, das Auto oder der ÖPNV sein.",
-          "pedestrianBase": "Der Fußverkehr bildet dabei das Basis-Verkehrsmittel, denn ohne ihn lassen sich auch alle anderen Optionen nicht sinnvoll nutzen. Deshalb kann er nicht deaktiviert werden.",
+          "pedestrianBase": "Für die Analyse muss mindestens ein Verkehrsmittel ausgewählt sein. Du kannst beliebige Kombinationen wählen, die zu deinem Szenario passen (z. B. nur Rad und ÖPNV, ohne separates Fußgänger-Profil).",
           "questionIntro": "Mit der Auswahl der Verkehrsmittel beantwortest du im Grunde folgende Frage:",
           "question": "Wie gut ist meine Mobilitätsqualität, wenn ich zu Fuß unterwegs bin oder ein Fahrrad zur Verfügung habe?",
           "approach": "Der mobi.mapr verfolgt dabei einen realitätsnahen Ansatz: Es wird stets das Verkehrsmittel gewählt, das unter Berücksichtigung aller Faktoren insgesamt am schnellsten ist – inklusive Parken, Abstellen oder sonstiger Nebenzeiten. Selbst wenn ein Auto verfügbar ist, geht man für einen 200 Meter entfernten Bäcker meist lieber zu Fuß, auch wenn die reine Fahrzeit kürzer wäre. Der zusätzliche Aufwand für Ein- und Ausparken macht das Auto in diesem Fall unattraktiv."
@@ -724,7 +723,7 @@
     "currentSettings": {
       "title": "Aktuelle Einstellungen",
       "categories": "Aktivitäten",
-      "profileCombination": "Profilkombination",
+      "profileCombination": "Profile",
       "persona": "Personengruppe",
       "none": "Keine",
       "notApplicable": "Nicht anwendbar"

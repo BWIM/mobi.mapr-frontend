@@ -41,7 +41,7 @@
               class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
               [style.background-color]="isSelected(option.id) ? 'var(--primary-color)' : 'var(--background-color)'"
               [style.border]="!isSelected(option.id) ? '1px solid var(--light-primary-color)' : 'none'"
-              [style.cursor]="(isPedestrianMode(option.id) && isSelected(option.id)) || isModeDisabled(option.id) ? 'not-allowed' : 'pointer'"
+              [style.cursor]="isOnlySelectedMode(option.id) || isModeDisabled(option.id) ? 'not-allowed' : 'pointer'"
               [style.opacity]="isModeDisabled(option.id) ? '0.5' : '1'"
               [disabled]="isModeDisabled(option.id)"
               (click)="toggleVerkehrsmittel(option.id)"
@@ -108,10 +108,6 @@
                   <p class="text-sm opacity-90 leading-relaxed mb-2">
                     {{ 'left.transportModes.modes.pedestrian.description' | translate }}
                   </p>
-                  <div class="flex items-center gap-2 text-xs opacity-75">
-                    <mat-icon class="text-base">lock</mat-icon>
-                    <span>{{ 'left.transportModes.modes.pedestrian.alwaysEnabled' | translate }}</span>
-                  </div>
                 </div>
               </div>
             </div>
