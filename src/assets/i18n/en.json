@@ -706,9 +706,14 @@
     }
   },
   "geojsonDownload": {
-    "title": "Download GeoJSON",
+    "title": "Export map data",
     "button": {
-      "label": "Download GeoJSON"
+      "label": "Export map data"
+    },
+    "format": {
+      "label": "Format",
+      "geojson": "GeoJSON",
+      "csv": "CSV"
     },
     "resolution": {
       "label": "Resolution",
@@ -720,18 +725,33 @@
     "state": {
       "label": "State"
     },
+    "email": {
+      "label": "Email",
+      "hint": "We will send the download link to this address when the export is ready.",
+      "required": "Email is required.",
+      "invalid": "Please enter a valid email address."
+    },
+    "includePopulation": {
+      "label": "Include population data",
+      "description": "Adds population fields to the export where supported by the API."
+    },
     "currentSettings": {
-      "title": "Current Settings",
+      "title": "Current settings",
       "categories": "Categories",
       "profileCombination": "Profiles",
       "persona": "Persona",
       "none": "None",
-      "notApplicable": "Not Applicable"
+      "notApplicable": "Not applicable"
     },
-    "download": "Download",
-    "downloading": {
-      "title": "Downloading...",
-      "message": "Please wait while the GeoJSON file is being downloaded. This may take some time."
+    "download": "Start export",
+    "success": {
+      "title": "Export started",
+      "lead": "Your export is running on the server right now.",
+      "durationHint": "How long it takes can vary a lot depending on the selected region, activities, profiles, and resolution.",
+      "cacheHint": "If the same resolution was requested recently, you may sometimes receive the download link very quickly.",
+      "message": "When the file is ready, you will receive a download link at {{email}}.",
+      "footer": "You can close this dialog. Please check your spam folder if you do not see the message.",
+      "ok": "Got it"
     },
     "license": {
       "title": "License Notice",
@@ -739,15 +759,10 @@
       "prefix-bkg": "CC BY 4.0. Geodata: ",
       "bwim": "Baden-Württemberg Institute for Sustainable Mobility",
       "bkg": "BKG",
-      "municipalityNote": "Please note that city borders must be credited accordingly as described in the license file.",
       "ccBy": "What does this mean? CC BY 4.0 (Creative Commons Attribution 4.0 International):"
     },
-    "preloading": {
-      "message": "Data is being preloaded. Please try again later.",
-      "progress": "Progress"
-    },
     "error": {
-      "generic": "Error downloading GeoJSON file"
+      "generic": "Error exporting map data"
     }
   },
   "dashboard": {
