@@ -1,7 +1,7 @@
-import { Component, OnInit, Inject, inject } from '@angular/core';
+import { Component, Inject, inject } from '@angular/core';
+import { AbstractControl, FormControl, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { FilterConfigService } from '../../../services/filter-config.service';
-import { ProjectsService } from '../../../services/project.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MapService } from '../../../services/map.service';
@@ -13,9 +13,12 @@ export interface GeoJsonDownloadDialogData {
   hasCategories: boolean;
 }
 
-export interface GeoJsonDownloadParams {
-  resolution: 'hexagon' | 'municipality' | 'county' | 'state';
-  state: string;
+function requiredTrimmedEmail(control: AbstractControl): ValidationErrors | null {
+  const raw = String(control.value ?? '').trim();
+  if (!raw) {
+    return { required: true };
+  }
+  return Validators.email(new FormControl(raw, { nonNullable: true }));
 }
 
 @Component({
@@ -25,42 +28,49 @@ export interface GeoJsonDownloadParams {
     SharedModule,
     TranslateModule,
     MatDialogModule,
+    ReactiveFormsModule,
   ],
   templateUrl: './geojson-download-dialog.component.html',
   styleUrl: './geojson-download-dialog.component.css'
 })
-export class GeoJsonDownloadDialogComponent implements OnInit {
+export class GeoJsonDownloadDialogComponent {
   private filterConfigService = inject(FilterConfigService);
-  private projectService = inject(ProjectsService);
   private mapService = inject(MapService);
   private translate = inject(TranslateService);
 
-  // Get project for creation date
-  project = this.projectService.project;
-
-  // Get data from FilterConfigService
   states = this.filterConfigService.allStates;
   activities = this.filterConfigService.allActivities;
   personas = this.filterConfigService.allPersonas;
   allProfiles = this.filterConfigService.allProfiles;
 
-  // Form values
+  selectedExportFormat: 'geojson' | 'csv' = 'geojson';
   selectedResolution: 'hexagon' | 'municipality' | 'county' | 'state' | null = null;
   selectedStateId: number | null = null;
+  includePopulation = false;
 
-  // Current settings (read-only)
+  emailControl = new FormControl<string>('', {
+    nonNullable: true,
+    validators: [requiredTrimmedEmail],
+  });
+
   currentActivities: number[] = [];
   currentPersonaId: number | null = null;
   currentProfileIds: number[] | null = null;
-  hasCategories: boolean = false;
+  hasCategories = false;
 
-  // UI state
-  isDownloading = false;
+  /** Short request in flight */
+  isSubmitting = false;
+  /** User acknowledged the “check your email” step */
+  exportConfirmed = false;
+  submittedEmail = '';
+
   errorMessage: string | null = null;
-  preloadingMessage: string | null = null;
-  preloadingProgress: number | null = null;
 
-  // Resolution options
+  formatOptions = [
+    { value: 'geojson' as const, label: 'geojsonDownload.format.geojson' },
+    { value: 'csv' as const, label: 'geojsonDownload.format.csv' },
+  ];
+
   resolutionOptions = [
     { value: 'hexagon' as const, label: 'geojsonDownload.resolution.hexagon' },
     { value: 'municipality' as const, label: 'geojsonDownload.resolution.municipality' },
@@ -72,27 +82,15 @@ export class GeoJsonDownloadDialogComponent implements OnInit {
     public dialogRef: MatDialogRef<GeoJsonDownloadDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: GeoJsonDownloadDialogData
   ) {
-    // Initialize current settings from data
     this.currentActivities = data.selectedActivities || [];
     this.currentPersonaId = data.selectedPersonas ?? null;
     this.currentProfileIds = data.profileIds?.length ? [...data.profileIds] : null;
     this.hasCategories = data.hasCategories ?? false;
 
-    // Set default selected state to first state if available
     const states = this.states();
     if (states.length > 0) {
       this.selectedStateId = states[0].id;
     }
-  }
-
-  ngOnInit() {
-    // Data is already loaded by FilterConfigService
-  }
-
-  getSelectedStateName(): string {
-    if (!this.selectedStateId) return '';
-    const state = this.states().find(s => s.id === this.selectedStateId);
-    return state ? state.name : '';
   }
 
   getCurrentActivitiesDisplay(): string {
@@ -106,7 +104,7 @@ export class GeoJsonDownloadDialogComponent implements OnInit {
         return activity ? (activity.display_name || activity.name) : '';
       })
       .filter(name => name !== '');
-    
+
     if (activityNames.length === 0) {
       return this.translate.instant('geojsonDownload.currentSettings.none');
     }
@@ -139,36 +137,16 @@ export class GeoJsonDownloadDialogComponent implements OnInit {
   }
 
   isFormValid(): boolean {
-    return this.selectedResolution !== null && this.selectedStateId !== null && !!this.currentProfileIds?.length;
-  }
-
-  getFormattedCreatedDate(): string {
-    const projectData = this.project();
-    if (!projectData?.created) {
-      return '';
-    }
-    const createdDate = new Date(projectData.created);
-    const day = String(createdDate.getDate()).padStart(2, '0');
-    const month = String(createdDate.getMonth() + 1).padStart(2, '0');
-    const year = createdDate.getFullYear();
-    return `${day}.${month}.${year}`;
-  }
-
-  getLicenseText(): string {
-    const createdDate = this.getFormattedCreatedDate();
-    const baseLicense = this.translate.instant('geojsonDownload.license.base', {
-      date: createdDate
-    });
-
-    if (this.selectedResolution === 'municipality') {
-      return baseLicense + ' ' + this.translate.instant('geojsonDownload.license.municipalityNote');
-    }
-
-    return baseLicense;
+    return (
+      this.selectedResolution !== null &&
+      this.selectedStateId !== null &&
+      !!this.currentProfileIds?.length &&
+      this.emailControl.valid
+    );
   }
 
   shouldShowLicenseWarning(): boolean {
-    return this.selectedResolution !== null;
+    return this.selectedResolution !== null && !this.exportConfirmed;
   }
 
   getCcByUrl(): string {
@@ -182,15 +160,22 @@ export class GeoJsonDownloadDialogComponent implements OnInit {
     this.dialogRef.close();
   }
 
+  onAcknowledgeSuccess() {
+    this.dialogRef.close();
+  }
+
   async onDownload() {
     if (!this.isFormValid()) {
       return;
     }
 
-    this.isDownloading = true;
+    this.emailControl.markAsTouched();
+    if (this.emailControl.invalid) {
+      return;
+    }
+
+    this.isSubmitting = true;
     this.errorMessage = null;
-    this.preloadingMessage = null;
-    this.preloadingProgress = null;
 
     try {
       const state = this.states().find(s => s.id === this.selectedStateId);
@@ -198,33 +183,27 @@ export class GeoJsonDownloadDialogComponent implements OnInit {
         throw new Error('Selected state not found');
       }
 
-      const params: GeoJsonDownloadParams = {
+      const emailTrimmed = this.emailControl.value.trim();
+
+      await this.mapService.exportMapData({
+        export_format: this.selectedExportFormat,
         resolution: this.selectedResolution!,
         state: state.name,
-      };
-
-      const result = await this.mapService.downloadGeoJSON({
-        resolution: params.resolution,
-        state: params.state,
-        categories: this.currentActivities.length > 0 ? this.currentActivities : undefined,
         profile_ids: this.currentProfileIds!,
+        email: emailTrimmed,
+        categories: this.currentActivities.length > 0 ? this.currentActivities : undefined,
         persona_id: this.currentPersonaId ?? undefined,
+        include_population: this.includePopulation || undefined,
       });
 
-      if (result.status === 'preloading') {
-        // Handle preloading case
-        this.preloadingMessage = result.message || 'geojsonDownload.preloading.message';
-        this.preloadingProgress = result.progress ?? null;
-        // Don't close dialog, show message
-      } else if (result.status === 'success') {
-        // Download was successful
-        this.dialogRef.close();
-      }
-    } catch (error: any) {
-      console.error('Error downloading GeoJSON:', error);
-      this.errorMessage = error.message || 'geojsonDownload.error.generic';
+      this.submittedEmail = emailTrimmed;
+      this.exportConfirmed = true;
+    } catch (error: unknown) {
+      console.error('Error exporting map data:', error);
+      const message = error instanceof Error ? error.message : '';
+      this.errorMessage = message || 'geojsonDownload.error.generic';
     } finally {
-      this.isDownloading = false;
+      this.isSubmitting = false;
     }
   }
 }

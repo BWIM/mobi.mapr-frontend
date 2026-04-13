@@ -706,9 +706,14 @@
     }
   },
   "geojsonDownload": {
-    "title": "GeoJSON herunterladen",
+    "title": "Karte exportieren",
     "button": {
-      "label": "GeoJSON herunterladen"
+      "label": "Karte exportieren"
+    },
+    "format": {
+      "label": "Format",
+      "geojson": "GeoJSON",
+      "csv": "CSV"
     },
     "resolution": {
       "label": "Auflösung",
@@ -720,6 +725,16 @@
     "state": {
       "label": "Bundesland"
     },
+    "email": {
+      "label": "E-Mail",
+      "hint": "Wir schicken den Download-Link an diese Adresse, sobald der Export fertig ist.",
+      "required": "E-Mail ist erforderlich.",
+      "invalid": "Bitte gib eine gültige E-Mail-Adresse ein."
+    },
+    "includePopulation": {
+      "label": "Bevölkerungsdaten inkludieren",
+      "description": "Ergänzt die Bevölkerungsdaten in den Exportdaten."
+    },
     "currentSettings": {
       "title": "Aktuelle Einstellungen",
       "categories": "Aktivitäten",
@@ -728,10 +743,15 @@
       "none": "Keine",
       "notApplicable": "Nicht anwendbar"
     },
-    "download": "Herunterladen",
-    "downloading": {
-      "title": "Download läuft...",
-      "message": "Bitte warte, während die GeoJSON-Datei heruntergeladen wird. Dies kann, je nach Größe der ausgewählten Daten, einige Zeit dauern."
+    "download": "Export starten",
+    "success": {
+      "title": "Export gestartet",
+      "lead": "Dein Export läuft gerade auf dem Server.",
+      "durationHint": "Die Dauer kann je nach gewähltem Gebiet, Aktivitäten, Profilen und Auflösung stark variieren.",
+      "cacheHint": "Wurde dieselbe Auflösung kürzlich schon angefragt, kannst du den Download-Link mitunter sehr schnell erhalten.",
+      "message": "Sobald die Datei bereit ist, erhältst du einen Download-Link an {{email}}.",
+      "footer": "Du kannst dieses Fenster schließen. Bitte prüfe auch den Spam-Ordner.",
+      "ok": "Verstanden"
     },
     "license": {
       "title": "Lizenzhinweis",
@@ -739,15 +759,10 @@
       "bwim": "Baden-Württemberg Institut für Nachhaltige Mobilität",
       "prefix-bkg": "CC BY 4.0. Geodaten: ",
       "bkg": "BKG",
-      "municipalityNote": "Bitte beachte , dass die Stadtgrenzen entsprechend den Angaben in der Lizenzdatei zu kennzeichnen sind.",
       "ccBy": "Was bedeutet das? CC BY 4.0 (Creative Commons Namensnennung 4.0 International):"
     },
-    "preloading": {
-      "message": "Daten werden vorgeladen. Bitte versuche es später erneut.",
-      "progress": "Fortschritt"
-    },
     "error": {
-      "generic": "Fehler beim Herunterladen der GeoJSON-Datei"
+      "generic": "Fehler beim Export der Kartendaten"
     }
   },
   "dashboard": {
