@@ -886,8 +886,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.map.fitBounds(bounds, {
       padding: 50,
-      duration: 1000,
-      maxZoom: 14 // Prevent zooming too close
+      duration: 1000
     });
   }
 

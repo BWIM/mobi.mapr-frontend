@@ -2045,8 +2045,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       style: baseStyle,
       center: [9.2156505, 49.320099],
       zoom: 7,
-      minZoom: 5,
-      maxZoom: 14,
       dragRotate: false,
       renderWorldCopies: false,
       attributionControl: false

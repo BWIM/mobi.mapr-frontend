@@ -182,6 +182,7 @@ export class MapService {
             tiles: ["https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"],
             tileSize: 256,
             minzoom: 0,
+            maxzoom: 16,
           } as SourceSpecification
         },
         layers: [
