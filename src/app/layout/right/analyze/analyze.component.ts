@@ -183,7 +183,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           JSON.stringify(this.previousFilters.state_ids?.sort()) !== JSON.stringify(filters.state_ids?.sort()) ||
           JSON.stringify(this.previousFilters.category_ids?.sort()) !== JSON.stringify(filters.category_ids?.sort()) ||
           this.previousFilters.persona_id !== filters.persona_id ||
-          this.previousFilters.regiotyp_id !== filters.regiotyp_id ||
           JSON.stringify(this.previousFilters.regiostar_ids?.sort()) !== JSON.stringify(filters.regiostar_ids?.sort());
         
         if (filtersChanged) {

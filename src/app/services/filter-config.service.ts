@@ -217,8 +217,6 @@ export class FilterConfigService {
       // Only include category_ids and persona_id if project has categories
       category_ids: (hasCategories && selectedActivities.length > 0) ? selectedActivities : undefined,
       persona_id: (hasCategories && selectedPersonas !== null) ? selectedPersonas : undefined,
-      regiotyp_id: selectedRegioStars.length === 1 ? selectedRegioStars[0] :
-        (selectedRegioStars.length > 1 ? selectedRegioStars[0] : undefined),
       regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined,
       // Only include admin_level if it's not null (null means "automatic" - don't add param)
       admin_level: selectedAdminLevel !== null ? selectedAdminLevel : undefined
@@ -330,7 +328,7 @@ export class FilterConfigService {
           JSON.stringify(previousFilters.state_ids?.sort()) !== JSON.stringify(filters.state_ids?.sort()) ||
           JSON.stringify(previousFilters.category_ids?.sort()) !== JSON.stringify(filters.category_ids?.sort()) ||
           previousFilters.persona_id !== filters.persona_id ||
-          previousFilters.regiotyp_id !== filters.regiotyp_id ||
+          JSON.stringify(previousFilters.regiostar_ids?.sort()) !== JSON.stringify(filters.regiostar_ids?.sort()) ||
           previousFilters.admin_level !== filters.admin_level
         ));
         
@@ -340,7 +338,7 @@ export class FilterConfigService {
           JSON.stringify(previousFilters.state_ids?.sort()) === JSON.stringify(filters.state_ids?.sort()) &&
           JSON.stringify(previousFilters.category_ids?.sort()) === JSON.stringify(filters.category_ids?.sort()) &&
           previousFilters.persona_id === filters.persona_id &&
-          previousFilters.regiotyp_id === filters.regiotyp_id &&
+          JSON.stringify(previousFilters.regiostar_ids?.sort()) === JSON.stringify(filters.regiostar_ids?.sort()) &&
           previousFilters.admin_level === filters.admin_level &&
           previousFilters.feature_type === filters.feature_type;
         
@@ -350,7 +348,7 @@ export class FilterConfigService {
           JSON.stringify([...previousFilters.profile_ids].sort((a, b) => a - b)) === JSON.stringify([...filters.profile_ids].sort((a, b) => a - b)) &&
           JSON.stringify(previousFilters.state_ids?.sort()) === JSON.stringify(filters.state_ids?.sort()) &&
           JSON.stringify(previousFilters.category_ids?.sort()) === JSON.stringify(filters.category_ids?.sort()) &&
-          previousFilters.regiotyp_id === filters.regiotyp_id &&
+          JSON.stringify(previousFilters.regiostar_ids?.sort()) === JSON.stringify(filters.regiostar_ids?.sort()) &&
           previousFilters.admin_level === filters.admin_level &&
           previousFilters.feature_type === filters.feature_type;
         
