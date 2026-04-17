@@ -187,22 +187,15 @@
   "LANDING": {
     "TITLE": "Welcome to mobi.mapr",
     "SUBTITLE": "Discover the quality of mobility in your region",
+    "LOGO_LINK_ARIA": "Go to the BWIM website",
     "CARDS": {
       "PROJECT_MAIN_SITE": {
         "TITLE": "Project Home Page",
-        "DESCRIPTION": "Visit the official project page for more information"
+        "DESCRIPTION": "Visit the project page of mobi.mapr with all information"
       },
-      "FAQ": {
-        "TITLE": "Frequently Asked Questions",
-        "DESCRIPTION": "Find answers to common questions about the project"
-      },
-      "TECHNICAL_DOCS": {
-        "TITLE": "Technical Documentation",
-        "DESCRIPTION": "Detailed technical information and API documentation"
-      },
-      "CONTACT": {
-        "TITLE": "Contact",
-        "DESCRIPTION": "Get in touch with us for questions and feedback"
+      "TRY_OUT": {
+        "TITLE": "How good is the everyday mobility in Germany?",
+        "DESCRIPTION": "Try mobi.mapr directly!"
       },
       "LOGIN": {
         "BUTTON": "Go to Login"

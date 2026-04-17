@@ -187,22 +187,15 @@
   "LANDING": {
     "TITLE": "Willkommen bei mobi.mapr",
     "SUBTITLE": "Entdecke die Mobilitätsqualität in deiner Region",
+    "LOGO_LINK_ARIA": "Zur BWIM-Webseite",
     "CARDS": {
       "PROJECT_MAIN_SITE": {
         "TITLE": "Projekt-Hauptseite",
-        "DESCRIPTION": "Besuche die offizielle Projektseite für weitere Informationen"
+        "DESCRIPTION": "Besuche die Projektseite von mobi.mapr mit allen Informationen"
       },
-      "FAQ": {
-        "TITLE": "Häufig gestellte Fragen",
-        "DESCRIPTION": "Finde Antworten auf häufige Fragen zum Projekt"
-      },
-      "TECHNICAL_DOCS": {
-        "TITLE": "Technische Dokumentation",
-        "DESCRIPTION": "Detaillierte technische Informationen und API-Dokumentation"
-      },
-      "CONTACT": {
-        "TITLE": "Kontakt",
-        "DESCRIPTION": "Nimm Kontakt mit uns auf für Fragen und Feedback"
+      "TRY_OUT": {
+        "TITLE": "Wie gut ist die Alltagsmobilität in Deutschland?",
+        "DESCRIPTION": "mobi.mapr direkt ausprobieren!"
       },
       "LOGIN": {
         "BUTTON": "Zur Anmeldung"
