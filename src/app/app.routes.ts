@@ -16,6 +16,13 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent, data: { public: true } },
   { path: 'maintenance', component: MaintenanceComponent, data: { public: true } },
   { path: 'invalid-share-key', component: InvalidShareKeyComponent, data: { public: true } },
+  { path: 'share', redirectTo: '/' , pathMatch: 'full' },
+  {
+    path: 'share',
+    children: [
+      { path: '**', redirectTo: '/' }
+    ]
+  },
   { path: 'users-area', component: UsersAreaComponent },
   {
     path: 'dashboard',
