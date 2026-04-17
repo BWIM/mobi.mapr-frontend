@@ -44,6 +44,9 @@
           <h3 class="text-xl font-bold text-white flex items-start flex-wrap">
             <div class="flex-1 min-w-0">
               <span class="leading-tight">{{ featureInfo.name }}</span>
+              <div *ngIf="featureInfo.regiostar_name" class="text-xs text-[var(--light-primary-color)] font-normal mt-1 leading-none">
+                {{ featureInfo.regiostar_name }}
+              </div>
               <div *ngIf="isHexagonSelected && hexagonId !== null" class="text-xs text-[var(--light-primary-color)] font-normal mt-1 leading-none">
                 Hexagon {{ hexagonId }}
               </div>
@@ -97,6 +100,9 @@
           <h3 class="text-xl font-bold text-white flex items-start flex-wrap">
             <div class="flex-1 min-w-0">
               <span class="leading-tight">{{ featureInfo2.name }}</span>
+              <div *ngIf="featureInfo2.regiostar_name" class="text-xs text-[var(--light-primary-color)] font-normal mt-1 leading-none">
+                {{ featureInfo2.regiostar_name }}
+              </div>
               <div *ngIf="isHexagonSelected2 && hexagonId2 !== null" class="text-xs text-[var(--light-primary-color)] font-normal mt-1 leading-none">
                 Hexagon {{ hexagonId2 }}
               </div>
@@ -301,6 +307,9 @@
       <div class="px-2 py-2 border-b border-white flex items-start justify-between">
         <div class="flex flex-col">
           <h3 class="text-xl font-bold text-white">{{ featureInfo.name }}</h3>
+          <div *ngIf="featureInfo.regiostar_name" class="text-xs text-[var(--light-primary-color)] font-normal mt-1 leading-none">
+            {{ featureInfo.regiostar_name }}
+          </div>
           <div *ngIf="isHexagonSelected && hexagonId !== null" class="text-xs text-[var(--light-primary-color)] font-normal mt-1 leading-none">
             Hexagon {{ hexagonId }}
           </div>

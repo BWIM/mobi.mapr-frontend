@@ -543,7 +543,13 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       // Optional population display if available on the feature (but not for hexagons)
       const tileType = properties['t'];
       const isHexagon = tileType === 'h';
+      const isMunicipality = tileType === 'm';
       const population = properties['population'];
+      const regiostarName = properties['regiostar_name'];
+      let regiostarHtml = '';
+      if (isMunicipality && regiostarName !== undefined && regiostarName !== null && regiostarName !== '') {
+        regiostarHtml = `<div>Regiostar: ${regiostarName}</div>`;
+      }
       let populationHtml = '';
       if (!isHexagon && population !== undefined && population !== null) {
         const populationLabel = this.translate.instant('analyze.population');
@@ -555,6 +561,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         <div>
           <div style="font-weight: 600; margin-bottom: 4px;">${name}</div>
           <div>${valueText}</div>
+          ${regiostarHtml}
           ${populationHtml}
         </div>
       `;

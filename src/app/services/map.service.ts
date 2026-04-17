@@ -20,6 +20,7 @@ export interface ContentLayerFilters {
 
 export interface FeatureInfoResponse {
   name: string;
+  regiostar_name?: string | null;
   population: number;
   rank: number;
   total_ranks: number;
