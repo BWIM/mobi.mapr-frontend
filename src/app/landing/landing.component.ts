@@ -9,8 +9,7 @@ import { LanguageService } from '../services/language.service';
     selector: 'app-landing',
     standalone: true,
     imports: [CommonModule, TranslateModule],
-    templateUrl: './landing.component.html',
-    styleUrl: './landing.component.css'
+    templateUrl: './landing.component.html'
 })
 export class LandingComponent implements OnInit {
     currentLang: string = 'de';
@@ -40,12 +39,11 @@ export class LandingComponent implements OnInit {
         }
     }
 
-    // External links - you can update these URLs as needed
+    // External links for the public landing page
     externalLinks = {
-        projectMainSite: 'https://bw-im.de/mobimapr', // Replace with actual project main site URL
-        technicalDocs: 'https://bw-im.de/mobimapr-dokumentation', // Replace with actual technical documentation URL
-        contact: 'https://bw-im.de/mobimapr-kontakt', // Replace with actual contact URL
-        faq: 'https://bw-im.de/mobimapr-faq' // Replace with actual FAQ URL
+        projectMainSite: 'https://mobimapr.bw-im.de',
+        instituteSite: 'https://bw-im.de',
+        bigProjectTryOut: 'https://mapr.mobi/dashboard?share_key=alltagsmobilitaet'
     };
 
     // Navigate to login page
