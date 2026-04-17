@@ -13,7 +13,6 @@ export interface ContentLayerFilters {
   state_ids?: number[];
   category_ids?: number[];
   persona_id?: number;
-  regiotyp_id?: number | null;
   regiostar_ids?: number[];
   admin_level?: 'state' | 'county' | 'municipality' | 'hexagon';
   feature_type: 'index' | 'score';
@@ -239,10 +238,6 @@ export class MapService {
     if (filters.regiostar_ids && filters.regiostar_ids.length > 0) {
       params = params.set('regiostar_ids', filters.regiostar_ids.join(','));
     }
-
-    // Note: regiostar_ids is not in ContentLayerFilters, but regiotyp_id is
-    // The API expects regiostar_ids, so we'll skip it for now
-    // If needed, we can add it to ContentLayerFilters later
 
     const url = `${environment.apiUrl}/ready/`;
     const response = await firstValueFrom(
