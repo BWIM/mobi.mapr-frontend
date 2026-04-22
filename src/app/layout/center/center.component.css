@@ -275,6 +275,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
 }
 
 .legend-circle {
@@ -335,6 +337,12 @@
 .legend-step {
   flex: 1;
   height: 100%;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.legend-item-inactive {
+  opacity: 0.25;
 }
 
 .legend-labels {

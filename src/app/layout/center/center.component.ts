@@ -14,6 +14,7 @@ import { FeatureSelectionService } from '../../shared/services/feature-selection
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SearchService } from '../../services/search.service';
 import { BottomComponent } from '../bottom/bottom.component';
+import { QualityBracket, TimeBracket } from '../../services/filter-config.service';
 
 interface NominatimResult {
   display_name: string;
@@ -100,7 +101,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   // Quality (index) colors - A through F
-  qualityColors = [
+  qualityColors: Array<{ letter: QualityBracket; color: string }> = [
     { letter: 'A', color: 'rgba(50, 97, 45, 0.7)' },
     { letter: 'B', color: 'rgba(60, 176, 67, 0.7)' },
     { letter: 'C', color: 'rgba(238, 210, 2, 0.7)' },
@@ -115,7 +116,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   // 43, 40, 105
   // 23, 25, 63
   // Time (score) colors - updated ranges
-  timeColors = [
+  timeColors: Array<{ value: TimeBracket; color: string }> = [
     { value: '0-7', color: 'rgb(23, 25, 63)' },
     { value: '8-15', color: 'rgb(43, 40, 105)' },
     { value: '16-23', color: 'rgb(74, 89, 160)' },
@@ -123,6 +124,24 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     { value: '31-45', color: 'rgb(121, 194, 230)' },
     { value: '45+', color: 'rgb(162, 210, 235)' }
   ];
+
+  isQualityBracketSelected(bracket: QualityBracket): boolean {
+    return this.filterConfigService.isQualityBracketSelected(bracket);
+  }
+
+  isTimeBracketSelected(bracket: TimeBracket): boolean {
+    return this.filterConfigService.isTimeBracketSelected(bracket);
+  }
+
+  toggleQualityBracket(event: MouseEvent, bracket: QualityBracket): void {
+    event.stopPropagation();
+    this.filterConfigService.toggleQualityBracket(bracket);
+  }
+
+  toggleTimeBracket(event: MouseEvent, bracket: TimeBracket): void {
+    event.stopPropagation();
+    this.filterConfigService.toggleTimeBracket(bracket);
+  }
 
   getIndexName(index: number): string {
     if (index <= 0) return this.translate.instant('map.popup.error');
