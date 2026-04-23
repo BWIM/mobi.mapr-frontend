@@ -16,6 +16,8 @@ export interface ContentLayerFilters {
   regiostar_ids?: number[];
   admin_level?: 'state' | 'county' | 'municipality' | 'hexagon';
   feature_type: 'index' | 'score';
+  selected_quality_brackets?: Array<'A' | 'B' | 'C' | 'D' | 'E' | 'F'>;
+  selected_time_brackets?: Array<'0-7' | '8-15' | '16-23' | '24-30' | '31-45' | '45+'>;
 }
 
 export interface FeatureInfoResponse {
@@ -108,6 +110,49 @@ export class MapService {
   readonly isReadyCheckComplete = this._isReadyCheckComplete.asReadonly();
 
   constructor() {}
+
+  private getLegendBracketFilterExpression(filters: ContentLayerFilters): any[] | null {
+    if (filters.feature_type === 'index') {
+      const selected = filters.selected_quality_brackets ?? ['A', 'B', 'C', 'D', 'E', 'F'];
+      if (selected.length === 0) {
+        return ['==', ['get', 'id'], -1];
+      }
+      if (selected.length === 6) {
+        return null;
+      }
+
+      const idx = ['/', ['get', 'index'], 100];
+      const bracketExpressions: Record<string, any[]> = {
+        A: ['<', idx, 0.35],
+        B: ['all', ['>=', idx, 0.35], ['<', idx, 0.5]],
+        C: ['all', ['>=', idx, 0.5], ['<', idx, 0.71]],
+        D: ['all', ['>=', idx, 0.71], ['<', idx, 1.0]],
+        E: ['all', ['>=', idx, 1.0], ['<', idx, 1.41]],
+        F: ['>=', idx, 1.41]
+      };
+
+      return ['any', ...selected.map(bracket => bracketExpressions[bracket])];
+    }
+
+    const selected = filters.selected_time_brackets ?? ['0-7', '8-15', '16-23', '24-30', '31-45', '45+'];
+    if (selected.length === 0) {
+      return ['==', ['get', 'id'], -1];
+    }
+    if (selected.length === 6) {
+      return null;
+    }
+
+    const bracketExpressions: Record<string, any[]> = {
+      '0-7': ['<', ['get', 'score'], 480],
+      '8-15': ['all', ['>=', ['get', 'score'], 480], ['<', ['get', 'score'], 960]],
+      '16-23': ['all', ['>=', ['get', 'score'], 960], ['<', ['get', 'score'], 1440]],
+      '24-30': ['all', ['>=', ['get', 'score'], 1440], ['<', ['get', 'score'], 1800]],
+      '31-45': ['all', ['>=', ['get', 'score'], 1800], ['<', ['get', 'score'], 2700]],
+      '45+': ['>=', ['get', 'score'], 2700]
+    };
+
+    return ['any', ...selected.map(bracket => bracketExpressions[bracket])];
+  }
 
   setMap(map: Map): void {
     this.map = map;
@@ -635,9 +680,10 @@ export class MapService {
       hexOpacityExpression,
       0.8
     ];
+    const legendBracketFilter = this.getLegendBracketFilterExpression(filters);
 
     // Add fill layer
-    updatedStyle.layers.push({
+    const fillLayer: any = {
       id: 'content-layer-fill',
       type: 'fill',
       source: 'content-layer',
@@ -646,10 +692,14 @@ export class MapService {
         'fill-color': fillColorExpression,
         'fill-opacity': fillOpacityExpression
       }
-    } as LayerSpecification);
+    };
+    if (legendBracketFilter) {
+      fillLayer.filter = legendBracketFilter;
+    }
+    updatedStyle.layers.push(fillLayer as LayerSpecification);
 
     // Add outline layer
-    updatedStyle.layers.push({
+    const outlineLayer: any = {
       id: 'content-layer-outline',
       type: 'line',
       source: 'content-layer',
@@ -659,7 +709,11 @@ export class MapService {
         'line-width': 1,
         'line-opacity': lineOpacityExpression
       }
-    } as LayerSpecification);
+    };
+    if (legendBracketFilter) {
+      outlineLayer.filter = legendBracketFilter;
+    }
+    updatedStyle.layers.push(outlineLayer as LayerSpecification);
 
     // Add highlight layer for hover effects (initially hidden, will be filtered on hover)
     // Uses a darkened version (10% black added) of the fill/outline color with full opacity

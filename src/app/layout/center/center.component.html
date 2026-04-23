@@ -34,7 +34,12 @@
     <!-- Quality legend (A-F letters) -->
     <div class="legend-quality" *ngIf="isQualityMode">
       <div class="legend-items">
-        <div class="legend-item-quality" *ngFor="let item of qualityColors">
+        <div
+          class="legend-item-quality"
+          *ngFor="let item of qualityColors"
+          (click)="toggleQualityBracket($event, item.letter)"
+          [class.legend-item-inactive]="!isQualityBracketSelected(item.letter)"
+        >
           <div class="legend-circle" [style.background-color]="item.color">
             <span class="legend-letter">{{ item.letter }}</span>
           </div>
@@ -44,7 +49,13 @@
     <!-- Time legend (discrete color steps) -->
     <div class="legend-time" *ngIf="!isQualityMode">
       <div class="legend-steps">
-        <div class="legend-step" *ngFor="let item of timeColors" [style.background-color]="item.color"></div>
+        <div
+          class="legend-step"
+          *ngFor="let item of timeColors"
+          [style.background-color]="item.color"
+          (click)="toggleTimeBracket($event, item.value)"
+          [class.legend-item-inactive]="!isTimeBracketSelected(item.value)"
+        ></div>
       </div>
       <div class="legend-labels">
         <span class="legend-label">{{ 'map.legend.time.min0' | translate }}</span>

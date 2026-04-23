@@ -6,6 +6,10 @@ export interface UserSettings {
   bewertung: string | null;
   statsLevel?: 'municipality' | 'county' | 'state';
   adminLevel?: 'state' | 'county' | 'municipality' | 'hexagon' | null;
+  legendBrackets?: {
+    quality: Array<'A' | 'B' | 'C' | 'D' | 'E' | 'F'>;
+    time: Array<'0-7' | '8-15' | '16-23' | '24-30' | '31-45' | '45+'>;
+  };
   filters: {
     activities: number[];
     personas: number | number[] | null; // Support both old array format and new single value format
@@ -57,6 +61,10 @@ export class SettingsService {
       verkehrsmittel: [],
       bewertung: 'qualitaet',
       statsLevel: 'county',
+      legendBrackets: {
+        quality: ['A', 'B', 'C', 'D', 'E', 'F'],
+        time: ['0-7', '8-15', '16-23', '24-30', '31-45', '45+']
+      },
       filters: {
         activities: [],
         personas: null,

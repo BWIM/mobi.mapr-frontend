@@ -41,6 +41,12 @@ export interface FilterState {
   selectedStates: number[];
 }
 
+export type QualityBracket = 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
+export type TimeBracket = '0-7' | '8-15' | '16-23' | '24-30' | '31-45' | '45+';
+
+const ALL_QUALITY_BRACKETS: QualityBracket[] = ['A', 'B', 'C', 'D', 'E', 'F'];
+const ALL_TIME_BRACKETS: TimeBracket[] = ['0-7', '8-15', '16-23', '24-30', '31-45', '45+'];
+
 @Injectable({
   providedIn: 'root'
 })
@@ -75,6 +81,8 @@ export class FilterConfigService {
   private _selectedRegioStars = signal<number[]>([]);
   private _selectedStates = signal<number[]>([]);
   private _selectedAdminLevel = signal<'state' | 'county' | 'municipality' | 'hexagon' | null>(null);
+  private _selectedQualityBrackets = signal<QualityBracket[]>([...ALL_QUALITY_BRACKETS]);
+  private _selectedTimeBrackets = signal<TimeBracket[]>([...ALL_TIME_BRACKETS]);
 
   // Metadata for mode selection
   private _allModes = signal<Mode[]>([]);
@@ -109,6 +117,8 @@ export class FilterConfigService {
   readonly selectedRegioStars = this._selectedRegioStars.asReadonly();
   readonly selectedStates = this._selectedStates.asReadonly();
   readonly selectedAdminLevel = this._selectedAdminLevel.asReadonly();
+  readonly selectedQualityBrackets = this._selectedQualityBrackets.asReadonly();
+  readonly selectedTimeBrackets = this._selectedTimeBrackets.asReadonly();
   readonly modeOptions = this._modeOptions.asReadonly();
   readonly allModes = this._allModes.asReadonly();
   readonly allProfiles = this._allProfiles.asReadonly();
@@ -219,7 +229,9 @@ export class FilterConfigService {
       persona_id: (hasCategories && selectedPersonas !== null) ? selectedPersonas : undefined,
       regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined,
       // Only include admin_level if it's not null (null means "automatic" - don't add param)
-      admin_level: selectedAdminLevel !== null ? selectedAdminLevel : undefined
+      admin_level: selectedAdminLevel !== null ? selectedAdminLevel : undefined,
+      selected_quality_brackets: [...this._selectedQualityBrackets()],
+      selected_time_brackets: [...this._selectedTimeBrackets()]
     };
   });
 
@@ -261,6 +273,8 @@ export class FilterConfigService {
 
           // "Automatic" admin level by default on project load.
           this._selectedAdminLevel.set(null);
+          this._selectedQualityBrackets.set([...ALL_QUALITY_BRACKETS]);
+          this._selectedTimeBrackets.set([...ALL_TIME_BRACKETS]);
 
           // Reset filter-data gating so the map waits for the new project's filter options.
           this._isFilterDataLoaded.set(false);
@@ -476,6 +490,31 @@ export class FilterConfigService {
           }
         }
       }
+    }
+
+    // Apply legend_brackets parameter (comma-separated values)
+    // If the parameter is missing, default to "all selected".
+    const legendBracketsParam = queryParams['legend_brackets'];
+    if (legendBracketsParam && typeof legendBracketsParam === 'string') {
+      const values = legendBracketsParam
+        .split(',')
+        .map(v => v.trim())
+        .filter(v => v.length > 0);
+
+      const qualityValues = values.filter((v): v is QualityBracket => ALL_QUALITY_BRACKETS.includes(v as QualityBracket));
+      const timeValues = values.filter((v): v is TimeBracket => ALL_TIME_BRACKETS.includes(v as TimeBracket));
+
+      if (qualityValues.length > 0) {
+        this._selectedQualityBrackets.set([...new Set(qualityValues)]);
+      }
+      if (timeValues.length > 0) {
+        this._selectedTimeBrackets.set([...new Set(timeValues)]);
+      }
+      this.saveSettings();
+    } else {
+      this._selectedQualityBrackets.set([...ALL_QUALITY_BRACKETS]);
+      this._selectedTimeBrackets.set([...ALL_TIME_BRACKETS]);
+      this.saveSettings();
     }
 
     // Mark URL params as applied
@@ -875,6 +914,34 @@ export class FilterConfigService {
     this.saveSettings();
   }
 
+  toggleQualityBracket(bracket: QualityBracket): void {
+    const current = this._selectedQualityBrackets();
+    if (current.includes(bracket)) {
+      this._selectedQualityBrackets.set(current.filter(b => b !== bracket));
+    } else {
+      this._selectedQualityBrackets.set([...current, bracket]);
+    }
+    this.saveSettings();
+  }
+
+  toggleTimeBracket(bracket: TimeBracket): void {
+    const current = this._selectedTimeBrackets();
+    if (current.includes(bracket)) {
+      this._selectedTimeBrackets.set(current.filter(b => b !== bracket));
+    } else {
+      this._selectedTimeBrackets.set([...current, bracket]);
+    }
+    this.saveSettings();
+  }
+
+  isQualityBracketSelected(bracket: QualityBracket): boolean {
+    return this._selectedQualityBrackets().includes(bracket);
+  }
+
+  isTimeBracketSelected(bracket: TimeBracket): boolean {
+    return this._selectedTimeBrackets().includes(bracket);
+  }
+
   setAdminLevel(adminLevel: 'state' | 'county' | 'municipality' | 'hexagon' | null): void {
     this._selectedAdminLevel.set(adminLevel);
     this.saveSettings();
@@ -1077,6 +1144,22 @@ export class FilterConfigService {
         this._selectedAdminLevel.set(settings.adminLevel);
       }
 
+      const allQuality = settings.legendBrackets?.quality;
+      if (Array.isArray(allQuality) && allQuality.length > 0) {
+        const validQuality = allQuality.filter((v): v is QualityBracket => ALL_QUALITY_BRACKETS.includes(v as QualityBracket));
+        this._selectedQualityBrackets.set(validQuality.length > 0 ? [...new Set(validQuality)] : [...ALL_QUALITY_BRACKETS]);
+      } else {
+        this._selectedQualityBrackets.set([...ALL_QUALITY_BRACKETS]);
+      }
+
+      const allTime = settings.legendBrackets?.time;
+      if (Array.isArray(allTime) && allTime.length > 0) {
+        const validTime = allTime.filter((v): v is TimeBracket => ALL_TIME_BRACKETS.includes(v as TimeBracket));
+        this._selectedTimeBrackets.set(validTime.length > 0 ? [...new Set(validTime)] : [...ALL_TIME_BRACKETS]);
+      } else {
+        this._selectedTimeBrackets.set([...ALL_TIME_BRACKETS]);
+      }
+
       // Load filter settings
       if (settings.filters) {
         this._selectedActivities.set(settings.filters.activities || []);
@@ -1111,6 +1194,10 @@ export class FilterConfigService {
       verkehrsmittel: [...this._selectedModes()],
       bewertung: this._selectedBewertung(),
       adminLevel: this._selectedAdminLevel(),
+      legendBrackets: {
+        quality: [...this._selectedQualityBrackets()],
+        time: [...this._selectedTimeBrackets()]
+      },
       filters: {
         activities: [...this._selectedActivities()],
         personas: selectedPersonas !== null ? selectedPersonas : null,
