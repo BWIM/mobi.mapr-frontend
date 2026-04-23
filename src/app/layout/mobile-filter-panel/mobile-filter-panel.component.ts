@@ -4,6 +4,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SearchService } from '../../services/search.service';
 import { ProjectsService } from '../../services/project.service';
+import { MapService } from '../../services/map.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CreditsDialogComponent } from '../rail/credits-dialog/credits-dialog.component';
 import { InfoOverlayComponent } from '../../shared/info-overlay/info-overlay.component';
@@ -21,9 +22,11 @@ export class MobileFilterPanelComponent {
   private translate = inject(TranslateService);
   private searchService = inject(SearchService);
   private projectService = inject(ProjectsService);
+  private mapService = inject(MapService);
   private dialog = inject(MatDialog);
   
   project = this.projectService.project;
+  isPreparingProject = this.mapService.isPreparingProject;
   searchQuery: string = '';
   
   private touchStartY: number = 0;
