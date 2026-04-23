@@ -1,12 +1,22 @@
-import { Component, inject, input, output } from '@angular/core';
+import { Component, inject, input, output, OnDestroy } from '@angular/core';
 import { FilterConfigService } from '../../services/filter-config.service';
 import { SharedModule } from '../../shared/shared.module';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { SearchService } from '../../services/search.service';
 import { ProjectsService } from '../../services/project.service';
+import { MapService } from '../../services/map.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CreditsDialogComponent } from '../rail/credits-dialog/credits-dialog.component';
 import { InfoOverlayComponent } from '../../shared/info-overlay/info-overlay.component';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
+
+interface NominatimResult {
+  display_name: string;
+  lat: string;
+  lon: string;
+}
 
 @Component({
   selector: 'app-mobile-filter-panel',
@@ -14,35 +24,74 @@ import { InfoOverlayComponent } from '../../shared/info-overlay/info-overlay.com
   templateUrl: './mobile-filter-panel.component.html',
   styleUrl: './mobile-filter-panel.component.css',
 })
-export class MobileFilterPanelComponent {
+export class MobileFilterPanelComponent implements OnDestroy {
   isExpanded = input.required<boolean>();
   onClose = output<void>();
   private filterConfigService = inject(FilterConfigService);
   private translate = inject(TranslateService);
-  private searchService = inject(SearchService);
   private projectService = inject(ProjectsService);
+  private mapService = inject(MapService);
+  private http = inject(HttpClient);
   private dialog = inject(MatDialog);
   
   project = this.projectService.project;
+  isPreparingProject = this.mapService.isPreparingProject;
   searchQuery: string = '';
+  searchResults: NominatimResult[] = [];
+  private searchSubject = new Subject<string>();
   
   private touchStartY: number = 0;
   private touchStartTime: number = 0;
   private readonly SWIPE_THRESHOLD = 50; // Minimum distance in pixels
   private readonly SWIPE_MAX_TIME = 300; // Maximum time in milliseconds
 
+  constructor() {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(query => this.searchNominatim(query))
+    ).subscribe(results => {
+      this.searchResults = results;
+    });
+  }
+
   onSearchInput(event: Event): void {
     const input = event.target as HTMLInputElement;
+    const query = input.value.trim();
     this.searchQuery = input.value;
-    if (this.searchQuery.trim().length >= 3) {
-      this.searchService.setSearchQuery(this.searchQuery.trim());
+    if (query.length >= 3) {
+      this.searchSubject.next(query);
+    } else {
+      this.searchResults = [];
     }
   }
 
   onSearchSubmit(): void {
-    if (this.searchQuery.trim().length >= 3) {
-      this.searchService.setSearchQuery(this.searchQuery.trim());
+    const query = this.searchQuery.trim();
+    if (query.length >= 3) {
+      this.searchSubject.next(query);
     }
+  }
+
+  onLocationSelected(event: MatAutocompleteSelectedEvent): void {
+    const result = event.option.value as NominatimResult;
+    const lat = Number.parseFloat(result.lat);
+    const lon = Number.parseFloat(result.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      return;
+    }
+
+    const map = this.mapService.getMap();
+    if (map) {
+      map.flyTo({
+        center: [lon, lat],
+        zoom: 12,
+        duration: 1500
+      });
+    }
+
+    this.searchQuery = result.display_name;
+    this.searchResults = [];
   }
 
   // Expose filter config service signals for template
@@ -136,6 +185,27 @@ export class MobileFilterPanelComponent {
     }
   }
 
+  private searchNominatim(query: string): Promise<NominatimResult[]> {
+    if (!query || query.length < 3) {
+      return Promise.resolve([]);
+    }
+
+    const params = new HttpParams()
+      .set('q', query)
+      .set('format', 'json')
+      .set('limit', '10')
+      .set('addressdetails', '1')
+      .set('countrycodes', 'de');
+
+    const headers = {
+      'User-Agent': 'MapR-Frontend/1.0'
+    };
+
+    return firstValueFrom(
+      this.http.get<NominatimResult[]>('https://nominatim.openstreetmap.org/search', { params, headers })
+    ).catch(() => []);
+  }
+
   openCreditsDialog(): void {
     this.dialog.open(CreditsDialogComponent, {
       width: '800px',
@@ -154,5 +224,9 @@ export class MobileFilterPanelComponent {
     const month = String(createdDate.getMonth() + 1).padStart(2, '0');
     const year = createdDate.getFullYear();
     return `${day}.${month}.${year}`;
+  }
+
+  ngOnDestroy(): void {
+    this.searchSubject.complete();
   }
 }

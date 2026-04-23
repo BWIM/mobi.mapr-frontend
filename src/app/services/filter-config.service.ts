@@ -367,15 +367,15 @@ export class FilterConfigService {
           previousFilters.feature_type === filters.feature_type;
         
         if (isFullReload) {
-          // On mobile, if only mode or persona changed, don't zoom to bounds to keep map position static
+          // On mobile, if only mode or persona changed, don't zoom to bounds to keep map position static.
+          // Still run a full reload so /ready + preload flow executes consistently across platforms.
           const shouldZoomToBounds = !(this.isMobile() && (onlyModeChanged || onlyPersonaChanged));
-          // Full reload with zoom to bounds (unless mobile mode-only or persona-only change)
-          this.updateMapLayer(filters, shouldZoomToBounds).catch(error => {
+          this.updateMapLayer(filters, true, shouldZoomToBounds).catch(error => {
             console.error('Error in updateMapLayer (full reload):', error);
           });
         } else {
           // Tile-only update (only bewertung changed) - preserve map position
-          this.updateMapLayer(filters, false).catch(error => {
+          this.updateMapLayer(filters, false, false).catch(error => {
             console.error('Error in updateMapLayer (tile update):', error);
           });
         }
@@ -1027,7 +1027,11 @@ export class FilterConfigService {
    * @param filters - The filter parameters
    * @param fullReload - Whether to do a full reload with zoom to bounds (default: true)
    */
-  private async updateMapLayer(filters: ContentLayerFilters, fullReload: boolean = true): Promise<void> {
+  private async updateMapLayer(
+    filters: ContentLayerFilters,
+    fullReload: boolean = true,
+    zoomToBounds: boolean = true
+  ): Promise<void> {
     // Prevent concurrent calls - if one is already in progress, skip this one
     if (this.updateMapLayerInProgress) {
       console.log('updateMapLayer already in progress, skipping concurrent call');
@@ -1107,7 +1111,7 @@ export class FilterConfigService {
       // (either via cache_flag: true OR websocket completion)
       // Use updateContentLayerTiles for tile-only updates to preserve map position
       if (fullReload) {
-        await this.mapService.loadContentLayer(filters, true);
+        await this.mapService.loadContentLayer(filters, zoomToBounds);
       } else {
         await this.mapService.updateContentLayerTiles(filters);
       }

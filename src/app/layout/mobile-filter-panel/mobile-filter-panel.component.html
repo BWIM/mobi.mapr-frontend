@@ -24,10 +24,30 @@
         [(ngModel)]="searchQuery"
         (input)="onSearchInput($event)"
         (keydown.enter)="onSearchSubmit()"
-        [placeholder]="'map.search.placeholder' | translate">
+        [placeholder]="'map.search.placeholder' | translate"
+        [matAutocomplete]="mobileSearchAuto">
       <mat-icon matPrefix>search</mat-icon>
+      <mat-autocomplete #mobileSearchAuto="matAutocomplete" (optionSelected)="onLocationSelected($event)">
+        <mat-option *ngFor="let result of searchResults" [value]="result">
+          <span>{{ result.display_name }}</span>
+        </mat-option>
+      </mat-autocomplete>
     </mat-form-field>
   </div>
+
+  @if (isPreparingProject()) {
+    <div class="mobile-preload-hint mx-4 mb-3">
+      <div class="mobile-preload-hint__header">
+        <mat-spinner diameter="16"></mat-spinner>
+        <span class="mobile-preload-hint__title">
+          {{ 'PREPARING_PROJECT.INFO.PREPARING' | translate }}
+        </span>
+      </div>
+      <p class="mobile-preload-hint__text">
+        {{ 'PREPARING_PROJECT.COFFEE_MESSAGE' | translate }}
+      </p>
+    </div>
+  }
 
   <!-- Filter Content - Only visible when expanded -->
   @if (isExpanded()) {
@@ -43,11 +63,11 @@
               [style.border]="!isSelected(option.id) ? '1px solid var(--light-primary-color)' : 'none'"
               [style.cursor]="isOnlySelectedMode(option.id) || isModeDisabled(option.id) ? 'not-allowed' : 'pointer'"
               [style.opacity]="isModeDisabled(option.id) ? '0.5' : '1'"
-              [disabled]="isModeDisabled(option.id)"
+              [disabled]="isModeDisabled(option.id) || isOnlySelectedMode(option.id)"
               (click)="toggleVerkehrsmittel(option.id)"
               [attr.aria-label]="option.display_name"
               [attr.aria-pressed]="isSelected(option.id)"
-              [attr.aria-disabled]="isModeDisabled(option.id)"
+              [attr.aria-disabled]="isModeDisabled(option.id) || isOnlySelectedMode(option.id)"
               [title]="getModeTooltip(option)">
               <mat-icon 
                 class="text-lg leading-none"
