@@ -52,6 +52,15 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private contextMenuFeature: any = null;
   private hasSelectedFeature: boolean = false;
   private currentSelectedFeature: any = null;
+  private isDragOpacityDimmed = false;
+  private readonly dragOpacityLayerProps: Array<{ layerId: string; paintProperty: string }> = [
+    { layerId: 'content-layer-fill', paintProperty: 'fill-opacity' },
+    { layerId: 'content-layer-outline', paintProperty: 'line-opacity' },
+    { layerId: 'content-layer-highlight', paintProperty: 'line-opacity' },
+    { layerId: 'content-layer-selection', paintProperty: 'line-opacity' }
+  ];
+  private dragStartOpacityHandler?: () => void;
+  private dragEndOpacityHandler?: () => void;
 
   // Nominatim search properties
   searchQuery: string = '';
@@ -187,6 +196,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         this.map.setStyle(style);
         // Re-setup event handlers after style change (MapLibre removes them when style changes)
         this.map.once('style.load', () => {
+          this.setupDragOpacityHandlers();
           this.setupFeatureInteractions();
           this.setupTileLoadingEvents();
           // Re-apply selection border if a feature is selected
@@ -237,6 +247,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       this.map.once('load', () => {
         if (this.map) {
           this.map.addControl(new MinimapControl(this.mapService.getMinimapConfig()), 'bottom-right');
+          this.setupDragOpacityHandlers();
           this.setupFeatureInteractions();
           this.setupTileLoadingEvents();
           this.map.addControl(new AttributionControl({customAttribution:'Hintergrundkarte: © OpenStreetMap, CARTO', compact: true}), 'bottom-right');
@@ -765,5 +776,54 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     this.map.on('error', () => {
       this.mapService.setMapLoading(false);
     });
+  }
+
+  private setupDragOpacityHandlers(): void {
+    if (!this.map) {
+      return;
+    }
+
+    if (this.dragStartOpacityHandler) {
+      this.map.off('dragstart', this.dragStartOpacityHandler);
+    }
+    if (this.dragEndOpacityHandler) {
+      this.map.off('dragend', this.dragEndOpacityHandler);
+    }
+
+    this.isDragOpacityDimmed = false;
+    this.dragStartOpacityHandler = () => {
+      if (!this.map || this.isDragOpacityDimmed) {
+        return;
+      }
+      this.scaleFeatureLayerOpacity(0.2);
+      this.isDragOpacityDimmed = true;
+    };
+    this.dragEndOpacityHandler = () => {
+      if (!this.map || !this.isDragOpacityDimmed) {
+        return;
+      }
+      this.scaleFeatureLayerOpacity(5);
+      this.isDragOpacityDimmed = false;
+    };
+
+    this.map.on('dragstart', this.dragStartOpacityHandler);
+    this.map.on('dragend', this.dragEndOpacityHandler);
+  }
+
+  private scaleFeatureLayerOpacity(factor: number): void {
+    if (!this.map) {
+      return;
+    }
+
+    for (const layer of this.dragOpacityLayerProps) {
+      if (!this.map.getLayer(layer.layerId)) {
+        continue;
+      }
+      const currentOpacity = this.map.getPaintProperty(layer.layerId, layer.paintProperty);
+      if (currentOpacity === undefined || currentOpacity === null) {
+        continue;
+      }
+      this.map.setPaintProperty(layer.layerId, layer.paintProperty, ['*', currentOpacity as any, factor]);
+    }
   }
 }
