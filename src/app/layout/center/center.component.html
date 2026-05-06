@@ -31,6 +31,12 @@
   </div>
   <!-- Legend -->
   <div class="map-legend absolute top-0 left-0 md:bottom-0 md:left-0 md:right-auto md:top-auto" (click)="openLegendDialog()" [title]="'map.search.clickForInfo' | translate">
+    <div class="legend-hint" *ngIf="showLegendClickHint">
+      <span class="legend-hint-text">{{ 'map.legend.hint.clickEntries' | translate }}</span>
+      <button type="button" class="legend-hint-close" (click)="dismissLegendClickHint($event)" [attr.aria-label]="'map.legend.hint.dismiss' | translate">
+        &times;
+      </button>
+    </div>
     <!-- Quality legend (A-F letters) -->
     <div class="legend-quality" *ngIf="isQualityMode">
       <div class="legend-items">
@@ -39,6 +45,7 @@
           *ngFor="let item of qualityColors"
           (click)="toggleQualityBracket($event, item.letter)"
           [class.legend-item-inactive]="!isQualityBracketSelected(item.letter)"
+          [attr.title]="('map.legend.quality.' + (item.letter | lowercase) + '.title') | translate"
         >
           <div class="legend-circle" [style.background-color]="item.color">
             <span class="legend-letter">{{ item.letter }}</span>
@@ -55,16 +62,13 @@
           [style.background-color]="item.color"
           (click)="toggleTimeBracket($event, item.value)"
           [class.legend-item-inactive]="!isTimeBracketSelected(item.value)"
+          [attr.title]="('map.legend.time.brackets.' + item.value) | translate"
         ></div>
       </div>
       <div class="legend-labels">
-        <span class="legend-label">{{ 'map.legend.time.min0' | translate }}</span>
-        <span class="legend-label">7</span>
-        <span class="legend-label">15</span>
-        <span class="legend-label">23</span>
-        <span class="legend-label">30</span>
-        <span class="legend-label">45</span>
-        <span class="legend-label">45+</span>
+        <span class="legend-label" *ngFor="let item of timeColors">
+          {{ getTimeBracketLabel(item.value) }}
+        </span>
       </div>
     </div>
   </div>

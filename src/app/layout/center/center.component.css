@@ -218,11 +218,12 @@
   border-width: 1px;
   border-style: solid;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
-  padding: 8px;
+  padding: 10px;
   z-index: 1000;
   min-width: auto;
   cursor: pointer;
   transition: all 0.2s ease;
+  overflow: visible;
 }
 
 /* Desktop: bottom-left positioning */
@@ -233,8 +234,8 @@
     top: auto;
     right: auto;
     border-radius: 0 0.75rem 0 0.75rem; /* top-left rounded, top-right pointy, bottom-right rounded, bottom-left pointy */
-    padding: 12px;
-    min-width: 200px;
+    padding: 14px;
+    min-width: 240px;
   }
 }
 
@@ -246,20 +247,20 @@
 .legend-quality {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 @media (min-width: 768px) {
   .legend-quality {
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
   }
 }
 
 .legend-items {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   align-items: center;
   justify-content: center;
 }
@@ -267,7 +268,7 @@
 @media (min-width: 768px) {
   .legend-items {
     flex-direction: row;
-    gap: 8px;
+    gap: 10px;
   }
 }
 
@@ -280,32 +281,33 @@
 }
 
 .legend-circle {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
 }
 
 @media (min-width: 768px) {
   .legend-circle {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
   }
 }
 
 .legend-letter {
   color: white;
-  font-weight: 600;
-  font-size: 11px;
+  font-weight: 700;
+  font-size: 12px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 @media (min-width: 768px) {
   .legend-letter {
-    font-size: 14px;
+    font-size: 15px;
   }
 }
 
@@ -313,24 +315,25 @@
 .legend-time {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .legend-steps {
   display: flex;
   width: 100%;
-  height: 16px;
+  height: 20px;
   border-radius: 4px;
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14);
 }
 
 @media (min-width: 768px) {
   .legend-time {
-    gap: 6px;
+    gap: 8px;
   }
   .legend-steps {
-    height: 20px;
+    height: 24px;
   }
 }
 
@@ -339,6 +342,11 @@
   height: 100%;
   cursor: pointer;
   transition: opacity 0.2s ease;
+  border-right: 1px solid rgba(255, 255, 255, 0.65);
+}
+
+.legend-step:last-child {
+  border-right: none;
 }
 
 .legend-item-inactive {
@@ -346,21 +354,79 @@
 }
 
 .legend-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 9px;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  font-size: 10px;
   color: var(--primary-color);
-  font-weight: 500;
+  font-weight: 600;
+  line-height: 1.2;
+  gap: 0;
 }
 
 @media (min-width: 768px) {
   .legend-labels {
-    font-size: 11px;
+    font-size: 12px;
   }
 }
 
 .legend-label {
   color: var(--primary-color);
+  text-align: center;
+}
+
+.legend-hint {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 70%;
+  transform: translateX(-50%);
+  max-width: min(260px, calc(100% - 16px));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  background-color: var(--background-color);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  color: var(--primary-color);
+  font-size: 11px;
+  font-weight: 500;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.legend-hint-text {
+  line-height: 1.25;
+}
+
+.legend-hint-close {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--primary-color);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.legend-hint-close:hover {
+  background: rgba(0, 0, 0, 0.14);
+}
+
+@media (max-width: 767px) {
+  .legend-hint {
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: min(250px, calc(100% - 12px));
+  }
 }
 
 /* Search form field styling - pill shaped with primary background */

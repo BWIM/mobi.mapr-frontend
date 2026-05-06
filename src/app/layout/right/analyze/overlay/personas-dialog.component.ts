@@ -61,12 +61,12 @@ export class PersonasDialogComponent implements OnInit, AfterViewInit {
 
   // Time (score) colors - match exact colors from map.service.ts getScoreFillColorExpression()
   timeColors = [
-    { value: '0-7', color: 'rgb(23, 25, 63)' },      // 0-7 min (default for < 480) - darkest
-    { value: '8-15', color: 'rgb(43, 40, 105)' },   // 8-15 min (480-960s) - very dark
-    { value: '16-23', color: 'rgb(74, 89, 160)' },    // 16-23 min (960-1440s) - darker
-    { value: '24-30', color: 'rgb(90, 135, 185)' },   // 24-30 min (1440-1800s) - medium
-    { value: '31-45', color: 'rgb(121, 194, 230)' },  // 31-45 min (1800-2700s) - medium-light
-    { value: '45+', color: 'rgb(162, 210, 235)' }     // 45+ min (2700+s) - lightest
+    { value: '0-7', color: 'rgb(46, 125, 50)' },      // 0-7 min (default for < 480) - strong green
+    { value: '8-15', color: 'rgb(102, 187, 106)' },   // 8-15 min (480-960s) - light green
+    { value: '16-23', color: 'rgb(253,216,53)' },   // 16-23 min (960-1440s) - strong yellow
+    { value: '24-30', color: 'rgb(255, 241, 118)' },  // 24-30 min (1440-1800s) - light yellow
+    { value: '31-45', color: 'rgb(239, 83, 80)' },    // 31-45 min (1800-2700s) - light red
+    { value: '45+', color: 'rgb(183, 28, 28)' }       // 45+ min (2700+s) - dark red
   ];
 
   private languageService = inject(LanguageService);
@@ -492,17 +492,17 @@ export class PersonasDialogComponent implements OnInit, AfterViewInit {
 
   private getScoreColor(score: number): string {
     if (score < 480) {
-      return 'rgb(23, 25, 63)'; // 0-7 min (default for < 480) - darkest
+      return 'rgb(46, 125, 50)'; // 0-7 min (default for < 480) - strong green
     } else if (score < 960) {
-      return 'rgb(43, 40, 105)'; // 8-15 min (480-960s) - very dark
+      return 'rgb(102, 187, 106)'; // 8-15 min (480-960s) - light green
     } else if (score < 1440) {
-      return 'rgb(74, 89, 160)'; // 16-23 min (960-1440s) - darker
+      return 'rgb(253,216,53)'; // 16-23 min (960-1440s) - strong yellow
     } else if (score < 1800) {
-      return 'rgb(90, 135, 185)'; // 24-30 min (1440-1800s) - medium
+      return 'rgb(255, 241, 118)'; // 24-30 min (1440-1800s) - light yellow
     } else if (score < 2700) {
-      return 'rgb(121, 194, 230)'; // 31-45 min (1800-2700s) - medium-light
+      return 'rgb(239, 83, 80)'; // 31-45 min (1800-2700s) - light red
     } else {
-      return 'rgb(162, 210, 235)'; // 45+ min (2700+s) - lightest
+      return 'rgb(183, 28, 28)'; // 45+ min (2700+s) - dark red
     }
   }
 

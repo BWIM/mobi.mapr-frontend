@@ -280,7 +280,19 @@
         "scaleDescription": "Die Skala ist dabei linear aufgebaut und wird in Minuten angegeben.",
         "howToRead": "Die Farben auf der Karte zeigen die Mobilitätszeit von dunkelblau (kurze Zeiten, 0-15 Minuten) bis hellblau (lange Zeiten, über 60 Minuten). Je dunkler die Farbe, desto kürzer die Mobilitätszeit.",
         "min0": "0 min",
-        "min60Plus": "60+ min"
+        "min60Plus": "60+ min",
+        "brackets": {
+          "0-7": "<=7 Minuten",
+          "8-15": "8-15 Minuten",
+          "16-23": "16-23 Minuten",
+          "24-30": "24-30 Minuten",
+          "31-45": "31-45 Minuten",
+          "45+": "45+ Minuten"
+        }
+      },
+      "hint": {
+        "clickEntries": "Tipp: Du kannst die Farben in der Legende anklicken, um die Karte nach Zeiten/Bewertung zu filtern.",
+        "dismiss": "Hinweis schließen"
       }
     }
   },
