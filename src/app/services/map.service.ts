@@ -833,12 +833,12 @@ export class MapService {
     return [
       'step',
       ['get', 'score'],
-      'rgb(23,25,63)',     // 0-7 min (default for < 480) - darkest
-      480, 'rgb(43,40,105)',   // 8-15 min (480-960s) - very dark
-      960, 'rgb(74,89,160)',    // 16-23 min (960-1440s) - darker
-      1440, 'rgb(90,135,185)',  // 24-30 min (1440-1800s) - medium
-      1800, 'rgb(121,194,230)', // 31-45 min (1800-2700s) - medium-light
-      2700, 'rgb(162,210,235)'  // 45+ min (2700+s) - lightest
+      'rgb(46,125,50)',     // 0-7 min (default for < 480) - strong green
+      480, 'rgb(102,187,106)',  // 8-15 min (480-960s) - light green
+      960, 'rgb(249,168,37)',   // 16-23 min (960-1440s) - strong yellow
+      1440, 'rgb(255,241,118)', // 24-30 min (1440-1800s) - light yellow
+      1800, 'rgb(239,83,80)',   // 31-45 min (1800-2700s) - light red
+      2700, 'rgb(183,28,28)'    // 45+ min (2700+s) - dark red
     ];
   }
 
@@ -853,17 +853,17 @@ export class MapService {
       return [
         'step',
         baseExpression[1], // ['get', 'score']
-        'rgb(21,23,57)',      // rgb(23,25,63) * 0.9 (rounded)
+        'rgb(41,113,45)',     // rgb(46,125,50) * 0.9 (rounded)
         baseExpression[3], // 480
-        'rgb(39,36,95)',      // rgb(43,40,105) * 0.9 (rounded)
+        'rgb(92,168,95)',     // rgb(102,187,106) * 0.9 (rounded)
         baseExpression[5], // 960
-        'rgb(67,80,144)',     // rgb(74,89,160) * 0.9 (rounded)
+        'rgb(224,151,33)',    // rgb(249,168,37) * 0.9 (rounded)
         baseExpression[7], // 1440
-        'rgb(81,122,167)',    // rgb(90,135,185) * 0.9 (rounded)
+        'rgb(230,217,106)',   // rgb(255,241,118) * 0.9 (rounded)
         baseExpression[9], // 1800
-        'rgb(109,175,207)',   // rgb(121,194,230) * 0.9 (rounded)
+        'rgb(215,75,72)',     // rgb(239,83,80) * 0.9 (rounded)
         baseExpression[11], // 2700
-        'rgb(146,189,212)'    // rgb(162,210,235) * 0.9 (rounded)
+        'rgb(165,25,25)'      // rgb(183,28,28) * 0.9 (rounded)
       ];
     } else if (baseExpression[0] === 'case') {
       // Darken index color expression by 10% (multiply RGB by 0.9)

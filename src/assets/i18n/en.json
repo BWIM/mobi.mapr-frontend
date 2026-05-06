@@ -280,7 +280,19 @@
         "scaleDescription": "The scale is structured linearly and is given in minutes.",
         "howToRead": "The colors on the map show mobility time from dark blue (short times, 0-15 minutes) to light blue (long times, over 60 minutes). The darker the color, the shorter the mobility time.",
         "min0": "0 min",
-        "min60Plus": "60+ min"
+        "min60Plus": "60+ min",
+        "brackets": {
+          "0-7": "<=7 minutes",
+          "8-15": "8-15 minutes",
+          "16-23": "16-23 minutes",
+          "24-30": "24-30 minutes",
+          "31-45": "31-45 minutes",
+          "45+": "45+ minutes"
+        }
+      },
+      "hint": {
+        "clickEntries": "Tip: You can click the colors in the legend to filter the map by time/rating.",
+        "dismiss": "Dismiss hint"
       }
     }
   },

@@ -15,6 +15,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SearchService } from '../../services/search.service';
 import { BottomComponent } from '../bottom/bottom.component';
 import { QualityBracket, TimeBracket } from '../../services/filter-config.service';
+import { SettingsService } from '../../services/settings.service';
 
 interface NominatimResult {
   display_name: string;
@@ -47,17 +48,28 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private featureSelectionService = inject(FeatureSelectionService);
   private translate = inject(TranslateService);
   private searchService = inject(SearchService);
+  private settingsService = inject(SettingsService);
   private popup?: Popup;
   private contextMenuPopup?: Popup;
   private contextMenuFeature: any = null;
   private hasSelectedFeature: boolean = false;
   private currentSelectedFeature: any = null;
+  private isDragOpacityDimmed = false;
+  private readonly dragOpacityLayerProps: Array<{ layerId: string; paintProperty: string }> = [
+    { layerId: 'content-layer-fill', paintProperty: 'fill-opacity' },
+    { layerId: 'content-layer-outline', paintProperty: 'line-opacity' },
+    { layerId: 'content-layer-highlight', paintProperty: 'line-opacity' },
+    { layerId: 'content-layer-selection', paintProperty: 'line-opacity' }
+  ];
+  private dragStartOpacityHandler?: () => void;
+  private dragEndOpacityHandler?: () => void;
 
   // Nominatim search properties
   searchQuery: string = '';
   searchResults: NominatimResult[] = [];
   private searchSubject = new Subject<string>();
   isGettingLocation: boolean = false;
+  showLegendClickHint: boolean = true;
 
   constructor(private mapService: MapService) {
     // Setup debounced search
@@ -117,13 +129,21 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   // 23, 25, 63
   // Time (score) colors - updated ranges
   timeColors: Array<{ value: TimeBracket; color: string }> = [
-    { value: '0-7', color: 'rgb(23, 25, 63)' },
-    { value: '8-15', color: 'rgb(43, 40, 105)' },
-    { value: '16-23', color: 'rgb(74, 89, 160)' },
-    { value: '24-30', color: 'rgb(90, 135, 185)' },
-    { value: '31-45', color: 'rgb(121, 194, 230)' },
-    { value: '45+', color: 'rgb(162, 210, 235)' }
+    { value: '0-7', color: 'rgb(46, 125, 50)' },
+    { value: '8-15', color: 'rgb(102, 187, 106)' },
+    { value: '16-23', color: 'rgb(253,216,53)' },
+    { value: '24-30', color: 'rgb(255, 241, 118)' },
+    { value: '31-45', color: 'rgb(239, 83, 80)' },
+    { value: '45+', color: 'rgb(183, 28, 28)' }
   ];
+  private readonly timeBracketDisplayLabels: Record<TimeBracket, string> = {
+    '0-7': '<=7',
+    '8-15': '8-15',
+    '16-23': '16-23',
+    '24-30': '24-30',
+    '31-45': '31-45',
+    '45+': '45+'
+  };
 
   isQualityBracketSelected(bracket: QualityBracket): boolean {
     return this.filterConfigService.isQualityBracketSelected(bracket);
@@ -141,6 +161,10 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   toggleTimeBracket(event: MouseEvent, bracket: TimeBracket): void {
     event.stopPropagation();
     this.filterConfigService.toggleTimeBracket(bracket);
+  }
+
+  getTimeBracketLabel(bracket: TimeBracket): string {
+    return this.timeBracketDisplayLabels[bracket];
   }
 
   getIndexName(index: number): string {
@@ -166,6 +190,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   openLegendDialog(): void {
+    this.markLegendClickHintAsSeen();
     this.dialog.open(InfoDialogComponent, {
       width: '80vw',
       height: '80vh',
@@ -177,6 +202,9 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async ngOnInit() {
+    const settings = this.settingsService.loadSettings();
+    this.showLegendClickHint = settings?.legendClickHintShown !== true;
+
     // Get initial style value immediately
     this.mapStyle = await firstValueFrom(this.mapService.mapStyle$);
 
@@ -187,6 +215,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         this.map.setStyle(style);
         // Re-setup event handlers after style change (MapLibre removes them when style changes)
         this.map.once('style.load', () => {
+          this.setupDragOpacityHandlers();
           this.setupFeatureInteractions();
           this.setupTileLoadingEvents();
           // Re-apply selection border if a feature is selected
@@ -237,6 +266,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       this.map.once('load', () => {
         if (this.map) {
           this.map.addControl(new MinimapControl(this.mapService.getMinimapConfig()), 'bottom-right');
+          this.setupDragOpacityHandlers();
           this.setupFeatureInteractions();
           this.setupTileLoadingEvents();
           this.map.addControl(new AttributionControl({customAttribution:'Hintergrundkarte: © OpenStreetMap, CARTO', compact: true}), 'bottom-right');
@@ -296,6 +326,20 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.searchQuery.trim().length >= 3) {
       this.searchSubject.next(this.searchQuery.trim());
     }
+  }
+
+  dismissLegendClickHint(event?: Event): void {
+    event?.stopPropagation();
+    this.markLegendClickHintAsSeen();
+  }
+
+  private markLegendClickHintAsSeen(): void {
+    if (!this.showLegendClickHint) {
+      return;
+    }
+
+    this.showLegendClickHint = false;
+    this.settingsService.saveSettings({ legendClickHintShown: true });
   }
 
   private searchNominatim(query: string): Promise<NominatimResult[]> {
@@ -765,5 +809,54 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     this.map.on('error', () => {
       this.mapService.setMapLoading(false);
     });
+  }
+
+  private setupDragOpacityHandlers(): void {
+    if (!this.map) {
+      return;
+    }
+
+    if (this.dragStartOpacityHandler) {
+      this.map.off('dragstart', this.dragStartOpacityHandler);
+    }
+    if (this.dragEndOpacityHandler) {
+      this.map.off('dragend', this.dragEndOpacityHandler);
+    }
+
+    this.isDragOpacityDimmed = false;
+    this.dragStartOpacityHandler = () => {
+      if (!this.map || this.isDragOpacityDimmed) {
+        return;
+      }
+      this.scaleFeatureLayerOpacity(0.2);
+      this.isDragOpacityDimmed = true;
+    };
+    this.dragEndOpacityHandler = () => {
+      if (!this.map || !this.isDragOpacityDimmed) {
+        return;
+      }
+      this.scaleFeatureLayerOpacity(5);
+      this.isDragOpacityDimmed = false;
+    };
+
+    this.map.on('dragstart', this.dragStartOpacityHandler);
+    this.map.on('dragend', this.dragEndOpacityHandler);
+  }
+
+  private scaleFeatureLayerOpacity(factor: number): void {
+    if (!this.map) {
+      return;
+    }
+
+    for (const layer of this.dragOpacityLayerProps) {
+      if (!this.map.getLayer(layer.layerId)) {
+        continue;
+      }
+      const currentOpacity = this.map.getPaintProperty(layer.layerId, layer.paintProperty);
+      if (currentOpacity === undefined || currentOpacity === null) {
+        continue;
+      }
+      this.map.setPaintProperty(layer.layerId, layer.paintProperty, ['*', currentOpacity as any, factor]);
+    }
   }
 }

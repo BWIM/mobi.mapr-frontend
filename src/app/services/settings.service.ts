@@ -10,6 +10,7 @@ export interface UserSettings {
     quality: Array<'A' | 'B' | 'C' | 'D' | 'E' | 'F'>;
     time: Array<'0-7' | '8-15' | '16-23' | '24-30' | '31-45' | '45+'>;
   };
+  legendClickHintShown?: boolean;
   filters: {
     activities: number[];
     personas: number | number[] | null; // Support both old array format and new single value format
@@ -65,6 +66,7 @@ export class SettingsService {
         quality: ['A', 'B', 'C', 'D', 'E', 'F'],
         time: ['0-7', '8-15', '16-23', '24-30', '31-45', '45+']
       },
+      legendClickHintShown: false,
       filters: {
         activities: [],
         personas: null,

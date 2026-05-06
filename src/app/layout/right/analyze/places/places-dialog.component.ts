@@ -75,12 +75,12 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // Time (score) colors - must match map.service.ts getScoreFillColorExpression()
   timeColors = [
-    { value: '0-7', color: 'rgb(23, 25, 63)' },
-    { value: '8-15', color: 'rgb(43, 40, 105)' },
-    { value: '16-23', color: 'rgb(74, 89, 160)' },
-    { value: '24-30', color: 'rgb(90, 135, 185)' },
-    { value: '31-45', color: 'rgb(121, 194, 230)' },
-    { value: '45+', color: 'rgb(162, 210, 235)' }
+    { value: '0-7', color: 'rgb(46, 125, 50)' },
+    { value: '8-15', color: 'rgb(102, 187, 106)' },
+    { value: '16-23', color: 'rgb(253,216,53)' },
+    { value: '24-30', color: 'rgb(255, 241, 118)' },
+    { value: '31-45', color: 'rgb(239, 83, 80)' },
+    { value: '45+', color: 'rgb(183, 28, 28)' }
   ];
 
   private placesService = inject(PlacesService);
@@ -302,17 +302,17 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private getScoreColor(score: number): string {
     if (score < 480) {
-      return 'rgb(23, 25, 63)';
+      return 'rgb(46, 125, 50)';
     } else if (score < 960) {
-      return 'rgb(43, 40, 105)';
+      return 'rgb(102, 187, 106)';
     } else if (score < 1440) {
-      return 'rgb(74, 89, 160)';
+      return 'rgb(253,216,53)';
     } else if (score < 1800) {
-      return 'rgb(90, 135, 185)';
+      return 'rgb(255, 241, 118)';
     } else if (score < 2700) {
-      return 'rgb(121, 194, 230)';
+      return 'rgb(239, 83, 80)';
     } else {
-      return 'rgb(162, 210, 235)';
+      return 'rgb(183, 28, 28)';
     }
   }
 
