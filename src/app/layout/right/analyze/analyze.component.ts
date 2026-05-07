@@ -111,8 +111,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   timeColors = [
     { value: '0-7', color: 'rgb(46, 125, 50)' },
     { value: '8-15', color: 'rgb(102, 187, 106)' },
-    { value: '16-23', color: 'rgb(253,216,53)' },
-    { value: '24-30', color: 'rgb(255, 241, 118)' },
+    { value: '16-23', color: 'rgb(255, 241, 118)' },
+    { value: '24-30', color: 'rgb(253,216,53)' },
     { value: '31-45', color: 'rgb(239, 83, 80)' },
     { value: '45+', color: 'rgb(183, 28, 28)' }
   ];
@@ -584,9 +584,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     } else if (score < 900) {
       return 'rgb(102, 187, 106)'; // 11-15 min (600-900s) - light green
     } else if (score < 1200) {
-      return 'rgb(253,216,53)'; // 16-20 min (900-1200s) - strong yellow
+      return 'rgb(255, 241, 118)'; // 16-20 min (900-1200s) - light yellow
     } else if (score < 1800) {
-      return 'rgb(255, 241, 118)'; // 21-30 min (1200-1800s) - light yellow
+      return 'rgb(253,216,53)'; // 21-30 min (1200-1800s) - strong yellow
     } else if (score < 2700) {
       return 'rgb(239, 83, 80)'; // 31-45 min (1800-2700s) - light red
     } else {
@@ -1211,9 +1211,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         } else if (scoreValue < 900) {
           return 'rgb(102, 187, 106)'; // 11-15 min (600-900s) - light green
         } else if (scoreValue < 1200) {
-          return 'rgb(253,216,53)'; // 16-20 min (900-1200s) - strong yellow
+          return 'rgb(255, 241, 118)'; // 16-20 min (900-1200s) - light yellow
         } else if (scoreValue < 1800) {
-          return 'rgb(255, 241, 118)'; // 21-30 min (1200-1800s) - light yellow
+          return 'rgb(253,216,53)'; // 21-30 min (1200-1800s) - strong yellow
         } else if (scoreValue < 2700) {
           return 'rgb(239, 83, 80)'; // 31-45 min (1800-2700s) - light red
         } else {
@@ -1414,9 +1414,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         } else if (scoreValue < 900) {
           return 'rgb(102, 187, 106)'; // 11-15 min (600-900s) - light green
         } else if (scoreValue < 1200) {
-          return 'rgb(253,216,53)'; // 16-20 min (900-1200s) - strong yellow
+          return 'rgb(255, 241, 118)'; // 16-20 min (900-1200s) - light yellow
         } else if (scoreValue < 1800) {
-          return 'rgb(255, 241, 118)'; // 21-30 min (1200-1800s) - light yellow
+          return 'rgb(253,216,53)'; // 21-30 min (1200-1800s) - strong yellow
         } else if (scoreValue < 2700) {
           return 'rgb(239, 83, 80)'; // 31-45 min (1800-2700s) - light red
         } else {
@@ -2147,9 +2147,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     } else if (score < 960) {
       return 'rgb(102, 187, 106)';
     } else if (score < 1440) {
-      return 'rgb(253,216,53)';
-    } else if (score < 1800) {
       return 'rgb(255, 241, 118)';
+    } else if (score < 1800) {
+      return 'rgb(253,216,53)';
     } else if (score < 2700) {
       return 'rgb(239, 83, 80)';
     } else {

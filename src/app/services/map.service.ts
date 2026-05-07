@@ -835,8 +835,8 @@ export class MapService {
       ['get', 'score'],
       'rgb(46,125,50)',     // 0-7 min (default for < 480) - strong green
       480, 'rgb(102,187,106)',  // 8-15 min (480-960s) - light green
-      960, 'rgb(249,168,37)',   // 16-23 min (960-1440s) - strong yellow
-      1440, 'rgb(255,241,118)', // 24-30 min (1440-1800s) - light yellow
+      960, 'rgb(255,241,118)', // 16-23 min (960-1440s) - light yellow
+      1440, 'rgb(253,216,53)', // 24-30 min (1440-1800s) - strong yellow
       1800, 'rgb(239,83,80)',   // 31-45 min (1800-2700s) - light red
       2700, 'rgb(183,28,28)'    // 45+ min (2700+s) - dark red
     ];
@@ -857,9 +857,9 @@ export class MapService {
         baseExpression[3], // 480
         'rgb(92,168,95)',     // rgb(102,187,106) * 0.9 (rounded)
         baseExpression[5], // 960
-        'rgb(224,151,33)',    // rgb(249,168,37) * 0.9 (rounded)
-        baseExpression[7], // 1440
         'rgb(230,217,106)',   // rgb(255,241,118) * 0.9 (rounded)
+        baseExpression[7], // 1440
+        'rgb(228,194,48)',    // rgb(253,216,53) * 0.9 (rounded)
         baseExpression[9], // 1800
         'rgb(215,75,72)',     // rgb(239,83,80) * 0.9 (rounded)
         baseExpression[11], // 2700

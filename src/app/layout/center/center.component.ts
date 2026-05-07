@@ -131,8 +131,8 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   timeColors: Array<{ value: TimeBracket; color: string }> = [
     { value: '0-7', color: 'rgb(46, 125, 50)' },
     { value: '8-15', color: 'rgb(102, 187, 106)' },
-    { value: '16-23', color: 'rgb(253,216,53)' },
-    { value: '24-30', color: 'rgb(255, 241, 118)' },
+    { value: '16-23', color: 'rgb(255, 241, 118)' },
+    { value: '24-30', color: 'rgb(253,216,53)' },
     { value: '31-45', color: 'rgb(239, 83, 80)' },
     { value: '45+', color: 'rgb(183, 28, 28)' }
   ];
