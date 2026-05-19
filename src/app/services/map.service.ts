@@ -698,14 +698,15 @@ export class MapService {
     }
     updatedStyle.layers.push(fillLayer as LayerSpecification);
 
-    // Add outline layer
+    // Add outline layer (darkened stroke so borders stay visible on light fills, e.g. yellow/orange)
+    const outlineColorExpression = this.getDarkenedColorExpression(fillColorExpression, 0.75);
     const outlineLayer: any = {
       id: 'content-layer-outline',
       type: 'line',
       source: 'content-layer',
       'source-layer': 'geodata',
       paint: {
-        'line-color': fillColorExpression,
+        'line-color': outlineColorExpression,
         'line-width': 1,
         'line-opacity': lineOpacityExpression
       }
@@ -843,49 +844,41 @@ export class MapService {
   }
 
   /**
-   * Returns a darkened version of the fill color expression (10% black added)
-   * Used for highlight borders to make them stand out better
+   * Returns a darkened copy of a fill color expression (multiply RGB channels by factor).
+   * @param factor 1 = unchanged; 0.9 ≈ 10% darker (highlights); 0.75 ≈ 25% darker (outlines)
    */
-  private getDarkenedColorExpression(baseExpression: any): any {
-    if (baseExpression[0] === 'step') {
-      // Darken score color expression by 10% (multiply RGB by 0.9)
-      // Structure: ['step', input, default, threshold1, color1, threshold2, color2, ...]
-      return [
-        'step',
-        baseExpression[1], // ['get', 'score']
-        'rgb(41,113,45)',     // rgb(46,125,50) * 0.9 (rounded)
-        baseExpression[3], // 480
-        'rgb(92,168,95)',     // rgb(102,187,106) * 0.9 (rounded)
-        baseExpression[5], // 960
-        'rgb(230,217,106)',   // rgb(255,241,118) * 0.9 (rounded)
-        baseExpression[7], // 1440
-        'rgb(228,194,48)',    // rgb(253,216,53) * 0.9 (rounded)
-        baseExpression[9], // 1800
-        'rgb(215,75,72)',     // rgb(239,83,80) * 0.9 (rounded)
-        baseExpression[11], // 2700
-        'rgb(165,25,25)'      // rgb(183,28,28) * 0.9 (rounded)
-      ];
-    } else if (baseExpression[0] === 'case') {
-      // Darken index color expression by 10% (multiply RGB by 0.9)
-      // Structure: ['case', condition1, color1, condition2, color2, ..., defaultColor]
-      return [
-        'case',
-        baseExpression[1], // ['<=', ['/', ['get', 'index'], 100], 0]
-        'rgba(115, 115, 115, 0)', // rgba(128, 128, 128, 0) * 0.9 (rounded)
-        baseExpression[3], // ['<', ['/', ['get', 'index'], 100], 0.35]
-        'rgba(45, 87, 41, 1)',    // rgba(50, 97, 45, 0.7) * 0.9, full opacity
-        baseExpression[5], // ['<', ['/', ['get', 'index'], 100], 0.5]
-        'rgba(54, 158, 60, 1)',   // rgba(60, 176, 67, 0.7) * 0.9, full opacity
-        baseExpression[7], // ['<', ['/', ['get', 'index'], 100], 0.71]
-        'rgba(214, 189, 2, 1)',   // rgba(238, 210, 2, 0.7) * 0.9, full opacity
-        baseExpression[9], // ['<', ['/', ['get', 'index'], 100], 1.0]
-        'rgba(213, 101, 18, 1)',  // rgba(237, 112, 20, 0.7) * 0.9, full opacity
-        baseExpression[11], // ['<', ['/', ['get', 'index'], 100], 1.41]
-        'rgba(175, 22, 6, 1)',    // rgba(194, 24, 7, 0.7) * 0.9, full opacity
-        'rgba(135, 77, 146, 1)'   // rgba(150, 86, 162, 0.7) * 0.9, full opacity
-      ];
+  private getDarkenedColorExpression(baseExpression: any, factor = 0.9): any {
+    if (baseExpression[0] === 'step' || baseExpression[0] === 'case') {
+      const result = [baseExpression[0], baseExpression[1]];
+      for (let i = 2; i < baseExpression.length; i++) {
+        const entry = baseExpression[i];
+        result.push(
+          typeof entry === 'string' && (entry.startsWith('rgb') || entry.startsWith('rgba'))
+            ? this.darkenColor(entry, factor)
+            : entry
+        );
+      }
+      return result;
     }
     return baseExpression;
+  }
+
+  /** Darkens an rgb/rgba color string; outline strokes use full opacity. */
+  private darkenColor(color: string, factor: number): string {
+    const match = color.match(
+      /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)$/
+    );
+    if (!match) {
+      return color;
+    }
+    const r = Math.round(Number(match[1]) * factor);
+    const g = Math.round(Number(match[2]) * factor);
+    const b = Math.round(Number(match[3]) * factor);
+    const alpha = match[4] !== undefined ? Number(match[4]) : undefined;
+    if (alpha !== undefined) {
+      return alpha === 0 ? color : `rgba(${r}, ${g}, ${b}, 1)`;
+    }
+    return `rgb(${r}, ${g}, ${b})`;
   }
 
   /**

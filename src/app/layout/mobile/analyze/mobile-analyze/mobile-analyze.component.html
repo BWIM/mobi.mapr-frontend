@@ -1,0 +1,321 @@
+<ng-template #personasInfoTpl>
+  <p class="p-4 text-sm text-[var(--primary-color)] leading-relaxed whitespace-pre-line">{{ personasInfoText }}</p>
+</ng-template>
+
+<ng-template #placesRelevanceInfoTpl>
+  <p class="p-4 text-sm text-[var(--primary-color)] leading-relaxed whitespace-pre-line">{{ placesRelevanceInfoText }}</p>
+</ng-template>
+
+@switch (step()) {
+  @case ('main') {
+    @if (!facade.selectedFeature()) {
+      <p class="text-sm text-[var(--primary-color)] text-center py-8 px-4">
+        {{ 'analyze.selectPlace' | translate }}
+      </p>
+    } @else if (facade.isLoading()) {
+      <div class="flex flex-col items-center py-12">
+        <mat-spinner diameter="40" />
+        <p class="text-sm text-[var(--primary-color)] mt-4">{{ 'analyze.loading' | translate }}</p>
+      </div>
+    } @else {
+      @if (facade.featureInfo(); as info) {
+        <div class="rounded-xl overflow-hidden text-white mb-3 mx-2 mt-2">
+          <div class="px-3 py-2 flex items-start justify-between gap-2 border-b border-white border-opacity-20">
+            <div class="min-w-0 flex-1">
+              <h3 class="text-base font-bold leading-tight flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+                <span>{{ info.name }}</span>
+                <span class="text-xs font-normal opacity-60 tabular-nums">{{ info.population | number }} {{ 'analyze.population' | translate }}</span>
+              </h3>
+              @if (info.regiostar_name) {
+                <p class="text-xs text-[var(--light-primary-color)] mt-0.5">{{ info.regiostar_name }}</p>
+              }
+              @if (facade.hexagonId(); as hid) {
+                <p class="text-xs text-[var(--light-primary-color)]">Hexagon {{ hid }}</p>
+              }
+            </div>
+            <span
+              class="shrink-0 px-2 py-1 rounded text-sm font-semibold whitespace-nowrap"
+              [style.background-color]="facade.getRatingColor(info)">
+              {{ facade.getRatingDisplay(info) }}
+            </span>
+          </div>
+          <div class="px-3 py-2 text-sm">
+            <div class="grid gap-3" [class.grid-cols-2]="info.regiostar_rank">
+              <div [class.col-span-2]="!info.regiostar_rank">
+                <span class="font-semibold">{{ 'analyze.rank.overall' | translate }}</span>
+                <span class="text-xs opacity-80 ml-1">{{ 'analyze.rank.overallLabel' | translate }}</span>
+                <div class="text-2xl font-bold">
+                  {{ info.rank }} <span class="text-sm font-normal">/ {{ info.total_ranks }}</span>
+                </div>
+                <div class="text-xs opacity-90">{{ facade.getRankPercentage(info.rank, info.total_ranks) }}</div>
+              </div>
+              @if (info.regiostar_rank) {
+                <div>
+                  <span class="font-semibold">{{ 'analyze.rank.regionalClass' | translate }}</span>
+                  <span class="text-xs opacity-80 ml-1">{{ 'analyze.rank.regionalClassLabel' | translate }}</span>
+                  <div class="text-2xl font-bold">
+                    {{ info.regiostar_rank }} <span class="text-sm font-normal">/ {{ info.regiostar_total_ranks }}</span>
+                  </div>
+                  <div class="text-xs opacity-90">{{ facade.getRankPercentage(info.regiostar_rank, info.regiostar_total_ranks) }}</div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <div class="flex flex-col flex-1 p-2">
+        @if (facade.featureInfoError()) {
+          <p class="text-sm text-red-600 py-2">{{ facade.featureInfoError() }}</p>
+        }
+
+        @if (facade.shouldShowMap()) {
+          <div class="mb-4 p-3 rounded-xl border border-[var(--primary-color)] border-opacity-30">
+            <p class="text-sm text-white mb-2">{{ 'analyze.categories' | translate }}</p>
+            <button
+              type="button"
+              class="w-full py-2 text-sm font-medium rounded-full bg-[var(--primary-color)] text-[var(--background-color)]"
+              (click)="openPlacesFromMap()">
+              {{ 'mobile.analyze.openPlacesMap' | translate }}
+            </button>
+          </div>
+        } @else if (facade.analyzeError()) {
+          <p class="text-sm text-red-600 py-2">{{ facade.analyzeError() }}</p>
+        } @else {
+          @if (facade.isAllPersonas()) {
+            <div class="flex rounded-full border border-[var(--primary-color)] mb-3 overflow-hidden">
+              <button
+                type="button"
+                class="flex-1 py-2 text-sm"
+                [class.bg-[var(--primary-color)]]="!showPersonasTab()"
+                [class.text-[var(--background-color)]]="!showPersonasTab()"
+                [class.text-[var(--primary-color)]]="showPersonasTab()"
+                (click)="setTab('activities')">
+                {{ 'analyze.analysis.activities' | translate }}
+              </button>
+              <button
+                type="button"
+                class="flex-1 py-2 text-sm"
+                [class.bg-[var(--primary-color)]]="showPersonasTab()"
+                [class.text-[var(--background-color)]]="showPersonasTab()"
+                [class.text-[var(--primary-color)]]="!showPersonasTab()"
+                (click)="setTab('personas')">
+                {{ 'analyze.analysis.personas' | translate }}
+              </button>
+            </div>
+          }
+
+          @if (showPersonasTab() && facade.personasChartData()) {
+            <div class="chart-host h-[180px]">
+              <p-chart type="bar" [data]="facade.personasChartData()" [options]="facade.personasChartOptions()" />
+            </div>
+            <ul class="space-y-1 mb-3">
+              @for (p of facade.getSortedPersonas(); track p.name; let i = $index) {
+                <li class="text-sm text-white"><span class="font-bold mr-1">{{ i + 1 }}.</span>{{ p.name }}</li>
+              }
+            </ul>
+            <button
+              type="button"
+              class="w-full py-2 text-sm font-medium text-[var(--primary-color)] border border-[var(--primary-color)] rounded-full"
+              (click)="openAllPersonas()">
+              {{ 'analyze.analysis.expandPersonas' | translate }}
+            </button>
+          } @else if (facade.activitiesChartData()) {
+            <div class="chart-host h-[180px]">
+              <p-chart type="bar" [data]="facade.activitiesChartData()" [options]="facade.activitiesChartOptions()" />
+            </div>
+            <ul class="space-y-1 mb-3">
+              @for (cat of facade.getSortedCategories(); track cat.category_id; let i = $index) {
+                <li class="text-sm text-white">
+                  <button type="button" class="text-left w-full" (click)="onMainCategoryClick(cat)">
+                    <span class="font-bold mr-1">{{ i + 1 }}.</span>
+                    <span class="underline">{{ cat.category_name }}</span>
+                  </button>
+                </li>
+              }
+            </ul>
+            <button
+              type="button"
+              class="w-full py-2 text-sm font-medium text-[var(--primary-color)] border border-[var(--primary-color)] rounded-full"
+              (click)="openAllActivities()">
+              {{ 'mobile.analyze.seeAllActivities' | translate }}
+            </button>
+          }
+
+          @if (
+            (showPersonasTab() && facade.personasChartData()) || facade.activitiesChartData()
+          ) {
+            <div class="border-t border-[var(--primary-color)] border-opacity-20 pt-3 mt-3 flex justify-center">
+              <ng-container *ngTemplateOutlet="legendStrip" />
+            </div>
+          }
+        }
+      </div>
+    }
+  }
+
+  @case ('activities') {
+    <div class="flex flex-col min-h-[60vh] px-2 pb-4">
+      <button
+        type="button"
+        class="flex items-center gap-1 text-sm text-[var(--primary-color)] mb-3 pt-1 self-start"
+        (click)="back()">
+        <mat-icon class="text-lg">arrow_back</mat-icon>
+        {{ 'mobile.analyze.backToAnalysis' | translate }}
+      </button>
+
+      @if (activitiesLoading()) {
+        <div class="flex justify-center py-12">
+          <mat-spinner diameter="40" />
+        </div>
+      } @else if (activitiesError()) {
+        <p class="text-sm text-red-600 text-center py-8">{{ activitiesError() }}</p>
+      } @else {
+        <div class="chart-scroll-y flex-1 min-h-0 mb-2">
+          <div class="chart-host" [style.height.px]="activitiesChartHeight()">
+            <p-chart
+              type="bar"
+              [data]="activitiesChartData()"
+              [options]="activitiesChartOptions()"
+              style="cursor: pointer"
+              (onDataSelect)="onActivitiesChartSelect($event)" />
+          </div>
+        </div>
+
+        <p class="click-hint-box text-xs text-white/90 mb-3 shrink-0">
+          {{ 'analyze.allCategoriesDialog.clickHint' | translate }}
+        </p>
+
+        <div class="border-t border-[var(--primary-color)] border-opacity-20 pt-3 shrink-0 flex justify-center">
+          <ng-container *ngTemplateOutlet="legendStrip" />
+        </div>
+      }
+    </div>
+  }
+
+  @case ('personas') {
+    <div class="flex flex-col min-h-[60vh] px-2 pb-4">
+      <button
+        type="button"
+        class="flex items-center gap-1 text-sm text-[var(--primary-color)] mb-3 pt-1 self-start"
+        (click)="back()">
+        <mat-icon class="text-lg">arrow_back</mat-icon>
+        {{ 'mobile.analyze.backToAnalysis' | translate }}
+      </button>
+
+      @if (personasLoading()) {
+        <div class="flex justify-center py-12">
+          <mat-spinner diameter="40" />
+        </div>
+      } @else if (personasError()) {
+        <p class="text-sm text-red-600 text-center py-8">{{ personasError() }}</p>
+      } @else {
+        <div class="chart-scroll-y flex-1 min-h-0 mb-2">
+          <div class="chart-host" [style.height.px]="personasChartHeight()">
+            <p-chart type="bar" [data]="personasChartData()" [options]="personasChartOptions()" />
+          </div>
+        </div>
+        <div class="border-t border-[var(--primary-color)] border-opacity-20 pt-3 relative">
+          <button
+            type="button"
+            class="absolute left-0 top-3 p-1.5 rounded-full text-[var(--primary-color)]"
+            (click)="openPersonasInfo($event)"
+            [attr.aria-label]="'mobile.analyze.info.personas' | translate">
+            <mat-icon class="text-xl">info_outline</mat-icon>
+          </button>
+          <div class="flex justify-center">
+            <ng-container *ngTemplateOutlet="legendStrip" />
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @case ('places') {
+    <div class="flex flex-col min-h-[65vh] px-2 pb-4">
+      <button
+        type="button"
+        class="flex items-center gap-1 text-sm text-[var(--primary-color)] mb-3 pt-1 self-start shrink-0"
+        (click)="back()">
+        <mat-icon class="text-lg">arrow_back</mat-icon>
+        {{ 'mobile.analyze.backToAnalysis' | translate }}
+      </button>
+
+      @if (placesError()) {
+        <p class="text-sm text-[var(--primary-color)] text-center py-12 px-4">{{ placesError() }}</p>
+      } @else {
+        <div
+          class="relative h-[50vh] min-h-[280px] w-full rounded-xl overflow-hidden border border-[var(--primary-color)] border-opacity-30 places-map-host">
+          <div #mapContainer class="w-full h-full"></div>
+
+          @if (placesLoading()) {
+            <div
+              class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[var(--background-color)] bg-opacity-95">
+              <mat-spinner diameter="40" />
+              <p class="text-sm text-[var(--primary-color)] mt-4">
+                {{ 'analyze.placesDialog.loading' | translate }}
+              </p>
+            </div>
+          }
+
+          @if (!placesLoading() && placesLegendItems().length > 0) {
+            <div class="absolute top-2 left-2 z-10 pointer-events-none">
+              <div class="pointer-events-auto flex flex-wrap gap-1.5">
+                @for (item of placesLegendItems(); track item.name) {
+                  <button
+                    type="button"
+                    class="w-4 h-4 rounded-full p-0 border-2 border-black/40 shrink-0"
+                    [class.opacity-40]="!item.enabled"
+                    [style.background-color]="item.color"
+                    [attr.aria-label]="item.name"
+                    (click)="togglePlacesCategory(item.name)"></button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (!placesLoading()) {
+          <div class="mt-3 relative shrink-0">
+            <button
+              type="button"
+              class="absolute left-0 top-0 p-1.5 rounded-full text-[var(--primary-color)]"
+              (click)="openPlacesRelevanceInfo($event)"
+              [attr.aria-label]="'mobile.analyze.info.relevance' | translate">
+              <mat-icon class="text-xl">info_outline</mat-icon>
+            </button>
+            <div class="flex justify-center pt-0.5">
+              <ng-container *ngTemplateOutlet="legendStrip" />
+            </div>
+          </div>
+        }
+      }
+    </div>
+  }
+}
+
+<ng-template #legendStrip>
+  <button
+    type="button"
+    class="flex justify-center p-0 border-0 bg-transparent cursor-pointer"
+    (click)="openLegendInfo($event)"
+    [attr.aria-label]="'mobile.analyze.info.legend' | translate">
+    @if (!detailIsScoreMode()) {
+      <span class="flex items-center justify-center gap-1.5">
+        @for (letter of qualityLetters; track letter; let i = $index) {
+          <span
+            class="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+            [style.background-color]="qualityColors[i]">
+            {{ letter }}
+          </span>
+        }
+      </span>
+    } @else {
+      <span class="flex w-[14rem] h-2.5 overflow-hidden rounded">
+        @for (color of timeColors; track $index) {
+          <span class="flex-1 h-full" [style.background-color]="color"></span>
+        }
+      </span>
+    }
+  </button>
+</ng-template>

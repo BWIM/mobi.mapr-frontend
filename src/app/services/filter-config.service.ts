@@ -1,6 +1,7 @@
 import { Injectable, inject, signal, computed, effect } from '@angular/core';
 import { Router } from '@angular/router';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { MOBILE_MEDIA_QUERY } from './mobile-ui.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ProfileService } from './profile.service';
 import { ProjectsService } from './project.service';
@@ -65,11 +66,11 @@ export class FilterConfigService {
   private router = inject(Router);
   private breakpointObserver = inject(BreakpointObserver);
 
-  // Mobile breakpoint detection (768px = md breakpoint)
   private isMobile = toSignal(
-    this.breakpointObserver.observe([Breakpoints.XSmall, Breakpoints.Small])
-      .pipe(map(result => result.matches)),
-    { initialValue: false }
+    this.breakpointObserver
+      .observe(MOBILE_MEDIA_QUERY)
+      .pipe(map((result) => result.matches)),
+    { initialValue: false },
   );
 
   // Internal state signals

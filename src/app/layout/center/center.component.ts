@@ -13,7 +13,6 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { FeatureSelectionService } from '../../shared/services/feature-selection.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SearchService } from '../../services/search.service';
-import { BottomComponent } from '../bottom/bottom.component';
 import { QualityBracket, TimeBracket } from '../../services/filter-config.service';
 import { SettingsService } from '../../services/settings.service';
 
@@ -26,7 +25,7 @@ interface NominatimResult {
 
 @Component({
   selector: 'app-center',
-  imports: [SharedModule, TranslateModule, BottomComponent],
+  imports: [SharedModule, TranslateModule],
   templateUrl: './center.component.html',
   styleUrl: './center.component.css',
 })

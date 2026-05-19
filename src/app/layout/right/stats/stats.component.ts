@@ -11,6 +11,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../services/language.service';
 import { SearchService } from '../../../services/search.service';
 import { FeatureSelectionService, MapLibreFeatureData } from '../../../shared/services/feature-selection.service';
+import { MobileUiService } from '../../../services/mobile-ui.service';
 
 @Component({
   selector: 'app-stats',
@@ -28,6 +29,7 @@ export class StatsComponent implements OnDestroy {
   private languageService = inject(LanguageService);
   private searchService = inject(SearchService);
   private featureSelectionService = inject(FeatureSelectionService);
+  private mobileUi = inject(MobileUiService);
 
   counties: County[] = [];
   isLoading = signal(true); // Start with loading state true by default (step 0)
@@ -446,8 +448,10 @@ export class StatsComponent implements OnDestroy {
         id: county.id
       };
       
-      // Select the feature in the analyze component
       this.featureSelectionService.setSelectedMapLibreFeature(featureData);
+      if (this.mobileUi.isMobile()) {
+        this.mobileUi.openAnalyze();
+      }
       // Zoom to the feature
       // this.mapService.flyTo({
       //   center: [county.lng, county.lat],

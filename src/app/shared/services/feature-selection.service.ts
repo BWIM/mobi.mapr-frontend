@@ -36,6 +36,10 @@ export class FeatureSelectionService {
     this.selectedMapLibreFeatureSource.next(feature);
   }
 
+  getCurrentMapLibreFeature(): MapLibreFeatureData | null {
+    return this.selectedMapLibreFeatureSource.getValue();
+  }
+
   setSelectedMapLibreFeature2(feature: MapLibreFeatureData | null) {
     this.selectedMapLibreFeature2Source.next(feature);
   }
