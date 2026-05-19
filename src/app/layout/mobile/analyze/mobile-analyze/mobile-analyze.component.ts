@@ -40,6 +40,29 @@ import {
   QUALITY_LETTERS,
   TIME_COLORS,
 } from '../../analyze-chart.utils';
+
+function gradeFromIndex(index: number): string {
+  const indexValue = index / 100;
+  if (indexValue <= 0 || !Number.isFinite(indexValue)) return 'N/A';
+  if (indexValue < 0.24) return 'A+';
+  if (indexValue < 0.27) return 'A';
+  if (indexValue < 0.35) return 'A-';
+  if (indexValue < 0.4) return 'B+';
+  if (indexValue < 0.45) return 'B';
+  if (indexValue < 0.5) return 'B-';
+  if (indexValue < 0.56) return 'C+';
+  if (indexValue < 0.63) return 'C';
+  if (indexValue < 0.71) return 'C-';
+  if (indexValue < 0.8) return 'D+';
+  if (indexValue < 0.9) return 'D';
+  if (indexValue < 1.0) return 'D-';
+  if (indexValue < 1.12) return 'E+';
+  if (indexValue < 1.26) return 'E';
+  if (indexValue < 1.41) return 'E-';
+  if (indexValue < 1.59) return 'F+';
+  if (indexValue < 1.78) return 'F';
+  return 'F-';
+}
 import { CategoryLegendItem, MobilePlacesMap } from '../../mobile-places-map';
 
 const LABEL_FONT = 'bold 11px sans-serif';
@@ -138,6 +161,7 @@ export class MobileAnalyzeComponent implements OnDestroy {
   placesError = signal<string | null>(null);
   placesScoreMode = signal(false);
   placesLegendItems = signal<CategoryLegendItem[]>([]);
+  placesLegendExpanded = signal(true);
   placesRelevanceInfoText = '';
 
   private placesMap?: MobilePlacesMap;
@@ -249,6 +273,16 @@ export class MobileAnalyzeComponent implements OnDestroy {
 
   togglePlacesCategory(name: string): void {
     this.placesMap?.toggleCategory(name);
+  }
+
+  togglePlacesLegendExpanded(): void {
+    this.placesLegendExpanded.update((expanded) => !expanded);
+  }
+
+  readonly gradeFromIndex = gradeFromIndex;
+
+  placesMetricTextColor(score: number, index: number): string {
+    return this.placesScoreMode() ? scoreColor(score) : gradeColor(index);
   }
 
   openLegendInfo(event: Event): void {
@@ -546,6 +580,7 @@ export class MobileAnalyzeComponent implements OnDestroy {
 
   private async loadPlaces(data: PlacesDialogData): Promise<void> {
     this.teardownPlaces();
+    this.placesLegendExpanded.set(true);
     this.placesMap = new MobilePlacesMap(
       {
         title: this.placesTitle,

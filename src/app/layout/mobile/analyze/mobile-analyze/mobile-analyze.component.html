@@ -71,7 +71,7 @@
 
         @if (facade.shouldShowMap()) {
           <div class="mb-4 p-3 rounded-xl border border-[var(--primary-color)] border-opacity-30">
-            <p class="text-sm text-white mb-2">{{ 'analyze.categories' | translate }}</p>
+            <p class="text-sm text-white mb-2">{{ 'analyze.analysis.activities' | translate }}</p>
             <button
               type="button"
               class="w-full py-2 text-sm font-medium rounded-full bg-[var(--primary-color)] text-[var(--background-color)]"
@@ -259,18 +259,55 @@
           }
 
           @if (!placesLoading() && placesLegendItems().length > 0) {
-            <div class="absolute top-2 left-2 z-10 pointer-events-none">
-              <div class="pointer-events-auto flex flex-wrap gap-1.5">
+            <div
+              class="absolute top-0 left-0 z-10 max-w-[min(100%,18rem)] bg-[var(--background-color)] bg-opacity-75 rounded-lg pointer-events-auto"
+              [style.max-height]="placesLegendExpanded() ? 'calc(100% - 0.5rem)' : null"
+              [style.overflow-y]="placesLegendExpanded() ? 'auto' : null">
+              <button
+                type="button"
+                class="flex items-center justify-between gap-2 w-full p-2 text-[var(--primary-color)] border-0 bg-transparent cursor-pointer"
+                (click)="togglePlacesLegendExpanded()"
+                [attr.aria-expanded]="placesLegendExpanded()"
+                [attr.aria-label]="
+                  (placesLegendExpanded()
+                    ? 'mobile.analyze.legend.collapse'
+                    : 'mobile.analyze.legend.expand'
+                  ) | translate
+                ">
+                <span class="text-xs font-semibold">{{ 'analyze.analysis.activities' | translate }}</span>
+                <mat-icon class="text-lg shrink-0">
+                  {{ placesLegendExpanded() ? 'expand_less' : 'expand_more' }}
+                </mat-icon>
+              </button>
+              @if (placesLegendExpanded()) {
+              <div class="flex flex-col gap-1.5 px-2 pb-2">
                 @for (item of placesLegendItems(); track item.name) {
                   <button
                     type="button"
-                    class="w-4 h-4 rounded-full p-0 border-2 border-black/40 shrink-0"
-                    [class.opacity-40]="!item.enabled"
-                    [style.background-color]="item.color"
-                    [attr.aria-label]="item.name"
-                    (click)="togglePlacesCategory(item.name)"></button>
+                    class="flex items-start gap-2 text-left w-full p-0 border-0 bg-transparent cursor-pointer hover:opacity-80 transition-opacity"
+                    [class.opacity-50]="!item.enabled"
+                    (click)="togglePlacesCategory(item.name)">
+                    <span
+                      class="w-3.5 h-3.5 rounded-full flex-shrink-0 mt-0.5 border border-black/30"
+                      [style.background-color]="item.color"></span>
+                    <span class="text-[var(--primary-color)] text-[11px] leading-snug min-w-0">
+                      {{ item.name }}
+                      <span class="opacity-90">
+                        · {{ item.weight }} · {{ item.relevance | number: '1.0-1' }}%
+                      </span>
+                      <span [style.color]="placesMetricTextColor(item.score, item.index)">
+                        @if (placesScoreMode()) {
+                          · {{ item.score / 60 | number: '1.1-1' }}
+                          {{ 'map.popup.minutes' | translate }}
+                        } @else {
+                          · {{ gradeFromIndex(item.index) }}
+                        }
+                      </span>
+                    </span>
+                  </button>
                 }
               </div>
+              }
             </div>
           }
         </div>

@@ -14,7 +14,11 @@ import { PlacesDialogData } from '../right/analyze/places/places-dialog.componen
 export interface CategoryLegendItem {
   name: string;
   color: string;
+  weight: number;
+  relevance: number;
   enabled: boolean;
+  score: number;
+  index: number;
 }
 
 export interface MobilePlacesMapState {
@@ -264,6 +268,7 @@ export class MobilePlacesMap {
   private assignCategoryColors(): void {
     this.categoryColors.clear();
     const items: CategoryLegendItem[] = [];
+    const totalWeight = this.categoryData.reduce((sum, cat) => sum + cat.weight, 0);
 
     this.categoryData.forEach((category, index) => {
       if (!category.name || this.categoryColors.has(category.name)) {
@@ -273,10 +278,16 @@ export class MobilePlacesMap {
       const pastelColor = this.pastelCategoryColors[index % this.pastelCategoryColors.length];
       this.categoryColors.set(category.name, pastelColor);
 
+      const relevance = totalWeight > 0 ? (category.weight / totalWeight) * 100 : 0;
+
       items.push({
         name: category.name,
         color: pastelColor,
+        weight: category.weight,
+        relevance,
         enabled: index < 3,
+        score: category.score,
+        index: category.index,
       });
     });
 
