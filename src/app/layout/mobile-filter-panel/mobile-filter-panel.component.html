@@ -8,13 +8,14 @@
        (click)="togglePanel()">
     <div class="flex items-center justify-center gap-2">
       <div class="text-lg font-semibold text-[var(--primary-color)]">{{ project()?.display_name }}</div>
-      <mat-icon class="text-[var(--primary-color)] transition-transform duration-300"
-                [class.rotate-180]="isExpanded()">
-        keyboard_arrow_up
-      </mat-icon>
+      <mat-icon class="mobile-collapsed-hint__icon" aria-hidden="true">swipe_up</mat-icon>
     </div>
   </div>
-  <!-- Searchbar - Always visible -->
+  @if (!isExpanded()) {
+    <p class="mobile-collapsed-hint px-4 pb-3 text-center">
+      <span>{{ 'mobileFilter.collapsedHint' | translate }}</span>
+    </p>
+  } @else {
   <div class="p-4 flex items-center gap-2">
     <mat-form-field appearance="fill" class="search-form-field flex-1 rounded-full pr-4 pl-4">
       <mat-label>{{ 'map.search.label' | translate }}</mat-label>
@@ -34,6 +35,7 @@
       </mat-autocomplete>
     </mat-form-field>
   </div>
+  }
 
   @if (isPreparingProject()) {
     <div class="mobile-preload-hint mx-4 mb-3">
@@ -303,6 +305,29 @@
         </div>
       </app-info-overlay>
     </div>
+
+    @if (isExpanded() && hasCategories()) {
+      <div class="mobile-selection-overview px-4 pb-3">
+        <div class="mobile-selection-overview__row">
+          <span class="mobile-selection-overview__label">{{ 'left.activeFilters.activities' | translate }}</span>
+          <span class="mobile-selection-overview__count">{{ getActivitiesCountLabel() }}</span>
+        </div>
+        <p class="mobile-selection-overview__names">
+          @if (areAllCategoriesSelected()) {
+            {{ 'mobileFilter.allActivitiesSelected' | translate }}
+          } @else {
+            {{ getSelectedCategoryNames().join(', ') }}
+          }
+        </p>
+        @if (selectedPersonas() !== null) {
+          <div class="mobile-selection-overview__row">
+            <span class="mobile-selection-overview__label">{{ 'left.activeFilters.personas' | translate }}</span>
+            <span class="mobile-selection-overview__value">{{ getSelectedPersonaName() }}</span>
+          </div>
+        }
+        <p class="mobile-selection-overview__hint">{{ 'mobileFilter.readOnlyHint' | translate }}</p>
+      </div>
+    }
   }
 
   <!-- Static Footer Information -->

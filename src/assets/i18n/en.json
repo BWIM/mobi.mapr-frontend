@@ -780,8 +780,38 @@
     "closeSidebar": "Close sidebar",
     "closeFilters": "Close filters"
   },
+  "mobile": {
+    "statsButton": {
+      "label": "Open rankings (The Best)"
+    },
+    "analyzeSheet": {
+      "title": "Analysis"
+    },
+    "analyze": {
+      "legend": {
+        "expand": "Expand legend",
+        "collapse": "Collapse legend"
+      },
+      "info": {
+        "legend": "Legend information",
+        "relevance": "Activity relevance information",
+        "howToUse": "How to use this view",
+        "personas": "Personas information"
+      },
+      "seeAllActivities": "See all activities",
+      "backToAnalysis": "Back to analysis",
+      "openPlacesMap": "View places on map"
+    }
+  },
   "mobileFilter": {
-    "licenseInfo": "License Info"
+    "licenseInfo": "License Info",
+    "collapsedHint": "Swipe up to search or change transport modes",
+    "readOnlyHint": "Filters can only be changed on desktop.",
+    "allActivitiesSelected": "All activities",
+    "search": {
+      "expand": "Expand search",
+      "collapse": "Collapse search"
+    }
   },
   "right": {
     "mobile": {

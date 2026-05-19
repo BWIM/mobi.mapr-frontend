@@ -1,7 +1,6 @@
 import { Component, signal, inject, effect } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { RailComponent } from '../rail/rail.component';
 import { LeftComponent } from '../left/left.component';
 import { RightComponent } from '../right/right.component';
@@ -13,17 +12,30 @@ import { MapService, ContentLayerFilters } from '../../services/map.service';
 import { FilterConfigService } from '../../services/filter-config.service';
 import { Project } from '../../interfaces/project';
 import { firstValueFrom } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { TranslateModule } from '@ngx-translate/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIcon } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { MobileFilterPanelComponent } from '../mobile-filter-panel/mobile-filter-panel.component';
 import { GeoJsonDownloadDialogComponent, GeoJsonDownloadDialogData } from '../left/geojson-download-dialog/geojson-download-dialog.component';
+import { MobileUiService } from '../../services/mobile-ui.service';
+import { FeatureSelectionService } from '../../shared/services/feature-selection.service';
+import { MobileMapControlsComponent } from '../mobile/mobile-map-controls/mobile-map-controls.component';
+import { MobileSheetsComponent } from '../mobile/mobile-sheets/mobile-sheets.component';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RailComponent, LeftComponent, RightComponent, CenterComponent, TranslateModule, MatIcon, MobileFilterPanelComponent],
+  imports: [
+    RailComponent,
+    LeftComponent,
+    RightComponent,
+    CenterComponent,
+    TranslateModule,
+    MatIcon,
+    MobileFilterPanelComponent,
+    MobileMapControlsComponent,
+    MobileSheetsComponent,
+  ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
@@ -36,7 +48,8 @@ export class DashboardComponent {
   private mapService = inject(MapService);
   private filterConfigService = inject(FilterConfigService);
   private dialog = inject(MatDialog);
-  private breakpointObserver = inject(BreakpointObserver);
+  readonly mobileUi = inject(MobileUiService);
+  private featureSelectionService = inject(FeatureSelectionService);
 
   leftPanelExpanded = signal(true);
   rightPanelExpanded = signal(true);
@@ -44,18 +57,23 @@ export class DashboardComponent {
   private hasInitialized = false;
   private currentProjectIdentifier: string | null = null;
 
-  // Mobile breakpoint detection (768px = md breakpoint)
-  isMobile = toSignal(
-    this.breakpointObserver.observe([Breakpoints.XSmall, Breakpoints.Small])
-      .pipe(map(result => result.matches)),
-    { initialValue: false }
-  );
+  readonly isMobile = this.mobileUi.isMobile;
 
   constructor() {
-    // Automatically collapse right panel when on mobile
+    this.featureSelectionService.selectedMapLibreFeature$
+      .pipe(
+        takeUntilDestroyed(),
+        filter((feature) => feature !== null),
+      )
+      .subscribe(() => {
+        if (this.mobileUi.isMobile()) {
+          this.mobileUi.openAnalyze();
+        }
+      });
+
     effect(() => {
-      if (this.isMobile()) {
-        this.rightPanelExpanded.set(false);
+      if (!this.mobileUi.isMobile() && this.mobileUi.isSheetOpen()) {
+        this.mobileUi.closeSheet();
       }
     });
     // First check: If user is not logged in and no share_key, redirect to login

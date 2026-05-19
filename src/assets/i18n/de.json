@@ -780,8 +780,38 @@
     "closeSidebar": "Sidebar schließen",
     "closeFilters": "Filter schließen"
   },
+  "mobile": {
+    "statsButton": {
+      "label": "Rankings öffnen (Die Besten)"
+    },
+    "analyzeSheet": {
+      "title": "Analyse"
+    },
+    "analyze": {
+      "legend": {
+        "expand": "Legende erweitern",
+        "collapse": "Legende einklappen"
+      },
+      "info": {
+        "legend": "Legenden-Information",
+        "relevance": "Information zur Aktivitätsrelevanz",
+        "howToUse": "Bedienhinweise",
+        "personas": "Information zu Personas"
+      },
+      "seeAllActivities": "Alle Aktivitäten anzeigen",
+      "backToAnalysis": "Zurück zur Analyse",
+      "openPlacesMap": "Orte auf der Karte anzeigen"
+    }
+  },
   "mobileFilter": {
-    "licenseInfo": "Lizenzinfos"
+    "licenseInfo": "Lizenzinfos",
+    "collapsedHint": "Nach oben wischen, um zu suchen oder die Karte anzupassen",
+    "readOnlyHint": "Filter können nur auf dem Desktop geändert werden.",
+    "allActivitiesSelected": "Alle Aktivitäten",
+    "search": {
+      "expand": "Suche erweitern",
+      "collapse": "Suche einklappen"
+    }
   },
   "right": {
     "mobile": {

@@ -17,6 +17,7 @@ import { PersonasDialogComponent, PersonasDialogData } from './overlay/personas-
 import { Map as MapLibreMap, NavigationControl, FullscreenControl, Popup, GeoJSONSource } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { MobileUiService } from '../../../services/mobile-ui.service';
 
 @Component({
   selector: 'app-analyze',
@@ -128,6 +129,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private placesService = inject(PlacesService);
   private dialog = inject(MatDialog);
   private translate = inject(TranslateService);
+  private mobileUi = inject(MobileUiService);
   private featureSubscription?: Subscription;
   private featureSubscription2?: Subscription;
   private featureInfoSubscription?: Subscription;
@@ -2586,6 +2588,13 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  private getOverlayDialogSize(): { width: string; maxWidth: string; maxHeight: string } {
+    if (this.mobileUi.isMobile()) {
+      return { width: '100vw', maxWidth: '100vw', maxHeight: '95vh' };
+    }
+    return { width: '95vw', maxWidth: '1400px', maxHeight: '90vh' };
+  }
+
   openAllCategoriesOverlay(): void {
     if (!this.selectedFeature) {
       return;
@@ -2663,12 +2672,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       featureName2: featureName2
     };
 
+    if (this.mobileUi.isMobile()) {
+      this.mobileUi.openAnalyzeSubSheet('analyze-activities', dialogData);
+      return;
+    }
+
     this.dialog.open(AllCategoriesDialogComponent, {
-      width: '95vw',
-      maxWidth: '1400px',
-      maxHeight: '90vh',
+      ...this.getOverlayDialogSize(),
       panelClass: 'all-categories-dialog-panel',
-      data: dialogData
+      data: dialogData,
     });
   }
 
@@ -2813,12 +2825,17 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       isScoreMode: filters.feature_type === 'score'
     };
 
+    if (this.mobileUi.isMobile()) {
+      this.mobileUi.openAnalyzeSubSheet('analyze-places', placesData);
+      return;
+    }
+
     this.dialog.open(PlacesDialogComponent, {
       width: '85vw',
       maxWidth: '1200px',
       maxHeight: '85vh',
       panelClass: 'places-dialog-panel',
-      data: placesData
+      data: placesData,
     });
   }
 
@@ -2898,12 +2915,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       featureName2: featureName2
     };
 
+    if (this.mobileUi.isMobile()) {
+      this.mobileUi.openAnalyzeSubSheet('analyze-personas', personasData);
+      return;
+    }
+
     this.dialog.open(PersonasDialogComponent, {
-      width: '95vw',
-      maxWidth: '1400px',
-      maxHeight: '90vh',
+      ...this.getOverlayDialogSize(),
       panelClass: 'personas-dialog-panel',
-      data: personasData
+      data: personasData,
     });
   }
 }
