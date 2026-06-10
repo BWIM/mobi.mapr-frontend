@@ -401,15 +401,33 @@
       </div>
       
       <!-- Legend Overlay -->
-      <div *ngIf="categoryLegendItems.length > 0 && !isLoading() && !placesError && !analyzeError" class="absolute top-0 left-0 bg-[var(--background-color)] bg-opacity-75 p-3" style="z-index: 1000;">
-        <div class="text-[var(--primary-color)] text-sm font-semibold mb-2">{{ 'analyze.categories' | translate }}</div>
-        <div class="flex flex-col gap-2">
-          <div *ngFor="let item of categoryLegendItems" 
-               class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
-               (click)="toggleCategory(item.name)"
-               [class.opacity-50]="!item.enabled">
-            <div class="w-4 h-4 rounded-full flex-shrink-0" [style.background-color]="item.color"></div>
-            <span class="text-[var(--primary-color)] text-xs">
+      <div
+        *ngIf="categoryLegendItems.length > 0 && !isLoading() && !placesError && !analyzeError"
+        class="absolute top-0 left-0 z-[1000] max-w-[min(100%,18rem)] bg-[var(--background-color)] bg-opacity-75 rounded-lg pointer-events-auto"
+        [style.max-height]="categoryLegendExpanded ? 'calc(100% - 0.5rem)' : null"
+        [style.overflow-y]="categoryLegendExpanded ? 'auto' : null">
+        <button
+          type="button"
+          class="flex items-center justify-between gap-2 w-full p-2 text-[var(--primary-color)] border-0 bg-transparent cursor-pointer"
+          (click)="toggleCategoryLegendExpanded()"
+          [attr.aria-expanded]="categoryLegendExpanded"
+          [attr.aria-label]="(categoryLegendExpanded ? 'mobile.analyze.legend.collapse' : 'mobile.analyze.legend.expand') | translate">
+          <span class="text-xs font-semibold">{{ 'analyze.categories' | translate }}</span>
+          <mat-icon class="text-lg shrink-0">
+            {{ categoryLegendExpanded ? 'expand_less' : 'expand_more' }}
+          </mat-icon>
+        </button>
+        <div *ngIf="categoryLegendExpanded" class="flex flex-col gap-1.5 px-2 pb-2">
+          <button
+            type="button"
+            *ngFor="let item of categoryLegendItems"
+            class="flex items-start gap-2 text-left w-full p-0 border-0 bg-transparent cursor-pointer hover:opacity-80 transition-opacity"
+            [class.opacity-50]="!item.enabled"
+            (click)="toggleCategory(item.name)">
+            <span
+              class="w-3.5 h-3.5 rounded-full flex-shrink-0 mt-0.5 border border-black/30"
+              [style.background-color]="item.color"></span>
+            <span class="text-[var(--primary-color)] text-[11px] leading-snug min-w-0">
               {{ item.name }}
               <span class="opacity-90">
                 · {{ item.weight }} · {{ item.relevance | number:'1.0-1' }}%
@@ -423,7 +441,7 @@
                 </ng-template>
               </span>
             </span>
-          </div>
+          </button>
         </div>
       </div>
     </div>
