@@ -100,6 +100,7 @@ export class MobileFilterPanelComponent implements OnDestroy {
   selectedBewertung = this.filterConfigService.selectedBewertung;
   isMapCompareMode = this.filterConfigService.isMapCompareMode;
   canUseMapCompare = this.filterConfigService.canUseMapCompare;
+  canToggleCompareModes = this.filterConfigService.canToggleCompareModes;
   rightSelectedModes = this.filterConfigService.rightSelectedModes;
   hasCategories = this.filterConfigService.hasCategories;
   selectedActivities = this.filterConfigService.selectedActivities;
