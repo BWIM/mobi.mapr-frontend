@@ -75,6 +75,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private categoryData: Array<{ name: string; weight: number; score: number; index: number; places: Place[] }> = [];
   private categoryColors = new Map<string, string>();
   categoryLegendItems: Array<{ name: string; color: string; weight: number; relevance: number; enabled: boolean; score: number; index: number }> = [];
+  categoryLegendExpanded = true;
   isLoadingPlaces: boolean = false;
   placesError: string | null = null;
   private pendingFeatureShape: any = null;
@@ -1069,6 +1070,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.isLoadingPlaces = true;
+    this.categoryLegendExpanded = true;
     this.placesError = null;
 
     // Check if places are available for this feature type
@@ -2299,6 +2301,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       }, 100);
     }
+  }
+
+  toggleCategoryLegendExpanded(): void {
+    this.categoryLegendExpanded = !this.categoryLegendExpanded;
   }
 
   toggleCategory(categoryName: string): void {

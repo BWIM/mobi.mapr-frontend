@@ -46,6 +46,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   private categoryData: Array<{ name: string; weight: number; score: number; index: number; places: Place[] }> = [];
   private categoryColors = new Map<string, string>();
   categoryLegendItems: Array<{ name: string; color: string; weight: number; relevance: number; enabled: boolean; score: number; index: number }> = [];
+  categoryLegendExpanded = true;
   private pendingFeatureShape: any = null;
   private viewInitialized = false;
   private dataLoaded = false;
@@ -104,6 +105,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
   async ngOnInit() {
     this.isLoading = true;
+    this.categoryLegendExpanded = true;
     this.error = null;
     this.categoryName = this.translate.instant('analyze.placesDialog.title');
 
@@ -476,6 +478,10 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     // Add hover interactions and click handlers
     this.setupMarkerInteractions();
     this.setupMarkerClickHandlers();
+  }
+
+  toggleCategoryLegendExpanded(): void {
+    this.categoryLegendExpanded = !this.categoryLegendExpanded;
   }
 
   toggleCategory(categoryName: string): void {
