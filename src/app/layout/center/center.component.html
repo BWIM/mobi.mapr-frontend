@@ -1,6 +1,13 @@
 <!-- map.component.html -->
 <div class="rounded-xl overflow-hidden h-full w-full relative">
-  <div #mapContainer class="h-full w-full rounded-xl"></div>
+  @if (!isMapCompareMode()) {
+    <div #mapContainer class="h-full w-full rounded-xl"></div>
+  } @else {
+    <div #compareContainer class="comparison-container h-full w-full rounded-xl">
+      <div #beforeMapContainer class="compare-map h-full w-full"></div>
+      <div #afterMapContainer class="compare-map h-full w-full"></div>
+    </div>
+  }
   <!-- Nominatim Search - Hidden on mobile, shown on desktop -->
   <div class="hidden md:flex absolute top-0 left-0 right-auto bottom-auto z-[1000] p-3 min-w-[300px] max-w-[400px] items-center gap-2">
     <mat-form-field appearance="fill" class="search-form-field w-full rounded-full" >

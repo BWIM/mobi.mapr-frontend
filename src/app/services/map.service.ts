@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { Map, StyleSpecification, SourceSpecification, LayerSpecification, LngLatBounds } from 'maplibre-gl';
+import { Map, StyleSpecification, SourceSpecification, LayerSpecification, LngLatBounds, FilterSpecification } from 'maplibre-gl';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { DashboardSessionService } from './dashboard-session.service';
@@ -83,6 +83,7 @@ interface MapExportCreateResponse {
 })
 export class MapService {
   private map: Map | null = null;
+  private compareRightMap: Map | null = null;
   private mapStyleSubject = new BehaviorSubject<StyleSpecification>(this.getBaseMapStyle());
   mapStyle$: Observable<StyleSpecification> = this.mapStyleSubject.asObservable();
   private authService = inject(AuthService);
@@ -154,12 +155,28 @@ export class MapService {
     return ['any', ...selected.map(bracket => bracketExpressions[bracket])];
   }
 
-  setMap(map: Map): void {
+  setMap(map: Map | null): void {
     this.map = map;
   }
 
   getMap(): Map | null {
     return this.map;
+  }
+
+  setCompareRightMap(map: Map | null): void {
+    this.compareRightMap = map;
+  }
+
+  getCompareRightMap(): Map | null {
+    return this.compareRightMap;
+  }
+
+  hasCompareMaps(): boolean {
+    return this.map !== null && this.compareRightMap !== null;
+  }
+
+  clearCompareMaps(): void {
+    this.compareRightMap = null;
   }
 
   getBaseMapStyle(): StyleSpecification {
@@ -527,14 +544,19 @@ export class MapService {
     if (!this.map) {
       return;
     }
+    await this.zoomToContentLayerBoundsForMap(this.map, filters, true);
+  }
 
-    // Only try geolocation on initial load
-    if (!this.hasInitialZoom) {
+  private async zoomToContentLayerBoundsForMap(
+    targetMap: Map,
+    filters: ContentLayerFilters,
+    allowGeolocation: boolean
+  ): Promise<void> {
+    if (allowGeolocation && !this.hasInitialZoom) {
       const geoLocation = await this.fetchGeoLocation();
-      
+
       if (geoLocation) {
-        // Move map to user's location
-        this.map.flyTo({
+        targetMap.flyTo({
           center: [geoLocation.lng, geoLocation.lat],
           zoom: 10,
           duration: 1000
@@ -542,94 +564,44 @@ export class MapService {
         this.hasInitialZoom = true;
         return;
       }
-      // Mark as initial zoom attempted even if geolocation failed
       this.hasInitialZoom = true;
     }
 
-    // After initial load, or if geolocation failed, use content layer bounds
     const apiBounds = await this.fetchContentLayerBounds(filters);
-    
+
     if (apiBounds) {
       const bounds = new LngLatBounds(
         [apiBounds.min_lon, apiBounds.min_lat],
         [apiBounds.max_lon, apiBounds.max_lat]
       );
-      
-      this.map.fitBounds(bounds, {
+
+      targetMap.fitBounds(bounds, {
         padding: 50,
         duration: 1000
       });
     }
   }
 
-  /**
-   * Updates the content layer in the map style based on filter parameters
-   * @param filters - The filter parameters
-   * @param zoomToBounds - Whether to zoom to bounds (default: true)
-   */
-  async loadContentLayer(filters: ContentLayerFilters, zoomToBounds: boolean = true): Promise<void> {
-    let projectId = this.dashboardSessionService.getProjectId();
-    const shareKey = this.dashboardSessionService.getShareKey();
-    
-    // If no projectId but we have a shareKey, get the project ID from the loaded project
-    if (!projectId && shareKey) {
-      const project = this.projectService.getProject();
-      if (project) {
-        projectId = project.id.toString();
-      } else {
-        console.warn('Cannot load content layer: No project ID available and project not loaded');
-        return;
-      }
-    }
-    
-    if (!projectId) {
-      console.warn('Cannot load content layer: No project ID available');
-      return;
-    }
+  private buildStyleWithContentLayer(filters: ContentLayerFilters, baseStyle?: StyleSpecification): StyleSpecification {
+    const tileUrl = this.buildTileUrlForFilters(filters);
+    const currentStyle = baseStyle ?? { ...this.mapStyleSubject.getValue() };
+    const updatedStyle = { ...currentStyle, sources: { ...currentStyle.sources }, layers: [...currentStyle.layers] };
 
-    if (!filters.profile_ids?.length) {
-      console.warn('Cannot load content layer: profile_ids is required');
-      this._currentProfileIds.set(null);
-      return;
-    }
-
-    this._currentProfileIds.set([...filters.profile_ids]);
-    this.currentFilters = filters;
-
-    // Zoom to bounds only if requested (for full reloads)
-    if (zoomToBounds) {
-      await this.zoomToContentLayerBounds(filters);
-    }
-
-    const tileUrl = this.buildTileUrl(projectId, filters);
-
-    if (!tileUrl) {
-      console.warn('Cannot load content layer: Invalid tile URL');
-      return;
-    }
-
-    const currentStyle = this.mapStyleSubject.getValue();
-    const updatedStyle = { ...currentStyle };
-
-    // Remove existing content layer source and layers if they exist
     if (updatedStyle.sources['content-layer']) {
       delete updatedStyle.sources['content-layer'];
     }
 
-    // Remove existing border layer source and layers if they exist
-    // if (updatedStyle.sources['border-layer']) {
-    //   delete updatedStyle.sources['border-layer'];
-    // }
-
-    // Remove existing content and border layers from layers array
     updatedStyle.layers = updatedStyle.layers.filter(
-      layer => layer.id !== 'content-layer-fill' && 
+      layer => layer.id !== 'content-layer-fill' &&
                layer.id !== 'content-layer-outline' &&
                layer.id !== 'content-layer-highlight' &&
                layer.id !== 'content-layer-selection'
     );
 
-    // Add the new content layer source
+    if (!tileUrl) {
+      return updatedStyle;
+    }
+
     updatedStyle.sources['content-layer'] = {
       type: 'vector',
       tiles: [tileUrl],
@@ -637,25 +609,10 @@ export class MapService {
       tileSize: 512
     } as SourceSpecification;
 
-    // Add the border layer source
-    // const borderTileUrl = `${environment.apiUrl}/borders/{z}/{x}/{y}.pbf`;
-    // updatedStyle.sources['border-layer'] = {
-    //   type: 'vector',
-    //   tiles: [borderTileUrl],
-    //   minzoom: 0,
-    //   maxzoom: 14,
-    //   tileSize: 512
-    // } as SourceSpecification;
-
-    // Determine the fill color expression based on feature_type
     const fillColorExpression = filters.feature_type === 'score'
       ? this.getScoreFillColorExpression()
       : this.getIndexFillColorExpression();
 
-    // Opacity expression for hexagons (t='h'):
-    // - Use population in the range [0, 1000]
-    // - Map to opacity [0.2, 0.9] using exponential interpolation
-    // - Clamp values outside [0, 1000] to the nearest bound
     const hexOpacityExpression: any = [
       'interpolate',
       ['cubic-bezier', 0.26, 0.38, 0.82, 0.36],
@@ -666,23 +623,21 @@ export class MapService {
       5000, 0.9
     ];
 
-    // For non-hex features, keep a constant opacity
     const fillOpacityExpression: any = [
       'case',
-      ['==', ['get', 't'], 'h'],  // If hexagon
+      ['==', ['get', 't'], 'h'],
       hexOpacityExpression,
       0.7
     ];
 
     const lineOpacityExpression: any = [
       'case',
-      ['==', ['get', 't'], 'h'],  // If hexagon
+      ['==', ['get', 't'], 'h'],
       hexOpacityExpression,
       0.8
     ];
     const legendBracketFilter = this.getLegendBracketFilterExpression(filters);
 
-    // Add fill layer
     const fillLayer: any = {
       id: 'content-layer-fill',
       type: 'fill',
@@ -698,7 +653,6 @@ export class MapService {
     }
     updatedStyle.layers.push(fillLayer as LayerSpecification);
 
-    // Add outline layer (darkened stroke so borders stay visible on light fills, e.g. yellow/orange)
     const outlineColorExpression = this.getDarkenedColorExpression(fillColorExpression, 0.75);
     const outlineLayer: any = {
       id: 'content-layer-outline',
@@ -716,8 +670,6 @@ export class MapService {
     }
     updatedStyle.layers.push(outlineLayer as LayerSpecification);
 
-    // Add highlight layer for hover effects (initially hidden, will be filtered on hover)
-    // Uses a darkened version (10% black added) of the fill/outline color with full opacity
     const darkenedColorExpression = this.getDarkenedColorExpression(fillColorExpression);
     updatedStyle.layers.push({
       id: 'content-layer-highlight',
@@ -729,11 +681,9 @@ export class MapService {
         'line-width': 2,
         'line-opacity': 1
       },
-      filter: ['==', ['get', 'name'], '__never_match__'] // Initially filter out everything
+      filter: ['==', ['get', 'name'], '__never_match__']
     } as LayerSpecification);
 
-    // Add selection border layer for selected features (initially hidden, will be filtered on selection)
-    // Positioned after highlight layer so it appears on top
     updatedStyle.layers.push({
       id: 'content-layer-selection',
       type: 'line',
@@ -744,29 +694,143 @@ export class MapService {
         'line-width': 2,
         'line-opacity': 1
       },
-      filter: ['==', ['get', 'name'], '__never_match__'] // Initially filter out everything (using name like highlight)
+      filter: ['==', ['get', 'name'], '__never_match__']
     } as LayerSpecification);
 
-    // Add border layer (between feature layers and labels)
-    // updatedStyle.layers.push({
-    //   id: 'border-layer',
-    //   type: 'line',
-    //   source: 'border-layer',
-    //   'source-layer': 'borders',
-    //   paint: {
-    //     'line-color': fillColorExpression,
-    //     'line-width': 0.1,
-    //     'line-opacity': 0.5
-    //   }
-    // } as LayerSpecification);
-
-    // Ensure labels layer is on top
     const labelsLayerIndex = updatedStyle.layers.findIndex(layer => layer.id === 'carto-labels-layer');
     if (labelsLayerIndex !== -1) {
       const labelsLayer = updatedStyle.layers.splice(labelsLayerIndex, 1)[0];
       updatedStyle.layers.push(labelsLayer);
     }
 
+    return updatedStyle;
+  }
+
+  private buildTileUrlForFilters(filters: ContentLayerFilters): string | null {
+    let projectId = this.dashboardSessionService.getProjectId();
+    const shareKey = this.dashboardSessionService.getShareKey();
+
+    if (!projectId && shareKey) {
+      const project = this.projectService.getProject();
+      if (project) {
+        projectId = project.id.toString();
+      }
+    }
+
+    if (!projectId || !filters.profile_ids?.length) {
+      return null;
+    }
+
+    return this.buildTileUrl(projectId, filters);
+  }
+
+  /**
+   * Updates the content layer in the map style based on filter parameters
+   * @param filters - The filter parameters
+   * @param zoomToBounds - Whether to zoom to bounds (default: true)
+   */
+  async loadContentLayerOnMap(
+    targetMap: Map,
+    filters: ContentLayerFilters,
+    zoomToBounds: boolean = false,
+    allowGeolocation: boolean = false
+  ): Promise<boolean> {
+    const tileUrl = this.buildTileUrlForFilters(filters);
+
+    if (!filters.profile_ids?.length) {
+      console.warn('Cannot load content layer: profile_ids is required');
+      return false;
+    }
+
+    if (!tileUrl) {
+      console.warn('Cannot load content layer: Invalid tile URL');
+      return false;
+    }
+
+    if (zoomToBounds) {
+      await this.zoomToContentLayerBoundsForMap(targetMap, filters, allowGeolocation);
+    }
+
+    const updatedStyle = this.buildStyleWithContentLayer(filters, this.getBaseMapStyle());
+
+    await new Promise<void>(resolve => {
+      targetMap.once('style.load', () => resolve());
+      targetMap.setStyle(updatedStyle);
+    });
+    return true;
+  }
+
+  /**
+   * Updates tiles and layer styling on a specific map without replacing the full style.
+   */
+  async updateContentLayerOnMap(targetMap: Map, filters: ContentLayerFilters): Promise<void> {
+    if (!filters.profile_ids?.length) {
+      console.warn('Cannot update content layer: profile_ids is required');
+      return;
+    }
+
+    const tileUrl = this.buildTileUrlForFilters(filters);
+    if (!tileUrl) {
+      console.warn('Cannot update content layer: Invalid tile URL');
+      return;
+    }
+
+    const source = targetMap.getSource('content-layer') as { setTiles?: (tiles: string[]) => void } | undefined;
+    if (!source?.setTiles) {
+      await this.loadContentLayerOnMap(targetMap, filters, false, false);
+      return;
+    }
+
+    source.setTiles([tileUrl]);
+    this.applyContentLayerStyleToMap(targetMap, filters);
+  }
+
+  private applyContentLayerStyleToMap(targetMap: Map, filters: ContentLayerFilters): void {
+    const fillColorExpression = filters.feature_type === 'score'
+      ? this.getScoreFillColorExpression()
+      : this.getIndexFillColorExpression();
+    const outlineColorExpression = this.getDarkenedColorExpression(fillColorExpression, 0.75);
+    const legendBracketFilter = this.getLegendBracketFilterExpression(filters);
+
+    if (targetMap.getLayer('content-layer-fill')) {
+      targetMap.setPaintProperty('content-layer-fill', 'fill-color', fillColorExpression);
+      if (legendBracketFilter) {
+        targetMap.setFilter('content-layer-fill', legendBracketFilter as FilterSpecification);
+      } else {
+        targetMap.setFilter('content-layer-fill', null);
+      }
+    }
+
+    if (targetMap.getLayer('content-layer-outline')) {
+      targetMap.setPaintProperty('content-layer-outline', 'line-color', outlineColorExpression);
+      if (legendBracketFilter) {
+        targetMap.setFilter('content-layer-outline', legendBracketFilter as FilterSpecification);
+      } else {
+        targetMap.setFilter('content-layer-outline', null);
+      }
+    }
+  }
+
+  async loadContentLayer(filters: ContentLayerFilters, zoomToBounds: boolean = true): Promise<void> {
+    if (!filters.profile_ids?.length) {
+      console.warn('Cannot load content layer: profile_ids is required');
+      this._currentProfileIds.set(null);
+      return;
+    }
+
+    if (!this.buildTileUrlForFilters(filters)) {
+      console.warn('Cannot load content layer: Invalid tile URL');
+      return;
+    }
+
+    this._currentProfileIds.set([...filters.profile_ids]);
+    this.currentFilters = filters;
+
+    if (zoomToBounds && this.map) {
+      await this.zoomToContentLayerBounds(filters);
+    }
+
+    const updatedStyle = this.buildStyleWithContentLayer(filters);
     this.updateStyle(updatedStyle);
   }
 

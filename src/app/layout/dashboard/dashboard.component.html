@@ -76,7 +76,7 @@
             </svg>
           </button>
         </div>
-      } @else {
+      } @else if (!filterConfigService.isMapCompareMode()) {
         <div class="flex-1 relative bg-[var(--secondary-color)]">
           <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <button 
@@ -89,6 +89,8 @@
             </button>
           </div>
         </div>
+      } @else {
+        <div class="flex-1 relative bg-[var(--secondary-color)]"></div>
       }
     </div>
   </div>
