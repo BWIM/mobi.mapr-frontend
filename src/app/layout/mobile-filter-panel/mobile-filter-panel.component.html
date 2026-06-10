@@ -55,31 +55,96 @@
   @if (isExpanded()) {
     <div class="px-6 pb-6 space-y-6 overflow-y-auto max-h-[calc(100vh-12rem)] relative">
       <!-- Verkehrsmittel Filter -->
-      <div class="space-y-2">
-        <h3 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.transportModes.title' | translate }}</h3>
-        <div class="flex items-center gap-2">
-          @for (option of modeOptions(); track option.id) {
-            <button 
-              class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
-              [style.background-color]="isSelected(option.id) ? 'var(--primary-color)' : 'var(--background-color)'"
-              [style.border]="!isSelected(option.id) ? '1px solid var(--light-primary-color)' : 'none'"
-              [style.cursor]="isOnlySelectedMode(option.id) || isModeDisabled(option.id) ? 'not-allowed' : 'pointer'"
-              [style.opacity]="isModeDisabled(option.id) ? '0.5' : '1'"
-              [disabled]="isModeDisabled(option.id) || isOnlySelectedMode(option.id)"
-              (click)="toggleVerkehrsmittel(option.id)"
-              [attr.aria-label]="option.display_name"
-              [attr.aria-pressed]="isSelected(option.id)"
-              [attr.aria-disabled]="isModeDisabled(option.id) || isOnlySelectedMode(option.id)"
-              [title]="getModeTooltip(option)">
-              <mat-icon 
-                class="text-lg leading-none"
-                [style.color]="isSelected(option.id) ? 'var(--background-color)' : 'var(--light-primary-color)'">
-                {{ option.icon }}
-              </mat-icon>
-            </button>
-          }
+      @if (!isMapCompareMode()) {
+        <div class="space-y-2">
+          <h3 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.transportModes.title' | translate }}</h3>
+          <div class="flex items-center gap-2">
+            @for (option of modeOptions(); track option.id) {
+              <button 
+                class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
+                [style.background-color]="isSelected(option.id) ? 'var(--primary-color)' : 'var(--background-color)'"
+                [style.border]="!isSelected(option.id) ? '1px solid var(--light-primary-color)' : 'none'"
+                [style.cursor]="isOnlySelectedMode(option.id) || isModeDisabled(option.id) ? 'not-allowed' : 'pointer'"
+                [style.opacity]="isModeDisabled(option.id) ? '0.5' : '1'"
+                [disabled]="isModeDisabled(option.id) || isOnlySelectedMode(option.id)"
+                (click)="toggleVerkehrsmittel(option.id)"
+                [attr.aria-label]="option.display_name"
+                [attr.aria-pressed]="isSelected(option.id)"
+                [attr.aria-disabled]="isModeDisabled(option.id) || isOnlySelectedMode(option.id)"
+                [title]="getModeTooltip(option)">
+                <mat-icon 
+                  class="text-lg leading-none"
+                  [style.color]="isSelected(option.id) ? 'var(--background-color)' : 'var(--light-primary-color)'">
+                  {{ option.icon }}
+                </mat-icon>
+              </button>
+            }
+          </div>
         </div>
-      </div>
+      } @else {
+        <div class="space-y-2">
+          <h3 class="text-sm font-semibold text-[var(--primary-color)] mb-2">{{ 'left.mapCompare.leftMap' | translate }}</h3>
+          <div class="flex items-center gap-2">
+            @for (option of modeOptions(); track option.id) {
+              <button
+                class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
+                [style.background-color]="isSelected(option.id) ? 'var(--primary-color)' : 'var(--background-color)'"
+                [style.border]="!isSelected(option.id) ? '1px solid var(--light-primary-color)' : 'none'"
+                [style.cursor]="isOnlySelectedMode(option.id) || isModeDisabled(option.id) ? 'not-allowed' : 'pointer'"
+                [style.opacity]="isModeDisabled(option.id) ? '0.5' : '1'"
+                [disabled]="isModeDisabled(option.id)"
+                (click)="toggleVerkehrsmittel(option.id)"
+                [attr.aria-label]="option.display_name"
+                [attr.aria-pressed]="isSelected(option.id)"
+                [title]="getModeTooltip(option)">
+                <mat-icon
+                  class="text-lg leading-none"
+                  [style.color]="isSelected(option.id) ? 'var(--background-color)' : 'var(--light-primary-color)'">
+                  {{ option.icon }}
+                </mat-icon>
+              </button>
+            }
+          </div>
+        </div>
+        <div class="space-y-2">
+          <h3 class="text-sm font-semibold text-[var(--primary-color)] mb-2">{{ 'left.mapCompare.rightMap' | translate }}</h3>
+          <div class="flex items-center gap-2">
+            @for (option of modeOptions(); track option.id) {
+              <button
+                class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
+                [style.background-color]="isRightSelected(option.id) ? 'var(--primary-color)' : 'var(--background-color)'"
+                [style.border]="!isRightSelected(option.id) ? '1px solid var(--light-primary-color)' : 'none'"
+                [style.cursor]="isRightOnlySelectedMode(option.id) || isModeDisabled(option.id) ? 'not-allowed' : 'pointer'"
+                [style.opacity]="isModeDisabled(option.id) ? '0.5' : '1'"
+                [disabled]="isModeDisabled(option.id)"
+                (click)="toggleRightVerkehrsmittel(option.id)"
+                [attr.aria-label]="option.display_name"
+                [attr.aria-pressed]="isRightSelected(option.id)"
+                [title]="getModeTooltip(option, true)">
+                <mat-icon
+                  class="text-lg leading-none"
+                  [style.color]="isRightSelected(option.id) ? 'var(--background-color)' : 'var(--light-primary-color)'">
+                  {{ option.icon }}
+                </mat-icon>
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      @if (canUseMapCompare()) {
+        <div class="space-y-2">
+          <button
+            type="button"
+            class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full border transition-all duration-200 w-full font-medium"
+            [style.background-color]="isMapCompareMode() ? 'var(--primary-color)' : 'var(--background-color)'"
+            [style.color]="isMapCompareMode() ? 'var(--background-color)' : 'var(--primary-color)'"
+            [style.border-color]="'var(--light-primary-color)'"
+            (click)="toggleMapCompare()">
+            {{ 'left.mapCompare.toggle' | translate }}
+          </button>
+        </div>
+      }
 
       <!-- Mobilitätsbewertung Toggle -->
       <div class="space-y-2">

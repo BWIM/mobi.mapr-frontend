@@ -137,7 +137,7 @@ export class FilterConfigService {
   readonly allStates = this._allStates.asReadonly();
   readonly isMapCompareMode = this._isMapCompareMode.asReadonly();
   readonly canUseMapCompare = computed(
-    () => this.dashboardSessionService.accessMethod() !== null && !this.isMobile()
+    () => this.dashboardSessionService.accessMethod() !== null
   );
   readonly rightSelectedModes = this._rightSelectedModes.asReadonly();
   readonly isMapModeTransitionInProgress = this._mapModeTransitionInProgress.asReadonly();

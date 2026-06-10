@@ -98,11 +98,18 @@ export class MobileFilterPanelComponent implements OnDestroy {
   modeOptions = this.filterConfigService.modeOptions;
   selectedModes = this.filterConfigService.selectedModes;
   selectedBewertung = this.filterConfigService.selectedBewertung;
+  isMapCompareMode = this.filterConfigService.isMapCompareMode;
+  canUseMapCompare = this.filterConfigService.canUseMapCompare;
+  rightSelectedModes = this.filterConfigService.rightSelectedModes;
   hasCategories = this.filterConfigService.hasCategories;
   selectedActivities = this.filterConfigService.selectedActivities;
   selectedPersonas = this.filterConfigService.selectedPersonas;
   allCategories = this.filterConfigService.allCategories;
   allPersonas = this.filterConfigService.allPersonas;
+
+  toggleMapCompare(): void {
+    this.filterConfigService.toggleMapCompare();
+  }
 
   toggleVerkehrsmittel(modeId: number) {
     if (this.filterConfigService.isOnlySelectedMode(modeId)) {
@@ -114,12 +121,30 @@ export class MobileFilterPanelComponent implements OnDestroy {
     this.filterConfigService.toggleMode(modeId);
   }
 
+  toggleRightVerkehrsmittel(modeId: number): void {
+    if (this.filterConfigService.isRightOnlySelectedMode(modeId)) {
+      return;
+    }
+    if (this.isModeDisabled(modeId)) {
+      return;
+    }
+    this.filterConfigService.toggleRightMode(modeId);
+  }
+
   isSelected(modeId: number): boolean {
     return this.filterConfigService.isModeSelected(modeId);
   }
 
   isOnlySelectedMode(modeId: number): boolean {
     return this.filterConfigService.isOnlySelectedMode(modeId);
+  }
+
+  isRightSelected(modeId: number): boolean {
+    return this.filterConfigService.isRightModeSelected(modeId);
+  }
+
+  isRightOnlySelectedMode(modeId: number): boolean {
+    return this.filterConfigService.isRightOnlySelectedMode(modeId);
   }
 
   isCarMode(modeId: number): boolean {
@@ -131,8 +156,9 @@ export class MobileFilterPanelComponent implements OnDestroy {
     return this.filterConfigService.isModeDisabled(modeId);
   }
 
-  getModeTooltip(option: { id: number; display_name: string }): string {
-    if (this.isOnlySelectedMode(option.id)) {
+  getModeTooltip(option: { id: number; display_name: string }, isRight = false): string {
+    const onlySelected = isRight ? this.isRightOnlySelectedMode(option.id) : this.isOnlySelectedMode(option.id);
+    if (onlySelected) {
       const cannotDeselectLast = this.translate.instant('left.transportModes.cannotDeselectLast');
       return `${option.display_name} - ${cannotDeselectLast}`;
     }
