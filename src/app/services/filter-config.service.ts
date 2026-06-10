@@ -91,8 +91,6 @@ export class FilterConfigService {
   private _rightSelectedModes = signal<number[]>([]);
   private _mapLayerRefreshNonce = signal<number>(0);
   private _mapModeTransitionInProgress = signal<boolean>(false);
-  private _isCompareLayersReady = signal<boolean>(true);
-  private _compareLayerUpdateInProgress = signal<boolean>(false);
 
   // Metadata for mode selection
   private _allModes = signal<Mode[]>([]);
@@ -143,17 +141,6 @@ export class FilterConfigService {
   );
   readonly rightSelectedModes = this._rightSelectedModes.asReadonly();
   readonly isMapModeTransitionInProgress = this._mapModeTransitionInProgress.asReadonly();
-  readonly isCompareLayersReady = this._isCompareLayersReady.asReadonly();
-  readonly canToggleCompareModes = computed(() => {
-    if (!this._isMapCompareMode()) {
-      return true;
-    }
-    return (
-      this._isCompareLayersReady() &&
-      !this._mapModeTransitionInProgress() &&
-      !this._compareLayerUpdateInProgress()
-    );
-  });
 
   // Computed signal to check if project is MID (replaces is_mid check)
   // A project is MID if category length != 1 (i.e., 0 or 2+ categories)
@@ -387,9 +374,6 @@ export class FilterConfigService {
         if (!this.mapService.hasCompareMaps()) {
           return;
         }
-        if (this._mapModeTransitionInProgress()) {
-          return;
-        }
 
         const leftChanged = compareInitialLoad || this.filtersDiffer(previousLeftFilters, filters);
         const rightChanged = compareInitialLoad || this.filtersDiffer(previousRightFilters, rightFilters);
@@ -420,7 +404,6 @@ export class FilterConfigService {
             previousLeftFilters = this.cloneContentLayerFilters(filters);
             previousRightFilters = this.cloneContentLayerFilters(rightFilters);
             compareInitialLoad = false;
-            this._isCompareLayersReady.set(true);
           }
           if (this.compareUpdateRetryNeeded) {
             this.compareUpdateRetryNeeded = false;
@@ -490,7 +473,6 @@ export class FilterConfigService {
         if (this._isMapCompareMode()) {
           this._mapModeTransitionInProgress.set(true);
           this._isMapCompareMode.set(false);
-          this._isCompareLayersReady.set(true);
         }
       }
     });
@@ -986,9 +968,6 @@ export class FilterConfigService {
    * Toggle mode selection. At least one mode must remain selected.
    */
   toggleMode(modeId: number): void {
-    if (!this.canToggleCompareModes()) {
-      return;
-    }
     const currentModes = this._selectedModes();
     const index = currentModes.indexOf(modeId);
     if (index > -1) {
@@ -1026,11 +1005,9 @@ export class FilterConfigService {
 
     if (this._isMapCompareMode()) {
       this._isMapCompareMode.set(false);
-      this._isCompareLayersReady.set(true);
       return;
     }
 
-    this._isCompareLayersReady.set(false);
     this._rightSelectedModes.set([...this._selectedModes()]);
     this.validateRightModeSelection();
     this._isMapCompareMode.set(true);
@@ -1049,9 +1026,6 @@ export class FilterConfigService {
   }
 
   toggleRightMode(modeId: number): void {
-    if (!this.canToggleCompareModes()) {
-      return;
-    }
     const currentModes = this._rightSelectedModes();
     const index = currentModes.indexOf(modeId);
     if (index > -1) {
@@ -1290,7 +1264,6 @@ export class FilterConfigService {
     }
 
     this.updateMapLayerInProgress = true;
-    this._compareLayerUpdateInProgress.set(true);
     try {
       this.mapService.setMapLoading(true);
       let success = true;
@@ -1309,7 +1282,6 @@ export class FilterConfigService {
       return success;
     } finally {
       this.updateMapLayerInProgress = false;
-      this._compareLayerUpdateInProgress.set(false);
       this.mapService.setMapLoading(false);
     }
   }

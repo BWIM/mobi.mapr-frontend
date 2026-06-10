@@ -100,7 +100,6 @@ export class MobileFilterPanelComponent implements OnDestroy {
   selectedBewertung = this.filterConfigService.selectedBewertung;
   isMapCompareMode = this.filterConfigService.isMapCompareMode;
   canUseMapCompare = this.filterConfigService.canUseMapCompare;
-  canToggleCompareModes = this.filterConfigService.canToggleCompareModes;
   rightSelectedModes = this.filterConfigService.rightSelectedModes;
   hasCategories = this.filterConfigService.hasCategories;
   selectedActivities = this.filterConfigService.selectedActivities;
@@ -109,16 +108,6 @@ export class MobileFilterPanelComponent implements OnDestroy {
   allPersonas = this.filterConfigService.allPersonas;
 
   toggleMapCompare(): void {
-    const enablingCompare = !this.filterConfigService.isMapCompareMode();
-    if (enablingCompare && this.isExpanded()) {
-      this.onClose.emit();
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          this.filterConfigService.toggleMapCompare();
-        });
-      });
-      return;
-    }
     this.filterConfigService.toggleMapCompare();
   }
 
