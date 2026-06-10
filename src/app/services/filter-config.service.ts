@@ -6,8 +6,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ProfileService } from './profile.service';
 import { ProjectsService } from './project.service';
 import { SettingsService } from './settings.service';
+import { Map as MapLibreMap } from 'maplibre-gl';
 import { MapService, ContentLayerFilters } from './map.service';
 import { DashboardSessionService } from './dashboard-session.service';
+import { AuthService } from '../auth/auth.service';
 import { Profile, Mode } from '../interfaces/profile';
 import { MatDialog } from '@angular/material/dialog';
 import { FilterDialogComponent, FilterDialogData } from '../layout/left/filter-dialog/filter-dialog.component';
@@ -57,6 +59,7 @@ export class FilterConfigService {
   private settingsService = inject(SettingsService);
   private mapService = inject(MapService);
   private dashboardSessionService = inject(DashboardSessionService);
+  private authService = inject(AuthService);
   private dialog = inject(MatDialog);
   private activityService = inject(ActivityService);
   private personaService = inject(PersonaService);
@@ -84,6 +87,10 @@ export class FilterConfigService {
   private _selectedAdminLevel = signal<'state' | 'county' | 'municipality' | 'hexagon' | null>(null);
   private _selectedQualityBrackets = signal<QualityBracket[]>([...ALL_QUALITY_BRACKETS]);
   private _selectedTimeBrackets = signal<TimeBracket[]>([...ALL_TIME_BRACKETS]);
+  private _isMapCompareMode = signal<boolean>(false);
+  private _rightSelectedModes = signal<number[]>([]);
+  private _mapLayerRefreshNonce = signal<number>(0);
+  private _mapModeTransitionInProgress = signal<boolean>(false);
 
   // Metadata for mode selection
   private _allModes = signal<Mode[]>([]);
@@ -128,6 +135,15 @@ export class FilterConfigService {
   readonly allPersonas = this._allPersonas.asReadonly();
   readonly allRegioStars = this._allRegioStars.asReadonly();
   readonly allStates = this._allStates.asReadonly();
+  readonly isMapCompareMode = this._isMapCompareMode.asReadonly();
+  readonly canUseMapCompare = computed(
+    () => this.dashboardSessionService.accessMethod() !== null
+  );
+  readonly rightSelectedModes = this._rightSelectedModes.asReadonly();
+  readonly isMapModeTransitionInProgress = this._mapModeTransitionInProgress.asReadonly();
+  readonly isModeSelectionLocked = computed(
+    () => this._mapModeTransitionInProgress() || this.mapService.isMapLoading()
+  );
 
   // Computed signal to check if project is MID (replaces is_mid check)
   // A project is MID if category length != 1 (i.e., 0 or 2+ categories)
@@ -184,8 +200,51 @@ export class FilterConfigService {
 
   /** Sorted profile IDs for selected modes within project base_profiles (API profile_ids). */
   readonly currentProfileIds = computed((): number[] | null => {
+    return this.getProfileIdsForModes(this._selectedModes());
+  });
+
+  readonly rightCurrentProfileIds = computed((): number[] | null => {
+    return this.getProfileIdsForModes(this._rightSelectedModes());
+  });
+
+  readonly contentLayerFilters = computed<ContentLayerFilters | null>(() => {
+    const profileIds = this.currentProfileIds();
+    return this.buildContentLayerFilters(profileIds);
+  });
+
+  readonly rightContentLayerFilters = computed<ContentLayerFilters | null>(() => {
+    const profileIds = this.rightCurrentProfileIds();
+    return this.buildContentLayerFilters(profileIds);
+  });
+
+  private buildContentLayerFilters(profileIds: number[] | null): ContentLayerFilters | null {
+    if (!profileIds || profileIds.length === 0) {
+      return null;
+    }
+
+    const hasCategories = this.hasCategories();
+    const featureType: 'index' | 'score' = this._selectedBewertung() === 'zeit' ? 'score' : 'index';
+    const selectedStates = this._selectedStates();
+    const selectedActivities = this._selectedActivities();
+    const selectedPersonas = this._selectedPersonas();
+    const selectedRegioStars = this._selectedRegioStars();
+    const selectedAdminLevel = this._selectedAdminLevel();
+
+    return {
+      profile_ids: profileIds,
+      feature_type: featureType,
+      state_ids: selectedStates.length > 0 ? selectedStates : undefined,
+      category_ids: (hasCategories && selectedActivities.length > 0) ? selectedActivities : undefined,
+      persona_id: (hasCategories && selectedPersonas !== null) ? selectedPersonas : undefined,
+      regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined,
+      admin_level: selectedAdminLevel !== null ? selectedAdminLevel : undefined,
+      selected_quality_brackets: [...this._selectedQualityBrackets()],
+      selected_time_brackets: [...this._selectedTimeBrackets()]
+    };
+  }
+
+  private getProfileIdsForModes(selectedModes: number[]): number[] | null {
     const project = this.projectService.project();
-    const selectedModes = this._selectedModes();
     const allProfiles = this._allProfiles();
 
     if (!project || !project.base_profiles || selectedModes.length === 0) {
@@ -202,39 +261,7 @@ export class FilterConfigService {
       .sort((a, b) => a - b);
 
     return selectedProfileIds.length > 0 ? selectedProfileIds : null;
-  });
-
-  // Computed signal for ContentLayerFilters
-  readonly contentLayerFilters = computed<ContentLayerFilters | null>(() => {
-    const profileIds = this.currentProfileIds();
-    if (!profileIds || profileIds.length === 0) {
-      return null;
-    }
-
-    const hasCategories = this.hasCategories();
-
-    const featureType: 'index' | 'score' = this._selectedBewertung() === 'zeit' ? 'score' : 'index';
-    const selectedStates = this._selectedStates();
-    const selectedActivities = this._selectedActivities();
-    const selectedPersonas = this._selectedPersonas();
-    const selectedRegioStars = this._selectedRegioStars();
-
-    const selectedAdminLevel = this._selectedAdminLevel();
-    
-    return {
-      profile_ids: profileIds,
-      feature_type: featureType,
-      state_ids: selectedStates.length > 0 ? selectedStates : undefined,
-      // Only include category_ids and persona_id if project has categories
-      category_ids: (hasCategories && selectedActivities.length > 0) ? selectedActivities : undefined,
-      persona_id: (hasCategories && selectedPersonas !== null) ? selectedPersonas : undefined,
-      regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined,
-      // Only include admin_level if it's not null (null means "automatic" - don't add param)
-      admin_level: selectedAdminLevel !== null ? selectedAdminLevel : undefined,
-      selected_quality_brackets: [...this._selectedQualityBrackets()],
-      selected_time_brackets: [...this._selectedTimeBrackets()]
-    };
-  });
+  }
 
   // Map mode IDs to icon names
   private readonly modeIcons: { [key: string]: string } = {
@@ -249,6 +276,8 @@ export class FilterConfigService {
 
   // Guard to prevent concurrent updateMapLayer calls
   private updateMapLayerInProgress = false;
+  /** Set when a compare update was skipped; flushed after the in-flight update completes. */
+  private compareUpdateRetryNeeded = false;
 
   constructor() {
     // Initialize data loading
@@ -267,6 +296,8 @@ export class FilterConfigService {
           // Force all advanced filter selections to be re-preselected from freshly loaded project data.
           // validateFilterSelections preselects "all" when these signals are empty / null.
           this._selectedModes.set([]);
+          this._rightSelectedModes.set([]);
+          this._isMapCompareMode.set(false);
           this._selectedActivities.set([]);
           this._selectedPersonas.set(null);
           this._selectedRegioStars.set([]);
@@ -320,35 +351,104 @@ export class FilterConfigService {
     });
 
     // React to filter changes and update map
-    // Track previous filter state to determine if it's a full reload or tile-only update
     let previousFilters: ContentLayerFilters | null = null;
+    let previousLeftFilters: ContentLayerFilters | null = null;
+    let previousRightFilters: ContentLayerFilters | null = null;
     let isInitialLoad = true;
+    let compareInitialLoad = true;
     effect(() => {
+      const compareMode = this._isMapCompareMode();
       const filters = this.contentLayerFilters();
+      const rightFilters = this.rightContentLayerFilters();
       const isFilterDataLoaded = this._isFilterDataLoaded();
-      
-      if (filters) {
-        // Wait for filter data to be loaded before calling ready/loading map
-        // This ensures step 1 (load filter options) completes before step 2 (ready request)
-        if (!isFilterDataLoaded && isInitialLoad) {
-          // Filter data not loaded yet, wait for it
+      this._mapLayerRefreshNonce();
+
+      if (compareMode) {
+        // Explicitly track mode selections so side-specific updates always re-run.
+        this._selectedModes();
+        this._rightSelectedModes();
+
+        if (this._mapModeTransitionInProgress()) {
           return;
         }
-        
-        // On initial load, always do a full reload
-        // Otherwise, determine if this is a full reload (filter settings changed) or tile-only update (bewertung changed)
-        // Note: profile_ids changes (from mode selection) require a full reload to call /ready endpoint
-        const isFullReload = isInitialLoad || (previousFilters && (
-          JSON.stringify([...previousFilters.profile_ids].sort((a, b) => a - b)) !== JSON.stringify([...filters.profile_ids].sort((a, b) => a - b)) ||
-          JSON.stringify(previousFilters.state_ids?.sort()) !== JSON.stringify(filters.state_ids?.sort()) ||
-          JSON.stringify(previousFilters.category_ids?.sort()) !== JSON.stringify(filters.category_ids?.sort()) ||
-          previousFilters.persona_id !== filters.persona_id ||
-          JSON.stringify(previousFilters.regiostar_ids?.sort()) !== JSON.stringify(filters.regiostar_ids?.sort()) ||
-          previousFilters.admin_level !== filters.admin_level
-        ));
-        
-        // Check if only mode changed (profile_ids) and we're on mobile
-        const onlyModeChanged = previousFilters && 
+        if (!filters || !rightFilters) {
+          return;
+        }
+        if (!isFilterDataLoaded && compareInitialLoad) {
+          return;
+        }
+        if (!this.mapService.hasCompareMaps()) {
+          return;
+        }
+
+        const leftMap = this.mapService.getMap();
+        const rightMap = this.mapService.getCompareRightMap();
+        if (!leftMap?.loaded() || !rightMap?.loaded()) {
+          return;
+        }
+        if (this.updateMapLayerInProgress) {
+          return;
+        }
+
+        const leftChanged = compareInitialLoad || this.filtersDiffer(previousLeftFilters, filters);
+        const rightChanged = compareInitialLoad || this.filtersDiffer(previousRightFilters, rightFilters);
+        const leftFullReload = leftChanged && (
+          compareInitialLoad || this.requiresFullReload(previousLeftFilters, filters)
+        );
+        const rightFullReload = rightChanged && (
+          compareInitialLoad || this.requiresFullReload(previousRightFilters, rightFilters)
+        );
+        const onlyLeftChanged = leftChanged && !rightChanged;
+        const onlyRightChanged = rightChanged && !leftChanged;
+
+        if (!leftChanged && !rightChanged) {
+          return;
+        }
+
+        void this.updateCompareMapLayers(
+          filters,
+          rightFilters,
+          leftFullReload,
+          rightFullReload,
+          onlyLeftChanged,
+          onlyRightChanged,
+          leftChanged,
+          rightChanged
+        ).then(applied => {
+          if (applied) {
+            previousLeftFilters = this.cloneContentLayerFilters(filters);
+            previousRightFilters = this.cloneContentLayerFilters(rightFilters);
+            compareInitialLoad = false;
+          }
+          if (this.compareUpdateRetryNeeded) {
+            this.compareUpdateRetryNeeded = false;
+            queueMicrotask(() => this.refreshMapLayers());
+          }
+        }).catch(error => {
+          console.error('Error in updateCompareMapLayers:', error);
+        });
+        return;
+      }
+
+      previousLeftFilters = null;
+      previousRightFilters = null;
+      compareInitialLoad = true;
+      isInitialLoad = true;
+
+      if (filters) {
+        if (this._mapModeTransitionInProgress()) {
+          return;
+        }
+        if (!isFilterDataLoaded && isInitialLoad) {
+          return;
+        }
+        if (this.updateMapLayerInProgress) {
+          return;
+        }
+
+        const isFullReload = isInitialLoad || this.requiresFullReload(previousFilters, filters);
+
+        const onlyModeChanged = previousFilters &&
           JSON.stringify([...previousFilters.profile_ids].sort((a, b) => a - b)) !== JSON.stringify([...filters.profile_ids].sort((a, b) => a - b)) &&
           JSON.stringify(previousFilters.state_ids?.sort()) === JSON.stringify(filters.state_ids?.sort()) &&
           JSON.stringify(previousFilters.category_ids?.sort()) === JSON.stringify(filters.category_ids?.sort()) &&
@@ -356,9 +456,8 @@ export class FilterConfigService {
           JSON.stringify(previousFilters.regiostar_ids?.sort()) === JSON.stringify(filters.regiostar_ids?.sort()) &&
           previousFilters.admin_level === filters.admin_level &&
           previousFilters.feature_type === filters.feature_type;
-        
-        // Check if only persona changed and we're on mobile
-        const onlyPersonaChanged = previousFilters && 
+
+        const onlyPersonaChanged = previousFilters &&
           previousFilters.persona_id !== filters.persona_id &&
           JSON.stringify([...previousFilters.profile_ids].sort((a, b) => a - b)) === JSON.stringify([...filters.profile_ids].sort((a, b) => a - b)) &&
           JSON.stringify(previousFilters.state_ids?.sort()) === JSON.stringify(filters.state_ids?.sort()) &&
@@ -366,21 +465,18 @@ export class FilterConfigService {
           JSON.stringify(previousFilters.regiostar_ids?.sort()) === JSON.stringify(filters.regiostar_ids?.sort()) &&
           previousFilters.admin_level === filters.admin_level &&
           previousFilters.feature_type === filters.feature_type;
-        
+
         if (isFullReload) {
-          // On mobile, if only mode or persona changed, don't zoom to bounds to keep map position static.
-          // Still run a full reload so /ready + preload flow executes consistently across platforms.
           const shouldZoomToBounds = !(this.isMobile() && (onlyModeChanged || onlyPersonaChanged));
           this.updateMapLayer(filters, true, shouldZoomToBounds).catch(error => {
             console.error('Error in updateMapLayer (full reload):', error);
           });
         } else {
-          // Tile-only update (only bewertung changed) - preserve map position
           this.updateMapLayer(filters, false, false).catch(error => {
             console.error('Error in updateMapLayer (tile update):', error);
           });
         }
-        
+
         previousFilters = { ...filters };
         isInitialLoad = false;
       } else {
@@ -390,23 +486,37 @@ export class FilterConfigService {
       }
     });
 
+    effect(() => {
+      if (!this.canUseMapCompare()) {
+        if (this._isMapCompareMode()) {
+          this._mapModeTransitionInProgress.set(true);
+          this._isMapCompareMode.set(false);
+        }
+      }
+    });
+
     // React to persona changes and deselect car mode if persona cannot use car
     effect(() => {
       const selectedPersonaId = this._selectedPersonas();
       const allPersonas = this._allPersonas();
       const selectedModes = this._selectedModes();
-      
+      const rightSelectedModes = this._rightSelectedModes();
+
       if (selectedPersonaId !== null) {
         const selectedPersona = allPersonas.find(p => p.id === selectedPersonaId);
-        
+
         if (selectedPersona && selectedPersona.can_use_car === false) {
-          // Find the car mode ID
           const carMode = this._allModes().find(mode => mode.name.toLowerCase() === 'car');
-          
+
           if (carMode && selectedModes.includes(carMode.id)) {
             this._selectedModes.set(selectedModes.filter(id => id !== carMode.id));
             this.validateModeSelection();
             this.saveSettings();
+          }
+
+          if (carMode && rightSelectedModes.includes(carMode.id)) {
+            this._rightSelectedModes.set(rightSelectedModes.filter(id => id !== carMode.id));
+            this.validateRightModeSelection();
           }
         }
       }
@@ -796,43 +906,64 @@ export class FilterConfigService {
 
     // Validate current selection against available modes
     this.validateModeSelection();
+    this.validateRightModeSelection();
+  }
+
+  private getModesInProject(): Set<number> {
+    const currentProject = this.projectService.project();
+    const modesInProject = new Set<number>();
+    if (!currentProject?.base_profiles) {
+      return modesInProject;
+    }
+
+    currentProject.base_profiles.forEach(profileId => {
+      const profile = this._allProfiles().find(p => p.id === profileId);
+      if (profile?.mode) {
+        modesInProject.add(profile.mode.id);
+      }
+    });
+    return modesInProject;
+  }
+
+  private validateModesForSignal(
+    currentModes: number[],
+    setter: (modes: number[]) => void,
+    modesInProject: Set<number>
+  ): void {
+    if (modesInProject.size === 0) {
+      return;
+    }
+
+    if (currentModes.length === 0) {
+      setter(Array.from(modesInProject));
+      return;
+    }
+
+    const validModes = currentModes.filter(modeId => modesInProject.has(modeId));
+    if (validModes.length === 0) {
+      setter(Array.from(modesInProject));
+    } else if (validModes.length !== currentModes.length) {
+      setter(validModes);
+    }
   }
 
   /**
    * Validate and update mode selection against available modes
    */
   private validateModeSelection(): void {
-    const currentProject = this.projectService.project();
-    if (!currentProject || !currentProject.base_profiles) {
+    const modesInProject = this.getModesInProject();
+    if (modesInProject.size === 0) {
       return;
     }
+    this.validateModesForSignal(this._selectedModes(), modes => this._selectedModes.set(modes), modesInProject);
+  }
 
-    const modesInProject = new Set<number>();
-    currentProject.base_profiles.forEach(profileId => {
-      const profile = this._allProfiles().find(p => p.id === profileId);
-      if (profile && profile.mode) {
-        modesInProject.add(profile.mode.id);
-      }
-    });
-
-    const currentModes = this._selectedModes();
-    
-    // If no modes selected, preselect all available modes
-    if (currentModes.length === 0) {
-      this._selectedModes.set(Array.from(modesInProject));
+  private validateRightModeSelection(): void {
+    const modesInProject = this.getModesInProject();
+    if (modesInProject.size === 0) {
       return;
     }
-
-    // Filter out any selected modes that are not available in the current project
-    const validModes = currentModes.filter(modeId => modesInProject.has(modeId));
-    
-    // If all selected modes were invalid, fall back to all available modes
-    if (validModes.length === 0 && modesInProject.size > 0) {
-      this._selectedModes.set(Array.from(modesInProject));
-    } else if (validModes.length !== currentModes.length) {
-      // Update if some modes were filtered out
-      this._selectedModes.set(validModes);
-    }
+    this.validateModesForSignal(this._rightSelectedModes(), modes => this._rightSelectedModes.set(modes), modesInProject);
   }
 
   /**
@@ -881,6 +1012,57 @@ export class FilterConfigService {
    */
   isModeSelected(modeId: number): boolean {
     return this._selectedModes().includes(modeId);
+  }
+
+  toggleMapCompare(): void {
+    if (!this.canUseMapCompare()) {
+      return;
+    }
+
+    this._mapModeTransitionInProgress.set(true);
+
+    if (this._isMapCompareMode()) {
+      this._isMapCompareMode.set(false);
+      return;
+    }
+
+    this._rightSelectedModes.set([...this._selectedModes()]);
+    this.validateRightModeSelection();
+    this._isMapCompareMode.set(true);
+  }
+
+  setMapModeTransitionInProgress(inProgress: boolean): void {
+    this._mapModeTransitionInProgress.set(inProgress);
+  }
+
+  resetMapLayerUpdateState(): void {
+    this.updateMapLayerInProgress = false;
+  }
+
+  refreshMapLayers(): void {
+    this._mapLayerRefreshNonce.update(value => value + 1);
+  }
+
+  toggleRightMode(modeId: number): void {
+    const currentModes = this._rightSelectedModes();
+    const index = currentModes.indexOf(modeId);
+    if (index > -1) {
+      if (currentModes.length === 1) {
+        return;
+      }
+      this._rightSelectedModes.set(currentModes.filter(id => id !== modeId));
+    } else {
+      this._rightSelectedModes.set([...currentModes, modeId]);
+    }
+  }
+
+  isRightOnlySelectedMode(modeId: number): boolean {
+    const modes = this._rightSelectedModes();
+    return modes.length === 1 && modes.includes(modeId);
+  }
+
+  isRightModeSelected(modeId: number): boolean {
+    return this._rightSelectedModes().includes(modeId);
   }
 
   /**
@@ -1023,6 +1205,105 @@ export class FilterConfigService {
     this.saveSettings();
   }
 
+  private requiresFullReload(
+    previousFilters: ContentLayerFilters | null,
+    filters: ContentLayerFilters
+  ): boolean {
+    if (!previousFilters) {
+      return true;
+    }
+
+    return (
+      JSON.stringify([...previousFilters.profile_ids].sort((a, b) => a - b)) !== JSON.stringify([...filters.profile_ids].sort((a, b) => a - b)) ||
+      JSON.stringify(previousFilters.state_ids?.sort()) !== JSON.stringify(filters.state_ids?.sort()) ||
+      JSON.stringify(previousFilters.category_ids?.sort()) !== JSON.stringify(filters.category_ids?.sort()) ||
+      previousFilters.persona_id !== filters.persona_id ||
+      JSON.stringify(previousFilters.regiostar_ids?.sort()) !== JSON.stringify(filters.regiostar_ids?.sort()) ||
+      previousFilters.admin_level !== filters.admin_level
+    );
+  }
+
+  private filtersDiffer(
+    previousFilters: ContentLayerFilters | null,
+    filters: ContentLayerFilters
+  ): boolean {
+    if (!previousFilters) {
+      return true;
+    }
+
+    return (
+      JSON.stringify([...previousFilters.profile_ids].sort((a, b) => a - b)) !== JSON.stringify([...filters.profile_ids].sort((a, b) => a - b)) ||
+      previousFilters.feature_type !== filters.feature_type ||
+      JSON.stringify(previousFilters.state_ids?.sort()) !== JSON.stringify(filters.state_ids?.sort()) ||
+      JSON.stringify(previousFilters.category_ids?.sort()) !== JSON.stringify(filters.category_ids?.sort()) ||
+      previousFilters.persona_id !== filters.persona_id ||
+      JSON.stringify(previousFilters.regiostar_ids?.sort()) !== JSON.stringify(filters.regiostar_ids?.sort()) ||
+      previousFilters.admin_level !== filters.admin_level ||
+      JSON.stringify(previousFilters.selected_quality_brackets) !== JSON.stringify(filters.selected_quality_brackets) ||
+      JSON.stringify(previousFilters.selected_time_brackets) !== JSON.stringify(filters.selected_time_brackets)
+    );
+  }
+
+  private cloneContentLayerFilters(filters: ContentLayerFilters): ContentLayerFilters {
+    return {
+      ...filters,
+      profile_ids: [...filters.profile_ids],
+      state_ids: filters.state_ids ? [...filters.state_ids] : undefined,
+      category_ids: filters.category_ids ? [...filters.category_ids] : undefined,
+      regiostar_ids: filters.regiostar_ids ? [...filters.regiostar_ids] : undefined,
+      selected_quality_brackets: filters.selected_quality_brackets
+        ? [...filters.selected_quality_brackets]
+        : undefined,
+      selected_time_brackets: filters.selected_time_brackets
+        ? [...filters.selected_time_brackets]
+        : undefined,
+    };
+  }
+
+  private async updateCompareMapLayers(
+    leftFilters: ContentLayerFilters,
+    rightFilters: ContentLayerFilters,
+    leftFullReload: boolean,
+    rightFullReload: boolean,
+    onlyLeftChanged: boolean = false,
+    onlyRightChanged: boolean = false,
+    leftChanged: boolean = true,
+    rightChanged: boolean = true
+  ): Promise<boolean> {
+    const leftMap = this.mapService.getMap();
+    const rightMap = this.mapService.getCompareRightMap();
+    if (!leftMap || !rightMap) {
+      return false;
+    }
+
+    if (this.updateMapLayerInProgress) {
+      this.compareUpdateRetryNeeded = true;
+      return false;
+    }
+
+    this.updateMapLayerInProgress = true;
+    try {
+      this.mapService.setMapLoading(true);
+      let success = true;
+      if (leftChanged && !onlyRightChanged) {
+        const leftOk = await this.updateMapLayer(leftFilters, leftFullReload, false, leftMap);
+        if (!leftOk) {
+          success = false;
+        }
+      }
+      if (rightChanged && !onlyLeftChanged) {
+        const rightOk = await this.updateMapLayer(rightFilters, rightFullReload, false, rightMap);
+        if (!rightOk) {
+          success = false;
+        }
+      }
+      return success;
+    } finally {
+      this.updateMapLayerInProgress = false;
+      this.mapService.setMapLoading(false);
+    }
+  }
+
   /**
    * Update map layer with current filters
    * @param filters - The filter parameters
@@ -1031,15 +1312,16 @@ export class FilterConfigService {
   private async updateMapLayer(
     filters: ContentLayerFilters,
     fullReload: boolean = true,
-    zoomToBounds: boolean = true
-  ): Promise<void> {
-    // Prevent concurrent calls - if one is already in progress, skip this one
-    if (this.updateMapLayerInProgress) {
-      console.log('updateMapLayer already in progress, skipping concurrent call');
-      return;
+    zoomToBounds: boolean = true,
+    targetMap?: MapLibreMap
+  ): Promise<boolean> {
+    if (!targetMap) {
+      if (this.updateMapLayerInProgress) {
+        console.log('updateMapLayer already in progress, skipping concurrent call');
+        return false;
+      }
+      this.updateMapLayerInProgress = true;
     }
-
-    this.updateMapLayerInProgress = true;
     let dialogRef: any = null;
 
     try {
@@ -1093,7 +1375,7 @@ export class FilterConfigService {
           this.mapService.setMapLoading(false);
           this.mapService.setPreparingProject(false);
           this.mapService.setReadyCheckComplete(false);
-          return;
+          return false;
         }
       } else {
         // For tile-only updates, ready check is not needed, so mark as complete
@@ -1110,27 +1392,34 @@ export class FilterConfigService {
 
       // Only load the content layer AFTER we've confirmed data is ready (step 3)
       // (either via cache_flag: true OR websocket completion)
-      // Use updateContentLayerTiles for tile-only updates to preserve map position
-      if (fullReload) {
+      if (targetMap) {
+        if (fullReload) {
+          const loaded = await this.mapService.loadContentLayerOnMap(targetMap, filters, zoomToBounds, false);
+          if (loaded) {
+            targetMap.resize();
+          }
+          return loaded;
+        }
+        await this.mapService.updateContentLayerOnMap(targetMap, filters);
+        return true;
+      } else if (fullReload) {
         await this.mapService.loadContentLayer(filters, zoomToBounds);
       } else {
         await this.mapService.updateContentLayerTiles(filters);
       }
-
-      // Loading state will be managed by map event listeners (dataloading/idle events)
-      // in center.component.ts, so we don't need to manually clear it here
-      // Rankings will load automatically when map loading is false and ready check is complete
+      return true;
     } catch (error) {
       console.error('Error in updateMapLayer:', error);
-      // Make sure to close dialog and reset loading state on error
       if (dialogRef) {
         dialogRef.close();
         this.mapService.setPreparingProject(false);
       }
       this.mapService.setMapLoading(false);
+      return false;
     } finally {
-      // Always reset the guard, even if an error occurred
-      this.updateMapLayerInProgress = false;
+      if (!targetMap) {
+        this.updateMapLayerInProgress = false;
+      }
     }
   }
 

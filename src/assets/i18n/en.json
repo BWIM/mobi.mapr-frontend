@@ -303,6 +303,11 @@
     "expanded": "Expanded",
     "normal": "Normal",
     "createdDate": "Project creation date",
+    "mapCompare": {
+      "toggle": "Toggle map compare",
+      "leftMap": "Left map",
+      "rightMap": "Right map"
+    },
     "transportModes": {
       "title": "Transport Modes",
       "description": "Select the transport modes that should be considered in the calculation. You can activate multiple transport modes at once; at least one mode must always remain selected.",

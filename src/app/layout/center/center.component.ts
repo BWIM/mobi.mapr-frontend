@@ -1,7 +1,8 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, effect, ChangeDetectorRef } from '@angular/core';
 import { Subscription, firstValueFrom, debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
-import { Map, NavigationControl, FullscreenControl, Popup, AttributionControl } from 'maplibre-gl';
+import { Map, MapDataEvent, NavigationControl, FullscreenControl, Popup, AttributionControl, LngLatLike } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import Compare from '@maplibre/maplibre-gl-compare';
 import { MapService } from '../../services/map.service';
 import MinimapControl from "maplibregl-minimap";
 import { SharedModule } from '../../shared/shared.module';
@@ -30,18 +31,38 @@ interface NominatimResult {
   styleUrl: './center.component.css',
 })
 export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
-  @ViewChild('mapContainer') mapContainer?: ElementRef;
+  @ViewChild('mapContainer') mapContainer?: ElementRef<HTMLDivElement>;
+  @ViewChild('compareContainer') compareContainer?: ElementRef<HTMLDivElement>;
+  @ViewChild('beforeMapContainer') beforeMapContainer?: ElementRef<HTMLDivElement>;
+  @ViewChild('afterMapContainer') afterMapContainer?: ElementRef<HTMLDivElement>;
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
   private map?: Map;
+  private beforeMap?: Map;
+  private afterMap?: Map;
+  private mapCompare?: Compare;
+  private savedViewport: { center: LngLatLike; zoom: number } | null = null;
+  private mapModeTransitionPending = false;
+  private pendingCompareMode: boolean | null = null;
+  private compareMapsInitPromise: Promise<void> | null = null;
+  private wasCompareMode = false;
   private mapStyleSubscription?: Subscription;
   private searchQuerySubscription?: Subscription;
   private featureSelectionSubscription?: Subscription;
-  private lastCanvasPointerMoveTs: number = 0;
-  private canvasPointerMoveListener?: (event: PointerEvent) => void;
+  private readonly canvasPointerMoveTsByMap = new WeakMap<Map, number>();
+  private readonly canvasPointerMoveListeners = new WeakMap<Map, (event: PointerEvent) => void>();
+  private readonly dragOpacityHandlers = new WeakMap<Map, { start: () => void; end: () => void }>();
+  private readonly tileLoadingHandlers = new WeakMap<Map, {
+    dataloading: (event: MapDataEvent) => void;
+    idle: () => void;
+    error: () => void;
+  }>();
   mapStyle: any;
   zoom: number = 7;
   center: [number, number] = [9.2156505, 49.320099];
   private filterConfigService = inject(FilterConfigService);
+  private changeDetectorRef = inject(ChangeDetectorRef);
+  private readonly hostElementRef = inject(ElementRef<HTMLElement>);
+  readonly isMapCompareMode = this.filterConfigService.isMapCompareMode;
   private dialog = inject(MatDialog);
   private http = inject(HttpClient);
   private featureSelectionService = inject(FeatureSelectionService);
@@ -49,19 +70,17 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private searchService = inject(SearchService);
   private settingsService = inject(SettingsService);
   private popup?: Popup;
+  private rightPopup?: Popup;
   private contextMenuPopup?: Popup;
   private contextMenuFeature: any = null;
   private hasSelectedFeature: boolean = false;
   private currentSelectedFeature: any = null;
-  private isDragOpacityDimmed = false;
   private readonly dragOpacityLayerProps: Array<{ layerId: string; paintProperty: string }> = [
     { layerId: 'content-layer-fill', paintProperty: 'fill-opacity' },
     { layerId: 'content-layer-outline', paintProperty: 'line-opacity' },
     { layerId: 'content-layer-highlight', paintProperty: 'line-opacity' },
     { layerId: 'content-layer-selection', paintProperty: 'line-opacity' }
   ];
-  private dragStartOpacityHandler?: () => void;
-  private dragEndOpacityHandler?: () => void;
 
   // Nominatim search properties
   searchQuery: string = '';
@@ -71,6 +90,24 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   showLegendClickHint: boolean = true;
 
   constructor(private mapService: MapService) {
+    effect(() => {
+      const compareMode = this.filterConfigService.isMapCompareMode();
+      queueMicrotask(() => {
+        if (compareMode === this.wasCompareMode) {
+          return;
+        }
+        if (!this.isActiveMapHost()) {
+          return;
+        }
+        const previousCompareMode = this.wasCompareMode;
+        this.wasCompareMode = compareMode;
+        if (!previousCompareMode && !compareMode) {
+          return;
+        }
+        void this.handleMapModeChange(compareMode);
+      });
+    });
+
     // Setup debounced search
     this.searchSubject.pipe(
       debounceTime(300),
@@ -210,15 +247,10 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     // Subscribe to map style changes
     this.mapStyleSubscription = this.mapService.mapStyle$.subscribe(style => {
       this.mapStyle = style;
-      if (this.map) {
+      if (this.map && !this.filterConfigService.isMapCompareMode()) {
         this.map.setStyle(style);
-        // Re-setup event handlers after style change (MapLibre removes them when style changes)
         this.map.once('style.load', () => {
-          this.setupDragOpacityHandlers();
-          this.setupFeatureInteractions();
-          this.setupTileLoadingEvents();
-          // Re-apply selection border if a feature is selected
-          this.updateSelectionBorder();
+          this.setupMapInteractions(this.map!);
         });
       }
     });
@@ -232,69 +264,318 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    if (this.mapContainer) {
-      const mapOptions: any = {
-        container: this.mapContainer.nativeElement,
-        style: this.mapStyle,
-        center: this.center,
-        zoom: this.zoom,
-        maxZoom: 15,
-        dragRotate: false,
-        renderWorldCopies: false,
-        attributionControl: false
-      };
-
-      this.map = new Map(mapOptions);
-      this.mapService.setMap(this.map);
-
-      // Initialize popup for hover tooltips
-      this.popup = new Popup({
-        closeButton: false,
-        closeOnClick: false,
-        anchor: 'bottom',
-        offset: [0, -5]
-      });
-
-      // Add navigation controls
-      this.map.addControl(new NavigationControl({ showCompass: false }), 'top-right');
-      this.map.addControl(new FullscreenControl(), 'top-right');
-      this.map.dragRotate.disable();
-      this.map.touchZoomRotate.disableRotation();
-
-      // Wait for map to load before adding minimap and setting up event handlers
-      this.map.once('load', () => {
-        if (this.map) {
-          this.map.addControl(new MinimapControl(this.mapService.getMinimapConfig()), 'bottom-right');
-          this.setupDragOpacityHandlers();
-          this.setupFeatureInteractions();
-          this.setupTileLoadingEvents();
-          this.map.addControl(new AttributionControl({customAttribution:'Hintergrundkarte: © OpenStreetMap, CARTO', compact: true}), 'bottom-right');
-          // Re-apply selection border if a feature is selected
-          this.updateSelectionBorder();
-
-          setTimeout(() => {
-            const btn = this.map!
-              .getContainer()
-              .querySelector<HTMLButtonElement>('.maplibregl-ctrl-attrib-button');
-            btn?.click();
-          }, 0);
-      
-          // Initial map load is complete
-          this.mapService.setMapLoading(false);
-        }
-      });
+    if (!this.isActiveMapHost()) {
+      return;
+    }
+    if (!this.filterConfigService.isMapCompareMode()) {
+      this.initSingleMap();
     }
   }
 
-  ngOnDestroy() {
-    if (this.map) {
-      const canvas = this.map.getCanvas();
-      if (canvas && this.canvasPointerMoveListener) {
-        canvas.removeEventListener('pointermove', this.canvasPointerMoveListener);
-        this.canvasPointerMoveListener = undefined;
-      }
-      this.map.remove();
+  /** Desktop and mobile each mount app-center; only the visible instance owns the map. */
+  private isActiveMapHost(): boolean {
+    return this.hostElementRef.nativeElement.getClientRects().length > 0;
+  }
+
+  private async handleMapModeChange(compareMode: boolean): Promise<void> {
+    if (!this.isActiveMapHost()) {
+      return;
     }
+    if (this.mapModeTransitionPending) {
+      this.pendingCompareMode = compareMode;
+      return;
+    }
+    this.mapModeTransitionPending = true;
+    try {
+      if (compareMode) {
+        if (this.beforeMap) {
+          return;
+        }
+        if (this.compareMapsInitPromise) {
+          await this.compareMapsInitPromise;
+          return;
+        }
+        this.compareMapsInitPromise = (async () => {
+          this.captureViewportFromActiveMap();
+          this.filterConfigService.resetMapLayerUpdateState();
+          this.destroySingleMap();
+          await this.waitForCompareContainers();
+          await this.initCompareMaps();
+        })();
+        try {
+          await this.compareMapsInitPromise;
+        } finally {
+          this.compareMapsInitPromise = null;
+        }
+      } else {
+        if (this.map && !this.beforeMap) {
+          return;
+        }
+        this.captureViewportFromActiveMap();
+        this.destroyCompareMaps();
+        await new Promise<void>(resolve => setTimeout(resolve, 0));
+        this.initSingleMap();
+        this.filterConfigService.refreshMapLayers();
+      }
+    } finally {
+      this.mapModeTransitionPending = false;
+      this.filterConfigService.setMapModeTransitionInProgress(false);
+
+      const pendingMode = this.pendingCompareMode;
+      this.pendingCompareMode = null;
+      if (pendingMode !== null) {
+        void this.handleMapModeChange(pendingMode);
+      }
+    }
+  }
+
+  private captureViewportFromActiveMap(): void {
+    const activeMap = this.beforeMap ?? this.map;
+    if (!activeMap) {
+      return;
+    }
+    this.savedViewport = {
+      center: activeMap.getCenter(),
+      zoom: activeMap.getZoom(),
+    };
+  }
+
+  private getMapViewport(): { center: LngLatLike; zoom: number } {
+    return this.savedViewport ?? { center: this.center, zoom: this.zoom };
+  }
+
+  private createPopup(): Popup {
+    return new Popup({
+      closeButton: false,
+      closeOnClick: false,
+      anchor: 'bottom',
+      offset: [0, -5]
+    });
+  }
+
+  private createBaseMapOptions(container: HTMLElement, useBaseStyleOnly = false): Record<string, unknown> {
+    const viewport = this.getMapViewport();
+    return {
+      container,
+      style: useBaseStyleOnly
+        ? this.mapService.getBaseMapStyle()
+        : (this.mapStyle ?? this.mapService.getBaseMapStyle()),
+      center: viewport.center,
+      zoom: viewport.zoom,
+      maxZoom: 15,
+      dragRotate: false,
+      renderWorldCopies: false,
+      attributionControl: false,
+    };
+  }
+
+  private configureMapControls(targetMap: Map, includeMinimap: boolean): void {
+    targetMap.addControl(new NavigationControl({ showCompass: false }), 'top-right');
+    targetMap.addControl(new FullscreenControl(), 'top-right');
+    targetMap.dragRotate.disable();
+    targetMap.touchZoomRotate.disableRotation();
+    targetMap.addControl(
+      new AttributionControl({ customAttribution: 'Hintergrundkarte: © OpenStreetMap, CARTO', compact: true }),
+      'bottom-right'
+    );
+
+    if (includeMinimap) {
+      targetMap.addControl(new MinimapControl(this.mapService.getMinimapConfig()), 'bottom-right');
+    }
+  }
+
+  private expandAttributionButton(targetMap: Map): void {
+    setTimeout(() => {
+      const btn = targetMap
+        .getContainer()
+        .querySelector<HTMLButtonElement>('.maplibregl-ctrl-attrib-button');
+      btn?.click();
+    }, 0);
+  }
+
+  private getPopupForMap(targetMap: Map): Popup | undefined {
+    if (this.afterMap && targetMap === this.afterMap) {
+      return this.rightPopup;
+    }
+    return this.popup;
+  }
+
+  private getActiveMaps(): Map[] {
+    if (this.filterConfigService.isMapCompareMode()) {
+      return [this.beforeMap, this.afterMap].filter((map): map is Map => !!map);
+    }
+    return this.map ? [this.map] : [];
+  }
+
+  private removeCanvasPointerMoveListener(targetMap: Map): void {
+    const listener = this.canvasPointerMoveListeners.get(targetMap);
+    if (!listener) {
+      return;
+    }
+    targetMap.getCanvas().removeEventListener('pointermove', listener);
+    this.canvasPointerMoveListeners.delete(targetMap);
+    this.canvasPointerMoveTsByMap.delete(targetMap);
+  }
+
+  private removeTileLoadingHandlers(targetMap: Map): void {
+    const handlers = this.tileLoadingHandlers.get(targetMap);
+    if (!handlers) {
+      return;
+    }
+    targetMap.off('dataloading', handlers.dataloading);
+    targetMap.off('idle', handlers.idle);
+    targetMap.off('error', handlers.error);
+    this.tileLoadingHandlers.delete(targetMap);
+  }
+
+  private initSingleMap(): void {
+    if (this.map || !this.mapContainer?.nativeElement) {
+      return;
+    }
+
+    this.map = new Map(this.createBaseMapOptions(this.mapContainer.nativeElement) as any);
+    this.mapService.setMap(this.map);
+    this.popup = this.createPopup();
+    this.configureMapControls(this.map, true);
+
+    this.map.once('load', () => {
+      if (!this.map) {
+        return;
+      }
+      this.setupMapInteractions(this.map);
+      this.expandAttributionButton(this.map);
+      this.mapService.setMapLoading(false);
+    });
+  }
+
+  private async waitForCompareContainers(): Promise<void> {
+    for (let attempt = 0; attempt < 30; attempt++) {
+      this.changeDetectorRef.detectChanges();
+      if (
+        this.compareContainer?.nativeElement &&
+        this.beforeMapContainer?.nativeElement &&
+        this.afterMapContainer?.nativeElement
+      ) {
+        return;
+      }
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+    }
+  }
+
+  private async initCompareMaps(): Promise<void> {
+    if (
+      this.beforeMap ||
+      !this.compareContainer?.nativeElement ||
+      !this.beforeMapContainer?.nativeElement ||
+      !this.afterMapContainer?.nativeElement
+    ) {
+      return;
+    }
+
+    // Register map instances synchronously so concurrent init cannot race past the guard.
+    this.beforeMap = new Map(this.createBaseMapOptions(this.beforeMapContainer.nativeElement, true) as any);
+    this.afterMap = new Map(this.createBaseMapOptions(this.afterMapContainer.nativeElement, true) as any);
+    this.mapService.setMap(this.beforeMap);
+    this.mapService.setCompareRightMap(this.afterMap);
+    this.popup = this.createPopup();
+    this.rightPopup = this.createPopup();
+    this.configureMapControls(this.beforeMap, false);
+    this.configureMapControls(this.afterMap, false);
+
+    this.mapCompare = new Compare(
+      this.beforeMap,
+      this.afterMap,
+      this.compareContainer.nativeElement,
+      { mousemove: false }
+    );
+
+    this.beforeMap.on('style.load', () => {
+      if (this.beforeMap) {
+        this.setupMapInteractions(this.beforeMap);
+        this.expandAttributionButton(this.beforeMap);
+      }
+    });
+
+    this.afterMap.on('style.load', () => {
+      if (this.afterMap) {
+        this.setupMapInteractions(this.afterMap);
+        this.expandAttributionButton(this.afterMap);
+      }
+    });
+
+    await Promise.all([
+      this.waitForMapLoad(this.beforeMap),
+      this.waitForMapLoad(this.afterMap),
+    ]);
+
+    this.beforeMap.resize();
+    this.afterMap.resize();
+    this.filterConfigService.refreshMapLayers();
+  }
+
+  private waitForMapLoad(map: Map): Promise<void> {
+    if (map.loaded()) {
+      return Promise.resolve();
+    }
+
+    return new Promise(resolve => {
+      map.once('load', () => resolve());
+    });
+  }
+
+  private destroySingleMap(): void {
+    if (!this.map) {
+      return;
+    }
+
+    this.removeCanvasPointerMoveListener(this.map);
+    this.removeTileLoadingHandlers(this.map);
+
+    this.map.remove();
+    this.map = undefined;
+    this.mapService.setMap(null);
+  }
+
+  private destroyCompareMaps(): void {
+    this.map = undefined;
+    if (this.mapCompare) {
+      this.mapCompare.remove();
+      this.mapCompare = undefined;
+    }
+
+    if (this.beforeMap) {
+      this.removeCanvasPointerMoveListener(this.beforeMap);
+      this.removeTileLoadingHandlers(this.beforeMap);
+      this.beforeMap.remove();
+      this.beforeMap = undefined;
+    }
+
+    if (this.afterMap) {
+      this.removeCanvasPointerMoveListener(this.afterMap);
+      this.removeTileLoadingHandlers(this.afterMap);
+      this.afterMap.remove();
+      this.afterMap = undefined;
+    }
+
+    this.rightPopup = undefined;
+
+    this.mapService.clearCompareMaps();
+    this.mapService.setMap(null);
+  }
+
+  private setupMapInteractions(targetMap: Map): void {
+    if (!this.filterConfigService.isMapCompareMode() || targetMap === this.beforeMap) {
+      this.map = targetMap;
+    }
+    this.setupDragOpacityHandlers(targetMap);
+    this.setupFeatureInteractions(targetMap);
+    this.setupTileLoadingEvents(targetMap);
+    this.updateSelectionBorder();
+  }
+
+  ngOnDestroy() {
+    this.destroyCompareMaps();
+    this.destroySingleMap();
     if (this.mapStyleSubscription) {
       this.mapStyleSubscription.unsubscribe();
     }
@@ -389,26 +670,22 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
    * Updates the selection border on the map based on currently selected feature
    */
   private updateSelectionBorder(): void {
-    if (!this.map || !this.map.getLayer('content-layer-selection')) {
-      return;
-    }
-
-    // Hide filter used when nothing is selected (or fallback fails).
-    // Using a non-matching `properties.id` value keeps the selection border invisible.
     const neverMatchIdFilter: any = ['==', ['get', 'id'], -1];
+    const selectionFilter = !this.currentSelectedFeature
+      ? neverMatchIdFilter
+      : ['==', ['get', 'id'], this.currentSelectedFeature.properties.id];
 
-    if (!this.currentSelectedFeature) {
-      this.map.setFilter('content-layer-selection', neverMatchIdFilter);
-      return;
+    for (const targetMap of this.getActiveMaps()) {
+      if (!targetMap.getLayer('content-layer-selection')) {
+        continue;
+      }
+      targetMap.setFilter('content-layer-selection', selectionFilter);
     }
-
-    // Always select by unique feature id (fixes "same-name" hexagon highlighting).
-    const selectedId = this.currentSelectedFeature.properties.id;
-    this.map.setFilter('content-layer-selection', ['==', ['get', 'id'], selectedId]);
   }
 
-  private setupFeatureInteractions(): void {
-    if (!this.map || !this.popup) {
+  private setupFeatureInteractions(targetMap: Map): void {
+    const popup = this.getPopupForMap(targetMap);
+    if (!popup) {
       return;
     }
 
@@ -427,19 +704,20 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Track actual pointer movement on the canvas (not just MapLibre's feature hover events).
     // This is the main guard against "follow" when there are many nearby features.
-    const canvas = this.map.getCanvas();
-    if (this.canvasPointerMoveListener) {
-      canvas.removeEventListener('pointermove', this.canvasPointerMoveListener);
-    }
-    this.lastCanvasPointerMoveTs = Date.now();
-    this.canvasPointerMoveListener = () => {
-      this.lastCanvasPointerMoveTs = Date.now();
+    this.removeCanvasPointerMoveListener(targetMap);
+    const canvas = targetMap.getCanvas();
+    this.canvasPointerMoveTsByMap.set(targetMap, Date.now());
+    const canvasPointerMoveListener = () => {
+      this.canvasPointerMoveTsByMap.set(targetMap, Date.now());
     };
-    canvas.addEventListener('pointermove', this.canvasPointerMoveListener, { passive: true });
+    this.canvasPointerMoveListeners.set(targetMap, canvasPointerMoveListener);
+    canvas.addEventListener('pointermove', canvasPointerMoveListener, { passive: true });
+
+    const getLastCanvasPointerMoveTs = () => this.canvasPointerMoveTsByMap.get(targetMap) ?? 0;
 
     // Helper function to update highlight
     const updateHighlight = (name: string | null, immediate: boolean = false) => {
-      if (!this.map || !this.map.getLayer('content-layer-highlight')) {
+      if (!targetMap.getLayer('content-layer-highlight')) {
         return;
       }
       
@@ -455,7 +733,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
           currentHighlightName = name;
           // Set filter to show all features with the same name
           // Handle both 'name' and 'NAME' properties
-          this.map.setFilter('content-layer-highlight', [
+          targetMap.setFilter('content-layer-highlight', [
             'any',
             ['==', ['get', 'name'], name],
             ['==', ['get', 'NAME'], name]
@@ -465,14 +743,14 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         if (immediate) {
           currentHighlightName = null;
           // Hide highlight layer by filtering to an impossible condition
-          this.map.setFilter('content-layer-highlight', ['==', ['get', 'name'], '__never_match__']);
+          targetMap.setFilter('content-layer-highlight', ['==', ['get', 'name'], '__never_match__']);
         } else {
           // Delay clearing to allow mouseenter of next feature to fire first
           mouseleaveTimeout = setTimeout(() => {
             if (currentHighlightName !== null) {
               currentHighlightName = null;
-              if (this.map && this.map.getLayer('content-layer-highlight')) {
-                this.map.setFilter('content-layer-highlight', ['==', ['get', 'name'], '__never_match__']);
+              if (targetMap.getLayer('content-layer-highlight')) {
+                targetMap.setFilter('content-layer-highlight', ['==', ['get', 'name'], '__never_match__']);
               }
             }
             mouseleaveTimeout = null;
@@ -482,65 +760,59 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     };
 
     // Change cursor to pointer when hovering over features
-    this.map.on('mouseenter', 'content-layer-fill', (e) => {
-      if (this.map) {
-        this.map.getCanvas().style.cursor = 'pointer';
+    targetMap.on('mouseenter', 'content-layer-fill', (e) => {
+      targetMap.getCanvas().style.cursor = 'pointer';
 
-        // Cancel any pending debounced mousemove highlight update.
-        if (mousemoveHighlightTimeout) {
-          clearTimeout(mousemoveHighlightTimeout);
+      // Cancel any pending debounced mousemove highlight update.
+      if (mousemoveHighlightTimeout) {
+        clearTimeout(mousemoveHighlightTimeout);
+        mousemoveHighlightTimeout = null;
+        pendingMousemoveHighlightName = null;
+      }
+      
+      // Highlight all features with the same name, but only after the pointer
+      // has been stable for a moment.
+      if (e.features && e.features.length > 0) {
+        const feature = e.features[0];
+        const properties = feature.properties;
+        const name = properties['name'] || properties['NAME'] || null;
+        pendingMousemoveHighlightName = name;
+
+        mousemoveHighlightTimeout = setTimeout(() => {
+          const candidateName = pendingMousemoveHighlightName;
           mousemoveHighlightTimeout = null;
           pendingMousemoveHighlightName = null;
-        }
-        
-        // Highlight all features with the same name, but only after the pointer
-        // has been stable for a moment.
-        if (e.features && e.features.length > 0) {
-          const feature = e.features[0];
-          const properties = feature.properties;
-          const name = properties['name'] || properties['NAME'] || null;
-          pendingMousemoveHighlightName = name;
-
-          mousemoveHighlightTimeout = setTimeout(() => {
-            const candidateName = pendingMousemoveHighlightName;
-            mousemoveHighlightTimeout = null;
-            pendingMousemoveHighlightName = null;
-            if (!this.map || !this.map.getLayer('content-layer-highlight')) {
-              return;
-            }
-            // Only commit highlight if the pointer has not moved on the canvas recently.
-            if (Date.now() - this.lastCanvasPointerMoveTs < HOVER_HIGHLIGHT_DEBOUNCE_MS) {
-              return;
-            }
-            updateHighlight(candidateName);
-          }, HOVER_HIGHLIGHT_DEBOUNCE_MS);
-        }
+          if (!targetMap.getLayer('content-layer-highlight')) {
+            return;
+          }
+          // Only commit highlight if the pointer has not moved on the canvas recently.
+          if (Date.now() - getLastCanvasPointerMoveTs() < HOVER_HIGHLIGHT_DEBOUNCE_MS) {
+            return;
+          }
+          updateHighlight(candidateName);
+        }, HOVER_HIGHLIGHT_DEBOUNCE_MS);
       }
     });
 
-    this.map.on('mouseleave', 'content-layer-fill', () => {
-      if (this.map) {
-        this.map.getCanvas().style.cursor = '';
+    targetMap.on('mouseleave', 'content-layer-fill', () => {
+      targetMap.getCanvas().style.cursor = '';
 
-        // Cancel any pending debounced mousemove highlight update.
-        if (mousemoveHighlightTimeout) {
-          clearTimeout(mousemoveHighlightTimeout);
-          mousemoveHighlightTimeout = null;
-          pendingMousemoveHighlightName = null;
-        }
+      // Cancel any pending debounced mousemove highlight update.
+      if (mousemoveHighlightTimeout) {
+        clearTimeout(mousemoveHighlightTimeout);
+        mousemoveHighlightTimeout = null;
+        pendingMousemoveHighlightName = null;
+      }
 
-        // Don't clear immediately - delay to allow smooth transitions between features
-        updateHighlight(null, false);
-      }
-      if (this.popup) {
-        this.popup.remove();
-      }
+      // Don't clear immediately - delay to allow smooth transitions between features
+      updateHighlight(null, false);
+      popup.remove();
     });
 
     // Show feature name and score/index on hover
     // Also update highlight on mousemove to handle transitions between features
-    this.map.on('mousemove', 'content-layer-fill', (e) => {
-      if (!this.map || !this.popup || !e.features || e.features.length === 0) {
+    targetMap.on('mousemove', 'content-layer-fill', (e) => {
+      if (!e.features || e.features.length === 0) {
         return;
       }
 
@@ -562,10 +834,10 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         const candidateName = pendingMousemoveHighlightName;
         mousemoveHighlightTimeout = null;
         pendingMousemoveHighlightName = null;
-        if (!this.map || !this.map.getLayer('content-layer-highlight')) {
+        if (!targetMap.getLayer('content-layer-highlight')) {
           return;
         }
-        if (Date.now() - this.lastCanvasPointerMoveTs < HOVER_HIGHLIGHT_DEBOUNCE_MS) {
+        if (Date.now() - getLastCanvasPointerMoveTs() < HOVER_HIGHLIGHT_DEBOUNCE_MS) {
           return;
         }
         updateHighlight(candidateName);
@@ -628,14 +900,14 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         </div>
       `;
 
-      this.popup
+      popup
         .setLngLat(e.lngLat)
         .setHTML(popupContent)
-        .addTo(this.map);
+        .addTo(targetMap);
     });
 
     // Handle feature click - log to analyze component
-    this.map.on('click', 'content-layer-fill', (e) => {
+    targetMap.on('click', 'content-layer-fill', (e) => {
       if (!e.features || e.features.length === 0) {
         return;
       }
@@ -681,7 +953,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     // Handle right-click (context menu)
-    this.map.on('contextmenu', 'content-layer-fill', (e) => {
+    targetMap.on('contextmenu', 'content-layer-fill', (e) => {
       if (!e.features || e.features.length === 0) {
         return;
       }
@@ -742,7 +1014,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       this.contextMenuPopup
         .setLngLat(e.lngLat)
         .setHTML(menuContent)
-        .addTo(this.map!);
+        .addTo(targetMap);
 
       // Add click handler after popup is added to DOM
       setTimeout(() => {
@@ -763,7 +1035,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     // Close context menu when clicking elsewhere
-    this.map.on('click', () => {
+    targetMap.on('click', () => {
       if (this.contextMenuPopup) {
         this.contextMenuPopup.remove();
         this.contextMenuPopup = undefined;
@@ -775,87 +1047,75 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   /**
    * Sets up event listeners to track tile loading state
    */
-  private setupTileLoadingEvents(): void {
-    if (!this.map) {
+  private setupTileLoadingEvents(targetMap?: Map): void {
+    const map = targetMap ?? this.map;
+    if (!map) {
       return;
     }
 
-    // Track when tiles start loading - show loading immediately when request starts
-    // This handles both initial load and subsequent tile loads (pan/zoom)
-    this.map.on('dataloading', (e) => {
+    this.removeTileLoadingHandlers(map);
+
+    const dataloading = (e: MapDataEvent) => {
       if (e?.dataType === 'tile') {
-        // Check if content-layer source exists (meaning we care about these tiles)
-        const style = this.map?.getStyle();
+        const style = map.getStyle();
         if (style?.sources && 'content-layer' in style.sources) {
-          // Start loading immediately when tile request begins
           this.mapService.setMapLoading(true);
         }
       }
-    });
-
-    // Track when tiles finish loading and are rendered
-    // idle fires when all tiles are loaded AND rendered (map is idle)
-    this.map.on('idle', () => {
-      // Only hide loading indicator if we're actually loading
-      // This prevents flickering when map is idle but not loading
+    };
+    const idle = () => {
       if (this.mapService.isMapLoading()) {
-        // Stop loading when map is idle (all tiles loaded and rendered)
         this.mapService.setMapLoading(false);
       }
-    });
-
-    // Handle errors - stop loading indicator
-    this.map.on('error', () => {
+    };
+    const error = () => {
       this.mapService.setMapLoading(false);
-    });
-  }
-
-  private setupDragOpacityHandlers(): void {
-    if (!this.map) {
-      return;
-    }
-
-    if (this.dragStartOpacityHandler) {
-      this.map.off('dragstart', this.dragStartOpacityHandler);
-    }
-    if (this.dragEndOpacityHandler) {
-      this.map.off('dragend', this.dragEndOpacityHandler);
-    }
-
-    this.isDragOpacityDimmed = false;
-    this.dragStartOpacityHandler = () => {
-      if (!this.map || this.isDragOpacityDimmed) {
-        return;
-      }
-      this.scaleFeatureLayerOpacity(0.2);
-      this.isDragOpacityDimmed = true;
-    };
-    this.dragEndOpacityHandler = () => {
-      if (!this.map || !this.isDragOpacityDimmed) {
-        return;
-      }
-      this.scaleFeatureLayerOpacity(5);
-      this.isDragOpacityDimmed = false;
     };
 
-    this.map.on('dragstart', this.dragStartOpacityHandler);
-    this.map.on('dragend', this.dragEndOpacityHandler);
+    map.on('dataloading', dataloading);
+    map.on('idle', idle);
+    map.on('error', error);
+    this.tileLoadingHandlers.set(map, { dataloading, idle, error });
   }
 
-  private scaleFeatureLayerOpacity(factor: number): void {
-    if (!this.map) {
-      return;
+  private setupDragOpacityHandlers(targetMap: Map): void {
+    const existing = this.dragOpacityHandlers.get(targetMap);
+    if (existing) {
+      targetMap.off('dragstart', existing.start);
+      targetMap.off('dragend', existing.end);
     }
 
+    let isDragOpacityDimmed = false;
+    const startHandler = () => {
+      if (isDragOpacityDimmed) {
+        return;
+      }
+      this.scaleFeatureLayerOpacity(targetMap, 0.2);
+      isDragOpacityDimmed = true;
+    };
+    const endHandler = () => {
+      if (!isDragOpacityDimmed) {
+        return;
+      }
+      this.scaleFeatureLayerOpacity(targetMap, 5);
+      isDragOpacityDimmed = false;
+    };
+
+    targetMap.on('dragstart', startHandler);
+    targetMap.on('dragend', endHandler);
+    this.dragOpacityHandlers.set(targetMap, { start: startHandler, end: endHandler });
+  }
+
+  private scaleFeatureLayerOpacity(targetMap: Map, factor: number): void {
     for (const layer of this.dragOpacityLayerProps) {
-      if (!this.map.getLayer(layer.layerId)) {
+      if (!targetMap.getLayer(layer.layerId)) {
         continue;
       }
-      const currentOpacity = this.map.getPaintProperty(layer.layerId, layer.paintProperty);
+      const currentOpacity = targetMap.getPaintProperty(layer.layerId, layer.paintProperty);
       if (currentOpacity === undefined || currentOpacity === null) {
         continue;
       }
-      this.map.setPaintProperty(layer.layerId, layer.paintProperty, ['*', currentOpacity as any, factor]);
+      targetMap.setPaintProperty(layer.layerId, layer.paintProperty, ['*', currentOpacity as any, factor]);
     }
   }
 }

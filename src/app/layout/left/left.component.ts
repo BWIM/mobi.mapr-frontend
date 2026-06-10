@@ -1,7 +1,9 @@
-import { Component, inject, OnInit, OnDestroy, computed, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, computed, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProjectsService } from '../../services/project.service';
 import { FilterConfigService } from '../../services/filter-config.service';
 import { DashboardSessionService } from '../../services/dashboard-session.service';
+import { AuthService } from '../../auth/auth.service';
 import { SharedModule } from '../../shared/shared.module';
 import { InfoOverlayComponent } from '../../shared/info-overlay/info-overlay.component';
 import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.component';
@@ -21,6 +23,9 @@ export class LeftComponent implements OnInit, OnDestroy {
   private projectService = inject(ProjectsService);
   private filterConfigService = inject(FilterConfigService);
   private dashboardSessionService = inject(DashboardSessionService);
+  private authService = inject(AuthService);
+  private destroyRef = inject(DestroyRef);
+  isLoggedIn = signal<boolean>(false);
   private dialog = inject(MatDialog);
   private translate = inject(TranslateService);
   private languageSubscription?: Subscription;
@@ -71,6 +76,10 @@ export class LeftComponent implements OnInit, OnDestroy {
   allRegioStars = this.filterConfigService.allRegioStars;
   allStates = this.filterConfigService.allStates;
   hasCategories = this.filterConfigService.hasCategories;
+  isMapCompareMode = this.filterConfigService.isMapCompareMode;
+  isModeSelectionLocked = this.filterConfigService.isModeSelectionLocked;
+  canUseMapCompare = this.filterConfigService.canUseMapCompare;
+  rightSelectedModes = this.filterConfigService.rightSelectedModes;
 
   constructor() {
     // Initialize project if not already initialized
@@ -80,9 +89,16 @@ export class LeftComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.isLoggedIn.set(this.authService.isLoggedIn());
+    this.authService.currentUser$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(user => {
+        this.isLoggedIn.set(!!user);
+      });
+
     this.initializeQualityChart();
     this.initializePersonasChart();
-    
+
     // Subscribe to language changes to update chart labels and admin level options
     this.languageSubscription = this.translate.onLangChange.subscribe((event) => {
       this.currentLang.set(event.lang);
@@ -285,7 +301,14 @@ export class LeftComponent implements OnInit, OnDestroy {
     this.filterConfigService.setSidebarExpanded(expanded);
   }
 
+  toggleMapCompare(): void {
+    this.filterConfigService.toggleMapCompare();
+  }
+
   toggleVerkehrsmittel(modeId: number) {
+    if (this.isModeSelectionLocked()) {
+      return;
+    }
     if (this.filterConfigService.isOnlySelectedMode(modeId)) {
       return;
     }
@@ -295,12 +318,33 @@ export class LeftComponent implements OnInit, OnDestroy {
     this.filterConfigService.toggleMode(modeId);
   }
 
+  toggleRightVerkehrsmittel(modeId: number): void {
+    if (this.isModeSelectionLocked()) {
+      return;
+    }
+    if (this.filterConfigService.isRightOnlySelectedMode(modeId)) {
+      return;
+    }
+    if (this.isModeDisabled(modeId)) {
+      return;
+    }
+    this.filterConfigService.toggleRightMode(modeId);
+  }
+
   isSelected(modeId: number): boolean {
     return this.filterConfigService.isModeSelected(modeId);
   }
 
+  isRightSelected(modeId: number): boolean {
+    return this.filterConfigService.isRightModeSelected(modeId);
+  }
+
   isOnlySelectedMode(modeId: number): boolean {
     return this.filterConfigService.isOnlySelectedMode(modeId);
+  }
+
+  isRightOnlySelectedMode(modeId: number): boolean {
+    return this.filterConfigService.isRightOnlySelectedMode(modeId);
   }
 
   isCarMode(modeId: number): boolean {
@@ -312,8 +356,9 @@ export class LeftComponent implements OnInit, OnDestroy {
     return this.filterConfigService.isModeDisabled(modeId);
   }
 
-  getModeTooltip(option: { id: number; display_name: string }): string {
-    if (this.isOnlySelectedMode(option.id)) {
+  getModeTooltip(option: { id: number; display_name: string }, isRight = false): string {
+    const onlySelected = isRight ? this.isRightOnlySelectedMode(option.id) : this.isOnlySelectedMode(option.id);
+    if (onlySelected) {
       const cannotDeselectLast = this.translate.instant('left.transportModes.cannotDeselectLast');
       return `${option.display_name} - ${cannotDeselectLast}`;
     }

@@ -4,6 +4,18 @@
   position: relative;
 }
 
+.comparison-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.comparison-container .compare-map {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+
 /* Remove rounded corners on mobile - override Tailwind rounded-xl class */
 @media (max-width: 767px) {
   :host .rounded-xl {

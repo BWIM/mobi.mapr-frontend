@@ -303,6 +303,11 @@
     "normal": "Normal",
     "createdDate": "Erstellungsdatum des Projekts",
     "filters": "Filter",
+    "mapCompare": {
+      "toggle": "Kartenvergleich umschalten",
+      "leftMap": "Linke Karte",
+      "rightMap": "Rechte Karte"
+    },
     "transportModes": {
       "title": "Verkehrsmittel",
       "description": "Wähle die Verkehrsmittel aus, die in der Berechnung berücksichtigt werden sollen. Du kannst mehrere Verkehrsmittel gleichzeitig aktivieren; mindestens eines muss immer ausgewählt bleiben.",

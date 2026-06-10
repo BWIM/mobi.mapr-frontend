@@ -46,7 +46,7 @@ export class DashboardComponent {
   private authService = inject(AuthService);
   private projectService = inject(ProjectsService);
   private mapService = inject(MapService);
-  private filterConfigService = inject(FilterConfigService);
+  readonly filterConfigService = inject(FilterConfigService);
   private dialog = inject(MatDialog);
   readonly mobileUi = inject(MobileUiService);
   private featureSelectionService = inject(FeatureSelectionService);
@@ -74,6 +74,12 @@ export class DashboardComponent {
     effect(() => {
       if (!this.mobileUi.isMobile() && this.mobileUi.isSheetOpen()) {
         this.mobileUi.closeSheet();
+      }
+    });
+
+    effect(() => {
+      if (this.filterConfigService.isMapCompareMode()) {
+        this.rightPanelExpanded.set(false);
       }
     });
     // First check: If user is not logged in and no share_key, redirect to login
@@ -261,6 +267,9 @@ export class DashboardComponent {
   }
 
   toggleRightPanel() {
+    if (this.filterConfigService.isMapCompareMode()) {
+      return;
+    }
     this.rightPanelExpanded.update(value => !value);
   }
 
