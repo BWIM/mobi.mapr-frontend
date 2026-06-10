@@ -99,6 +99,7 @@ export class MobileFilterPanelComponent implements OnDestroy {
   selectedModes = this.filterConfigService.selectedModes;
   selectedBewertung = this.filterConfigService.selectedBewertung;
   isMapCompareMode = this.filterConfigService.isMapCompareMode;
+  isModeSelectionLocked = this.filterConfigService.isModeSelectionLocked;
   canUseMapCompare = this.filterConfigService.canUseMapCompare;
   rightSelectedModes = this.filterConfigService.rightSelectedModes;
   hasCategories = this.filterConfigService.hasCategories;
@@ -112,6 +113,9 @@ export class MobileFilterPanelComponent implements OnDestroy {
   }
 
   toggleVerkehrsmittel(modeId: number) {
+    if (this.isModeSelectionLocked()) {
+      return;
+    }
     if (this.filterConfigService.isOnlySelectedMode(modeId)) {
       return;
     }
@@ -122,6 +126,9 @@ export class MobileFilterPanelComponent implements OnDestroy {
   }
 
   toggleRightVerkehrsmittel(modeId: number): void {
+    if (this.isModeSelectionLocked()) {
+      return;
+    }
     if (this.filterConfigService.isRightOnlySelectedMode(modeId)) {
       return;
     }

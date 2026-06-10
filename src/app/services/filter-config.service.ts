@@ -141,6 +141,9 @@ export class FilterConfigService {
   );
   readonly rightSelectedModes = this._rightSelectedModes.asReadonly();
   readonly isMapModeTransitionInProgress = this._mapModeTransitionInProgress.asReadonly();
+  readonly isModeSelectionLocked = computed(
+    () => this._mapModeTransitionInProgress() || this.mapService.isMapLoading()
+  );
 
   // Computed signal to check if project is MID (replaces is_mid check)
   // A project is MID if category length != 1 (i.e., 0 or 2+ categories)
@@ -365,6 +368,9 @@ export class FilterConfigService {
         this._selectedModes();
         this._rightSelectedModes();
 
+        if (this._mapModeTransitionInProgress()) {
+          return;
+        }
         if (!filters || !rightFilters) {
           return;
         }
@@ -372,6 +378,15 @@ export class FilterConfigService {
           return;
         }
         if (!this.mapService.hasCompareMaps()) {
+          return;
+        }
+
+        const leftMap = this.mapService.getMap();
+        const rightMap = this.mapService.getCompareRightMap();
+        if (!leftMap?.loaded() || !rightMap?.loaded()) {
+          return;
+        }
+        if (this.updateMapLayerInProgress) {
           return;
         }
 
@@ -425,6 +440,9 @@ export class FilterConfigService {
           return;
         }
         if (!isFilterDataLoaded && isInitialLoad) {
+          return;
+        }
+        if (this.updateMapLayerInProgress) {
           return;
         }
 

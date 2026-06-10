@@ -77,6 +77,7 @@ export class LeftComponent implements OnInit, OnDestroy {
   allStates = this.filterConfigService.allStates;
   hasCategories = this.filterConfigService.hasCategories;
   isMapCompareMode = this.filterConfigService.isMapCompareMode;
+  isModeSelectionLocked = this.filterConfigService.isModeSelectionLocked;
   canUseMapCompare = this.filterConfigService.canUseMapCompare;
   rightSelectedModes = this.filterConfigService.rightSelectedModes;
 
@@ -305,6 +306,9 @@ export class LeftComponent implements OnInit, OnDestroy {
   }
 
   toggleVerkehrsmittel(modeId: number) {
+    if (this.isModeSelectionLocked()) {
+      return;
+    }
     if (this.filterConfigService.isOnlySelectedMode(modeId)) {
       return;
     }
@@ -315,6 +319,9 @@ export class LeftComponent implements OnInit, OnDestroy {
   }
 
   toggleRightVerkehrsmittel(modeId: number): void {
+    if (this.isModeSelectionLocked()) {
+      return;
+    }
     if (this.filterConfigService.isRightOnlySelectedMode(modeId)) {
       return;
     }
