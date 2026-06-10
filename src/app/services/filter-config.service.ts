@@ -136,6 +136,9 @@ export class FilterConfigService {
   readonly allRegioStars = this._allRegioStars.asReadonly();
   readonly allStates = this._allStates.asReadonly();
   readonly isMapCompareMode = this._isMapCompareMode.asReadonly();
+  readonly canUseMapCompare = computed(
+    () => this.dashboardSessionService.accessMethod() !== null && !this.isMobile()
+  );
   readonly rightSelectedModes = this._rightSelectedModes.asReadonly();
   readonly isMapModeTransitionInProgress = this._mapModeTransitionInProgress.asReadonly();
 
@@ -466,7 +469,7 @@ export class FilterConfigService {
     });
 
     effect(() => {
-      if (!this.authService.isLoggedIn() || this.isMobile()) {
+      if (!this.canUseMapCompare()) {
         if (this._isMapCompareMode()) {
           this._mapModeTransitionInProgress.set(true);
           this._isMapCompareMode.set(false);
@@ -994,7 +997,7 @@ export class FilterConfigService {
   }
 
   toggleMapCompare(): void {
-    if (!this.authService.isLoggedIn() || this.isMobile()) {
+    if (!this.canUseMapCompare()) {
       return;
     }
 

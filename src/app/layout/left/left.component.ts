@@ -77,6 +77,7 @@ export class LeftComponent implements OnInit, OnDestroy {
   allStates = this.filterConfigService.allStates;
   hasCategories = this.filterConfigService.hasCategories;
   isMapCompareMode = this.filterConfigService.isMapCompareMode;
+  canUseMapCompare = this.filterConfigService.canUseMapCompare;
   rightSelectedModes = this.filterConfigService.rightSelectedModes;
 
   constructor() {
