@@ -1,5 +1,5 @@
 <div class="w-full bg-[var(--background-color)] rounded-t-3xl transition-all duration-300 ease-in-out overflow-hidden shadow-lg"
-     [style.max-height]="isExpanded() ? 'calc(100vh - 4rem)' : 'auto'"
+     [style.max-height]="isExpanded() ? (isMapCompareMode() ? '45vh' : 'calc(100vh - 4rem)') : 'auto'"
      [style.height]="!isExpanded() ? 'auto' : 'auto'"
      (touchstart)="onTouchStart($event)"
      (touchend)="onTouchEnd($event)">

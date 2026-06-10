@@ -301,6 +301,10 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
           this.destroySingleMap();
           await this.waitForCompareContainers();
           await this.initCompareMaps();
+          await this.waitForMapLayout();
+          this.beforeMap?.resize();
+          this.afterMap?.resize();
+          this.filterConfigService.refreshMapLayers();
         })();
         try {
           await this.compareMapsInitPromise;
@@ -449,8 +453,8 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private async waitForCompareContainers(): Promise<void> {
-    for (let attempt = 0; attempt < 30; attempt++) {
-      this.changeDetectorRef.detectChanges();
+    this.changeDetectorRef.detectChanges();
+    for (let attempt = 0; attempt < 60; attempt++) {
       if (
         this.compareContainer?.nativeElement &&
         this.beforeMapContainer?.nativeElement &&
@@ -458,8 +462,16 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       ) {
         return;
       }
+      if (attempt % 4 === 3) {
+        this.changeDetectorRef.detectChanges();
+      }
       await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
     }
+  }
+
+  private async waitForMapLayout(): Promise<void> {
+    await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+    await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
   }
 
   private async initCompareMaps(): Promise<void> {
@@ -510,16 +522,22 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.beforeMap.resize();
     this.afterMap.resize();
-    this.filterConfigService.refreshMapLayers();
   }
 
-  private waitForMapLoad(map: Map): Promise<void> {
+  private waitForMapLoad(map: Map, timeoutMs = 15000): Promise<void> {
     if (map.loaded()) {
       return Promise.resolve();
     }
 
     return new Promise(resolve => {
-      map.once('load', () => resolve());
+      const timeoutId = window.setTimeout(() => {
+        console.warn('Map load timed out, continuing compare initialization');
+        resolve();
+      }, timeoutMs);
+      map.once('load', () => {
+        window.clearTimeout(timeoutId);
+        resolve();
+      });
     });
   }
 

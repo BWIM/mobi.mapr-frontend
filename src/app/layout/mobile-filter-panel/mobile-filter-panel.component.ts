@@ -109,6 +109,16 @@ export class MobileFilterPanelComponent implements OnDestroy {
   allPersonas = this.filterConfigService.allPersonas;
 
   toggleMapCompare(): void {
+    const enablingCompare = !this.filterConfigService.isMapCompareMode();
+    if (enablingCompare && this.isExpanded()) {
+      this.onClose.emit();
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          this.filterConfigService.toggleMapCompare();
+        });
+      });
+      return;
+    }
     this.filterConfigService.toggleMapCompare();
   }
 

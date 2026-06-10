@@ -387,6 +387,9 @@ export class FilterConfigService {
         if (!this.mapService.hasCompareMaps()) {
           return;
         }
+        if (this._mapModeTransitionInProgress()) {
+          return;
+        }
 
         const leftChanged = compareInitialLoad || this.filtersDiffer(previousLeftFilters, filters);
         const rightChanged = compareInitialLoad || this.filtersDiffer(previousRightFilters, rightFilters);
