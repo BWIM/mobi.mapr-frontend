@@ -278,11 +278,7 @@
 
         <div class="flex flex-col gap-2 items-center">
 
-          @if (isShareKeyOnly()) {
-            <div class="text-sm text-[var(--light-primary-color)] border border-[var(--light-primary-color)] rounded-full px-3 py-2 mt-2">
-              {{ 'left.activeFilters.filterButtonDisabledHint' | translate }}
-            </div>
-          } @else {
+          @if (!isShareKeyOnly()) {
             <div class="flex gap-2 items-center">
               <button 
                 class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full border transition-all duration-200 w-fit bg-[var(--primary-color)] text-[var(--background-color)] border-[var(--background-color)] font-bold"
@@ -295,7 +291,7 @@
                 [class.opacity-50]="isShareKeyOnly()"
                 [class.cursor-not-allowed]="isShareKeyOnly()"
                 [disabled]="isShareKeyOnly()"
-                [title]="isShareKeyOnly() ? ('left.activeFilters.filterButtonDisabledHint' | translate) : ('left.activeFilters.resetButton' | translate)"
+                [title]="'left.activeFilters.resetButton' | translate"
                 (click)="resetFilters()">
                 <mat-icon class="text-base leading-none">refresh</mat-icon>
               </button>
@@ -661,8 +657,9 @@
             [style.background-color]="isMapCompareMode() ? 'var(--primary-color)' : 'var(--secondary-color)'"
             [style.color]="isMapCompareMode() ? 'var(--background-color)' : 'var(--primary-color)'"
             [style.border-color]="'var(--light-primary-color)'"
+            [attr.aria-label]="(isMapCompareMode() ? 'left.mapCompare.exit' : 'left.mapCompare.start') | translate"
             (click)="toggleMapCompare()">
-            {{ 'left.mapCompare.toggle' | translate }}
+            {{ (isMapCompareMode() ? 'left.mapCompare.exit' : 'left.mapCompare.start') | translate }}
           </button>
         </div>
       }

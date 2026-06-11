@@ -140,8 +140,9 @@
             [style.background-color]="isMapCompareMode() ? 'var(--primary-color)' : 'var(--background-color)'"
             [style.color]="isMapCompareMode() ? 'var(--background-color)' : 'var(--primary-color)'"
             [style.border-color]="'var(--light-primary-color)'"
+            [attr.aria-label]="(isMapCompareMode() ? 'left.mapCompare.exit' : 'left.mapCompare.start') | translate"
             (click)="toggleMapCompare()">
-            {{ 'left.mapCompare.toggle' | translate }}
+            {{ (isMapCompareMode() ? 'left.mapCompare.exit' : 'left.mapCompare.start') | translate }}
           </button>
         </div>
       }

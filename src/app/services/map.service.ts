@@ -753,11 +753,31 @@ export class MapService {
 
     const updatedStyle = this.buildStyleWithContentLayer(filters, this.getBaseMapStyle());
 
-    await new Promise<void>(resolve => {
-      targetMap.once('style.load', () => resolve());
+    await this.waitForMapStyleLoad(targetMap, () => {
       targetMap.setStyle(updatedStyle);
     });
     return true;
+  }
+
+  private waitForMapStyleLoad(targetMap: Map, applyStyle: () => void): Promise<void> {
+    return new Promise<void>(resolve => {
+      let settled = false;
+      const complete = () => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        resolve();
+      };
+
+      targetMap.once('style.load', complete);
+      applyStyle();
+      queueMicrotask(() => {
+        if (targetMap.isStyleLoaded()) {
+          complete();
+        }
+      });
+    });
   }
 
   /**

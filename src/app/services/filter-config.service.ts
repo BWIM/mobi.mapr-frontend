@@ -88,9 +88,13 @@ export class FilterConfigService {
   private _selectedQualityBrackets = signal<QualityBracket[]>([...ALL_QUALITY_BRACKETS]);
   private _selectedTimeBrackets = signal<TimeBracket[]>([...ALL_TIME_BRACKETS]);
   private _isMapCompareMode = signal<boolean>(false);
+  private _pendingMapCompareEnable = signal<boolean>(false);
   private _rightSelectedModes = signal<number[]>([]);
   private _mapLayerRefreshNonce = signal<number>(0);
   private _mapModeTransitionInProgress = signal<boolean>(false);
+  private _urlCompareIntent = signal<boolean>(false);
+  private _urlCompareModeIds = signal<number[]>([]);
+  private _compareMapsReady = signal<boolean>(false);
 
   // Metadata for mode selection
   private _allModes = signal<Mode[]>([]);
@@ -136,9 +140,36 @@ export class FilterConfigService {
   readonly allRegioStars = this._allRegioStars.asReadonly();
   readonly allStates = this._allStates.asReadonly();
   readonly isMapCompareMode = this._isMapCompareMode.asReadonly();
+  readonly pendingMapCompareEnable = this._pendingMapCompareEnable.asReadonly();
   readonly canUseMapCompare = computed(
     () => this.dashboardSessionService.accessMethod() !== null
   );
+  readonly hasUrlCompareIntent = this._urlCompareIntent.asReadonly();
+  readonly compareMapsReady = this._compareMapsReady.asReadonly();
+  readonly canConfirmMapCompare = computed(() => {
+    if (!this._pendingMapCompareEnable()) {
+      return false;
+    }
+    if (!this.canUseMapCompare()) {
+      return false;
+    }
+    if (!this.projectService.project()) {
+      return false;
+    }
+    if (this._allProfiles().length === 0) {
+      return false;
+    }
+    if (!this._isFilterDataLoaded()) {
+      return false;
+    }
+    if (!this.contentLayerFilters() || !this.rightContentLayerFilters()) {
+      return false;
+    }
+    if (this._selectedModes().length === 0 || this._rightSelectedModes().length === 0) {
+      return false;
+    }
+    return true;
+  });
   readonly rightSelectedModes = this._rightSelectedModes.asReadonly();
   readonly isMapModeTransitionInProgress = this._mapModeTransitionInProgress.asReadonly();
   readonly isModeSelectionLocked = computed(
@@ -278,6 +309,9 @@ export class FilterConfigService {
   private updateMapLayerInProgress = false;
   /** Set when a compare update was skipped; flushed after the in-flight update completes. */
   private compareUpdateRetryNeeded = false;
+  private compareLayerSyncRetries = 0;
+  private compareLayerSyncScheduled = false;
+  private readonly maxCompareLayerSyncRetries = 5;
 
   constructor() {
     // Initialize data loading
@@ -298,6 +332,8 @@ export class FilterConfigService {
           this._selectedModes.set([]);
           this._rightSelectedModes.set([]);
           this._isMapCompareMode.set(false);
+          this._pendingMapCompareEnable.set(false);
+          this._compareMapsReady.set(false);
           this._selectedActivities.set([]);
           this._selectedPersonas.set(null);
           this._selectedRegioStars.set([]);
@@ -336,11 +372,13 @@ export class FilterConfigService {
         // This will update mode options and validate selection (including URL params)
         if (this._allProfiles().length > 0) {
           this.updateModeSelection(currentProject.base_profiles);
+          this.tryEnableCompareFromUrl();
         }
       } else {
         // Reset when project is cleared
         previousProjectId = null;
         this._isFilterDataLoaded.set(false);
+        this._compareMapsReady.set(false);
         // Reset URL params applied flag when project is cleared
         this._urlParamsApplied.set(false);
         // Reset ready check state when project is cleared
@@ -348,6 +386,11 @@ export class FilterConfigService {
         // Clear initialized project IDs when project is cleared
         this._initializedProjectIds.clear();
       }
+    });
+
+    effect(() => {
+      this.dashboardSessionService.accessMethod();
+      this.tryEnableCompareFromUrl();
     });
 
     // React to filter changes and update map
@@ -361,6 +404,7 @@ export class FilterConfigService {
       const filters = this.contentLayerFilters();
       const rightFilters = this.rightContentLayerFilters();
       const isFilterDataLoaded = this._isFilterDataLoaded();
+      const compareMapsReady = this._compareMapsReady();
       this._mapLayerRefreshNonce();
 
       if (compareMode) {
@@ -368,25 +412,37 @@ export class FilterConfigService {
         this._selectedModes();
         this._rightSelectedModes();
 
+        const scheduleRetryIfNeeded = () => {
+          if (compareInitialLoad) {
+            this.scheduleCompareLayerSync();
+          }
+        };
+
         if (this._mapModeTransitionInProgress()) {
+          scheduleRetryIfNeeded();
           return;
         }
         if (!filters || !rightFilters) {
+          scheduleRetryIfNeeded();
           return;
         }
         if (!isFilterDataLoaded && compareInitialLoad) {
+          scheduleRetryIfNeeded();
           return;
         }
-        if (!this.mapService.hasCompareMaps()) {
+        if (!compareMapsReady || !this.mapService.hasCompareMaps()) {
+          scheduleRetryIfNeeded();
           return;
         }
 
         const leftMap = this.mapService.getMap();
         const rightMap = this.mapService.getCompareRightMap();
-        if (!leftMap?.loaded() || !rightMap?.loaded()) {
+        if (!leftMap || !rightMap) {
+          scheduleRetryIfNeeded();
           return;
         }
         if (this.updateMapLayerInProgress) {
+          scheduleRetryIfNeeded();
           return;
         }
 
@@ -402,6 +458,9 @@ export class FilterConfigService {
         const onlyRightChanged = rightChanged && !leftChanged;
 
         if (!leftChanged && !rightChanged) {
+          if (compareInitialLoad && (!this.mapHasContentLayer(leftMap) || !this.mapHasContentLayer(rightMap))) {
+            scheduleRetryIfNeeded();
+          }
           return;
         }
 
@@ -413,19 +472,29 @@ export class FilterConfigService {
           onlyLeftChanged,
           onlyRightChanged,
           leftChanged,
-          rightChanged
+          rightChanged,
+          compareInitialLoad
         ).then(applied => {
-          if (applied) {
+          const leftOk = this.mapHasContentLayer(leftMap);
+          const rightOk = this.mapHasContentLayer(rightMap);
+
+          if (applied && leftOk && rightOk) {
             previousLeftFilters = this.cloneContentLayerFilters(filters);
             previousRightFilters = this.cloneContentLayerFilters(rightFilters);
             compareInitialLoad = false;
+            this.compareLayerSyncRetries = 0;
+          } else if (compareInitialLoad) {
+            this.scheduleCompareLayerSync();
           }
           if (this.compareUpdateRetryNeeded) {
             this.compareUpdateRetryNeeded = false;
-            queueMicrotask(() => this.refreshMapLayers());
+            this.scheduleCompareLayerSync();
           }
         }).catch(error => {
           console.error('Error in updateCompareMapLayers:', error);
+          if (compareInitialLoad) {
+            this.scheduleCompareLayerSync();
+          }
         });
         return;
       }
@@ -433,6 +502,7 @@ export class FilterConfigService {
       previousLeftFilters = null;
       previousRightFilters = null;
       compareInitialLoad = true;
+      this.compareLayerSyncRetries = 0;
       isInitialLoad = true;
 
       if (filters) {
@@ -488,6 +558,7 @@ export class FilterConfigService {
 
     effect(() => {
       if (!this.canUseMapCompare()) {
+        this._pendingMapCompareEnable.set(false);
         if (this._isMapCompareMode()) {
           this._mapModeTransitionInProgress.set(true);
           this._isMapCompareMode.set(false);
@@ -550,8 +621,27 @@ export class FilterConfigService {
     });
   }
 
+  private getModeIdsFromProfileIdsParam(param: string): number[] {
+    const ids = param
+      .split(',')
+      .map(s => Number(s.trim()))
+      .filter(n => !isNaN(n));
+    if (ids.length === 0) {
+      return [];
+    }
+    const modeIds = new Set<number>();
+    this._allProfiles()
+      .filter(p => ids.includes(p.id))
+      .forEach(p => {
+        if (p.mode) {
+          modeIds.add(p.mode.id);
+        }
+      });
+    return Array.from(modeIds);
+  }
+
   /**
-   * Apply URL parameters for profile_ids and bewertung
+   * Apply URL parameters for profile_ids, compare_profile_ids, and bewertung
    * Called after profiles are loaded
    */
   private applyUrlParams(): void {
@@ -580,28 +670,18 @@ export class FilterConfigService {
     // Apply profile_ids parameter (comma-separated integers)
     const profileIdsParam = queryParams['profile_ids'];
     if (profileIdsParam && typeof profileIdsParam === 'string') {
-      const ids = profileIdsParam
-        .split(',')
-        .map(s => Number(s.trim()))
-        .filter(n => !isNaN(n));
-      if (ids.length > 0) {
-        const profiles = this._allProfiles().filter(p => ids.includes(p.id));
-        const modeIds = new Set<number>();
-        profiles.forEach(profile => {
-          if (profile.mode) {
-            modeIds.add(profile.mode.id);
-          }
-        });
-        if (modeIds.size > 0) {
-          this._selectedModes.set(Array.from(modeIds));
-          this.saveSettings();
-          const currentProject = this.projectService.project();
-          if (currentProject && currentProject.base_profiles) {
-            this.validateModeSelection();
-          }
+      const modeIds = this.getModeIdsFromProfileIdsParam(profileIdsParam);
+      if (modeIds.length > 0) {
+        this._selectedModes.set(modeIds);
+        this.saveSettings();
+        const currentProject = this.projectService.project();
+        if (currentProject && currentProject.base_profiles) {
+          this.validateModeSelection();
         }
       }
     }
+
+    this.parseUrlCompareIntent(queryParams);
 
     // Apply legend_brackets parameter (comma-separated values)
     // If the parameter is missing, default to "all selected".
@@ -630,6 +710,64 @@ export class FilterConfigService {
 
     // Mark URL params as applied
     this._urlParamsApplied.set(true);
+
+    this.tryEnableCompareFromUrl();
+  }
+
+  private parseUrlCompareIntent(queryParams?: Record<string, unknown>): void {
+    if (this._allProfiles().length === 0) {
+      return;
+    }
+
+    const params = queryParams ?? this.router.parseUrl(this.router.url).queryParams;
+    const compareProfileIdsParam = params['compare_profile_ids'];
+    if (compareProfileIdsParam && typeof compareProfileIdsParam === 'string') {
+      const compareModeIds = this.getModeIdsFromProfileIdsParam(compareProfileIdsParam);
+      if (compareModeIds.length > 0) {
+        this._urlCompareIntent.set(true);
+        this._urlCompareModeIds.set(compareModeIds);
+      }
+    }
+  }
+
+  private tryEnableCompareFromUrl(): void {
+    if (!this._urlCompareIntent() || !this.canUseMapCompare()) {
+      return;
+    }
+
+    const project = this.projectService.project();
+    if (!project || this._allProfiles().length === 0) {
+      return;
+    }
+
+    const modeIds = this._urlCompareModeIds();
+    if (modeIds.length === 0) {
+      return;
+    }
+
+    if (this._isMapCompareMode()) {
+      return;
+    }
+
+    if (this._pendingMapCompareEnable()) {
+      this._rightSelectedModes.set(modeIds);
+      this.validateRightModeSelection();
+      return;
+    }
+
+    this.requestEnableMapCompare(modeIds);
+  }
+
+  private scheduleCompareLayerSync(): void {
+    if (this.compareLayerSyncScheduled || this.compareLayerSyncRetries >= this.maxCompareLayerSyncRetries) {
+      return;
+    }
+    this.compareLayerSyncScheduled = true;
+    this.compareLayerSyncRetries++;
+    requestAnimationFrame(() => {
+      this.compareLayerSyncScheduled = false;
+      this.refreshMapLayers();
+    });
   }
 
   /**
@@ -1014,25 +1152,67 @@ export class FilterConfigService {
     return this._selectedModes().includes(modeId);
   }
 
+  requestEnableMapCompare(rightModeIds?: number[]): void {
+    if (!this.canUseMapCompare() || this._isMapCompareMode() || this._pendingMapCompareEnable()) {
+      return;
+    }
+
+    if (rightModeIds?.length) {
+      this._rightSelectedModes.set(rightModeIds);
+    } else {
+      this._rightSelectedModes.set([...this._selectedModes()]);
+    }
+    this.validateRightModeSelection();
+    this._pendingMapCompareEnable.set(true);
+  }
+
+  confirmEnableMapCompare(): void {
+    if (!this._pendingMapCompareEnable()) {
+      return;
+    }
+    this._pendingMapCompareEnable.set(false);
+    this._isMapCompareMode.set(true);
+  }
+
   toggleMapCompare(): void {
     if (!this.canUseMapCompare()) {
       return;
     }
 
-    this._mapModeTransitionInProgress.set(true);
-
     if (this._isMapCompareMode()) {
+      this._mapModeTransitionInProgress.set(true);
+      this._pendingMapCompareEnable.set(false);
       this._isMapCompareMode.set(false);
+      this._urlCompareIntent.set(false);
+      this._urlCompareModeIds.set([]);
+      this.clearCompareProfileIdsFromUrl();
       return;
     }
 
-    this._rightSelectedModes.set([...this._selectedModes()]);
-    this.validateRightModeSelection();
-    this._isMapCompareMode.set(true);
+    this.requestEnableMapCompare();
+  }
+
+  private clearCompareProfileIdsFromUrl(): void {
+    const urlTree = this.router.parseUrl(this.router.url);
+    if (!urlTree.queryParams['compare_profile_ids']) {
+      return;
+    }
+    const { compare_profile_ids: _, ...remaining } = urlTree.queryParams;
+    void this.router.navigate([], {
+      queryParams: remaining,
+      replaceUrl: true,
+    });
   }
 
   setMapModeTransitionInProgress(inProgress: boolean): void {
     this._mapModeTransitionInProgress.set(inProgress);
+  }
+
+  setCompareMapsReady(ready: boolean): void {
+    this._compareMapsReady.set(ready);
+    if (ready) {
+      this.refreshMapLayers();
+    }
   }
 
   resetMapLayerUpdateState(): void {
@@ -1260,6 +1440,52 @@ export class FilterConfigService {
     };
   }
 
+  private mapHasContentLayer(targetMap: MapLibreMap): boolean {
+    return !!targetMap.getSource('content-layer');
+  }
+
+  private async ensureProjectReady(filters: ContentLayerFilters): Promise<boolean> {
+    let dialogRef: ReturnType<MatDialog['open']> | null = null;
+
+    try {
+      const readyResponse = await this.mapService.checkReady(filters);
+
+      if (!readyResponse.cache_flag) {
+        this.mapService.setPreparingProject(true);
+
+        dialogRef = this.dialog.open(PreparingProjectDialogComponent, {
+          width: '80%',
+          maxWidth: '900px',
+          disableClose: true,
+          hasBackdrop: true,
+          panelClass: 'preparing-project-dialog-panel',
+          data: { sessionId: readyResponse.session_id }
+        });
+
+        if (readyResponse.session_id) {
+          try {
+            await this.mapService.waitForPreload(readyResponse.session_id);
+          } catch (preloadError) {
+            console.error('Error waiting for preload via websocket:', preloadError);
+          }
+        } else {
+          console.warn('No session_id provided, cannot wait for preload');
+        }
+      }
+
+      return true;
+    } catch (readyError) {
+      console.error('Error calling ready endpoint:', readyError);
+      this.mapService.setPreparingProject(false);
+      return false;
+    } finally {
+      if (dialogRef) {
+        dialogRef.close();
+        this.mapService.setPreparingProject(false);
+      }
+    }
+  }
+
   private async updateCompareMapLayers(
     leftFilters: ContentLayerFilters,
     rightFilters: ContentLayerFilters,
@@ -1268,7 +1494,8 @@ export class FilterConfigService {
     onlyLeftChanged: boolean = false,
     onlyRightChanged: boolean = false,
     leftChanged: boolean = true,
-    rightChanged: boolean = true
+    rightChanged: boolean = true,
+    sequentialInitialLoad: boolean = false
   ): Promise<boolean> {
     const leftMap = this.mapService.getMap();
     const rightMap = this.mapService.getCompareRightMap();
@@ -1281,22 +1508,75 @@ export class FilterConfigService {
       return false;
     }
 
+    const shouldUpdateLeft = leftChanged && !onlyRightChanged;
+    const shouldUpdateRight = rightChanged && !onlyLeftChanged;
+
     this.updateMapLayerInProgress = true;
     try {
       this.mapService.setMapLoading(true);
-      let success = true;
-      if (leftChanged && !onlyRightChanged) {
-        const leftOk = await this.updateMapLayer(leftFilters, leftFullReload, false, leftMap);
-        if (!leftOk) {
-          success = false;
+
+      const needsReadyCheck =
+        (shouldUpdateLeft && leftFullReload) || (shouldUpdateRight && rightFullReload);
+      if (needsReadyCheck) {
+        this.mapService.setReadyCheckComplete(false);
+        if (shouldUpdateLeft && leftFullReload) {
+          const leftReady = await this.ensureProjectReady(leftFilters);
+          if (!leftReady) {
+            this.mapService.setReadyCheckComplete(false);
+            return false;
+          }
         }
-      }
-      if (rightChanged && !onlyLeftChanged) {
-        const rightOk = await this.updateMapLayer(rightFilters, rightFullReload, false, rightMap);
-        if (!rightOk) {
-          success = false;
+        if (shouldUpdateRight && rightFullReload) {
+          const rightReady = await this.ensureProjectReady(rightFilters);
+          if (!rightReady) {
+            this.mapService.setReadyCheckComplete(false);
+            return false;
+          }
         }
+        this.mapService.setReadyCheckComplete(true);
       }
+
+      let success = false;
+
+      if (sequentialInitialLoad && shouldUpdateLeft && shouldUpdateRight) {
+        const leftOk = await this.updateMapLayer(leftFilters, leftFullReload, false, leftMap, true);
+        const rightOk = leftOk
+          ? await this.updateMapLayer(rightFilters, rightFullReload, false, rightMap, true)
+          : false;
+        success = leftOk && rightOk;
+      } else {
+        const loadTasks: Promise<boolean>[] = [];
+        if (shouldUpdateLeft) {
+          loadTasks.push(
+            this.updateMapLayer(leftFilters, leftFullReload, false, leftMap, true)
+          );
+        }
+        if (shouldUpdateRight) {
+          loadTasks.push(
+            this.updateMapLayer(rightFilters, rightFullReload, false, rightMap, true)
+          );
+        }
+
+        const results = await Promise.all(loadTasks);
+        success = loadTasks.length > 0 && results.every(Boolean);
+      }
+
+      if (shouldUpdateRight && !this.mapHasContentLayer(rightMap)) {
+        const rightRetryOk = await this.updateMapLayer(
+          rightFilters,
+          true,
+          false,
+          rightMap,
+          true
+        );
+        success = rightRetryOk;
+      }
+
+      if (success) {
+        leftMap.resize();
+        rightMap.resize();
+      }
+
       return success;
     } finally {
       this.updateMapLayerInProgress = false;
@@ -1313,7 +1593,8 @@ export class FilterConfigService {
     filters: ContentLayerFilters,
     fullReload: boolean = true,
     zoomToBounds: boolean = true,
-    targetMap?: MapLibreMap
+    targetMap?: MapLibreMap,
+    skipReadyCheck: boolean = false
   ): Promise<boolean> {
     if (!targetMap) {
       if (this.updateMapLayerInProgress) {
@@ -1322,7 +1603,6 @@ export class FilterConfigService {
       }
       this.updateMapLayerInProgress = true;
     }
-    let dialogRef: any = null;
 
     try {
       // Set loading state BEFORE calling ready endpoint (step 0: turn on loading)
@@ -1331,63 +1611,21 @@ export class FilterConfigService {
 
       // Call the ready endpoint first to check if project is ready (step 2)
       // Only check ready for full reloads (filter changes), not for tile-only updates
-      if (fullReload) {
+      if (fullReload && !skipReadyCheck) {
         // Mark ready check as not complete yet (prevents rankings from loading)
         this.mapService.setReadyCheckComplete(false);
-        
-        try {
-          const readyResponse = await this.mapService.checkReady(filters);
 
-          // Only open dialog if project is not ready (cache_flag is false)
-          if (!readyResponse.cache_flag) {
-            // Set preparation state to true before opening dialog
-            this.mapService.setPreparingProject(true);
-            
-            // Show preparing dialog (non-closable) for preloading
-            dialogRef = this.dialog.open(PreparingProjectDialogComponent, {
-              width: '80%',
-              maxWidth: '900px',
-              disableClose: true,
-              hasBackdrop: true,
-              panelClass: 'preparing-project-dialog-panel',
-              data: { sessionId: readyResponse.session_id }
-            });
-
-            if (readyResponse.session_id) {
-              console.log('Data not cached, waiting for preload via websocket, session_id:', readyResponse.session_id);
-              try {
-                await this.mapService.waitForPreload(readyResponse.session_id);
-                console.log('Preload completed via websocket');
-              } catch (preloadError) {
-                console.error('Error waiting for preload via websocket:', preloadError);
-              }
-            } else {
-              console.warn('No session_id provided, cannot wait for preload');
-            }
-          }
-          // If cache_flag is true, the endpoint was successful and data is ready
-          // Mark ready check as complete (step 2 done, now step 3 can proceed)
-          this.mapService.setReadyCheckComplete(true);
-          // Proceed to load content layer below
-        } catch (readyError) {
-          console.error('Error calling ready endpoint:', readyError);
-          // If ready endpoint fails, we can't determine if data is ready
+        const ready = await this.ensureProjectReady(filters);
+        if (!ready) {
           this.mapService.setMapLoading(false);
-          this.mapService.setPreparingProject(false);
           this.mapService.setReadyCheckComplete(false);
           return false;
         }
-      } else {
+
+        this.mapService.setReadyCheckComplete(true);
+      } else if (!skipReadyCheck) {
         // For tile-only updates, ready check is not needed, so mark as complete
         this.mapService.setReadyCheckComplete(true);
-      }
-
-      // Close the dialog if it was opened (before loading content layer)
-      if (dialogRef) {
-        dialogRef.close();
-        dialogRef = null;
-        // Set preparation state to false after closing dialog
-        this.mapService.setPreparingProject(false);
       }
 
       // Only load the content layer AFTER we've confirmed data is ready (step 3)
@@ -1410,10 +1648,7 @@ export class FilterConfigService {
       return true;
     } catch (error) {
       console.error('Error in updateMapLayer:', error);
-      if (dialogRef) {
-        dialogRef.close();
-        this.mapService.setPreparingProject(false);
-      }
+      this.mapService.setPreparingProject(false);
       this.mapService.setMapLoading(false);
       return false;
     } finally {
