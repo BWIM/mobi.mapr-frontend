@@ -422,6 +422,8 @@ export class FilterConfigService {
             previousLeftFilters = this.cloneContentLayerFilters(filters);
             previousRightFilters = this.cloneContentLayerFilters(rightFilters);
             compareInitialLoad = false;
+          } else if (compareInitialLoad) {
+            queueMicrotask(() => this.refreshMapLayers());
           }
           if (this.compareUpdateRetryNeeded) {
             this.compareUpdateRetryNeeded = false;
@@ -1300,6 +1302,52 @@ export class FilterConfigService {
     };
   }
 
+  private mapHasContentLayer(targetMap: MapLibreMap): boolean {
+    return !!targetMap.getSource('content-layer');
+  }
+
+  private async ensureProjectReady(filters: ContentLayerFilters): Promise<boolean> {
+    let dialogRef: ReturnType<MatDialog['open']> | null = null;
+
+    try {
+      const readyResponse = await this.mapService.checkReady(filters);
+
+      if (!readyResponse.cache_flag) {
+        this.mapService.setPreparingProject(true);
+
+        dialogRef = this.dialog.open(PreparingProjectDialogComponent, {
+          width: '80%',
+          maxWidth: '900px',
+          disableClose: true,
+          hasBackdrop: true,
+          panelClass: 'preparing-project-dialog-panel',
+          data: { sessionId: readyResponse.session_id }
+        });
+
+        if (readyResponse.session_id) {
+          try {
+            await this.mapService.waitForPreload(readyResponse.session_id);
+          } catch (preloadError) {
+            console.error('Error waiting for preload via websocket:', preloadError);
+          }
+        } else {
+          console.warn('No session_id provided, cannot wait for preload');
+        }
+      }
+
+      return true;
+    } catch (readyError) {
+      console.error('Error calling ready endpoint:', readyError);
+      this.mapService.setPreparingProject(false);
+      return false;
+    } finally {
+      if (dialogRef) {
+        dialogRef.close();
+        this.mapService.setPreparingProject(false);
+      }
+    }
+  }
+
   private async updateCompareMapLayers(
     leftFilters: ContentLayerFilters,
     rightFilters: ContentLayerFilters,
@@ -1321,22 +1369,65 @@ export class FilterConfigService {
       return false;
     }
 
+    const shouldUpdateLeft = leftChanged && !onlyRightChanged;
+    const shouldUpdateRight = rightChanged && !onlyLeftChanged;
+
     this.updateMapLayerInProgress = true;
     try {
       this.mapService.setMapLoading(true);
-      let success = true;
-      if (leftChanged && !onlyRightChanged) {
-        const leftOk = await this.updateMapLayer(leftFilters, leftFullReload, false, leftMap);
-        if (!leftOk) {
-          success = false;
+
+      const needsReadyCheck =
+        (shouldUpdateLeft && leftFullReload) || (shouldUpdateRight && rightFullReload);
+      if (needsReadyCheck) {
+        this.mapService.setReadyCheckComplete(false);
+        if (shouldUpdateLeft && leftFullReload) {
+          const leftReady = await this.ensureProjectReady(leftFilters);
+          if (!leftReady) {
+            this.mapService.setReadyCheckComplete(false);
+            return false;
+          }
         }
-      }
-      if (rightChanged && !onlyLeftChanged) {
-        const rightOk = await this.updateMapLayer(rightFilters, rightFullReload, false, rightMap);
-        if (!rightOk) {
-          success = false;
+        if (shouldUpdateRight && rightFullReload) {
+          const rightReady = await this.ensureProjectReady(rightFilters);
+          if (!rightReady) {
+            this.mapService.setReadyCheckComplete(false);
+            return false;
+          }
         }
+        this.mapService.setReadyCheckComplete(true);
       }
+
+      const loadTasks: Promise<boolean>[] = [];
+      if (shouldUpdateLeft) {
+        loadTasks.push(
+          this.updateMapLayer(leftFilters, leftFullReload, false, leftMap, true)
+        );
+      }
+      if (shouldUpdateRight) {
+        loadTasks.push(
+          this.updateMapLayer(rightFilters, rightFullReload, false, rightMap, true)
+        );
+      }
+
+      const results = await Promise.all(loadTasks);
+      let success = loadTasks.length > 0 && results.every(Boolean);
+
+      if (success && shouldUpdateRight && !this.mapHasContentLayer(rightMap)) {
+        const rightRetryOk = await this.updateMapLayer(
+          rightFilters,
+          true,
+          false,
+          rightMap,
+          true
+        );
+        success = rightRetryOk;
+      }
+
+      if (success) {
+        leftMap.resize();
+        rightMap.resize();
+      }
+
       return success;
     } finally {
       this.updateMapLayerInProgress = false;
@@ -1353,7 +1444,8 @@ export class FilterConfigService {
     filters: ContentLayerFilters,
     fullReload: boolean = true,
     zoomToBounds: boolean = true,
-    targetMap?: MapLibreMap
+    targetMap?: MapLibreMap,
+    skipReadyCheck: boolean = false
   ): Promise<boolean> {
     if (!targetMap) {
       if (this.updateMapLayerInProgress) {
@@ -1362,7 +1454,6 @@ export class FilterConfigService {
       }
       this.updateMapLayerInProgress = true;
     }
-    let dialogRef: any = null;
 
     try {
       // Set loading state BEFORE calling ready endpoint (step 0: turn on loading)
@@ -1371,63 +1462,21 @@ export class FilterConfigService {
 
       // Call the ready endpoint first to check if project is ready (step 2)
       // Only check ready for full reloads (filter changes), not for tile-only updates
-      if (fullReload) {
+      if (fullReload && !skipReadyCheck) {
         // Mark ready check as not complete yet (prevents rankings from loading)
         this.mapService.setReadyCheckComplete(false);
-        
-        try {
-          const readyResponse = await this.mapService.checkReady(filters);
 
-          // Only open dialog if project is not ready (cache_flag is false)
-          if (!readyResponse.cache_flag) {
-            // Set preparation state to true before opening dialog
-            this.mapService.setPreparingProject(true);
-            
-            // Show preparing dialog (non-closable) for preloading
-            dialogRef = this.dialog.open(PreparingProjectDialogComponent, {
-              width: '80%',
-              maxWidth: '900px',
-              disableClose: true,
-              hasBackdrop: true,
-              panelClass: 'preparing-project-dialog-panel',
-              data: { sessionId: readyResponse.session_id }
-            });
-
-            if (readyResponse.session_id) {
-              console.log('Data not cached, waiting for preload via websocket, session_id:', readyResponse.session_id);
-              try {
-                await this.mapService.waitForPreload(readyResponse.session_id);
-                console.log('Preload completed via websocket');
-              } catch (preloadError) {
-                console.error('Error waiting for preload via websocket:', preloadError);
-              }
-            } else {
-              console.warn('No session_id provided, cannot wait for preload');
-            }
-          }
-          // If cache_flag is true, the endpoint was successful and data is ready
-          // Mark ready check as complete (step 2 done, now step 3 can proceed)
-          this.mapService.setReadyCheckComplete(true);
-          // Proceed to load content layer below
-        } catch (readyError) {
-          console.error('Error calling ready endpoint:', readyError);
-          // If ready endpoint fails, we can't determine if data is ready
+        const ready = await this.ensureProjectReady(filters);
+        if (!ready) {
           this.mapService.setMapLoading(false);
-          this.mapService.setPreparingProject(false);
           this.mapService.setReadyCheckComplete(false);
           return false;
         }
-      } else {
+
+        this.mapService.setReadyCheckComplete(true);
+      } else if (!skipReadyCheck) {
         // For tile-only updates, ready check is not needed, so mark as complete
         this.mapService.setReadyCheckComplete(true);
-      }
-
-      // Close the dialog if it was opened (before loading content layer)
-      if (dialogRef) {
-        dialogRef.close();
-        dialogRef = null;
-        // Set preparation state to false after closing dialog
-        this.mapService.setPreparingProject(false);
       }
 
       // Only load the content layer AFTER we've confirmed data is ready (step 3)
@@ -1450,10 +1499,7 @@ export class FilterConfigService {
       return true;
     } catch (error) {
       console.error('Error in updateMapLayer:', error);
-      if (dialogRef) {
-        dialogRef.close();
-        this.mapService.setPreparingProject(false);
-      }
+      this.mapService.setPreparingProject(false);
       this.mapService.setMapLoading(false);
       return false;
     } finally {
