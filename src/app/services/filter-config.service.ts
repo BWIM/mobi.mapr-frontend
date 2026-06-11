@@ -1183,10 +1183,25 @@ export class FilterConfigService {
       this._mapModeTransitionInProgress.set(true);
       this._pendingMapCompareEnable.set(false);
       this._isMapCompareMode.set(false);
+      this._urlCompareIntent.set(false);
+      this._urlCompareModeIds.set([]);
+      this.clearCompareProfileIdsFromUrl();
       return;
     }
 
     this.requestEnableMapCompare();
+  }
+
+  private clearCompareProfileIdsFromUrl(): void {
+    const urlTree = this.router.parseUrl(this.router.url);
+    if (!urlTree.queryParams['compare_profile_ids']) {
+      return;
+    }
+    const { compare_profile_ids: _, ...remaining } = urlTree.queryParams;
+    void this.router.navigate([], {
+      queryParams: remaining,
+      replaceUrl: true,
+    });
   }
 
   setMapModeTransitionInProgress(inProgress: boolean): void {

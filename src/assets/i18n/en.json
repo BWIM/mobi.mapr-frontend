@@ -304,7 +304,8 @@
     "normal": "Normal",
     "createdDate": "Project creation date",
     "mapCompare": {
-      "toggle": "Toggle map compare",
+      "start": "Compare maps",
+      "exit": "Exit comparison",
       "leftMap": "Left map",
       "rightMap": "Right map"
     },
