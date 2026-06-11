@@ -274,7 +274,10 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!this.isActiveMapHost()) {
       return;
     }
-    if (this.filterConfigService.pendingMapCompareEnable()) {
+    if (
+      this.filterConfigService.pendingMapCompareEnable() ||
+      this.filterConfigService.hasUrlCompareIntent()
+    ) {
       return;
     }
     if (this.filterConfigService.isMapCompareMode()) {
@@ -526,6 +529,8 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.beforeMap.resize();
     this.afterMap.resize();
+
+    this.filterConfigService.setCompareMapsReady(true);
   }
 
   private waitForMapLoad(map: Map): Promise<void> {
@@ -552,6 +557,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private destroyCompareMaps(): void {
+    this.filterConfigService.setCompareMapsReady(false);
     this.map = undefined;
     if (this.mapCompare) {
       this.mapCompare.remove();

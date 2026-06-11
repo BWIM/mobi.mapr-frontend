@@ -91,7 +91,17 @@ export class DashboardComponent {
         return;
       }
 
-      const confirm = () => this.filterConfigService.confirmEnableMapCompare();
+      // Re-run when prerequisites (filter data, modes, project) become available.
+      if (!this.filterConfigService.canConfirmMapCompare()) {
+        return;
+      }
+
+      const confirm = () => {
+        if (!this.filterConfigService.canConfirmMapCompare()) {
+          return;
+        }
+        this.filterConfigService.confirmEnableMapCompare();
+      };
 
       if (this.mobileUi.isMobile()) {
         const id = requestAnimationFrame(confirm);

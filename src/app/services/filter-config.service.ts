@@ -92,6 +92,9 @@ export class FilterConfigService {
   private _rightSelectedModes = signal<number[]>([]);
   private _mapLayerRefreshNonce = signal<number>(0);
   private _mapModeTransitionInProgress = signal<boolean>(false);
+  private _urlCompareIntent = signal<boolean>(false);
+  private _urlCompareModeIds = signal<number[]>([]);
+  private _compareMapsReady = signal<boolean>(false);
 
   // Metadata for mode selection
   private _allModes = signal<Mode[]>([]);
@@ -141,6 +144,32 @@ export class FilterConfigService {
   readonly canUseMapCompare = computed(
     () => this.dashboardSessionService.accessMethod() !== null
   );
+  readonly hasUrlCompareIntent = this._urlCompareIntent.asReadonly();
+  readonly compareMapsReady = this._compareMapsReady.asReadonly();
+  readonly canConfirmMapCompare = computed(() => {
+    if (!this._pendingMapCompareEnable()) {
+      return false;
+    }
+    if (!this.canUseMapCompare()) {
+      return false;
+    }
+    if (!this.projectService.project()) {
+      return false;
+    }
+    if (this._allProfiles().length === 0) {
+      return false;
+    }
+    if (!this._isFilterDataLoaded()) {
+      return false;
+    }
+    if (!this.contentLayerFilters() || !this.rightContentLayerFilters()) {
+      return false;
+    }
+    if (this._selectedModes().length === 0 || this._rightSelectedModes().length === 0) {
+      return false;
+    }
+    return true;
+  });
   readonly rightSelectedModes = this._rightSelectedModes.asReadonly();
   readonly isMapModeTransitionInProgress = this._mapModeTransitionInProgress.asReadonly();
   readonly isModeSelectionLocked = computed(
@@ -280,6 +309,9 @@ export class FilterConfigService {
   private updateMapLayerInProgress = false;
   /** Set when a compare update was skipped; flushed after the in-flight update completes. */
   private compareUpdateRetryNeeded = false;
+  private compareLayerSyncRetries = 0;
+  private compareLayerSyncScheduled = false;
+  private readonly maxCompareLayerSyncRetries = 5;
 
   constructor() {
     // Initialize data loading
@@ -301,6 +333,7 @@ export class FilterConfigService {
           this._rightSelectedModes.set([]);
           this._isMapCompareMode.set(false);
           this._pendingMapCompareEnable.set(false);
+          this._compareMapsReady.set(false);
           this._selectedActivities.set([]);
           this._selectedPersonas.set(null);
           this._selectedRegioStars.set([]);
@@ -339,11 +372,13 @@ export class FilterConfigService {
         // This will update mode options and validate selection (including URL params)
         if (this._allProfiles().length > 0) {
           this.updateModeSelection(currentProject.base_profiles);
+          this.tryEnableCompareFromUrl();
         }
       } else {
         // Reset when project is cleared
         previousProjectId = null;
         this._isFilterDataLoaded.set(false);
+        this._compareMapsReady.set(false);
         // Reset URL params applied flag when project is cleared
         this._urlParamsApplied.set(false);
         // Reset ready check state when project is cleared
@@ -351,6 +386,11 @@ export class FilterConfigService {
         // Clear initialized project IDs when project is cleared
         this._initializedProjectIds.clear();
       }
+    });
+
+    effect(() => {
+      this.dashboardSessionService.accessMethod();
+      this.tryEnableCompareFromUrl();
     });
 
     // React to filter changes and update map
@@ -364,6 +404,7 @@ export class FilterConfigService {
       const filters = this.contentLayerFilters();
       const rightFilters = this.rightContentLayerFilters();
       const isFilterDataLoaded = this._isFilterDataLoaded();
+      const compareMapsReady = this._compareMapsReady();
       this._mapLayerRefreshNonce();
 
       if (compareMode) {
@@ -371,25 +412,37 @@ export class FilterConfigService {
         this._selectedModes();
         this._rightSelectedModes();
 
+        const scheduleRetryIfNeeded = () => {
+          if (compareInitialLoad) {
+            this.scheduleCompareLayerSync();
+          }
+        };
+
         if (this._mapModeTransitionInProgress()) {
+          scheduleRetryIfNeeded();
           return;
         }
         if (!filters || !rightFilters) {
+          scheduleRetryIfNeeded();
           return;
         }
         if (!isFilterDataLoaded && compareInitialLoad) {
+          scheduleRetryIfNeeded();
           return;
         }
-        if (!this.mapService.hasCompareMaps()) {
+        if (!compareMapsReady || !this.mapService.hasCompareMaps()) {
+          scheduleRetryIfNeeded();
           return;
         }
 
         const leftMap = this.mapService.getMap();
         const rightMap = this.mapService.getCompareRightMap();
-        if (!leftMap?.loaded() || !rightMap?.loaded()) {
+        if (!leftMap || !rightMap) {
+          scheduleRetryIfNeeded();
           return;
         }
         if (this.updateMapLayerInProgress) {
+          scheduleRetryIfNeeded();
           return;
         }
 
@@ -405,6 +458,9 @@ export class FilterConfigService {
         const onlyRightChanged = rightChanged && !leftChanged;
 
         if (!leftChanged && !rightChanged) {
+          if (compareInitialLoad && (!this.mapHasContentLayer(leftMap) || !this.mapHasContentLayer(rightMap))) {
+            scheduleRetryIfNeeded();
+          }
           return;
         }
 
@@ -416,21 +472,29 @@ export class FilterConfigService {
           onlyLeftChanged,
           onlyRightChanged,
           leftChanged,
-          rightChanged
+          rightChanged,
+          compareInitialLoad
         ).then(applied => {
-          if (applied) {
+          const leftOk = this.mapHasContentLayer(leftMap);
+          const rightOk = this.mapHasContentLayer(rightMap);
+
+          if (applied && leftOk && rightOk) {
             previousLeftFilters = this.cloneContentLayerFilters(filters);
             previousRightFilters = this.cloneContentLayerFilters(rightFilters);
             compareInitialLoad = false;
+            this.compareLayerSyncRetries = 0;
           } else if (compareInitialLoad) {
-            queueMicrotask(() => this.refreshMapLayers());
+            this.scheduleCompareLayerSync();
           }
           if (this.compareUpdateRetryNeeded) {
             this.compareUpdateRetryNeeded = false;
-            queueMicrotask(() => this.refreshMapLayers());
+            this.scheduleCompareLayerSync();
           }
         }).catch(error => {
           console.error('Error in updateCompareMapLayers:', error);
+          if (compareInitialLoad) {
+            this.scheduleCompareLayerSync();
+          }
         });
         return;
       }
@@ -438,6 +502,7 @@ export class FilterConfigService {
       previousLeftFilters = null;
       previousRightFilters = null;
       compareInitialLoad = true;
+      this.compareLayerSyncRetries = 0;
       isInitialLoad = true;
 
       if (filters) {
@@ -616,14 +681,7 @@ export class FilterConfigService {
       }
     }
 
-    // Apply compare_profile_ids parameter — enables compare mode when valid
-    const compareProfileIdsParam = queryParams['compare_profile_ids'];
-    if (compareProfileIdsParam && typeof compareProfileIdsParam === 'string') {
-      const compareModeIds = this.getModeIdsFromProfileIdsParam(compareProfileIdsParam);
-      if (compareModeIds.length > 0 && this.canUseMapCompare()) {
-        this.requestEnableMapCompare(compareModeIds);
-      }
-    }
+    this.parseUrlCompareIntent(queryParams);
 
     // Apply legend_brackets parameter (comma-separated values)
     // If the parameter is missing, default to "all selected".
@@ -652,6 +710,64 @@ export class FilterConfigService {
 
     // Mark URL params as applied
     this._urlParamsApplied.set(true);
+
+    this.tryEnableCompareFromUrl();
+  }
+
+  private parseUrlCompareIntent(queryParams?: Record<string, unknown>): void {
+    if (this._allProfiles().length === 0) {
+      return;
+    }
+
+    const params = queryParams ?? this.router.parseUrl(this.router.url).queryParams;
+    const compareProfileIdsParam = params['compare_profile_ids'];
+    if (compareProfileIdsParam && typeof compareProfileIdsParam === 'string') {
+      const compareModeIds = this.getModeIdsFromProfileIdsParam(compareProfileIdsParam);
+      if (compareModeIds.length > 0) {
+        this._urlCompareIntent.set(true);
+        this._urlCompareModeIds.set(compareModeIds);
+      }
+    }
+  }
+
+  private tryEnableCompareFromUrl(): void {
+    if (!this._urlCompareIntent() || !this.canUseMapCompare()) {
+      return;
+    }
+
+    const project = this.projectService.project();
+    if (!project || this._allProfiles().length === 0) {
+      return;
+    }
+
+    const modeIds = this._urlCompareModeIds();
+    if (modeIds.length === 0) {
+      return;
+    }
+
+    if (this._isMapCompareMode()) {
+      return;
+    }
+
+    if (this._pendingMapCompareEnable()) {
+      this._rightSelectedModes.set(modeIds);
+      this.validateRightModeSelection();
+      return;
+    }
+
+    this.requestEnableMapCompare(modeIds);
+  }
+
+  private scheduleCompareLayerSync(): void {
+    if (this.compareLayerSyncScheduled || this.compareLayerSyncRetries >= this.maxCompareLayerSyncRetries) {
+      return;
+    }
+    this.compareLayerSyncScheduled = true;
+    this.compareLayerSyncRetries++;
+    requestAnimationFrame(() => {
+      this.compareLayerSyncScheduled = false;
+      this.refreshMapLayers();
+    });
   }
 
   /**
@@ -1077,6 +1193,13 @@ export class FilterConfigService {
     this._mapModeTransitionInProgress.set(inProgress);
   }
 
+  setCompareMapsReady(ready: boolean): void {
+    this._compareMapsReady.set(ready);
+    if (ready) {
+      this.refreshMapLayers();
+    }
+  }
+
   resetMapLayerUpdateState(): void {
     this.updateMapLayerInProgress = false;
   }
@@ -1356,7 +1479,8 @@ export class FilterConfigService {
     onlyLeftChanged: boolean = false,
     onlyRightChanged: boolean = false,
     leftChanged: boolean = true,
-    rightChanged: boolean = true
+    rightChanged: boolean = true,
+    sequentialInitialLoad: boolean = false
   ): Promise<boolean> {
     const leftMap = this.mapService.getMap();
     const rightMap = this.mapService.getCompareRightMap();
@@ -1397,22 +1521,32 @@ export class FilterConfigService {
         this.mapService.setReadyCheckComplete(true);
       }
 
-      const loadTasks: Promise<boolean>[] = [];
-      if (shouldUpdateLeft) {
-        loadTasks.push(
-          this.updateMapLayer(leftFilters, leftFullReload, false, leftMap, true)
-        );
-      }
-      if (shouldUpdateRight) {
-        loadTasks.push(
-          this.updateMapLayer(rightFilters, rightFullReload, false, rightMap, true)
-        );
+      let success = false;
+
+      if (sequentialInitialLoad && shouldUpdateLeft && shouldUpdateRight) {
+        const leftOk = await this.updateMapLayer(leftFilters, leftFullReload, false, leftMap, true);
+        const rightOk = leftOk
+          ? await this.updateMapLayer(rightFilters, rightFullReload, false, rightMap, true)
+          : false;
+        success = leftOk && rightOk;
+      } else {
+        const loadTasks: Promise<boolean>[] = [];
+        if (shouldUpdateLeft) {
+          loadTasks.push(
+            this.updateMapLayer(leftFilters, leftFullReload, false, leftMap, true)
+          );
+        }
+        if (shouldUpdateRight) {
+          loadTasks.push(
+            this.updateMapLayer(rightFilters, rightFullReload, false, rightMap, true)
+          );
+        }
+
+        const results = await Promise.all(loadTasks);
+        success = loadTasks.length > 0 && results.every(Boolean);
       }
 
-      const results = await Promise.all(loadTasks);
-      let success = loadTasks.length > 0 && results.every(Boolean);
-
-      if (success && shouldUpdateRight && !this.mapHasContentLayer(rightMap)) {
+      if (shouldUpdateRight && !this.mapHasContentLayer(rightMap)) {
         const rightRetryOk = await this.updateMapLayer(
           rightFilters,
           true,
