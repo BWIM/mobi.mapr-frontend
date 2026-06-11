@@ -475,7 +475,6 @@
       "states": "States",
       "statesDescription": "States allow you to filter for regions on the map. While this does not influence the data at all, it allows for better comparison, as well as filtering the Top rankings.",
       "filterButton": "Filter",
-      "filterButtonDisabledHint": "The adjustment of filters is only available for registered users.",
       "resetButton": "Reset Filters",
       "infoTabs": {
         "general": "General",

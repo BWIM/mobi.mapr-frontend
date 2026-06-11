@@ -550,8 +550,27 @@ export class FilterConfigService {
     });
   }
 
+  private getModeIdsFromProfileIdsParam(param: string): number[] {
+    const ids = param
+      .split(',')
+      .map(s => Number(s.trim()))
+      .filter(n => !isNaN(n));
+    if (ids.length === 0) {
+      return [];
+    }
+    const modeIds = new Set<number>();
+    this._allProfiles()
+      .filter(p => ids.includes(p.id))
+      .forEach(p => {
+        if (p.mode) {
+          modeIds.add(p.mode.id);
+        }
+      });
+    return Array.from(modeIds);
+  }
+
   /**
-   * Apply URL parameters for profile_ids and bewertung
+   * Apply URL parameters for profile_ids, compare_profile_ids, and bewertung
    * Called after profiles are loaded
    */
   private applyUrlParams(): void {
@@ -580,26 +599,26 @@ export class FilterConfigService {
     // Apply profile_ids parameter (comma-separated integers)
     const profileIdsParam = queryParams['profile_ids'];
     if (profileIdsParam && typeof profileIdsParam === 'string') {
-      const ids = profileIdsParam
-        .split(',')
-        .map(s => Number(s.trim()))
-        .filter(n => !isNaN(n));
-      if (ids.length > 0) {
-        const profiles = this._allProfiles().filter(p => ids.includes(p.id));
-        const modeIds = new Set<number>();
-        profiles.forEach(profile => {
-          if (profile.mode) {
-            modeIds.add(profile.mode.id);
-          }
-        });
-        if (modeIds.size > 0) {
-          this._selectedModes.set(Array.from(modeIds));
-          this.saveSettings();
-          const currentProject = this.projectService.project();
-          if (currentProject && currentProject.base_profiles) {
-            this.validateModeSelection();
-          }
+      const modeIds = this.getModeIdsFromProfileIdsParam(profileIdsParam);
+      if (modeIds.length > 0) {
+        this._selectedModes.set(modeIds);
+        this.saveSettings();
+        const currentProject = this.projectService.project();
+        if (currentProject && currentProject.base_profiles) {
+          this.validateModeSelection();
         }
+      }
+    }
+
+    // Apply compare_profile_ids parameter — enables compare mode when valid
+    const compareProfileIdsParam = queryParams['compare_profile_ids'];
+    if (compareProfileIdsParam && typeof compareProfileIdsParam === 'string') {
+      const compareModeIds = this.getModeIdsFromProfileIdsParam(compareProfileIdsParam);
+      if (compareModeIds.length > 0 && this.canUseMapCompare()) {
+        this._rightSelectedModes.set(compareModeIds);
+        this.validateRightModeSelection();
+        this._mapModeTransitionInProgress.set(true);
+        this._isMapCompareMode.set(true);
       }
     }
 
