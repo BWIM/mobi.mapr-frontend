@@ -88,6 +88,7 @@ export class FilterConfigService {
   private _selectedQualityBrackets = signal<QualityBracket[]>([...ALL_QUALITY_BRACKETS]);
   private _selectedTimeBrackets = signal<TimeBracket[]>([...ALL_TIME_BRACKETS]);
   private _isMapCompareMode = signal<boolean>(false);
+  private _pendingMapCompareEnable = signal<boolean>(false);
   private _rightSelectedModes = signal<number[]>([]);
   private _mapLayerRefreshNonce = signal<number>(0);
   private _mapModeTransitionInProgress = signal<boolean>(false);
@@ -136,6 +137,7 @@ export class FilterConfigService {
   readonly allRegioStars = this._allRegioStars.asReadonly();
   readonly allStates = this._allStates.asReadonly();
   readonly isMapCompareMode = this._isMapCompareMode.asReadonly();
+  readonly pendingMapCompareEnable = this._pendingMapCompareEnable.asReadonly();
   readonly canUseMapCompare = computed(
     () => this.dashboardSessionService.accessMethod() !== null
   );
@@ -298,6 +300,7 @@ export class FilterConfigService {
           this._selectedModes.set([]);
           this._rightSelectedModes.set([]);
           this._isMapCompareMode.set(false);
+          this._pendingMapCompareEnable.set(false);
           this._selectedActivities.set([]);
           this._selectedPersonas.set(null);
           this._selectedRegioStars.set([]);
@@ -488,6 +491,7 @@ export class FilterConfigService {
 
     effect(() => {
       if (!this.canUseMapCompare()) {
+        this._pendingMapCompareEnable.set(false);
         if (this._isMapCompareMode()) {
           this._mapModeTransitionInProgress.set(true);
           this._isMapCompareMode.set(false);
@@ -615,10 +619,7 @@ export class FilterConfigService {
     if (compareProfileIdsParam && typeof compareProfileIdsParam === 'string') {
       const compareModeIds = this.getModeIdsFromProfileIdsParam(compareProfileIdsParam);
       if (compareModeIds.length > 0 && this.canUseMapCompare()) {
-        this._rightSelectedModes.set(compareModeIds);
-        this.validateRightModeSelection();
-        this._mapModeTransitionInProgress.set(true);
-        this._isMapCompareMode.set(true);
+        this.requestEnableMapCompare(compareModeIds);
       }
     }
 
@@ -1033,21 +1034,41 @@ export class FilterConfigService {
     return this._selectedModes().includes(modeId);
   }
 
+  requestEnableMapCompare(rightModeIds?: number[]): void {
+    if (!this.canUseMapCompare() || this._isMapCompareMode() || this._pendingMapCompareEnable()) {
+      return;
+    }
+
+    if (rightModeIds?.length) {
+      this._rightSelectedModes.set(rightModeIds);
+    } else {
+      this._rightSelectedModes.set([...this._selectedModes()]);
+    }
+    this.validateRightModeSelection();
+    this._pendingMapCompareEnable.set(true);
+  }
+
+  confirmEnableMapCompare(): void {
+    if (!this._pendingMapCompareEnable()) {
+      return;
+    }
+    this._pendingMapCompareEnable.set(false);
+    this._isMapCompareMode.set(true);
+  }
+
   toggleMapCompare(): void {
     if (!this.canUseMapCompare()) {
       return;
     }
 
-    this._mapModeTransitionInProgress.set(true);
-
     if (this._isMapCompareMode()) {
+      this._mapModeTransitionInProgress.set(true);
+      this._pendingMapCompareEnable.set(false);
       this._isMapCompareMode.set(false);
       return;
     }
 
-    this._rightSelectedModes.set([...this._selectedModes()]);
-    this.validateRightModeSelection();
-    this._isMapCompareMode.set(true);
+    this.requestEnableMapCompare();
   }
 
   setMapModeTransitionInProgress(inProgress: boolean): void {

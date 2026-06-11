@@ -1,4 +1,4 @@
-import { Component, signal, inject, effect } from '@angular/core';
+import { Component, signal, inject, effect, untracked } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RailComponent } from '../rail/rail.component';
@@ -51,6 +51,9 @@ export class DashboardComponent {
   readonly mobileUi = inject(MobileUiService);
   private featureSelectionService = inject(FeatureSelectionService);
 
+  /** Matches right panel `duration-300` transition in dashboard template. */
+  private static readonly RIGHT_PANEL_TRANSITION_MS = 300;
+
   leftPanelExpanded = signal(true);
   rightPanelExpanded = signal(true);
   mobileFilterExpanded = signal(false);
@@ -80,6 +83,30 @@ export class DashboardComponent {
     effect(() => {
       if (this.filterConfigService.isMapCompareMode()) {
         this.rightPanelExpanded.set(false);
+      }
+    });
+
+    effect((onCleanup) => {
+      if (!this.filterConfigService.pendingMapCompareEnable()) {
+        return;
+      }
+
+      const confirm = () => this.filterConfigService.confirmEnableMapCompare();
+
+      if (this.mobileUi.isMobile()) {
+        const id = requestAnimationFrame(confirm);
+        onCleanup(() => cancelAnimationFrame(id));
+        return;
+      }
+
+      const needsCollapse = untracked(() => this.rightPanelExpanded());
+      if (needsCollapse) {
+        untracked(() => this.rightPanelExpanded.set(false));
+        const timeoutId = setTimeout(confirm, DashboardComponent.RIGHT_PANEL_TRANSITION_MS);
+        onCleanup(() => clearTimeout(timeoutId));
+      } else {
+        const rafId = requestAnimationFrame(confirm);
+        onCleanup(() => cancelAnimationFrame(rafId));
       }
     });
     // First check: If user is not logged in and no share_key, redirect to login

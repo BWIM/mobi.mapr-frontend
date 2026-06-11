@@ -92,11 +92,18 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(private mapService: MapService) {
     effect(() => {
       const compareMode = this.filterConfigService.isMapCompareMode();
+      // Re-run when pending compare resolves so maps init after panel collapse.
+      this.filterConfigService.pendingMapCompareEnable();
       queueMicrotask(() => {
-        if (compareMode === this.wasCompareMode) {
+        if (!this.isActiveMapHost()) {
           return;
         }
-        if (!this.isActiveMapHost()) {
+        if (compareMode && !this.beforeMap) {
+          this.wasCompareMode = true;
+          void this.handleMapModeChange(true);
+          return;
+        }
+        if (compareMode === this.wasCompareMode) {
           return;
         }
         const previousCompareMode = this.wasCompareMode;
@@ -267,7 +274,14 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!this.isActiveMapHost()) {
       return;
     }
-    if (!this.filterConfigService.isMapCompareMode()) {
+    if (this.filterConfigService.pendingMapCompareEnable()) {
+      return;
+    }
+    if (this.filterConfigService.isMapCompareMode()) {
+      if (!this.beforeMap) {
+        void this.handleMapModeChange(true);
+      }
+    } else if (!this.map) {
       this.initSingleMap();
     }
   }
@@ -286,6 +300,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     this.mapModeTransitionPending = true;
+    this.filterConfigService.setMapModeTransitionInProgress(true);
     try {
       if (compareMode) {
         if (this.beforeMap) {
@@ -320,6 +335,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     } finally {
       this.mapModeTransitionPending = false;
       this.filterConfigService.setMapModeTransitionInProgress(false);
+      this.filterConfigService.refreshMapLayers();
 
       const pendingMode = this.pendingCompareMode;
       this.pendingCompareMode = null;
@@ -510,7 +526,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.beforeMap.resize();
     this.afterMap.resize();
-    this.filterConfigService.refreshMapLayers();
   }
 
   private waitForMapLoad(map: Map): Promise<void> {
