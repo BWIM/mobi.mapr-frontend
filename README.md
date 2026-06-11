@@ -16,5 +16,8 @@ Please be aware, that every part of the back and frontend can have breaking chan
 This project is currently not very well documented. Neither the API of the backend, nor the code itself. I am glad, if you help improving it. A wiki is planned.
 For generel topics, please advise the main site of the mobi.mapr: bw-im.de/mobimapr.
 
+## AI
+Parts of the developement frontend are supported by agentic Coding. Please be aware of that.
+
 ## Funding
 This project is fully developed by the Baden-Württemberg Institut für nachhaltige Mobilität (BWIM).
