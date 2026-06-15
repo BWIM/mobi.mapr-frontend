@@ -11,4 +11,5 @@ export interface Project {
     base_profiles: number[];
     group_id?: number | null;
     group?: ProjectGroup | null;
+    pin?: boolean;
 }

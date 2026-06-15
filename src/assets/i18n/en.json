@@ -888,6 +888,14 @@
       "STATS_TEXT": "You can combine the 28 activities freely, for 8 different mode combinations and 7 personas, this means more than 15 billion different maps to produce."
     }
   },
+  "usersArea": {
+    "title": "My Projects",
+    "empty": "No projects found.",
+    "loadError": "Error loading projects.",
+    "ungrouped": "Individual projects",
+    "pinned": "Pinned",
+    "status": "Status"
+  },
   "groupOverview": {
     "title": "Projects in {{groupName}}",
     "empty": "No projects in this group.",

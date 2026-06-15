@@ -888,6 +888,14 @@
       "STATS_TEXT": "Du kannst die 28 Aktivitäten frei kombinieren, für 8 verschiedene Modus-Kombinationen und 7 Personengruppen bedeutet dies mehr als 15 Milliarden verschiedene Karten."
     }
   },
+  "usersArea": {
+    "title": "Meine Projekte",
+    "empty": "Keine Projekte gefunden.",
+    "loadError": "Fehler beim Laden der Projekte.",
+    "ungrouped": "Einzelne Projekte",
+    "pinned": "Angepinnt",
+    "status": "Status"
+  },
   "groupOverview": {
     "title": "Projekte in {{groupName}}",
     "empty": "Keine Projekte in dieser Gruppe.",
