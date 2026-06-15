@@ -22,6 +22,8 @@ import { MobileUiService } from '../../services/mobile-ui.service';
 import { FeatureSelectionService } from '../../shared/services/feature-selection.service';
 import { MobileMapControlsComponent } from '../mobile/mobile-map-controls/mobile-map-controls.component';
 import { MobileSheetsComponent } from '../mobile/mobile-sheets/mobile-sheets.component';
+import { GroupOverviewComponent } from '../../group-overview/group-overview.component';
+import { ProjectNavigationService } from '../../services/project-navigation.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -35,6 +37,7 @@ import { MobileSheetsComponent } from '../mobile/mobile-sheets/mobile-sheets.com
     MobileFilterPanelComponent,
     MobileMapControlsComponent,
     MobileSheetsComponent,
+    GroupOverviewComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
@@ -50,6 +53,7 @@ export class DashboardComponent {
   private dialog = inject(MatDialog);
   readonly mobileUi = inject(MobileUiService);
   private featureSelectionService = inject(FeatureSelectionService);
+  private projectNavigation = inject(ProjectNavigationService);
 
   /** Matches right panel `duration-300` transition in dashboard template. */
   private static readonly RIGHT_PANEL_TRANSITION_MS = 300;
@@ -57,6 +61,7 @@ export class DashboardComponent {
   leftPanelExpanded = signal(true);
   rightPanelExpanded = signal(true);
   mobileFilterExpanded = signal(false);
+  showGroupOverview = signal(false);
   private hasInitialized = false;
   private currentProjectIdentifier: string | null = null;
 
@@ -123,14 +128,16 @@ export class DashboardComponent {
     this.route.queryParams
       .pipe(
         takeUntilDestroyed(),
-        distinctUntilChanged((prev, curr) => 
-          prev['project_id'] === curr['project_id'] && 
-          prev['share_key'] === curr['share_key']
+        distinctUntilChanged((prev, curr) =>
+          prev['project_id'] === curr['project_id'] &&
+          prev['share_key'] === curr['share_key'] &&
+          prev['overview'] === curr['overview']
         )
       )
       .subscribe(async params => {
         const projectId = params['project_id'];
         const shareKey = params['share_key'];
+        const overview = params['overview'] === 'true' || params['overview'] === true;
 
         // Check authentication tokens
         const isLoggedIn = this.authService.isLoggedIn();
@@ -138,77 +145,89 @@ export class DashboardComponent {
         // Check if there's already a project or share key in the session service
         const existingProjectId = this.dashboardSessionService.getProjectId();
         const existingShareKey = this.dashboardSessionService.getShareKey();
+        const existingShareProjectId = this.dashboardSessionService.getShareProjectId();
 
         // Check current route to prevent redirect loops
         const currentUrl = this.router.url.split('?')[0];
 
-        // Determine the new project identifier
-        const newProjectIdentifier = projectId || shareKey || existingProjectId || existingShareKey || null;
-        
-        // Check if project has changed
+        const newProjectIdentifier = this.buildProjectIdentifier(
+          shareKey,
+          projectId,
+          existingShareKey,
+          existingProjectId,
+          existingShareProjectId
+        );
+
         const projectChanged = this.currentProjectIdentifier !== newProjectIdentifier;
-        if (projectChanged && this.currentProjectIdentifier !== null) {
-          // Clear the old project when switching to a new one
+        const targetProjectId = shareKey
+          ? (projectId || existingShareProjectId)
+          : (projectId || existingProjectId);
+        const alreadyLoaded =
+          !!this.projectService.project() &&
+          !!targetProjectId &&
+          this.projectService.project()!.id === Number(targetProjectId) &&
+          (!shareKey || this.dashboardSessionService.getShareKey() === (shareKey || existingShareKey));
+
+        if (projectChanged && this.currentProjectIdentifier !== null && !alreadyLoaded) {
           this.projectService.clearProject();
         }
         if (projectChanged) {
-          // Reset initialization state when project changes
           this.hasInitialized = false;
           this.currentProjectIdentifier = newProjectIdentifier;
         }
 
-        if (projectId) {
-          // User is accessing with project_id (authenticated)
+        if (shareKey) {
+          if (projectId) {
+            this.dashboardSessionService.setShareKey(shareKey);
+            this.dashboardSessionService.setShareProjectId(projectId);
+          }
+
+          if ((projectChanged || !this.projectService.isInitialized()) && !alreadyLoaded) {
+            await this.validateShareKeyAndPreload(
+              shareKey,
+              projectId ? Number(projectId) : undefined
+            );
+          } else if (projectId) {
+            this.dashboardSessionService.setShareProjectId(projectId);
+          }
+
+          this.hasInitialized = true;
+        } else if (projectId) {
           if (!isLoggedIn) {
-            // User has project_id but no auth tokens - redirect to login
             if (currentUrl !== '/login') {
               this.router.navigate(['/login']);
             }
             return;
           }
-          
-          // Set project ID in session service (this will clear share_key if present)
+
           this.dashboardSessionService.setProjectId(projectId);
-          
-          // Load the project if it changed or hasn't been loaded yet
-          if (projectChanged || !this.projectService.isInitialized()) {
+
+          if ((projectChanged || !this.projectService.isInitialized()) && !alreadyLoaded) {
             await this.loadProjectById(projectId);
           }
-          
+
           this.hasInitialized = true;
-        } else if (shareKey) {
-          // User is accessing with share_key (unauthenticated)
-          // Validate share key by making preload call with defaults
-          await this.validateShareKeyAndPreload(shareKey);
+        } else if (existingShareKey) {
+          if (projectChanged || !this.projectService.isInitialized()) {
+            await this.validateShareKeyAndPreload(
+              existingShareKey,
+              existingShareProjectId ? Number(existingShareProjectId) : undefined
+            );
+          }
           this.hasInitialized = true;
         } else if (existingProjectId) {
-          // No project_id or share_key in query params, but there's one in session
-          // User already has a project selected, allow access
-          // Load the project if it changed or hasn't been loaded yet
           if (projectChanged || !this.projectService.isInitialized()) {
             await this.loadProjectById(existingProjectId);
           }
           this.hasInitialized = true;
-        } else if (existingShareKey) {
-          // No project_id or share_key in query params, but there's a share key in session
-          // User already has a share key, allow access
-          // Load the project if it changed or hasn't been loaded yet
-          if (projectChanged || !this.projectService.isInitialized()) {
-            await this.validateShareKeyAndPreload(existingShareKey);
-          }
-          this.hasInitialized = true;
         } else {
-          // No project_id or share_key in query params AND none in session service
-          // Only redirect on initial load, not on subsequent query param changes
           if (!this.hasInitialized) {
             if (isLoggedIn) {
-              // User is authenticated but has no project - redirect to users-area to select one
               if (currentUrl !== '/users-area') {
                 this.router.navigate(['/users-area']);
               }
               return;
             } else {
-              // User is not authenticated and has no share key - redirect to landing
               if (currentUrl !== '/landing') {
                 this.router.navigate(['/landing']);
               }
@@ -216,7 +235,41 @@ export class DashboardComponent {
             }
           }
         }
+
+        this.updateGroupOverviewState(overview);
       });
+  }
+
+  private buildProjectIdentifier(
+    shareKey: string | undefined,
+    projectId: string | undefined,
+    existingShareKey: string | null,
+    existingProjectId: string | null,
+    existingShareProjectId: string | null
+  ): string | null {
+    const key = shareKey || existingShareKey;
+    if (key) {
+      const siblingId = projectId || existingShareProjectId || '';
+      return `share:${key}:${siblingId}`;
+    }
+    return projectId || existingProjectId || null;
+  }
+
+  private updateGroupOverviewState(overviewRequested: boolean): void {
+    const project = this.projectService.project();
+    if (overviewRequested && project?.group) {
+      this.showGroupOverview.set(true);
+      return;
+    }
+
+    this.showGroupOverview.set(false);
+    if (overviewRequested && !project?.group) {
+      this.projectNavigation.closeGroupOverview();
+    }
+  }
+
+  closeGroupOverview(): void {
+    this.projectNavigation.closeGroupOverview();
   }
 
   /**
@@ -247,31 +300,30 @@ export class DashboardComponent {
   /**
    * Validates share key by fetching the project and making a preload call with defaults
    */
-  private async validateShareKeyAndPreload(shareKey: string): Promise<void> {
+  private async validateShareKeyAndPreload(shareKey: string, siblingProjectId?: number): Promise<void> {
     try {
-      // First, set the share key in the session service
       this.dashboardSessionService.setShareKey(shareKey);
+      if (siblingProjectId !== undefined) {
+        this.dashboardSessionService.setShareProjectId(siblingProjectId.toString());
+      }
 
-      // Fetch the project to validate the share key
       let project: Project | null = null;
       try {
         project = await firstValueFrom(
-          this.projectService.getProjectByShareKey(shareKey)
+          this.projectService.getProjectByShareKey(shareKey, siblingProjectId)
         );
       } catch (error) {
         console.error('Error fetching project with share key:', error);
-        // Redirect to invalid share key page
         this.router.navigate(['/invalid-share-key']);
         return;
       }
 
       if (!project) {
-        // Project is null or undefined - invalid share key
         this.router.navigate(['/invalid-share-key']);
         return;
       }
 
-      // Set the project in the service
+      this.dashboardSessionService.setShareProjectId(project.id.toString());
       this.projectService.setProject(project);
 
       if (!project.base_profiles?.length) {

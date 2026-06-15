@@ -1,3 +1,5 @@
+import { ProjectGroup } from './project-group';
+
 export interface Project {
     id: number;
     display_name: string;
@@ -7,4 +9,6 @@ export interface Project {
     created: Date;
     version: string;
     base_profiles: number[];
+    group_id?: number | null;
+    group?: ProjectGroup | null;
 }

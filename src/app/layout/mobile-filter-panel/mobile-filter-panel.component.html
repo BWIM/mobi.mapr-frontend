@@ -6,8 +6,8 @@
   <!-- Project Name - Always visible -->
   <div class="px-4 pt-2 pb-2 cursor-pointer"
        (click)="togglePanel()">
-    <div class="flex items-center justify-center gap-2">
-      <div class="text-lg font-semibold text-[var(--primary-color)]">{{ project()?.display_name }}</div>
+    <div class="flex items-center justify-center gap-2" (click)="togglePanel()">
+      <app-project-switcher />
       <mat-icon class="mobile-collapsed-hint__icon" aria-hidden="true">swipe_up</mat-icon>
     </div>
   </div>

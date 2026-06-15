@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, inject, signal, ViewChild, TemplateRef, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { SharedModule } from '../../shared/shared.module';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -8,6 +8,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.component';
 import { CreditsDialogComponent } from './credits-dialog/credits-dialog.component';
 import { FeedbackDialogComponent } from './feedback-dialog/feedback-dialog.component';
+import { ProjectsService } from '../../services/project.service';
+import { ProjectNavigationService } from '../../services/project-navigation.service';
 
 @Component({
   selector: 'app-rail',
@@ -24,9 +26,12 @@ export class RailComponent implements OnInit {
   private authService = inject(AuthService);
   private languageService = inject(LanguageService);
   private dialog = inject(MatDialog);
+  private projectsService = inject(ProjectsService);
+  private projectNavigation = inject(ProjectNavigationService);
 
   currentLang = signal<string>('de');
   isLoggedIn = signal<boolean>(false);
+  hasGroup = computed(() => !!this.projectsService.project()?.group);
 
   availableLangs = this.languageService.availableLanguages.map(lang => ({
     code: lang.code,
@@ -60,6 +65,10 @@ export class RailComponent implements OnInit {
 
   navigateToUsersArea(): void {
     this.router.navigate(['/users-area']);
+  }
+
+  openGroupOverview(): void {
+    this.projectNavigation.openGroupOverview();
   }
 
   openMailDialog(): void {

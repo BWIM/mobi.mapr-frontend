@@ -30,10 +30,14 @@ export class ProjectsService {
   readonly hasProject = computed(() => this._project() !== null);
 
   // Project CRUD Operations
-  getProjects(page: number = 1, pageSize: number = 10): Observable<PaginatedResponse<Project>> {
-    const params = new HttpParams()
+  getProjects(page: number = 1, pageSize: number = 10, groupId?: number): Observable<PaginatedResponse<Project>> {
+    let params = new HttpParams()
       .set('page', page.toString())
       .set('page_size', pageSize.toString());
+
+    if (groupId !== undefined) {
+      params = params.set('group', groupId.toString());
+    }
 
     return this.http.get<PaginatedResponse<Project>>(`${this.apiUrl}/projects/`, { params });
   }
@@ -42,16 +46,24 @@ export class ProjectsService {
     return this.http.get<Project>(`${this.apiUrl}/projects/${id}/`);
   }
 
-  getProjectByShareKey(shareKey: string): Observable<Project> {
-    const params = new HttpParams()
-      .set('key', shareKey);
+  getProjectByShareKey(shareKey: string, projectId?: number): Observable<Project> {
+    let params = new HttpParams().set('key', shareKey);
+
+    if (projectId !== undefined) {
+      params = params.set('project', projectId.toString());
+    }
 
     return this.http.get<Project>(`${this.apiUrl}/projects/share-key/`, { params });
   }
 
   fetchProject(): Observable<Project> {
     if (this.dashboardSessionService.getShareKey()) {
-      return this.getProjectByShareKey(this.dashboardSessionService.getShareKey()!);
+      const shareKey = this.dashboardSessionService.getShareKey()!;
+      const shareProjectId = this.dashboardSessionService.getShareProjectId();
+      return this.getProjectByShareKey(
+        shareKey,
+        shareProjectId ? Number(shareProjectId) : undefined
+      );
     } else {
       return this.getProjectById(Number(this.dashboardSessionService.getProjectId()));
     }

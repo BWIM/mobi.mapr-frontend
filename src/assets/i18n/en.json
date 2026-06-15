@@ -624,6 +624,7 @@
   },
   "rail": {
     "manageProjects": "Manage Projects",
+    "groupOverview": "Group projects overview",
     "logoHint": "To the project page",
     "mail": {
       "title": "About mobi.mapr",
@@ -886,5 +887,17 @@
       "STATS_TITLE": "More than 15 billion possibilities",
       "STATS_TEXT": "You can combine the 28 activities freely, for 8 different mode combinations and 7 personas, this means more than 15 billion different maps to produce."
     }
+  },
+  "groupOverview": {
+    "title": "Projects in {{groupName}}",
+    "empty": "No projects in this group.",
+    "back": "Back to map",
+    "loadError": "Error loading group projects.",
+    "switchHint": "Tip: Switch between projects anytime by clicking the project name, or open this overview via the group icon in the left rail.",
+    "switchHintMobile": "Tip: Switch between projects anytime by tapping the project name at the bottom of the screen."
+  },
+  "projectSwitcher": {
+    "label": "Switch project in group",
+    "menuTitle": "Project group"
   }
 }

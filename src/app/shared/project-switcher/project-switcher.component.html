@@ -1,0 +1,51 @@
+@if (hasGroup()) {
+  <div (click)="$event.stopPropagation()">
+    <button
+      type="button"
+      class="group inline-flex max-w-full cursor-pointer items-start gap-1 border-0 bg-transparent p-0 text-left text-[var(--primary-color)]"
+      [matMenuTriggerFor]="projectMenu"
+      [attr.aria-label]="'projectSwitcher.label' | translate">
+      <span class="max-w-full text-lg font-semibold leading-snug break-words [overflow-wrap:anywhere] md:text-2xl">
+        {{ project()?.display_name }}
+      </span>
+      <mat-icon
+        class="mt-0.5 shrink-0 text-xl opacity-70 transition-opacity group-hover:opacity-100"
+        aria-hidden="true">
+        expand_more
+      </mat-icon>
+    </button>
+
+    <mat-menu
+      #projectMenu="matMenu"
+      xPosition="after"
+      class= "border border-[var(--primary-color)] rounded-xl shadow-[0_12px_32px_rgba(0,0,0,0.35)] overflow-hidden [&_.mat-mdc-menu-content]:!p-0 [&_.mat-mdc-menu-content]:max-h-[min(32rem,calc(100vh-6rem))] [&_.mat-mdc-menu-content]:overflow-y-auto [&_.mat-mdc-menu-item]:!h-auto [&_.mat-mdc-menu-item]:!min-h-12 [&_.mat-mdc-menu-item_.mat-mdc-menu-item-text]:w-full">
+
+      @for (sibling of siblings(); track sibling.id) {
+        <button
+          mat-menu-item
+          type="button"
+          class="!h-auto !min-h-12 !rounded-none border-b border-white/[0.08] !px-4 !py-2.5 whitespace-normal !leading-snug last:border-b-0 hover:!bg-white/[0.12]"
+          [class.!bg-white/[0.08]]="sibling.id === activeProjectId()"
+          [class.!border-l-[3px]]="sibling.id === activeProjectId()"
+          [class.!border-l-[var(--primary-color)]]="sibling.id === activeProjectId()"
+          [class.!pl-[calc(1rem-3px)]]="sibling.id === activeProjectId()"
+          [class.hover:!bg-white/[0.14]]="sibling.id === activeProjectId()"
+          (click)="switchTo(sibling.id)"
+          [attr.aria-current]="sibling.id === activeProjectId() ? 'true' : null">
+          <span class="flex w-full items-start justify-between gap-3">
+            <span
+              class="min-w-0 flex-1 text-left text-sm leading-snug break-words text-[var(--primary-color)] [overflow-wrap:anywhere]"
+              [class.font-bold]="sibling.id === activeProjectId()"
+              [class.font-medium]="sibling.id !== activeProjectId()">
+              {{ sibling.display_name }}
+            </span>
+          </span>
+        </button>
+      }
+    </mat-menu>
+  </div>
+} @else {
+  <div class="mb-1 text-2xl font-semibold leading-snug break-words text-[var(--primary-color)] [overflow-wrap:anywhere]">
+    {{ project()?.display_name }}
+  </div>
+}

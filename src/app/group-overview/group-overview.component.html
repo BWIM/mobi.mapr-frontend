@@ -1,0 +1,57 @@
+<div class="min-h-full bg-[var(--background-color)] p-8 overflow-auto">
+  <div class="max-w-4xl mx-auto">
+    <div class="flex items-center gap-4 mb-6 md:hidden">
+      <button
+        type="button"
+        class="inline-flex items-center gap-1 text-[var(--primary-color)] opacity-80 hover:opacity-100"
+        (click)="onBack()">
+        <mat-icon>arrow_back</mat-icon>
+        <span>{{ 'groupOverview.back' | translate }}</span>
+      </button>
+    </div>
+
+    <h1 class="text-3xl font-bold text-[var(--primary-color)] mb-2">
+      {{ 'groupOverview.title' | translate: { groupName: groupName() } }}
+    </h1>
+
+    <p class="mb-6 flex items-start gap-2 rounded-lg border border-[var(--light-primary-color)] bg-[var(--secondary-color)] px-4 py-3 text-sm leading-relaxed text-[var(--primary-color)] opacity-90">
+      <mat-icon class="mt-0.5 shrink-0 text-base opacity-70">info</mat-icon>
+      <span class="hidden md:inline">{{ 'groupOverview.switchHint' | translate }}</span>
+      <span class="md:hidden">{{ 'groupOverview.switchHintMobile' | translate }}</span>
+    </p>
+
+    @if (loading()) {
+      <div class="flex justify-center items-center py-12">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    } @else if (error(); as errorKey) {
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {{ errorKey | translate }}
+      </div>
+    } @else if (siblings().length === 0) {
+      <div class="text-center py-12">
+        <p class="text-lg text-[var(--primary-color)]">{{ 'groupOverview.empty' | translate }}</p>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 gap-4 mt-6">
+        @for (sibling of siblings(); track sibling.id) {
+          <button
+            type="button"
+            (click)="selectProject(sibling)"
+            [class.selected]="isActive(sibling.id)"
+            [style.border-color]="isActive(sibling.id) ? 'var(--primary-color)' : 'transparent'"
+            class="w-full text-left p-6 bg-[var(--secondary-color)] rounded-lg border-2 transition-all duration-200 hover:shadow-lg">
+            <div class="flex items-start justify-between">
+              <h3 class="text-xl font-semibold text-[var(--primary-color)]">
+                {{ sibling.display_name }}
+              </h3>
+              @if (isActive(sibling.id)) {
+                <mat-icon class="text-[var(--primary-color)] ml-4">check_circle</mat-icon>
+              }
+            </div>
+          </button>
+        }
+      </div>
+    }
+  </div>
+</div>

@@ -624,6 +624,7 @@
   },
   "rail": {
     "manageProjects": "Projekte verwalten",
+    "groupOverview": "Projektgruppen-Übersicht",
     "logoHint": "Zur Projektseite",
     "mail": {
       "title": "Über mobi.mapr",
@@ -886,5 +887,17 @@
       "STATS_TITLE": "Über 15 Milliarden Möglichkeiten",
       "STATS_TEXT": "Du kannst die 28 Aktivitäten frei kombinieren, für 8 verschiedene Modus-Kombinationen und 7 Personengruppen bedeutet dies mehr als 15 Milliarden verschiedene Karten."
     }
+  },
+  "groupOverview": {
+    "title": "Projekte in {{groupName}}",
+    "empty": "Keine Projekte in dieser Gruppe.",
+    "back": "Zurück zur Karte",
+    "loadError": "Fehler beim Laden der Gruppenprojekte.",
+    "switchHint": "Tipp: Wechsle jederzeit zwischen Projekten über den Projektnamen oder öffne diese Übersicht über das Gruppensymbol in der linken Leiste.",
+    "switchHintMobile": "Tipp: Wechsle jederzeit zwischen Projekten, indem du unten auf den Projektnamen tippst."
+  },
+  "projectSwitcher": {
+    "label": "Projekt in der Gruppe wechseln",
+    "menuTitle": "Projektgruppe"
   }
 }

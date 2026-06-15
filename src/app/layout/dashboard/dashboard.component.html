@@ -14,112 +14,120 @@
       <app-rail></app-rail>
     </div>
 
-    <!-- LEFT PANEL - Expandable -->
-    <div class="flex flex-col transition-all duration-300 ease-in-out relative"
-         [class.w-80]="leftPanelExpanded()"
-         [class.w-12]="!leftPanelExpanded()">
-      @if (leftPanelExpanded()) {
-        <div class="flex-1 overflow-auto bg-none">
-          <app-left></app-left>
-        </div>
-        <div class="absolute top-1/2 right-0 transform -translate-y-1/2 z-10">
-          <button 
-            (click)="toggleLeftPanel()"
-            class="p-2 hover:bg-none rounded transition-colors"
-            [attr.aria-label]="'dashboard.collapseLeftPanel' | translate">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-          </button>
-        </div>
-      } @else {
-        <div class="flex-1 relative bg-none">
-          <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+    @if (showGroupOverview()) {
+      <div class="flex-1 min-w-0 overflow-auto bg-[var(--background-color)]">
+        <app-group-overview (backRequested)="closeGroupOverview()"></app-group-overview>
+      </div>
+    } @else {
+      <!-- LEFT PANEL - Expandable -->
+      <div class="flex flex-col transition-all duration-300 ease-in-out relative"
+           [class.w-80]="leftPanelExpanded()"
+           [class.w-12]="!leftPanelExpanded()">
+        @if (leftPanelExpanded()) {
+          <div class="flex-1 overflow-auto bg-none">
+            <app-left></app-left>
+          </div>
+          <div class="absolute top-1/2 right-0 transform -translate-y-1/2 z-10">
             <button 
               (click)="toggleLeftPanel()"
               class="p-2 hover:bg-none rounded transition-colors"
-              [attr.aria-label]="'dashboard.expandLeftPanel' | translate">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      }
-    </div>
-
-    <!-- CENTER AREA - Map and Credits -->
-    <div class="flex-1 flex flex-col min-w-0 bg-[var(--secondary-color)]">
-      <div class="flex-1 flex flex-col min-h-0 bg-[var(--background-color)] rounded-tr-3xl rounded-br-3xl">
-        <!-- MAP - Main content area that grows to fill space, large, right corner rounded -->
-        <div class="flex-1 min-h-0 p-4 rounded-1xl overflow-hidden">
-          <app-center></app-center>
-        </div>
-      </div>
-    </div>
-
-    <!-- RIGHT PANEL - Expandable -->
-    <div class="flex flex-col transition-all duration-300 ease-in-out relative z-0"
-         [class.w-106]="rightPanelExpanded()"
-         [class.w-12]="!rightPanelExpanded()">
-      @if (rightPanelExpanded()) {
-        <div class="flex-1 overflow-auto bg-[var(--secondary-color)]">
-          <app-right></app-right>
-        </div>
-        <div class="absolute top-1/2 left-0 transform -translate-y-1/2 z-10">
-          <button 
-            (click)="toggleRightPanel()"
-            class="p-2 hover:bg-none rounded transition-colors"
-            [attr.aria-label]="'dashboard.collapseRightPanel' | translate">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-          </button>
-        </div>
-      } @else if (!filterConfigService.isMapCompareMode()) {
-        <div class="flex-1 relative bg-[var(--secondary-color)]">
-          <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <button 
-              (click)="toggleRightPanel()"
-              class="p-2 hover:bg-none rounded transition-colors"
-              [attr.aria-label]="'dashboard.expandRightPanel' | translate">
+              [attr.aria-label]="'dashboard.collapseLeftPanel' | translate">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
               </svg>
             </button>
           </div>
+        } @else {
+          <div class="flex-1 relative bg-none">
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <button 
+                (click)="toggleLeftPanel()"
+                class="p-2 hover:bg-none rounded transition-colors"
+                [attr.aria-label]="'dashboard.expandLeftPanel' | translate">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- CENTER AREA - Map and Credits -->
+      <div class="flex-1 flex flex-col min-w-0 bg-[var(--secondary-color)]">
+        <div class="flex-1 flex flex-col min-h-0 bg-[var(--background-color)] rounded-tr-3xl rounded-br-3xl">
+          <div class="flex-1 min-h-0 p-4 rounded-1xl overflow-hidden">
+            <app-center></app-center>
+          </div>
         </div>
-      } @else {
-        <div class="flex-1 relative bg-[var(--secondary-color)]"></div>
-      }
-    </div>
+      </div>
+
+      <!-- RIGHT PANEL - Expandable -->
+      <div class="flex flex-col transition-all duration-300 ease-in-out relative z-0"
+           [class.w-106]="rightPanelExpanded()"
+           [class.w-12]="!rightPanelExpanded()">
+        @if (rightPanelExpanded()) {
+          <div class="flex-1 overflow-auto bg-[var(--secondary-color)]">
+            <app-right></app-right>
+          </div>
+          <div class="absolute top-1/2 left-0 transform -translate-y-1/2 z-10">
+            <button 
+              (click)="toggleRightPanel()"
+              class="p-2 hover:bg-none rounded transition-colors"
+              [attr.aria-label]="'dashboard.collapseRightPanel' | translate">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        } @else if (!filterConfigService.isMapCompareMode()) {
+          <div class="flex-1 relative bg-[var(--secondary-color)]">
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <button 
+                (click)="toggleRightPanel()"
+                class="p-2 hover:bg-none rounded transition-colors"
+                [attr.aria-label]="'dashboard.expandRightPanel' | translate">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        } @else {
+          <div class="flex-1 relative bg-[var(--secondary-color)]"></div>
+        }
+      </div>
+    }
   </div>
 
   <!-- MOBILE LAYOUT -->
   <div class="md:hidden flex-1 flex flex-col min-h-0 relative">
-    <!-- MAP - Full screen on mobile -->
-    <div class="flex-1 min-h-0 overflow-hidden relative">
-      <app-center></app-center>
-      <app-mobile-map-controls />
-    </div>
-
-    @if (mobileUi.isSheetOpen()) {
-      <app-mobile-sheets />
-    }
-
-    <!-- MOBILE FILTER PANEL - Custom bottom panel -->
-    <div class="absolute bottom-0 left-0 right-0 z-[1002] pointer-events-none">
-      <div class="pointer-events-auto">
-        <app-mobile-filter-panel 
-          [isExpanded]="mobileFilterExpanded()"
-          (onClose)="toggleMobileFilterPanel()">
-        </app-mobile-filter-panel>
+    @if (showGroupOverview()) {
+      <div class="flex-1 min-h-0 overflow-auto">
+        <app-group-overview (backRequested)="closeGroupOverview()"></app-group-overview>
       </div>
-    </div>
+    } @else {
+      <div class="flex-1 min-h-0 overflow-hidden relative">
+        <app-center></app-center>
+        <app-mobile-map-controls />
+      </div>
+
+      @if (mobileUi.isSheetOpen()) {
+        <app-mobile-sheets />
+      }
+
+      <div class="absolute bottom-0 left-0 right-0 z-[1002] pointer-events-none">
+        <div class="pointer-events-auto">
+          <app-mobile-filter-panel 
+            [isExpanded]="mobileFilterExpanded()"
+            (onClose)="toggleMobileFilterPanel()">
+          </app-mobile-filter-panel>
+        </div>
+      </div>
+    }
   </div>
 
-  <!-- GeoJSON Download Button - Bottom Right (Desktop Only) -->
-  @if (!isMobile()) {
+  @if (!isMobile() && !showGroupOverview()) {
     <button 
       (click)="openGeoJsonDownloadDialog()"
       class="fixed bottom-4 right-4 z-[1000] bg-[var(--background-color)] text-[var(--primary-color)] rounded-full w-14 h-14 shadow-lg flex items-center justify-center transition-all duration-200 hover:opacity-90 hover:scale-105 border border-[var(--primary-color)]"

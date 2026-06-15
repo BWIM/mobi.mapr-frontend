@@ -11,6 +11,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
+import { ProjectSwitcherComponent } from '../../shared/project-switcher/project-switcher.component';
 
 interface NominatimResult {
   display_name: string;
@@ -20,7 +21,7 @@ interface NominatimResult {
 
 @Component({
   selector: 'app-mobile-filter-panel',
-  imports: [SharedModule, TranslateModule, InfoOverlayComponent],
+  imports: [SharedModule, TranslateModule, InfoOverlayComponent, ProjectSwitcherComponent],
   templateUrl: './mobile-filter-panel.component.html',
   styleUrl: './mobile-filter-panel.component.css',
 })
