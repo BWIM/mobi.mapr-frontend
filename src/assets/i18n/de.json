@@ -460,7 +460,7 @@
       "state": "Bundesland"
     },
     "activeFilters": {
-      "title": "Aktuelle Filter",
+      "title": "Projekteinstellungen",
       "description": "Diese Übersicht zeigt die aktuell aktiven Filter und deren Anzahl. Die Zahlen zeigen, wie viele Filter in jeder Kategorie ausgewählt sind.",
       "introduction": "Filter ermöglichen es dir, die Analyse anzupassen, indem du bestimmte Aktivitäten, Personengruppen, Regionen und Regionaltypen auswählst. Verwende die Filter-Schaltfläche, um diese Einstellungen anzupassen.",
       "adjustFilters": "Filter anpassen",

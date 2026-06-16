@@ -432,10 +432,6 @@ export class MapService {
     const shareKey = this.dashboardSessionService.getShareKey();
     if (shareKey && !token) {
       params.push(`key=${shareKey}`);
-      const effectiveId = this.dashboardSessionService.getEffectiveProjectId();
-      if (effectiveId) {
-        params.push(`project=${effectiveId}`);
-      }
     }
 
     return `${baseUrl}?${params.join('&')}`;
@@ -473,10 +469,6 @@ export class MapService {
       const shareKey = this.dashboardSessionService.getShareKey();
       if (shareKey) {
         params = params.set('key', shareKey);
-        const effectiveId = this.dashboardSessionService.getEffectiveProjectId();
-        if (effectiveId) {
-          params = params.set('project', effectiveId);
-        }
         const url = `${environment.apiUrl}/geo`;
         const response = await firstValueFrom(
           this.http.get<GeoLocationResponse>(url, { params })
@@ -516,10 +508,6 @@ export class MapService {
       const shareKey = this.dashboardSessionService.getShareKey();
       if (shareKey && !token) {
         params = params.set('key', shareKey);
-        const effectiveId = this.dashboardSessionService.getEffectiveProjectId();
-        if (effectiveId) {
-          params = params.set('project', effectiveId);
-        }
       }
 
       // Only send state_ids if they are selected

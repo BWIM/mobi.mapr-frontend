@@ -46,24 +46,15 @@ export class ProjectsService {
     return this.http.get<Project>(`${this.apiUrl}/projects/${id}/`);
   }
 
-  getProjectByShareKey(shareKey: string, projectId?: number): Observable<Project> {
-    let params = new HttpParams().set('key', shareKey);
-
-    if (projectId !== undefined) {
-      params = params.set('project', projectId.toString());
-    }
-
+  getProjectByShareKey(shareKey: string): Observable<Project> {
+    const params = new HttpParams().set('key', shareKey);
     return this.http.get<Project>(`${this.apiUrl}/projects/share-key/`, { params });
   }
 
   fetchProject(): Observable<Project> {
     if (this.dashboardSessionService.getShareKey()) {
       const shareKey = this.dashboardSessionService.getShareKey()!;
-      const shareProjectId = this.dashboardSessionService.getShareProjectId();
-      return this.getProjectByShareKey(
-        shareKey,
-        shareProjectId ? Number(shareProjectId) : undefined
-      );
+      return this.getProjectByShareKey(shareKey);
     } else {
       return this.getProjectById(Number(this.dashboardSessionService.getProjectId()));
     }

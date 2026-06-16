@@ -22,9 +22,12 @@ export class ProjectSwitcherComponent {
   hasGroup = computed(() => !!this.project()?.group);
 
   switchTo(projectId: number): void {
-    if (projectId === this.activeProjectId()) {
+    const sibling = this.siblings().find((entry) => entry.id === projectId);
+    const siblingShareKey = sibling?.share_key ?? null;
+
+    if (projectId === this.activeProjectId() && !siblingShareKey) {
       return;
     }
-    this.projectNavigation.switchToProject(projectId).subscribe();
+    this.projectNavigation.switchToProject(projectId, { siblingShareKey }).subscribe();
   }
 }

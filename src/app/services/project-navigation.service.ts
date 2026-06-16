@@ -22,11 +22,18 @@ export class ProjectNavigationService {
 
   readonly activeProjectId = computed(() => this.projectsService.project()?.id ?? null);
 
-  switchToProject(targetId: number, options?: { closeOverview?: boolean }): Observable<Project> {
+  switchToProject(
+    targetId: number,
+    options?: { closeOverview?: boolean; siblingShareKey?: string | null }
+  ): Observable<Project> {
     const currentId = this.projectsService.project()?.id;
-    if (currentId === targetId) {
+    const shareKey = this.dashboardSessionService.getShareKey();
+    const isShareMode = !this.dashboardSessionService.getIsAuthenticated() && !!shareKey;
+    const targetShareKey = options?.siblingShareKey ?? shareKey ?? null;
+
+    if (currentId === targetId && (!isShareMode || !targetShareKey || targetShareKey === shareKey)) {
       if (options?.closeOverview) {
-        this.updateUrl(targetId, true);
+        this.updateUrl(targetId, true, targetShareKey);
       }
       return new Observable((subscriber) => {
         subscriber.next(this.projectsService.project()!);
@@ -34,32 +41,26 @@ export class ProjectNavigationService {
       });
     }
 
-    const isShareKey = this.dashboardSessionService.getAccessMethod() === 'share_key';
-    const shareKey = this.dashboardSessionService.getShareKey();
-
     this.projectsService.clearProject();
 
-    if (isShareKey && shareKey) {
-      this.dashboardSessionService.setShareProjectId(targetId.toString());
+    if (isShareMode && targetShareKey) {
+      this.dashboardSessionService.setShareKey(targetShareKey);
     } else {
       this.dashboardSessionService.setProjectId(targetId.toString());
     }
 
-    const fetch$ = isShareKey && shareKey
-      ? this.projectsService.getProjectByShareKey(shareKey, targetId)
+    const fetch$ = isShareMode && targetShareKey
+      ? this.projectsService.getProjectByShareKey(targetShareKey)
       : this.projectsService.getProjectById(targetId);
 
     return fetch$.pipe(
       tap({
         next: (project) => {
           this.projectsService.setProject(project);
-          if (isShareKey && shareKey) {
-            this.dashboardSessionService.setShareProjectId(project.id.toString());
-          }
-          this.updateUrl(project.id, options?.closeOverview ?? false);
+          this.updateUrl(project.id, options?.closeOverview ?? false, targetShareKey);
         },
         error: () => {
-          if (isShareKey) {
+          if (isShareMode) {
             this.router.navigate(['/invalid-share-key']);
           } else {
             this.router.navigate(['/users-area']);
@@ -83,9 +84,9 @@ export class ProjectNavigationService {
     });
   }
 
-  private updateUrl(projectId: number, closeOverview: boolean): void {
-    const isShareKey = this.dashboardSessionService.getAccessMethod() === 'share_key';
-    const shareKey = this.dashboardSessionService.getShareKey();
+  private updateUrl(projectId: number, closeOverview: boolean, shareKeyOverride?: string | null): void {
+    const shareKey = shareKeyOverride ?? this.dashboardSessionService.getShareKey();
+    const isShareKey = !this.dashboardSessionService.getIsAuthenticated() && !!shareKey;
 
     const queryParams: Record<string, string | null> = closeOverview
       ? { overview: null }
@@ -93,9 +94,10 @@ export class ProjectNavigationService {
 
     if (isShareKey && shareKey) {
       queryParams['share_key'] = shareKey;
-      queryParams['project_id'] = projectId.toString();
+      queryParams['project_id'] = null;
     } else {
       queryParams['project_id'] = projectId.toString();
+      queryParams['share_key'] = null;
     }
 
     this.router.navigate(['/dashboard'], {

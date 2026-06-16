@@ -60,7 +60,10 @@ export class GroupOverviewComponent implements OnInit {
   }
 
   selectProject(sibling: ProjectGroupSibling): void {
-    this.projectNavigation.switchToProject(sibling.id, { closeOverview: true }).subscribe({
+    this.projectNavigation.switchToProject(sibling.id, {
+      closeOverview: true,
+      siblingShareKey: sibling.share_key ?? null,
+    }).subscribe({
       next: () => this.projectSelected.emit(sibling.id),
     });
   }

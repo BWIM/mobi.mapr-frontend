@@ -460,7 +460,7 @@
       "state": "State"
     },
     "activeFilters": {
-      "title": "Current Filters",
+      "title": "Project Settings",
       "description": "This overview shows the currently active filters and their count. The numbers show how many filters are selected in each category.",
       "introduction": "Filters allow you to customize the analysis by selecting specific activities, personas, regions, and regional types. Use the filter button to adjust these settings.",
       "adjustFilters": "Adjust Filters",

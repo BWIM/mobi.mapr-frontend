@@ -145,28 +145,28 @@ export class DashboardComponent {
         // Check if there's already a project or share key in the session service
         const existingProjectId = this.dashboardSessionService.getProjectId();
         const existingShareKey = this.dashboardSessionService.getShareKey();
-        const existingShareProjectId = this.dashboardSessionService.getShareProjectId();
-
         // Check current route to prevent redirect loops
         const currentUrl = this.router.url.split('?')[0];
 
         const newProjectIdentifier = this.buildProjectIdentifier(
+          isLoggedIn,
           shareKey,
           projectId,
           existingShareKey,
-          existingProjectId,
-          existingShareProjectId
+          existingProjectId
         );
 
         const projectChanged = this.currentProjectIdentifier !== newProjectIdentifier;
-        const targetProjectId = shareKey
-          ? (projectId || existingShareProjectId)
-          : (projectId || existingProjectId);
+        const targetProjectId = isLoggedIn
+          ? (projectId || existingProjectId)
+          : null;
         const alreadyLoaded =
           !!this.projectService.project() &&
           !!targetProjectId &&
           this.projectService.project()!.id === Number(targetProjectId) &&
-          (!shareKey || this.dashboardSessionService.getShareKey() === (shareKey || existingShareKey));
+          (!isLoggedIn && shareKey
+            ? this.dashboardSessionService.getShareKey() === shareKey
+            : true);
 
         if (projectChanged && this.currentProjectIdentifier !== null && !alreadyLoaded) {
           this.projectService.clearProject();
@@ -176,64 +176,43 @@ export class DashboardComponent {
           this.currentProjectIdentifier = newProjectIdentifier;
         }
 
-        if (shareKey) {
+        if (isLoggedIn) {
+          // Authenticated users always use project-id mode.
+          this.dashboardSessionService.setShareKey(null);
+
           if (projectId) {
-            this.dashboardSessionService.setShareKey(shareKey);
-            this.dashboardSessionService.setShareProjectId(projectId);
+            this.dashboardSessionService.setProjectId(projectId);
+            if ((projectChanged || !this.projectService.isInitialized()) && !alreadyLoaded) {
+              await this.loadProjectById(projectId);
+            }
+            this.hasInitialized = true;
+          } else if (existingProjectId) {
+            if ((projectChanged || !this.projectService.isInitialized()) && !alreadyLoaded) {
+              await this.loadProjectById(existingProjectId);
+            }
+            this.hasInitialized = true;
+          } else if (!this.hasInitialized) {
+            if (currentUrl !== '/users-area') {
+              this.router.navigate(['/users-area']);
+            }
+            return;
           }
-
-          if ((projectChanged || !this.projectService.isInitialized()) && !alreadyLoaded) {
-            await this.validateShareKeyAndPreload(
-              shareKey,
-              projectId ? Number(projectId) : undefined
-            );
-          } else if (projectId) {
-            this.dashboardSessionService.setShareProjectId(projectId);
-          }
-
-          this.hasInitialized = true;
-        } else if (projectId) {
-          if (!isLoggedIn) {
-            if (currentUrl !== '/login') {
-              this.router.navigate(['/login']);
+        } else {
+          // Anonymous users always use share-key mode.
+          const activeShareKey = shareKey || existingShareKey;
+          if (!activeShareKey) {
+            if (!this.hasInitialized && currentUrl !== '/landing') {
+              this.router.navigate(['/landing']);
             }
             return;
           }
 
-          this.dashboardSessionService.setProjectId(projectId);
+          this.dashboardSessionService.setProjectId(null);
 
           if ((projectChanged || !this.projectService.isInitialized()) && !alreadyLoaded) {
-            await this.loadProjectById(projectId);
-          }
-
-          this.hasInitialized = true;
-        } else if (existingShareKey) {
-          if (projectChanged || !this.projectService.isInitialized()) {
-            await this.validateShareKeyAndPreload(
-              existingShareKey,
-              existingShareProjectId ? Number(existingShareProjectId) : undefined
-            );
+            await this.validateShareKeyAndPreload(activeShareKey);
           }
           this.hasInitialized = true;
-        } else if (existingProjectId) {
-          if (projectChanged || !this.projectService.isInitialized()) {
-            await this.loadProjectById(existingProjectId);
-          }
-          this.hasInitialized = true;
-        } else {
-          if (!this.hasInitialized) {
-            if (isLoggedIn) {
-              if (currentUrl !== '/users-area') {
-                this.router.navigate(['/users-area']);
-              }
-              return;
-            } else {
-              if (currentUrl !== '/landing') {
-                this.router.navigate(['/landing']);
-              }
-              return;
-            }
-          }
         }
 
         this.updateGroupOverviewState(overview);
@@ -241,18 +220,18 @@ export class DashboardComponent {
   }
 
   private buildProjectIdentifier(
+    isLoggedIn: boolean,
     shareKey: string | undefined,
     projectId: string | undefined,
     existingShareKey: string | null,
-    existingProjectId: string | null,
-    existingShareProjectId: string | null
+    existingProjectId: string | null
   ): string | null {
-    const key = shareKey || existingShareKey;
-    if (key) {
-      const siblingId = projectId || existingShareProjectId || '';
-      return `share:${key}:${siblingId}`;
+    if (isLoggedIn) {
+      return projectId || existingProjectId || null;
     }
-    return projectId || existingProjectId || null;
+
+    const key = shareKey || existingShareKey;
+    return key ? `share:${key}` : null;
   }
 
   private updateGroupOverviewState(overviewRequested: boolean): void {
@@ -300,17 +279,14 @@ export class DashboardComponent {
   /**
    * Validates share key by fetching the project and making a preload call with defaults
    */
-  private async validateShareKeyAndPreload(shareKey: string, siblingProjectId?: number): Promise<void> {
+  private async validateShareKeyAndPreload(shareKey: string): Promise<void> {
     try {
       this.dashboardSessionService.setShareKey(shareKey);
-      if (siblingProjectId !== undefined) {
-        this.dashboardSessionService.setShareProjectId(siblingProjectId.toString());
-      }
 
       let project: Project | null = null;
       try {
         project = await firstValueFrom(
-          this.projectService.getProjectByShareKey(shareKey, siblingProjectId)
+          this.projectService.getProjectByShareKey(shareKey)
         );
       } catch (error) {
         console.error('Error fetching project with share key:', error);
@@ -323,7 +299,6 @@ export class DashboardComponent {
         return;
       }
 
-      this.dashboardSessionService.setShareProjectId(project.id.toString());
       this.projectService.setProject(project);
 
       if (!project.base_profiles?.length) {

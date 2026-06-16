@@ -5,15 +5,12 @@ export function buildProjectAccessParams(
   session: DashboardSessionService
 ): HttpParams {
   const shareKey = session.getShareKey();
-  const effectiveId = session.getEffectiveProjectId();
   let params = new HttpParams();
 
   if (shareKey) {
     params = params.set('key', shareKey);
-    if (effectiveId) {
-      params = params.set('project', effectiveId);
-    }
-  } else if (effectiveId) {
+  } else if (session.getEffectiveProjectId()) {
+    const effectiveId = session.getEffectiveProjectId()!;
     params = params.set('project', effectiveId);
   }
 
@@ -26,14 +23,11 @@ export function appendProjectAccessParams(
 ): HttpParams {
   let params = base;
   const shareKey = session.getShareKey();
-  const effectiveId = session.getEffectiveProjectId();
 
   if (shareKey) {
     params = params.set('key', shareKey);
-    if (effectiveId) {
-      params = params.set('project', effectiveId);
-    }
-  } else if (effectiveId) {
+  } else if (session.getEffectiveProjectId()) {
+    const effectiveId = session.getEffectiveProjectId()!;
     params = params.set('project', effectiveId);
   }
 

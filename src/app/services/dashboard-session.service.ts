@@ -11,13 +11,11 @@ export class DashboardSessionService {
   // Signals for session state
   private _projectId = signal<string | null>(null);
   private _shareKey = signal<string | null>(null);
-  private _shareProjectId = signal<string | null>(null);
   private _isAuthenticated = signal<boolean>(false);
 
   // Public readonly signals
   readonly projectId = this._projectId.asReadonly();
   readonly shareKey = this._shareKey.asReadonly();
-  readonly shareProjectId = this._shareProjectId.asReadonly();
   readonly isAuthenticated = this._isAuthenticated.asReadonly();
 
   // Computed signal to determine the current access method
@@ -59,7 +57,6 @@ export class DashboardSessionService {
       if (isAuth && projectId) {
         if (shareKey) {
           this._shareKey.set(null);
-          this._shareProjectId.set(null);
         }
       }
       // If using share_key, ensure we're not authenticated or clear project_id
@@ -77,7 +74,6 @@ export class DashboardSessionService {
     // Clear share_key when setting project_id
     if (projectId) {
       this._shareKey.set(null);
-      this._shareProjectId.set(null);
     }
   }
 
@@ -89,16 +85,7 @@ export class DashboardSessionService {
     // Clear auth project_id when setting share_key
     if (shareKey) {
       this._projectId.set(null);
-    } else {
-      this._shareProjectId.set(null);
     }
-  }
-
-  /**
-   * Set the active project ID when using a share key (sibling switching)
-   */
-  setShareProjectId(projectId: string | null): void {
-    this._shareProjectId.set(projectId);
   }
 
   /**
@@ -107,7 +94,6 @@ export class DashboardSessionService {
   clearSession(): void {
     this._projectId.set(null);
     this._shareKey.set(null);
-    this._shareProjectId.set(null);
   }
 
   /**
@@ -125,23 +111,10 @@ export class DashboardSessionService {
   }
 
   /**
-   * Get the active project ID when using share key access
-   */
-  getShareProjectId(): string | null {
-    return this._shareProjectId();
-  }
-
-  /**
-   * Get the effective project ID for API calls
+   * Get the effective project ID for API calls (authenticated users only)
    */
   getEffectiveProjectId(): string | null {
-    if (this._projectId()) {
-      return this._projectId();
-    }
-    if (this._shareKey()) {
-      return this._shareProjectId();
-    }
-    return null;
+    return this._projectId();
   }
 
   /**
