@@ -110,6 +110,10 @@ export class FilterConfigService {
   
   // Track when filter data is loaded (for initialization order)
   private _isFilterDataLoaded = signal<boolean>(false);
+  /** Project id that the loaded filter data belongs to (guards stale async completions). */
+  private _filterDataProjectId = signal<number | null>(null);
+  /** Bumped on every project switch to invalidate in-flight map/ready work. */
+  private projectLoadGeneration = 0;
   
   // Track if URL params have been applied (to prevent re-applying on every effect run)
   private _urlParamsApplied = signal<boolean>(false);
@@ -346,6 +350,10 @@ export class FilterConfigService {
 
           // Reset filter-data gating so the map waits for the new project's filter options.
           this._isFilterDataLoaded.set(false);
+          this._filterDataProjectId.set(null);
+          this.projectLoadGeneration++;
+          this.updateMapLayerInProgress = false;
+          this.compareUpdateRetryNeeded = false;
 
           // Allow URL params to be re-applied when switching projects.
           this._urlParamsApplied.set(false);
@@ -378,6 +386,10 @@ export class FilterConfigService {
         // Reset when project is cleared
         previousProjectId = null;
         this._isFilterDataLoaded.set(false);
+        this._filterDataProjectId.set(null);
+        this.projectLoadGeneration++;
+        this.updateMapLayerInProgress = false;
+        this.compareUpdateRetryNeeded = false;
         this._compareMapsReady.set(false);
         // Reset URL params applied flag when project is cleared
         this._urlParamsApplied.set(false);
@@ -404,6 +416,12 @@ export class FilterConfigService {
       const filters = this.contentLayerFilters();
       const rightFilters = this.rightContentLayerFilters();
       const isFilterDataLoaded = this._isFilterDataLoaded();
+      const filterDataProjectId = this._filterDataProjectId();
+      const currentProjectId = this.projectService.project()?.id ?? null;
+      const filterDataReadyForProject =
+        isFilterDataLoaded &&
+        filterDataProjectId !== null &&
+        filterDataProjectId === currentProjectId;
       const compareMapsReady = this._compareMapsReady();
       this._mapLayerRefreshNonce();
 
@@ -426,7 +444,7 @@ export class FilterConfigService {
           scheduleRetryIfNeeded();
           return;
         }
-        if (!isFilterDataLoaded && compareInitialLoad) {
+        if (!filterDataReadyForProject && compareInitialLoad) {
           scheduleRetryIfNeeded();
           return;
         }
@@ -509,7 +527,7 @@ export class FilterConfigService {
         if (this._mapModeTransitionInProgress()) {
           return;
         }
-        if (!isFilterDataLoaded && isInitialLoad) {
+        if (!filterDataReadyForProject && isInitialLoad) {
           return;
         }
         if (this.updateMapLayerInProgress) {
@@ -777,6 +795,8 @@ export class FilterConfigService {
    * @param projectId - The current project ID to track initialization
    */
   private loadAllFilterData(projectId?: number): void {
+    const loadGeneration = this.projectLoadGeneration;
+    const expectedProjectId = projectId;
     const isShareKeyOnly = this.dashboardSessionService.accessMethod() === 'share_key';
     
     // Always load RegioStars, States, Categories and Personas (including for share_key users so they can see the data)
@@ -792,6 +812,10 @@ export class FilterConfigService {
       personas: personas$
     }).subscribe({
       next: (responses) => {
+        if (!this.isProjectLoadCurrent(loadGeneration, expectedProjectId)) {
+          return;
+        }
+
         this._allRegioStars.set(responses.regiostars.results);
         this._allStates.set(responses.states.results);
         this._allCategories.set(responses.categories.results);
@@ -817,11 +841,10 @@ export class FilterConfigService {
           this.preselectAllRegioStars();
           this.preselectAllStates();
           
-          // Mark filter data as loaded and project as initialized
-          this._isFilterDataLoaded.set(true);
-          if (projectId !== undefined) {
-            this._initializedProjectIds.add(projectId);
+          if (expectedProjectId !== undefined) {
+            this._initializedProjectIds.add(expectedProjectId);
           }
+          this.markFilterDataLoadedForProject(expectedProjectId);
           return;
         }
 
@@ -852,15 +875,39 @@ export class FilterConfigService {
           }
         }
         
-        // Mark filter data as loaded (step 1 complete)
-        this._isFilterDataLoaded.set(true);
+        this.markFilterDataLoadedForProject(expectedProjectId);
       },
       error: (error) => {
         console.error('Error loading filter data:', error);
+        if (!this.isProjectLoadCurrent(loadGeneration, expectedProjectId)) {
+          return;
+        }
         // Still mark as loaded to allow the flow to continue
-        this._isFilterDataLoaded.set(true);
+        this.markFilterDataLoadedForProject(expectedProjectId);
       }
     });
+  }
+
+  private isProjectLoadCurrent(loadGeneration: number, expectedProjectId?: number): boolean {
+    if (loadGeneration !== this.projectLoadGeneration) {
+      return false;
+    }
+
+    if (expectedProjectId === undefined) {
+      return true;
+    }
+
+    return this.projectService.project()?.id === expectedProjectId;
+  }
+
+  private markFilterDataLoadedForProject(projectId?: number): void {
+    const currentProjectId = this.projectService.project()?.id;
+    if (projectId !== undefined && currentProjectId !== projectId) {
+      return;
+    }
+
+    this._filterDataProjectId.set(currentProjectId ?? null);
+    this._isFilterDataLoaded.set(true);
   }
 
   /**
@@ -1444,11 +1491,22 @@ export class FilterConfigService {
     return !!targetMap.getSource('content-layer');
   }
 
-  private async ensureProjectReady(filters: ContentLayerFilters): Promise<boolean> {
+  private async ensureProjectReady(
+    filters: ContentLayerFilters,
+    loadGeneration: number
+  ): Promise<boolean> {
+    if (!this.isProjectLoadCurrent(loadGeneration)) {
+      return false;
+    }
+
     let dialogRef: ReturnType<MatDialog['open']> | null = null;
 
     try {
       const readyResponse = await this.mapService.checkReady(filters);
+
+      if (!this.isProjectLoadCurrent(loadGeneration)) {
+        return false;
+      }
 
       if (!readyResponse.cache_flag) {
         this.mapService.setPreparingProject(true);
@@ -1473,7 +1531,7 @@ export class FilterConfigService {
         }
       }
 
-      return true;
+      return this.isProjectLoadCurrent(loadGeneration);
     } catch (readyError) {
       console.error('Error calling ready endpoint:', readyError);
       this.mapService.setPreparingProject(false);
@@ -1510,6 +1568,7 @@ export class FilterConfigService {
 
     const shouldUpdateLeft = leftChanged && !onlyRightChanged;
     const shouldUpdateRight = rightChanged && !onlyLeftChanged;
+    const loadGeneration = this.projectLoadGeneration;
 
     this.updateMapLayerInProgress = true;
     try {
@@ -1520,18 +1579,22 @@ export class FilterConfigService {
       if (needsReadyCheck) {
         this.mapService.setReadyCheckComplete(false);
         if (shouldUpdateLeft && leftFullReload) {
-          const leftReady = await this.ensureProjectReady(leftFilters);
+          const leftReady = await this.ensureProjectReady(leftFilters, loadGeneration);
           if (!leftReady) {
             this.mapService.setReadyCheckComplete(false);
             return false;
           }
         }
         if (shouldUpdateRight && rightFullReload) {
-          const rightReady = await this.ensureProjectReady(rightFilters);
+          const rightReady = await this.ensureProjectReady(rightFilters, loadGeneration);
           if (!rightReady) {
             this.mapService.setReadyCheckComplete(false);
             return false;
           }
+        }
+        if (!this.isProjectLoadCurrent(loadGeneration)) {
+          this.mapService.setReadyCheckComplete(false);
+          return false;
         }
         this.mapService.setReadyCheckComplete(true);
       }
@@ -1596,6 +1659,8 @@ export class FilterConfigService {
     targetMap?: MapLibreMap,
     skipReadyCheck: boolean = false
   ): Promise<boolean> {
+    const loadGeneration = this.projectLoadGeneration;
+
     if (!targetMap) {
       if (this.updateMapLayerInProgress) {
         console.log('updateMapLayer already in progress, skipping concurrent call');
@@ -1615,7 +1680,7 @@ export class FilterConfigService {
         // Mark ready check as not complete yet (prevents rankings from loading)
         this.mapService.setReadyCheckComplete(false);
 
-        const ready = await this.ensureProjectReady(filters);
+        const ready = await this.ensureProjectReady(filters, loadGeneration);
         if (!ready) {
           this.mapService.setMapLoading(false);
           this.mapService.setReadyCheckComplete(false);
@@ -1628,24 +1693,31 @@ export class FilterConfigService {
         this.mapService.setReadyCheckComplete(true);
       }
 
+      if (!this.isProjectLoadCurrent(loadGeneration)) {
+        return false;
+      }
+
       // Only load the content layer AFTER we've confirmed data is ready (step 3)
       // (either via cache_flag: true OR websocket completion)
       if (targetMap) {
         if (fullReload) {
           const loaded = await this.mapService.loadContentLayerOnMap(targetMap, filters, zoomToBounds, false);
+          if (!this.isProjectLoadCurrent(loadGeneration)) {
+            return false;
+          }
           if (loaded) {
             targetMap.resize();
           }
           return loaded;
         }
         await this.mapService.updateContentLayerOnMap(targetMap, filters);
-        return true;
+        return this.isProjectLoadCurrent(loadGeneration);
       } else if (fullReload) {
         await this.mapService.loadContentLayer(filters, zoomToBounds);
       } else {
         await this.mapService.updateContentLayerTiles(filters);
       }
-      return true;
+      return this.isProjectLoadCurrent(loadGeneration);
     } catch (error) {
       console.error('Error in updateMapLayer:', error);
       this.mapService.setPreparingProject(false);

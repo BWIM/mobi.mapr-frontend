@@ -160,13 +160,14 @@ export class DashboardComponent {
         const targetProjectId = isLoggedIn
           ? (projectId || existingProjectId)
           : null;
-        const alreadyLoaded =
-          !!this.projectService.project() &&
-          !!targetProjectId &&
-          this.projectService.project()!.id === Number(targetProjectId) &&
-          (!isLoggedIn && shareKey
-            ? this.dashboardSessionService.getShareKey() === shareKey
-            : true);
+        const activeShareKey = !isLoggedIn ? (shareKey || existingShareKey) : null;
+        const alreadyLoaded = isLoggedIn
+          ? !!this.projectService.project() &&
+            !!targetProjectId &&
+            this.projectService.project()!.id === Number(targetProjectId)
+          : !!this.projectService.project() &&
+            !!activeShareKey &&
+            this.dashboardSessionService.getShareKey() === activeShareKey;
 
         if (projectChanged && this.currentProjectIdentifier !== null && !alreadyLoaded) {
           this.projectService.clearProject();
@@ -199,7 +200,6 @@ export class DashboardComponent {
           }
         } else {
           // Anonymous users always use share-key mode.
-          const activeShareKey = shareKey || existingShareKey;
           if (!activeShareKey) {
             if (!this.hasInitialized && currentUrl !== '/landing') {
               this.router.navigate(['/landing']);
