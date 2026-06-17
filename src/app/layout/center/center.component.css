@@ -45,11 +45,10 @@
   }
 }
 
-/* Map Controls Styling - Move everything 20px down */
+/* Map Controls Styling - Move controls below layer switcher */
 :host ::ng-deep .maplibregl-ctrl {
-  margin-top: 20px !important;
+  margin-top: 68px !important;
 }
-
 
 :host ::ng-deep .maplibregl-ctrl-group:has(.maplibregl-ctrl-zoom-in) {
   background-color: var(--background-color) !important;
@@ -131,7 +130,8 @@
   justify-content: center;
   z-index: 1000;
   border-radius: 0.75rem;
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: wait;
 }
 
 /* Remove rounded corners on mobile */
@@ -177,15 +177,10 @@
   height: 18px !important;
 }
 
-/* Minimap styling - bottom right, no padding, rounded top-left and bottom-right corners */
+/* Minimap styling - bottom right, flush to corner */
 :host ::ng-deep .custom-ctrl-minimap,
 :host ::ng-deep #miniMap {
-  margin-top: 0 !important;
-  margin-right: 0 !important;
-  margin-bottom: 0 !important;
-  margin-left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
+  margin: 0 !important;
   border-radius: 0.75rem 0 0.75rem 0 !important; /* top-left rounded, top-right pointy, bottom-right rounded, bottom-left pointy */
   border: none !important;
   border-top: 4px solid var(--background-color) !important;
@@ -194,6 +189,7 @@
   border-bottom: none !important;
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65) !important;
   overflow: hidden !important;
+  order: 2;
 }
 
 /* Hide minimap on mobile */
@@ -211,10 +207,100 @@
   overflow: hidden !important;
 }
 
-/* Remove padding from bottom-right control container */
+/* Bottom-right controls: attribution above minimap */
 :host ::ng-deep .maplibregl-ctrl-bottom-right {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
   padding: 0 !important;
   margin: 0 !important;
+}
+
+:host ::ng-deep .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib {
+  order: 1;
+  margin: 0 0 4px 0 !important;
+}
+
+.layer-switcher-host {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1001;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.layer-switcher {
+  background-color: var(--background-color);
+  border: 1px solid var(--light-primary-color);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+  padding: 10px;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  /* top-left and bottom-right pointy; top-right and bottom-left rounded */
+  border-radius: 0 0.75rem 0 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .layer-switcher {
+    padding: 10px;
+  }
+}
+
+.layer-switcher-segments {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.layer-switcher-btn-wrap {
+  display: inline-flex;
+}
+
+.layer-switcher-btn {
+  border: none;
+  background: transparent;
+  color: var(--primary-color);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.layer-switcher-btn--active {
+  background-color: var(--primary-color);
+  color: var(--background-color);
+  border: 1px solid var(--background-color);
+  border-radius: 9999px;
+}
+
+.layer-switcher-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.layer-switcher-reset {
+  background: transparent;
+  border: none;
+  color: var(--primary-color);
+  font-size: 11px;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.layer-switcher-reset:hover {
+  opacity: 0.8;
 }
 
 /* Legend styling - responsive positioning */

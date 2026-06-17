@@ -5,8 +5,9 @@ import Compare from '@maplibre/maplibre-gl-compare';
 import { MapService } from '../../services/map.service';
 import MinimapControl from "maplibregl-minimap";
 import { SharedModule } from '../../shared/shared.module';
-import { FilterConfigService } from '../../services/filter-config.service';
+import { AdminLevel, FilterConfigService } from '../../services/filter-config.service';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.component';
 import { LegendInfoComponent } from '../../shared/legend-info/legend-info.component';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -21,6 +22,11 @@ interface NominatimResult {
   lat: string;
   lon: string;
   boundingbox?: string[];
+}
+
+interface LayerButtonOption {
+  value: AdminLevel;
+  labelKey: string;
 }
 
 @Component({
@@ -68,6 +74,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private translate = inject(TranslateService);
   private searchService = inject(SearchService);
   private settingsService = inject(SettingsService);
+  private snackBar = inject(MatSnackBar);
   private popup?: Popup;
   private rightPopup?: Popup;
   private contextMenuPopup?: Popup;
@@ -87,8 +94,20 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private searchSubject = new Subject<string>();
   isGettingLocation: boolean = false;
   showLegendClickHint: boolean = true;
+  private lastLayerFallbackToastAt = 0;
+  readonly layerButtonOptions: LayerButtonOption[] = [
+    { value: 'state', labelKey: 'map.layerSwitcher.state' },
+    { value: 'county', labelKey: 'map.layerSwitcher.county' },
+    { value: 'municipality', labelKey: 'map.layerSwitcher.municipality' },
+    { value: 'hexagon', labelKey: 'map.layerSwitcher.hexagon' }
+  ];
 
   constructor(private mapService: MapService) {
+    effect(() => {
+      const loading = this.mapService.isMapLoading();
+      queueMicrotask(() => this.syncMapInteractionsForLoading(loading));
+    });
+
     effect(() => {
       const compareMode = this.filterConfigService.isMapCompareMode();
       // Re-run when pending compare resolves so maps init after panel collapse.
@@ -153,6 +172,14 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.selectedBewertung() === 'qualitaet';
   }
 
+  get layerMode() {
+    return this.filterConfigService.layerMode;
+  }
+
+  get effectiveAdminLevel() {
+    return this.filterConfigService.effectiveAdminLevel;
+  }
+
 
   // Quality (index) colors - A through F
   qualityColors: Array<{ letter: QualityBracket; color: string }> = [
@@ -209,6 +236,36 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.timeBracketDisplayLabels[bracket];
   }
 
+  isLayerAvailable(level: AdminLevel): boolean {
+    return this.filterConfigService.availableAdminLevels().includes(level);
+  }
+
+  getLayerDisabledHint(level: AdminLevel): string {
+    const hintKey = this.filterConfigService.getAdminLevelDisabledHintKey(level);
+    if (!hintKey) {
+      return '';
+    }
+
+    if (hintKey === 'map.layerSwitcher.disabledZoom') {
+      return this.translate.instant(hintKey, { zoom: 8 });
+    }
+
+    return this.translate.instant(hintKey);
+  }
+
+  isLayerActive(level: AdminLevel): boolean {
+    return this.effectiveAdminLevel() === level;
+  }
+
+  onLayerButtonClick(level: AdminLevel): void {
+    this.filterConfigService.selectLayerFromUi(level);
+  }
+
+  resetLayerModeToAuto(event?: Event): void {
+    event?.preventDefault();
+    this.filterConfigService.setLayerModeAuto();
+  }
+
   getIndexName(index: number): string {
     if (index <= 0) return this.translate.instant('map.popup.error');
     if (index < 0.28) return "A+";
@@ -250,15 +307,9 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     // Get initial style value immediately
     this.mapStyle = await firstValueFrom(this.mapService.mapStyle$);
 
-    // Subscribe to map style changes
+    // Subscribe to map style changes (used for initial map options only).
     this.mapStyleSubscription = this.mapService.mapStyle$.subscribe(style => {
       this.mapStyle = style;
-      if (this.map && !this.filterConfigService.isMapCompareMode()) {
-        this.map.setStyle(style);
-        this.map.once('style.load', () => {
-          this.setupMapInteractions(this.map!);
-        });
-      }
     });
 
     // Track if a feature is currently selected and update selection border
@@ -392,14 +443,40 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     targetMap.addControl(new FullscreenControl(), 'top-right');
     targetMap.dragRotate.disable();
     targetMap.touchZoomRotate.disableRotation();
-    targetMap.addControl(
-      new AttributionControl({ customAttribution: 'Hintergrundkarte: © OpenStreetMap, CARTO', compact: true }),
-      'bottom-right'
-    );
 
     if (includeMinimap) {
       targetMap.addControl(new MinimapControl(this.mapService.getMinimapConfig()), 'bottom-right');
     }
+
+    targetMap.addControl(
+      new AttributionControl({ customAttribution: 'Hintergrundkarte: © OpenStreetMap, CARTO', compact: true }),
+      'bottom-right'
+    );
+  }
+
+  private bindLayerZoomSync(targetMap: Map): void {
+    const syncZoom = () => {
+      const fallbackTriggered = this.filterConfigService.setCurrentMapZoom(targetMap.getZoom());
+      if (!fallbackTriggered) {
+        return;
+      }
+      const now = Date.now();
+      if (now - this.lastLayerFallbackToastAt < 500) {
+        return;
+      }
+      this.lastLayerFallbackToastAt = now;
+      this.snackBar.open(this.translate.instant('map.layerSwitcher.layerNoLongerAvailable'), undefined, {
+        duration: 2000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top'
+      });
+    };
+
+    if (targetMap.loaded()) {
+      syncZoom();
+    }
+    targetMap.on('load', syncZoom);
+    targetMap.on('zoomend', syncZoom);
   }
 
   private expandAttributionButton(targetMap: Map): void {
@@ -455,6 +532,18 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     this.mapService.setMap(this.map);
     this.popup = this.createPopup();
     this.configureMapControls(this.map, true);
+    this.bindLayerZoomSync(this.map);
+
+    this.syncMapInteractionsForLoading(this.mapService.isMapLoading());
+
+    this.map.on('style.load', () => {
+      if (!this.map || this.filterConfigService.isMapCompareMode()) {
+        return;
+      }
+      this.setupMapInteractions(this.map);
+      this.expandAttributionButton(this.map);
+      queueMicrotask(() => this.tryClearMapLoading());
+    });
 
     this.map.once('load', () => {
       if (!this.map) {
@@ -462,7 +551,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       this.setupMapInteractions(this.map);
       this.expandAttributionButton(this.map);
-      this.mapService.setMapLoading(false);
     });
   }
 
@@ -499,6 +587,10 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     this.rightPopup = this.createPopup();
     this.configureMapControls(this.beforeMap, false);
     this.configureMapControls(this.afterMap, false);
+    this.bindLayerZoomSync(this.beforeMap);
+    this.bindLayerZoomSync(this.afterMap);
+
+    this.syncMapInteractionsForLoading(this.mapService.isMapLoading());
 
     this.mapCompare = new Compare(
       this.beforeMap,
@@ -511,6 +603,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.beforeMap) {
         this.setupMapInteractions(this.beforeMap);
         this.expandAttributionButton(this.beforeMap);
+        queueMicrotask(() => this.tryClearMapLoading());
       }
     });
 
@@ -518,6 +611,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.afterMap) {
         this.setupMapInteractions(this.afterMap);
         this.expandAttributionButton(this.afterMap);
+        queueMicrotask(() => this.tryClearMapLoading());
       }
     });
 
@@ -1084,9 +1178,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     };
     const idle = () => {
-      if (this.mapService.isMapLoading()) {
-        this.mapService.setMapLoading(false);
-      }
+      this.tryClearMapLoading();
     };
     const error = () => {
       this.mapService.setMapLoading(false);
@@ -1096,6 +1188,64 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     map.on('idle', idle);
     map.on('error', error);
     this.tileLoadingHandlers.set(map, { dataloading, idle, error });
+  }
+
+  private shouldClearMapLoading(): boolean {
+    const maps = this.getActiveMaps();
+    if (maps.length === 0) {
+      return false;
+    }
+
+    let contentLayerPresent = false;
+    for (const targetMap of maps) {
+      const style = targetMap.getStyle();
+      if (!style?.sources || !('content-layer' in style.sources)) {
+        continue;
+      }
+      contentLayerPresent = true;
+      if (!targetMap.isSourceLoaded('content-layer')) {
+        return false;
+      }
+    }
+
+    return contentLayerPresent;
+  }
+
+  private tryClearMapLoading(): void {
+    if (!this.shouldClearMapLoading()) {
+      return;
+    }
+    this.mapService.setMapLoading(false);
+  }
+
+  private syncMapInteractionsForLoading(loading: boolean): void {
+    for (const targetMap of this.getActiveMaps()) {
+      const handlers = [
+        targetMap.dragPan,
+        targetMap.scrollZoom,
+        targetMap.doubleClickZoom,
+        targetMap.boxZoom,
+        targetMap.keyboard,
+        targetMap.touchZoomRotate,
+      ];
+
+      for (const handler of handlers) {
+        if (loading) {
+          handler.disable();
+        } else {
+          handler.enable();
+        }
+      }
+
+      if (!loading) {
+        targetMap.dragRotate.disable();
+        targetMap.touchZoomRotate.disableRotation();
+      }
+    }
+
+    if (this.compareContainer?.nativeElement) {
+      this.compareContainer.nativeElement.style.pointerEvents = loading ? 'none' : '';
+    }
   }
 
   private setupDragOpacityHandlers(targetMap: Map): void {
