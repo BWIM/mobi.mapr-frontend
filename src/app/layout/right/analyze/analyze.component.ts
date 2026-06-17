@@ -15,7 +15,6 @@ import { AllCategoriesDialogComponent, AllCategoriesDialogData } from './overlay
 import { PlacesDialogComponent, PlacesDialogData } from './places/places-dialog.component';
 import { PersonasDialogComponent, PersonasDialogData } from './overlay/personas-dialog.component';
 import { Map as MapLibreMap, NavigationControl, FullscreenControl, Popup, GeoJSONSource } from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MobileUiService } from '../../../services/mobile-ui.service';
 
