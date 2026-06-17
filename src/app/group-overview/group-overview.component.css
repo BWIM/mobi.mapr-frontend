@@ -1,0 +1,7 @@
+button.selected {
+  background-color: var(--secondary-color);
+}
+
+button:not(.selected):hover {
+  transform: translateY(-2px);
+}

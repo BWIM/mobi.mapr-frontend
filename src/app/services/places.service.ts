@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { DashboardSessionService } from './dashboard-session.service';
+import { appendProjectAccessParams, hasProjectAccess } from './project-access-params';
 import { SessionService } from './session.service';
 
 export interface PlacesParams {
@@ -49,10 +50,7 @@ export class PlacesService {
    * Gets places for a feature from the API
    */
   getPlaces(params: PlacesParams): Observable<PlacesResponse> {
-    const projectId = this.dashboardSessionService.getProjectId();
-    const shareKey = this.dashboardSessionService.getShareKey();
-    
-    if (!projectId && !shareKey) {
+    if (!hasProjectAccess(this.dashboardSessionService)) {
       throw new Error('Project ID or share key is required');
     }
 
@@ -63,12 +61,7 @@ export class PlacesService {
       .set('profile_ids', params.profile_ids.join(','))
       .set('lang', this.sessionService.getCurrentLanguage());
 
-    // Add project or key
-    if (projectId) {
-      httpParams = httpParams.set('project', projectId.toString());
-    } else if (shareKey) {
-      httpParams = httpParams.set('key', shareKey);
-    }
+    httpParams = appendProjectAccessParams(httpParams, this.dashboardSessionService);
 
     if (params.category_ids && params.category_ids.length > 0) {
       httpParams = httpParams.set('category_ids', params.category_ids.join(','));
@@ -136,10 +129,7 @@ export class PlacesService {
     feature_type: 'municipality' | 'hexagon' | 'county' | 'state';
     feature_id: number;
   }): Observable<any> {
-    const projectId = this.dashboardSessionService.getProjectId();
-    const shareKey = this.dashboardSessionService.getShareKey();
-    
-    if (!projectId && !shareKey) {
+    if (!hasProjectAccess(this.dashboardSessionService)) {
       throw new Error('Project ID or share key is required');
     }
 
@@ -148,12 +138,7 @@ export class PlacesService {
       .set('feature_type', params.feature_type)
       .set('feature_id', params.feature_id.toString());
 
-    // Add project or key
-    if (projectId) {
-      httpParams = httpParams.set('project', projectId.toString());
-    } else if (shareKey) {
-      httpParams = httpParams.set('key', shareKey);
-    }
+    httpParams = appendProjectAccessParams(httpParams, this.dashboardSessionService);
 
     return this.http.get<any>(url, { params: httpParams });
   }

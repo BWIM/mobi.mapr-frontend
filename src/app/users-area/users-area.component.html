@@ -1,48 +1,107 @@
 <div class="min-h-screen bg-[var(--background-color)] p-8">
   <div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold text-[var(--primary-color)] mb-6">Meine Projekte</h1>
+    <h1 class="text-3xl font-bold text-[var(--primary-color)] mb-6">
+      {{ 'usersArea.title' | translate }}
+    </h1>
 
     @if (loading()) {
       <div class="flex justify-center items-center py-12">
         <mat-spinner diameter="50"></mat-spinner>
       </div>
-    } @else if (error()) {
+    } @else if (error(); as errorKey) {
       <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-        {{ error() }}
+        {{ errorKey | translate }}
       </div>
     } @else if (projects().length === 0) {
       <div class="text-center py-12">
-        <p class="text-lg text-[var(--primary-color)]">Keine Projekte gefunden.</p>
+        <p class="text-lg text-[var(--primary-color)]">{{ 'usersArea.empty' | translate }}</p>
       </div>
     } @else {
-      <div class="grid grid-cols-1 gap-4">
-        @for (project of projects(); track project.id) {
-          <button
-            (click)="selectProject(project)"
-            [class.selected]="isProjectSelected(project.id)"
-            [style.border-color]="isProjectSelected(project.id) ? 'var(--primary-color)' : 'transparent'"
-            class="w-full text-left p-6 bg-[var(--secondary-color)] rounded-lg border-2 transition-all duration-200 hover:shadow-lg">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <h3 class="text-xl font-semibold text-[var(--primary-color)] mb-2">
-                  {{ project.display_name }}
-                </h3>
-                @if (project.description) {
-                  <p class="text-sm text-[var(--primary-color)] opacity-80 mb-2">
-                    {{ project.description }}
-                  </p>
-                }
-                <div class="flex gap-4 text-xs text-[var(--primary-color)] opacity-60">
-                  <span>Status: {{ project.status }}</span>
+      @if (pinnedProjects().length > 0) {
+        <div class="mb-6">
+          <h2 class="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-[var(--light-primary-color)]">
+            <mat-icon class="!text-base">push_pin</mat-icon>
+            {{ 'usersArea.pinned' | translate }}
+          </h2>
+          <div class="grid grid-cols-1 gap-3">
+            @for (project of pinnedProjects(); track project.id) {
+              <ng-container *ngTemplateOutlet="projectCard; context: { $implicit: project, pinned: true }" />
+            }
+          </div>
+        </div>
+      }
+
+      @if (!hasGroupedSections()) {
+        <div class="grid grid-cols-1 gap-4">
+          @for (project of flatProjects(); track project.id) {
+            @if (!project.pin) {
+              <ng-container *ngTemplateOutlet="projectCard; context: { $implicit: project, pinned: false }" />
+            }
+          }
+        </div>
+      } @else {
+        <div class="flex flex-col gap-4">
+          @for (section of sections(); track sectionKey(section)) {
+            <div class="rounded-lg bg-[var(--secondary-color)] overflow-hidden">
+              <button
+                type="button"
+                class="flex w-full items-center justify-between gap-3 px-5 py-4 text-left text-[var(--primary-color)] transition-colors hover:bg-white/5"
+                (click)="toggleSection(section)"
+                [attr.aria-expanded]="isSectionExpanded(section)">
+                <span class="flex min-w-0 flex-1 items-center gap-2">
+                  <mat-icon class="shrink-0 opacity-80">
+                    {{ isSectionExpanded(section) ? 'expand_less' : 'expand_more' }}
+                  </mat-icon>
+                  <span class="truncate text-lg font-semibold">
+                    @if (section.id === null) {
+                      {{ 'usersArea.ungrouped' | translate }}
+                    } @else {
+                      {{ section.displayName }}
+                    }
+                  </span>
+                  <span class="shrink-0 text-sm opacity-60">({{ section.projects.length }})</span>
+                </span>
+              </button>
+
+              @if (isSectionExpanded(section)) {
+                <div class="grid grid-cols-1 gap-3 px-3 pb-3">
+                  @for (project of section.projects; track project.id) {
+                    <ng-container
+                      *ngTemplateOutlet="projectCard; context: { $implicit: project, pinned: false }" />
+                  }
                 </div>
-              </div>
-              @if (isProjectSelected(project.id)) {
-                <mat-icon class="text-[var(--primary-color)] ml-4">check_circle</mat-icon>
               }
             </div>
-          </button>
-        }
-      </div>
+          }
+        </div>
+      }
     }
   </div>
 </div>
+
+<ng-template #projectCard let-project let-pinned="pinned">
+  <button
+    type="button"
+    (click)="selectProject(project)"
+    [class.selected]="isProjectSelected(project.id)"
+    [style.border-color]="isProjectSelected(project.id) || pinned ? 'var(--primary-color)' : 'transparent'"
+    class="w-full text-left rounded-lg border-2 bg-[var(--background-color)] p-5 transition-all duration-200 hover:shadow-lg">
+    <div class="flex items-start justify-between gap-3">
+      <div class="min-w-0 flex-1">
+        <div class="mb-2 flex items-start gap-2">
+          <h3 class="text-xl font-semibold text-[var(--primary-color)] break-words [overflow-wrap:anywhere]">
+            {{ project.display_name }}
+          </h3>
+        </div>
+        @if (project.description) {
+          <p class="mb-2 text-sm text-[var(--primary-color)] opacity-80 break-words [overflow-wrap:anywhere]">
+            {{ project.description }}
+          </p>
+        }
+      </div>
+      @if (isProjectSelected(project.id)) {
+        <mat-icon class="ml-2 shrink-0 text-[var(--primary-color)]">check_circle</mat-icon>
+      }
+    </div>
+  </button>
+</ng-template>

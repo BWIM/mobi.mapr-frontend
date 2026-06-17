@@ -4,6 +4,7 @@ import { Map, StyleSpecification, SourceSpecification, LayerSpecification, LngLa
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { DashboardSessionService } from './dashboard-session.service';
+import { appendProjectAccessParams, hasProjectAccess } from './project-access-params';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { WebsocketService } from './websocket.service';
 import { ProjectsService } from './project.service';
@@ -264,10 +265,7 @@ export class MapService {
    * Calls the ready endpoint to check and ensure preloaded data
    */
   async checkReady(filters: ContentLayerFilters): Promise<{ cache_flag: boolean; was_preloaded: boolean; session_id?: string }> {
-    const projectId = this.dashboardSessionService.getProjectId();
-    const shareKey = this.dashboardSessionService.getShareKey();
-
-    if (!projectId && !shareKey) {
+    if (!hasProjectAccess(this.dashboardSessionService)) {
       throw new Error('Project ID or share key is required');
     }
 
@@ -278,12 +276,7 @@ export class MapService {
     let params = new HttpParams()
       .set('profile_ids', filters.profile_ids.join(','));
 
-    // Add project or key
-    if (projectId) {
-      params = params.set('project', projectId);
-    } else if (shareKey) {
-      params = params.set('key', shareKey);
-    }
+    params = appendProjectAccessParams(params, this.dashboardSessionService);
 
     // Add optional parameters
     if (filters.category_ids && filters.category_ids.length > 0) {
@@ -472,10 +465,9 @@ export class MapService {
     try {
       let params = new HttpParams();
 
-      // Add share key only (for unauthenticated access)
+      // Add share key if available (for unauthenticated access)
       const shareKey = this.dashboardSessionService.getShareKey();
       if (shareKey) {
-
         params = params.set('key', shareKey);
         const url = `${environment.apiUrl}/geo`;
         const response = await firstValueFrom(
@@ -707,21 +699,15 @@ export class MapService {
   }
 
   private buildTileUrlForFilters(filters: ContentLayerFilters): string | null {
-    let projectId = this.dashboardSessionService.getProjectId();
-    const shareKey = this.dashboardSessionService.getShareKey();
+    const effectiveId = this.dashboardSessionService.getEffectiveProjectId()
+      ?? this.projectService.getProject()?.id?.toString()
+      ?? null;
 
-    if (!projectId && shareKey) {
-      const project = this.projectService.getProject();
-      if (project) {
-        projectId = project.id.toString();
-      }
-    }
-
-    if (!projectId || !filters.profile_ids?.length) {
+    if (!effectiveId || !filters.profile_ids?.length) {
       return null;
     }
 
-    return this.buildTileUrl(projectId, filters);
+    return this.buildTileUrl(effectiveId, filters);
   }
 
   /**
@@ -1023,10 +1009,7 @@ export class MapService {
    * Gets feature information from the API
    */
   getFeatureInfo(params: FeatureInfoParams): Observable<FeatureInfoResponse> {
-    const projectId = this.dashboardSessionService.getProjectId();
-    const shareKey = this.dashboardSessionService.getShareKey();
-    
-    if (!projectId && !shareKey) {
+    if (!hasProjectAccess(this.dashboardSessionService)) {
       throw new Error('Project ID or share key is required');
     }
 
@@ -1036,12 +1019,7 @@ export class MapService {
       .set('feature_id', params.feature_id.toString())
       .set('profile_ids', params.profile_ids.join(','));
 
-    // Add project or key
-    if (projectId) {
-      httpParams = httpParams.set('project', projectId.toString());
-    } else if (shareKey) {
-      httpParams = httpParams.set('key', shareKey);
-    }
+    httpParams = appendProjectAccessParams(httpParams, this.dashboardSessionService);
 
     // Add optional filter parameters
     if (params.category_ids && params.category_ids.length > 0) {
@@ -1068,10 +1046,7 @@ export class MapService {
    * Does not poll or download in the browser — the user receives the file via email.
    */
   async exportMapData(params: MapExportParams): Promise<MapExportResult> {
-    const projectId = this.dashboardSessionService.getProjectId();
-    const shareKey = this.dashboardSessionService.getShareKey();
-
-    if (!projectId && !shareKey) {
+    if (!hasProjectAccess(this.dashboardSessionService)) {
       throw new Error('Project ID or share key is required');
     }
 
@@ -1087,11 +1062,7 @@ export class MapService {
       .set('profile_ids', params.profile_ids.join(','))
       .set('email', trimmedEmail);
 
-    if (projectId) {
-      httpParams = httpParams.set('project', projectId.toString());
-    } else {
-      httpParams = httpParams.set('key', shareKey!);
-    }
+    httpParams = appendProjectAccessParams(httpParams, this.dashboardSessionService);
 
     if (params.include_population === true) {
       httpParams = httpParams.set('include_population', 'true');

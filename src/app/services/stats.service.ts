@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { DashboardSessionService } from './dashboard-session.service';
+import { appendProjectAccessParams, hasProjectAccess } from './project-access-params';
 import { County, Municipality, State } from '../interfaces/features';
 
 export interface RankingsResponse {
@@ -39,27 +40,17 @@ export class StatsService {
    * Get the top 10 municipalities, counties, or states for a project
    */
   getTopRankings(params: TopRankingsParams): Observable<(County | Municipality | State)[]> {
-    const projectId = this.dashboardSessionService.getProjectId();
-    const shareKey = this.dashboardSessionService.getShareKey();
-    
-    if (!projectId && !shareKey) {
+    if (!hasProjectAccess(this.dashboardSessionService)) {
       throw new Error('Project ID or share key is required');
     }
 
-    // Build the URL
     const url = `${this.apiUrl}/rankings/`;
 
-    // Build query parameters
     let httpParams = new HttpParams()
       .set('type', params.type)
       .set('profile_ids', params.profile_ids.join(','));
 
-    // Add project or key
-    if (projectId) {
-      httpParams = httpParams.set('project', projectId.toString());
-    } else if (shareKey) {
-      httpParams = httpParams.set('key', shareKey);
-    }
+    httpParams = appendProjectAccessParams(httpParams, this.dashboardSessionService);
 
     // Add optional filter parameters
     if (params.category_ids && params.category_ids.length > 0) {

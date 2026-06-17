@@ -82,7 +82,7 @@ export class DashboardSessionService {
    */
   setShareKey(shareKey: string | null): void {
     this._shareKey.set(shareKey);
-    // Clear project_id when setting share_key
+    // Clear auth project_id when setting share_key
     if (shareKey) {
       this._projectId.set(null);
     }
@@ -97,7 +97,7 @@ export class DashboardSessionService {
   }
 
   /**
-   * Get the current project ID value
+   * Get the current project ID value (authenticated users)
    */
   getProjectId(): string | null {
     return this._projectId();
@@ -108,6 +108,13 @@ export class DashboardSessionService {
    */
   getShareKey(): string | null {
     return this._shareKey();
+  }
+
+  /**
+   * Get the effective project ID for API calls (authenticated users only)
+   */
+  getEffectiveProjectId(): string | null {
+    return this._projectId();
   }
 
   /**

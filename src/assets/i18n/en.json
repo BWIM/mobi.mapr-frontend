@@ -460,7 +460,7 @@
       "state": "State"
     },
     "activeFilters": {
-      "title": "Current Filters",
+      "title": "Project Settings",
       "description": "This overview shows the currently active filters and their count. The numbers show how many filters are selected in each category.",
       "introduction": "Filters allow you to customize the analysis by selecting specific activities, personas, regions, and regional types. Use the filter button to adjust these settings.",
       "adjustFilters": "Adjust Filters",
@@ -624,6 +624,7 @@
   },
   "rail": {
     "manageProjects": "Manage Projects",
+    "groupOverview": "Group projects overview",
     "logoHint": "To the project page",
     "mail": {
       "title": "About mobi.mapr",
@@ -886,5 +887,25 @@
       "STATS_TITLE": "More than 15 billion possibilities",
       "STATS_TEXT": "You can combine the 28 activities freely, for 8 different mode combinations and 7 personas, this means more than 15 billion different maps to produce."
     }
+  },
+  "usersArea": {
+    "title": "My Projects",
+    "empty": "No projects found.",
+    "loadError": "Error loading projects.",
+    "ungrouped": "Individual projects",
+    "pinned": "Pinned",
+    "status": "Status"
+  },
+  "groupOverview": {
+    "title": "Projects in {{groupName}}",
+    "empty": "No projects in this group.",
+    "back": "Back to map",
+    "loadError": "Error loading group projects.",
+    "switchHint": "Tip: Switch between projects anytime by clicking the project name, or open this overview via the group icon in the left rail.",
+    "switchHintMobile": "Tip: Switch between projects anytime by tapping the project name at the bottom of the screen."
+  },
+  "projectSwitcher": {
+    "label": "Switch project in group",
+    "menuTitle": "Project group"
   }
 }

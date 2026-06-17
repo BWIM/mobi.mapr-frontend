@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { DashboardSessionService } from './dashboard-session.service';
+import { appendProjectAccessParams, hasProjectAccess } from './project-access-params';
 import { AuthService } from '../auth/auth.service';
 import { SessionService } from './session.service';
 
@@ -61,10 +62,7 @@ export class AnalyzeService {
    * Gets the top 5 activities (categories) for a feature from the API
    */
   getAnalyze(params: AnalyzeParams): Observable<AnalyzeResponse> {
-    const projectId = this.dashboardSessionService.getProjectId();
-    const shareKey = this.dashboardSessionService.getShareKey();
-    
-    if (!projectId && !shareKey) {
+    if (!hasProjectAccess(this.dashboardSessionService)) {
       throw new Error('Project ID or share key is required');
     }
 
@@ -76,12 +74,7 @@ export class AnalyzeService {
       .set('top5', params.top5 !== false ? 'true' : 'false')
       .set('lang', this.sessionService.getCurrentLanguage());
 
-    // Add project or key
-    if (projectId) {
-      httpParams = httpParams.set('project', projectId.toString());
-    } else if (shareKey) {
-      httpParams = httpParams.set('key', shareKey);
-    }
+    httpParams = appendProjectAccessParams(httpParams, this.dashboardSessionService);
 
     // Add optional filter parameters
     if (params.category_ids && params.category_ids.length > 0) {
@@ -99,10 +92,7 @@ export class AnalyzeService {
    * Gets persona breakdown for persona 54 (all personas) from the API
    */
   getPersonas(params: PersonaBreakdownParams): Observable<PersonaBreakdown[]> {
-    const projectId = this.dashboardSessionService.getProjectId();
-    const shareKey = this.dashboardSessionService.getShareKey();
-    
-    if (!projectId && !shareKey) {
+    if (!hasProjectAccess(this.dashboardSessionService)) {
       throw new Error('Project ID or share key is required');
     }
 
@@ -114,12 +104,7 @@ export class AnalyzeService {
       .set('persona_id', (params.persona_id ?? 54).toString())
       .set('lang', params.lang || this.sessionService.getCurrentLanguage());
 
-    // Add project or key
-    if (projectId) {
-      httpParams = httpParams.set('project', projectId.toString());
-    } else if (shareKey) {
-      httpParams = httpParams.set('key', shareKey);
-    }
+    httpParams = appendProjectAccessParams(httpParams, this.dashboardSessionService);
 
     // Add optional filter parameters
     if (params.category_ids && params.category_ids.length > 0) {

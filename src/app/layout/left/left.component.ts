@@ -12,10 +12,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ChartModule } from 'primeng/chart';
 import { Subscription } from 'rxjs';
+import { ProjectSwitcherComponent } from '../../shared/project-switcher/project-switcher.component';
 
 @Component({
   selector: 'app-left',
-  imports: [SharedModule, InfoOverlayComponent, TranslateModule, ChartModule],
+  imports: [SharedModule, InfoOverlayComponent, TranslateModule, ChartModule, ProjectSwitcherComponent],
   templateUrl: './left.component.html',
   styleUrl: './left.component.css',
 })
