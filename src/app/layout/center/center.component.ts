@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, effect, ChangeDetectorRef } from '@angular/core';
 import { Subscription, firstValueFrom, debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { Map, MapDataEvent, NavigationControl, FullscreenControl, Popup, AttributionControl, LngLatLike } from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
 import Compare from '@maplibre/maplibre-gl-compare';
 import { MapService } from '../../services/map.service';
 import MinimapControl from "maplibregl-minimap";

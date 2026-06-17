@@ -3,7 +3,6 @@ import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dial
 import { SharedModule } from '../../../../shared/shared.module';
 import { CommonModule } from '@angular/common';
 import { Map as MapLibreMap, NavigationControl, FullscreenControl, Popup, GeoJSONSource } from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
 import { PlacesService, Place } from '../../../../services/places.service';
 import { MapService } from '../../../../services/map.service';
 import { firstValueFrom, catchError, of } from 'rxjs';
