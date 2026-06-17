@@ -221,6 +221,20 @@
       "loading": "Lade Kartendaten...",
       "clickForInfo": "Klicke für weitere Informationen"
     },
+    "layerSwitcher": {
+      "title": "Kartenebene",
+      "state": "Bundesland",
+      "county": "Landkreis",
+      "municipality": "Gemeinde",
+      "hexagon": "Hexagon",
+      "resetToAuto": "Zurück auf Auto",
+      "layerNoLongerAvailable": "Ebene nicht mehr verfügbar",
+      "disabledZoom": "Weiter in die Karte hineinzoomen (Zoomstufe {{zoom}} oder höher), um diese Ebene auszuwählen",
+      "disabledEnforceMunicipality": "Weiter hineinzoomen, bis die Landkreis-Ansicht aktiv ist, um die Gemeinde-Ansicht zu fixieren",
+      "disabledEnforceHexagon": "Weiter hineinzoomen, bis die Hexagon-Ansicht aktiv ist, um die Hexagon-Ansicht zu fixieren",
+      "disabledRegiostarFilter": "Diese Ebene ist bei RegioStar-Filter in der geteilten Ansicht nicht verfügbar",
+      "disabledGeneric": "Diese Ebene ist bei der aktuellen Zoomstufe nicht verfügbar"
+    },
     "popup": {
       "index": "Mobilitätsqualität:",
       "score": "Mobilitätszeit:",

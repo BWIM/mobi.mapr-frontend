@@ -221,6 +221,20 @@
       "loading": "Loading map data...",
       "clickForInfo": "Click for more information"
     },
+    "layerSwitcher": {
+      "title": "Map layer",
+      "state": "State",
+      "county": "County",
+      "municipality": "Municipality",
+      "hexagon": "Hexagon",
+      "resetToAuto": "Reset to auto",
+      "layerNoLongerAvailable": "Layer no longer available",
+      "disabledZoom": "Zoom in to level {{zoom}} or higher to select this layer",
+      "disabledEnforceMunicipality": "Zoom in until county view is active to lock municipality view",
+      "disabledEnforceHexagon": "Zoom in until hexagon view is active to lock hexagon view",
+      "disabledRegiostarFilter": "This layer is not available with a RegioStar filter in shared view",
+      "disabledGeneric": "This layer is not available at the current zoom level"
+    },
     "popup": {
       "index": "Mobility quality:",
       "score": "Mobility time:",

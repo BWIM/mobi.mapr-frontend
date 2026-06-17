@@ -710,10 +710,32 @@ export class MapService {
     return this.buildTileUrl(effectiveId, filters);
   }
 
+  private parseAdminLevelFromTileUrl(tileUrl?: string): ContentLayerFilters['admin_level'] | null {
+    if (!tileUrl) {
+      return null;
+    }
+    const match = tileUrl.match(/[?&]admin_level=([^&]+)/);
+    const value = match?.[1];
+    if (value === 'state' || value === 'county' || value === 'municipality' || value === 'hexagon') {
+      return value;
+    }
+    return null;
+  }
+
+  private getCurrentContentLayerTileUrl(targetMap: Map): string | null {
+    const source = targetMap.getSource('content-layer') as { tiles?: string[] } | undefined;
+    return source?.tiles?.[0] ?? null;
+  }
+
+  private syncContentLayerState(filters: ContentLayerFilters): void {
+    this._currentProfileIds.set([...filters.profile_ids]);
+    this.currentFilters = filters;
+  }
+
   /**
    * Updates the content layer in the map style based on filter parameters
    * @param filters - The filter parameters
-   * @param zoomToBounds - Whether to zoom to bounds (default: true)
+   * @param zoomToBounds - Whether to zoom to bounds (default: false)
    */
   async loadContentLayerOnMap(
     targetMap: Map,
@@ -737,11 +759,17 @@ export class MapService {
       await this.zoomToContentLayerBoundsForMap(targetMap, filters, allowGeolocation);
     }
 
+    this.syncContentLayerState(filters);
     const updatedStyle = this.buildStyleWithContentLayer(filters, this.getBaseMapStyle());
 
     await this.waitForMapStyleLoad(targetMap, () => {
       targetMap.setStyle(updatedStyle);
     });
+
+    if (targetMap === this.map) {
+      this.mapStyleSubject.next(updatedStyle);
+    }
+
     return true;
   }
 
@@ -781,14 +809,19 @@ export class MapService {
       return;
     }
 
-    const source = targetMap.getSource('content-layer') as { setTiles?: (tiles: string[]) => void } | undefined;
-    if (!source?.setTiles) {
+    const source = targetMap.getSource('content-layer') as { setTiles?: (tiles: string[]) => void; tiles?: string[] } | undefined;
+    const currentTileUrl = this.getCurrentContentLayerTileUrl(targetMap) ?? undefined;
+    const adminLevelChanged =
+      this.parseAdminLevelFromTileUrl(currentTileUrl) !== this.parseAdminLevelFromTileUrl(tileUrl);
+
+    if (!source?.setTiles || adminLevelChanged) {
       await this.loadContentLayerOnMap(targetMap, filters, false, false);
       return;
     }
 
     source.setTiles([tileUrl]);
     this.applyContentLayerStyleToMap(targetMap, filters);
+    this.syncContentLayerState(filters);
   }
 
   private applyContentLayerStyleToMap(targetMap: Map, filters: ContentLayerFilters): void {
@@ -817,7 +850,7 @@ export class MapService {
     }
   }
 
-  async loadContentLayer(filters: ContentLayerFilters, zoomToBounds: boolean = true): Promise<void> {
+  async loadContentLayer(filters: ContentLayerFilters, zoomToBounds: boolean = false): Promise<void> {
     if (!filters.profile_ids?.length) {
       console.warn('Cannot load content layer: profile_ids is required');
       this._currentProfileIds.set(null);
@@ -829,8 +862,12 @@ export class MapService {
       return;
     }
 
-    this._currentProfileIds.set([...filters.profile_ids]);
-    this.currentFilters = filters;
+    if (this.map) {
+      await this.loadContentLayerOnMap(this.map, filters, zoomToBounds, true);
+      return;
+    }
+
+    this.syncContentLayerState(filters);
 
     if (zoomToBounds && this.map) {
       await this.zoomToContentLayerBounds(filters);

@@ -29,6 +29,38 @@
       </mat-autocomplete>
     </mat-form-field>
   </div>
+
+  <div class="layer-switcher-host">
+    <div class="layer-switcher">
+      <div
+        class="layer-switcher-segments"
+        role="group"
+        [attr.aria-label]="'map.layerSwitcher.title' | translate">
+        @for (option of layerButtonOptions; track option.value) {
+          <span
+            class="layer-switcher-btn-wrap"
+            [matTooltip]="getLayerDisabledHint(option.value)"
+            [matTooltipDisabled]="isLayerAvailable(option.value)"
+            matTooltipPosition="below">
+            <button
+              type="button"
+              class="layer-switcher-btn"
+              [class.layer-switcher-btn--active]="isLayerActive(option.value)"
+              [disabled]="!isLayerAvailable(option.value)"
+              [attr.aria-pressed]="isLayerActive(option.value)"
+              (click)="onLayerButtonClick(option.value)">
+              <span>{{ option.labelKey | translate }}</span>
+              @if (isLayerActive(option.value) && layerMode() === 'manual') {
+                <span aria-hidden="true">🔒</span>
+              } @else if (isLayerActive(option.value) && layerMode() === 'auto') {
+                <span aria-hidden="true">✦</span>
+              }
+            </button>
+          </span>
+        }
+      </div>
+    </div>
+  </div>
   <!-- Loading indicator overlay -->
   <div class="map-loading-overlay" *ngIf="isMapLoading()">
     <div class="map-loading-content">

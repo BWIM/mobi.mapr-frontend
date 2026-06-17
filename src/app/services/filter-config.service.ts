@@ -46,9 +46,17 @@ export interface FilterState {
 
 export type QualityBracket = 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
 export type TimeBracket = '0-7' | '8-15' | '16-23' | '24-30' | '31-45' | '45+';
+export type AdminLevel = 'state' | 'county' | 'municipality' | 'hexagon';
+export type LayerMode = 'auto' | 'manual';
 
 const ALL_QUALITY_BRACKETS: QualityBracket[] = ['A', 'B', 'C', 'D', 'E', 'F'];
 const ALL_TIME_BRACKETS: TimeBracket[] = ['0-7', '8-15', '16-23', '24-30', '31-45', '45+'];
+const ADMIN_LEVEL_RANK: Record<AdminLevel, number> = {
+  state: 0,
+  county: 1,
+  municipality: 2,
+  hexagon: 3,
+};
 
 @Injectable({
   providedIn: 'root'
@@ -85,6 +93,9 @@ export class FilterConfigService {
   private _selectedRegioStars = signal<number[]>([]);
   private _selectedStates = signal<number[]>([]);
   private _selectedAdminLevel = signal<'state' | 'county' | 'municipality' | 'hexagon' | null>(null);
+  private _layerMode = signal<LayerMode>('auto');
+  private _currentMapZoom = signal<number>(7);
+  private _layerFallbackNoticeNonce = signal<number>(0);
   private _selectedQualityBrackets = signal<QualityBracket[]>([...ALL_QUALITY_BRACKETS]);
   private _selectedTimeBrackets = signal<TimeBracket[]>([...ALL_TIME_BRACKETS]);
   private _isMapCompareMode = signal<boolean>(false);
@@ -133,6 +144,9 @@ export class FilterConfigService {
   readonly selectedRegioStars = this._selectedRegioStars.asReadonly();
   readonly selectedStates = this._selectedStates.asReadonly();
   readonly selectedAdminLevel = this._selectedAdminLevel.asReadonly();
+  readonly layerMode = this._layerMode.asReadonly();
+  readonly currentMapZoom = this._currentMapZoom.asReadonly();
+  readonly layerFallbackNoticeNonce = this._layerFallbackNoticeNonce.asReadonly();
   readonly selectedQualityBrackets = this._selectedQualityBrackets.asReadonly();
   readonly selectedTimeBrackets = this._selectedTimeBrackets.asReadonly();
   readonly modeOptions = this._modeOptions.asReadonly();
@@ -183,6 +197,25 @@ export class FilterConfigService {
   // Computed signal to check if project is MID (replaces is_mid check)
   // A project is MID if category length != 1 (i.e., 0 or 2+ categories)
   readonly hasCategories = computed(() => this._allCategories().length !== 1);
+  readonly isShareKeyOnly = computed(() => this.dashboardSessionService.accessMethod() === 'share_key');
+  readonly isRegiostarFilterMode = computed(() => {
+    const all = this._allRegioStars();
+    const selected = this._selectedRegioStars();
+    return all.length > 0 && selected.length > 0 && selected.length < all.length;
+  });
+  readonly availableAdminLevels = computed<AdminLevel[]>(() => {
+    if (!this.isShareKeyOnly()) {
+      return ['state', 'county', 'municipality', 'hexagon'];
+    }
+
+    return this.getShareKeySelectableAdminLevels(this.getZoomForAdminLevel());
+  });
+  readonly effectiveAdminLevel = computed<AdminLevel>(() => {
+    if (this._layerMode() === 'manual' && this._selectedAdminLevel()) {
+      return this._selectedAdminLevel()!;
+    }
+    return this.determineDefaultAdminLevel(this.getZoomForAdminLevel(), this.isRegiostarFilterMode());
+  });
 
   // Grouped data for nested selects
   readonly groupedCategories = computed(() => {
@@ -263,7 +296,7 @@ export class FilterConfigService {
     const selectedActivities = this._selectedActivities();
     const selectedPersonas = this._selectedPersonas();
     const selectedRegioStars = this._selectedRegioStars();
-    const selectedAdminLevel = this._selectedAdminLevel();
+    const selectedAdminLevel = this.effectiveAdminLevel();
 
     return {
       profile_ids: profileIds,
@@ -272,7 +305,7 @@ export class FilterConfigService {
       category_ids: (hasCategories && selectedActivities.length > 0) ? selectedActivities : undefined,
       persona_id: (hasCategories && selectedPersonas !== null) ? selectedPersonas : undefined,
       regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined,
-      admin_level: selectedAdminLevel !== null ? selectedAdminLevel : undefined,
+      admin_level: selectedAdminLevel,
       selected_quality_brackets: [...this._selectedQualityBrackets()],
       selected_time_brackets: [...this._selectedTimeBrackets()]
     };
@@ -311,6 +344,8 @@ export class FilterConfigService {
 
   // Guard to prevent concurrent updateMapLayer calls
   private updateMapLayerInProgress = false;
+  /** Set when a single-map update was skipped; flushed after the in-flight update completes. */
+  private mapUpdateRetryNeeded = false;
   /** Set when a compare update was skipped; flushed after the in-flight update completes. */
   private compareUpdateRetryNeeded = false;
   private compareLayerSyncRetries = 0;
@@ -345,6 +380,7 @@ export class FilterConfigService {
 
           // "Automatic" admin level by default on project load.
           this._selectedAdminLevel.set(null);
+          this._layerMode.set('auto');
           this._selectedQualityBrackets.set([...ALL_QUALITY_BRACKETS]);
           this._selectedTimeBrackets.set([...ALL_TIME_BRACKETS]);
 
@@ -354,6 +390,7 @@ export class FilterConfigService {
           this.projectLoadGeneration++;
           this.updateMapLayerInProgress = false;
           this.compareUpdateRetryNeeded = false;
+          this.mapUpdateRetryNeeded = false;
 
           // Allow URL params to be re-applied when switching projects.
           this._urlParamsApplied.set(false);
@@ -390,6 +427,7 @@ export class FilterConfigService {
         this.projectLoadGeneration++;
         this.updateMapLayerInProgress = false;
         this.compareUpdateRetryNeeded = false;
+        this.mapUpdateRetryNeeded = false;
         this._compareMapsReady.set(false);
         // Reset URL params applied flag when project is cleared
         this._urlParamsApplied.set(false);
@@ -403,6 +441,15 @@ export class FilterConfigService {
     effect(() => {
       this.dashboardSessionService.accessMethod();
       this.tryEnableCompareFromUrl();
+    });
+
+    effect(() => {
+      this.dashboardSessionService.accessMethod();
+      this._currentMapZoom();
+      this._layerMode();
+      this._selectedRegioStars();
+      this._allRegioStars();
+      this.syncLayerForZoomInternal({ emitFallbackNotice: false, persist: false });
     });
 
     // React to filter changes and update map
@@ -424,6 +471,10 @@ export class FilterConfigService {
         filterDataProjectId === currentProjectId;
       const compareMapsReady = this._compareMapsReady();
       this._mapLayerRefreshNonce();
+      this.effectiveAdminLevel();
+      this._currentMapZoom();
+      this._layerMode();
+      this._selectedAdminLevel();
 
       if (compareMode) {
         // Explicitly track mode selections so side-specific updates always re-run.
@@ -467,10 +518,12 @@ export class FilterConfigService {
         const leftChanged = compareInitialLoad || this.filtersDiffer(previousLeftFilters, filters);
         const rightChanged = compareInitialLoad || this.filtersDiffer(previousRightFilters, rightFilters);
         const leftFullReload = leftChanged && (
-          compareInitialLoad || this.requiresFullReload(previousLeftFilters, filters)
+          compareInitialLoad ||
+          (previousLeftFilters?.admin_level !== filters.admin_level)
         );
         const rightFullReload = rightChanged && (
-          compareInitialLoad || this.requiresFullReload(previousRightFilters, rightFilters)
+          compareInitialLoad ||
+          (previousRightFilters?.admin_level !== rightFilters.admin_level)
         );
         const onlyLeftChanged = leftChanged && !rightChanged;
         const onlyRightChanged = rightChanged && !leftChanged;
@@ -531,42 +584,33 @@ export class FilterConfigService {
           return;
         }
         if (this.updateMapLayerInProgress) {
+          this.mapUpdateRetryNeeded = true;
           return;
         }
 
-        const isFullReload = isInitialLoad || this.requiresFullReload(previousFilters, filters);
+        const adminLevelChanged =
+          previousFilters !== null && previousFilters.admin_level !== filters.admin_level;
+        const isFullReload = isInitialLoad || adminLevelChanged;
+        const wasInitialLoad = isInitialLoad;
 
-        const onlyModeChanged = previousFilters &&
-          JSON.stringify([...previousFilters.profile_ids].sort((a, b) => a - b)) !== JSON.stringify([...filters.profile_ids].sort((a, b) => a - b)) &&
-          JSON.stringify(previousFilters.state_ids?.sort()) === JSON.stringify(filters.state_ids?.sort()) &&
-          JSON.stringify(previousFilters.category_ids?.sort()) === JSON.stringify(filters.category_ids?.sort()) &&
-          previousFilters.persona_id === filters.persona_id &&
-          JSON.stringify(previousFilters.regiostar_ids?.sort()) === JSON.stringify(filters.regiostar_ids?.sort()) &&
-          previousFilters.admin_level === filters.admin_level &&
-          previousFilters.feature_type === filters.feature_type;
-
-        const onlyPersonaChanged = previousFilters &&
-          previousFilters.persona_id !== filters.persona_id &&
-          JSON.stringify([...previousFilters.profile_ids].sort((a, b) => a - b)) === JSON.stringify([...filters.profile_ids].sort((a, b) => a - b)) &&
-          JSON.stringify(previousFilters.state_ids?.sort()) === JSON.stringify(filters.state_ids?.sort()) &&
-          JSON.stringify(previousFilters.category_ids?.sort()) === JSON.stringify(filters.category_ids?.sort()) &&
-          JSON.stringify(previousFilters.regiostar_ids?.sort()) === JSON.stringify(filters.regiostar_ids?.sort()) &&
-          previousFilters.admin_level === filters.admin_level &&
-          previousFilters.feature_type === filters.feature_type;
-
-        if (isFullReload) {
-          const shouldZoomToBounds = !(this.isMobile() && (onlyModeChanged || onlyPersonaChanged));
-          this.updateMapLayer(filters, true, shouldZoomToBounds).catch(error => {
+        void this.updateMapLayer(filters, isFullReload, false).then(applied => {
+          if (!applied) {
+            return;
+          }
+          const latestFilters = this.contentLayerFilters();
+          if (latestFilters) {
+            previousFilters = this.cloneContentLayerFilters(latestFilters);
+          }
+          if (wasInitialLoad) {
+            isInitialLoad = false;
+          }
+        }).catch(error => {
+          if (isFullReload) {
             console.error('Error in updateMapLayer (full reload):', error);
-          });
-        } else {
-          this.updateMapLayer(filters, false, false).catch(error => {
+          } else {
             console.error('Error in updateMapLayer (tile update):', error);
-          });
-        }
-
-        previousFilters = { ...filters };
-        isInitialLoad = false;
+          }
+        });
       } else {
         this.mapService.removeContentLayer();
         previousFilters = null;
@@ -1264,6 +1308,7 @@ export class FilterConfigService {
 
   resetMapLayerUpdateState(): void {
     this.updateMapLayerInProgress = false;
+    this.mapUpdateRetryNeeded = false;
   }
 
   refreshMapLayers(): void {
@@ -1353,8 +1398,182 @@ export class FilterConfigService {
   }
 
   setAdminLevel(adminLevel: 'state' | 'county' | 'municipality' | 'hexagon' | null): void {
+    if (adminLevel === null) {
+      this.setLayerModeAuto();
+      return;
+    }
+    this.selectLayerFromUi(adminLevel);
+  }
+
+  setCurrentMapZoom(zoom: number): boolean {
+    const previousZoom = this._currentMapZoom();
+    const previousEffectiveLevel = this.effectiveAdminLevel();
+    this._currentMapZoom.set(zoom);
+    const fallbackTriggered = this.syncLayerForZoom(previousZoom);
+
+    const effectiveLevelChanged = this.effectiveAdminLevel() !== previousEffectiveLevel;
+    const roundedZoomChanged = Math.round(zoom) !== Math.round(previousZoom);
+    if (effectiveLevelChanged || roundedZoomChanged) {
+      this.refreshMapLayers();
+    }
+
+    return fallbackTriggered;
+  }
+
+  selectLayerFromUi(adminLevel: AdminLevel): void {
+    if (!this.availableAdminLevels().includes(adminLevel)) {
+      return;
+    }
+
+    if (this._layerMode() === 'manual' && this._selectedAdminLevel() === adminLevel) {
+      this.setLayerModeAuto();
+      return;
+    }
+
+    this._layerMode.set('manual');
     this._selectedAdminLevel.set(adminLevel);
     this.saveSettings();
+    this.refreshMapLayers();
+  }
+
+  setLayerModeAuto(): void {
+    this._layerMode.set('auto');
+    this._selectedAdminLevel.set(null);
+    this.syncLayerForZoomInternal({ emitFallbackNotice: false, persist: true });
+    this.refreshMapLayers();
+  }
+
+  syncLayerForZoom(previousZoom?: number): boolean {
+    return this.syncLayerForZoomInternal({ emitFallbackNotice: true, persist: true }, previousZoom);
+  }
+
+  private syncLayerForZoomInternal(
+    options: { emitFallbackNotice: boolean; persist: boolean },
+    previousZoom?: number
+  ): boolean {
+    const availableLevels = this.availableAdminLevels();
+    const currentSelected = this._selectedAdminLevel();
+    const zoom = this._currentMapZoom();
+    const zoomingOut = previousZoom !== undefined && zoom < previousZoom;
+    let fallbackTriggered = false;
+    let changed = false;
+
+    if (this._layerMode() === 'manual') {
+      if (!currentSelected || !availableLevels.includes(currentSelected)) {
+        this._layerMode.set('auto');
+        this._selectedAdminLevel.set(null);
+        fallbackTriggered = true;
+        changed = true;
+      } else if (zoomingOut) {
+        const defaultAtZoom = this.determineDefaultAdminLevel(zoom, this.isRegiostarFilterMode());
+        if (this.isAdminLevelCoarserThan(defaultAtZoom, currentSelected)) {
+          this._layerMode.set('auto');
+          this._selectedAdminLevel.set(null);
+          changed = true;
+        }
+      }
+    } else if (currentSelected !== null) {
+      this._selectedAdminLevel.set(null);
+      changed = true;
+    }
+
+    if (fallbackTriggered && options.emitFallbackNotice) {
+      this._layerFallbackNoticeNonce.update(value => value + 1);
+    }
+
+    if (changed && options.persist) {
+      this.saveSettings();
+    }
+
+    return fallbackTriggered;
+  }
+
+  private isAdminLevelCoarserThan(coarse: AdminLevel, fine: AdminLevel): boolean {
+    return ADMIN_LEVEL_RANK[coarse] < ADMIN_LEVEL_RANK[fine];
+  }
+
+  /**
+   * Share-key users may lock municipality/hexagon one admin level above the automatic layer.
+   */
+  private getShareKeySelectableAdminLevels(zoom: number): AdminLevel[] {
+    const regiostarFilterMode = this.isRegiostarFilterMode();
+    const defaultLevel = this.determineDefaultAdminLevel(zoom, regiostarFilterMode);
+
+    if (regiostarFilterMode) {
+      const levels: AdminLevel[] = ['municipality'];
+      if (defaultLevel === 'municipality' || defaultLevel === 'hexagon') {
+        levels.push('hexagon');
+      }
+      return levels;
+    }
+
+    const levels = this.getAdminLevelsUpTo(defaultLevel);
+    const nextFiner = this.getNextFinerAdminLevel(defaultLevel);
+    if (nextFiner === 'municipality' || nextFiner === 'hexagon') {
+      levels.push(nextFiner);
+    }
+    return [...new Set(levels)];
+  }
+
+  private getAdminLevelsUpTo(level: AdminLevel): AdminLevel[] {
+    const order: AdminLevel[] = ['state', 'county', 'municipality', 'hexagon'];
+    const index = order.indexOf(level);
+    return order.slice(0, index + 1);
+  }
+
+  private getNextFinerAdminLevel(level: AdminLevel): AdminLevel | null {
+    const order: AdminLevel[] = ['state', 'county', 'municipality', 'hexagon'];
+    const index = order.indexOf(level);
+    if (index < 0 || index >= order.length - 1) {
+      return null;
+    }
+    return order[index + 1];
+  }
+
+  getAdminLevelDisabledHintKey(adminLevel: AdminLevel): string | null {
+    if (this.availableAdminLevels().includes(adminLevel)) {
+      return null;
+    }
+
+    if (!this.isShareKeyOnly()) {
+      return 'map.layerSwitcher.disabledGeneric';
+    }
+
+    if (this.isRegiostarFilterMode() && (adminLevel === 'state' || adminLevel === 'county')) {
+      return 'map.layerSwitcher.disabledRegiostarFilter';
+    }
+
+    if (adminLevel === 'municipality') {
+      return 'map.layerSwitcher.disabledEnforceMunicipality';
+    }
+
+    if (adminLevel === 'hexagon') {
+      return 'map.layerSwitcher.disabledEnforceHexagon';
+    }
+
+    if (adminLevel === 'county') {
+      return 'map.layerSwitcher.disabledZoom';
+    }
+
+    return 'map.layerSwitcher.disabledGeneric';
+  }
+
+  /** Mirrors backend `determine_admin_level` when no admin_level override is sent. */
+  private determineDefaultAdminLevel(zoom: number, regiostarFilterMode: boolean): AdminLevel {
+    const z = Math.round(zoom);
+    if (regiostarFilterMode) {
+      return z < 9 ? 'municipality' : 'hexagon';
+    }
+    if (z <= 7) {
+      return 'state';
+    }
+    if (z <= 8) {
+      return 'county';
+    }
+    if (z <= 9) {
+      return 'municipality';
+    }
+    return 'hexagon';
   }
 
   /**
@@ -1432,22 +1651,21 @@ export class FilterConfigService {
     this.saveSettings();
   }
 
-  private requiresFullReload(
-    previousFilters: ContentLayerFilters | null,
-    filters: ContentLayerFilters
-  ): boolean {
-    if (!previousFilters) {
-      return true;
+  private getZoomForAdminLevel(): number {
+    // Keep reactive dependency on zoom sync even when the map instance is not ready yet.
+    const trackedZoom = this._currentMapZoom();
+    const liveZoom = this.mapService.getMap()?.getZoom();
+    if (typeof liveZoom === 'number' && Number.isFinite(liveZoom)) {
+      return liveZoom;
     }
+    return trackedZoom;
+  }
 
-    return (
-      JSON.stringify([...previousFilters.profile_ids].sort((a, b) => a - b)) !== JSON.stringify([...filters.profile_ids].sort((a, b) => a - b)) ||
-      JSON.stringify(previousFilters.state_ids?.sort()) !== JSON.stringify(filters.state_ids?.sort()) ||
-      JSON.stringify(previousFilters.category_ids?.sort()) !== JSON.stringify(filters.category_ids?.sort()) ||
-      previousFilters.persona_id !== filters.persona_id ||
-      JSON.stringify(previousFilters.regiostar_ids?.sort()) !== JSON.stringify(filters.regiostar_ids?.sort()) ||
-      previousFilters.admin_level !== filters.admin_level
-    );
+  private resolveFiltersForMapApply(filters: ContentLayerFilters): ContentLayerFilters {
+    return {
+      ...filters,
+      admin_level: this.effectiveAdminLevel(),
+    };
   }
 
   private filtersDiffer(
@@ -1643,7 +1861,6 @@ export class FilterConfigService {
       return success;
     } finally {
       this.updateMapLayerInProgress = false;
-      this.mapService.setMapLoading(false);
     }
   }
 
@@ -1655,7 +1872,7 @@ export class FilterConfigService {
   private async updateMapLayer(
     filters: ContentLayerFilters,
     fullReload: boolean = true,
-    zoomToBounds: boolean = true,
+    zoomToBounds: boolean = false,
     targetMap?: MapLibreMap,
     skipReadyCheck: boolean = false
   ): Promise<boolean> {
@@ -1697,25 +1914,28 @@ export class FilterConfigService {
         return false;
       }
 
+      const filtersToApply = this.resolveFiltersForMapApply(this.contentLayerFilters() ?? filters);
+
       // Only load the content layer AFTER we've confirmed data is ready (step 3)
       // (either via cache_flag: true OR websocket completion)
-      if (targetMap) {
+      const activeMap = targetMap ?? this.mapService.getMap();
+      if (activeMap) {
         if (fullReload) {
-          const loaded = await this.mapService.loadContentLayerOnMap(targetMap, filters, zoomToBounds, false);
+          const loaded = await this.mapService.loadContentLayerOnMap(activeMap, filtersToApply, zoomToBounds, false);
           if (!this.isProjectLoadCurrent(loadGeneration)) {
             return false;
           }
           if (loaded) {
-            targetMap.resize();
+            activeMap.resize();
           }
           return loaded;
         }
-        await this.mapService.updateContentLayerOnMap(targetMap, filters);
+        await this.mapService.updateContentLayerOnMap(activeMap, filtersToApply);
         return this.isProjectLoadCurrent(loadGeneration);
       } else if (fullReload) {
-        await this.mapService.loadContentLayer(filters, zoomToBounds);
+        await this.mapService.loadContentLayer(filtersToApply, zoomToBounds);
       } else {
-        await this.mapService.updateContentLayerTiles(filters);
+        await this.mapService.updateContentLayerTiles(filtersToApply);
       }
       return this.isProjectLoadCurrent(loadGeneration);
     } catch (error) {
@@ -1726,6 +1946,10 @@ export class FilterConfigService {
     } finally {
       if (!targetMap) {
         this.updateMapLayerInProgress = false;
+        if (this.mapUpdateRetryNeeded) {
+          this.mapUpdateRetryNeeded = false;
+          this.refreshMapLayers();
+        }
       }
     }
   }
@@ -1740,9 +1964,11 @@ export class FilterConfigService {
       this._isExpanded.set(settings.expanded ?? false);
       this._selectedBewertung.set((settings.bewertung === 'zeit' ? 'zeit' : 'qualitaet') as 'qualitaet' | 'zeit');
       
-      // Load admin level
-      if (settings.adminLevel !== undefined) {
+      this._layerMode.set(settings.layerMode === 'manual' ? 'manual' : 'auto');
+      if (settings.layerMode === 'manual' && settings.adminLevel !== undefined && settings.adminLevel !== null) {
         this._selectedAdminLevel.set(settings.adminLevel);
+      } else {
+        this._selectedAdminLevel.set(null);
       }
 
       const allQuality = settings.legendBrackets?.quality;
@@ -1794,7 +2020,8 @@ export class FilterConfigService {
       expanded: this._isExpanded(),
       verkehrsmittel: [...this._selectedModes()],
       bewertung: this._selectedBewertung(),
-      adminLevel: this._selectedAdminLevel(),
+      adminLevel: this._layerMode() === 'manual' ? this._selectedAdminLevel() : null,
+      layerMode: this._layerMode(),
       legendBrackets: {
         quality: [...this._selectedQualityBrackets()],
         time: [...this._selectedTimeBrackets()]
