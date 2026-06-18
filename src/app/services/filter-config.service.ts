@@ -1916,7 +1916,7 @@ export class FilterConfigService {
         return false;
       }
 
-      const filtersToApply = this.resolveFiltersForMapApply(this.contentLayerFilters() ?? filters);
+      const filtersToApply = this.resolveFiltersForMapApply(filters);
 
       // Only load the content layer AFTER we've confirmed data is ready (step 3)
       // (either via cache_flag: true OR websocket completion)
