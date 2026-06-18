@@ -160,7 +160,9 @@ export class FilterConfigService {
   readonly isMapCompareMode = this._isMapCompareMode.asReadonly();
   readonly pendingMapCompareEnable = this._pendingMapCompareEnable.asReadonly();
   readonly canUseMapCompare = computed(
-    () => this.dashboardSessionService.accessMethod() !== null
+    () =>
+      this.dashboardSessionService.isAuthenticated() ||
+      !!this.projectService.project()?.group
   );
   readonly hasUrlCompareIntent = this._urlCompareIntent.asReadonly();
   readonly compareMapsReady = this._compareMapsReady.asReadonly();
