@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inj
 import { Subscription, firstValueFrom, debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { Map, MapDataEvent, NavigationControl, FullscreenControl, Popup, AttributionControl, LngLatLike } from 'maplibre-gl';
 import Compare from '@maplibre/maplibre-gl-compare';
-import { MapService } from '../../services/map.service';
+import { MapService, NO_DATA_SCORE } from '../../services/map.service';
 import MinimapControl from "maplibregl-minimap";
 import { SharedModule } from '../../shared/shared.module';
 import { AdminLevel, FilterConfigService } from '../../services/filter-config.service';
@@ -957,33 +957,34 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         updateHighlight(candidateName);
       }, HOVER_HIGHLIGHT_DEBOUNCE_MS);
       const isQualityMode = this.isQualityMode;
+      const score = properties['score'];
+      const isNoData = Number(score) === NO_DATA_SCORE;
+      const notAvailable = this.translate.instant('map.popup.notAvailable');
       
       let valueText = '';
       if (isQualityMode) {
-        const index = properties['index'];
-        if (index !== undefined && index !== null) {
-          // Index is stored as integer (multiplied by 100), so divide by 100
-          const indexValue = index / 100;
-          const indexName = this.getIndexName(indexValue);
-          const indexLabel = this.translate.instant('map.popup.index');
-          const notAvailable = this.translate.instant('map.popup.notAvailable');
-          valueText = `${indexLabel} ${indexName}`;
-        } else {
-          const indexLabel = this.translate.instant('map.popup.index');
-          const notAvailable = this.translate.instant('map.popup.notAvailable');
+        const indexLabel = this.translate.instant('map.popup.index');
+        if (isNoData) {
           valueText = `${indexLabel} ${notAvailable}`;
+        } else {
+          const index = properties['index'];
+          if (index !== undefined && index !== null) {
+            // Index is stored as integer (multiplied by 100), so divide by 100
+            const indexValue = index / 100;
+            const indexName = this.getIndexName(indexValue);
+            valueText = `${indexLabel} ${indexName}`;
+          } else {
+            valueText = `${indexLabel} ${notAvailable}`;
+          }
         }
       } else {
-        const score = properties['score'];
-        if (score !== undefined && score !== null) {
+        const scoreLabel = this.translate.instant('map.popup.score');
+        if (score !== undefined && score !== null && !isNoData) {
           // Score is in seconds, convert to minutes
           const minutes = (score / 60).toFixed(1);
-          const scoreLabel = this.translate.instant('map.popup.score');
           const minLabel = this.translate.instant('map.popup.minutes');
           valueText = `${scoreLabel} ${minutes} ${minLabel}`;
         } else {
-          const scoreLabel = this.translate.instant('map.popup.score');
-          const notAvailable = this.translate.instant('map.popup.notAvailable');
           valueText = `${scoreLabel} ${notAvailable}`;
         }
       }

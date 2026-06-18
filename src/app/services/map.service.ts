@@ -21,6 +21,9 @@ export interface ContentLayerFilters {
   selected_time_brackets?: Array<'0-7' | '8-15' | '16-23' | '24-30' | '31-45' | '45+'>;
 }
 
+/** Backend sentinel: score === NO_DATA_SCORE means no data for this feature. */
+export const NO_DATA_SCORE = 15000;
+
 export interface FeatureInfoResponse {
   name: string;
   regiostar_name?: string | null;
@@ -926,6 +929,10 @@ export class MapService {
     return this.currentFilters;
   }
 
+  private isNoDataScoreExpression(): any {
+    return ['==', ['get', 'score'], NO_DATA_SCORE];
+  }
+
   /**
    * Returns the fill color expression for Score feature type
    * 162, 210, 235
@@ -939,14 +946,19 @@ export class MapService {
 
   private getScoreFillColorExpression(): any {
     return [
-      'step',
-      ['get', 'score'],
-      'rgb(46,125,50)',     // 0-7 min (default for < 480) - strong green
-      480, 'rgb(102,187,106)',  // 8-15 min (480-960s) - light green
-      960, 'rgb(255,241,118)', // 16-23 min (960-1440s) - light yellow
-      1440, 'rgb(253,216,53)', // 24-30 min (1440-1800s) - strong yellow
-      1800, 'rgb(239,83,80)',   // 31-45 min (1800-2700s) - light red
-      2700, 'rgb(183,28,28)'    // 45+ min (2700+s) - dark red
+      'case',
+      this.isNoDataScoreExpression(),
+      'rgb(233, 233, 233)',
+      [
+        'step',
+        ['get', 'score'],
+        'rgb(46,125,50)',     // 0-7 min (default for < 480) - strong green
+        480, 'rgb(102,187,106)',  // 8-15 min (480-960s) - light green
+        960, 'rgb(255,241,118)', // 16-23 min (960-1440s) - light yellow
+        1440, 'rgb(253,216,53)', // 24-30 min (1440-1800s) - strong yellow
+        1800, 'rgb(239,83,80)',   // 31-45 min (1800-2700s) - light red
+        2700, 'rgb(183,28,28)'    // 45+ min (2700+s) - dark red
+      ]
     ];
   }
 
@@ -1002,6 +1014,8 @@ export class MapService {
     // Divide "index" by 100 before applying color breaks
     return [
       'case',
+      this.isNoDataScoreExpression(),
+      'rgba(128, 128, 128, 0.7)',
       ['<=', ['/', ['get', 'index'], 100], 0],
       'rgba(128, 128, 128, 0)', // NaN or invalid
       ['<', ['/', ['get', 'index'], 100], 0.35],
