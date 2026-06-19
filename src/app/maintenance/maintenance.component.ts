@@ -1,36 +1,33 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { interval, Subscription } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-import { of } from 'rxjs';
 import { LanguageService } from '../services/language.service';
+import { HealthService } from '../services/health.service';
 
 @Component({
     selector: 'app-maintenance',
     standalone: true,
-    imports: [CommonModule, TranslateModule],
+    imports: [CommonModule, TranslateModule, MatIconModule, MatProgressSpinnerModule],
     templateUrl: './maintenance.component.html',
     styleUrl: './maintenance.component.css'
 })
 export class MaintenanceComponent implements OnInit, OnDestroy {
     private healthCheckSubscription?: Subscription;
-    private checkInterval = 5000; // Check every 5 seconds
+    private checkInterval = 5000;
     isChecking = false;
 
     constructor(
         private router: Router,
-        public translate: TranslateService,
-        private http: HttpClient,
-        private languageService: LanguageService
+        private languageService: LanguageService,
+        private healthService: HealthService
     ) {
-        // Initialize language using LanguageService
-        this.translate.setDefaultLang('de');
-        const savedLang = this.languageService.getSavedLanguage() || 'de';
-        this.translate.use(savedLang);
+        this.languageService.setLanguage(
+            this.languageService.getSavedLanguage() || this.languageService.getCurrentLanguage()
+        );
     }
 
     ngOnInit(): void {
@@ -43,36 +40,22 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
 
     private startHealthCheck(): void {
         this.isChecking = true;
-
-        // Check immediately
         this.checkHealth();
-
-        // Then check periodically
         this.healthCheckSubscription = interval(this.checkInterval).subscribe(() => {
             this.checkHealth();
         });
     }
 
     private stopHealthCheck(): void {
-        if (this.healthCheckSubscription) {
-            this.healthCheckSubscription.unsubscribe();
-        }
+        this.healthCheckSubscription?.unsubscribe();
     }
 
     private checkHealth(): void {
-        this.http.get(`${environment.apiUrl}/health/`, { observe: 'response' })
-            .pipe(
-                map(response => response.status === 200),
-                catchError(() => of(false))
-            )
-            .subscribe((isHealthy: boolean) => {
-                if (isHealthy) {
-                    this.stopHealthCheck();
-                    // Navigate back to the previous page or dashboard
-                    const previousUrl = sessionStorage.getItem('previousUrl') || '/dashboard';
-                    this.router.navigate([previousUrl]);
-                }
-            });
+        this.healthService.checkHealth().subscribe(health => {
+            if (this.healthService.isHealthy(health)) {
+                this.stopHealthCheck();
+                this.router.navigate(['/landing']);
+            }
+        });
     }
 }
-

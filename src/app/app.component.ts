@@ -1,10 +1,9 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { AuthService } from './auth/auth.service';
-import { HealthService } from './services/health.service';
 import { SessionService } from './services/session.service';
 import { LanguageService } from './services/language.service';
+import { RuntimeConfigService } from './services/runtime-config.service';
 import { environment } from '../environments/environment';
 // Archived components - to be migrated back
 // import { ProjectWizardComponent } from './_archive/legacy/project-wizard/project-wizard.component';
@@ -24,17 +23,15 @@ import { environment } from '../environments/environment';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent implements OnDestroy {
+export class AppComponent {
   title = 'mobi.mapr-frontend-2.0';
   isLoggedIn: boolean = false;
-  private subscriptions: Subscription[] = [];
   buildDate: string;
 
   constructor(
     private languageService: LanguageService,
     private authService: AuthService,
-    // private keyboardShortcutsService: KeyboardShortcutsService, // Archived
-    private healthService: HealthService,
+    private runtimeConfig: RuntimeConfigService,
     private router: Router,
     private sessionService: SessionService // Initialize SessionService early to ensure session_id is generated
   ) {
@@ -53,15 +50,9 @@ export class AppComponent implements OnDestroy {
     document.documentElement.removeAttribute('data-theme');
     document.documentElement.classList.remove('dark');
 
-    // Subscribe to health check
-    this.subscriptions.push(
-      this.healthService.checkHealth().subscribe(health => {
-        if (health.status !== 'healthy') {
-          console.warn('Health check failed, navigating to maintenance page');
-          this.router.navigate(['/maintenance']);
-        }
-      })
-    );
+    if (this.runtimeConfig.maintenanceMode && !this.router.url.startsWith('/maintenance')) {
+      this.router.navigate(['/maintenance']);
+    }
 
     // Keyboard shortcuts - to be re-enabled when map component is migrated
     // this.subscriptions.push(
@@ -75,8 +66,4 @@ export class AppComponent implements OnDestroy {
   // handleKeyboardEvent(event: KeyboardEvent) {
   //   this.keyboardShortcutsService.handleKeyboardEvent(event);
   // }
-
-  ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
-  }
 }

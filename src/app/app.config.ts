@@ -1,4 +1,6 @@
-import { ApplicationConfig, importProvidersFrom } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom, provideAppInitializer, inject } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import { RuntimeConfigService } from './services/runtime-config.service';
 import { provideZoneChangeDetection } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
@@ -18,6 +20,10 @@ export function HttpLoaderFactory(http: HttpClient) {
 
 export const appConfig: ApplicationConfig = {
     providers: [
+        provideAppInitializer(() => {
+            const config = inject(RuntimeConfigService);
+            return firstValueFrom(config.load());
+        }),
         provideZoneChangeDetection({ eventCoalescing: true }),
         provideRouter(routes),
         provideAnimationsAsync(),
