@@ -209,6 +209,12 @@
     "CHECKING": "Checking system status...",
     "INFO": "We are working to make the application available again as soon as possible."
   },
+  "INVALID_SHARE_KEY": {
+    "TITLE": "Invalid Share Key",
+    "MESSAGE": "The share key you used is invalid or has expired. Please request a new link or log in to access your projects.",
+    "GO_TO_LOGIN": "Go to Login",
+    "GO_TO_LANDING": "Go to Home"
+  },
   "language": {
     "de": "Deutsch",
     "en": "English",

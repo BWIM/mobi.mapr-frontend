@@ -3,62 +3,85 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: var(--surface-ground);
+  background: linear-gradient(to bottom right, var(--background-color), var(--secondary-color));
   padding: 2rem;
 }
 
-:host ::ng-deep .login-card {
+.login-card {
   width: 100%;
-  max-width: 400px;
-  margin: auto;
+  max-width: 420px;
+  background-color: var(--background-color);
+  color: var(--primary-color);
+  border: 1px solid var(--secondary-color);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
-:host ::ng-deep .login-card {
-  background: var(--surface-card);
-  border-radius: var(--border-radius);
-}
-
-h2 {
-  margin: 0;
-  padding: 1.5rem;
-  color: var(--text-color);
-  text-align: center;
-  font-weight: 600;
-}
-
-.form-group {
-  margin-bottom: 2rem;
-}
-
-:host ::ng-deep .p-float-label {
-  display: block;
-  margin-bottom: 0.5rem;
-}
-
-:host ::ng-deep .p-float-label input,
-:host ::ng-deep .p-float-label .p-password {
-  width: 100%;
-}
-
-:host ::ng-deep .p-password input {
-  width: 100%;
-}
-
-.p-error {
-  color: var(--red-500);
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-  display: block;
-}
-
-.button-container {
-  margin-top: 2rem;
+.login-header {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 2rem 0;
 }
 
-:host ::ng-deep .button-container .p-button {
+.login-logo {
+  height: 5rem;
+  margin-bottom: 1rem;
+}
+
+.login-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  text-align: center;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.w-full {
   width: 100%;
+}
+
+.login-error {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background-color: rgba(186, 26, 26, 0.15);
+  color: #ffb4ab;
+  font-size: 0.875rem;
+}
+
+.login-button {
+  width: 100%;
+  margin-top: 0.5rem;
+  min-height: 48px;
+}
+
+.login-spinner {
+  display: inline-block;
+}
+
+.language-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--secondary-color);
+}
+
+.language-icon {
+  color: var(--light-primary-color);
+}
+
+.language-field {
+  width: 10rem;
 }
 
 @media (max-width: 480px) {

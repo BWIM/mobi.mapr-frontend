@@ -1,14 +1,15 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { PasswordModule } from 'primeng/password';
-import { CardModule } from 'primeng/card';
-import { MessageModule } from 'primeng/message';
-import { SelectModule } from 'primeng/select';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule, MatSelectChange } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../services/language.service';
@@ -21,13 +22,13 @@ import { LanguageService } from '../../services/language.service';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    FormsModule,
-    ButtonModule,
-    InputTextModule,
-    PasswordModule,
-    CardModule,
-    MessageModule,
-    SelectModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSelectModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
     TranslateModule
   ]
 })
@@ -37,6 +38,7 @@ export class LoginComponent {
   isLoading: boolean = false;
   currentLang = 'de';
   languages: { code: string; name: string }[] = [];
+  hidePassword = true;
 
   constructor(
     private fb: FormBuilder,
@@ -57,8 +59,8 @@ export class LoginComponent {
     });
   }
 
-  onLanguageChange(event: any): void {
-    const selectedLang = event.value?.code || event.value || 'de';
+  onLanguageChange(event: MatSelectChange): void {
+    const selectedLang = event.value || 'de';
     this.languageService.setLanguage(selectedLang);
     this.currentLang = selectedLang;
   }

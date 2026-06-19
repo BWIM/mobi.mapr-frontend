@@ -1,63 +1,61 @@
-<div
-  class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
-  <p-card styleClass="w-full max-w-md">
-    <ng-template pTemplate="header">
-      <div class="flex justify-center mb-4">
-        <img src="assets/images/logo.png" alt="Logo" class="h-20">
-      </div>
-      <h2
-        class="text-2xl font-semibold text-center text-gray-800 dark:text-white py-4">
-        {{ 'auth.login.title' | translate }}
-      </h2>
-    </ng-template>
-
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
-      <div class="space-y-2">
-        <span class="p-float-label w-full">
-          <input id="username" type="text" pInputText formControlName="username"
-            class="w-full"
-            [ngClass]="{'ng-invalid ng-dirty': isFieldInvalid('username')}">
-          <label for="username">{{ 'auth.login.username' | translate }}</label>
-        </span>
-        <small class="text-red-500 text-sm" *ngIf="getFieldError('username')">
-          {{ getFieldError('username') }}
-        </small>
-      </div>
-
-      <div class="space-y-2">
-        <span class="p-float-label w-full">
-          <p-password id="password" formControlName="password"
-            [feedback]="false" [toggleMask]="true" styleClass="w-full"
-            [ngClass]="{'ng-invalid ng-dirty': isFieldInvalid('password')}">
-          </p-password>
-          <label for="password">{{ 'auth.login.password' | translate }}</label>
-        </span>
-        <small class="text-red-500 text-sm" *ngIf="getFieldError('password')">
-          {{ getFieldError('password') }}
-        </small>
-      </div>
-
-      <p-message severity="error" *ngIf="error" [text]="error"
-        styleClass="w-full"></p-message>
-
-      <div class="pt-2">
-        <p-button type="submit" label="{{ 'auth.login.loginButton' | translate }}"
-          [disabled]="loginForm.invalid || isLoading" [loading]="isLoading"
-          styleClass="w-full">
-        </p-button>
-      </div>
-    </form>
-
-    <!-- Language Selector -->
-    <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-      <div class="flex items-center justify-center space-x-2">
-        <i class="pi pi-globe text-gray-600 dark:text-gray-400"></i>
-        <p-select [options]="languages" [(ngModel)]="currentLang"
-          optionLabel="name" optionValue="code" [placeholder]="'auth.login.selectLanguage' | translate"
-          (onChange)="onLanguageChange($event)" styleClass="w-32"
-          [showClear]="false">
-        </p-select>
-      </div>
+<div class="login-container">
+  <mat-card class="login-card">
+    <div class="login-header">
+      <img src="assets/images/logo.png" alt="Logo" class="login-logo">
+      <h2>{{ 'auth.login.title' | translate }}</h2>
     </div>
-  </p-card>
+
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>{{ 'auth.login.username' | translate }}</mat-label>
+          <input matInput id="username" type="text" formControlName="username" autocomplete="username">
+          <mat-error *ngIf="getFieldError('username')">{{ getFieldError('username') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>{{ 'auth.login.password' | translate }}</mat-label>
+          <input
+            matInput
+            id="password"
+            [type]="hidePassword ? 'password' : 'text'"
+            formControlName="password"
+            autocomplete="current-password">
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="hidePassword = !hidePassword"
+            [attr.aria-label]="hidePassword ? 'Show password' : 'Hide password'">
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="getFieldError('password')">{{ getFieldError('password') }}</mat-error>
+        </mat-form-field>
+
+        <p class="login-error" *ngIf="error">{{ error }}</p>
+
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          class="login-button"
+          [disabled]="loginForm.invalid || isLoading">
+          <mat-spinner *ngIf="isLoading" diameter="20" class="login-spinner"></mat-spinner>
+          <span *ngIf="!isLoading">{{ 'auth.login.loginButton' | translate }}</span>
+        </button>
+      </form>
+
+      <div class="language-selector">
+        <mat-icon class="language-icon">language</mat-icon>
+        <mat-form-field appearance="outline" class="language-field">
+          <mat-label>{{ 'auth.login.selectLanguage' | translate }}</mat-label>
+          <mat-select [value]="currentLang" (selectionChange)="onLanguageChange($event)">
+            <mat-option *ngFor="let lang of languages" [value]="lang.code">
+              {{ lang.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
 </div>

@@ -209,6 +209,12 @@
     "CHECKING": "Prüfe Systemstatus...",
     "INFO": "Wir arbeiten daran, die Anwendung so schnell wie möglich wieder verfügbar zu machen."
   },
+  "INVALID_SHARE_KEY": {
+    "TITLE": "Ungültiger Freigabeschlüssel",
+    "MESSAGE": "Der verwendete Freigabeschlüssel ist ungültig oder abgelaufen. Bitte fordere einen neuen Link an oder melde dich an, um auf deine Projekte zuzugreifen.",
+    "GO_TO_LOGIN": "Zur Anmeldung",
+    "GO_TO_LANDING": "Zur Startseite"
+  },
   "language": {
     "de": "Deutsch",
     "en": "English",
