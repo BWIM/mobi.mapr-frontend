@@ -3,12 +3,23 @@
         <img src="assets/images/logo.png" alt="mobi.mapr" class="maintenance-logo">
 
         <div class="maintenance-icon-wrapper">
-            <mat-icon class="maintenance-icon">build</mat-icon>
+            <mat-icon class="maintenance-icon">rocket_launch</mat-icon>
         </div>
 
         <h1>{{ 'MAINTENANCE.TITLE' | translate }}</h1>
 
         <p class="message">{{ 'MAINTENANCE.MESSAGE' | translate }}</p>
+
+        <p class="project-hint">
+            {{ 'MAINTENANCE.PROJECT_HINT' | translate }}
+            <a
+                class="project-link"
+                [href]="projectPageUrl"
+                target="_blank"
+                rel="noopener noreferrer">
+                {{ 'MAINTENANCE.PROJECT_LINK' | translate }}
+            </a>
+        </p>
 
         <div class="checking-status">
             <mat-spinner diameter="20"></mat-spinner>

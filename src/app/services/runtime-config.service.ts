@@ -15,15 +15,22 @@ export class RuntimeConfigService {
     maintenanceMode = false;
 
     load(): Observable<void> {
+        return this.fetchConfig().pipe(map(() => void 0));
+    }
+
+    reload(): Observable<void> {
+        return this.fetchConfig().pipe(map(() => void 0));
+    }
+
+    private fetchConfig(): Observable<RuntimeConfig> {
         return this.http.get<RuntimeConfig>('/assets/config.json').pipe(
             tap(config => {
                 this.maintenanceMode = config.maintenanceMode ?? false;
             }),
             catchError(() => {
                 this.maintenanceMode = false;
-                return of(undefined);
-            }),
-            map(() => void 0)
+                return of({ maintenanceMode: false });
+            })
         );
     }
 }

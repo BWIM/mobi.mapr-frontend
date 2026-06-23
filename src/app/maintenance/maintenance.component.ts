@@ -7,6 +7,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { interval, Subscription } from 'rxjs';
 import { LanguageService } from '../services/language.service';
 import { HealthService } from '../services/health.service';
+import { RuntimeConfigService } from '../services/runtime-config.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
     selector: 'app-maintenance',
@@ -19,11 +21,13 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
     private healthCheckSubscription?: Subscription;
     private checkInterval = 5000;
     isChecking = false;
+    readonly projectPageUrl = 'https://mobimapr.bw-im.de';
 
     constructor(
         private router: Router,
         private languageService: LanguageService,
-        private healthService: HealthService
+        private healthService: HealthService,
+        private runtimeConfig: RuntimeConfigService
     ) {
         this.languageService.setLanguage(
             this.languageService.getSavedLanguage() || this.languageService.getCurrentLanguage()
@@ -51,8 +55,11 @@ export class MaintenanceComponent implements OnInit, OnDestroy {
     }
 
     private checkHealth(): void {
-        this.healthService.checkHealth().subscribe(health => {
-            if (this.healthService.isHealthy(health)) {
+        forkJoin({
+            config: this.runtimeConfig.reload(),
+            health: this.healthService.checkHealth()
+        }).subscribe(({ health }) => {
+            if (!this.runtimeConfig.maintenanceMode && this.healthService.isHealthy(health)) {
                 this.stopHealthCheck();
                 this.router.navigate(['/landing']);
             }
