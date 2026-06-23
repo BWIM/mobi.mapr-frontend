@@ -1,4 +1,4 @@
-<div class="flex flex-col h-screen w-screen overflow-hidden bg-[var(--background-color)]">
+<div class="flex flex-col h-dvh w-dvw overflow-hidden bg-[var(--background-color)]">
   <!-- MOBILE HEADER - Only visible on mobile -->
   <div class="md:hidden h-16 bg-[var(--secondary-color)] flex items-center justify-center px-4 border-b border-[var(--background-color)]">
     <a href="https://bw-im.de/mobimapr" target="_blank" [attr.title]="'rail.logoHint' | translate" class="flex items-center gap-2">
@@ -107,7 +107,9 @@
         <app-group-overview (backRequested)="closeGroupOverview()"></app-group-overview>
       </div>
     } @else {
-      <div class="flex-1 min-h-0 overflow-hidden relative">
+      <div
+        class="mobile-map-container flex-1 min-h-0 overflow-hidden relative"
+        [class.mobile-map-container--filter-collapsed]="!mobileFilterExpanded()">
         <app-center></app-center>
         <app-mobile-map-controls />
       </div>
@@ -116,7 +118,14 @@
         <app-mobile-sheets />
       }
 
-      <div class="absolute bottom-0 left-0 right-0 z-[1002] pointer-events-none">
+      @if (mobileFilterExpanded()) {
+        <div
+          class="fixed inset-0 z-[1001] bg-black/30 md:hidden"
+          (click)="toggleMobileFilterPanel()"
+          aria-hidden="true"></div>
+      }
+
+      <div class="fixed bottom-0 left-0 right-0 z-[1002] pointer-events-none">
         <div class="pointer-events-auto">
           <app-mobile-filter-panel 
             [isExpanded]="mobileFilterExpanded()"

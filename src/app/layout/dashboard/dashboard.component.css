@@ -1,1 +1,9 @@
 /* Mobile filter panel custom styling - removed MatBottomSheet */
+
+.mobile-map-container {
+  --mobile-filter-collapsed-height: 7.5rem;
+}
+
+.mobile-map-container--filter-collapsed {
+  padding-bottom: var(--mobile-filter-collapsed-height);
+}

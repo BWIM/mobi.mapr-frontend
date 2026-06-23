@@ -339,6 +339,10 @@ export class DashboardComponent {
 
   toggleMobileFilterPanel() {
     this.mobileFilterExpanded.update(value => !value);
+    requestAnimationFrame(() => {
+      this.mapService.getMap()?.resize();
+      this.mapService.getCompareRightMap()?.resize();
+    });
   }
 
   openGeoJsonDownloadDialog() {

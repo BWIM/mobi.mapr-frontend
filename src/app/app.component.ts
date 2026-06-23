@@ -4,6 +4,7 @@ import { AuthService } from './auth/auth.service';
 import { SessionService } from './services/session.service';
 import { LanguageService } from './services/language.service';
 import { RuntimeConfigService } from './services/runtime-config.service';
+import { VisualViewportService } from './services/visual-viewport.service';
 import { environment } from '../environments/environment';
 // Archived components - to be migrated back
 // import { ProjectWizardComponent } from './_archive/legacy/project-wizard/project-wizard.component';
@@ -33,8 +34,10 @@ export class AppComponent {
     private authService: AuthService,
     private runtimeConfig: RuntimeConfigService,
     private router: Router,
-    private sessionService: SessionService // Initialize SessionService early to ensure session_id is generated
+    private sessionService: SessionService, // Initialize SessionService early to ensure session_id is generated
+    visualViewportService: VisualViewportService,
   ) {
+    visualViewportService.init();
     // Format build date for display
     const buildDateObj = new Date(environment.buildDate);
     this.buildDate = buildDateObj.toLocaleDateString('en-US', { 
@@ -53,17 +56,5 @@ export class AppComponent {
     if (this.runtimeConfig.maintenanceMode && !this.router.url.startsWith('/maintenance')) {
       this.router.navigate(['/maintenance']);
     }
-
-    // Keyboard shortcuts - to be re-enabled when map component is migrated
-    // this.subscriptions.push(
-    //   this.keyboardShortcutsService.getShortcutStream().subscribe(action => {
-    //     // Handle shortcuts
-    //   })
-    // );
   }
-
-  // @HostListener('window:keydown', ['$event'])
-  // handleKeyboardEvent(event: KeyboardEvent) {
-  //   this.keyboardShortcutsService.handleKeyboardEvent(event);
-  // }
 }

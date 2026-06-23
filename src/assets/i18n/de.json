@@ -833,7 +833,7 @@
   },
   "mobileFilter": {
     "licenseInfo": "Lizenzinfos",
-    "collapsedHint": "Nach oben wischen, um zu suchen oder die Karte anzupassen",
+    "collapsedHint": "Tippen oder nach oben wischen, um zu suchen oder die Karte anzupassen",
     "readOnlyHint": "Filter können nur auf dem Desktop geändert werden.",
     "allActivitiesSelected": "Alle Aktivitäten",
     "search": {

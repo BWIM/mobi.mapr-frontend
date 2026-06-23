@@ -1,18 +1,32 @@
-<div class="w-full bg-[var(--background-color)] rounded-t-3xl transition-all duration-300 ease-in-out overflow-hidden shadow-lg"
-     [style.max-height]="isExpanded() ? 'calc(100vh - 4rem)' : 'auto'"
-     [style.height]="!isExpanded() ? 'auto' : 'auto'"
+<div class="mobile-filter-panel w-full bg-[var(--background-color)] rounded-t-3xl transition-all duration-300 ease-in-out overflow-hidden shadow-lg"
+     [class.mobile-filter-panel--collapsed]="!isExpanded()"
+     [style.max-height]="isExpanded() ? 'calc(100dvh - 4rem)' : 'auto'"
+     [attr.role]="!isExpanded() ? 'button' : null"
+     [attr.aria-expanded]="isExpanded()"
+     [attr.aria-label]="!isExpanded() ? ('mobileFilter.search.expand' | translate) : null"
+     (click)="onPanelClick($event)"
      (touchstart)="onTouchStart($event)"
+     (touchmove)="onTouchMove($event)"
      (touchend)="onTouchEnd($event)">
+  <div class="mobile-filter-panel__handle touch-handle" aria-hidden="true"></div>
+
   <!-- Project Name - Always visible -->
-  <div class="px-4 pt-2 pb-2 cursor-pointer"
-       (click)="togglePanel()">
-    <div class="flex items-center justify-center gap-2" (click)="togglePanel()">
-      <app-project-switcher />
-      <mat-icon class="mobile-collapsed-hint__icon" aria-hidden="true">swipe_up</mat-icon>
+  <div class="px-4 pt-1 pb-2">
+    <div class="flex items-center justify-center gap-2">
+      <div class="flex-1 min-w-0 flex justify-center" data-no-panel-toggle (click)="$event.stopPropagation()">
+        <app-project-switcher />
+      </div>
+      <button
+        type="button"
+        class="mobile-filter-panel__expand-btn shrink-0 p-2 rounded-full text-[var(--primary-color)] hover:opacity-80 transition-opacity"
+        (click)="togglePanel(); $event.stopPropagation()"
+        [attr.aria-label]="(isExpanded() ? 'mobileFilter.search.collapse' : 'mobileFilter.search.expand') | translate">
+        <mat-icon aria-hidden="true">{{ isExpanded() ? 'expand_more' : 'expand_less' }}</mat-icon>
+      </button>
     </div>
   </div>
   @if (!isExpanded()) {
-    <p class="mobile-collapsed-hint px-4 pb-3 text-center">
+    <p class="mobile-collapsed-hint px-4 pb-3 text-center pointer-events-none">
       <span>{{ 'mobileFilter.collapsedHint' | translate }}</span>
     </p>
   } @else {
@@ -53,7 +67,7 @@
 
   <!-- Filter Content - Only visible when expanded -->
   @if (isExpanded()) {
-    <div class="px-6 pb-6 space-y-6 overflow-y-auto max-h-[calc(100vh-12rem)] relative">
+    <div class="px-6 pb-6 space-y-6 overflow-y-auto max-h-[calc(100dvh-12rem)] relative">
       <!-- Verkehrsmittel Filter -->
       @if (!isMapCompareMode()) {
         <div class="space-y-2">
