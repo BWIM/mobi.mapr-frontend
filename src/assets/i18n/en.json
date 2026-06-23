@@ -204,10 +204,12 @@
     "FOOTER": "© mobi.mapr - Baden-Württemberg Institute for Sustainable Mobility"
   },
   "MAINTENANCE": {
-    "TITLE": "Maintenance",
-    "MESSAGE": "The application is currently under maintenance. Please try again later.",
-    "CHECKING": "Checking system status...",
-    "INFO": "We are working to make the application available again as soon as possible."
+    "TITLE": "We're enhancing mobi.mapr",
+    "MESSAGE": "We're currently improving the software to bring you an even better experience. Please check back soon.",
+    "CHECKING": "Checking when we're back online...",
+    "INFO": "Thank you for your patience — we'll be back shortly.",
+    "PROJECT_HINT": "In the meantime, feel free to explore our project page:",
+    "PROJECT_LINK": "mobimapr.bw-im.de"
   },
   "INVALID_SHARE_KEY": {
     "TITLE": "Invalid Share Key",
