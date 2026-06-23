@@ -1,23 +1,26 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { LanguageService } from '../services/language.service';
 
 @Component({
     selector: 'app-invalid-share-key',
     standalone: true,
-    imports: [CommonModule, TranslateModule],
+    imports: [CommonModule, TranslateModule, MatIconModule, MatButtonModule],
     templateUrl: './invalid-share-key.component.html',
     styleUrl: './invalid-share-key.component.css'
 })
 export class InvalidShareKeyComponent {
     constructor(
         private router: Router,
-        public translate: TranslateService
+        private languageService: LanguageService
     ) {
-        // Get saved language preference or default to German
-        const savedLang = localStorage.getItem('language') || 'de';
-        this.translate.use(savedLang);
+        this.languageService.setLanguage(
+            this.languageService.getSavedLanguage() || this.languageService.getCurrentLanguage()
+        );
     }
 
     goToLogin(): void {

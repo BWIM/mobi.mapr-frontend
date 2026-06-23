@@ -32,8 +32,12 @@ COPY --from=build /app/dist/mobi.mapr/browser /usr/share/nginx/html
 # Copy the custom Nginx configuration file
 COPY nginx.conf /etc/nginx/nginx.conf
 
+# Copy entrypoint script for runtime config
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # Expose port 80
 EXPOSE 80
 
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Start Nginx with runtime config injection
+CMD ["/docker-entrypoint.sh"]

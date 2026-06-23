@@ -24,7 +24,6 @@
     "@maplibre/maplibre-gl-compare": "^0.5.0",
     "@ngx-translate/core": "^16.0.4",
     "@ngx-translate/http-loader": "^16.0.1",
-    "@primeng/themes": "^21.0.4",
     "@tailwindcss/postcss": "^4.3.1",
     "angular-gridster2": "^21.0.1",
     "chart.js": "^4.4.8",

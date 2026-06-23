@@ -1,5 +1,75 @@
 .maintenance-container {
-    font-family: system-ui, -apple-system, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 1rem;
+    background: linear-gradient(to bottom right, var(--background-color), var(--secondary-color));
+}
+
+.maintenance-card {
+    width: 100%;
+    max-width: 28rem;
+    padding: 2rem;
+    text-align: center;
+    border-radius: 12px;
+    border: 1px solid var(--secondary-color);
+    background-color: var(--background-color);
+    color: var(--primary-color);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.maintenance-logo {
+    height: 5rem;
+    margin-bottom: 1.5rem;
+}
+
+.maintenance-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 5rem;
+    height: 5rem;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.maintenance-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    animation: spin 2s linear infinite;
+}
+
+.maintenance-card h1 {
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.message {
+    margin: 0 0 1.5rem;
+    line-height: 1.6;
+    color: var(--light-primary-color);
+}
+
+.checking-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+    color: var(--light-primary-color);
+}
+
+.info {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--light-primary-color);
+    opacity: 0.7;
 }
 
 @keyframes spin {
@@ -10,8 +80,4 @@
     to {
         transform: rotate(360deg);
     }
-}
-
-.animate-spin {
-    animation: spin 2s linear infinite;
 }
