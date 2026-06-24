@@ -1,3 +1,31 @@
+:host {
+  display: block;
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), var(--browser-ui-bottom, 0px));
+}
+
+.mobile-filter-panel--collapsed {
+  cursor: pointer;
+}
+
+.mobile-filter-panel__handle {
+  width: 2.5rem;
+  height: 0.25rem;
+  border-radius: 9999px;
+  background: var(--light-primary-color);
+  margin: 0.5rem auto 0;
+  opacity: 0.85;
+}
+
+.touch-handle {
+  touch-action: pan-y;
+}
+
+.mobile-filter-panel__expand-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
 /* Search form field styling - pill shaped with primary background */
 :host ::ng-deep .search-form-field {
   border-radius: 9999px !important; /* pill shape */

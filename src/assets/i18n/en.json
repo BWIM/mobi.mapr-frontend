@@ -833,7 +833,7 @@
   },
   "mobileFilter": {
     "licenseInfo": "License Info",
-    "collapsedHint": "Swipe up to search or change transport modes",
+    "collapsedHint": "Tap or swipe up to search or change transport modes",
     "readOnlyHint": "Filters can only be changed on desktop.",
     "allActivitiesSelected": "All activities",
     "search": {

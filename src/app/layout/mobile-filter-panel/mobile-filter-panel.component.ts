@@ -42,9 +42,9 @@ export class MobileFilterPanelComponent implements OnDestroy {
   private searchSubject = new Subject<string>();
   
   private touchStartY: number = 0;
-  private touchStartTime: number = 0;
-  private readonly SWIPE_THRESHOLD = 50; // Minimum distance in pixels
-  private readonly SWIPE_MAX_TIME = 300; // Maximum time in milliseconds
+  private touchDragging = false;
+  private readonly DRAG_THRESHOLD = 40;
+  private readonly SWIPE_THRESHOLD = 30;
 
   constructor() {
     this.searchSubject.pipe(
@@ -193,35 +193,53 @@ export class MobileFilterPanelComponent implements OnDestroy {
     this.onClose.emit();
   }
 
+  onPanelClick(event: MouseEvent): void {
+    if (this.isExpanded()) {
+      return;
+    }
+    const target = event.target as HTMLElement;
+    if (target.closest('[data-no-panel-toggle]')) {
+      return;
+    }
+    this.togglePanel();
+  }
+
   onTouchStart(event: TouchEvent): void {
     if (event.touches.length > 0) {
       this.touchStartY = event.touches[0].clientY;
-      this.touchStartTime = Date.now();
+      this.touchDragging = true;
+    }
+  }
+
+  onTouchMove(event: TouchEvent): void {
+    if (!this.touchDragging || this.isExpanded() || event.touches.length === 0) {
+      return;
+    }
+
+    const deltaY = this.touchStartY - event.touches[0].clientY;
+    if (deltaY >= this.DRAG_THRESHOLD) {
+      this.touchDragging = false;
+      this.touchStartY = 0;
+      this.onClose.emit();
     }
   }
 
   onTouchEnd(event: TouchEvent): void {
-    if (!this.touchStartY || event.changedTouches.length === 0) {
+    if (!this.touchDragging || this.isExpanded()) {
+      this.touchStartY = 0;
+      this.touchDragging = false;
       return;
     }
 
-    const touchEndY = event.changedTouches[0].clientY;
-    const touchEndTime = Date.now();
-    const deltaY = this.touchStartY - touchEndY; // Positive if swiped up
-    const deltaTime = touchEndTime - this.touchStartTime;
-
-    // Reset touch start values
-    this.touchStartY = 0;
-    this.touchStartTime = 0;
-
-    // Check if it's a valid swipe up gesture
-    // Only trigger if panel is collapsed
-    if (!this.isExpanded() && 
-        deltaY > this.SWIPE_THRESHOLD && 
-        deltaTime < this.SWIPE_MAX_TIME) {
-      // Swipe up detected - open the panel
-      this.onClose.emit(); // This toggles the panel open
+    if (event.changedTouches.length > 0 && this.touchStartY) {
+      const deltaY = this.touchStartY - event.changedTouches[0].clientY;
+      if (deltaY > this.SWIPE_THRESHOLD) {
+        this.onClose.emit();
+      }
     }
+
+    this.touchStartY = 0;
+    this.touchDragging = false;
   }
 
   private searchNominatim(query: string): Promise<NominatimResult[]> {
