@@ -1,3 +1,5 @@
+import { getColorForScore, NO_SCORE_COLOR, ScoreColorConfig } from '../../utils/score-colors.util';
+
 export function gradeColor(index: number): string {
   const v = index / 100;
   if (v <= 0) return 'rgba(128, 128, 128, 1)';
@@ -9,13 +11,8 @@ export function gradeColor(index: number): string {
   return 'rgba(150, 86, 162, 1)';
 }
 
-export function scoreColor(score: number): string {
-  if (score < 480) return 'rgb(46, 125, 50)';
-  if (score < 960) return 'rgb(102, 187, 106)';
-  if (score < 1440) return 'rgb(255, 241, 118)';
-  if (score < 1800) return 'rgb(253,216,53)';
-  if (score < 2700) return 'rgb(239, 83, 80)';
-  return 'rgb(183, 28, 28)';
+export function scoreColor(score: number, config: ScoreColorConfig | null): string {
+  return getColorForScore(score, config);
 }
 
 export function gradeColorSimple(index: number): string {
@@ -25,10 +22,8 @@ export function gradeColorSimple(index: number): string {
   return 'rgba(237, 112, 20, 0.9)';
 }
 
-export function scoreColorSimple(score: number): string {
-  if (score < 1200) return 'rgb(102, 187, 106)';
-  if (score < 2700) return 'rgb(239, 83, 80)';
-  return 'rgb(183, 28, 28)';
+export function scoreColorSimple(score: number, config: ScoreColorConfig | null): string {
+  return getColorForScore(score, config);
 }
 
 export const QUALITY_COLORS = [
@@ -42,11 +37,4 @@ export const QUALITY_COLORS = [
 
 export const QUALITY_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'] as const;
 
-export const TIME_COLORS = [
-  'rgb(46, 125, 50)',
-  'rgb(102, 187, 106)',
-  'rgb(255, 241, 118)',
-  'rgb(253,216,53)',
-  'rgb(239, 83, 80)',
-  'rgb(183, 28, 28)',
-] as const;
+export { NO_SCORE_COLOR };

@@ -17,6 +17,7 @@ import { PersonasDialogComponent, PersonasDialogData } from './overlay/personas-
 import { Map as MapLibreMap, NavigationControl, FullscreenControl, Popup, GeoJSONSource } from 'maplibre-gl';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MobileUiService } from '../../../services/mobile-ui.service';
+import { ScoreColorsService } from '../../../services/score-colors.service';
 
 @Component({
   selector: 'app-analyze',
@@ -108,19 +109,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     { letter: 'F', color: 'rgb(197, 136, 187)' }
   ];
 
-  // Time (score) colors - must match map.service.ts getScoreFillColorExpression()
-  timeColors = [
-    { value: '0-7', color: 'rgb(46, 125, 50)' },
-    { value: '8-15', color: 'rgb(102, 187, 106)' },
-    { value: '16-23', color: 'rgb(255, 241, 118)' },
-    { value: '24-30', color: 'rgb(253,216,53)' },
-    { value: '31-45', color: 'rgb(239, 83, 80)' },
-    { value: '45+', color: 'rgb(183, 28, 28)' }
-  ];
-  
   @ViewChild('activitiesChart') activitiesChart?: UIChart;
   @ViewChild('personasChart') personasChart?: UIChart;
-  
+
   private featureSelectionService = inject(FeatureSelectionService);
   private mapService = inject(MapService);
   private filterConfigService = inject(FilterConfigService);
@@ -130,6 +121,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private dialog = inject(MatDialog);
   private translate = inject(TranslateService);
   private mobileUi = inject(MobileUiService);
+  private scoreColorsService = inject(ScoreColorsService);
   private featureSubscription?: Subscription;
   private featureSubscription2?: Subscription;
   private featureInfoSubscription?: Subscription;
@@ -581,19 +573,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getScoreColor(score: number): string {
-    if (score < 600) {
-      return 'rgb(46, 125, 50)'; // 0-10 min (default for < 600) - strong green
-    } else if (score < 900) {
-      return 'rgb(102, 187, 106)'; // 11-15 min (600-900s) - light green
-    } else if (score < 1200) {
-      return 'rgb(255, 241, 118)'; // 16-20 min (900-1200s) - light yellow
-    } else if (score < 1800) {
-      return 'rgb(253,216,53)'; // 21-30 min (1200-1800s) - strong yellow
-    } else if (score < 2700) {
-      return 'rgb(239, 83, 80)'; // 31-45 min (1800-2700s) - light red
-    } else {
-      return 'rgb(183, 28, 28)'; // 45+ min (2700+s) - dark red
-    }
+    return this.scoreColorsService.getColorForScore(score);
   }
 
   getRatingDisplay(featureInfo: FeatureInfoResponse | null): string {
@@ -1206,22 +1186,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Colors match exactly with map.service.ts getScoreFillColorExpression() and getIndexFillColorExpression()
     const colors = sortedCategories.map((cat) => {
       if (isScoreMode) {
-        // Use score-based colors (traffic-light colors for zeit bewertung from getScoreFillColorExpression)
-        // Match exact color breaks from map.service.ts
-        const scoreValue = cat.score;
-        if (scoreValue < 600) {
-          return 'rgb(46, 125, 50)'; // 0-10 min (default for < 600) - strong green
-        } else if (scoreValue < 900) {
-          return 'rgb(102, 187, 106)'; // 11-15 min (600-900s) - light green
-        } else if (scoreValue < 1200) {
-          return 'rgb(255, 241, 118)'; // 16-20 min (900-1200s) - light yellow
-        } else if (scoreValue < 1800) {
-          return 'rgb(253,216,53)'; // 21-30 min (1200-1800s) - strong yellow
-        } else if (scoreValue < 2700) {
-          return 'rgb(239, 83, 80)'; // 31-45 min (1800-2700s) - light red
-        } else {
-          return 'rgb(183, 28, 28)'; // 45+ min (2700+s) - dark red
-        }
+        return this.scoreColorsService.getColorForScore(cat.score);
       } else {
         // Use index-based colors (from getIndexFillColorExpression)
         // Match exact color breaks from map.service.ts
@@ -1409,22 +1374,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Colors match exactly with map.service.ts getScoreFillColorExpression() and getIndexFillColorExpression()
     const colors = sortedPersonas.map((persona) => {
       if (isScoreMode) {
-        // Use score-based colors (traffic-light colors for zeit bewertung from getScoreFillColorExpression)
-        // Match exact color breaks from map.service.ts
-        const scoreValue = persona.score;
-        if (scoreValue < 600) {
-          return 'rgb(46, 125, 50)'; // 0-10 min (default for < 600) - strong green
-        } else if (scoreValue < 900) {
-          return 'rgb(102, 187, 106)'; // 11-15 min (600-900s) - light green
-        } else if (scoreValue < 1200) {
-          return 'rgb(255, 241, 118)'; // 16-20 min (900-1200s) - light yellow
-        } else if (scoreValue < 1800) {
-          return 'rgb(253,216,53)'; // 21-30 min (1200-1800s) - strong yellow
-        } else if (scoreValue < 2700) {
-          return 'rgb(239, 83, 80)'; // 31-45 min (1800-2700s) - light red
-        } else {
-          return 'rgb(183, 28, 28)'; // 45+ min (2700+s) - dark red
-        }
+        return this.scoreColorsService.getColorForScore(persona.score);
       } else {
         // Use index-based colors (from getIndexFillColorExpression)
         // Match exact color breaks from map.service.ts
@@ -2145,19 +2095,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private getPlacesScoreColor(score: number): string {
-    if (score < 480) {
-      return 'rgb(46, 125, 50)';
-    } else if (score < 960) {
-      return 'rgb(102, 187, 106)';
-    } else if (score < 1440) {
-      return 'rgb(255, 241, 118)';
-    } else if (score < 1800) {
-      return 'rgb(253,216,53)';
-    } else if (score < 2700) {
-      return 'rgb(239, 83, 80)';
-    } else {
-      return 'rgb(183, 28, 28)';
-    }
+    return this.scoreColorsService.getColorForScore(score);
   }
 
   private getPlacesIndexColor(index: number): string {

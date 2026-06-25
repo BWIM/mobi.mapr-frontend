@@ -347,10 +347,10 @@
           </span>
         }
       </span>
-    } @else {
+    } @else if (hasScoreColors()) {
       <span class="flex w-[14rem] h-2.5 overflow-hidden rounded">
-        @for (color of timeColors; track $index) {
-          <span class="flex-1 h-full" [style.background-color]="color"></span>
+        @for (item of timeLegendItems(); track item.bracketId) {
+          <span class="flex-1 h-full" [style.background-color]="item.color"></span>
         }
       </span>
     }

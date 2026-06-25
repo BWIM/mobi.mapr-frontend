@@ -452,13 +452,12 @@
 }
 
 .legend-labels {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  display: flex;
+  width: 100%;
   font-size: 10px;
   color: var(--primary-color);
   font-weight: 600;
   line-height: 1.2;
-  gap: 0;
 }
 
 @media (min-width: 768px) {
@@ -468,6 +467,8 @@
 }
 
 .legend-label {
+  flex: 1;
+  min-width: 0;
   color: var(--primary-color);
   text-align: center;
 }

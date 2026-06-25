@@ -93,20 +93,20 @@
       </div>
     </div>
     <!-- Time legend (discrete color steps) -->
-    <div class="legend-time" *ngIf="!isQualityMode">
+    <div class="legend-time" *ngIf="!isQualityMode && hasScoreColors()">
       <div class="legend-steps">
         <div
           class="legend-step"
-          *ngFor="let item of timeColors"
+          *ngFor="let item of timeLegendItems()"
           [style.background-color]="item.color"
-          (click)="toggleTimeBracket($event, item.value)"
-          [class.legend-item-inactive]="!isTimeBracketSelected(item.value)"
-          [attr.title]="('map.legend.time.brackets.' + item.value) | translate"
+          (click)="toggleTimeBracket($event, item.bracketId)"
+          [class.legend-item-inactive]="!isTimeBracketSelected(item.bracketId)"
+          [attr.title]="item.segmentLabel"
         ></div>
       </div>
       <div class="legend-labels">
-        <span class="legend-label" *ngFor="let item of timeColors">
-          {{ getTimeBracketLabel(item.value) }}
+        <span class="legend-label" *ngFor="let item of timeLegendItems()">
+          {{ item.segmentLabel }}
         </span>
       </div>
     </div>

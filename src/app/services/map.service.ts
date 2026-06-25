@@ -8,6 +8,7 @@ import { appendProjectAccessParams, hasProjectAccess } from './project-access-pa
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { WebsocketService } from './websocket.service';
 import { ProjectsService } from './project.service';
+import { ScoreColorsService } from './score-colors.service';
 
 export interface ContentLayerFilters {
   profile_ids: number[];
@@ -18,7 +19,7 @@ export interface ContentLayerFilters {
   admin_level?: 'state' | 'county' | 'municipality' | 'hexagon';
   feature_type: 'index' | 'score';
   selected_quality_brackets?: Array<'A' | 'B' | 'C' | 'D' | 'E' | 'F'>;
-  selected_time_brackets?: Array<'0-7' | '8-15' | '16-23' | '24-30' | '31-45' | '45+'>;
+  selected_time_brackets?: string[];
 }
 
 /** Backend sentinel: score === NO_DATA_SCORE means no data for this feature. */
@@ -95,6 +96,7 @@ export class MapService {
   private http = inject(HttpClient);
   private websocketService = inject(WebsocketService);
   private projectService = inject(ProjectsService);
+  private scoreColorsService = inject(ScoreColorsService);
   private currentFilters: ContentLayerFilters | null = null;
   private hasInitialZoom = false; // Track if initial zoom to geolocation has occurred
   
@@ -139,24 +141,9 @@ export class MapService {
       return ['any', ...selected.map(bracket => bracketExpressions[bracket])];
     }
 
-    const selected = filters.selected_time_brackets ?? ['0-7', '8-15', '16-23', '24-30', '31-45', '45+'];
-    if (selected.length === 0) {
-      return ['==', ['get', 'id'], -1];
-    }
-    if (selected.length === 6) {
-      return null;
-    }
-
-    const bracketExpressions: Record<string, any[]> = {
-      '0-7': ['<', ['get', 'score'], 480],
-      '8-15': ['all', ['>=', ['get', 'score'], 480], ['<', ['get', 'score'], 960]],
-      '16-23': ['all', ['>=', ['get', 'score'], 960], ['<', ['get', 'score'], 1440]],
-      '24-30': ['all', ['>=', ['get', 'score'], 1440], ['<', ['get', 'score'], 1800]],
-      '31-45': ['all', ['>=', ['get', 'score'], 1800], ['<', ['get', 'score'], 2700]],
-      '45+': ['>=', ['get', 'score'], 2700]
-    };
-
-    return ['any', ...selected.map(bracket => bracketExpressions[bracket])];
+    const allBracketIds = this.scoreColorsService.bracketIds();
+    const selected = filters.selected_time_brackets ?? allBracketIds;
+    return this.scoreColorsService.buildBracketFilter(selected) as any[] | null;
   }
 
   setMap(map: Map | null): void {
@@ -945,21 +932,7 @@ export class MapService {
    */
 
   private getScoreFillColorExpression(): any {
-    return [
-      'case',
-      this.isNoDataScoreExpression(),
-      'rgb(233, 233, 233)',
-      [
-        'step',
-        ['get', 'score'],
-        'rgb(46,125,50)',     // 0-7 min (default for < 480) - strong green
-        480, 'rgb(102,187,106)',  // 8-15 min (480-960s) - light green
-        960, 'rgb(255,241,118)', // 16-23 min (960-1440s) - light yellow
-        1440, 'rgb(253,216,53)', // 24-30 min (1440-1800s) - strong yellow
-        1800, 'rgb(239,83,80)',   // 31-45 min (1800-2700s) - light red
-        2700, 'rgb(183,28,28)'    // 45+ min (2700+s) - dark red
-      ]
-    ];
+    return this.scoreColorsService.buildMapLibreStepExpression(this.isNoDataScoreExpression());
   }
 
   /**
