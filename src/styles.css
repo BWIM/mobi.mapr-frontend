@@ -282,7 +282,11 @@ button[matRaisedButton]:hover,
         touch-action: pan-x;
     }
 }
-/* Project switcher menu must render above the mobile filter panel (z-index 1002). */
+/* Project switcher menu must render above the mobile filter panel (z-index 1002) and sheets (1060). */
+.cdk-overlay-container:has(.project-switcher-menu-panel) {
+    z-index: 1100 !important;
+}
+
 .cdk-overlay-pane:has(.project-switcher-menu-panel) {
-    z-index: 1050 !important;
+    z-index: 1100 !important;
 }
