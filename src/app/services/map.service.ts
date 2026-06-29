@@ -700,18 +700,6 @@ export class MapService {
     return this.buildTileUrl(effectiveId, filters);
   }
 
-  private parseAdminLevelFromTileUrl(tileUrl?: string): ContentLayerFilters['admin_level'] | null {
-    if (!tileUrl) {
-      return null;
-    }
-    const match = tileUrl.match(/[?&]admin_level=([^&]+)/);
-    const value = match?.[1];
-    if (value === 'state' || value === 'county' || value === 'municipality' || value === 'hexagon') {
-      return value;
-    }
-    return null;
-  }
-
   private getCurrentContentLayerTileUrl(targetMap: Map): string | null {
     const source = targetMap.getSource('content-layer') as { tiles?: string[] } | undefined;
     return source?.tiles?.[0] ?? null;
@@ -801,10 +789,11 @@ export class MapService {
 
     const source = targetMap.getSource('content-layer') as { setTiles?: (tiles: string[]) => void; tiles?: string[] } | undefined;
     const currentTileUrl = this.getCurrentContentLayerTileUrl(targetMap) ?? undefined;
-    const adminLevelChanged =
-      this.parseAdminLevelFromTileUrl(currentTileUrl) !== this.parseAdminLevelFromTileUrl(tileUrl);
+    const tileUrlChanged = currentTileUrl !== tileUrl;
 
-    if (!source?.setTiles || adminLevelChanged) {
+    // setTiles alone does not reliably refetch when profile_ids or other query params change
+    // (notably on the compare right map); reload the style when the tile URL changes.
+    if (!source?.setTiles || tileUrlChanged) {
       await this.loadContentLayerOnMap(targetMap, filters, false, false);
       return;
     }
