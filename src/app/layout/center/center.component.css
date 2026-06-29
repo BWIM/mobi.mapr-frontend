@@ -9,6 +9,12 @@
   overflow: hidden;
 }
 
+@media (max-width: 1023px) {
+  .comparison-container {
+    overscroll-behavior: none;
+  }
+}
+
 .comparison-container .compare-map {
   position: absolute;
   top: 0;
