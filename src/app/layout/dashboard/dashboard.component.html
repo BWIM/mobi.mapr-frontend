@@ -1,6 +1,6 @@
 <div class="flex flex-col h-dvh w-dvw overflow-hidden bg-[var(--background-color)]">
   <!-- MOBILE HEADER - Only visible on mobile -->
-  <div class="md:hidden h-16 bg-[var(--secondary-color)] flex items-center justify-center px-4 border-b border-[var(--background-color)]">
+  <div class="lg:hidden h-16 bg-[var(--secondary-color)] flex items-center justify-center px-4 border-b border-[var(--background-color)]">
     <a href="https://bw-im.de/mobimapr" target="_blank" [attr.title]="'rail.logoHint' | translate" class="flex items-center gap-2">
       <img src="assets/images/logo.png" alt="Logo" class="h-10 w-auto">
       <img src="assets/images/logo_name.png" alt="Logo Text" class="h-8 w-auto">
@@ -8,7 +8,7 @@
   </div>
 
   <!-- DESKTOP LAYOUT -->
-  <div class="hidden md:flex h-full w-full overflow-hidden">
+  <div class="hidden lg:flex h-full w-full overflow-hidden">
     <!-- RAIL - Narrow left section -->
     <div class="flex-shrink-0 w-24 bg-[var(--secondary-color)]">
       <app-rail></app-rail>
@@ -21,8 +21,7 @@
     } @else {
       <!-- LEFT PANEL - Expandable -->
       <div class="flex flex-col transition-all duration-300 ease-in-out relative"
-           [class.w-80]="leftPanelExpanded()"
-           [class.w-12]="!leftPanelExpanded()">
+           [ngClass]="leftPanelExpanded() ? 'lg:w-72 xl:w-80' : 'w-12'">
         @if (leftPanelExpanded()) {
           <div class="flex-1 overflow-auto bg-none">
             <app-left></app-left>
@@ -56,7 +55,7 @@
       <!-- CENTER AREA - Map and Credits -->
       <div class="flex-1 flex flex-col min-w-0 bg-[var(--secondary-color)]">
         <div class="flex-1 flex flex-col min-h-0 bg-[var(--background-color)] rounded-tr-3xl rounded-br-3xl">
-          <div class="flex-1 min-h-0 p-4 rounded-1xl overflow-hidden">
+          <div class="flex-1 min-h-0 lg:p-3 xl:p-4 rounded-1xl overflow-hidden">
             <app-center></app-center>
           </div>
         </div>
@@ -64,8 +63,7 @@
 
       <!-- RIGHT PANEL - Expandable -->
       <div class="flex flex-col transition-all duration-300 ease-in-out relative z-0"
-           [class.w-106]="rightPanelExpanded()"
-           [class.w-12]="!rightPanelExpanded()">
+           [ngClass]="rightPanelExpanded() ? 'lg:w-80 xl:w-96 2xl:w-106' : 'w-12'">
         @if (rightPanelExpanded()) {
           <div class="flex-1 overflow-auto bg-[var(--secondary-color)]">
             <app-right></app-right>
@@ -101,7 +99,7 @@
   </div>
 
   <!-- MOBILE LAYOUT -->
-  <div class="md:hidden flex-1 flex flex-col min-h-0 relative">
+  <div class="lg:hidden flex-1 flex flex-col min-h-0 relative">
     @if (showGroupOverview()) {
       <div class="flex-1 min-h-0 overflow-auto">
         <app-group-overview (backRequested)="closeGroupOverview()"></app-group-overview>
@@ -120,7 +118,7 @@
 
       @if (mobileFilterExpanded()) {
         <div
-          class="fixed inset-0 z-[1001] bg-black/30 md:hidden"
+          class="fixed inset-0 z-[1001] bg-black/30 lg:hidden"
           (click)="toggleMobileFilterPanel()"
           aria-hidden="true"></div>
       }

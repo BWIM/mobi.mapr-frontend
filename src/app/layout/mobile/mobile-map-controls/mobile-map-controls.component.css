@@ -1,0 +1,7 @@
+/* Stack below map zoom + fullscreen controls (see center.component.css top-right layout). */
+.mobile-stats-btn {
+  position: absolute;
+  top: calc(68px + 5.25rem + 0.5rem + 3rem + 0.5rem);
+  right: 0.625rem;
+  z-index: 1001;
+}

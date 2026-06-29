@@ -1,6 +1,6 @@
 <div class="min-h-full bg-[var(--background-color)] p-8 overflow-auto">
   <div class="max-w-4xl mx-auto">
-    <div class="flex items-center gap-4 mb-6 md:hidden">
+    <div class="flex items-center gap-4 mb-6 lg:hidden">
       <button
         type="button"
         class="inline-flex items-center gap-1 text-[var(--primary-color)] opacity-80 hover:opacity-100"
@@ -16,8 +16,8 @@
 
     <p class="mb-6 flex items-start gap-2 rounded-lg border border-[var(--light-primary-color)] bg-[var(--secondary-color)] px-4 py-3 text-sm leading-relaxed text-[var(--primary-color)] opacity-90">
       <mat-icon class="mt-0.5 shrink-0 text-base opacity-70">info</mat-icon>
-      <span class="hidden md:inline">{{ 'groupOverview.switchHint' | translate }}</span>
-      <span class="md:hidden">{{ 'groupOverview.switchHintMobile' | translate }}</span>
+      <span class="hidden lg:inline">{{ 'groupOverview.switchHint' | translate }}</span>
+      <span class="lg:hidden">{{ 'groupOverview.switchHintMobile' | translate }}</span>
     </p>
 
     @if (loading()) {

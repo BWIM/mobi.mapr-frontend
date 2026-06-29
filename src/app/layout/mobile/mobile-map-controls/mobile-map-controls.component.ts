@@ -7,6 +7,7 @@ import { MobileUiService } from '../../../services/mobile-ui.service';
   selector: 'app-mobile-map-controls',
   imports: [MatIcon, TranslateModule],
   templateUrl: './mobile-map-controls.component.html',
+  styleUrl: './mobile-map-controls.component.css',
 })
 export class MobileMapControlsComponent {
   private mobileUi = inject(MobileUiService);

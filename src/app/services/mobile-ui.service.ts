@@ -21,8 +21,8 @@ export type AnalyzeSubSheetPayload =
     }
   | { type: 'analyze-places'; data: PlacesDialogData };
 
-/** Matches Tailwind `md` breakpoint (768px). */
-export const MOBILE_MEDIA_QUERY = '(max-width: 767px)';
+/** Matches Tailwind `lg` breakpoint (1024px). Phones and tablets use mobile layout. */
+export const MOBILE_MEDIA_QUERY = '(max-width: 1023px)';
 
 @Injectable({
   providedIn: 'root',
