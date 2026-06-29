@@ -25,6 +25,7 @@ import { RegioStar } from '../interfaces/regiostar';
 import { Category } from '../interfaces/category';
 import { State } from '../interfaces/features';
 import { forkJoin } from 'rxjs';
+import { ScoreColorsService } from './score-colors.service';
 import { map } from 'rxjs/operators';
 
 export interface FilterState {
@@ -45,12 +46,11 @@ export interface FilterState {
 }
 
 export type QualityBracket = 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
-export type TimeBracket = '0-7' | '8-15' | '16-23' | '24-30' | '31-45' | '45+';
+export type TimeBracket = string;
 export type AdminLevel = 'state' | 'county' | 'municipality' | 'hexagon';
 export type LayerMode = 'auto' | 'manual';
 
 const ALL_QUALITY_BRACKETS: QualityBracket[] = ['A', 'B', 'C', 'D', 'E', 'F'];
-const ALL_TIME_BRACKETS: TimeBracket[] = ['0-7', '8-15', '16-23', '24-30', '31-45', '45+'];
 const ADMIN_LEVEL_RANK: Record<AdminLevel, number> = {
   state: 0,
   county: 1,
@@ -74,6 +74,7 @@ export class FilterConfigService {
   private regiostarService = inject(RegioStarService);
   private stateService = inject(StateService);
   private categoryService = inject(CategoryService);
+  private scoreColorsService = inject(ScoreColorsService);
   private router = inject(Router);
   private breakpointObserver = inject(BreakpointObserver);
 
@@ -97,7 +98,7 @@ export class FilterConfigService {
   private _currentMapZoom = signal<number>(7);
   private _layerFallbackNoticeNonce = signal<number>(0);
   private _selectedQualityBrackets = signal<QualityBracket[]>([...ALL_QUALITY_BRACKETS]);
-  private _selectedTimeBrackets = signal<TimeBracket[]>([...ALL_TIME_BRACKETS]);
+  private _selectedTimeBrackets = signal<TimeBracket[]>([]);
   private _isMapCompareMode = signal<boolean>(false);
   private _pendingMapCompareEnable = signal<boolean>(false);
   private _rightSelectedModes = signal<number[]>([]);
@@ -384,7 +385,7 @@ export class FilterConfigService {
           this._selectedAdminLevel.set(null);
           this._layerMode.set('auto');
           this._selectedQualityBrackets.set([...ALL_QUALITY_BRACKETS]);
-          this._selectedTimeBrackets.set([...ALL_TIME_BRACKETS]);
+          this._selectedTimeBrackets.set([...this.scoreColorsService.bracketIds()]);
 
           // Reset filter-data gating so the map waits for the new project's filter options.
           this._isFilterDataLoaded.set(false);
@@ -757,7 +758,8 @@ export class FilterConfigService {
         .filter(v => v.length > 0);
 
       const qualityValues = values.filter((v): v is QualityBracket => ALL_QUALITY_BRACKETS.includes(v as QualityBracket));
-      const timeValues = values.filter((v): v is TimeBracket => ALL_TIME_BRACKETS.includes(v as TimeBracket));
+      const availableTimeBrackets = this.scoreColorsService.bracketIds();
+      const timeValues = values.filter((v): v is TimeBracket => availableTimeBrackets.includes(v));
 
       if (qualityValues.length > 0) {
         this._selectedQualityBrackets.set([...new Set(qualityValues)]);
@@ -768,7 +770,7 @@ export class FilterConfigService {
       this.saveSettings();
     } else {
       this._selectedQualityBrackets.set([...ALL_QUALITY_BRACKETS]);
-      this._selectedTimeBrackets.set([...ALL_TIME_BRACKETS]);
+      this._selectedTimeBrackets.set([...this.scoreColorsService.bracketIds()]);
       this.saveSettings();
     }
 
@@ -1982,11 +1984,14 @@ export class FilterConfigService {
       }
 
       const allTime = settings.legendBrackets?.time;
+      const availableTimeBrackets = this.scoreColorsService.bracketIds();
       if (Array.isArray(allTime) && allTime.length > 0) {
-        const validTime = allTime.filter((v): v is TimeBracket => ALL_TIME_BRACKETS.includes(v as TimeBracket));
-        this._selectedTimeBrackets.set(validTime.length > 0 ? [...new Set(validTime)] : [...ALL_TIME_BRACKETS]);
+        const validTime = allTime.filter((v): v is TimeBracket => availableTimeBrackets.includes(v));
+        this._selectedTimeBrackets.set(
+          validTime.length > 0 ? [...new Set(validTime)] : [...availableTimeBrackets]
+        );
       } else {
-        this._selectedTimeBrackets.set([...ALL_TIME_BRACKETS]);
+        this._selectedTimeBrackets.set([...availableTimeBrackets]);
       }
 
       // Load filter settings

@@ -9,6 +9,7 @@ import { firstValueFrom, catchError, of } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { InfoDialogComponent } from '../../../../shared/info-overlay/info-dialog.component';
 import { LegendInfoComponent } from '../../../../shared/legend-info/legend-info.component';
+import { ScoreColorsService } from '../../../../services/score-colors.service';
 
 export interface PlacesDialogData {
   featureType: 'municipality' | 'hexagon' | 'county' | 'state';
@@ -72,18 +73,9 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     { letter: 'F', color: 'rgb(197, 136, 187)' }
   ];
 
-  // Time (score) colors - must match map.service.ts getScoreFillColorExpression()
-  timeColors = [
-    { value: '0-7', color: 'rgb(46, 125, 50)' },
-    { value: '8-15', color: 'rgb(102, 187, 106)' },
-    { value: '16-23', color: 'rgb(255, 241, 118)' },
-    { value: '24-30', color: 'rgb(253,216,53)' },
-    { value: '31-45', color: 'rgb(239, 83, 80)' },
-    { value: '45+', color: 'rgb(183, 28, 28)' }
-  ];
-
   private placesService = inject(PlacesService);
   private mapService = inject(MapService);
+  private scoreColorsService = inject(ScoreColorsService);
 
   constructor(
     public dialogRef: MatDialogRef<PlacesDialogComponent>,
@@ -300,19 +292,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private getScoreColor(score: number): string {
-    if (score < 480) {
-      return 'rgb(46, 125, 50)';
-    } else if (score < 960) {
-      return 'rgb(102, 187, 106)';
-    } else if (score < 1440) {
-      return 'rgb(255, 241, 118)';
-    } else if (score < 1800) {
-      return 'rgb(253,216,53)';
-    } else if (score < 2700) {
-      return 'rgb(239, 83, 80)';
-    } else {
-      return 'rgb(183, 28, 28)';
-    }
+    return this.scoreColorsService.getColorForScore(score);
   }
 
   private getIndexColor(index: number): string {

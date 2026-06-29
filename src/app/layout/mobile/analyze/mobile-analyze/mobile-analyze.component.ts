@@ -38,8 +38,8 @@ import {
   scoreColor,
   QUALITY_COLORS,
   QUALITY_LETTERS,
-  TIME_COLORS,
 } from '../../analyze-chart.utils';
+import { ScoreColorsService } from '../../../../services/score-colors.service';
 
 function gradeFromIndex(index: number): string {
   const indexValue = index / 100;
@@ -118,6 +118,7 @@ export class MobileAnalyzeComponent implements OnDestroy {
   private analyzeService = inject(AnalyzeService);
   private placesService = inject(PlacesService);
   private mapService = inject(MapService);
+  private scoreColorsService = inject(ScoreColorsService);
   private dialog = inject(MatDialog);
   private injector = inject(Injector);
 
@@ -129,7 +130,8 @@ export class MobileAnalyzeComponent implements OnDestroy {
   readonly step = this.mobileUi.analyzeStep;
   readonly qualityColors = QUALITY_COLORS;
   readonly qualityLetters = QUALITY_LETTERS;
-  readonly timeColors = TIME_COLORS;
+  readonly timeLegendItems = this.scoreColorsService.legendItems;
+  readonly hasScoreColors = this.scoreColorsService.hasConfig;
 
   showPersonasTab = computed(
     () =>
@@ -282,7 +284,9 @@ export class MobileAnalyzeComponent implements OnDestroy {
   readonly gradeFromIndex = gradeFromIndex;
 
   placesMetricTextColor(score: number, index: number): string {
-    return this.placesScoreMode() ? scoreColor(score) : gradeColor(index);
+    return this.placesScoreMode()
+      ? scoreColor(score, this.scoreColorsService.getConfig())
+      : gradeColor(index);
   }
 
   openLegendInfo(event: Event): void {
@@ -380,7 +384,7 @@ export class MobileAnalyzeComponent implements OnDestroy {
     const maxWeight = Math.max(...weights, 0);
     const xAxisMax = Math.max(5, Math.ceil(maxWeight / 5) * 5);
     const colors = categories.map((c) =>
-      d.isScoreMode ? scoreColor(c.score) : gradeColor(c.index),
+      d.isScoreMode ? scoreColor(c.score, this.scoreColorsService.getConfig()) : gradeColor(c.index),
     );
 
     this.activitiesChartHeight.set(categories.length * barHeight + 56);
@@ -502,7 +506,7 @@ export class MobileAnalyzeComponent implements OnDestroy {
     const maxWeight = Math.max(...weights, 0);
     const xAxisMax = Math.max(5, Math.ceil(maxWeight / 5) * 5);
     const colors = personas.map((p) =>
-      d.isScoreMode ? scoreColor(p.score) : gradeColor(p.index),
+      d.isScoreMode ? scoreColor(p.score, this.scoreColorsService.getConfig()) : gradeColor(p.index),
     );
 
     this.personasChartHeight.set(personas.length * barHeight + 56);

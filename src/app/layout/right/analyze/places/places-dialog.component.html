@@ -91,19 +91,15 @@
         </div>
 
         <!-- Time legend (discrete color steps) -->
-        <div class="w-full" *ngIf="getPlacesIsScoreMode()">
+        <div class="w-full" *ngIf="getPlacesIsScoreMode() && hasScoreColors()">
           <div class="flex flex-col gap-2 w-full">
             <div class="flex w-full h-3 overflow-hidden rounded">
-              <div class="flex-1" *ngFor="let item of timeColors" [style.background-color]="item.color"></div>
+              <div class="flex-1" *ngFor="let item of timeLegendItems()" [style.background-color]="item.color"></div>
             </div>
             <div class="flex justify-between">
-              <span class="text-xs text-white">{{ 'map.legend.time.min0' | translate }}</span>
-              <span class="text-xs text-white">7</span>
-              <span class="text-xs text-white">15</span>
-              <span class="text-xs text-white">23</span>
-              <span class="text-xs text-white">30</span>
-              <span class="text-xs text-white">45</span>
-              <span class="text-xs text-white">45+</span>
+              <span class="text-xs text-white flex-1 min-w-0 text-center" *ngFor="let item of timeLegendItems()">
+                {{ item.segmentLabel }}
+              </span>
             </div>
           </div>
         </div>

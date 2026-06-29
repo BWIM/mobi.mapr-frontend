@@ -11,6 +11,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { InfoDialogComponent } from '../../../../shared/info-overlay/info-dialog.component';
 import { LegendInfoComponent } from '../../../../shared/legend-info/legend-info.component';
 import { LanguageService } from '../../../../services/language.service';
+import { ScoreColorsService } from '../../../../services/score-colors.service';
 
 export interface AllCategoriesDialogData {
   featureType: 'municipality' | 'hexagon' | 'county' | 'state';
@@ -62,17 +63,11 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
     { letter: 'F', color: 'rgb(197, 136, 187)' }
   ];
 
-  // Time (score) colors - match exact colors from map.service.ts getScoreFillColorExpression()
-  timeColors = [
-    { value: '0-7', color: 'rgb(46, 125, 50)' },      // 0-7 min (default for < 480) - strong green
-    { value: '8-15', color: 'rgb(102, 187, 106)' },   // 8-15 min (480-960s) - light green
-    { value: '16-23', color: 'rgb(255, 241, 118)' }, // 16-23 min (960-1440s) - light yellow
-    { value: '24-30', color: 'rgb(253,216,53)' },    // 24-30 min (1440-1800s) - strong yellow
-    { value: '31-45', color: 'rgb(239, 83, 80)' },    // 31-45 min (1800-2700s) - light red
-    { value: '45+', color: 'rgb(183, 28, 28)' }       // 45+ min (2700+s) - dark red
-  ];
-
   private languageService = inject(LanguageService);
+  private scoreColorsService = inject(ScoreColorsService);
+
+  readonly timeLegendItems = this.scoreColorsService.legendItems;
+  readonly hasScoreColors = this.scoreColorsService.hasConfig;
 
   constructor(
     public dialogRef: MatDialogRef<AllCategoriesDialogComponent>,
@@ -200,22 +195,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
     // Colors match exactly with map.service.ts getScoreFillColorExpression() and getIndexFillColorExpression()
     const colors = categories.map((cat) => {
       if (this.data.isScoreMode) {
-        // Use score-based colors (blue colors for zeit bewertung from getScoreFillColorExpression)
-        // Match exact color breaks from map.service.ts
-        const scoreValue = cat.score;
-        if (scoreValue < 480) {
-          return 'rgb(46, 125, 50)'; // 0-7 min (default for < 480) - strong green
-        } else if (scoreValue < 960) {
-          return 'rgb(102, 187, 106)'; // 8-15 min (480-960s) - light green
-        } else if (scoreValue < 1440) {
-          return 'rgb(255, 241, 118)'; // 16-23 min (960-1440s) - light yellow
-        } else if (scoreValue < 1800) {
-          return 'rgb(253,216,53)'; // 24-30 min (1440-1800s) - strong yellow
-        } else if (scoreValue < 2700) {
-          return 'rgb(239, 83, 80)'; // 31-45 min (1800-2700s) - light red
-        } else {
-          return 'rgb(183, 28, 28)'; // 45+ min (2700+s) - dark red
-        }
+        return this.scoreColorsService.getColorForScore(cat.score);
       } else {
         // Use index-based colors (from getIndexFillColorExpression)
         // Match exact color breaks from map.service.ts
@@ -358,19 +338,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
   }
 
   private getScoreColor(score: number): string {
-    if (score < 480) {
-      return 'rgb(46, 125, 50)'; // 0-7 min (default for < 480) - strong green
-    } else if (score < 960) {
-      return 'rgb(102, 187, 106)'; // 8-15 min (480-960s) - light green
-    } else if (score < 1440) {
-      return 'rgb(255, 241, 118)'; // 16-23 min (960-1440s) - light yellow
-    } else if (score < 1800) {
-      return 'rgb(253,216,53)'; // 24-30 min (1440-1800s) - strong yellow
-    } else if (score < 2700) {
-      return 'rgb(239, 83, 80)'; // 31-45 min (1800-2700s) - light red
-    } else {
-      return 'rgb(183, 28, 28)'; // 45+ min (2700+s) - dark red
-    }
+    return this.scoreColorsService.getColorForScore(score);
   }
 
   private getGradeColor(index: number): string {

@@ -158,6 +158,11 @@
 
 .legend-labels {
   display: flex;
-  justify-content: space-between;
   width: 100%;
+}
+
+.legend-label {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
 }

@@ -9,7 +9,7 @@ export interface UserSettings {
   layerMode?: 'auto' | 'manual';
   legendBrackets?: {
     quality: Array<'A' | 'B' | 'C' | 'D' | 'E' | 'F'>;
-    time: Array<'0-7' | '8-15' | '16-23' | '24-30' | '31-45' | '45+'>;
+    time: string[];
   };
   legendClickHintShown?: boolean;
   filters: {
@@ -66,7 +66,7 @@ export class SettingsService {
       layerMode: 'auto',
       legendBrackets: {
         quality: ['A', 'B', 'C', 'D', 'E', 'F'],
-        time: ['0-7', '8-15', '16-23', '24-30', '31-45', '45+']
+        time: []
       },
       legendClickHintShown: false,
       filters: {

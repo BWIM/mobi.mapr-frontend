@@ -16,6 +16,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SearchService } from '../../services/search.service';
 import { QualityBracket, TimeBracket } from '../../services/filter-config.service';
 import { SettingsService } from '../../services/settings.service';
+import { ScoreColorsService } from '../../services/score-colors.service';
 
 interface NominatimResult {
   display_name: string;
@@ -74,6 +75,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private translate = inject(TranslateService);
   private searchService = inject(SearchService);
   private settingsService = inject(SettingsService);
+  private scoreColorsService = inject(ScoreColorsService);
   private snackBar = inject(MatSnackBar);
   private popup?: Popup;
   private rightPopup?: Popup;
@@ -190,29 +192,8 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     { letter: 'E', color: 'rgba(194, 24, 7, 0.7)' },
     { letter: 'F', color: 'rgba(197, 136, 187, 0.7)' }
   ];
-  // 162, 210, 235
-  // 121, 194, 230
-  // 90, 135, 185
-  // 74, 89, 160
-  // 43, 40, 105
-  // 23, 25, 63
-  // Time (score) colors - updated ranges
-  timeColors: Array<{ value: TimeBracket; color: string }> = [
-    { value: '0-7', color: 'rgb(46, 125, 50)' },
-    { value: '8-15', color: 'rgb(102, 187, 106)' },
-    { value: '16-23', color: 'rgb(255, 241, 118)' },
-    { value: '24-30', color: 'rgb(253,216,53)' },
-    { value: '31-45', color: 'rgb(239, 83, 80)' },
-    { value: '45+', color: 'rgb(183, 28, 28)' }
-  ];
-  private readonly timeBracketDisplayLabels: Record<TimeBracket, string> = {
-    '0-7': '<=7',
-    '8-15': '8-15',
-    '16-23': '16-23',
-    '24-30': '24-30',
-    '31-45': '31-45',
-    '45+': '45+'
-  };
+  readonly timeLegendItems = this.scoreColorsService.legendItems;
+  readonly hasScoreColors = this.scoreColorsService.hasConfig;
 
   isQualityBracketSelected(bracket: QualityBracket): boolean {
     return this.filterConfigService.isQualityBracketSelected(bracket);
@@ -230,10 +211,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   toggleTimeBracket(event: MouseEvent, bracket: TimeBracket): void {
     event.stopPropagation();
     this.filterConfigService.toggleTimeBracket(bracket);
-  }
-
-  getTimeBracketLabel(bracket: TimeBracket): string {
-    return this.timeBracketDisplayLabels[bracket];
   }
 
   isLayerAvailable(level: AdminLevel): boolean {

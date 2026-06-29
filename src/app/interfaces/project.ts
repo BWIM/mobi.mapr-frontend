@@ -12,4 +12,5 @@ export interface Project {
     group_id?: number | null;
     group?: ProjectGroup | null;
     pin?: boolean;
+    score_colors?: Record<string, string> | null;
 }

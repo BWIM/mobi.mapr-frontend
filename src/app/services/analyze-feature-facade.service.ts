@@ -12,6 +12,7 @@ import {
   PersonaBreakdown,
 } from './analyze.service';
 import { TranslateService } from '@ngx-translate/core';
+import { ScoreColorsService } from './score-colors.service';
 
 @Injectable({
   providedIn: 'root',
@@ -22,6 +23,7 @@ export class AnalyzeFeatureFacadeService {
   private filterConfig = inject(FilterConfigService);
   private analyzeService = inject(AnalyzeService);
   private translate = inject(TranslateService);
+  private scoreColorsService = inject(ScoreColorsService);
   private destroyRef = inject(DestroyRef);
 
   private subscription?: Subscription;
@@ -440,11 +442,6 @@ export class AnalyzeFeatureFacadeService {
   }
 
   private scoreColor(score: number): string {
-    if (score < 600) return 'rgb(46, 125, 50)';
-    if (score < 900) return 'rgb(102, 187, 106)';
-    if (score < 1200) return 'rgb(255, 241, 118)';
-    if (score < 1800) return 'rgb(253,216,53)';
-    if (score < 2700) return 'rgb(239, 83, 80)';
-    return 'rgb(183, 28, 28)';
+    return this.scoreColorsService.getColorForScore(score);
   }
 }
