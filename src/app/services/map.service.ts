@@ -105,7 +105,7 @@ export class MapService {
   readonly currentProfileIds = this._currentProfileIds.asReadonly();
 
   // Signal to track map loading state
-  private _isMapLoading = signal<boolean>(true);
+  private _isMapLoading = signal<boolean>(false);
   readonly isMapLoading = this._isMapLoading.asReadonly();
 
   // Signal to track project preparation state (when preparing dialog is shown)
