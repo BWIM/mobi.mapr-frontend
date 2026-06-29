@@ -812,6 +812,9 @@
     "statsButton": {
       "label": "Rankings öffnen (Die Besten)"
     },
+    "groupOverviewButton": {
+      "label": "Projektgruppen-Übersicht öffnen"
+    },
     "analyzeSheet": {
       "title": "Analyse"
     },
@@ -833,12 +836,14 @@
   },
   "mobileFilter": {
     "licenseInfo": "Lizenzinfos",
+    "openFiltersLabel": "Filter & Suche öffnen",
+    "collapseLabel": "Filter schließen",
     "collapsedHint": "Tippen oder nach oben wischen, um zu suchen oder die Karte anzupassen",
     "readOnlyHint": "Filter können nur auf dem Desktop geändert werden.",
     "allActivitiesSelected": "Alle Aktivitäten",
     "search": {
-      "expand": "Suche erweitern",
-      "collapse": "Suche einklappen"
+      "expand": "Filter öffnen",
+      "collapse": "Filter schließen"
     }
   },
   "right": {
@@ -924,10 +929,12 @@
     "back": "Zurück zur Karte",
     "loadError": "Fehler beim Laden der Gruppenprojekte.",
     "switchHint": "Tipp: Wechsle jederzeit zwischen Projekten über den Projektnamen oder öffne diese Übersicht über das Gruppensymbol in der linken Leiste.",
-    "switchHintMobile": "Tipp: Wechsle jederzeit zwischen Projekten, indem du unten auf den Projektnamen tippst."
+    "switchHintMobile": "Tipp: Tippe auf das Projekt-Feld unten, um zwischen Projekten zu wechseln, oder öffne die Gruppenübersicht über das Hive-Symbol auf der Karte."
   },
   "projectSwitcher": {
     "label": "Projekt in der Gruppe wechseln",
-    "menuTitle": "Projektgruppe"
+    "menuTitle": "Projektgruppe",
+    "switchProject": "Projekt wechseln",
+    "fieldLabel": "Projekt"
   }
 }

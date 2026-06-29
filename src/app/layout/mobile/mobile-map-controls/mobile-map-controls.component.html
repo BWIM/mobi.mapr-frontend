@@ -1,8 +1,20 @@
-<button
-  type="button"
-  class="mobile-stats-btn lg:hidden w-12 h-12 rounded-full bg-[var(--primary-color)] text-[var(--background-color)] shadow-lg flex items-center justify-center transition-opacity hover:opacity-90]"
-  (click)="openStats()"
-  [attr.aria-label]="'mobile.statsButton.label' | translate"
-  [title]="'stats.title' | translate">
-  <mat-icon class="text-2xl">leaderboard</mat-icon>
-</button>
+<div class="mobile-map-controls lg:hidden">
+  @if (hasGroup()) {
+    <button
+      type="button"
+      class="mobile-map-controls__btn"
+      (click)="openGroupOverview()"
+      [attr.aria-label]="'mobile.groupOverviewButton.label' | translate"
+      [title]="'rail.groupOverview' | translate">
+      <mat-icon class="text-2xl">hive</mat-icon>
+    </button>
+  }
+  <button
+    type="button"
+    class="mobile-map-controls__btn"
+    (click)="openStats()"
+    [attr.aria-label]="'mobile.statsButton.label' | translate"
+    [title]="'stats.title' | translate">
+    <mat-icon class="text-2xl">leaderboard</mat-icon>
+  </button>
+</div>

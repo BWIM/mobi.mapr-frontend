@@ -4,7 +4,26 @@
 }
 
 .mobile-filter-panel--collapsed {
+  cursor: default;
+}
+
+.mobile-filter-panel__handle-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+  width: 100%;
+  padding: 0.5rem 1rem 0.375rem;
+  border: none;
+  background: transparent;
+  color: var(--light-primary-color);
   cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.mobile-filter-panel__handle-row:hover,
+.mobile-filter-panel__handle-row:focus-visible {
+  opacity: 0.9;
 }
 
 .mobile-filter-panel__handle {
@@ -12,18 +31,27 @@
   height: 0.25rem;
   border-radius: 9999px;
   background: var(--light-primary-color);
-  margin: 0.5rem auto 0;
   opacity: 0.85;
+}
+
+.mobile-filter-panel__handle-label {
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--light-primary-color);
+}
+
+.mobile-filter-panel__handle-chevron {
+  font-size: 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--light-primary-color);
+  opacity: 0.9;
 }
 
 .touch-handle {
   touch-action: pan-y;
-}
-
-.mobile-filter-panel__expand-btn {
-  border: none;
-  background: transparent;
-  cursor: pointer;
 }
 
 /* Search form field styling - pill shaped with primary background */

@@ -812,6 +812,9 @@
     "statsButton": {
       "label": "Open rankings (The Best)"
     },
+    "groupOverviewButton": {
+      "label": "Open group projects overview"
+    },
     "analyzeSheet": {
       "title": "Analysis"
     },
@@ -833,12 +836,14 @@
   },
   "mobileFilter": {
     "licenseInfo": "License Info",
+    "openFiltersLabel": "Open filters & search",
+    "collapseLabel": "Close filters",
     "collapsedHint": "Tap or swipe up to search or change transport modes",
     "readOnlyHint": "Filters can only be changed on desktop.",
     "allActivitiesSelected": "All activities",
     "search": {
-      "expand": "Expand search",
-      "collapse": "Collapse search"
+      "expand": "Open filters",
+      "collapse": "Close filters"
     }
   },
   "right": {
@@ -924,10 +929,12 @@
     "back": "Back to map",
     "loadError": "Error loading group projects.",
     "switchHint": "Tip: Switch between projects anytime by clicking the project name, or open this overview via the group icon in the left rail.",
-    "switchHintMobile": "Tip: Switch between projects anytime by tapping the project name at the bottom of the screen."
+    "switchHintMobile": "Tip: Tap the project field at the bottom to switch projects, or open the group overview via the hive icon on the map."
   },
   "projectSwitcher": {
     "label": "Switch project in group",
-    "menuTitle": "Project group"
+    "menuTitle": "Project group",
+    "switchProject": "Switch project",
+    "fieldLabel": "Project"
   }
 }

@@ -1,7 +1,30 @@
 /* Stack below map zoom + fullscreen controls (see center.component.css top-right layout). */
-.mobile-stats-btn {
+.mobile-map-controls {
   position: absolute;
   top: calc(68px + 5.25rem + 0.5rem + 3rem + 0.5rem);
   right: 0.625rem;
   z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mobile-map-controls__btn {
+  width: 3rem;
+  height: 3rem;
+  border: none;
+  border-radius: 9999px;
+  background-color: var(--primary-color);
+  color: var(--background-color);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.mobile-map-controls__btn:hover {
+  opacity: 0.9;
 }

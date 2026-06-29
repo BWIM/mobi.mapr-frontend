@@ -1,24 +1,43 @@
 @if (hasGroup()) {
-  <div (click)="$event.stopPropagation()">
-    <button
-      type="button"
-      class="group inline-flex max-w-full cursor-pointer items-start gap-1 border-0 bg-transparent p-0 text-left text-[var(--primary-color)]"
-      [matMenuTriggerFor]="projectMenu"
-      [attr.aria-label]="'projectSwitcher.label' | translate">
-      <span class="max-w-full text-lg font-semibold leading-snug break-words [overflow-wrap:anywhere] md:text-2xl">
-        {{ project()?.display_name }}
-      </span>
-      <mat-icon
-        class="mt-0.5 shrink-0 text-xl opacity-70 transition-opacity group-hover:opacity-100"
-        aria-hidden="true">
-        expand_more
-      </mat-icon>
-    </button>
+  <div class="w-full" (click)="$event.stopPropagation()">
+    @if (variant() === 'mobile') {
+      <button
+        type="button"
+        class="project-switcher-mobile-trigger"
+        [matMenuTriggerFor]="projectMenu"
+        [attr.aria-label]="'projectSwitcher.label' | translate">
+        <span class="project-switcher-mobile-trigger__icon-wrap" aria-hidden="true">
+          <mat-icon>layers</mat-icon>
+        </span>
+        <span class="project-switcher-mobile-trigger__text">
+          <span class="project-switcher-mobile-trigger__label">{{ 'projectSwitcher.fieldLabel' | translate }}</span>
+          <span class="project-switcher-mobile-trigger__value">{{ project()?.display_name }}</span>
+        </span>
+        <mat-icon class="project-switcher-mobile-trigger__chevron" aria-hidden="true">expand_more</mat-icon>
+      </button>
+    } @else {
+      <button
+        type="button"
+        class="group inline-flex max-w-full cursor-pointer items-start gap-1 border-0 bg-transparent p-0 text-left text-[var(--primary-color)]"
+        [matMenuTriggerFor]="projectMenu"
+        [attr.aria-label]="'projectSwitcher.label' | translate">
+        <span class="max-w-full text-lg font-semibold leading-snug break-words [overflow-wrap:anywhere] md:text-2xl">
+          {{ project()?.display_name }}
+        </span>
+        <mat-icon
+          class="mt-0.5 shrink-0 text-xl opacity-70 transition-opacity group-hover:opacity-100"
+          aria-hidden="true">
+          expand_more
+        </mat-icon>
+      </button>
+    }
 
     <mat-menu
       #projectMenu="matMenu"
+      [yPosition]="variant() === 'mobile' ? 'above' : 'below'"
       xPosition="after"
-      class= "border border-[var(--primary-color)] rounded-xl shadow-[0_12px_32px_rgba(0,0,0,0.35)] overflow-hidden [&_.mat-mdc-menu-content]:!p-0 [&_.mat-mdc-menu-content]:max-h-[min(32rem,calc(100vh-6rem))] [&_.mat-mdc-menu-content]:overflow-y-auto [&_.mat-mdc-menu-item]:!h-auto [&_.mat-mdc-menu-item]:!min-h-12 [&_.mat-mdc-menu-item_.mat-mdc-menu-item-text]:w-full">
+      panelClass="project-switcher-menu-panel"
+      class="border border-[var(--primary-color)] rounded-xl shadow-[0_12px_32px_rgba(0,0,0,0.35)] overflow-hidden [&_.mat-mdc-menu-content]:!p-0 [&_.mat-mdc-menu-content]:max-h-[min(32rem,calc(100vh-6rem))] [&_.mat-mdc-menu-content]:overflow-y-auto [&_.mat-mdc-menu-item]:!h-auto [&_.mat-mdc-menu-item]:!min-h-12 [&_.mat-mdc-menu-item_.mat-mdc-menu-item-text]:w-full">
 
       @for (sibling of siblings(); track sibling.id) {
         <button
@@ -45,7 +64,19 @@
     </mat-menu>
   </div>
 } @else {
-  <div class="mb-1 text-2xl font-semibold leading-snug break-words text-[var(--primary-color)] [overflow-wrap:anywhere]">
-    {{ project()?.display_name }}
-  </div>
+  @if (variant() === 'mobile') {
+    <div class="project-switcher-mobile-trigger project-switcher-mobile-trigger--static w-full">
+      <span class="project-switcher-mobile-trigger__icon-wrap" aria-hidden="true">
+        <mat-icon>layers</mat-icon>
+      </span>
+      <span class="project-switcher-mobile-trigger__text">
+        <span class="project-switcher-mobile-trigger__label">{{ 'projectSwitcher.fieldLabel' | translate }}</span>
+        <span class="project-switcher-mobile-trigger__value">{{ project()?.display_name }}</span>
+      </span>
+    </div>
+  } @else {
+    <div class="text-2xl font-semibold leading-snug break-words text-[var(--primary-color)] [overflow-wrap:anywhere]">
+      {{ project()?.display_name }}
+    </div>
+  }
 }
