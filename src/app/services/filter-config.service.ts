@@ -522,11 +522,11 @@ export class FilterConfigService {
         const rightChanged = compareInitialLoad || this.filtersDiffer(previousRightFilters, rightFilters);
         const leftFullReload = leftChanged && (
           compareInitialLoad ||
-          (previousLeftFilters?.admin_level !== filters.admin_level)
+          this.needsContentLayerFullReload(previousLeftFilters, filters)
         );
         const rightFullReload = rightChanged && (
           compareInitialLoad ||
-          (previousRightFilters?.admin_level !== rightFilters.admin_level)
+          this.needsContentLayerFullReload(previousRightFilters, rightFilters)
         );
         const onlyLeftChanged = leftChanged && !rightChanged;
         const onlyRightChanged = rightChanged && !leftChanged;
@@ -1670,6 +1670,27 @@ export class FilterConfigService {
       ...filters,
       admin_level: this.effectiveAdminLevel(),
     };
+  }
+
+  private needsContentLayerFullReload(
+    previousFilters: ContentLayerFilters | null,
+    filters: ContentLayerFilters
+  ): boolean {
+    if (!previousFilters) {
+      return true;
+    }
+
+    if (previousFilters.admin_level !== filters.admin_level) {
+      return true;
+    }
+
+    if (previousFilters.feature_type !== filters.feature_type) {
+      return true;
+    }
+
+    const previousProfileIds = [...previousFilters.profile_ids].sort((a, b) => a - b).join(',');
+    const profileIds = [...filters.profile_ids].sort((a, b) => a - b).join(',');
+    return previousProfileIds !== profileIds;
   }
 
   private filtersDiffer(
