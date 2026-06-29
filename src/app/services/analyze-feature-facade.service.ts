@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin, of, Subscription } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { FeatureSelectionService, MapLibreFeatureData } from '../shared/services/feature-selection.service';
-import { MapService, FeatureInfoResponse } from './map.service';
+import { MapService, FeatureInfoResponse, ContentLayerFilters } from './map.service';
 import { FilterConfigService } from './filter-config.service';
 import {
   AnalyzeService,
@@ -28,6 +28,7 @@ export class AnalyzeFeatureFacadeService {
 
   private subscription?: Subscription;
   private savedFeatureType: 'municipality' | 'hexagon' | 'county' | 'state' | null = null;
+  private selectedCompareSide: 'left' | 'right' = 'left';
 
   readonly selectedFeature = signal<MapLibreFeatureData | null>(null);
   readonly featureInfo = signal<FeatureInfoResponse | null>(null);
@@ -74,6 +75,7 @@ export class AnalyzeFeatureFacadeService {
   private onFeatureSelected(feature: MapLibreFeatureData | null): void {
     if (feature) {
       this.selectedFeature.set(feature);
+      this.selectedCompareSide = this.featureSelection.getSelectedMapLibreFeatureSide();
       const featureType = this.mapService.getFeatureTypeFromTileProperty(feature);
       if (featureType) {
         this.savedFeatureType = featureType;
@@ -105,6 +107,22 @@ export class AnalyzeFeatureFacadeService {
     this.analyzeError.set(null);
     this.personasError.set(null);
     this.savedFeatureType = null;
+    this.selectedCompareSide = 'left';
+  }
+
+  private getProfileContext(): { profileIds: number[]; filters: ContentLayerFilters } | null {
+    const useRight =
+      this.filterConfig.isMapCompareMode() && this.selectedCompareSide === 'right';
+    const profileIds = useRight
+      ? this.filterConfig.rightCurrentProfileIds()
+      : this.filterConfig.currentProfileIds();
+    const filters = useRight
+      ? this.filterConfig.rightContentLayerFilters()
+      : this.filterConfig.contentLayerFilters();
+    if (!profileIds?.length || !filters) {
+      return null;
+    }
+    return { profileIds, filters };
   }
 
   shouldShowMap(): boolean {
@@ -114,11 +132,11 @@ export class AnalyzeFeatureFacadeService {
   }
 
   isAllPersonas(): boolean {
-    return this.filterConfig.contentLayerFilters()?.persona_id === 54;
+    return this.getProfileContext()?.filters.persona_id === 54;
   }
 
   isScoreMode(): boolean {
-    return this.filterConfig.contentLayerFilters()?.feature_type === 'score';
+    return this.getProfileContext()?.filters.feature_type === 'score';
   }
 
   getSortedCategories(): CategoryScore[] {
@@ -189,9 +207,9 @@ export class AnalyzeFeatureFacadeService {
     const featureId =
       typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
     if (!featureId || isNaN(featureId)) return null;
-    const profileIds = this.filterConfig.currentProfileIds();
-    const filters = this.filterConfig.contentLayerFilters();
-    if (!profileIds?.length || !filters) return null;
+    const profileContext = this.getProfileContext();
+    if (!profileContext) return null;
+    const { profileIds, filters } = profileContext;
     return {
       featureType: this.savedFeatureType,
       featureId,
@@ -245,9 +263,9 @@ export class AnalyzeFeatureFacadeService {
       typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
     if (!featureId || isNaN(featureId)) return;
 
-    const profileIds = this.filterConfig.currentProfileIds();
-    const filters = this.filterConfig.contentLayerFilters();
-    if (!profileIds?.length || !filters) return;
+    const profileContext = this.getProfileContext();
+    if (!profileContext) return;
+    const { profileIds, filters } = profileContext;
 
     this.isLoadingFeatureInfo.set(true);
     this.isLoadingAnalyze.set(true);

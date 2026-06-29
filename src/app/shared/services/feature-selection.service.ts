@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Feature } from 'ol';
 
+export type MapCompareSide = 'left' | 'right';
+
 export interface MapLibreFeatureData {
   properties: {
     name?: string;
@@ -24,6 +26,9 @@ export class FeatureSelectionService {
   private selectedMapLibreFeatureSource = new BehaviorSubject<MapLibreFeatureData | null>(null);
   selectedMapLibreFeature$ = this.selectedMapLibreFeatureSource.asObservable();
 
+  private selectedMapLibreFeatureSideSource = new BehaviorSubject<MapCompareSide>('left');
+  selectedMapLibreFeatureSide$ = this.selectedMapLibreFeatureSideSource.asObservable();
+
   // Second feature for comparison
   private selectedMapLibreFeature2Source = new BehaviorSubject<MapLibreFeatureData | null>(null);
   selectedMapLibreFeature2$ = this.selectedMapLibreFeature2Source.asObservable();
@@ -32,12 +37,17 @@ export class FeatureSelectionService {
     this.selectedFeatureSource.next(feature);
   }
 
-  setSelectedMapLibreFeature(feature: MapLibreFeatureData | null) {
+  setSelectedMapLibreFeature(feature: MapLibreFeatureData | null, side: MapCompareSide = 'left') {
     this.selectedMapLibreFeatureSource.next(feature);
+    this.selectedMapLibreFeatureSideSource.next(side);
   }
 
   getCurrentMapLibreFeature(): MapLibreFeatureData | null {
     return this.selectedMapLibreFeatureSource.getValue();
+  }
+
+  getSelectedMapLibreFeatureSide(): MapCompareSide {
+    return this.selectedMapLibreFeatureSideSource.getValue();
   }
 
   setSelectedMapLibreFeature2(feature: MapLibreFeatureData | null) {

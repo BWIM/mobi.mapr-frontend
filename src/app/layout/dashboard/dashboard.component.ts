@@ -78,6 +78,9 @@ export class DashboardComponent {
       .subscribe(() => {
         if (this.mobileUi.isMobile()) {
           this.mobileUi.openAnalyze();
+        } else if (this.filterConfigService.isMapCompareMode()) {
+          this.rightPanelExpanded.set(true);
+          this.resizeMapAfterPanelTransition();
         }
       });
 
@@ -334,9 +337,6 @@ export class DashboardComponent {
   }
 
   toggleRightPanel() {
-    if (this.filterConfigService.isMapCompareMode()) {
-      return;
-    }
     this.rightPanelExpanded.update(value => !value);
     this.resizeMapAfterPanelTransition();
   }
