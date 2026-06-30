@@ -1026,6 +1026,10 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         id: feature.id
       };
 
+      const compareSide = this.filterConfigService.isMapCompareMode()
+        ? (targetMap === this.afterMap ? 'right' : 'left')
+        : 'left';
+
       // Check if Ctrl key is pressed (for comparison mode)
       const isCtrlPressed = e.originalEvent && (e.originalEvent.ctrlKey || e.originalEvent.metaKey);
       
@@ -1036,11 +1040,11 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
           this.featureSelectionService.setSelectedMapLibreFeature2(featureData);
         } else {
           // If no feature is selected, treat as normal click
-          this.featureSelectionService.setSelectedMapLibreFeature(featureData);
+          this.featureSelectionService.setSelectedMapLibreFeature(featureData, compareSide);
         }
       } else {
         // Set as primary feature
-        this.featureSelectionService.setSelectedMapLibreFeature(featureData);
+        this.featureSelectionService.setSelectedMapLibreFeature(featureData, compareSide);
       }
     });
 

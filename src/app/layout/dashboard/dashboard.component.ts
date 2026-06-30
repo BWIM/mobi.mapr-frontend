@@ -1,3 +1,4 @@
+import { NgClass } from '@angular/common';
 import { Component, signal, inject, effect, untracked } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -28,6 +29,7 @@ import { ProjectNavigationService } from '../../services/project-navigation.serv
 @Component({
   selector: 'app-dashboard',
   imports: [
+    NgClass,
     RailComponent,
     LeftComponent,
     RightComponent,
@@ -76,6 +78,9 @@ export class DashboardComponent {
       .subscribe(() => {
         if (this.mobileUi.isMobile()) {
           this.mobileUi.openAnalyze();
+        } else if (this.filterConfigService.isMapCompareMode()) {
+          this.rightPanelExpanded.set(true);
+          this.resizeMapAfterPanelTransition();
         }
       });
 
@@ -328,13 +333,19 @@ export class DashboardComponent {
 
   toggleLeftPanel() {
     this.leftPanelExpanded.update(value => !value);
+    this.resizeMapAfterPanelTransition();
   }
 
   toggleRightPanel() {
-    if (this.filterConfigService.isMapCompareMode()) {
-      return;
-    }
     this.rightPanelExpanded.update(value => !value);
+    this.resizeMapAfterPanelTransition();
+  }
+
+  private resizeMapAfterPanelTransition() {
+    setTimeout(() => {
+      this.mapService.getMap()?.resize();
+      this.mapService.getCompareRightMap()?.resize();
+    }, DashboardComponent.RIGHT_PANEL_TRANSITION_MS);
   }
 
   toggleMobileFilterPanel() {

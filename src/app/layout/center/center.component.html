@@ -9,7 +9,7 @@
     </div>
   }
   <!-- Nominatim Search - Hidden on mobile, shown on desktop -->
-  <div class="hidden md:flex absolute top-0 left-0 right-auto bottom-auto z-[1000] p-3 min-w-[300px] max-w-[400px] items-center gap-2">
+  <div class="hidden lg:flex absolute top-0 left-0 right-auto bottom-auto z-[1000] p-3 min-w-[240px] max-w-[300px] xl:min-w-[300px] xl:max-w-[400px] items-center gap-2">
     <mat-form-field appearance="fill" class="search-form-field w-full rounded-full" >
       <mat-label>{{ 'map.search.label' | translate }}</mat-label>
       <input 
@@ -69,7 +69,7 @@
     </div>
   </div>
   <!-- Legend -->
-  <div class="map-legend absolute top-0 left-0 md:bottom-0 md:left-0 md:right-auto md:top-auto" (click)="openLegendDialog()" [title]="'map.search.clickForInfo' | translate">
+  <div class="map-legend absolute top-0 left-0 lg:bottom-0 lg:left-0 lg:right-auto lg:top-auto" (click)="openLegendDialog()" [title]="'map.search.clickForInfo' | translate">
     <div class="legend-hint" *ngIf="showLegendClickHint">
       <span class="legend-hint-text">{{ 'map.legend.hint.clickEntries' | translate }}</span>
       <button type="button" class="legend-hint-close" (click)="dismissLegendClickHint($event)" [attr.aria-label]="'map.legend.hint.dismiss' | translate">

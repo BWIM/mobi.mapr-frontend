@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, ViewChild, ElementRef, AfterViewInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription, catchError, of, forkJoin, firstValueFrom } from 'rxjs';
-import { FeatureSelectionService } from '../../../shared/services/feature-selection.service';
+import { FeatureSelectionService, MapCompareSide } from '../../../shared/services/feature-selection.service';
 import { MapService, FeatureInfoResponse, ContentLayerFilters } from '../../../services/map.service';
 import { FilterConfigService } from '../../../services/filter-config.service';
 import { AnalyzeService, AnalyzeResponse, CategoryScore, PersonaBreakdown } from '../../../services/analyze.service';
@@ -136,6 +136,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private savedFeatureType: 'municipality' | 'hexagon' | 'county' | 'state' | null = null;
   private savedFeatureType2: 'municipality' | 'hexagon' | 'county' | 'state' | null = null;
   private pendingReload = false; // Track if we're waiting for map to load before reloading
+  private selectedCompareSide: MapCompareSide = 'left';
+  private previousLeftFilters: ContentLayerFilters | null = null;
+  private previousRightFilters: ContentLayerFilters | null = null;
   
   // Comparison mode computed property
   get isComparisonMode(): boolean {
@@ -161,34 +164,46 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor() {
     // Watch for filter changes and reload data instead of resetting
     effect(() => {
-      const filters = this.filterConfigService.contentLayerFilters();
+      const compareMode = this.filterConfigService.isMapCompareMode();
+      const leftFilters = this.filterConfigService.contentLayerFilters();
+      const rightFilters = this.filterConfigService.rightContentLayerFilters();
+      const filters =
+        compareMode && this.selectedCompareSide === 'right' ? rightFilters : leftFilters;
+      const previousFilters =
+        compareMode && this.selectedCompareSide === 'right'
+          ? this.previousRightFilters
+          : this.previousLeftFilters;
       
       // Skip reload on initial load
       if (this.isInitialFilterLoad) {
+        this.previousLeftFilters = leftFilters ? { ...leftFilters } : null;
+        this.previousRightFilters = rightFilters ? { ...rightFilters } : null;
         this.previousFilters = filters ? { ...filters } : null;
         this.isInitialFilterLoad = false;
         return;
       }
       
       // Only reload if filters actually changed
-      if (filters && this.previousFilters) {
+      if (filters && previousFilters) {
         const filtersChanged = 
-          JSON.stringify([...this.previousFilters.profile_ids].sort((a, b) => a - b)) !== JSON.stringify([...filters.profile_ids].sort((a, b) => a - b)) ||
-          JSON.stringify(this.previousFilters.state_ids?.sort()) !== JSON.stringify(filters.state_ids?.sort()) ||
-          JSON.stringify(this.previousFilters.category_ids?.sort()) !== JSON.stringify(filters.category_ids?.sort()) ||
-          this.previousFilters.persona_id !== filters.persona_id ||
-          JSON.stringify(this.previousFilters.regiostar_ids?.sort()) !== JSON.stringify(filters.regiostar_ids?.sort());
+          JSON.stringify([...previousFilters.profile_ids].sort((a, b) => a - b)) !== JSON.stringify([...filters.profile_ids].sort((a, b) => a - b)) ||
+          JSON.stringify(previousFilters.state_ids?.sort()) !== JSON.stringify(filters.state_ids?.sort()) ||
+          JSON.stringify(previousFilters.category_ids?.sort()) !== JSON.stringify(filters.category_ids?.sort()) ||
+          previousFilters.persona_id !== filters.persona_id ||
+          JSON.stringify(previousFilters.regiostar_ids?.sort()) !== JSON.stringify(filters.regiostar_ids?.sort());
         
         if (filtersChanged) {
           // Reload data for selected features instead of resetting
           // Wait for map to finish loading first
           this.reloadDataForSelectedFeatures();
         }
-      } else if (filters !== this.previousFilters) {
+      } else if (filters !== previousFilters) {
         // Filters changed from null to non-null or vice versa - reset component
         this.resetComponent();
       }
       
+      this.previousLeftFilters = leftFilters ? { ...leftFilters } : null;
+      this.previousRightFilters = rightFilters ? { ...rightFilters } : null;
       this.previousFilters = filters ? { ...filters } : null;
     });
 
@@ -207,6 +222,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       (feature) => {
         if (feature) {
           this.selectedFeature = feature;
+          this.selectedCompareSide = this.featureSelectionService.getSelectedMapLibreFeatureSide();
           // Extract and save feature type from tile property 't' immediately when feature is selected
           const featureType = this.mapService.getFeatureTypeFromTileProperty(feature);
           if (featureType) {
@@ -403,6 +419,22 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isLoadingPersonas2 = false;
     this.personasError2 = null;
     this.savedFeatureType2 = null;
+    this.selectedCompareSide = 'left';
+  }
+
+  private getProfileContext(): { profileIds: number[]; filters: ContentLayerFilters } | null {
+    const useRight =
+      this.filterConfigService.isMapCompareMode() && this.selectedCompareSide === 'right';
+    const profileIds = useRight
+      ? this.filterConfigService.rightCurrentProfileIds()
+      : this.filterConfigService.currentProfileIds();
+    const filters = useRight
+      ? this.filterConfigService.rightContentLayerFilters()
+      : this.filterConfigService.contentLayerFilters();
+    if (!profileIds?.length || !filters) {
+      return null;
+    }
+    return { profileIds, filters };
   }
   
   /**
@@ -429,8 +461,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.isLoadingAnalyze2 = true;
       }
 
-      const filters = this.filterConfigService.contentLayerFilters();
-      if (filters?.persona_id === 54) {
+      const profileContext = this.getProfileContext();
+      if (profileContext?.filters.persona_id === 54) {
         if (this.selectedFeature) {
           this.isLoadingPersonas = true;
         }
@@ -679,19 +711,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     const featureType = this.savedFeatureType;
 
-    // Get profile combination ID
-    const profileIds = this.filterConfigService.currentProfileIds();
-    if (!profileIds?.length) {
-      console.warn('Profile combination ID not available');
+    const profileContext = this.getProfileContext();
+    if (!profileContext) {
+      console.warn('Profile combination or filters not available');
       return;
     }
-
-    // Get current filters
-    const filters = this.filterConfigService.contentLayerFilters();
-    if (!filters) {
-      console.warn('Content layer filters not available');
-      return;
-    }
+    const { profileIds, filters } = profileContext;
 
     // Mark that we're loading this feature
     this.currentLoadingFeatureId = featureId;
@@ -1041,13 +1066,13 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     const featureType = this.savedFeatureType;
-    const profileIds = this.filterConfigService.currentProfileIds();
-    
-    if (!profileIds?.length) {
+    const profileContext = this.getProfileContext();
+    if (!profileContext) {
       console.warn('Profile IDs not available');
       return;
     }
-
+    const { profileIds } = profileContext;
+    
     this.isLoadingPlaces = true;
     this.categoryLegendExpanded = true;
     this.placesError = null;
@@ -1980,8 +2005,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
    * Returns true if persona_id is 54 (all personas)
    */
   isAllPersonas(): boolean {
-    const filters = this.filterConfigService.contentLayerFilters();
-    return filters?.persona_id === 54;
+    return this.getProfileContext()?.filters.persona_id === 54;
   }
 
   private initializeMap(): void {
@@ -2090,8 +2114,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getPlacesIsScoreMode(): boolean {
-    const filters = this.filterConfigService.contentLayerFilters();
-    return filters?.feature_type === 'score';
+    return this.getProfileContext()?.filters.feature_type === 'score';
   }
 
   private getPlacesScoreColor(score: number): string {
@@ -2567,20 +2590,14 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     const featureType = this.savedFeatureType;
-    const profileIds = this.filterConfigService.currentProfileIds();
-    
-    if (!profileIds?.length) {
+    const profileContext = this.getProfileContext();
+    if (!profileContext) {
       console.warn('Profile IDs not available');
       return;
     }
+    const { profileIds, filters } = profileContext;
 
-    const filters = this.filterConfigService.contentLayerFilters();
-    if (!filters) {
-      console.warn('Content layer filters not available');
-      return;
-    }
-
-    const isScoreMode = filters?.feature_type === 'score';
+    const isScoreMode = filters.feature_type === 'score';
     
     // Check if we're in comparison mode
     const isComparisonMode = this.isComparisonMode;
@@ -2745,18 +2762,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
 
-    const profileIds = this.filterConfigService.currentProfileIds();
-    
-    if (!profileIds?.length) {
+    const profileContext = this.getProfileContext();
+    if (!profileContext) {
       console.warn('Profile IDs not available');
       return;
     }
-
-    const filters = this.filterConfigService.contentLayerFilters();
-    if (!filters) {
-      console.warn('Content layer filters not available');
-      return;
-    }
+    const { profileIds, filters } = profileContext;
 
     const placesData: PlacesDialogData = {
       featureType: featureType,
@@ -2811,18 +2822,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     const featureType = this.savedFeatureType;
-    const profileIds = this.filterConfigService.currentProfileIds();
-    
-    if (!profileIds?.length) {
+    const profileContext = this.getProfileContext();
+    if (!profileContext) {
       console.warn('Profile IDs not available');
       return;
     }
-
-    const filters = this.filterConfigService.contentLayerFilters();
-    if (!filters) {
-      console.warn('Content layer filters not available');
-      return;
-    }
+    const { profileIds, filters } = profileContext;
 
     const bewertung = this.filterConfigService.selectedBewertung();
     const isScoreMode = bewertung === 'zeit';

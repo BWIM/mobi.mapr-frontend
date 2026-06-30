@@ -193,17 +193,6 @@ export class MobileFilterPanelComponent implements OnDestroy {
     this.onClose.emit();
   }
 
-  onPanelClick(event: MouseEvent): void {
-    if (this.isExpanded()) {
-      return;
-    }
-    const target = event.target as HTMLElement;
-    if (target.closest('[data-no-panel-toggle]')) {
-      return;
-    }
-    this.togglePanel();
-  }
-
   onTouchStart(event: TouchEvent): void {
     if (event.touches.length > 0) {
       this.touchStartY = event.touches[0].clientY;
