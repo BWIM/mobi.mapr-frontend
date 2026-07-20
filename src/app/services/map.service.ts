@@ -22,8 +22,9 @@ export interface ContentLayerFilters {
   selected_time_brackets?: string[];
 }
 
-/** Backend sentinel: score === NO_DATA_SCORE means no data for this feature. */
 export const NO_DATA_SCORE = 15000;
+/** Capped mobility time in minutes (NO_DATA_SCORE / 60). */
+export const CAPPED_SCORE_MINUTES = NO_DATA_SCORE / 60;
 
 export interface FeatureInfoResponse {
   name: string;
@@ -905,10 +906,6 @@ export class MapService {
     return this.currentFilters;
   }
 
-  private isNoDataScoreExpression(): any {
-    return ['==', ['get', 'score'], NO_DATA_SCORE];
-  }
-
   /**
    * Returns the fill color expression for Score feature type
    * 162, 210, 235
@@ -921,7 +918,7 @@ export class MapService {
    */
 
   private getScoreFillColorExpression(): any {
-    return this.scoreColorsService.buildMapLibreStepExpression(this.isNoDataScoreExpression());
+    return this.scoreColorsService.buildMapLibreStepExpression();
   }
 
   /**
@@ -976,8 +973,6 @@ export class MapService {
     // Divide "index" by 100 before applying color breaks
     return [
       'case',
-      this.isNoDataScoreExpression(),
-      'rgba(128, 128, 128, 0.7)',
       ['<=', ['/', ['get', 'index'], 100], 0],
       'rgba(128, 128, 128, 0)', // NaN or invalid
       ['<', ['/', ['get', 'index'], 100], 0.35],

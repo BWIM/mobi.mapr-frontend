@@ -37,12 +37,12 @@ export class ScoreColorsService {
     return getColorForScore(score, this.config());
   }
 
-  buildMapLibreStepExpression(noDataExpression: unknown): unknown[] {
+  buildMapLibreStepExpression(): unknown[] | string {
     const config = this.config();
     if (!config) {
-      return ['case', noDataExpression, 'rgb(233, 233, 233)', 'rgb(233, 233, 233)'];
+      return 'rgb(233, 233, 233)';
     }
-    return buildMapLibreStepExpression(config, noDataExpression);
+    return buildMapLibreStepExpression(config);
   }
 
   buildBracketFilter(selectedBracketIds: string[]): unknown[] | null {

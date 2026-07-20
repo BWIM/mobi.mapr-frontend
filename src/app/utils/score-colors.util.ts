@@ -139,10 +139,7 @@ export function getColorForScore(score: number, config: ScoreColorConfig | null)
   return config.defaultColor;
 }
 
-export function buildMapLibreStepExpression(
-  config: ScoreColorConfig,
-  noDataExpression: unknown
-): unknown[] {
+export function buildMapLibreStepExpression(config: ScoreColorConfig): unknown[] {
   const stepExpression: unknown[] = ['step', ['get', 'score'], config.defaultColor];
 
   for (const step of config.steps) {
@@ -152,7 +149,7 @@ export function buildMapLibreStepExpression(
     stepExpression.push(step.threshold, step.color);
   }
 
-  return ['case', noDataExpression, NO_SCORE_COLOR, stepExpression];
+  return stepExpression;
 }
 
 export function buildBracketFilterExpressions(
