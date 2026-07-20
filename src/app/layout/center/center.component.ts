@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inj
 import { Subscription, firstValueFrom, debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { Map, MapDataEvent, NavigationControl, FullscreenControl, Popup, AttributionControl, LngLatLike } from 'maplibre-gl';
 import Compare from '@maplibre/maplibre-gl-compare';
-import { MapService, NO_DATA_SCORE } from '../../services/map.service';
+import { MapService, NO_DATA_SCORE, CAPPED_SCORE_MINUTES } from '../../services/map.service';
 import MinimapControl from "maplibregl-minimap";
 import { SharedModule } from '../../shared/shared.module';
 import { AdminLevel, FilterConfigService } from '../../services/filter-config.service';
@@ -935,28 +935,24 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       }, HOVER_HIGHLIGHT_DEBOUNCE_MS);
       const isQualityMode = this.isQualityMode;
       const score = properties['score'];
-      const isNoData = Number(score) === NO_DATA_SCORE;
+      const isCappedScore = Number(score) === NO_DATA_SCORE;
       const notAvailable = this.translate.instant('map.popup.notAvailable');
       
       let valueText = '';
       if (isQualityMode) {
         const indexLabel = this.translate.instant('map.popup.index');
-        if (isNoData) {
-          valueText = `${indexLabel} ${notAvailable}`;
+        const index = properties['index'];
+        if (index !== undefined && index !== null) {
+          // Index is stored as integer (multiplied by 100), so divide by 100
+          const indexValue = index / 100;
+          const indexName = this.getIndexName(indexValue);
+          valueText = `${indexLabel} ${indexName}`;
         } else {
-          const index = properties['index'];
-          if (index !== undefined && index !== null) {
-            // Index is stored as integer (multiplied by 100), so divide by 100
-            const indexValue = index / 100;
-            const indexName = this.getIndexName(indexValue);
-            valueText = `${indexLabel} ${indexName}`;
-          } else {
-            valueText = `${indexLabel} ${notAvailable}`;
-          }
+          valueText = `${indexLabel} ${notAvailable}`;
         }
       } else {
         const scoreLabel = this.translate.instant('map.popup.score');
-        if (score !== undefined && score !== null && !isNoData) {
+        if (score !== undefined && score !== null) {
           // Score is in seconds, convert to minutes
           const minutes = (score / 60).toFixed(1);
           const minLabel = this.translate.instant('map.popup.minutes');
@@ -983,17 +979,38 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         populationHtml = `<div>${populationLabel}: ${formattedPopulation}</div>`;
       }
 
+      let cappedHintHtml = '';
+      if (isCappedScore) {
+        const cappedHintTitle = this.translate.instant('map.popup.cappedScoreHintTitle');
+        const cappedHint = this.translate.instant('map.popup.cappedScoreHint', {
+          minutes: CAPPED_SCORE_MINUTES
+        });
+        cappedHintHtml = `
+          <div class="map-popup-capped-hint" role="note">
+            <div class="map-popup-capped-hint-header">
+              <span class="map-popup-capped-hint-icon" aria-hidden="true">i</span>
+              <span class="map-popup-capped-hint-title">${cappedHintTitle}</span>
+            </div>
+            <div class="map-popup-capped-hint-body">${cappedHint}</div>
+          </div>
+        `;
+      }
+
       const popupContent = `
-        <div>
-          <div style="font-weight: 600; margin-bottom: 4px;">${name}</div>
-          <div>${valueText}</div>
-          ${regiostarHtml}
-          ${populationHtml}
+        <div class="map-popup">
+          <div class="map-popup-name">${name}</div>
+          <div class="map-popup-meta">
+            <div>${valueText}</div>
+            ${regiostarHtml}
+            ${populationHtml}
+          </div>
+          ${cappedHintHtml}
         </div>
       `;
 
       popup
         .setLngLat(e.lngLat)
+        .setMaxWidth(isCappedScore ? '360px' : '300px')
         .setHTML(popupContent)
         .addTo(targetMap);
     });

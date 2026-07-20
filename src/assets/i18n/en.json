@@ -249,7 +249,9 @@
       "minutes": "min",
       "notAvailable": "N/A",
       "unnamed": "Unknown",
-      "error": "Error"
+      "error": "Error",
+      "cappedScoreHintTitle": "Note",
+      "cappedScoreHint": "Calculations are capped at {{minutes}} minutes. Longer journeys are shown as {{minutes}} minutes or F-.<br><br>Individual hexagons with this value may also appear in areas where a lower value would be expected. This can happen when the hexagon center has no (good) starting point — for example in the middle of a river — or when there are issues with the map data, underlying data (e.g. missing public transport data), or the calculation itself.<br><br>To avoid skewing municipality values too much, these hexagons are ignored when calculating the municipality score.<br><br>If a municipality has the value of {{minutes}} minutes or F-, all of its hexagons also have this value."
     },
     "legend": {
       "title": "Legend",

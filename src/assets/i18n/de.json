@@ -249,7 +249,9 @@
       "minutes": "min",
       "notAvailable": "N/A",
       "unnamed": "Unbenannt",
-      "error": "Fehler"
+      "error": "Fehler",
+      "cappedScoreHintTitle": "Hinweis",
+      "cappedScoreHint": "Berechnungen sind bei dem Wert von {{minutes}} Minuten gekappt. Sind Wege länger, werden diese als {{minutes}} Minuten bzw. F- dargestellt.<br><br>Es kann dazu kommen, dass einzelne Hexagone mit diesem Wert auch in einem Gebiet erscheinen, in denen eigentlich ein niedrigerer Wert vorhanden sein müsste. Das kann entweder daran liegen, dass das Zentrum des Hexagon keinen (guten) Startpunkt hat, wie z.B. inmitten eines Flusses, oder es Probleme mit dem Kartenmaterial, der Datengrundlage (z.B. fehlende ÖV-Daten) oder der Berechnung gibt.<br><br>Um die Werte der Gemeinden nicht zu weit zu verzerren, werden diese Hexagone für die Berechnung der Gemeinde ignoriert.<br><br>Hat eine Gemeinde den Wert von {{minutes}} Minuten bzw. F-, haben alle Hexagone ebenfalls diesen Wert."
     },
     "legend": {
       "title": "Legende",
