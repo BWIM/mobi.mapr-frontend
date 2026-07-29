@@ -247,6 +247,9 @@
       "index": "Mobilitätsqualität:",
       "score": "Mobilitätszeit:",
       "minutes": "min",
+      "left": "Links:",
+      "right": "Rechts:",
+      "difference": "Differenz:",
       "notAvailable": "N/A",
       "unnamed": "Unbenannt",
       "error": "Fehler",
@@ -331,7 +334,8 @@
       "start": "Verkehrsmittel vergleichen",
       "exit": "Vergleich beenden",
       "leftMap": "Linke Karte",
-      "rightMap": "Rechte Karte"
+      "rightMap": "Rechte Karte",
+      "differenceView": "Differenzansicht"
     },
     "transportModes": {
       "title": "Verkehrsmittel",

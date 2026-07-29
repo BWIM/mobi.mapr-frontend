@@ -247,6 +247,9 @@
       "index": "Mobility quality:",
       "score": "Mobility time:",
       "minutes": "min",
+      "left": "Left:",
+      "right": "Right:",
+      "difference": "Difference:",
       "notAvailable": "N/A",
       "unnamed": "Unknown",
       "error": "Error",
@@ -331,7 +334,8 @@
       "start": "Compare maps",
       "exit": "Exit comparison",
       "leftMap": "Left map",
-      "rightMap": "Right map"
+      "rightMap": "Right map",
+      "differenceView": "Difference view"
     },
     "transportModes": {
       "title": "Transport Modes",
