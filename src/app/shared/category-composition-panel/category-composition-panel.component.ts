@@ -5,6 +5,7 @@ import { SharedModule } from '../shared.module';
 import {
   CompositionNode,
   CompositionWeightedChild,
+  evaluateCompositionValue,
   weightedChildrenTotal,
 } from '../../interfaces/composition';
 
@@ -21,6 +22,11 @@ export interface CompositionActivityMeta {
   metricLabel?: string;
   metricColor?: string;
   role_hint?: 'primary' | 'substitute';
+}
+
+export interface CompositionFormattedMetric {
+  label: string;
+  color: string;
 }
 
 @Component({
@@ -47,6 +53,10 @@ export class CategoryCompositionPanelComponent {
   @Input() shareLabel: number | null = null;
   /** Activity display name currently highlighted (from map or panel hover). */
   @Input() highlightedActivityName: string | null = null;
+  /** Formats an aggregated score/index for AND / OR / SUBST headers. */
+  @Input() formatMetric:
+    | ((score: number, index: number) => CompositionFormattedMetric)
+    | null = null;
 
   @Output() toggleActivity = new EventEmitter<string>();
   /** Emits activity display name on hover, or null on leave. */
@@ -70,6 +80,25 @@ export class CategoryCompositionPanelComponent {
       return false;
     }
     return this.metaFor(activityId)?.name === this.highlightedActivityName;
+  }
+
+  /** Aggregated metric for the current AND / OR / SUBST node header. */
+  groupMetric(): CompositionFormattedMetric | null {
+    if (!this.node || this.node.op === 'atom' || !this.formatMetric) {
+      return null;
+    }
+    const score = evaluateCompositionValue(
+      this.node,
+      (id) => this.activityMeta[id]?.score
+    );
+    const index = evaluateCompositionValue(
+      this.node,
+      (id) => this.activityMeta[id]?.index
+    );
+    if (score == null && index == null) {
+      return null;
+    }
+    return this.formatMetric(score ?? 0, index ?? 0);
   }
 
   onAtomClick(activityId: number, event: Event): void {

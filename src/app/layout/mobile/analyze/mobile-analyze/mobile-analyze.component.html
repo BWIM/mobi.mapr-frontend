@@ -280,6 +280,7 @@
               [overallMetricLabel]="placesOverallMetricLabel()"
               [overallMetricColor]="placesOverallMetricColor()"
               [highlightedActivityName]="placesHighlightedActivity()"
+              [formatMetric]="formatPlacesCompositionMetric"
               (toggleActivity)="togglePlacesCategory($event)"
               (hoverActivity)="onPlacesActivityHover($event)">
             </app-category-composition-panel>
@@ -303,7 +304,6 @@
                 <button
                   type="button"
                   class="flex items-center gap-2 text-left w-full px-1.5 py-1 border-0 bg-transparent cursor-pointer text-[var(--primary-color)] rounded"
-                  [class.opacity-40]="!item.enabled"
                   [class.legend-row-highlighted]="placesHighlightedActivity() === item.name"
                   (click)="togglePlacesCategory(item.name)"
                   (mouseenter)="onPlacesActivityHover(item.name)"

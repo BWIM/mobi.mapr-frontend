@@ -111,7 +111,7 @@
         "or": "ODER",
         "subst": "Substitution"
       },
-      "activityToggleHint": "Durch Klicken auf die Aktivität wird sie von der Karte entfernt, die Werte bleiben gleich. Es werden immer nur die Aktivitäten angezeigt, die für die Berechnung relevant sind.",
+      "activityToggleHint": "Klicken hält die Aktivität auf der Karte hervorgehoben; erneutes Klicken hebt die Auswahl auf.",
       "help": {
         "and": "Alle Teile zählen; der Score ist ein gewichteter Durchschnitt.",
         "or": "Jede dieser Optionen kann den Bedarf erfüllen; die beste (schnellste) wird verwendet.",

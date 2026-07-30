@@ -60,6 +60,12 @@
           matTooltipShowDelay="200">
           info_outline
         </mat-icon>
+        <span
+          *ngIf="groupMetric() as metric"
+          class="atom-metric shrink-0 ml-auto"
+          [style.color]="metric.color">
+          {{ metric.label }}
+        </span>
       </div>
       <ul class="branch list-none m-0 p-0 space-y-1">
         <li *ngFor="let child of node.children" class="min-w-0">
@@ -70,6 +76,7 @@
             [interactive]="interactive"
             [shareLabel]="sharePercent(child.weight, node.children)"
             [highlightedActivityName]="highlightedActivityName"
+            [formatMetric]="formatMetric"
             [depth]="depth + 1"
             (toggleActivity)="onChildToggle($event)"
             (hoverActivity)="onChildHover($event)">
@@ -89,6 +96,12 @@
           matTooltipShowDelay="200">
           info_outline
         </mat-icon>
+        <span
+          *ngIf="groupMetric() as metric"
+          class="atom-metric shrink-0 ml-auto"
+          [style.color]="metric.color">
+          {{ metric.label }}
+        </span>
       </div>
       <ul class="branch list-none m-0 p-0 space-y-0.5">
         <li *ngFor="let child of node.children" class="min-w-0">
@@ -98,6 +111,7 @@
             [activityMeta]="activityMeta"
             [interactive]="interactive"
             [highlightedActivityName]="highlightedActivityName"
+            [formatMetric]="formatMetric"
             [depth]="depth + 1"
             (toggleActivity)="onChildToggle($event)"
             (hoverActivity)="onChildHover($event)">
@@ -117,6 +131,12 @@
           matTooltipShowDelay="200">
           info_outline
         </mat-icon>
+        <span
+          *ngIf="groupMetric() as metric"
+          class="atom-metric shrink-0 ml-auto"
+          [style.color]="metric.color">
+          {{ metric.label }}
+        </span>
       </div>
       <div class="branch space-y-2">
         <div>
@@ -127,6 +147,7 @@
             [activityMeta]="activityMeta"
             [interactive]="interactive"
             [highlightedActivityName]="highlightedActivityName"
+            [formatMetric]="formatMetric"
             [depth]="depth + 1"
             (toggleActivity)="onChildToggle($event)"
             (hoverActivity)="onChildHover($event)">
@@ -143,6 +164,7 @@
                 [interactive]="interactive"
                 [shareLabel]="sharePercent(sub.weight, node.substitutes)"
                 [highlightedActivityName]="highlightedActivityName"
+                [formatMetric]="formatMetric"
                 [depth]="depth + 1"
                 (toggleActivity)="onChildToggle($event)"
                 (hoverActivity)="onChildHover($event)">

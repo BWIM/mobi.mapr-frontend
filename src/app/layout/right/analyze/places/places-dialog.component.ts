@@ -52,8 +52,11 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   compositionActivityMeta: Record<number, CompositionActivityMeta> = {};
   overallMetricLabel: string | null = null;
   overallMetricColor: string | null = null;
-  /** Activity display name highlighted via map↔panel hover. */
+  /** Activity display name highlighted via map↔panel hover or sticky click. */
   highlightedActivityName: string | null = null;
+  /** Sticky selection from click; hover temporarily overrides display. */
+  private pinnedActivityName: string | null = null;
+  private hoveredActivityName: string | null = null;
   private map?: MapLibreMap;
   private translate = inject(TranslateService);
   private dialog = inject(MatDialog);
@@ -448,6 +451,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
             'circle-stroke-width': isHighlighted ? 2.5 : 1.5,
             'circle-stroke-color': isHighlighted ? 'rgba(0, 0, 0, 0.85)' : 'rgba(0, 0, 0, 0.55)',
             'circle-opacity': 1.0,
+            'circle-stroke-opacity': 1.0,
           },
         },
         beforeLayer
@@ -477,7 +481,20 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onPanelActivityHover(activityName: string | null): void {
-    this.setHighlightedActivity(activityName);
+    this.hoveredActivityName = activityName;
+    this.applyEffectiveHighlight();
+  }
+
+  /** Click pins (or unpins) an activity highlight — does not hide map layers. */
+  onPanelActivitySelect(activityName: string): void {
+    this.pinnedActivityName =
+      this.pinnedActivityName === activityName ? null : activityName;
+    this.applyEffectiveHighlight();
+  }
+
+  private applyEffectiveHighlight(): void {
+    const next = this.hoveredActivityName ?? this.pinnedActivityName;
+    this.setHighlightedActivity(next);
   }
 
   private setHighlightedActivity(activityName: string | null): void {
@@ -537,6 +554,11 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       'circle-opacity',
       dimmed ? 0.18 : 1.0
     );
+    this.map.setPaintProperty(
+      circleLayerId,
+      'circle-stroke-opacity',
+      dimmed ? 0.18 : 1.0
+    );
   }
 
   private setOverallMetricFromDialogData(): void {
@@ -560,6 +582,15 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     return this.getGradeFromIndex(index);
   }
+
+  /** Bound for composition panel AND/OR/SUBST headers. */
+  readonly formatCompositionMetric = (
+    score: number,
+    index: number
+  ): { label: string; color: string } => ({
+    label: this.formatPlacesMetric(score, index),
+    color: this.getPlacesMetricTextColor(score, index),
+  });
 
   getPlacesIsScoreMode(): boolean {
     return !!this.data.isScoreMode;
@@ -661,36 +692,6 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     this.categoryLegendExpanded = !this.categoryLegendExpanded;
   }
 
-  toggleCategory(categoryName: string): void {
-    const legendItem = this.categoryLegendItems.find(item => item.name === categoryName);
-    if (!legendItem) {
-      return;
-    }
-
-    legendItem.enabled = !legendItem.enabled;
-    this.syncCompositionActivityMeta();
-    const circleLayerId = `places-circles-${categoryName}`;
-
-    if (this.map) {
-      if (legendItem.enabled) {
-        if (!this.map.getLayer(circleLayerId)) {
-          const category = this.categoryData.find(cat => cat.name === categoryName);
-          if (category) {
-            try {
-              this.ensureCategoryLayers(category);
-            } catch (error) {
-              console.error(`Error creating layer for ${categoryName}:`, error);
-            }
-          }
-        } else {
-          this.setCategoryLayersVisibility(categoryName, true);
-        }
-      } else {
-        this.setCategoryLayersVisibility(categoryName, false);
-      }
-    }
-  }
-
   private setupMarkerInteractionsForLayer(layerId: string, activityName: string): void {
     if (!this.map || !this.popup) {
       return;
@@ -717,7 +718,10 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         pendingPopupLngLat = null;
       }
 
-      this.ngZone.run(() => this.setHighlightedActivity(activityName));
+      this.ngZone.run(() => {
+        this.hoveredActivityName = activityName;
+        this.applyEffectiveHighlight();
+      });
     });
 
     this.map.on('mouseleave', layerId, () => {
@@ -736,7 +740,15 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         this.popup.remove();
       }
 
-      this.ngZone.run(() => this.setHighlightedActivity(null));
+      this.ngZone.run(() => {
+        this.hoveredActivityName = null;
+        this.applyEffectiveHighlight();
+      });
+    });
+
+    // Click pins the activity (same sticky highlight as panel click).
+    this.map.on('click', layerId, () => {
+      this.ngZone.run(() => this.onPanelActivitySelect(activityName));
     });
 
     // Show popup on hover

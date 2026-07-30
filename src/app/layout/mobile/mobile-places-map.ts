@@ -59,6 +59,8 @@ export class MobilePlacesMap {
   private resizeObserver?: ResizeObserver;
   private mapContainer?: HTMLElement;
   private readonly ngZone: NgZone;
+  private pinnedActivityName: string | null = null;
+  private hoveredActivityName: string | null = null;
 
   constructor(
     private readonly state: MobilePlacesMapState,
@@ -187,35 +189,20 @@ export class MobilePlacesMap {
     this.pendingFeatureShape = null;
   }
 
-  toggleCategory(categoryName: string): void {
-    const items = this.state.categoryLegendItems();
-    const legendItem = items.find((item) => item.name === categoryName);
-    if (!legendItem || !this.map) {
-      return;
-    }
+  /** Click pins (or unpins) highlight — does not hide map layers. */
+  selectActivity(activityName: string): void {
+    this.pinnedActivityName =
+      this.pinnedActivityName === activityName ? null : activityName;
+    this.applyEffectiveHighlight();
+  }
 
-    legendItem.enabled = !legendItem.enabled;
-    this.state.categoryLegendItems.set([...items]);
-    this.refreshCompositionEnabledFlags();
+  setHoveredActivity(activityName: string | null): void {
+    this.hoveredActivityName = activityName;
+    this.applyEffectiveHighlight();
+  }
 
-    const circleLayerId = `places-circles-${categoryName}`;
-
-    if (legendItem.enabled) {
-      if (!this.map.getLayer(circleLayerId)) {
-        const category = this.categoryData.find((cat) => cat.name === categoryName);
-        if (category) {
-          try {
-            this.ensureCategoryLayers(category);
-          } catch (err) {
-            console.error(`Error creating layer for ${categoryName}:`, err);
-          }
-        }
-      } else {
-        this.setCategoryLayersVisibility(categoryName, true);
-      }
-    } else {
-      this.setCategoryLayersVisibility(categoryName, false);
-    }
+  private applyEffectiveHighlight(): void {
+    this.setHighlightedActivity(this.hoveredActivityName ?? this.pinnedActivityName);
   }
 
   setHighlightedActivity(activityName: string | null): void {
@@ -495,6 +482,7 @@ export class MobilePlacesMap {
             'circle-stroke-width': isHighlighted ? 2.5 : 1.5,
             'circle-stroke-color': isHighlighted ? 'rgba(0, 0, 0, 0.85)' : 'rgba(0, 0, 0, 0.55)',
             'circle-opacity': 1.0,
+            'circle-stroke-opacity': 1.0,
           },
         },
         beforeLayer,
@@ -552,6 +540,7 @@ export class MobilePlacesMap {
       highlighted ? 'rgba(0, 0, 0, 0.85)' : 'rgba(0, 0, 0, 0.55)',
     );
     this.map.setPaintProperty(circleLayerId, 'circle-opacity', dimmed ? 0.18 : 1.0);
+    this.map.setPaintProperty(circleLayerId, 'circle-stroke-opacity', dimmed ? 0.18 : 1.0);
   }
 
   private setCategoryLayersVisibility(categoryName: string, visible: boolean): void {
@@ -647,7 +636,7 @@ export class MobilePlacesMap {
         pendingPopupFeature = null;
         pendingPopupLngLat = null;
       }
-      this.ngZone.run(() => this.setHighlightedActivity(activityName));
+      this.ngZone.run(() => this.setHoveredActivity(activityName));
     });
 
     this.map.on('mouseleave', layerId, () => {
@@ -659,7 +648,11 @@ export class MobilePlacesMap {
         mousemovePopupTimeout = null;
       }
       this.popup?.remove();
-      this.ngZone.run(() => this.setHighlightedActivity(null));
+      this.ngZone.run(() => this.setHoveredActivity(null));
+    });
+
+    this.map.on('click', layerId, () => {
+      this.ngZone.run(() => this.selectActivity(activityName));
     });
 
     this.map.on('mousemove', layerId, (e) => {

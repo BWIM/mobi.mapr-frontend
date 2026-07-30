@@ -2022,6 +2022,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.getGrade(index);
   }
 
+  /** Bound for composition panel AND/OR/SUBST headers. */
+  readonly formatCompositionMetric = (
+    score: number,
+    index: number
+  ): { label: string; color: string } => ({
+    label: this.formatPlacesMetric(score, index),
+    color: this.getPlacesMetricTextColor(score, index),
+  });
+
   getPlacesIsScoreMode(): boolean {
     return this.filterConfigService.selectedBewertung() === 'zeit';
   }

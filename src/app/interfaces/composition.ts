@@ -183,3 +183,98 @@ export function deriveTopLevelLegendItems(
 export function weightedChildrenTotal(children: CompositionWeightedChild[]): number {
   return children.reduce((sum, c) => sum + (Number(c.weight) || 0), 0);
 }
+
+/** Matches backend ERROR_SCORE_SECONDS (250 minutes). */
+const FAULTY_SCORE_SECONDS = 250 * 60;
+
+function isFaultyMetric(value: number | null | undefined): boolean {
+  return value == null || !Number.isFinite(value) || value === FAULTY_SCORE_SECONDS;
+}
+
+/**
+ * Evaluate a composition node to a single metric (score seconds or quality index),
+ * mirroring backend AND / OR / SUBST semantics in combination_expr.evaluate.
+ *
+ * @param lookup maps activity_id → metric value (score or index)
+ */
+export function evaluateCompositionValue(
+  node: CompositionNode | null | undefined,
+  lookup: (activityId: number) => number | null | undefined
+): number | null {
+  if (!node) {
+    return null;
+  }
+
+  const evalNode = (n: CompositionNode): number => {
+    if (n.op === 'atom') {
+      const value = lookup(n.activity_id);
+      if (isFaultyMetric(value)) {
+        return FAULTY_SCORE_SECONDS;
+      }
+      return Number(value);
+    }
+
+    if (n.op === 'or') {
+      const valid: number[] = [];
+      for (const child of n.children) {
+        const value = evalNode(child);
+        if (!isFaultyMetric(value)) {
+          valid.push(value);
+        }
+      }
+      if (valid.length === 0) {
+        return FAULTY_SCORE_SECONDS;
+      }
+      return Math.min(...valid);
+    }
+
+    if (n.op === 'and') {
+      let totalW = 0;
+      let totalS = 0;
+      for (const child of n.children) {
+        const value = evalNode(child.expr);
+        if (isFaultyMetric(value)) {
+          return FAULTY_SCORE_SECONDS;
+        }
+        const weight = Number(child.weight) || 0;
+        totalS += value * weight;
+        totalW += weight;
+      }
+      if (totalW === 0) {
+        return 0;
+      }
+      return totalS / totalW;
+    }
+
+    if (n.op === 'subst') {
+      const primaryValue = evalNode(n.primary);
+      if (isFaultyMetric(primaryValue)) {
+        return FAULTY_SCORE_SECONDS;
+      }
+      let totalW = 0;
+      let totalS = 0;
+      for (const sub of n.substitutes) {
+        const subValue = evalNode(sub.expr);
+        const term = isFaultyMetric(subValue)
+          ? primaryValue
+          : Math.min(subValue as number, primaryValue);
+        const weight = Number(sub.weight) || 0;
+        totalS += term * weight;
+        totalW += weight;
+      }
+      if (totalW === 0) {
+        return FAULTY_SCORE_SECONDS;
+      }
+      return totalS / totalW;
+    }
+
+    return FAULTY_SCORE_SECONDS;
+  };
+
+  const result = evalNode(node);
+  if (isFaultyMetric(result)) {
+    return null;
+  }
+  return result;
+}
+

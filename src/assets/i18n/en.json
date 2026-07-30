@@ -111,7 +111,7 @@
         "or": "OR",
         "subst": "Substitution"
       },
-      "activityToggleHint": "Clicking on the activity removes it from the map, the values stay the same",
+      "activityToggleHint": "Click to keep this activity highlighted on the map; click again to clear",
       "help": {
         "and": "All parts count; score is a weighted average.",
         "or": "Any of these can fulfill the need; the best (fastest) option is used.",

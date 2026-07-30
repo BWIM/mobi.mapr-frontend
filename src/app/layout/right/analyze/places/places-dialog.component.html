@@ -43,7 +43,8 @@
           [overallMetricLabel]="overallMetricLabel"
           [overallMetricColor]="overallMetricColor"
           [highlightedActivityName]="highlightedActivityName"
-          (toggleActivity)="toggleCategory($event)"
+          [formatMetric]="formatCompositionMetric"
+          (toggleActivity)="onPanelActivitySelect($event)"
           (hoverActivity)="onPanelActivityHover($event)">
         </app-category-composition-panel>
 
@@ -60,9 +61,8 @@
               type="button"
               *ngFor="let item of categoryLegendItems"
               class="flex items-center gap-2 text-left w-full px-1.5 py-1 border-0 bg-transparent cursor-pointer transition-colors text-[var(--primary-color)] rounded"
-              [class.opacity-40]="!item.enabled"
               [class.legend-row-highlighted]="highlightedActivityName === item.name"
-              (click)="toggleCategory(item.name)"
+              (click)="onPanelActivitySelect(item.name)"
               (mouseenter)="onPanelActivityHover(item.name)"
               (mouseleave)="onPanelActivityHover(null)">
               <span class="text-[12px] leading-snug min-w-0 flex-1 truncate">

@@ -288,11 +288,11 @@ export class MobileAnalyzeComponent implements OnDestroy {
   }
 
   togglePlacesCategory(name: string): void {
-    this.placesMap?.toggleCategory(name);
+    this.placesMap?.selectActivity(name);
   }
 
   onPlacesActivityHover(name: string | null): void {
-    this.placesMap?.setHighlightedActivity(name);
+    this.placesMap?.setHoveredActivity(name);
   }
 
   togglePlacesLegendExpanded(): void {
@@ -306,6 +306,19 @@ export class MobileAnalyzeComponent implements OnDestroy {
       ? scoreColor(score, this.scoreColorsService.getConfig())
       : gradeColor(index);
   }
+
+  readonly formatPlacesCompositionMetric = (
+    score: number,
+    index: number
+  ): { label: string; color: string } => {
+    const label = this.placesScoreMode()
+      ? `${(score / 60).toFixed(1)} ${this.translate.instant('map.popup.minutes')}`
+      : gradeFromIndex(index);
+    return {
+      label,
+      color: this.placesMetricTextColor(score, index),
+    };
+  };
 
   openLegendInfo(event: Event): void {
     event.stopPropagation();
