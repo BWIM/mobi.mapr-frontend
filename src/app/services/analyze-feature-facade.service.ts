@@ -228,6 +228,12 @@ export class AnalyzeFeatureFacadeService {
   ): import('../layout/right/analyze/places/places-dialog.component').PlacesDialogData | null {
     const base = this.buildAllCategoriesDialogData();
     if (!base) return null;
+    const match =
+      categoryId != null
+        ? this.analyzeData()?.categories?.find((c) => c.category_id === categoryId)
+        : this.analyzeData()?.categories?.length === 1
+          ? this.analyzeData()!.categories[0]
+          : undefined;
     return {
       featureType: base.featureType,
       featureId: base.featureId,
@@ -236,6 +242,8 @@ export class AnalyzeFeatureFacadeService {
       categoryNames: categoryName || '',
       personaId: base.personaId,
       isScoreMode: base.isScoreMode,
+      categoryScore: match?.score,
+      categoryIndex: match?.index,
     };
   }
 

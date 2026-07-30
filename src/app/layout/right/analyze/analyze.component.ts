@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, ViewChild, ElementRef, AfterViewInit, effect } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ViewChild, AfterViewInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription, catchError, of, forkJoin, firstValueFrom } from 'rxjs';
 import { FeatureSelectionService, MapCompareSide } from '../../../shared/services/feature-selection.service';
@@ -14,14 +14,18 @@ import { SharedModule } from '../../../shared/shared.module';
 import { AllCategoriesDialogComponent, AllCategoriesDialogData } from './overlay/all-categories-dialog.component';
 import { PlacesDialogComponent, PlacesDialogData } from './places/places-dialog.component';
 import { PersonasDialogComponent, PersonasDialogData } from './overlay/personas-dialog.component';
-import { Map as MapLibreMap, NavigationControl, FullscreenControl, Popup, GeoJSONSource } from 'maplibre-gl';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MobileUiService } from '../../../services/mobile-ui.service';
 import { ScoreColorsService } from '../../../services/score-colors.service';
+import { CompositionNode } from '../../../interfaces/composition';
+import {
+  CategoryCompositionPanelComponent,
+  CompositionActivityMeta,
+} from '../../../shared/category-composition-panel/category-composition-panel.component';
 
 @Component({
   selector: 'app-analyze',
-  imports: [CommonModule, ChartModule, SharedModule, TranslateModule],
+  imports: [CommonModule, ChartModule, SharedModule, TranslateModule, CategoryCompositionPanelComponent],
   templateUrl: './analyze.component.html',
   styleUrl: './analyze.component.css',
 })
@@ -67,36 +71,40 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   isLoadingPersonas2: boolean = false;
   personasError2: string | null = null;
   
-  // Map data
-  @ViewChild('mapContainerMini') mapContainerMini?: ElementRef;
-  private map?: MapLibreMap;
-  private popup?: Popup;
+  // Places summary data (composition / activity grades; map opens as overlay)
   private places: Place[] = [];
-  private categoryData: Array<{ name: string; weight: number; score: number; index: number; places: Place[] }> = [];
+  private categoryData: Array<{
+    name: string;
+    weight: number;
+    score: number;
+    index: number;
+    places: Place[];
+    activity_id?: number;
+  }> = [];
   private categoryColors = new Map<string, string>();
-  categoryLegendItems: Array<{ name: string; color: string; weight: number; relevance: number; enabled: boolean; score: number; index: number }> = [];
-  categoryLegendExpanded = true;
+  /** Leaf activity list for places summary / composition panel. */
+  categoryLegendItems: Array<{
+    name: string;
+    color: string;
+    weight: number;
+    relevance: number;
+    enabled: boolean;
+    score: number;
+    index: number;
+    activity_id?: number;
+  }> = [];
+  composition: CompositionNode | null = null;
+  compositionActivityMeta: Record<number, CompositionActivityMeta> = {};
+  placesOverallMetricLabel: string | null = null;
+  placesOverallMetricColor: string | null = null;
   isLoadingPlaces: boolean = false;
   placesError: string | null = null;
-  private pendingFeatureShape: any = null;
+  /** Places map overlay is only available for municipality / hexagon. */
+  placesMapAvailable = false;
   private colorPalette = [
     '#FF0000', '#00FF00', '#0066FF', '#FFA07A', '#98D8C8',
     '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52BE80',
     '#EC7063', '#5DADE2', '#58D68D', '#F4D03F', '#AF7AC5'
-  ];
-
-  // Pastel colors for category dots and circle fills (NOT tied to score/index)
-  private pastelCategoryColors = [
-    '#FAD7A0', // warm pastel
-    '#AEC6CF', // soft blue/gray
-    '#C5E1A5', // soft green
-    '#FFCDD2', // soft red/pink
-    '#B3E5FC', // light blue
-    '#E1BEE7', // light purple
-    '#FFE0B2', // light amber
-    '#C8E6C9', // pale green
-    '#D1C4E9', // pale violet
-    '#FFECB3'  // soft yellow
   ];
 
   // Quality (index) colors - A through F (must match map.service.ts getIndexFillColorExpression())
@@ -214,6 +222,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.executeReload();
       }
     });
+
+    // Score vs quality only changes how existing values are shown — no API reload.
+    effect(() => {
+      this.filterConfigService.selectedBewertung();
+      if (this.categoryData.length === 0 && !this.analyzeData?.categories?.length) {
+        return;
+      }
+      this.refreshPlacesMetricDisplay();
+    });
   }
 
   ngOnInit() {
@@ -311,22 +328,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // Use setTimeout to ensure the view is fully rendered
-    setTimeout(() => {
-      // Initialize map if we should show it, regardless of categoryData being loaded yet
-      // Places will be added when they're loaded in loadPlacesForMap()
-      if (this.mapContainerMini && !this.map && this.shouldShowMap()) {
-        this.initializeMap();
-        // Only add places if categoryData is already available
-        if (this.categoryData.length > 0) {
-          this.addPlacesWhenReady();
-        }
-        if (this.pendingFeatureShape) {
-          this.addFeatureShapeToMap(this.pendingFeatureShape);
-          this.pendingFeatureShape = null;
-        }
-      }
-    }, 0);
+    // Places summary is data-driven; the map opens only via the places dialog overlay.
   }
 
   ngOnDestroy() {
@@ -350,9 +352,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     if (this.languageSubscription) {
       this.languageSubscription.unsubscribe();
-    }
-    if (this.map) {
-      this.map.remove();
     }
     // Angular effects are automatically cleaned up on component destruction
   }
@@ -379,15 +378,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.analyzeSubscription2 = undefined;
     }
     // Clean up map
-    if (this.map) {
-      this.map.remove();
-      this.map = undefined;
-    }
-    this.popup = undefined;
     this.places = [];
     this.categoryData = [];
+    this.categoryLegendItems = [];
+    this.composition = null;
+    this.compositionActivityMeta = {};
+    this.placesOverallMetricLabel = null;
+    this.placesOverallMetricColor = null;
+    this.placesMapAvailable = false;
     this.categoryColors.clear();
-    this.pendingFeatureShape = null;
     this.selectedFeature = null;
     this.selectedFeatureId = null;
     this.featureInfo = null;
@@ -520,15 +519,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.personasData2 = null;
     
     // Clear map data (will be reloaded if needed)
-    if (this.map) {
-      this.map.remove();
-      this.map = undefined;
-    }
-    this.popup = undefined;
     this.places = [];
     this.categoryData = [];
+    this.categoryLegendItems = [];
+    this.composition = null;
+    this.compositionActivityMeta = {};
+    this.placesOverallMetricLabel = null;
+    this.placesOverallMetricColor = null;
+    this.placesMapAvailable = false;
     this.categoryColors.clear();
-    this.pendingFeatureShape = null;
     this.isLoadingPlaces = false;
     
     // Reload data for feature 1 if selected
@@ -691,15 +690,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     
     // Clean up existing map if switching features
-    if (this.map) {
-      this.map.remove();
-      this.map = undefined;
-    }
-    this.popup = undefined;
     this.places = [];
     this.categoryData = [];
+    this.categoryLegendItems = [];
+    this.composition = null;
+    this.compositionActivityMeta = {};
+    this.placesOverallMetricLabel = null;
+    this.placesOverallMetricColor = null;
+    this.placesMapAvailable = false;
     this.categoryColors.clear();
-    this.pendingFeatureShape = null;
     this.isLoadingPlaces = false;
     this.placesError = null;
 
@@ -1074,78 +1073,27 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const { profileIds } = profileContext;
     
     this.isLoadingPlaces = true;
-    this.categoryLegendExpanded = true;
     this.placesError = null;
-
-    // Check if places are available for this feature type
-    // Places API only supports 'municipality' and 'hexagon'
-    const isPlacesSupported = featureType === 'municipality' || featureType === 'hexagon';
-
-    if (!isPlacesSupported) {
-      // Show error message for unsupported feature types (state/county)
-      this.placesError = this.translate.instant('analyze.placesDialog.disabledForCountiesStates');
-      this.isLoadingPlaces = false;
-      
-      // Still load feature shape and initialize map to show the feature boundary
-      try {
-        const featureShape = await firstValueFrom(
-          this.placesService.getFeatureShape({
-            feature_type: featureType,
-            feature_id: featureId
-          }).pipe(
-            catchError((error) => {
-              console.warn('Could not load feature shape:', error);
-              return of(null);
-            })
-          )
-        );
-        
-        // Initialize map to show feature shape even without places
-        if (!this.map && this.mapContainerMini) {
-          this.initializeMap();
-        } else if (this.map) {
-          if (featureShape) {
-            this.addFeatureShapeToMap(featureShape);
-          }
-        } else {
-          this.pendingFeatureShape = featureShape;
-        }
-      } catch (err: any) {
-        console.error('Error loading feature shape:', err);
-      }
-      
-      return;
-    }
+    this.placesMapAvailable =
+      featureType === 'municipality' || featureType === 'hexagon';
 
     try {
-      // Get category IDs from analyzeData
       const categoryIds = this.analyzeData.categories.map(cat => cat.category_id);
 
-      // Load places and feature shape in parallel
-      const [placesResponse, featureShape] = await Promise.all([
-        firstValueFrom(
-          this.placesService.getPlaces({
-            feature_type: featureType,
-            feature_id: featureId,
-            profile_ids: profileIds,
-            category_ids: categoryIds.length > 0 ? categoryIds : undefined
-          })
-        ),
-        firstValueFrom(
-          this.placesService.getFeatureShape({
-            feature_type: featureType,
-            feature_id: featureId
-          }).pipe(
-            catchError((error) => {
-              console.warn('Could not load feature shape:', error);
-              return of(null);
-            })
-          )
-        )
-      ]);
+      const placesResponse = await firstValueFrom(
+        this.placesService.getPlaces({
+          feature_type: featureType,
+          feature_id: featureId,
+          profile_ids: profileIds,
+          category_ids: categoryIds.length > 0 ? categoryIds : undefined,
+          simplified: true,
+        })
+      );
 
-      this.places = placesResponse.places || [];
-      this.places = this.places.filter(p => p.lat !== 0 && p.lon !== 0 && !isNaN(p.lat) && !isNaN(p.lon));
+      this.places = (placesResponse.places || []).filter(
+        p => p.lat !== 0 && p.lon !== 0 && !isNaN(p.lat) && !isNaN(p.lon)
+      );
+      this.composition = placesResponse.composition ?? null;
 
       if (placesResponse.categories) {
         this.categoryData = placesResponse.categories
@@ -1154,31 +1102,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
             weight: cat.weight,
             score: cat.activityScore?.score ?? 0,
             index: cat.activityScore?.index ?? 0,
+            activity_id: cat.activity_id,
             places: cat.places.filter(p => p.lat !== 0 && p.lon !== 0 && !isNaN(p.lat) && !isNaN(p.lon))
           }))
           .sort((a, b) => b.weight - a.weight);
       }
 
       this.assignCategoryColors();
-
-      // Initialize map if not already done
-      // Use setTimeout to ensure the DOM is fully updated
-      setTimeout(() => {
-        if (!this.map && this.mapContainerMini) {
-          this.initializeMap();
-          // Places will be added when map finishes loading (handled in initializeMap's 'load' event)
-          if (featureShape) {
-            this.pendingFeatureShape = featureShape;
-          }
-        } else if (this.map) {
-          this.addPlacesWhenReady();
-          if (featureShape) {
-            this.addFeatureShapeToMap(featureShape);
-          }
-        } else {
-          this.pendingFeatureShape = featureShape;
-        }
-      }, 100);
+      this.syncCompositionActivityMeta(placesResponse.categories);
+      this.setPlacesOverallMetricFromAnalyze();
 
       this.isLoadingPlaces = false;
     } catch (err: any) {
@@ -2008,141 +1940,94 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.getProfileContext()?.filters.persona_id === 54;
   }
 
-  private initializeMap(): void {
-    if (!this.mapContainerMini) {
-      console.warn('Cannot initialize map: mapContainerMini not available');
-      return;
-    }
-
-    const baseStyle = this.mapService.getBaseMapStyle();
-
-    const mapOptions: any = {
-      container: this.mapContainerMini.nativeElement,
-      style: baseStyle,
-      center: [9.2156505, 49.320099],
-      zoom: 7,
-      dragRotate: false,
-      renderWorldCopies: false,
-      attributionControl: false
-    };
-
-    this.map = new MapLibreMap(mapOptions);
-
-    this.popup = new Popup({
-      closeButton: false,
-      closeOnClick: false,
-      anchor: 'bottom',
-      offset: [0, -5]
-    });
-
-    this.map.addControl(new NavigationControl({ showCompass: false }), 'top-right');
-    this.map.addControl(new FullscreenControl(), 'top-right');
-    this.map.dragRotate.disable();
-    this.map.touchZoomRotate.disableRotation();
-
-    this.map.once('load', () => {
-      if (this.map) {
-        // Ensure map resizes after container is properly rendered
-        setTimeout(() => {
-          if (this.map) {
-            this.map.resize();
-          }
-        }, 100);
-      }
-      this.addPlacesWhenReady();
-      if (this.pendingFeatureShape) {
-        this.addFeatureShapeToMap(this.pendingFeatureShape);
-        this.pendingFeatureShape = null;
-      }
-    });
-  }
-
-  private addPlacesWhenReady(): void {
-    if (!this.map) {
-      console.warn('Cannot add places: map not initialized');
-      return;
-    }
-
-    if (this.categoryData.length === 0) {
-      console.warn('Cannot add places: no category data available');
-      return;
-    }
-    
-    console.log('Adding places to map, categoryData:', this.categoryData.length, 'categories');
-    const totalPlaces = this.categoryData.reduce((sum, cat) => sum + cat.places.length, 0);
-    console.log('Total places to add:', totalPlaces);
-
-    if (this.map.loaded()) {
-      this.addPlacesToMap();
-      this.fitMapToPlaces();
-    } else {
-      this.map.once('load', () => {
-        this.addPlacesToMap();
-        this.fitMapToPlaces();
-      });
-    }
-  }
-
   private assignCategoryColors(): void {
     this.categoryColors.clear();
     this.categoryLegendItems = [];
-    
-    // Calculate total weight for relevance calculation
+
     const totalWeight = this.categoryData.reduce((sum, cat) => sum + cat.weight, 0);
-    
-    // Use categoryData which is already sorted by weight
-    // Show all categories, but only enable the first 3
+
     this.categoryData.forEach((category, index) => {
       if (category.name && !this.categoryColors.has(category.name)) {
-        const pastelColor = this.pastelCategoryColors[index % this.pastelCategoryColors.length];
-        this.categoryColors.set(category.name, pastelColor);
-        
-        // Calculate relevance as percentage
+        const color = this.getPlacesMetricTextColor(category.score, category.index);
+        this.categoryColors.set(category.name, color);
+
         const relevance = totalWeight > 0 ? (category.weight / totalWeight) * 100 : 0;
-        
-        this.categoryLegendItems.push({ 
-          name: category.name, 
-          color: pastelColor,
+
+        this.categoryLegendItems.push({
+          name: category.name,
+          color,
           weight: category.weight,
-          relevance: relevance,
-          enabled: index < 3, // Only first 3 enabled by default
+          relevance,
+          enabled: true,
           score: category.score,
-          index: category.index
+          index: category.index,
+          activity_id: category.activity_id,
         });
       }
     });
   }
 
+  private syncCompositionActivityMeta(
+    categories?: Array<{ activity_id?: number; role_hint?: 'primary' | 'substitute' }>
+  ): void {
+    const totalWeight = this.categoryData.reduce((sum, cat) => sum + cat.weight, 0);
+    const next: Record<number, CompositionActivityMeta> = {};
+    for (const cat of this.categoryData) {
+      if (cat.activity_id == null) {
+        continue;
+      }
+      const apiCat = categories?.find((c) => c.activity_id === cat.activity_id);
+      const prev = this.compositionActivityMeta[cat.activity_id];
+      next[cat.activity_id] = {
+        name: cat.name,
+        color: this.categoryColors.get(cat.name),
+        weight: cat.weight,
+        relevance: totalWeight > 0 ? (cat.weight / totalWeight) * 100 : 0,
+        enabled: true,
+        score: cat.score,
+        index: cat.index,
+        role_hint: apiCat?.role_hint ?? prev?.role_hint,
+        metricLabel: this.formatPlacesMetric(cat.score, cat.index),
+        metricColor: this.getPlacesMetricTextColor(cat.score, cat.index),
+      };
+    }
+    this.compositionActivityMeta = next;
+  }
+
+  /** Reformat composition / legend metrics after quality ↔ time toggle. */
+  private refreshPlacesMetricDisplay(): void {
+    if (this.categoryData.length > 0) {
+      this.assignCategoryColors();
+      this.syncCompositionActivityMeta();
+    }
+    this.setPlacesOverallMetricFromAnalyze();
+  }
+
+  private setPlacesOverallMetricFromAnalyze(): void {
+    const category = this.analyzeData?.categories?.[0];
+    if (!category) {
+      this.placesOverallMetricLabel = null;
+      this.placesOverallMetricColor = null;
+      return;
+    }
+    this.placesOverallMetricLabel = this.formatPlacesMetric(category.score, category.index);
+    this.placesOverallMetricColor = this.getPlacesMetricTextColor(category.score, category.index);
+  }
+
+  private formatPlacesMetric(score: number, index: number): string {
+    if (this.getPlacesIsScoreMode()) {
+      const minutes = (score / 60).toFixed(1);
+      return `${minutes} ${this.translate.instant('map.popup.minutes')}`;
+    }
+    return this.getGrade(index);
+  }
+
   getPlacesIsScoreMode(): boolean {
-    return this.getProfileContext()?.filters.feature_type === 'score';
+    return this.filterConfigService.selectedBewertung() === 'zeit';
   }
 
   private getPlacesScoreColor(score: number): string {
     return this.scoreColorsService.getColorForScore(score);
-  }
-
-  private getPlacesIndexColor(index: number): string {
-    const indexValue = index / 100;
-    if (indexValue <= 0) {
-      return 'rgba(128, 128, 128, 0.7)';
-    } else if (indexValue < 0.35) {
-      return 'rgb(50, 97, 45)';
-    } else if (indexValue < 0.5) {
-      return 'rgb(60, 176, 67)';
-    } else if (indexValue < 0.71) {
-      return 'rgb(238, 210, 2)';
-    } else if (indexValue < 1.0) {
-      return 'rgb(237, 112, 20)';
-    } else if (indexValue < 1.41) {
-      return 'rgb(194, 24, 7)';
-    } else {
-      return 'rgb(197, 136, 187)';
-    }
-  }
-
-  private getPlacesScoreTextColor(score: number): string {
-    // Same rgb breaks as the map/legend, but used for colored text
-    return this.getPlacesScoreColor(score);
   }
 
   private getPlacesIndexTextColor(index: number): string {
@@ -2158,400 +2043,20 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   getPlacesMetricTextColor(score: number, index: number): string {
     return this.getPlacesIsScoreMode()
-      ? this.getPlacesScoreTextColor(score)
+      ? this.getPlacesScoreColor(score)
       : this.getPlacesIndexTextColor(index);
   }
 
-  private addPlacesToMap(): void {
-    if (!this.map || this.categoryData.length === 0) {
-      console.warn('addPlacesToMap: map or categoryData missing', { map: !!this.map, categoryDataLength: this.categoryData.length });
+  openMiniMapPlacesDetails(): void {
+    if (!this.placesMapAvailable) {
       return;
     }
-
-    console.log('addPlacesToMap: Adding places for', this.categoryData.length, 'categories');
-    const beforeLayer = this.map.getLayer('carto-labels-layer') ? 'carto-labels-layer' : undefined;
-
-    // Create a separate layer for each enabled category
-    this.categoryData.forEach((category, index) => {
-      const legendItem = this.categoryLegendItems.find(item => item.name === category.name);
-      const isEnabled = legendItem?.enabled ?? (index < 3);
-      
-      // Only create layers for enabled categories initially
-      if (!isEnabled) {
-        return;
-      }
-      
-      console.log(`Adding category "${category.name}" with ${category.places.length} places`);
-      const sourceId = `places-${category.name}`;
-      const layerId = `places-circles-${category.name}`;
-
-      const features = category.places.map(place => ({
-        type: 'Feature' as const,
-        geometry: {
-          type: 'Point' as const,
-          coordinates: [place.lon, place.lat]
-        },
-        properties: {
-          id: place.id,
-          name: place.name,
-          category_id: place.category_id || 0,
-          category_name: place.category_name || this.translate.instant('map.popup.notAvailable'),
-          url: place['url'] || null
-        }
-      }));
-
-      const geoJsonData = {
-        type: 'FeatureCollection' as const,
-        features
-      };
-
-      const color = this.categoryColors.get(category.name) || '#4ECDC4';
-
-      if (this.map!.getSource(sourceId)) {
-        (this.map!.getSource(sourceId) as GeoJSONSource).setData(geoJsonData);
-      } else {
-        this.map!.addSource(sourceId, {
-          type: 'geojson',
-          data: geoJsonData
-        });
-      }
-
-      if (!this.map!.getLayer(layerId)) {
-        try {
-          this.map!.addLayer({
-            id: layerId,
-            type: 'circle',
-            source: sourceId,
-            paint: {
-              'circle-radius': [
-                'interpolate',
-                ['linear'],
-                ['zoom'],
-                5, 4,
-                10, 8,
-                14, 12
-              ],
-              'circle-color': color,
-              'circle-stroke-width': 2,
-              'circle-stroke-color': 'rgba(0, 0, 0, 0.45)',
-              'circle-opacity': 1.0
-            }
-          }, beforeLayer);
-          
-          // Set up interactions for this layer
-          this.setupMarkerInteractionsForLayer(layerId);
-          
-          // Set up click handler for this layer
-          this.setupMarkerClickHandlerForLayer(layerId);
-          
-          console.log(`Layer added for category: ${category.name}`);
-        } catch (error) {
-          console.error(`Error adding layer for ${category.name}:`, error);
-        }
-      } else {
-        this.map!.setPaintProperty(layerId, 'circle-color', color);
-      }
-    });
-    
-    // Ensure map resizes after adding places
-    if (this.map) {
-      setTimeout(() => {
-        if (this.map) {
-          this.map.resize();
-        }
-      }, 100);
-    }
-  }
-
-  toggleCategoryLegendExpanded(): void {
-    this.categoryLegendExpanded = !this.categoryLegendExpanded;
-  }
-
-  toggleCategory(categoryName: string): void {
-    const legendItem = this.categoryLegendItems.find(item => item.name === categoryName);
-    if (!legendItem) {
+    const category = this.analyzeData?.categories?.[0];
+    if (category) {
+      this.openPlacesDialog(category.category_id, category.category_name, 1);
       return;
     }
-
-    legendItem.enabled = !legendItem.enabled;
-    const layerId = `places-circles-${categoryName}`;
-    const sourceId = `places-${categoryName}`;
-
-    if (this.map) {
-      if (legendItem.enabled) {
-        // Enable category - create layer if it doesn't exist
-        if (!this.map.getLayer(layerId)) {
-          const category = this.categoryData.find(cat => cat.name === categoryName);
-          if (category) {
-            // Create GeoJSON features for this category
-            const features = category.places.map(place => ({
-              type: 'Feature' as const,
-              geometry: {
-                type: 'Point' as const,
-                coordinates: [place.lon, place.lat]
-              },
-              properties: {
-                id: place.id,
-                name: place.name,
-                category_id: place.category_id || 0,
-                category_name: place.category_name || this.translate.instant('map.popup.notAvailable'),
-                url: place['url'] || null
-              }
-            }));
-
-            const geoJsonData = {
-              type: 'FeatureCollection' as const,
-              features
-            };
-
-            const color = this.categoryColors.get(categoryName) || '#4ECDC4';
-
-            // Add source if it doesn't exist
-            if (!this.map.getSource(sourceId)) {
-              this.map.addSource(sourceId, {
-                type: 'geojson',
-                data: geoJsonData
-              });
-            } else {
-              (this.map.getSource(sourceId) as GeoJSONSource).setData(geoJsonData);
-            }
-
-            // Add layer
-            const beforeLayer = this.map.getLayer('carto-labels-layer') ? 'carto-labels-layer' : undefined;
-            try {
-              this.map.addLayer({
-                id: layerId,
-                type: 'circle',
-                source: sourceId,
-                paint: {
-                  'circle-radius': [
-                    'interpolate',
-                    ['linear'],
-                    ['zoom'],
-                    5, 4,
-                    10, 8,
-                    14, 12
-                  ],
-                  'circle-color': color,
-                  'circle-stroke-width': 2,
-                  'circle-stroke-color': 'rgba(0, 0, 0, 0.45)',
-                  'circle-opacity': 1.0
-                }
-              }, beforeLayer);
-              
-              // Set up interactions for this layer
-              this.setupMarkerInteractionsForLayer(layerId);
-              
-              // Set up click handler for this layer
-              this.setupMarkerClickHandlerForLayer(layerId);
-              
-              console.log(`Layer created and enabled for category: ${categoryName}`);
-            } catch (error) {
-              console.error(`Error creating layer for ${categoryName}:`, error);
-            }
-          }
-        } else {
-          // Layer exists, just make it visible
-          this.map.setLayoutProperty(layerId, 'visibility', 'visible');
-        }
-      } else {
-        // Disable category - hide layer
-        if (this.map.getLayer(layerId)) {
-          this.map.setLayoutProperty(layerId, 'visibility', 'none');
-        }
-      }
-    }
-  }
-
-  private setupMarkerInteractionsForLayer(layerId: string): void {
-    if (!this.map || !this.popup) {
-      return;
-    }
-
-    let mousemovePopupTimeout: any = null;
-    let pendingPopupFeature: any = null;
-    let pendingPopupLngLat: any = null;
-
-    // Prevent popup from constantly updating when the user moves the pointer quickly.
-    const HOVER_POPUP_DEBOUNCE_MS = 120;
-
-    // Change cursor on hover
-    this.map.on('mouseenter', layerId, () => {
-      if (this.map) {
-        this.map.getCanvas().style.cursor = 'pointer';
-      }
-
-      if (mousemovePopupTimeout) {
-        clearTimeout(mousemovePopupTimeout);
-        mousemovePopupTimeout = null;
-        pendingPopupFeature = null;
-        pendingPopupLngLat = null;
-      }
-    });
-
-    this.map.on('mouseleave', layerId, () => {
-      if (this.map) {
-        this.map.getCanvas().style.cursor = '';
-      }
-
-      if (mousemovePopupTimeout) {
-        clearTimeout(mousemovePopupTimeout);
-        mousemovePopupTimeout = null;
-        pendingPopupFeature = null;
-        pendingPopupLngLat = null;
-      }
-
-      if (this.popup) {
-        this.popup.remove();
-      }
-    });
-
-    // Show popup on hover
-    this.map.on('mousemove', layerId, (e) => {
-      if (!this.map || !this.popup || !e.features || e.features.length === 0) {
-        return;
-      }
-
-      pendingPopupFeature = e.features[0];
-      pendingPopupLngLat = e.lngLat;
-
-      if (mousemovePopupTimeout) {
-        clearTimeout(mousemovePopupTimeout);
-      }
-
-      mousemovePopupTimeout = setTimeout(() => {
-        if (!this.map || !this.popup || !pendingPopupFeature || !pendingPopupLngLat) {
-          return;
-        }
-
-        const properties = pendingPopupFeature.properties;
-        const unnamedText = this.translate.instant('map.popup.unnamed');
-        const notAvailableText = this.translate.instant('map.popup.notAvailable');
-        const name = properties['name'] || unnamedText;
-        const categoryName = properties['category_name'] || notAvailableText;
-
-        const popupContent = `
-          <div>
-            <div style="font-weight: 600; margin-bottom: 4px;">${name}</div>
-            <div style="font-size: 12px; color: #666;">${categoryName}</div>
-          </div>
-        `;
-
-        this.popup
-          .setLngLat(pendingPopupLngLat)
-          .setHTML(popupContent)
-          .addTo(this.map);
-      }, HOVER_POPUP_DEBOUNCE_MS);
-    });
-  }
-
-  private setupMarkerClickHandlerForLayer(layerId: string): void {
-    if (!this.map) {
-      return;
-    }
-
-    this.map.on('click', layerId, (e) => {
-      if (!e.features || e.features.length === 0) {
-        return;
-      }
-
-      const feature = e.features[0];
-      const properties = feature.properties;
-      const url = properties['url'];
-
-      if (url) {
-        window.open(url, '_blank', 'noopener,noreferrer');
-      }
-    });
-  }
-
-  private addFeatureShapeToMap(featureShape: any): void {
-    if (!this.map || !featureShape) {
-      return;
-    }
-
-    const geoJsonData = featureShape.type === 'FeatureCollection' 
-      ? featureShape 
-      : {
-          type: 'FeatureCollection' as const,
-          features: [featureShape]
-        };
-
-    const sourceId = 'feature-shape';
-    const layerId = 'feature-shape-fill';
-
-    if (this.map.getSource(sourceId)) {
-      (this.map.getSource(sourceId) as GeoJSONSource).setData(geoJsonData);
-    } else {
-      this.map.addSource(sourceId, {
-        type: 'geojson',
-        data: geoJsonData
-      });
-    }
-
-    if (!this.map.getLayer(layerId)) {
-      try {
-        const beforeLayer = this.map.getLayer('carto-labels-layer') ? 'carto-labels-layer' : undefined;
-        
-        this.map.addLayer({
-          id: layerId,
-          type: 'fill',
-          source: sourceId,
-          paint: {
-            'fill-color': '#808080',
-            'fill-opacity': 0.3
-          }
-        }, beforeLayer);
-
-        this.map.addLayer({
-          id: 'feature-shape-outline',
-          type: 'line',
-          source: sourceId,
-          paint: {
-            'line-color': '#808080',
-            'line-width': 1,
-            'line-opacity': 0.5
-          }
-        }, beforeLayer);
-      } catch (error) {
-        console.error('Error adding feature shape layer:', error);
-      }
-    } else {
-      (this.map.getSource(sourceId) as GeoJSONSource).setData(geoJsonData);
-    }
-  }
-
-  private fitMapToPlaces(): void {
-    if (!this.map || this.categoryData.length === 0) {
-      return;
-    }
-
-    const allPlaces = this.categoryData.flatMap(cat => cat.places);
-    const lngs = allPlaces.map(p => p.lon).filter(lng => !isNaN(lng) && lng !== 0);
-    const lats = allPlaces.map(p => p.lat).filter(lat => !isNaN(lat) && lat !== 0);
-
-    if (lngs.length === 0 || lats.length === 0) {
-      return;
-    }
-
-    const minLng = Math.min(...lngs);
-    const maxLng = Math.max(...lngs);
-    const minLat = Math.min(...lats);
-    const maxLat = Math.max(...lats);
-
-    const padding = 0.1;
-    const lngPadding = (maxLng - minLng) * padding;
-    const latPadding = (maxLat - minLat) * padding;
-
-    const bounds: [[number, number], [number, number]] = [
-      [minLng - lngPadding, minLat - latPadding],
-      [maxLng + lngPadding, maxLat + latPadding]
-    ];
-
-    this.map.fitBounds(bounds, {
-      padding: 50,
-      duration: 1000
-    });
+    this.openPlacesDialog(undefined, undefined, 1);
   }
 
   private getOverlayDialogSize(): { width: string; maxWidth: string; maxHeight: string } {
@@ -2769,6 +2274,21 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     const { profileIds, filters } = profileContext;
 
+    const analyzeForFeature =
+      featureNumber === 2 ? this.analyzeData2 : this.analyzeData;
+    let categoryScore: number | undefined;
+    let categoryIndex: number | undefined;
+    if (categoryId != null) {
+      const match = analyzeForFeature?.categories?.find(
+        (c) => c.category_id === categoryId
+      );
+      categoryScore = match?.score;
+      categoryIndex = match?.index;
+    } else if (analyzeForFeature?.categories?.length === 1) {
+      categoryScore = analyzeForFeature.categories[0].score;
+      categoryIndex = analyzeForFeature.categories[0].index;
+    }
+
     const placesData: PlacesDialogData = {
       featureType: featureType,
       featureId: featureId,
@@ -2776,7 +2296,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       categoryIds: categoryId ? [categoryId] : filters.category_ids,
       personaId: filters.persona_id,
       categoryNames: categoryName || '',
-      isScoreMode: filters.feature_type === 'score'
+      isScoreMode: filters.feature_type === 'score',
+      categoryScore,
+      categoryIndex,
     };
 
     if (this.mobileUi.isMobile()) {

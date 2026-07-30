@@ -91,3 +91,21 @@
 .analyze-tab-expand-button:hover mat-icon {
   color: var(--secondary-color) !important;
 }
+
+.places-open-map-btn {
+  background: color-mix(in srgb, var(--primary-color) 14%, transparent);
+  color: var(--primary-color);
+}
+
+.places-open-map-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--primary-color) 22%, transparent);
+}
+
+.places-open-map-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.places-open-map-btn mat-icon {
+  color: inherit;
+}

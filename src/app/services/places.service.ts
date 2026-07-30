@@ -5,12 +5,18 @@ import { environment } from '../../environments/environment';
 import { DashboardSessionService } from './dashboard-session.service';
 import { appendProjectAccessParams, hasProjectAccess } from './project-access-params';
 import { SessionService } from './session.service';
+import { CompositionNode, CompositionRoleHint } from '../interfaces/composition';
 
 export interface PlacesParams {
-  feature_type: 'municipality' | 'hexagon';
+  feature_type: 'municipality' | 'hexagon' | 'county' | 'state';
   feature_id: number;
   profile_ids: number[];
   category_ids?: number[];
+  /**
+   * When true, the API returns composition + activity scores without place geometries
+   * (places arrays stay empty). Use for the analyze summary panel.
+   */
+  simplified?: boolean;
 }
 
 export interface Place {
@@ -20,13 +26,17 @@ export interface Place {
   lon: number;
   category_id: number;
   category_name: string;
-  [key: string]: any; // Allow additional properties
+  activity_id?: number;
+  [key: string]: any;
 }
 
 export interface CategoryData {
   weight: number;
   places: Place[];
   category_name: string;
+  activity_id?: number;
+  name?: string;
+  role_hint?: CompositionRoleHint;
   activityScore?: {
     score: number;
     index: number;
@@ -36,6 +46,8 @@ export interface CategoryData {
 export interface PlacesResponse {
   places: Place[];
   categories: CategoryData[];
+  composition: CompositionNode | null;
+  profile_ids?: number[];
 }
 
 @Injectable({
@@ -67,59 +79,116 @@ export class PlacesService {
       httpParams = httpParams.set('category_ids', params.category_ids.join(','));
     }
 
+    if (params.simplified) {
+      httpParams = httpParams.set('simplified', 'true');
+    }
+
     return this.http.get<any>(url, { params: httpParams }).pipe(
-      map((response: any) => {
-        console.log('Places API response:', response);
-        // The API returns data with activity display names as keys
-        // Each key maps to an object with "weight" and "places" array
-        // Structure: { "Activity Display Name 1": { weight: 5, places: [...] } }
-        const allPlaces: Place[] = [];
-        
-        const categories: CategoryData[] = [];
-        
-        // Iterate over all keys in the response (display names)
-        for (const displayName in response) {
-          const categoryData = response[displayName];
-          
-          // Check if this is the expected structure with places array
-          if (categoryData && Array.isArray(categoryData.places)) {
-            console.log(`Processing category "${displayName}" with ${categoryData.places.length} places`);
-            
-            const categoryPlaces = categoryData.places.map((item: any, index: number) => {
-              const place: Place = {
-                id: item.id !== undefined ? item.id : index, // Use index if id is missing
-                name: item.name || 'Unnamed',
-                lat: item.lat !== undefined && item.lat !== null ? item.lat : 0,
-                lon: item.lng !== undefined && item.lng !== null ? item.lng : (item.lon !== undefined && item.lon !== null ? item.lon : 0), // Map lng to lon
-                category_id: item.category_id !== undefined ? item.category_id : 0,
-                category_name: displayName, // Use the display name as category name
-                url: item.url // Preserve url if present
-              };
-              console.log(`Transformed place:`, place);
-              return place;
-            });
-            
-            allPlaces.push(...categoryPlaces);
-            
-            // Store category data with weight
-            categories.push({
-              weight: categoryData.weight || 0,
-              places: categoryPlaces,
-              category_name: displayName,
-              activityScore: categoryData.activityScore && typeof categoryData.activityScore === 'object'
-                ? {
-                    score: Number(categoryData.activityScore.score ?? 0),
-                    index: Number(categoryData.activityScore.index ?? 0),
-                  }
-                : undefined
-            });
-          }
-        }
-        
-        console.log(`Total places extracted: ${allPlaces.length}`);
-        return { places: allPlaces, categories };
-      })
+      map((response: any) => this.normalizePlacesResponse(response))
     );
+  }
+
+  private normalizePlacesResponse(response: any): PlacesResponse {
+    const composition: CompositionNode | null =
+      response?.composition && typeof response.composition === 'object'
+        ? response.composition
+        : null;
+
+    const profile_ids = Array.isArray(response?.profile_ids)
+      ? response.profile_ids.map((id: any) => Number(id))
+      : undefined;
+
+    const allPlaces: Place[] = [];
+    const categories: CategoryData[] = [];
+
+    const activities = response?.activities;
+    if (activities && typeof activities === 'object' && !Array.isArray(activities)) {
+      for (const key of Object.keys(activities)) {
+        const entry = activities[key];
+        if (!entry || typeof entry !== 'object') {
+          continue;
+        }
+        const placeItems = Array.isArray(entry.places) ? entry.places : [];
+        const activityId = Number(entry.activity_id ?? key);
+        const displayName =
+          entry.display_name || entry.name || `Activity ${activityId}`;
+        const categoryPlaces = this.mapPlaces(placeItems, displayName, activityId);
+        allPlaces.push(...categoryPlaces);
+        categories.push({
+          weight: entry.weight || 0,
+          places: categoryPlaces,
+          category_name: displayName,
+          activity_id: Number.isFinite(activityId) ? activityId : undefined,
+          name: entry.name,
+          role_hint: entry.role_hint === 'primary' || entry.role_hint === 'substitute'
+            ? entry.role_hint
+            : undefined,
+          activityScore:
+            entry.activityScore && typeof entry.activityScore === 'object'
+              ? {
+                  score: Number(entry.activityScore.score ?? 0),
+                  index: Number(entry.activityScore.index ?? 0),
+                }
+              : undefined,
+        });
+      }
+    } else {
+      // Legacy flat display-name keys
+      for (const displayName in response) {
+        if (
+          displayName === 'composition' ||
+          displayName === 'activities' ||
+          displayName === 'profile_ids'
+        ) {
+          continue;
+        }
+        const categoryData = response[displayName];
+        if (!categoryData || typeof categoryData !== 'object') {
+          continue;
+        }
+        const placeItems = Array.isArray(categoryData.places) ? categoryData.places : [];
+        const categoryPlaces = this.mapPlaces(placeItems, displayName);
+        allPlaces.push(...categoryPlaces);
+        categories.push({
+          weight: categoryData.weight || 0,
+          places: categoryPlaces,
+          category_name: displayName,
+          activityScore:
+            categoryData.activityScore && typeof categoryData.activityScore === 'object'
+              ? {
+                  score: Number(categoryData.activityScore.score ?? 0),
+                  index: Number(categoryData.activityScore.index ?? 0),
+                }
+              : undefined,
+        });
+      }
+    }
+
+    categories.sort((a, b) => b.weight - a.weight);
+
+    return { places: allPlaces, categories, composition, profile_ids };
+  }
+
+  private mapPlaces(
+    items: any[],
+    displayName: string,
+    activityId?: number
+  ): Place[] {
+    return items.map((item: any, index: number) => ({
+      id: item.id !== undefined ? item.id : index,
+      name: item.name || 'Unnamed',
+      lat: item.lat !== undefined && item.lat !== null ? item.lat : 0,
+      lon:
+        item.lng !== undefined && item.lng !== null
+          ? item.lng
+          : item.lon !== undefined && item.lon !== null
+            ? item.lon
+            : 0,
+      category_id: item.category_id !== undefined ? item.category_id : 0,
+      category_name: displayName,
+      activity_id: activityId,
+      url: item.url,
+    }));
   }
 
   /**
