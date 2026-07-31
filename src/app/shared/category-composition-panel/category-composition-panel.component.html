@@ -1,0 +1,178 @@
+<div *ngIf="node" class="composition-root text-[var(--primary-color)]">
+  <ng-container *ngIf="showHeader">
+    <div class="flex items-center justify-between gap-2 mb-2">
+      <div class="text-xs font-semibold uppercase tracking-wide opacity-75">
+        {{ 'analyze.composition.title' | translate }}
+      </div>
+      <button
+        *ngIf="collapsible"
+        type="button"
+        class="shrink-0 border-0 bg-transparent cursor-pointer text-[var(--primary-color)] p-0 flex items-center"
+        (click)="toggleExpanded()"
+        [attr.aria-expanded]="expanded"
+        [attr.aria-label]="(expanded ? 'analyze.composition.collapse' : 'analyze.composition.expand') | translate">
+        <mat-icon class="text-xl">{{ expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+      </button>
+    </div>
+
+    <div *ngIf="overallMetricLabel && (!collapsible || expanded)" class="overall-row mb-2.5">
+      <span class="overall-label">{{ 'analyze.composition.overall' | translate }}</span>
+      <span class="overall-metric" [style.color]="overallMetricColor || null">{{ overallMetricLabel }}</span>
+    </div>
+  </ng-container>
+
+  <div *ngIf="!collapsible || expanded || !showHeader" class="composition-tree space-y-1">
+    <!-- Atom -->
+    <ng-container *ngIf="node.op === 'atom'">
+      <button
+        type="button"
+        class="atom-row"
+        [class.atom-row-interactive]="interactive"
+        [class.atom-row-off]="interactive && metaFor(node.activity_id)?.enabled === false"
+        [class.atom-row-highlighted]="isHighlighted(node.activity_id)"
+        [disabled]="!interactive"
+        [matTooltip]="'analyze.composition.activityToggleHint' | translate"
+        [matTooltipDisabled]="!interactive"
+        matTooltipShowDelay="200"
+        (click)="onAtomClick(node.activity_id, $event)"
+        (mouseenter)="onAtomHover(node.activity_id, true)"
+        (mouseleave)="onAtomHover(node.activity_id, false)">
+        <span class="atom-label min-w-0 truncate" [title]="node.display_name || node.name">
+          {{ node.display_name || node.name }}<ng-container *ngIf="shareLabel != null"> ({{ shareLabel | number:'1.0-0' }}%)</ng-container>
+        </span>
+        <span
+          *ngIf="metaFor(node.activity_id)?.metricLabel as metric"
+          class="atom-metric shrink-0"
+          [style.color]="metaFor(node.activity_id)?.metricColor || null">
+          {{ metric }}
+        </span>
+      </button>
+    </ng-container>
+
+    <!-- AND -->
+    <ng-container *ngIf="node.op === 'and'">
+      <div class="op-row">
+        <span class="op-badge">{{ 'analyze.composition.op.and' | translate }}</span>
+        <span *ngIf="shareLabel != null" class="op-share"> ({{ shareLabel | number:'1.0-0' }}%)</span>
+        <mat-icon
+          class="op-info"
+          [matTooltip]="'analyze.composition.help.and' | translate"
+          matTooltipShowDelay="200">
+          info_outline
+        </mat-icon>
+        <span
+          *ngIf="groupMetric() as metric"
+          class="atom-metric shrink-0 ml-auto"
+          [style.color]="metric.color">
+          {{ metric.label }}
+        </span>
+      </div>
+      <ul class="branch list-none m-0 p-0 space-y-1">
+        <li *ngFor="let child of node.children" class="min-w-0">
+          <app-category-composition-panel
+            [node]="child.expr"
+            [showHeader]="false"
+            [activityMeta]="activityMeta"
+            [interactive]="interactive"
+            [shareLabel]="sharePercent(child.weight, node.children)"
+            [highlightedActivityName]="highlightedActivityName"
+            [formatMetric]="formatMetric"
+            [depth]="depth + 1"
+            (toggleActivity)="onChildToggle($event)"
+            (hoverActivity)="onChildHover($event)">
+          </app-category-composition-panel>
+        </li>
+      </ul>
+    </ng-container>
+
+    <!-- OR -->
+    <ng-container *ngIf="node.op === 'or'">
+      <div class="op-row">
+        <span class="op-badge">{{ 'analyze.composition.op.or' | translate }}</span>
+        <span *ngIf="shareLabel != null" class="op-share"> ({{ shareLabel | number:'1.0-0' }}%)</span>
+        <mat-icon
+          class="op-info"
+          [matTooltip]="'analyze.composition.help.or' | translate"
+          matTooltipShowDelay="200">
+          info_outline
+        </mat-icon>
+        <span
+          *ngIf="groupMetric() as metric"
+          class="atom-metric shrink-0 ml-auto"
+          [style.color]="metric.color">
+          {{ metric.label }}
+        </span>
+      </div>
+      <ul class="branch list-none m-0 p-0 space-y-0.5">
+        <li *ngFor="let child of node.children" class="min-w-0">
+          <app-category-composition-panel
+            [node]="child"
+            [showHeader]="false"
+            [activityMeta]="activityMeta"
+            [interactive]="interactive"
+            [highlightedActivityName]="highlightedActivityName"
+            [formatMetric]="formatMetric"
+            [depth]="depth + 1"
+            (toggleActivity)="onChildToggle($event)"
+            (hoverActivity)="onChildHover($event)">
+          </app-category-composition-panel>
+        </li>
+      </ul>
+    </ng-container>
+
+    <!-- SUBST -->
+    <ng-container *ngIf="node.op === 'subst'">
+      <div class="op-row">
+        <span class="op-badge">{{ 'analyze.composition.op.subst' | translate }}</span>
+        <span *ngIf="shareLabel != null" class="op-share"> ({{ shareLabel | number:'1.0-0' }}%)</span>
+        <mat-icon
+          class="op-info"
+          [matTooltip]="'analyze.composition.help.subst' | translate"
+          matTooltipShowDelay="200">
+          info_outline
+        </mat-icon>
+        <span
+          *ngIf="groupMetric() as metric"
+          class="atom-metric shrink-0 ml-auto"
+          [style.color]="metric.color">
+          {{ metric.label }}
+        </span>
+      </div>
+      <div class="branch space-y-2">
+        <div>
+          <div class="section-label">{{ 'analyze.composition.primary' | translate }}</div>
+          <app-category-composition-panel
+            [node]="node.primary"
+            [showHeader]="false"
+            [activityMeta]="activityMeta"
+            [interactive]="interactive"
+            [highlightedActivityName]="highlightedActivityName"
+            [formatMetric]="formatMetric"
+            [depth]="depth + 1"
+            (toggleActivity)="onChildToggle($event)"
+            (hoverActivity)="onChildHover($event)">
+          </app-category-composition-panel>
+        </div>
+        <div>
+          <div class="section-label">{{ 'analyze.composition.substitutes' | translate }}</div>
+          <ul class="list-none m-0 p-0 space-y-1.5">
+            <li *ngFor="let sub of node.substitutes" class="min-w-0">
+              <app-category-composition-panel
+                [node]="sub.expr"
+                [showHeader]="false"
+                [activityMeta]="activityMeta"
+                [interactive]="interactive"
+                [shareLabel]="sharePercent(sub.weight, node.substitutes)"
+                [highlightedActivityName]="highlightedActivityName"
+                [formatMetric]="formatMetric"
+                [depth]="depth + 1"
+                (toggleActivity)="onChildToggle($event)"
+                (hoverActivity)="onChildHover($event)">
+              </app-category-composition-panel>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>

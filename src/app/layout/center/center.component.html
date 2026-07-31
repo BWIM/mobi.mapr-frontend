@@ -1,6 +1,6 @@
 <!-- map.component.html -->
 <div class="rounded-xl overflow-hidden h-full w-full relative">
-  @if (!isMapCompareMode()) {
+  @if (!isMapCompareMode() || isDifferenceView()) {
     <div #mapContainer class="h-full w-full rounded-xl"></div>
   } @else {
     <div #compareContainer class="comparison-container h-full w-full rounded-xl">
@@ -76,8 +76,26 @@
         &times;
       </button>
     </div>
+    <!-- Difference legend (white → violet) -->
+    <div class="legend-time" *ngIf="isDifferenceView() && differenceLegendItems().length > 0">
+      <div class="legend-steps">
+        <div
+          class="legend-step"
+          *ngFor="let item of differenceLegendItems()"
+          [style.background-color]="item.color"
+          (click)="toggleDifferenceBracket($event, item.bracketId)"
+          [class.legend-item-inactive]="!isDifferenceBracketSelected(item.bracketId)"
+          [attr.title]="item.segmentLabel"
+        ></div>
+      </div>
+      <div class="legend-labels">
+        <span class="legend-label" *ngFor="let item of differenceLegendItems()">
+          {{ item.segmentLabel }}
+        </span>
+      </div>
+    </div>
     <!-- Quality legend (A-F letters) -->
-    <div class="legend-quality" *ngIf="isQualityMode">
+    <div class="legend-quality" *ngIf="!isDifferenceView() && isQualityMode">
       <div class="legend-items">
         <div
           class="legend-item-quality"
@@ -93,7 +111,7 @@
       </div>
     </div>
     <!-- Time legend (discrete color steps) -->
-    <div class="legend-time" *ngIf="!isQualityMode && hasScoreColors()">
+    <div class="legend-time" *ngIf="!isDifferenceView() && !isQualityMode && hasScoreColors()">
       <div class="legend-steps">
         <div
           class="legend-step"

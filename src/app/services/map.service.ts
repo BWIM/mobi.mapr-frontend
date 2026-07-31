@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { Map, StyleSpecification, SourceSpecification, LayerSpecification, LngLatBounds, FilterSpecification } from 'maplibre-gl';
+import { Map as MapLibreMap, StyleSpecification, SourceSpecification, LayerSpecification, LngLatBounds, FilterSpecification, MapSourceDataEvent } from 'maplibre-gl';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { DashboardSessionService } from './dashboard-session.service';
@@ -9,6 +9,13 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { WebsocketService } from './websocket.service';
 import { ProjectsService } from './project.service';
 import { ScoreColorsService } from './score-colors.service';
+import {
+  buildDifferenceFillColorExpression,
+  buildQualityDifferenceConfig,
+  buildTimeDifferenceConfig,
+  DifferenceColorConfig,
+  isDifferenceInSelectedBrackets,
+} from '../utils/difference-colors.util';
 
 export interface ContentLayerFilters {
   profile_ids: number[];
@@ -25,6 +32,11 @@ export interface ContentLayerFilters {
 export const NO_DATA_SCORE = 15000;
 /** Capped mobility time in minutes (NO_DATA_SCORE / 60). */
 export const CAPPED_SCORE_MINUTES = NO_DATA_SCORE / 60;
+
+export const CONTENT_LAYER_SOURCE = 'content-layer';
+export const CONTENT_LAYER_RIGHT_SOURCE = 'content-layer-right';
+export const CONTENT_LAYER_RIGHT_KEEPALIVE = 'content-layer-right-keepalive';
+export const CONTENT_SOURCE_LAYER = 'geodata';
 
 export interface FeatureInfoResponse {
   name: string;
@@ -88,8 +100,8 @@ interface MapExportCreateResponse {
   providedIn: 'root'
 })
 export class MapService {
-  private map: Map | null = null;
-  private compareRightMap: Map | null = null;
+  private map: MapLibreMap | null = null;
+  private compareRightMap: MapLibreMap | null = null;
   private mapStyleSubject = new BehaviorSubject<StyleSpecification>(this.getBaseMapStyle());
   mapStyle$: Observable<StyleSpecification> = this.mapStyleSubject.asObservable();
   private authService = inject(AuthService);
@@ -99,7 +111,24 @@ export class MapService {
   private projectService = inject(ProjectsService);
   private scoreColorsService = inject(ScoreColorsService);
   private currentFilters: ContentLayerFilters | null = null;
+  private currentRightFilters: ContentLayerFilters | null = null;
   private hasInitialZoom = false; // Track if initial zoom to geolocation has occurred
+  private differenceSyncMap: MapLibreMap | null = null;
+  private differenceColorConfig: DifferenceColorConfig | null = null;
+  private differenceSelectedBracketIds: string[] = [];
+  private readonly onDifferenceIdle = () => this.syncDifferenceFeatureStates();
+  private readonly onDifferenceSourceData = (event: MapSourceDataEvent) => {
+    if (
+      event.sourceId !== CONTENT_LAYER_SOURCE &&
+      event.sourceId !== CONTENT_LAYER_RIGHT_SOURCE
+    ) {
+      return;
+    }
+    if (!event.isSourceLoaded) {
+      return;
+    }
+    this.syncDifferenceFeatureStates();
+  };
   
   /** Current API profile_ids selection (subset of project base_profiles). */
   private _currentProfileIds = signal<number[] | null>(null);
@@ -147,19 +176,19 @@ export class MapService {
     return this.scoreColorsService.buildBracketFilter(selected) as any[] | null;
   }
 
-  setMap(map: Map | null): void {
+  setMap(map: MapLibreMap | null): void {
     this.map = map;
   }
 
-  getMap(): Map | null {
+  getMap(): MapLibreMap | null {
     return this.map;
   }
 
-  setCompareRightMap(map: Map | null): void {
+  setCompareRightMap(map: MapLibreMap | null): void {
     this.compareRightMap = map;
   }
 
-  getCompareRightMap(): Map | null {
+  getCompareRightMap(): MapLibreMap | null {
     return this.compareRightMap;
   }
 
@@ -169,6 +198,460 @@ export class MapService {
 
   clearCompareMaps(): void {
     this.compareRightMap = null;
+  }
+
+  getCurrentRightFilters(): ContentLayerFilters | null {
+    return this.currentRightFilters;
+  }
+
+  getDifferenceColorConfig(featureType: 'index' | 'score'): DifferenceColorConfig | null {
+    if (featureType === 'score') {
+      const scoreConfig = this.scoreColorsService.getConfig();
+      return scoreConfig ? buildTimeDifferenceConfig(scoreConfig) : null;
+    }
+    return buildQualityDifferenceConfig();
+  }
+
+  hasDifferenceLayers(targetMap: MapLibreMap = this.map as MapLibreMap): boolean {
+    return !!targetMap?.getSource(CONTENT_LAYER_RIGHT_SOURCE);
+  }
+
+  bindDifferenceSync(targetMap: MapLibreMap): void {
+    this.unbindDifferenceSync();
+    this.differenceSyncMap = targetMap;
+    targetMap.on('idle', this.onDifferenceIdle);
+    targetMap.on('sourcedata', this.onDifferenceSourceData);
+  }
+
+  unbindDifferenceSync(): void {
+    if (this.differenceSyncMap) {
+      this.differenceSyncMap.off('idle', this.onDifferenceIdle);
+      this.differenceSyncMap.off('sourcedata', this.onDifferenceSourceData);
+      this.differenceSyncMap = null;
+    }
+  }
+
+  syncDifferenceFeatureStates(targetMap?: MapLibreMap): void {
+    const map = targetMap ?? this.differenceSyncMap ?? this.map;
+    if (!map || !map.getSource(CONTENT_LAYER_SOURCE) || !map.getSource(CONTENT_LAYER_RIGHT_SOURCE)) {
+      return;
+    }
+    if (!map.isStyleLoaded()) {
+      return;
+    }
+    // Right source needs loaded tiles; without a consuming layer MapLibre skips fetching.
+    if (
+      !map.isSourceLoaded(CONTENT_LAYER_SOURCE) ||
+      !map.isSourceLoaded(CONTENT_LAYER_RIGHT_SOURCE)
+    ) {
+      return;
+    }
+
+    const config = this.differenceColorConfig;
+    if (!config) {
+      return;
+    }
+
+    const featureType = this.currentFilters?.feature_type ?? 'score';
+    const leftFeatures = map.querySourceFeatures(CONTENT_LAYER_SOURCE, {
+      sourceLayer: CONTENT_SOURCE_LAYER,
+    });
+    const rightFeatures = map.querySourceFeatures(CONTENT_LAYER_RIGHT_SOURCE, {
+      sourceLayer: CONTENT_SOURCE_LAYER,
+    });
+
+    const rightValues = new Map<string, number>();
+    for (const feature of rightFeatures) {
+      const idKey = this.getFeatureIdKey(feature);
+      if (idKey === null) {
+        continue;
+      }
+      const value = this.getComparableFeatureValue(feature.properties, featureType);
+      if (value === null) {
+        continue;
+      }
+      rightValues.set(idKey, value);
+    }
+
+    const seenIds = new Set<string>();
+    for (const feature of leftFeatures) {
+      const idKey = this.getFeatureIdKey(feature);
+      const stateId = this.getFeatureStateId(feature);
+      if (idKey === null || stateId === null || seenIds.has(idKey)) {
+        continue;
+      }
+      seenIds.add(idKey);
+
+      const leftValue = this.getComparableFeatureValue(feature.properties, featureType);
+      const rightValue = rightValues.get(idKey);
+      if (leftValue === null || rightValue === undefined) {
+        map.setFeatureState(
+          { source: CONTENT_LAYER_SOURCE, sourceLayer: CONTENT_SOURCE_LAYER, id: stateId },
+          { hasDiff: false, diff: -1, diffInSelection: false, leftValue: null, rightValue: null }
+        );
+        continue;
+      }
+
+      const diff = Math.abs(leftValue - rightValue);
+      const diffInSelection = isDifferenceInSelectedBrackets(
+        diff,
+        config,
+        this.differenceSelectedBracketIds
+      );
+      map.setFeatureState(
+        { source: CONTENT_LAYER_SOURCE, sourceLayer: CONTENT_SOURCE_LAYER, id: stateId },
+        { hasDiff: true, diff, diffInSelection, leftValue, rightValue }
+      );
+    }
+  }
+
+  /** Stable string key for joining left/right features (avoids number vs string mismatches). */
+  private getFeatureIdKey(feature: { id?: unknown; properties?: Record<string, unknown> | null }): string | null {
+    const raw = feature.id ?? feature.properties?.['id'];
+    if (raw === undefined || raw === null || raw === '') {
+      return null;
+    }
+    return String(raw);
+  }
+
+  /** Id type expected by setFeatureState / promoteId (prefer numeric when possible). */
+  private getFeatureStateId(
+    feature: { id?: unknown; properties?: Record<string, unknown> | null }
+  ): string | number | null {
+    const raw = feature.id ?? feature.properties?.['id'];
+    if (raw === undefined || raw === null || raw === '') {
+      return null;
+    }
+    if (typeof raw === 'number' && Number.isFinite(raw)) {
+      return raw;
+    }
+    const asNumber = Number(raw);
+    if (typeof raw === 'string' && raw.trim() !== '' && Number.isFinite(asNumber)) {
+      return asNumber;
+    }
+    return raw as string | number;
+  }
+
+  private getComparableFeatureValue(
+    properties: Record<string, unknown> | null | undefined,
+    featureType: 'index' | 'score'
+  ): number | null {
+    if (!properties) {
+      return null;
+    }
+    if (featureType === 'score') {
+      const score = Number(properties['score']);
+      if (!Number.isFinite(score) || score === NO_DATA_SCORE) {
+        return null;
+      }
+      return score;
+    }
+    const index = Number(properties['index']);
+    if (!Number.isFinite(index) || index <= 0) {
+      return null;
+    }
+    return index / 100;
+  }
+
+  private resolveDifferenceSelectedBracketIds(
+    filters: ContentLayerFilters,
+    config: DifferenceColorConfig
+  ): string[] {
+    if (filters.feature_type === 'index') {
+      return filters.selected_quality_brackets?.length
+        ? [...filters.selected_quality_brackets]
+        : config.steps.map((step) => step.bracketId);
+    }
+    const allIds = config.steps.map((step) => step.bracketId);
+    return filters.selected_time_brackets?.length
+      ? [...filters.selected_time_brackets]
+      : allIds;
+  }
+
+  async loadDifferenceLayersOnMap(
+    targetMap : MapLibreMap,
+    leftFilters: ContentLayerFilters,
+    rightFilters: ContentLayerFilters,
+    zoomToBounds: boolean = false
+  ): Promise<boolean> {
+    const leftTileUrl = this.buildTileUrlForFilters(leftFilters);
+    const rightTileUrl = this.buildTileUrlForFilters(rightFilters);
+
+    if (!leftFilters.profile_ids?.length || !rightFilters.profile_ids?.length) {
+      console.warn('Cannot load difference layers: profile_ids required on both sides');
+      return false;
+    }
+    if (!leftTileUrl || !rightTileUrl) {
+      console.warn('Cannot load difference layers: Invalid tile URL');
+      return false;
+    }
+
+    const colorConfig = this.getDifferenceColorConfig(leftFilters.feature_type);
+    if (!colorConfig) {
+      console.warn('Cannot load difference layers: missing difference color config');
+      return false;
+    }
+
+    if (zoomToBounds) {
+      await this.zoomToContentLayerBoundsForMap(targetMap, leftFilters, false);
+    }
+
+    this.syncContentLayerState(leftFilters);
+    this.currentRightFilters = { ...rightFilters, profile_ids: [...rightFilters.profile_ids] };
+    this.differenceColorConfig = colorConfig;
+    this.differenceSelectedBracketIds = this.resolveDifferenceSelectedBracketIds(leftFilters, colorConfig);
+
+    const updatedStyle = this.buildStyleWithDifferenceLayers(
+      leftFilters,
+      rightFilters,
+      colorConfig,
+      this.getBaseMapStyle()
+    );
+
+    await this.waitForMapStyleLoad(targetMap, () => {
+      targetMap.setStyle(updatedStyle);
+    });
+
+    if (targetMap === this.map) {
+      this.mapStyleSubject.next(updatedStyle);
+    }
+
+    this.bindDifferenceSync(targetMap);
+    queueMicrotask(() => this.syncDifferenceFeatureStates(targetMap));
+    return true;
+  }
+
+  async updateDifferenceLayersOnMap(
+    targetMap : MapLibreMap,
+    leftFilters: ContentLayerFilters,
+    rightFilters: ContentLayerFilters
+  ): Promise<void> {
+    const leftTileUrl = this.buildTileUrlForFilters(leftFilters);
+    const rightTileUrl = this.buildTileUrlForFilters(rightFilters);
+    if (!leftTileUrl || !rightTileUrl) {
+      console.warn('Cannot update difference layers: Invalid tile URL');
+      return;
+    }
+
+    const leftSource = targetMap.getSource(CONTENT_LAYER_SOURCE) as
+      | { setTiles?: (tiles: string[]) => void; tiles?: string[] }
+      | undefined;
+    const rightSource = targetMap.getSource(CONTENT_LAYER_RIGHT_SOURCE) as
+      | { setTiles?: (tiles: string[]) => void; tiles?: string[] }
+      | undefined;
+
+    const leftChanged = (leftSource?.tiles?.[0] ?? null) !== leftTileUrl;
+    const rightChanged = (rightSource?.tiles?.[0] ?? null) !== rightTileUrl;
+    const featureTypeChanged = this.currentFilters?.feature_type !== leftFilters.feature_type;
+
+    if (!leftSource?.setTiles || !rightSource?.setTiles || leftChanged || rightChanged || featureTypeChanged) {
+      await this.loadDifferenceLayersOnMap(targetMap, leftFilters, rightFilters, false);
+      return;
+    }
+
+    const colorConfig = this.getDifferenceColorConfig(leftFilters.feature_type);
+    if (!colorConfig) {
+      return;
+    }
+
+    this.syncContentLayerState(leftFilters);
+    this.currentRightFilters = { ...rightFilters, profile_ids: [...rightFilters.profile_ids] };
+    this.differenceColorConfig = colorConfig;
+    this.differenceSelectedBracketIds = this.resolveDifferenceSelectedBracketIds(leftFilters, colorConfig);
+    this.applyDifferenceLayerStyleToMap(targetMap, colorConfig);
+    this.syncDifferenceFeatureStates(targetMap);
+  }
+
+  private applyDifferenceLayerStyleToMap(targetMap : MapLibreMap, colorConfig: DifferenceColorConfig): void {
+    const fillColorExpression = buildDifferenceFillColorExpression(colorConfig);
+    const outlineColorExpression = this.getDarkenedColorExpression(fillColorExpression, 0.75);
+    const fillOpacityExpression = this.getDifferenceFillOpacityExpression();
+    const lineOpacityExpression = this.getDifferenceLineOpacityExpression();
+
+    if (targetMap.getLayer('content-layer-fill')) {
+      targetMap.setPaintProperty('content-layer-fill', 'fill-color', fillColorExpression as any);
+      targetMap.setPaintProperty('content-layer-fill', 'fill-opacity', fillOpacityExpression as any);
+      targetMap.setFilter('content-layer-fill', null);
+    }
+    if (targetMap.getLayer('content-layer-outline')) {
+      targetMap.setPaintProperty('content-layer-outline', 'line-color', outlineColorExpression as any);
+      targetMap.setPaintProperty('content-layer-outline', 'line-opacity', lineOpacityExpression as any);
+      targetMap.setFilter('content-layer-outline', null);
+    }
+  }
+
+  private getDifferenceFillOpacityExpression(): unknown[] {
+    const hexOpacityExpression: unknown[] = [
+      'interpolate',
+      ['cubic-bezier', 0.26, 0.38, 0.82, 0.36],
+      ['get', 'population'],
+      0, 0.2,
+      100, 0.5,
+      1000, 0.8,
+      5000, 0.9,
+    ];
+    const baseOpacity: unknown[] = [
+      'case',
+      ['==', ['get', 't'], 'h'],
+      hexOpacityExpression,
+      0.7,
+    ];
+    return [
+      'case',
+      ['!', ['to-boolean', ['feature-state', 'hasDiff']]],
+      0,
+      ['!', ['to-boolean', ['feature-state', 'diffInSelection']]],
+      0.12,
+      baseOpacity,
+    ];
+  }
+
+  private getDifferenceLineOpacityExpression(): unknown[] {
+    const hexOpacityExpression: unknown[] = [
+      'interpolate',
+      ['cubic-bezier', 0.26, 0.38, 0.82, 0.36],
+      ['get', 'population'],
+      0, 0.2,
+      100, 0.5,
+      1000, 0.8,
+      5000, 0.9,
+    ];
+    const baseOpacity: unknown[] = [
+      'case',
+      ['==', ['get', 't'], 'h'],
+      hexOpacityExpression,
+      0.8,
+    ];
+    return [
+      'case',
+      ['!', ['to-boolean', ['feature-state', 'hasDiff']]],
+      0,
+      ['!', ['to-boolean', ['feature-state', 'diffInSelection']]],
+      0.12,
+      baseOpacity,
+    ];
+  }
+
+  private buildStyleWithDifferenceLayers(
+    leftFilters: ContentLayerFilters,
+    rightFilters: ContentLayerFilters,
+    colorConfig: DifferenceColorConfig,
+    baseStyle?: StyleSpecification
+  ): StyleSpecification {
+    const leftTileUrl = this.buildTileUrlForFilters(leftFilters);
+    const rightTileUrl = this.buildTileUrlForFilters(rightFilters);
+    const currentStyle = baseStyle ?? { ...this.mapStyleSubject.getValue() };
+    const updatedStyle = { ...currentStyle, sources: { ...currentStyle.sources }, layers: [...currentStyle.layers] };
+
+    delete updatedStyle.sources[CONTENT_LAYER_SOURCE];
+    delete updatedStyle.sources[CONTENT_LAYER_RIGHT_SOURCE];
+
+    updatedStyle.layers = updatedStyle.layers.filter(
+      (layer) =>
+        layer.id !== 'content-layer-fill' &&
+        layer.id !== 'content-layer-outline' &&
+        layer.id !== 'content-layer-highlight' &&
+        layer.id !== 'content-layer-selection' &&
+        layer.id !== CONTENT_LAYER_RIGHT_KEEPALIVE
+    );
+
+    if (!leftTileUrl || !rightTileUrl) {
+      return updatedStyle;
+    }
+
+    const promoteId = { [CONTENT_SOURCE_LAYER]: 'id' };
+
+    updatedStyle.sources[CONTENT_LAYER_SOURCE] = {
+      type: 'vector',
+      tiles: [leftTileUrl],
+      minzoom: 0,
+      tileSize: 512,
+      promoteId,
+    } as SourceSpecification;
+
+    updatedStyle.sources[CONTENT_LAYER_RIGHT_SOURCE] = {
+      type: 'vector',
+      tiles: [rightTileUrl],
+      minzoom: 0,
+      tileSize: 512,
+      promoteId,
+    } as SourceSpecification;
+
+    // MapLibre does not fetch tiles for sources with zero consuming layers.
+    // Keep an invisible fill so the right profile tiles actually load for joining.
+    updatedStyle.layers.push({
+      id: CONTENT_LAYER_RIGHT_KEEPALIVE,
+      type: 'fill',
+      source: CONTENT_LAYER_RIGHT_SOURCE,
+      'source-layer': CONTENT_SOURCE_LAYER,
+      paint: {
+        'fill-color': '#000000',
+        'fill-opacity': 0,
+      },
+    } as LayerSpecification);
+
+    const fillColorExpression = buildDifferenceFillColorExpression(colorConfig);
+    const fillOpacityExpression = this.getDifferenceFillOpacityExpression();
+    const lineOpacityExpression = this.getDifferenceLineOpacityExpression();
+
+    updatedStyle.layers.push({
+      id: 'content-layer-fill',
+      type: 'fill',
+      source: CONTENT_LAYER_SOURCE,
+      'source-layer': CONTENT_SOURCE_LAYER,
+      paint: {
+        'fill-color': fillColorExpression as any,
+        'fill-opacity': fillOpacityExpression as any,
+      },
+    } as LayerSpecification);
+
+    const outlineColorExpression = this.getDarkenedColorExpression(fillColorExpression, 0.75);
+    updatedStyle.layers.push({
+      id: 'content-layer-outline',
+      type: 'line',
+      source: CONTENT_LAYER_SOURCE,
+      'source-layer': CONTENT_SOURCE_LAYER,
+      paint: {
+        'line-color': outlineColorExpression,
+        'line-width': 1,
+        'line-opacity': lineOpacityExpression as any,
+      },
+    } as LayerSpecification);
+
+    const darkenedColorExpression = this.getDarkenedColorExpression(fillColorExpression);
+    updatedStyle.layers.push({
+      id: 'content-layer-highlight',
+      type: 'line',
+      source: CONTENT_LAYER_SOURCE,
+      'source-layer': CONTENT_SOURCE_LAYER,
+      paint: {
+        'line-color': darkenedColorExpression,
+        'line-width': 2,
+        'line-opacity': 1,
+      },
+      filter: ['==', ['get', 'name'], '__never_match__'],
+    } as LayerSpecification);
+
+    updatedStyle.layers.push({
+      id: 'content-layer-selection',
+      type: 'line',
+      source: CONTENT_LAYER_SOURCE,
+      'source-layer': CONTENT_SOURCE_LAYER,
+      paint: {
+        'line-color': '#FFFFFF',
+        'line-width': 2,
+        'line-opacity': 1,
+      },
+      filter: ['==', ['get', 'name'], '__never_match__'],
+    } as LayerSpecification);
+
+    const labelsLayerIndex = updatedStyle.layers.findIndex((layer) => layer.id === 'carto-labels-layer');
+    if (labelsLayerIndex !== -1) {
+      const labelsLayer = updatedStyle.layers.splice(labelsLayerIndex, 1)[0];
+      updatedStyle.layers.push(labelsLayer);
+    }
+
+    return updatedStyle;
   }
 
   getBaseMapStyle(): StyleSpecification {
@@ -531,7 +1014,7 @@ export class MapService {
   }
 
   private async zoomToContentLayerBoundsForMap(
-    targetMap: Map,
+    targetMap : MapLibreMap,
     filters: ContentLayerFilters,
     allowGeolocation: boolean
   ): Promise<void> {
@@ -573,12 +1056,16 @@ export class MapService {
     if (updatedStyle.sources['content-layer']) {
       delete updatedStyle.sources['content-layer'];
     }
+    if (updatedStyle.sources[CONTENT_LAYER_RIGHT_SOURCE]) {
+      delete updatedStyle.sources[CONTENT_LAYER_RIGHT_SOURCE];
+    }
 
     updatedStyle.layers = updatedStyle.layers.filter(
       layer => layer.id !== 'content-layer-fill' &&
                layer.id !== 'content-layer-outline' &&
                layer.id !== 'content-layer-highlight' &&
-               layer.id !== 'content-layer-selection'
+               layer.id !== 'content-layer-selection' &&
+               layer.id !== CONTENT_LAYER_RIGHT_KEEPALIVE
     );
 
     if (!tileUrl) {
@@ -701,7 +1188,7 @@ export class MapService {
     return this.buildTileUrl(effectiveId, filters);
   }
 
-  private getCurrentContentLayerTileUrl(targetMap: Map): string | null {
+  private getCurrentContentLayerTileUrl(targetMap: MapLibreMap): string | null {
     const source = targetMap.getSource('content-layer') as { tiles?: string[] } | undefined;
     return source?.tiles?.[0] ?? null;
   }
@@ -717,11 +1204,15 @@ export class MapService {
    * @param zoomToBounds - Whether to zoom to bounds (default: false)
    */
   async loadContentLayerOnMap(
-    targetMap: Map,
+    targetMap : MapLibreMap,
     filters: ContentLayerFilters,
     zoomToBounds: boolean = false,
     allowGeolocation: boolean = false
   ): Promise<boolean> {
+    this.unbindDifferenceSync();
+    this.currentRightFilters = null;
+    this.differenceColorConfig = null;
+
     const tileUrl = this.buildTileUrlForFilters(filters);
 
     if (!filters.profile_ids?.length) {
@@ -752,7 +1243,7 @@ export class MapService {
     return true;
   }
 
-  private waitForMapStyleLoad(targetMap: Map, applyStyle: () => void): Promise<void> {
+  private waitForMapStyleLoad(targetMap : MapLibreMap, applyStyle: () => void): Promise<void> {
     return new Promise<void>(resolve => {
       let settled = false;
       const complete = () => {
@@ -776,7 +1267,7 @@ export class MapService {
   /**
    * Updates tiles and layer styling on a specific map without replacing the full style.
    */
-  async updateContentLayerOnMap(targetMap: Map, filters: ContentLayerFilters): Promise<void> {
+  async updateContentLayerOnMap(targetMap : MapLibreMap, filters: ContentLayerFilters): Promise<void> {
     if (!filters.profile_ids?.length) {
       console.warn('Cannot update content layer: profile_ids is required');
       return;
@@ -804,7 +1295,7 @@ export class MapService {
     this.syncContentLayerState(filters);
   }
 
-  private applyContentLayerStyleToMap(targetMap: Map, filters: ContentLayerFilters): void {
+  private applyContentLayerStyleToMap(targetMap : MapLibreMap, filters: ContentLayerFilters): void {
     const fillColorExpression = filters.feature_type === 'score'
       ? this.getScoreFillColorExpression()
       : this.getIndexFillColorExpression();
@@ -869,12 +1360,16 @@ export class MapService {
    * Removes the content layer from the map
    */
   removeContentLayer(): void {
+    this.unbindDifferenceSync();
     const currentStyle = this.mapStyleSubject.getValue();
     const updatedStyle = { ...currentStyle };
 
     // Remove content layer source
     if (updatedStyle.sources['content-layer']) {
       delete updatedStyle.sources['content-layer'];
+    }
+    if (updatedStyle.sources[CONTENT_LAYER_RIGHT_SOURCE]) {
+      delete updatedStyle.sources[CONTENT_LAYER_RIGHT_SOURCE];
     }
 
     // Remove border layer source
@@ -887,11 +1382,14 @@ export class MapService {
       layer => layer.id !== 'content-layer-fill' && 
                layer.id !== 'content-layer-outline' &&
                layer.id !== 'content-layer-highlight' &&
-               layer.id !== 'content-layer-selection'
+               layer.id !== 'content-layer-selection' &&
+               layer.id !== CONTENT_LAYER_RIGHT_KEEPALIVE
     );
 
     this._currentProfileIds.set(null);
     this.currentFilters = null;
+    this.currentRightFilters = null;
+    this.differenceColorConfig = null;
     // Reset ready check state when content layer is removed
     this._isReadyCheckComplete.set(false);
     // Reset initial zoom flag so geolocation is attempted again on next load
@@ -926,18 +1424,24 @@ export class MapService {
    * @param factor 1 = unchanged; 0.9 ≈ 10% darker (highlights); 0.75 ≈ 25% darker (outlines)
    */
   private getDarkenedColorExpression(baseExpression: any, factor = 0.9): any {
+    if (!Array.isArray(baseExpression)) {
+      if (
+        typeof baseExpression === 'string' &&
+        (baseExpression.startsWith('rgb') || baseExpression.startsWith('rgba'))
+      ) {
+        return this.darkenColor(baseExpression, factor);
+      }
+      return baseExpression;
+    }
+
     if (baseExpression[0] === 'step' || baseExpression[0] === 'case') {
       const result = [baseExpression[0], baseExpression[1]];
       for (let i = 2; i < baseExpression.length; i++) {
-        const entry = baseExpression[i];
-        result.push(
-          typeof entry === 'string' && (entry.startsWith('rgb') || entry.startsWith('rgba'))
-            ? this.darkenColor(entry, factor)
-            : entry
-        );
+        result.push(this.getDarkenedColorExpression(baseExpression[i], factor));
       }
       return result;
     }
+
     return baseExpression;
   }
 

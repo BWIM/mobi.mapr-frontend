@@ -1,8 +1,8 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, effect, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, effect, ChangeDetectorRef, computed } from '@angular/core';
 import { Subscription, firstValueFrom, debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { Map, MapDataEvent, NavigationControl, FullscreenControl, Popup, AttributionControl, LngLatLike } from 'maplibre-gl';
 import Compare from '@maplibre/maplibre-gl-compare';
-import { MapService, NO_DATA_SCORE, CAPPED_SCORE_MINUTES } from '../../services/map.service';
+import { MapService, NO_DATA_SCORE, CAPPED_SCORE_MINUTES, CONTENT_LAYER_RIGHT_SOURCE } from '../../services/map.service';
 import MinimapControl from "maplibregl-minimap";
 import { SharedModule } from '../../shared/shared.module';
 import { AdminLevel, FilterConfigService } from '../../services/filter-config.service';
@@ -17,7 +17,12 @@ import { SearchService } from '../../services/search.service';
 import { QualityBracket, TimeBracket } from '../../services/filter-config.service';
 import { SettingsService } from '../../services/settings.service';
 import { ScoreColorsService } from '../../services/score-colors.service';
-
+import {
+  buildDifferenceLegendItems,
+  buildQualityDifferenceConfig,
+  buildTimeDifferenceConfig,
+} from '../../utils/difference-colors.util';
+import { ScoreLegendItem } from '../../utils/score-colors.util';
 interface NominatimResult {
   display_name: string;
   lat: string;
@@ -51,6 +56,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private pendingCompareMode: boolean | null = null;
   private compareMapsInitPromise: Promise<void> | null = null;
   private wasCompareMode = false;
+  private wasDifferenceView = false;
   private mapStyleSubscription?: Subscription;
   private searchQuerySubscription?: Subscription;
   private featureSelectionSubscription?: Subscription;
@@ -69,6 +75,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private changeDetectorRef = inject(ChangeDetectorRef);
   private readonly hostElementRef = inject(ElementRef<HTMLElement>);
   readonly isMapCompareMode = this.filterConfigService.isMapCompareMode;
+  readonly isDifferenceView = this.filterConfigService.isDifferenceView;
   private dialog = inject(MatDialog);
   private http = inject(HttpClient);
   private featureSelectionService = inject(FeatureSelectionService);
@@ -112,26 +119,44 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
     effect(() => {
       const compareMode = this.filterConfigService.isMapCompareMode();
+      const differenceView = this.filterConfigService.isDifferenceView();
       // Re-run when pending compare resolves so maps init after panel collapse.
       this.filterConfigService.pendingMapCompareEnable();
       queueMicrotask(() => {
         if (!this.isActiveMapHost()) {
           return;
         }
-        if (compareMode && !this.beforeMap) {
+
+        const wantSwipe = compareMode && !differenceView;
+        const wantDifference = compareMode && differenceView;
+        const wantSingle = !compareMode;
+
+        if (wantDifference) {
           this.wasCompareMode = true;
-          void this.handleMapModeChange(true);
+          this.wasDifferenceView = true;
+          if (this.beforeMap || !this.map) {
+            void this.switchToDifferenceMap();
+          }
           return;
         }
-        if (compareMode === this.wasCompareMode) {
+
+        if (wantSwipe) {
+          this.wasCompareMode = true;
+          if (this.wasDifferenceView || !this.beforeMap) {
+            this.wasDifferenceView = false;
+            void this.switchToSwipeCompareMaps();
+          }
           return;
         }
-        const previousCompareMode = this.wasCompareMode;
-        this.wasCompareMode = compareMode;
-        if (!previousCompareMode && !compareMode) {
-          return;
+
+        if (wantSingle) {
+          if (!this.wasCompareMode && !this.wasDifferenceView) {
+            return;
+          }
+          this.wasCompareMode = false;
+          this.wasDifferenceView = false;
+          void this.handleMapModeChange(false);
         }
-        void this.handleMapModeChange(compareMode);
       });
     });
 
@@ -194,6 +219,16 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   ];
   readonly timeLegendItems = this.scoreColorsService.legendItems;
   readonly hasScoreColors = this.scoreColorsService.hasConfig;
+  readonly differenceLegendItems = computed((): ScoreLegendItem[] => {
+    if (!this.filterConfigService.isDifferenceView()) {
+      return [];
+    }
+    if (this.filterConfigService.selectedBewertung() === 'zeit') {
+      const scoreConfig = this.scoreColorsService.config();
+      return scoreConfig ? buildDifferenceLegendItems(buildTimeDifferenceConfig(scoreConfig)) : [];
+    }
+    return buildDifferenceLegendItems(buildQualityDifferenceConfig());
+  });
 
   isQualityBracketSelected(bracket: QualityBracket): boolean {
     return this.filterConfigService.isQualityBracketSelected(bracket);
@@ -201,6 +236,13 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
   isTimeBracketSelected(bracket: TimeBracket): boolean {
     return this.filterConfigService.isTimeBracketSelected(bracket);
+  }
+
+  isDifferenceBracketSelected(bracketId: string): boolean {
+    if (this.isQualityMode) {
+      return this.filterConfigService.isQualityBracketSelected(bracketId as QualityBracket);
+    }
+    return this.filterConfigService.isTimeBracketSelected(bracketId);
   }
 
   toggleQualityBracket(event: MouseEvent, bracket: QualityBracket): void {
@@ -211,6 +253,15 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   toggleTimeBracket(event: MouseEvent, bracket: TimeBracket): void {
     event.stopPropagation();
     this.filterConfigService.toggleTimeBracket(bracket);
+  }
+
+  toggleDifferenceBracket(event: MouseEvent, bracketId: string): void {
+    event.stopPropagation();
+    if (this.isQualityMode) {
+      this.filterConfigService.toggleQualityBracket(bracketId as QualityBracket);
+      return;
+    }
+    this.filterConfigService.toggleTimeBracket(bracketId);
   }
 
   isLayerAvailable(level: AdminLevel): boolean {
@@ -248,6 +299,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     if (index < 0.28) return "A+";
     if (index < 0.32) return "A";
     if (index < 0.35) return "A-";
+
     if (index < 0.4) return "B+";
     if (index < 0.45) return "B";
     if (index < 0.5) return "B-";
@@ -263,6 +315,62 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     if (index < 1.59) return "F+";
     if (index < 1.78) return "F";
     return "F-";
+  }
+
+  private buildDifferencePopupValueHtml(
+    properties: Record<string, unknown>,
+    isQualityMode: boolean,
+    notAvailable: string
+  ): string {
+    const featureId = properties['id'];
+    const state =
+      this.map && featureId !== undefined && featureId !== null
+        ? this.map.getFeatureState({
+            source: 'content-layer',
+            sourceLayer: 'geodata',
+            id: featureId as string | number,
+          })
+        : null;
+
+    const leftLabel = this.translate.instant('map.popup.left');
+    const rightLabel = this.translate.instant('map.popup.right');
+    const diffLabel = this.translate.instant('map.popup.difference');
+    const minLabel = this.translate.instant('map.popup.minutes');
+
+    const formatValue = (raw: unknown): string => {
+      if (raw === undefined || raw === null || !Number.isFinite(Number(raw))) {
+        return notAvailable;
+      }
+      const value = Number(raw);
+      if (isQualityMode) {
+        return this.getIndexName(value);
+      }
+      return `${(value / 60).toFixed(1)} ${minLabel}`;
+    };
+
+    const leftRaw = state?.['leftValue'] ?? (isQualityMode
+      ? (properties['index'] !== undefined && properties['index'] !== null
+          ? Number(properties['index']) / 100
+          : null)
+      : properties['score']);
+    const rightRaw = state?.['rightValue'];
+    const hasDiff = !!state?.['hasDiff'];
+    const diffRaw = hasDiff ? state?.['diff'] : null;
+
+    const leftText = formatValue(leftRaw);
+    const rightText = formatValue(rightRaw);
+    let diffText = notAvailable;
+    if (hasDiff && diffRaw !== undefined && diffRaw !== null && Number.isFinite(Number(diffRaw))) {
+      diffText = isQualityMode
+        ? Number(diffRaw).toFixed(2)
+        : `${(Number(diffRaw) / 60).toFixed(1)} ${minLabel}`;
+    }
+
+    return `
+      <div>${leftLabel} ${leftText}</div>
+      <div>${rightLabel} ${rightText}</div>
+      <div>${diffLabel} ${diffText}</div>
+    `;
   }
 
   openLegendDialog(): void {
@@ -308,8 +416,12 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     if (this.filterConfigService.isMapCompareMode()) {
-      if (!this.beforeMap) {
-        void this.handleMapModeChange(true);
+      if (this.filterConfigService.isDifferenceView()) {
+        if (!this.map) {
+          void this.switchToDifferenceMap();
+        }
+      } else if (!this.beforeMap) {
+        void this.switchToSwipeCompareMaps();
       }
     } else if (!this.map) {
       this.initSingleMap();
@@ -333,31 +445,15 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     this.filterConfigService.setMapModeTransitionInProgress(true);
     try {
       if (compareMode) {
-        if (this.beforeMap) {
-          return;
-        }
-        if (this.compareMapsInitPromise) {
-          await this.compareMapsInitPromise;
-          return;
-        }
-        this.compareMapsInitPromise = (async () => {
-          this.captureViewportFromActiveMap();
-          this.filterConfigService.resetMapLayerUpdateState();
-          this.destroySingleMap();
-          await this.waitForCompareContainers();
-          await this.initCompareMaps();
-        })();
-        try {
-          await this.compareMapsInitPromise;
-        } finally {
-          this.compareMapsInitPromise = null;
-        }
+        await this.switchToSwipeCompareMaps();
       } else {
         if (this.map && !this.beforeMap) {
           return;
         }
         this.captureViewportFromActiveMap();
+        this.mapService.unbindDifferenceSync();
         this.destroyCompareMaps();
+        this.destroySingleMap();
         await new Promise<void>(resolve => setTimeout(resolve, 0));
         this.initSingleMap();
         this.filterConfigService.refreshMapLayers();
@@ -373,6 +469,107 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         void this.handleMapModeChange(pendingMode);
       }
     }
+  }
+
+  private async switchToSwipeCompareMaps(): Promise<void> {
+    if (!this.isActiveMapHost()) {
+      return;
+    }
+    if (this.beforeMap && !this.filterConfigService.isDifferenceView()) {
+      this.filterConfigService.setCompareMapsReady(true);
+      return;
+    }
+    const ownsLock = !this.mapModeTransitionPending;
+    if (ownsLock) {
+      this.mapModeTransitionPending = true;
+      this.filterConfigService.setMapModeTransitionInProgress(true);
+    }
+    try {
+      this.captureViewportFromActiveMap();
+      this.filterConfigService.resetMapLayerUpdateState();
+      this.filterConfigService.setCompareMapsReady(false);
+      this.mapService.unbindDifferenceSync();
+      this.destroyCompareMaps();
+      this.destroySingleMap();
+      await this.waitForCompareContainers();
+      await this.initCompareMaps();
+    } finally {
+      if (ownsLock) {
+        this.mapModeTransitionPending = false;
+        this.filterConfigService.setMapModeTransitionInProgress(false);
+      }
+    }
+  }
+
+  private async switchToDifferenceMap(): Promise<void> {
+    if (!this.isActiveMapHost()) {
+      return;
+    }
+    if (
+      this.map &&
+      !this.beforeMap &&
+      this.mapService.hasDifferenceLayers(this.map)
+    ) {
+      return;
+    }
+    this.mapModeTransitionPending = true;
+    this.filterConfigService.setMapModeTransitionInProgress(true);
+    try {
+      this.captureViewportFromActiveMap();
+      this.filterConfigService.resetMapLayerUpdateState();
+      this.filterConfigService.setCompareMapsReady(false);
+      this.mapService.unbindDifferenceSync();
+      this.destroyCompareMaps();
+      this.destroySingleMap();
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+      this.changeDetectorRef.detectChanges();
+      await this.waitForSingleMapContainer();
+      this.initSingleMapForDifference();
+      this.filterConfigService.setCompareMapsReady(true);
+    } finally {
+      this.mapModeTransitionPending = false;
+      this.filterConfigService.setMapModeTransitionInProgress(false);
+    }
+  }
+
+  private async waitForSingleMapContainer(): Promise<void> {
+    for (let attempt = 0; attempt < 30; attempt++) {
+      this.changeDetectorRef.detectChanges();
+      if (this.mapContainer?.nativeElement) {
+        return;
+      }
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    }
+  }
+
+  private initSingleMapForDifference(): void {
+    if (this.map || !this.mapContainer?.nativeElement) {
+      return;
+    }
+
+    this.map = new Map(this.createBaseMapOptions(this.mapContainer.nativeElement, true) as any);
+    this.mapService.setMap(this.map);
+    this.popup = this.createPopup();
+    this.configureMapControls(this.map, true);
+    this.bindLayerZoomSync(this.map);
+    this.syncMapInteractionsForLoading(this.mapService.isMapLoading());
+
+    this.map.on('style.load', () => {
+      if (!this.map || !this.filterConfigService.isDifferenceView()) {
+        return;
+      }
+      this.setupMapInteractions(this.map);
+      this.expandAttributionButton(this.map);
+      queueMicrotask(() => this.tryClearMapLoading());
+    });
+
+    this.map.once('load', () => {
+      if (!this.map) {
+        return;
+      }
+      this.setupMapInteractions(this.map);
+      this.expandAttributionButton(this.map);
+    });
   }
 
   private captureViewportFromActiveMap(): void {
@@ -473,7 +670,10 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private getActiveMaps(): Map[] {
-    if (this.filterConfigService.isMapCompareMode()) {
+    if (
+      this.filterConfigService.isMapCompareMode() &&
+      !this.filterConfigService.isDifferenceView()
+    ) {
       return [this.beforeMap, this.afterMap].filter((map): map is Map => !!map);
     }
     return this.map ? [this.map] : [];
@@ -514,7 +714,11 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     this.syncMapInteractionsForLoading(this.mapService.isMapLoading());
 
     this.map.on('style.load', () => {
-      if (!this.map || this.filterConfigService.isMapCompareMode()) {
+      if (
+        !this.map ||
+        (this.filterConfigService.isMapCompareMode() &&
+          !this.filterConfigService.isDifferenceView())
+      ) {
         return;
       }
       this.setupMapInteractions(this.map);
@@ -618,6 +822,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    this.mapService.unbindDifferenceSync();
     this.removeCanvasPointerMoveListener(this.map);
     this.removeTileLoadingHandlers(this.map);
 
@@ -655,7 +860,11 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private setupMapInteractions(targetMap: Map): void {
-    if (!this.filterConfigService.isMapCompareMode() || targetMap === this.beforeMap) {
+    if (
+      !this.filterConfigService.isMapCompareMode() ||
+      this.filterConfigService.isDifferenceView() ||
+      targetMap === this.beforeMap
+    ) {
       this.map = targetMap;
     }
     this.setupDragOpacityHandlers(targetMap);
@@ -934,12 +1143,15 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         updateHighlight(candidateName);
       }, HOVER_HIGHLIGHT_DEBOUNCE_MS);
       const isQualityMode = this.isQualityMode;
+      const isDifferenceView = this.filterConfigService.isDifferenceView();
       const score = properties['score'];
       const isCappedScore = Number(score) === NO_DATA_SCORE;
       const notAvailable = this.translate.instant('map.popup.notAvailable');
-      
+
       let valueText = '';
-      if (isQualityMode) {
+      if (isDifferenceView) {
+        valueText = this.buildDifferencePopupValueHtml(properties, isQualityMode, notAvailable);
+      } else if (isQualityMode) {
         const indexLabel = this.translate.instant('map.popup.index');
         const index = properties['index'];
         if (index !== undefined && index !== null) {
@@ -1000,7 +1212,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         <div class="map-popup">
           <div class="map-popup-name">${name}</div>
           <div class="map-popup-meta">
-            <div>${valueText}</div>
+            ${isDifferenceView ? valueText : `<div>${valueText}</div>`}
             ${regiostarHtml}
             ${populationHtml}
           </div>
@@ -1203,6 +1415,13 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       contentLayerPresent = true;
       if (!targetMap.isSourceLoaded('content-layer')) {
+        return false;
+      }
+      if (
+        this.filterConfigService.isDifferenceView() &&
+        CONTENT_LAYER_RIGHT_SOURCE in style.sources &&
+        !targetMap.isSourceLoaded(CONTENT_LAYER_RIGHT_SOURCE)
+      ) {
         return false;
       }
     }

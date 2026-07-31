@@ -616,6 +616,10 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
 
   openPlacesOverlay(categoryId?: number, categoryName?: string): void {
     // Always open the places dialog - it will show a hint for unsupported feature types (state/county)
+    const match =
+      categoryId != null
+        ? this.allCategories.find((c) => c.category_id === categoryId)
+        : undefined;
     const placesData: PlacesDialogData = {
       featureType: this.data.featureType,
       featureId: this.data.featureId,
@@ -623,7 +627,9 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
       categoryIds: categoryId ? [categoryId] : this.data.categoryIds,
       personaId: this.data.personaId,
       categoryNames: categoryName || '',
-      isScoreMode: this.data.isScoreMode
+      isScoreMode: this.data.isScoreMode,
+      categoryScore: match?.score,
+      categoryIndex: match?.index,
     };
 
     this.dialog.open(PlacesDialogComponent, {

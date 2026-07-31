@@ -40,6 +40,12 @@ import {
   QUALITY_LETTERS,
 } from '../../analyze-chart.utils';
 import { ScoreColorsService } from '../../../../services/score-colors.service';
+import { CategoryLegendItem, MobilePlacesMap } from '../../mobile-places-map';
+import { CompositionNode } from '../../../../interfaces/composition';
+import {
+  CategoryCompositionPanelComponent,
+  CompositionActivityMeta,
+} from '../../../../shared/category-composition-panel/category-composition-panel.component';
 
 function gradeFromIndex(index: number): string {
   const indexValue = index / 100;
@@ -63,7 +69,6 @@ function gradeFromIndex(index: number): string {
   if (indexValue < 1.78) return 'F';
   return 'F-';
 }
-import { CategoryLegendItem, MobilePlacesMap } from '../../mobile-places-map';
 
 const LABEL_FONT = 'bold 11px sans-serif';
 const LABEL_PADDING = 8;
@@ -107,6 +112,7 @@ Chart.register(horizontalBarLabelsPlugin);
     MatProgressSpinner,
     MatIcon,
     ChartModule,
+    CategoryCompositionPanelComponent,
   ],
   templateUrl: './mobile-analyze.component.html',
   styleUrl: './mobile-analyze.component.scss',
@@ -165,6 +171,12 @@ export class MobileAnalyzeComponent implements OnDestroy {
   placesLegendItems = signal<CategoryLegendItem[]>([]);
   placesLegendExpanded = signal(true);
   placesRelevanceInfoText = '';
+  placesComposition = signal<CompositionNode | null>(null);
+  placesCompositionMeta = signal<Record<number, CompositionActivityMeta>>({});
+  placesCompositionExpanded = signal(false);
+  placesOverallMetricLabel = signal<string | null>(null);
+  placesOverallMetricColor = signal<string | null>(null);
+  placesHighlightedActivity = signal<string | null>(null);
 
   private placesMap?: MobilePlacesMap;
   private lastLoadedStep: string | null = null;
@@ -264,6 +276,8 @@ export class MobileAnalyzeComponent implements OnDestroy {
       categoryNames: cat.category_name,
       personaId: d.personaId,
       isScoreMode: d.isScoreMode,
+      categoryScore: cat.score,
+      categoryIndex: cat.index,
     };
     this.lastLoadedStep = null;
     this.mobileUi.openAnalyzePlaces(places);
@@ -274,7 +288,11 @@ export class MobileAnalyzeComponent implements OnDestroy {
   }
 
   togglePlacesCategory(name: string): void {
-    this.placesMap?.toggleCategory(name);
+    this.placesMap?.selectActivity(name);
+  }
+
+  onPlacesActivityHover(name: string | null): void {
+    this.placesMap?.setHoveredActivity(name);
   }
 
   togglePlacesLegendExpanded(): void {
@@ -288,6 +306,19 @@ export class MobileAnalyzeComponent implements OnDestroy {
       ? scoreColor(score, this.scoreColorsService.getConfig())
       : gradeColor(index);
   }
+
+  readonly formatPlacesCompositionMetric = (
+    score: number,
+    index: number
+  ): { label: string; color: string } => {
+    const label = this.placesScoreMode()
+      ? `${(score / 60).toFixed(1)} ${this.translate.instant('map.popup.minutes')}`
+      : gradeFromIndex(index);
+    return {
+      label,
+      color: this.placesMetricTextColor(score, index),
+    };
+  };
 
   openLegendInfo(event: Event): void {
     event.stopPropagation();
@@ -585,6 +616,22 @@ export class MobileAnalyzeComponent implements OnDestroy {
   private async loadPlaces(data: PlacesDialogData): Promise<void> {
     this.teardownPlaces();
     this.placesLegendExpanded.set(true);
+    if (data.categoryScore != null || data.categoryIndex != null) {
+      const score = Number(data.categoryScore ?? 0);
+      const index = Number(data.categoryIndex ?? 0);
+      const label = data.isScoreMode
+        ? `${(score / 60).toFixed(1)} ${this.translate.instant('map.popup.minutes')}`
+        : gradeFromIndex(index);
+      this.placesOverallMetricLabel.set(label);
+      this.placesOverallMetricColor.set(
+        data.isScoreMode
+          ? scoreColor(score, this.scoreColorsService.getConfig())
+          : gradeColor(index),
+      );
+    } else {
+      this.placesOverallMetricLabel.set(null);
+      this.placesOverallMetricColor.set(null);
+    }
     this.placesMap = new MobilePlacesMap(
       {
         title: this.placesTitle,
@@ -592,6 +639,9 @@ export class MobileAnalyzeComponent implements OnDestroy {
         error: this.placesError,
         isScoreMode: this.placesScoreMode,
         categoryLegendItems: this.placesLegendItems,
+        composition: this.placesComposition,
+        compositionActivityMeta: this.placesCompositionMeta,
+        highlightedActivityName: this.placesHighlightedActivity,
       },
       this.placesService,
       this.mapService,
@@ -613,5 +663,6 @@ export class MobileAnalyzeComponent implements OnDestroy {
   private teardownPlaces(): void {
     this.placesMap?.destroy();
     this.placesMap = undefined;
+    this.placesHighlightedActivity.set(null);
   }
 }

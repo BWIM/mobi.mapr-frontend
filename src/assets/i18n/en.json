@@ -89,7 +89,34 @@
       "loading": "Loading map...",
       "errorLoadingPlaces": "Error loading places",
       "disabledForCountiesStates": "The places view is disabled for counties and states. Please select the municipality/hexagon view for a more detailed analysis about an area",
-      "categoryRelevanceInfo": "The percentage shows how relevant the single Activity is for the whole Category."
+      "categoryRelevanceInfo": "The percentage shows how relevant the single Activity is for the whole Category.",
+      "openDetails": "Open detailed places map and composition",
+      "openMap": "Open places map",
+      "openMapDisabled": "Places map is only available for municipalities and hexagons. Zoom in on the map to select one.",
+      "noActivities": "No activities available for this area."
+    },
+    "composition": {
+      "title": "Composition",
+      "expand": "Show composition",
+      "collapse": "Hide composition",
+      "overall": "Overall result",
+      "primary": "Target",
+      "substitute": "Substitute",
+      "substitutes": "Substitutes",
+      "andLabel": "Weighted average of all",
+      "orLabel": "Best of (any of)",
+      "substLabel": "Target with weighted substitutes",
+      "op": {
+        "and": "AND",
+        "or": "OR",
+        "subst": "Substitution"
+      },
+      "activityToggleHint": "Click to keep this activity highlighted on the map; click again to clear",
+      "help": {
+        "and": "All parts count; score is a weighted average.",
+        "or": "Any of these can fulfill the need; the best (fastest) option is used.",
+        "subst": "Since a place can combine multiple activities, it is possible to consider individual activities separately. If these are better reachable than the main activity, the value improves."
+      }
     },
     "rank": {
       "overall": "Rank",
@@ -247,6 +274,9 @@
       "index": "Mobility quality:",
       "score": "Mobility time:",
       "minutes": "min",
+      "left": "Left:",
+      "right": "Right:",
+      "difference": "Difference:",
       "notAvailable": "N/A",
       "unnamed": "Unknown",
       "error": "Error",
@@ -331,7 +361,8 @@
       "start": "Compare maps",
       "exit": "Exit comparison",
       "leftMap": "Left map",
-      "rightMap": "Right map"
+      "rightMap": "Right map",
+      "differenceView": "Difference view"
     },
     "transportModes": {
       "title": "Transport Modes",

@@ -78,6 +78,7 @@ export class LeftComponent implements OnInit, OnDestroy {
   allStates = this.filterConfigService.allStates;
   hasCategories = this.filterConfigService.hasCategories;
   isMapCompareMode = this.filterConfigService.isMapCompareMode;
+  isDifferenceView = this.filterConfigService.isDifferenceView;
   isModeSelectionLocked = this.filterConfigService.isModeSelectionLocked;
   canUseMapCompare = this.filterConfigService.canUseMapCompare;
   rightSelectedModes = this.filterConfigService.rightSelectedModes;
@@ -304,6 +305,10 @@ export class LeftComponent implements OnInit, OnDestroy {
 
   toggleMapCompare(): void {
     this.filterConfigService.toggleMapCompare();
+  }
+
+  toggleDifferenceView(): void {
+    this.filterConfigService.toggleDifferenceView();
   }
 
   toggleVerkehrsmittel(modeId: number) {

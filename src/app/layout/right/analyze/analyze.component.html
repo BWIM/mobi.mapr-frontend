@@ -381,71 +381,85 @@
     </div>
   </div>
   
-  <!-- Map Section (for non-MID projects or single category) -->
+  <!-- Places composition summary (single category / no category list) — map opens as overlay -->
   <div class="mb-4 flex-1 flex flex-col min-h-0" *ngIf="selectedFeature && shouldShowMap()">
-    <!-- Map Container - Always rendered, overlays show loading/error states -->
-    <div class="flex-1 min-h-[400px] rounded-lg overflow-hidden border border-white relative">
-      <div #mapContainerMini class="w-full h-full min-h-[400px]"></div>
-      
-      <!-- Loading State Overlay -->
-      <div *ngIf="isLoading()" class="absolute inset-0 bg-[var(--background-color)] bg-opacity-95 text-sm text-[var(--primary-color)] flex items-center justify-center" style="z-index: 2000;">
+    <div class="flex-1 min-h-[200px] relative flex flex-col">
+      <!-- Loading -->
+      <div *ngIf="isLoading()" class="absolute inset-0 bg-[var(--background-color)] bg-opacity-95 text-sm text-[var(--primary-color)] flex items-center justify-center z-[10]">
         <div class="flex flex-col items-center gap-4">
           <mat-spinner diameter="40"></mat-spinner>
           <p>{{ 'analyze.loading' | translate }}</p>
         </div>
       </div>
-      
-      <!-- Error State Overlay -->
-      <div *ngIf="(placesError || analyzeError) && !isLoading()" class="absolute inset-0 bg-[var(--background-color)] bg-opacity-95 text-sm text-[var(--primary-color)] py-4 text-center flex items-center justify-center" style="z-index: 2000;">
+
+      <!-- Error -->
+      <div *ngIf="(placesError || analyzeError) && !isLoading()" class="absolute inset-0 bg-[var(--background-color)] bg-opacity-95 text-sm text-[var(--primary-color)] py-4 text-center flex items-center justify-center z-[10]">
         <div class="px-4">{{ placesError || analyzeError }}</div>
       </div>
-      
-      <!-- Legend Overlay -->
-      <div
-        *ngIf="categoryLegendItems.length > 0 && !isLoading() && !placesError && !analyzeError"
-        class="absolute top-0 left-0 z-[1000] max-w-[min(100%,18rem)] bg-[var(--background-color)] bg-opacity-75 rounded-lg pointer-events-auto"
-        [style.max-height]="categoryLegendExpanded ? 'calc(100% - 0.5rem)' : null"
-        [style.overflow-y]="categoryLegendExpanded ? 'auto' : null">
+
+      <div *ngIf="!isLoading() && !placesError && !analyzeError" class="flex flex-col flex-1 min-h-0 gap-4">
+        <div class="flex-1 min-h-0 overflow-y-auto pr-3">
+          <app-category-composition-panel
+            *ngIf="composition; else flatPlacesLegend"
+            [node]="composition"
+            [showHeader]="true"
+            [interactive]="false"
+            [activityMeta]="compositionActivityMeta"
+            [overallMetricLabel]="placesOverallMetricLabel"
+            [overallMetricColor]="placesOverallMetricColor"
+            [formatMetric]="formatCompositionMetric">
+          </app-category-composition-panel>
+
+          <ng-template #flatPlacesLegend>
+            <div class="text-xs font-semibold uppercase tracking-wide opacity-60 mb-2 text-[var(--primary-color)]">
+              {{ 'analyze.categories' | translate }}
+            </div>
+            <div *ngIf="placesOverallMetricLabel" class="flex items-baseline justify-between gap-2 mb-3 text-[var(--primary-color)]">
+              <span class="text-[12px] opacity-70">{{ 'analyze.composition.overall' | translate }}</span>
+              <span class="text-sm font-semibold tabular-nums" [style.color]="placesOverallMetricColor || null">{{ placesOverallMetricLabel }}</span>
+            </div>
+            <div class="flex flex-col gap-0.5" *ngIf="categoryLegendItems.length > 0; else noPlacesActivities">
+              <div
+                *ngFor="let item of categoryLegendItems"
+                class="flex items-center gap-2 text-left w-full py-1 text-[var(--primary-color)]">
+                <span class="text-[13px] leading-snug min-w-0 flex-1 truncate">
+                  {{ item.name }} ({{ item.relevance | number:'1.0-0' }}%)
+                </span>
+                <span
+                  class="text-[12px] shrink-0 tabular-nums"
+                  [style.color]="getPlacesMetricTextColor(item.score, item.index)">
+                  <ng-container *ngIf="getPlacesIsScoreMode(); else placesIndexMode">
+                    {{ (item.score / 60) | number:'1.1-1' }} {{ 'map.popup.minutes' | translate }}
+                  </ng-container>
+                  <ng-template #placesIndexMode>
+                    {{ getGrade(item.index) }}
+                  </ng-template>
+                </span>
+              </div>
+            </div>
+            <ng-template #noPlacesActivities>
+              <p class="text-sm text-[var(--primary-color)] opacity-70 m-0">
+                {{ 'analyze.placesDialog.noActivities' | translate }}
+              </p>
+            </ng-template>
+          </ng-template>
+        </div>
+
         <button
           type="button"
-          class="flex items-center justify-between gap-2 w-full p-2 text-[var(--primary-color)] border-0 bg-transparent cursor-pointer"
-          (click)="toggleCategoryLegendExpanded()"
-          [attr.aria-expanded]="categoryLegendExpanded"
-          [attr.aria-label]="(categoryLegendExpanded ? 'mobile.analyze.legend.collapse' : 'mobile.analyze.legend.expand') | translate">
-          <span class="text-xs font-semibold">{{ 'analyze.categories' | translate }}</span>
-          <mat-icon class="text-lg shrink-0">
-            {{ categoryLegendExpanded ? 'expand_less' : 'expand_more' }}
-          </mat-icon>
+          class="places-open-map-btn shrink-0 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-md border-0 cursor-pointer font-medium text-sm"
+          [disabled]="!placesMapAvailable"
+          [matTooltip]="'analyze.placesDialog.openMapDisabled' | translate"
+          [matTooltipDisabled]="placesMapAvailable"
+          matTooltipShowDelay="200"
+          (click)="openMiniMapPlacesDetails()"
+          [attr.aria-label]="'analyze.placesDialog.openMap' | translate">
+          <mat-icon class="text-lg">map</mat-icon>
+          <span>{{ 'analyze.placesDialog.openMap' | translate }}</span>
         </button>
-        <div *ngIf="categoryLegendExpanded" class="flex flex-col gap-1.5 px-2 pb-2">
-          <button
-            type="button"
-            *ngFor="let item of categoryLegendItems"
-            class="flex items-start gap-2 text-left w-full p-0 border-0 bg-transparent cursor-pointer hover:opacity-80 transition-opacity"
-            [class.opacity-50]="!item.enabled"
-            (click)="toggleCategory(item.name)">
-            <span
-              class="w-3.5 h-3.5 rounded-full flex-shrink-0 mt-0.5 border border-black/30"
-              [style.background-color]="item.color"></span>
-            <span class="text-[var(--primary-color)] text-[11px] leading-snug min-w-0">
-              {{ item.name }}
-              <span class="opacity-90">
-                · {{ item.weight }} · {{ item.relevance | number:'1.0-1' }}%
-              </span>
-              <span [style.color]="getPlacesMetricTextColor(item.score, item.index)">
-                <ng-container *ngIf="getPlacesIsScoreMode(); else placesIndexMode">
-                  · {{ (item.score / 60) | number:'1.1-1' }} {{ 'map.popup.minutes' | translate }}
-                </ng-container>
-                <ng-template #placesIndexMode>
-                  · {{ getGrade(item.index) }}
-                </ng-template>
-              </span>
-            </span>
-          </button>
-        </div>
       </div>
     </div>
-    </div>
+  </div>
 
   
   <!-- Analyze Chart Section (for MID projects with multiple categories) -->

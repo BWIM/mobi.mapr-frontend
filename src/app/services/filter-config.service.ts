@@ -101,6 +101,7 @@ export class FilterConfigService {
   private _selectedQualityBrackets = signal<QualityBracket[]>([...ALL_QUALITY_BRACKETS]);
   private _selectedTimeBrackets = signal<TimeBracket[]>([]);
   private _isMapCompareMode = signal<boolean>(false);
+  private _isDifferenceView = signal<boolean>(false);
   private _pendingMapCompareEnable = signal<boolean>(false);
   private _rightSelectedModes = signal<number[]>([]);
   private _mapLayerRefreshNonce = signal<number>(0);
@@ -160,6 +161,7 @@ export class FilterConfigService {
   readonly allRegioStars = this._allRegioStars.asReadonly();
   readonly allStates = this._allStates.asReadonly();
   readonly isMapCompareMode = this._isMapCompareMode.asReadonly();
+  readonly isDifferenceView = this._isDifferenceView.asReadonly();
   readonly pendingMapCompareEnable = this._pendingMapCompareEnable.asReadonly();
   readonly canUseMapCompare = computed(
     () =>
@@ -376,6 +378,7 @@ export class FilterConfigService {
           this._selectedModes.set([]);
           this._rightSelectedModes.set([]);
           this._isMapCompareMode.set(false);
+          this._isDifferenceView.set(false);
           this._pendingMapCompareEnable.set(false);
           this._compareMapsReady.set(false);
           this._selectedActivities.set([]);
@@ -462,8 +465,10 @@ export class FilterConfigService {
     let previousRightFilters: ContentLayerFilters | null = null;
     let isInitialLoad = true;
     let compareInitialLoad = true;
+    let differenceInitialLoad = true;
     effect(() => {
       const compareMode = this._isMapCompareMode();
+      const differenceView = this._isDifferenceView();
       const filters = this.contentLayerFilters();
       const rightFilters = this.rightContentLayerFilters();
       const isFilterDataLoaded = this._isFilterDataLoaded();
@@ -480,7 +485,107 @@ export class FilterConfigService {
       this._layerMode();
       this._selectedAdminLevel();
 
+      if (compareMode && differenceView) {
+        this._selectedModes();
+        this._rightSelectedModes();
+        this._selectedQualityBrackets();
+        this._selectedTimeBrackets();
+        compareInitialLoad = true;
+        if (this.mapService.hasCompareMaps()) {
+          differenceInitialLoad = true;
+          previousLeftFilters = null;
+          previousRightFilters = null;
+        }
+
+        const scheduleRetryIfNeeded = () => {
+          if (differenceInitialLoad) {
+            this.scheduleCompareLayerSync();
+          }
+        };
+
+        if (this._mapModeTransitionInProgress()) {
+          scheduleRetryIfNeeded();
+          return;
+        }
+        if (!filters || !rightFilters) {
+          scheduleRetryIfNeeded();
+          return;
+        }
+        if (!filterDataReadyForProject && differenceInitialLoad) {
+          scheduleRetryIfNeeded();
+          return;
+        }
+        if (!compareMapsReady || this.mapService.hasCompareMaps()) {
+          scheduleRetryIfNeeded();
+          return;
+        }
+
+        const diffMap = this.mapService.getMap();
+        if (!diffMap) {
+          scheduleRetryIfNeeded();
+          return;
+        }
+        if (this.updateMapLayerInProgress) {
+          scheduleRetryIfNeeded();
+          return;
+        }
+
+        const leftChanged = differenceInitialLoad || this.filtersDiffer(previousLeftFilters, filters);
+        const rightChanged = differenceInitialLoad || this.filtersDiffer(previousRightFilters, rightFilters);
+
+        if (!leftChanged && !rightChanged) {
+          if (differenceInitialLoad && !this.mapService.hasDifferenceLayers(diffMap)) {
+            scheduleRetryIfNeeded();
+          }
+          return;
+        }
+
+        const leftFullReload =
+          leftChanged &&
+          (differenceInitialLoad || this.needsContentLayerFullReload(previousLeftFilters, filters));
+        const rightFullReload =
+          rightChanged &&
+          (differenceInitialLoad ||
+            this.needsContentLayerFullReload(previousRightFilters, rightFilters));
+        const fullReload = differenceInitialLoad || leftFullReload || rightFullReload;
+
+        const runDifferenceUpdate = () => {
+          void this.updateDifferenceMapLayers(filters, rightFilters, fullReload).then((applied) => {
+            if (applied && this.mapService.hasDifferenceLayers(diffMap)) {
+              previousLeftFilters = this.cloneContentLayerFilters(filters);
+              previousRightFilters = this.cloneContentLayerFilters(rightFilters);
+              differenceInitialLoad = false;
+              this.compareLayerSyncRetries = 0;
+            } else if (differenceInitialLoad) {
+              this.scheduleCompareLayerSync();
+            }
+            if (this.compareUpdateRetryNeeded) {
+              this.compareUpdateRetryNeeded = false;
+              this.scheduleCompareLayerSync();
+            }
+          }).catch((error) => {
+            console.error('Error in updateDifferenceMapLayers:', error);
+            if (differenceInitialLoad) {
+              this.scheduleCompareLayerSync();
+            }
+          });
+        };
+
+        if (differenceInitialLoad) {
+          this.scheduleInitialLoad(runDifferenceUpdate);
+        } else {
+          runDifferenceUpdate();
+        }
+        return;
+      }
+
       if (compareMode) {
+        differenceInitialLoad = true;
+        if (!this.mapService.hasCompareMaps()) {
+          compareInitialLoad = true;
+          previousLeftFilters = null;
+          previousRightFilters = null;
+        }
         // Explicitly track mode selections so side-specific updates always re-run.
         this._selectedModes();
         this._rightSelectedModes();
@@ -585,6 +690,7 @@ export class FilterConfigService {
       previousLeftFilters = null;
       previousRightFilters = null;
       compareInitialLoad = true;
+      differenceInitialLoad = true;
       this.compareLayerSyncRetries = 0;
       isInitialLoad = true;
 
@@ -643,6 +749,7 @@ export class FilterConfigService {
         this._pendingMapCompareEnable.set(false);
         if (this._isMapCompareMode()) {
           this._mapModeTransitionInProgress.set(true);
+          this._isDifferenceView.set(false);
           this._isMapCompareMode.set(false);
         }
       }
@@ -1294,6 +1401,7 @@ export class FilterConfigService {
     if (this._isMapCompareMode()) {
       this._mapModeTransitionInProgress.set(true);
       this._pendingMapCompareEnable.set(false);
+      this._isDifferenceView.set(false);
       this._isMapCompareMode.set(false);
       this._urlCompareIntent.set(false);
       this._urlCompareModeIds.set([]);
@@ -1302,6 +1410,16 @@ export class FilterConfigService {
     }
 
     this.requestEnableMapCompare();
+  }
+
+  toggleDifferenceView(): void {
+    if (!this._isMapCompareMode()) {
+      return;
+    }
+    this._mapModeTransitionInProgress.set(true);
+    this._compareMapsReady.set(false);
+    this.mapService.unbindDifferenceSync();
+    this._isDifferenceView.update((value) => !value);
   }
 
   private clearCompareProfileIdsFromUrl(): void {
@@ -1816,6 +1934,73 @@ export class FilterConfigService {
         dialogRef.close();
         this.mapService.setPreparingProject(false);
       }
+    }
+  }
+
+  private async updateDifferenceMapLayers(
+    leftFilters: ContentLayerFilters,
+    rightFilters: ContentLayerFilters,
+    fullReload: boolean
+  ): Promise<boolean> {
+    const targetMap = this.mapService.getMap();
+    if (!targetMap || this.mapService.hasCompareMaps()) {
+      return false;
+    }
+
+    if (this.updateMapLayerInProgress) {
+      this.compareUpdateRetryNeeded = true;
+      return false;
+    }
+
+    const loadGeneration = this.projectLoadGeneration;
+    this.updateMapLayerInProgress = true;
+    try {
+      this.mapService.setMapLoading(true);
+
+      if (fullReload) {
+        this.mapService.setReadyCheckComplete(false);
+        const leftReady = await this.ensureProjectReady(leftFilters, loadGeneration);
+        if (!leftReady) {
+          this.mapService.setReadyCheckComplete(false);
+          return false;
+        }
+        const rightReady = await this.ensureProjectReady(rightFilters, loadGeneration);
+        if (!rightReady) {
+          this.mapService.setReadyCheckComplete(false);
+          return false;
+        }
+        if (!this.isProjectLoadCurrent(loadGeneration)) {
+          this.mapService.setReadyCheckComplete(false);
+          return false;
+        }
+        this.mapService.setReadyCheckComplete(true);
+      }
+
+      const leftToApply = this.resolveFiltersForMapApply(leftFilters);
+      const rightToApply = this.resolveFiltersForMapApply(rightFilters);
+
+      if (fullReload || !this.mapService.hasDifferenceLayers(targetMap)) {
+        const loaded = await this.mapService.loadDifferenceLayersOnMap(
+          targetMap,
+          leftToApply,
+          rightToApply,
+          false
+        );
+        if (loaded) {
+          targetMap.resize();
+        }
+        return loaded && this.isProjectLoadCurrent(loadGeneration);
+      }
+
+      await this.mapService.updateDifferenceLayersOnMap(targetMap, leftToApply, rightToApply);
+      return this.isProjectLoadCurrent(loadGeneration);
+    } catch (error) {
+      console.error('Error in updateDifferenceMapLayers:', error);
+      this.mapService.setPreparingProject(false);
+      this.mapService.setMapLoading(false);
+      return false;
+    } finally {
+      this.updateMapLayerInProgress = false;
     }
   }
 

@@ -39,3 +39,8 @@
 ::ng-deep .places-dialog-panel .mat-mdc-dialog-surface {
   overflow: visible !important;
 }
+
+.legend-row-highlighted {
+  background: color-mix(in srgb, var(--primary-color) 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 35%, transparent);
+}

@@ -89,7 +89,34 @@
       "loading": "Lade Karte...",
       "errorLoadingPlaces": "Fehler beim Laden der Orte",
       "disabledForCountiesStates": "Die Ortsansicht ist für Landkreise und Bundesländer deaktiviert. Um eine detaillierte Analyse eines Gebiets durchzuführen, wähle bitte die Gemeinde/Hexagon-Ansicht, indem du in die Karte zoomst.",
-      "categoryRelevanceInfo": "Der Prozentwert zeigt, wie relevant die einzelne Aktivität für die gesamte Kategorie ist."
+      "categoryRelevanceInfo": "Der Prozentwert zeigt, wie relevant die einzelne Aktivität für die gesamte Kategorie ist.",
+      "openDetails": "Detaillierte Ortskarte und Zusammensetzung öffnen",
+      "openMap": "Ortskarte öffnen",
+      "openMapDisabled": "Die Ortskarte ist nur für Gemeinden und Hexagone verfügbar. Zoome in die Karte, um eine auszuwählen.",
+      "noActivities": "Keine Aktivitäten für dieses Gebiet verfügbar."
+    },
+    "composition": {
+      "title": "Zusammensetzung",
+      "expand": "Zusammensetzung anzeigen",
+      "collapse": "Zusammensetzung ausblenden",
+      "overall": "Gesamtergebnis",
+      "primary": "Ziel",
+      "substitute": "Ersatz",
+      "substitutes": "Ersatzmöglichkeiten",
+      "andLabel": "Gewichteter Durchschnitt aller",
+      "orLabel": "Beste Option (eine davon)",
+      "substLabel": "Ziel mit gewichteten Ersatzmöglichkeiten",
+      "op": {
+        "and": "UND",
+        "or": "ODER",
+        "subst": "Substitution"
+      },
+      "activityToggleHint": "Klicken hält die Aktivität auf der Karte hervorgehoben; erneutes Klicken hebt die Auswahl auf.",
+      "help": {
+        "and": "Alle Teile zählen; der Score ist ein gewichteter Durchschnitt.",
+        "or": "Jede dieser Optionen kann den Bedarf erfüllen; die beste (schnellste) wird verwendet.",
+        "subst": "Da ein Ort mehrere Aktivitäten in sich vereinen kann, ist es möglich Teilaktivitäten davon einzeln zu betrachten. Sind diese besser erreichbar als die Haupt-Aktivität, verbessert sich der Wert."
+      }
     },
     "rank": {
       "overall": "Platz",
@@ -247,6 +274,9 @@
       "index": "Mobilitätsqualität:",
       "score": "Mobilitätszeit:",
       "minutes": "min",
+      "left": "Links:",
+      "right": "Rechts:",
+      "difference": "Differenz:",
       "notAvailable": "N/A",
       "unnamed": "Unbenannt",
       "error": "Fehler",
@@ -331,7 +361,8 @@
       "start": "Verkehrsmittel vergleichen",
       "exit": "Vergleich beenden",
       "leftMap": "Linke Karte",
-      "rightMap": "Rechte Karte"
+      "rightMap": "Rechte Karte",
+      "differenceView": "Differenzansicht"
     },
     "transportModes": {
       "title": "Verkehrsmittel",
