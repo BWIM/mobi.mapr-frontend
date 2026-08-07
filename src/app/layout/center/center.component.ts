@@ -559,7 +559,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
       this.setupMapInteractions(this.map);
-      this.expandAttributionButton(this.map);
       queueMicrotask(() => this.tryClearMapLoading());
     });
 
@@ -568,7 +567,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
       this.setupMapInteractions(this.map);
-      this.expandAttributionButton(this.map);
     });
   }
 
@@ -623,9 +621,21 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     targetMap.addControl(
-      new AttributionControl({ customAttribution: 'Hintergrundkarte: © OpenStreetMap, CARTO', compact: true }),
+      new AttributionControl({ customAttribution: 'Hintergrundkarte: © OpenStreetMap, VersaTiles', compact: true }),
       'bottom-right'
     );
+    // MapLibre starts compact attribution expanded; collapse to the ⓘ button by default.
+    this.collapseAttribution(targetMap);
+  }
+
+  private collapseAttribution(targetMap: Map): void {
+    const collapse = () => {
+      const attrib = targetMap.getContainer().querySelector('.maplibregl-ctrl-attrib');
+      attrib?.classList.remove('maplibregl-compact-show');
+      attrib?.removeAttribute('open');
+    };
+    requestAnimationFrame(collapse);
+    targetMap.once('idle', collapse);
   }
 
   private bindLayerZoomSync(targetMap: Map): void {
@@ -651,15 +661,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     targetMap.on('load', syncZoom);
     targetMap.on('zoomend', syncZoom);
-  }
-
-  private expandAttributionButton(targetMap: Map): void {
-    setTimeout(() => {
-      const btn = targetMap
-        .getContainer()
-        .querySelector<HTMLButtonElement>('.maplibregl-ctrl-attrib-button');
-      btn?.click();
-    }, 0);
   }
 
   private getPopupForMap(targetMap: Map): Popup | undefined {
@@ -722,7 +723,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
       this.setupMapInteractions(this.map);
-      this.expandAttributionButton(this.map);
       queueMicrotask(() => this.tryClearMapLoading());
     });
 
@@ -731,7 +731,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
       this.setupMapInteractions(this.map);
-      this.expandAttributionButton(this.map);
     });
   }
 
@@ -783,7 +782,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     this.beforeMap.on('style.load', () => {
       if (this.beforeMap) {
         this.setupMapInteractions(this.beforeMap);
-        this.expandAttributionButton(this.beforeMap);
         queueMicrotask(() => this.tryClearMapLoading());
       }
     });
@@ -791,7 +789,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     this.afterMap.on('style.load', () => {
       if (this.afterMap) {
         this.setupMapInteractions(this.afterMap);
-        this.expandAttributionButton(this.afterMap);
         queueMicrotask(() => this.tryClearMapLoading());
       }
     });

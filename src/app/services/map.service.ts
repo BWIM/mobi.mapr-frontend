@@ -16,6 +16,7 @@ import {
   DifferenceColorConfig,
   isDifferenceInSelectedBrackets,
 } from '../utils/difference-colors.util';
+import { buildBasemapStyle, moveBasemapLabelsToTop } from './basemap-style';
 
 export interface ContentLayerFilters {
   profile_ids: number[];
@@ -645,49 +646,11 @@ export class MapService {
       filter: ['==', ['get', 'name'], '__never_match__'],
     } as LayerSpecification);
 
-    const labelsLayerIndex = updatedStyle.layers.findIndex((layer) => layer.id === 'carto-labels-layer');
-    if (labelsLayerIndex !== -1) {
-      const labelsLayer = updatedStyle.layers.splice(labelsLayerIndex, 1)[0];
-      updatedStyle.layers.push(labelsLayer);
-    }
-
-    return updatedStyle;
+    return moveBasemapLabelsToTop(updatedStyle);
   }
 
   getBaseMapStyle(): StyleSpecification {
-    const style: StyleSpecification = {
-      version: 8,
-      sources: {
-        'carto-light': {
-          type: 'raster',
-          tiles: ['https://basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png'],
-          tileSize: 256,
-          minzoom: 0,
-        } as SourceSpecification,
-        'carto-labels': {
-          type: 'raster',
-          tiles: ['https://basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png'],
-          tileSize: 256,
-          minzoom: 0,
-        } as SourceSpecification
-      },
-      layers: [
-        {
-          id: 'carto-light-layer',
-          type: 'raster',
-          source: 'carto-light',
-          minzoom: 0,
-        } as LayerSpecification,
-        {
-          id: 'carto-labels-layer',
-          type: 'raster',
-          source: 'carto-labels',
-          minzoom: 0,
-        } as LayerSpecification
-      ],
-      glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf'
-    };
-    return style;
+    return buildBasemapStyle();
   }
 
   updateStyle(style: StyleSpecification): void {
@@ -698,6 +661,11 @@ export class MapService {
   }
 
   getMinimapConfig(): any {
+    const basemapStyle = buildBasemapStyle({ hideLabels: true });
+    // maplibregl-minimap bundles MapLibre 2, which rejects multi-sprite arrays.
+    // Labels are hidden anyway, so sprites are unused.
+    const { sprite: _sprite, ...minimapStyle } = basemapStyle;
+
     return {
       id: "miniMap",
       width: "200px",
@@ -708,30 +676,7 @@ export class MapService {
       collapsedWidth: "30px",
       collapsedHeight: "30px",
       borderRadius: "5px",
-      style: {
-        borderRadius: "5px",
-        border: "1px solid var(--background-color)",
-        backgroundColor: "var(--secondary-color)",
-        padding: "0px",
-        sources: {
-          'carto-light': {
-            type: "raster",
-            tiles: ["https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"],
-            tileSize: 256,
-            minzoom: 0,
-            maxzoom: 16,
-          } as SourceSpecification
-        },
-        layers: [
-          {
-            id: 'carto-light-layer',
-            type: 'raster',
-            source: 'carto-light',
-            minzoom: 0,
-          } as LayerSpecification,
-        ],
-        glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf'
-      },
+      style: minimapStyle,
     };
   }
 
@@ -1167,13 +1112,7 @@ export class MapService {
       filter: ['==', ['get', 'name'], '__never_match__']
     } as LayerSpecification);
 
-    const labelsLayerIndex = updatedStyle.layers.findIndex(layer => layer.id === 'carto-labels-layer');
-    if (labelsLayerIndex !== -1) {
-      const labelsLayer = updatedStyle.layers.splice(labelsLayerIndex, 1)[0];
-      updatedStyle.layers.push(labelsLayer);
-    }
-
-    return updatedStyle;
+    return moveBasemapLabelsToTop(updatedStyle);
   }
 
   private buildTileUrlForFilters(filters: ContentLayerFilters): string | null {

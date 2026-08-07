@@ -24,7 +24,7 @@ export class CreditsDialogComponent {
     { name: 'OpenStreetMap', icon: 'map', url: 'https://www.openstreetmap.org' },
     { name: 'Angular', icon: 'code', url: 'https://angular.io' },
     { name: 'Material Design', icon: 'desktop_windows', url: 'https://material.angular.io' },
-    { name: 'Carto', icon: 'place', url: 'https://carto.com' },
+    { name: 'VersaTiles', icon: 'place', url: 'https://versatiles.org' },
     { name: 'MapLibre', icon: 'place', url: 'https://maplibre.org' },
     { name: 'Nominatim', icon: 'place', url: 'https://nominatim.org' },
     { name: 'Flaticon', icon: 'place', url: 'https://www.flaticon.com' }

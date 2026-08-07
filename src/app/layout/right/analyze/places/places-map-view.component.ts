@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { Map as MapLibreMap, NavigationControl, FullscreenControl, Popup, GeoJSONSource } from 'maplibre-gl';
 import { PlacesService, Place } from '../../../../services/places.service';
 import { MapService } from '../../../../services/map.service';
+import { findBasemapLabelsBeforeId } from '../../../../services/basemap-style';
 import { firstValueFrom, catchError, of } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { InfoDialogComponent } from '../../../../shared/info-overlay/info-dialog.component';
@@ -372,7 +373,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     console.log('Creating separate layers for each category');
 
     // Find the labels layer to insert before it, or add at the end
-    const beforeLayer = this.map.getLayer('carto-labels-layer') ? 'carto-labels-layer' : undefined;
+    const beforeLayer = findBasemapLabelsBeforeId(this.map);
 
     // Create a separate layer for each enabled category
     this.categoryData.forEach((category, index) => {
@@ -507,7 +508,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
             }
 
             // Add layer
-            const beforeLayer = this.map.getLayer('carto-labels-layer') ? 'carto-labels-layer' : undefined;
+            const beforeLayer = findBasemapLabelsBeforeId(this.map);
             try {
               this.map.addLayer({
                 id: layerId,
@@ -686,7 +687,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!this.map.getLayer(layerId)) {
       try {
         // Find the labels layer to insert before it, or add at the end
-        const beforeLayer = this.map.getLayer('carto-labels-layer') ? 'carto-labels-layer' : undefined;
+        const beforeLayer = findBasemapLabelsBeforeId(this.map);
         
         this.map.addLayer({
           id: layerId,
