@@ -68,7 +68,7 @@
         </span>
       </div>
       <ul class="branch list-none m-0 p-0 space-y-1">
-        <li *ngFor="let child of node.children" class="min-w-0">
+        <li *ngFor="let child of sortedWeightedChildren(node.children)" class="min-w-0">
           <app-category-composition-panel
             [node]="child.expr"
             [showHeader]="false"
@@ -104,7 +104,7 @@
         </span>
       </div>
       <ul class="branch list-none m-0 p-0 space-y-0.5">
-        <li *ngFor="let child of node.children" class="min-w-0">
+        <li *ngFor="let child of sortedOrChildren(node.children)" class="min-w-0">
           <app-category-composition-panel
             [node]="child"
             [showHeader]="false"
@@ -156,7 +156,7 @@
         <div>
           <div class="section-label">{{ 'analyze.composition.substitutes' | translate }}</div>
           <ul class="list-none m-0 p-0 space-y-1.5">
-            <li *ngFor="let sub of node.substitutes" class="min-w-0">
+            <li *ngFor="let sub of sortedWeightedChildren(node.substitutes)" class="min-w-0">
               <app-category-composition-panel
                 [node]="sub.expr"
                 [showHeader]="false"

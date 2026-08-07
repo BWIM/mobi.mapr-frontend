@@ -649,6 +649,7 @@ export class MobileAnalyzeComponent implements OnDestroy {
       this.injector,
     );
     await this.placesMap.load(data);
+    this.applyPlacesOverallFromBackend();
     afterNextRender(
       () => {
         const el = this.mapContainer?.nativeElement;
@@ -657,6 +658,24 @@ export class MobileAnalyzeComponent implements OnDestroy {
         }
       },
       { injector: this.injector },
+    );
+  }
+
+  /** Prefer composition.activityScore from places API when present. */
+  private applyPlacesOverallFromBackend(): void {
+    const metrics = this.placesComposition()?.activityScore;
+    if (!metrics) {
+      return;
+    }
+    const isScoreMode = this.placesScoreMode();
+    const label = isScoreMode
+      ? `${(metrics.score / 60).toFixed(1)} ${this.translate.instant('map.popup.minutes')}`
+      : gradeFromIndex(metrics.index);
+    this.placesOverallMetricLabel.set(label);
+    this.placesOverallMetricColor.set(
+      isScoreMode
+        ? scoreColor(metrics.score, this.scoreColorsService.getConfig())
+        : gradeColor(metrics.index),
     );
   }
 
