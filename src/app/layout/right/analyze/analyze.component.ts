@@ -2003,7 +2003,21 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.setPlacesOverallMetricFromAnalyze();
   }
 
+  /** Overall from backend: composition.activityScore, else analyze category. */
   private setPlacesOverallMetricFromAnalyze(): void {
+    const fromComposition = this.composition?.activityScore;
+    if (fromComposition) {
+      this.placesOverallMetricLabel = this.formatPlacesMetric(
+        fromComposition.score,
+        fromComposition.index
+      );
+      this.placesOverallMetricColor = this.getPlacesMetricTextColor(
+        fromComposition.score,
+        fromComposition.index
+      );
+      return;
+    }
+
     const category = this.analyzeData?.categories?.[0];
     if (!category) {
       this.placesOverallMetricLabel = null;

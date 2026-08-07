@@ -5,7 +5,8 @@ import { SharedModule } from '../shared.module';
 import {
   CompositionNode,
   CompositionWeightedChild,
-  evaluateCompositionValue,
+  sortCompositionChildren,
+  sortWeightedChildren,
   weightedChildrenTotal,
 } from '../../interfaces/composition';
 
@@ -38,7 +39,6 @@ export interface CompositionFormattedMetric {
 })
 export class CategoryCompositionPanelComponent {
   @Input() node: CompositionNode | null = null;
-  @Input() categoryName = '';
   @Input() showHeader = true;
   @Input() collapsible = false;
   @Input() expanded = true;
@@ -53,7 +53,7 @@ export class CategoryCompositionPanelComponent {
   @Input() shareLabel: number | null = null;
   /** Activity display name currently highlighted (from map or panel hover). */
   @Input() highlightedActivityName: string | null = null;
-  /** Formats an aggregated score/index for AND / OR / SUBST headers. */
+  /** Formats backend-provided score/index for AND / OR / SUBST headers. */
   @Input() formatMetric:
     | ((score: number, index: number) => CompositionFormattedMetric)
     | null = null;
@@ -71,6 +71,16 @@ export class CategoryCompositionPanelComponent {
     return total > 0 ? (weight / total) * 100 : 0;
   }
 
+  /** AND children / SUBST substitutes: weight desc, then A–Z. */
+  sortedWeightedChildren(children: CompositionWeightedChild[]): CompositionWeightedChild[] {
+    return sortWeightedChildren(children);
+  }
+
+  /** OR children: A–Z (no per-child weights). */
+  sortedOrChildren(children: CompositionNode[]): CompositionNode[] {
+    return sortCompositionChildren(children);
+  }
+
   metaFor(activityId: number): CompositionActivityMeta | undefined {
     return this.activityMeta[activityId];
   }
@@ -82,23 +92,16 @@ export class CategoryCompositionPanelComponent {
     return this.metaFor(activityId)?.name === this.highlightedActivityName;
   }
 
-  /** Aggregated metric for the current AND / OR / SUBST node header. */
+  /** Backend-annotated metric for the current AND / OR / SUBST node header. */
   groupMetric(): CompositionFormattedMetric | null {
     if (!this.node || this.node.op === 'atom' || !this.formatMetric) {
       return null;
     }
-    const score = evaluateCompositionValue(
-      this.node,
-      (id) => this.activityMeta[id]?.score
-    );
-    const index = evaluateCompositionValue(
-      this.node,
-      (id) => this.activityMeta[id]?.index
-    );
-    if (score == null && index == null) {
+    const metrics = this.node.activityScore;
+    if (!metrics) {
       return null;
     }
-    return this.formatMetric(score ?? 0, index ?? 0);
+    return this.formatMetric(Number(metrics.score ?? 0), Number(metrics.index ?? 0));
   }
 
   onAtomClick(activityId: number, event: Event): void {

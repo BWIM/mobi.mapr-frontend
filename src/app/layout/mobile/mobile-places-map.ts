@@ -9,6 +9,7 @@ import { firstValueFrom, catchError, of } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { PlacesService, Place } from '../../services/places.service';
 import { MapService } from '../../services/map.service';
+import { findBasemapLabelsBeforeId } from '../../services/basemap-style';
 import { PlacesDialogData } from '../right/analyze/places/places-dialog.component';
 import { CompositionNode } from '../../interfaces/composition';
 import { CompositionActivityMeta } from '../../shared/category-composition-panel/category-composition-panel.component';
@@ -434,9 +435,7 @@ export class MobilePlacesMap {
     const sourceId = `places-${category.name}`;
     const circleLayerId = `places-circles-${category.name}`;
     const labelLayerId = `places-labels-${category.name}`;
-    const beforeLayer = this.map.getLayer('carto-labels-layer')
-      ? 'carto-labels-layer'
-      : undefined;
+    const beforeLayer = findBasemapLabelsBeforeId(this.map);
     const fillColor = this.getMarkerFillColor(category.score, category.index);
     const highlightedName = this.state.highlightedActivityName();
     const isHighlighted = highlightedName === category.name;
@@ -574,9 +573,7 @@ export class MobilePlacesMap {
 
     const sourceId = 'feature-shape';
     const layerId = 'feature-shape-fill';
-    const beforeLayer = this.map.getLayer('carto-labels-layer')
-      ? 'carto-labels-layer'
-      : undefined;
+    const beforeLayer = findBasemapLabelsBeforeId(this.map);
 
     if (this.map.getSource(sourceId)) {
       (this.map.getSource(sourceId) as GeoJSONSource).setData(geoJsonData as never);

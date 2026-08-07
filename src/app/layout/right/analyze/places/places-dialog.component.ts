@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { Map as MapLibreMap, NavigationControl, FullscreenControl, Popup, GeoJSONSource } from 'maplibre-gl';
 import { PlacesService, Place } from '../../../../services/places.service';
 import { MapService } from '../../../../services/map.service';
+import { findBasemapLabelsBeforeId } from '../../../../services/basemap-style';
 import { firstValueFrom, catchError, of } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { InfoDialogComponent } from '../../../../shared/info-overlay/info-dialog.component';
@@ -215,6 +216,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       // Assign colors to categories
       this.assignCategoryColors();
       this.syncCompositionActivityMeta();
+      this.setOverallMetricFromBackend();
 
       // Defer map initialization until both (1) the view is ready and (2) the data is loaded.
       // This avoids race conditions around MapLibre's `load` event.
@@ -419,7 +421,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     const sourceId = `places-${category.name}`;
     const circleLayerId = `places-circles-${category.name}`;
-    const beforeLayer = this.map.getLayer('carto-labels-layer') ? 'carto-labels-layer' : undefined;
+    const beforeLayer = findBasemapLabelsBeforeId(this.map);
     const geoJsonData = this.buildCategoryGeoJson(category);
     const fillColor = this.getMarkerFillColor(category.score, category.index);
     const isHighlighted = this.highlightedActivityName === category.name;
@@ -561,6 +563,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
+  /** Overall from analyze category score passed into the dialog (backend). */
   private setOverallMetricFromDialogData(): void {
     const score = this.data.categoryScore;
     const index = this.data.categoryIndex;
@@ -573,6 +576,17 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     const safeIndex = Number(index ?? 0);
     this.overallMetricLabel = this.formatPlacesMetric(safeScore, safeIndex);
     this.overallMetricColor = this.getPlacesMetricTextColor(safeScore, safeIndex);
+  }
+
+  /** Prefer composition.activityScore from places API when present. */
+  private setOverallMetricFromBackend(): void {
+    const metrics = this.composition?.activityScore;
+    if (metrics) {
+      this.overallMetricLabel = this.formatPlacesMetric(metrics.score, metrics.index);
+      this.overallMetricColor = this.getPlacesMetricTextColor(metrics.score, metrics.index);
+      return;
+    }
+    this.setOverallMetricFromDialogData();
   }
 
   private formatPlacesMetric(score: number, index: number): string {
@@ -840,7 +854,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!this.map.getLayer(layerId)) {
       try {
         // Find the labels layer to insert before it, or add at the end
-        const beforeLayer = this.map.getLayer('carto-labels-layer') ? 'carto-labels-layer' : undefined;
+        const beforeLayer = findBasemapLabelsBeforeId(this.map);
         
         this.map.addLayer({
           id: layerId,
