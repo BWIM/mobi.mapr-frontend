@@ -20,6 +20,8 @@ export class ProjectsService {
   private _project = signal<Project | null>(null);
   private _isLoading = signal<boolean>(false);
   private _isInitialized = signal<boolean>(false);
+  /** Bumps on each initialize/set/clear so stale HTTP callbacks cannot overwrite newer state. */
+  private projectLoadGeneration = 0;
 
   // Expose readonly signals for reactive access
   readonly project = this._project.asReadonly();
@@ -61,35 +63,45 @@ export class ProjectsService {
   }
 
   setProject(project: Project): void {
+    this.projectLoadGeneration++;
     this._project.set(project);
     this._isInitialized.set(true);
+    this._isLoading.set(false);
   }
 
   /**
    * Clear the current project and reset initialization state
    */
   clearProject(): void {
+    this.projectLoadGeneration++;
     this._project.set(null);
     this._isInitialized.set(false);
     this._isLoading.set(false);
   }
   
   initializeProject(): void {
-    // Prevent multiple simultaneous initializations
-    if (this._isLoading()) {
+    // Prevent multiple simultaneous initializations; Dashboard owns load when already set.
+    if (this._isLoading() || this._isInitialized()) {
       return;
     }
 
+    const loadGeneration = ++this.projectLoadGeneration;
     this._isLoading.set(true);
     this.fetchProject().subscribe({
       next: (project) => {
-        this.setProject(project);
+        if (loadGeneration !== this.projectLoadGeneration) {
+          return;
+        }
+        this._project.set(project);
+        this._isInitialized.set(true);
         this._isLoading.set(false);
       },
       error: (error) => {
+        if (loadGeneration !== this.projectLoadGeneration) {
+          return;
+        }
         console.error('Error loading project:', error);
-        this._isLoading.set(false);
-        this._project.set(null);
+        this.clearProject();
       }
     });
   }
