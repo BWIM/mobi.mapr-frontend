@@ -889,7 +889,7 @@
     "loading": "Loading...",
     "errorLoading": "Error loading data",
     "noDataAvailable": "No data available",
-    "clickToSearch": "Click to search",
+    "clickToZoom": "Click to show on map",
     "levels": {
       "state": "States",
       "county": "Counties",
