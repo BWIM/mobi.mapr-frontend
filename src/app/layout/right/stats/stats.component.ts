@@ -9,7 +9,6 @@ import { SharedModule } from '../../../shared/shared.module';
 import { InfoOverlayComponent } from '../../../shared/info-overlay/info-overlay.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../services/language.service';
-import { SearchService } from '../../../services/search.service';
 import { FeatureSelectionService, MapLibreFeatureData } from '../../../shared/services/feature-selection.service';
 import { MobileUiService } from '../../../services/mobile-ui.service';
 
@@ -27,7 +26,6 @@ export class StatsComponent implements OnDestroy {
   private projectService = inject(ProjectsService);
   private translate = inject(TranslateService);
   private languageService = inject(LanguageService);
-  private searchService = inject(SearchService);
   private featureSelectionService = inject(FeatureSelectionService);
   private mobileUi = inject(MobileUiService);
 
@@ -415,13 +413,10 @@ export class StatsComponent implements OnDestroy {
   }
 
   /**
-   * Handle clicking on a feature name - copy it to the search bar and select it in the analyze component
+   * Handle clicking on a feature name - pan the map to its coordinates and select it in Analyze
    */
   onFeatureNameClick(county: County): void {
     if (county.name) {
-      // Copy to search bar (existing behavior)
-      this.searchService.setSearchQuery(county.name);
-      
       // Map selectedLevel to the 't' property used by MapLibre features
       // 'h' = hexagon, 'm' = municipality, 'c' = county, 's' = state
       let tileType: string;
@@ -452,13 +447,27 @@ export class StatsComponent implements OnDestroy {
       if (this.mobileUi.isMobile()) {
         this.mobileUi.openAnalyze();
       }
-      // Zoom to the feature
-      // this.mapService.flyTo({
-      //   center: [county.lng, county.lat],
-      //   zoom: 10,
-      //   duration: 1000
-      // });
+
+      const map = this.mapService.getMap();
+      if (map && county.lat != null && county.lng != null) {
+        map.flyTo({
+          center: [county.lng, county.lat],
+          zoom: this.getZoomForSelectedLevel(),
+          duration: 1000
+        });
+      }
     }
+  }
+
+  /** Zoom matching automatic admin-level bands in FilterConfigService.determineDefaultAdminLevel */
+  private getZoomForSelectedLevel(): number {
+    if (this.selectedLevel === 'state') {
+      return 7;
+    }
+    if (this.selectedLevel === 'county') {
+      return 8;
+    }
+    return 9; // municipality
   }
 
   ngOnDestroy(): void {

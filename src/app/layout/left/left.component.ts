@@ -83,13 +83,6 @@ export class LeftComponent implements OnInit, OnDestroy {
   canUseMapCompare = this.filterConfigService.canUseMapCompare;
   rightSelectedModes = this.filterConfigService.rightSelectedModes;
 
-  constructor() {
-    // Initialize project if not already initialized
-    if (!this.projectService.isInitialized()) {
-      this.projectService.initializeProject();
-    }
-  }
-
   ngOnInit() {
     this.isLoggedIn.set(this.authService.isLoggedIn());
     this.authService.currentUser$

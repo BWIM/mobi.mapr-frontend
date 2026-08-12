@@ -889,7 +889,7 @@
     "loading": "Laden...",
     "errorLoading": "Fehler beim Laden der Daten",
     "noDataAvailable": "Keine Daten verfügbar",
-    "clickToSearch": "Klicken zum Suchen",
+    "clickToZoom": "Klicken, um auf der Karte anzuzeigen",
     "levels": {
       "state": "Bundesländer",
       "county": "Kreise",

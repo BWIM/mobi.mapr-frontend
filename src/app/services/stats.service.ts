@@ -15,6 +15,8 @@ export interface RankingsResponse {
     score: number;
     index: number;
     population: number;
+    lat: number;
+    lng: number;
   }>;
 }
 

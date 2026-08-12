@@ -114,6 +114,9 @@ export class FilterConfigService {
   private _allModes = signal<Mode[]>([]);
   private _allProfiles = signal<Profile[]>([]);
   private _modeOptions = signal<Array<{ id: number; name: string; display_name: string; icon: string }>>([]);
+  private profilesLoading = false;
+  private profilesLoadAttempts = 0;
+  private readonly maxProfilesLoadAttempts = 3;
 
   // Filter data
   private _allActivities = signal<Activity[]>([]);
@@ -424,6 +427,9 @@ export class FilterConfigService {
         if (this._allProfiles().length > 0) {
           this.updateModeSelection(currentProject.base_profiles);
           this.tryEnableCompareFromUrl();
+        } else {
+          // Profiles may have failed or not finished on cold start — retry so modes/circles can resolve.
+          this.loadProfilesAndModes();
         }
       } else {
         // Reset when project is cleared
@@ -790,8 +796,18 @@ export class FilterConfigService {
    * Load profiles and modes from API
    */
   private loadProfilesAndModes(): void {
+    if (this.profilesLoading || this._allProfiles().length > 0) {
+      return;
+    }
+    if (this.profilesLoadAttempts >= this.maxProfilesLoadAttempts) {
+      return;
+    }
+
+    this.profilesLoading = true;
+    this.profilesLoadAttempts++;
     this.profileService.getProfiles(1, 1000).subscribe({
       next: (response) => {
+        this.profilesLoading = false;
         this._allProfiles.set(response.results);
         this.extractModes();
         // Apply URL params - this will set modes if profile_ids is in URL
@@ -805,7 +821,16 @@ export class FilterConfigService {
         this.validateModeSelection();
       },
       error: (error) => {
+        this.profilesLoading = false;
         console.error('Error loading profiles:', error);
+        // Retry shortly if a project is already waiting on profile_ids (cold-start auth races).
+        if (
+          this.projectService.project() &&
+          this._allProfiles().length === 0 &&
+          this.profilesLoadAttempts < this.maxProfilesLoadAttempts
+        ) {
+          setTimeout(() => this.loadProfilesAndModes(), 500);
+        }
       }
     });
   }
