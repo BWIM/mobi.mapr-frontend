@@ -38,12 +38,9 @@ function buildSegmentLabel(lowerBound: number, upperBound: number | null): strin
   const upperMinutes = upperBound === null ? null : Math.floor((upperBound - 1) / 60);
 
   if (upperBound === null) {
-    return `${lowerMinutes}+`;
+    return `> ${lowerMinutes}`;
   }
-  if (lowerBound === 0) {
-    return `≤${upperMinutes}`;
-  }
-  return `${lowerMinutes}-${upperMinutes}`;
+  return `<= ${upperMinutes}`;
 }
 
 export function parseScoreColors(raw: Record<string, string> | null | undefined): ScoreColorConfig | null {
