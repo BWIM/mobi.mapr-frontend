@@ -116,11 +116,14 @@ export class GeoJsonDownloadDialogComponent {
 
   getCurrentPersonaDisplay(): string {
     if (!this.currentPersonaId) {
-      const key = this.hasCategories ? 'geojsonDownload.currentSettings.none' : 'geojsonDownload.currentSettings.notApplicable';
-      return this.translate.instant(key);
+      return this.translate.instant(
+        this.hasCategories ? 'left.activeFilters.projectMix' : 'geojsonDownload.currentSettings.notApplicable'
+      );
     }
     const persona = this.personas().find(p => p.id === this.currentPersonaId);
-    return persona ? (persona.display_name || persona.name) : this.translate.instant('geojsonDownload.currentSettings.none');
+    return persona
+      ? (persona.display_name || persona.name)
+      : this.translate.instant('left.activeFilters.projectMix');
   }
 
   getCurrentProfilesDisplay(): string {

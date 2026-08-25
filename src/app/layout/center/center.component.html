@@ -68,6 +68,14 @@
       <p class="map-loading-text">{{ 'map.search.loading' | translate }}</p>
     </div>
   </div>
+  <!-- Empty / missing project tiles hint -->
+  <div
+    class="map-no-tiles-hint"
+    *ngIf="noProjectTiles() && !isMapLoading()"
+    role="status">
+    <mat-icon class="map-no-tiles-hint__icon" aria-hidden="true">info</mat-icon>
+    <p class="map-no-tiles-hint__text">{{ 'map.noTiles.hint' | translate }}</p>
+  </div>
   <!-- Legend -->
   <div class="map-legend absolute top-0 left-0 lg:bottom-0 lg:left-0 lg:right-auto lg:top-auto" (click)="openLegendDialog()" [title]="'map.search.clickForInfo' | translate">
     <div class="legend-hint" *ngIf="showLegendClickHint">

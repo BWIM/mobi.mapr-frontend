@@ -36,7 +36,6 @@ export class MobileFilterPanelComponent implements OnDestroy {
   private dialog = inject(MatDialog);
   
   project = this.projectService.project;
-  isPreparingProject = this.mapService.isPreparingProject;
   searchQuery: string = '';
   searchResults: NominatimResult[] = [];
   private searchSubject = new Subject<string>();
@@ -104,11 +103,6 @@ export class MobileFilterPanelComponent implements OnDestroy {
   isModeSelectionLocked = this.filterConfigService.isModeSelectionLocked;
   canUseMapCompare = this.filterConfigService.canUseMapCompare;
   rightSelectedModes = this.filterConfigService.rightSelectedModes;
-  hasCategories = this.filterConfigService.hasCategories;
-  selectedActivities = this.filterConfigService.selectedActivities;
-  selectedPersonas = this.filterConfigService.selectedPersonas;
-  allCategories = this.filterConfigService.allCategories;
-  allPersonas = this.filterConfigService.allPersonas;
 
   toggleMapCompare(): void {
     this.filterConfigService.toggleMapCompare();
@@ -263,34 +257,6 @@ export class MobileFilterPanelComponent implements OnDestroy {
       maxWidth: '90vw',
       maxHeight: '90vh'
     });
-  }
-
-  getSelectedPersonaName(): string {
-    const selectedPersonaId = this.selectedPersonas();
-    if (selectedPersonaId === null) {
-      return '';
-    }
-    const persona = this.allPersonas().find(p => p.id === selectedPersonaId);
-    return persona ? (persona.display_name || persona.name) : '';
-  }
-
-  getSelectedCategoryNames(): string[] {
-    const selectedIds = new Set(this.selectedActivities());
-    return this.allCategories()
-      .filter(c => selectedIds.has(c.id))
-      .map(c => c.display_name || c.name)
-      .sort((a, b) => a.localeCompare(b));
-  }
-
-  getActivitiesCountLabel(): string {
-    const selected = this.selectedActivities().length;
-    const total = this.allCategories().length;
-    return `(${selected} / ${total})`;
-  }
-
-  areAllCategoriesSelected(): boolean {
-    const total = this.allCategories().length;
-    return total > 0 && this.selectedActivities().length === total;
   }
 
   getFormattedCreatedDate(): string {

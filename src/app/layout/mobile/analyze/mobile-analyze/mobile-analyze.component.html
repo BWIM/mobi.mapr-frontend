@@ -1,7 +1,3 @@
-<ng-template #personasInfoTpl>
-  <p class="p-4 text-sm text-[var(--primary-color)] leading-relaxed whitespace-pre-line">{{ personasInfoText }}</p>
-</ng-template>
-
 <ng-template #placesRelevanceInfoTpl>
   <p class="p-4 text-sm text-[var(--primary-color)] leading-relaxed whitespace-pre-line">{{ placesRelevanceInfoText }}</p>
 </ng-template>
@@ -40,26 +36,30 @@
             </span>
           </div>
           <div class="px-3 py-2 text-sm">
-            <div class="grid gap-3" [class.grid-cols-2]="info.regiostar_rank">
-              <div [class.col-span-2]="!info.regiostar_rank">
-                <span class="font-semibold">{{ 'analyze.rank.overall' | translate }}</span>
-                <span class="text-xs opacity-80 ml-1">{{ 'analyze.rank.overallLabel' | translate }}</span>
-                <div class="text-2xl font-bold">
-                  {{ info.rank }} <span class="text-sm font-normal">/ {{ info.total_ranks }}</span>
-                </div>
-                <div class="text-xs opacity-90">{{ facade.getRankPercentage(info.rank, info.total_ranks) }}</div>
-              </div>
-              @if (info.regiostar_rank) {
-                <div>
-                  <span class="font-semibold">{{ 'analyze.rank.regionalClass' | translate }}</span>
-                  <span class="text-xs opacity-80 ml-1">{{ 'analyze.rank.regionalClassLabel' | translate }}</span>
+            @if (info.rank != null) {
+              <div class="grid gap-3" [class.grid-cols-2]="info.regiostar_rank">
+                <div [class.col-span-2]="!info.regiostar_rank">
+                  <span class="font-semibold">{{ 'analyze.rank.overall' | translate }}</span>
+                  <span class="text-xs opacity-80 ml-1">{{ 'analyze.rank.overallLabel' | translate }}</span>
                   <div class="text-2xl font-bold">
-                    {{ info.regiostar_rank }} <span class="text-sm font-normal">/ {{ info.regiostar_total_ranks }}</span>
+                    {{ info.rank }} <span class="text-sm font-normal">/ {{ info.total_ranks }}</span>
                   </div>
-                  <div class="text-xs opacity-90">{{ facade.getRankPercentage(info.regiostar_rank, info.regiostar_total_ranks) }}</div>
+                  <div class="text-xs opacity-90">{{ facade.getRankPercentage(info.rank, info.total_ranks) }}</div>
                 </div>
-              }
-            </div>
+                @if (info.regiostar_rank) {
+                  <div>
+                    <span class="font-semibold">{{ 'analyze.rank.regionalClass' | translate }}</span>
+                    <span class="text-xs opacity-80 ml-1">{{ 'analyze.rank.regionalClassLabel' | translate }}</span>
+                    <div class="text-2xl font-bold">
+                      {{ info.regiostar_rank }} <span class="text-sm font-normal">/ {{ info.regiostar_total_ranks }}</span>
+                    </div>
+                    <div class="text-xs opacity-90">{{ facade.getRankPercentage(info.regiostar_rank, info.regiostar_total_ranks) }}</div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="text-sm opacity-80">{{ 'analyze.rank.noRankingForDistricts' | translate }}</p>
+            }
           </div>
         </div>
       }
@@ -82,45 +82,7 @@
         } @else if (facade.analyzeError()) {
           <p class="text-sm text-red-600 py-2">{{ facade.analyzeError() }}</p>
         } @else {
-          @if (facade.isAllPersonas()) {
-            <div class="flex rounded-full border border-[var(--primary-color)] mb-3 overflow-hidden">
-              <button
-                type="button"
-                class="flex-1 py-2 text-sm"
-                [class.bg-[var(--primary-color)]]="!showPersonasTab()"
-                [class.text-[var(--background-color)]]="!showPersonasTab()"
-                [class.text-[var(--primary-color)]]="showPersonasTab()"
-                (click)="setTab('activities')">
-                {{ 'analyze.analysis.activities' | translate }}
-              </button>
-              <button
-                type="button"
-                class="flex-1 py-2 text-sm"
-                [class.bg-[var(--primary-color)]]="showPersonasTab()"
-                [class.text-[var(--background-color)]]="showPersonasTab()"
-                [class.text-[var(--primary-color)]]="!showPersonasTab()"
-                (click)="setTab('personas')">
-                {{ 'analyze.analysis.personas' | translate }}
-              </button>
-            </div>
-          }
-
-          @if (showPersonasTab() && facade.personasChartData()) {
-            <div class="chart-host h-[180px]">
-              <p-chart type="bar" [data]="facade.personasChartData()" [options]="facade.personasChartOptions()" />
-            </div>
-            <ul class="space-y-1 mb-3">
-              @for (p of facade.getSortedPersonas(); track p.name; let i = $index) {
-                <li class="text-sm text-white"><span class="font-bold mr-1">{{ i + 1 }}.</span>{{ p.name }}</li>
-              }
-            </ul>
-            <button
-              type="button"
-              class="w-full py-2 text-sm font-medium text-[var(--primary-color)] border border-[var(--primary-color)] rounded-full"
-              (click)="openAllPersonas()">
-              {{ 'analyze.analysis.expandPersonas' | translate }}
-            </button>
-          } @else if (facade.activitiesChartData()) {
+          @if (facade.activitiesChartData()) {
             <div class="chart-host h-[180px]">
               <p-chart type="bar" [data]="facade.activitiesChartData()" [options]="facade.activitiesChartOptions()" />
             </div>
@@ -142,9 +104,7 @@
             </button>
           }
 
-          @if (
-            (showPersonasTab() && facade.personasChartData()) || facade.activitiesChartData()
-          ) {
+          @if (facade.activitiesChartData()) {
             <div class="border-t border-[var(--primary-color)] border-opacity-20 pt-3 mt-3 flex justify-center">
               <ng-container *ngTemplateOutlet="legendStrip" />
             </div>
@@ -188,44 +148,6 @@
 
         <div class="border-t border-[var(--primary-color)] border-opacity-20 pt-3 shrink-0 flex justify-center">
           <ng-container *ngTemplateOutlet="legendStrip" />
-        </div>
-      }
-    </div>
-  }
-
-  @case ('personas') {
-    <div class="flex flex-col min-h-[60vh] px-2 pb-4">
-      <button
-        type="button"
-        class="flex items-center gap-1 text-sm text-[var(--primary-color)] mb-3 pt-1 self-start"
-        (click)="back()">
-        <mat-icon class="text-lg">arrow_back</mat-icon>
-        {{ 'mobile.analyze.backToAnalysis' | translate }}
-      </button>
-
-      @if (personasLoading()) {
-        <div class="flex justify-center py-12">
-          <mat-spinner diameter="40" />
-        </div>
-      } @else if (personasError()) {
-        <p class="text-sm text-red-600 text-center py-8">{{ personasError() }}</p>
-      } @else {
-        <div class="chart-scroll-y flex-1 min-h-0 mb-2">
-          <div class="chart-host" [style.height.px]="personasChartHeight()">
-            <p-chart type="bar" [data]="personasChartData()" [options]="personasChartOptions()" />
-          </div>
-        </div>
-        <div class="border-t border-[var(--primary-color)] border-opacity-20 pt-3 relative">
-          <button
-            type="button"
-            class="absolute left-0 top-3 p-1.5 rounded-full text-[var(--primary-color)]"
-            (click)="openPersonasInfo($event)"
-            [attr.aria-label]="'mobile.analyze.info.personas' | translate">
-            <mat-icon class="text-xl">info_outline</mat-icon>
-          </button>
-          <div class="flex justify-center">
-            <ng-container *ngTemplateOutlet="legendStrip" />
-          </div>
         </div>
       }
     </div>

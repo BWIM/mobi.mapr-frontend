@@ -252,18 +252,6 @@
     @if (isExpanded()) {
       <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-3 xl:p-4 mt-4 mr-2 lg:mr-3 xl:mr-4 relative" >
         <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.activeFilters.title' | translate }}</h2>
-        @if (hasCategories()) {
-          <div class=""  >
-            <div class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.activities' | translate }}</div>
-            <div class="text-sm font-normal text-[var(--light-primary-color)] pl-2">({{ selectedActivities().length }} / {{ allActivities().length }})</div>
-          </div>
-          <div class="">
-            <div class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.personas' | translate }}</div>
-            <div class="text-sm font-normal text-[var(--light-primary-color)] pl-2" *ngIf="selectedPersonas() !== null">
-              ({{ getSelectedPersonaName() }})
-            </div>
-          </div>
-        }
         <div class="">
           <div class="text-base font-bold text-[var(--primary-color)]">{{ 'left.activeFilters.regioStars' | translate }}</div>
           <div class="text-sm font-normal text-[var(--light-primary-color)] pl-2">({{ selectedRegioStars().length }} / {{ allRegioStars().length }})</div>

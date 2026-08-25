@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inj
 import { Subscription, firstValueFrom, debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { Map, MapDataEvent, NavigationControl, FullscreenControl, Popup, AttributionControl, LngLatLike } from 'maplibre-gl';
 import Compare from '@maplibre/maplibre-gl-compare';
-import { MapService, NO_DATA_SCORE, CAPPED_SCORE_MINUTES, CONTENT_LAYER_RIGHT_SOURCE } from '../../services/map.service';
+import { MapService, NO_DATA_SCORE, CAPPED_SCORE_MINUTES, CONTENT_LAYER_RIGHT_SOURCE, CONTENT_SOURCE_LAYER } from '../../services/map.service';
 import MinimapControl from "maplibregl-minimap";
 import { SharedModule } from '../../shared/shared.module';
 import { AdminLevel, FilterConfigService } from '../../services/filter-config.service';
@@ -66,7 +66,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly tileLoadingHandlers = new WeakMap<Map, {
     dataloading: (event: MapDataEvent) => void;
     idle: () => void;
-    error: () => void;
+    error: (event: { sourceId?: string; error?: { sourceId?: string } }) => void;
   }>();
   mapStyle: any;
   zoom: number = 7;
@@ -189,6 +189,10 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
   get isMapLoading() {
     return this.mapService.isMapLoading;
+  }
+
+  get noProjectTiles() {
+    return this.mapService.noProjectTiles;
   }
 
   get selectedBewertung() {
@@ -1388,8 +1392,15 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     const idle = () => {
       this.tryClearMapLoading();
     };
-    const error = () => {
+    const error = (e: { sourceId?: string; error?: { sourceId?: string; status?: number } }) => {
       this.mapService.setMapLoading(false);
+      const sourceId = e?.sourceId ?? e?.error?.sourceId;
+      if (
+        sourceId === 'content-layer' ||
+        sourceId === CONTENT_LAYER_RIGHT_SOURCE
+      ) {
+        this.mapService.setNoProjectTiles(true);
+      }
     };
 
     map.on('dataloading', dataloading);
@@ -1431,6 +1442,57 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     this.mapService.setMapLoading(false);
+    this.refreshNoProjectTilesHint();
+  }
+
+  /**
+   * Shows a hint when the project content layer loaded but has no features
+   * (e.g. scores not populated yet, or filters yield an empty tile set).
+   */
+  private refreshNoProjectTilesHint(): void {
+    const maps = this.getActiveMaps();
+    if (maps.length === 0) {
+      this.mapService.setNoProjectTiles(false);
+      return;
+    }
+
+    let contentLayerPresent = false;
+    let hasFeatures = false;
+
+    for (const targetMap of maps) {
+      const style = targetMap.getStyle();
+      if (!style?.sources || !('content-layer' in style.sources)) {
+        continue;
+      }
+      contentLayerPresent = true;
+      if (!targetMap.isSourceLoaded('content-layer')) {
+        return;
+      }
+
+      const features = targetMap.querySourceFeatures('content-layer', {
+        sourceLayer: CONTENT_SOURCE_LAYER,
+      });
+      if (features.length > 0) {
+        hasFeatures = true;
+        break;
+      }
+
+      if (
+        this.filterConfigService.isDifferenceView() &&
+        CONTENT_LAYER_RIGHT_SOURCE in style.sources &&
+        targetMap.isSourceLoaded(CONTENT_LAYER_RIGHT_SOURCE)
+      ) {
+        const rightFeatures = targetMap.querySourceFeatures(CONTENT_LAYER_RIGHT_SOURCE, {
+          sourceLayer: CONTENT_SOURCE_LAYER,
+        });
+        if (rightFeatures.length > 0) {
+          hasFeatures = true;
+          break;
+        }
+      }
+    }
+
+    this.mapService.setNoProjectTiles(contentLayerPresent && !hasFeatures);
   }
 
   private syncMapInteractionsForLoading(loading: boolean): void {

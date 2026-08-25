@@ -24,10 +24,8 @@ import { MobileUiService } from '../../../../services/mobile-ui.service';
 import {
   AnalyzeService,
   CategoryScore,
-  PersonaBreakdown,
 } from '../../../../services/analyze.service';
 import { AllCategoriesDialogData } from '../../../right/analyze/overlay/all-categories-dialog.component';
-import { PersonasDialogData } from '../../../right/analyze/overlay/personas-dialog.component';
 import { PlacesDialogData } from '../../../right/analyze/places/places-dialog.component';
 import { PlacesService } from '../../../../services/places.service';
 import { MapService } from '../../../../services/map.service';
@@ -128,7 +126,6 @@ export class MobileAnalyzeComponent implements OnDestroy {
   private dialog = inject(MatDialog);
   private injector = inject(Injector);
 
-  @ViewChild('personasInfoTpl') personasInfoTpl?: TemplateRef<unknown>;
   @ViewChild('placesRelevanceInfoTpl') placesRelevanceInfoTpl?: TemplateRef<unknown>;
 
   @ViewChild('mapContainer') mapContainer?: ElementRef<HTMLElement>;
@@ -139,11 +136,6 @@ export class MobileAnalyzeComponent implements OnDestroy {
   readonly timeLegendItems = this.scoreColorsService.legendItems;
   readonly hasScoreColors = this.scoreColorsService.hasConfig;
 
-  showPersonasTab = computed(
-    () =>
-      this.facade.isAllPersonas() &&
-      this.facade.activePersonaTab() === 'personas',
-  );
 
   // Activities detail state
   activitiesData = signal<AllCategoriesDialogData | null>(null);
@@ -154,14 +146,6 @@ export class MobileAnalyzeComponent implements OnDestroy {
   activitiesLoading = signal(false);
   activitiesError = signal<string | null>(null);
 
-  // Personas detail state
-  personasData = signal<PersonasDialogData | null>(null);
-  personasChartData = signal<unknown>(null);
-  personasChartOptions = signal<unknown>(null);
-  personasChartHeight = signal(200);
-  personasLoading = signal(false);
-  personasError = signal<string | null>(null);
-  personasInfoText = '';
 
   // Places state
   placesTitle = signal('');
@@ -182,7 +166,6 @@ export class MobileAnalyzeComponent implements OnDestroy {
   private lastLoadedStep: string | null = null;
 
   constructor() {
-    this.personasInfoText = this.translate.instant('analyze.personasDialog.info');
     this.placesRelevanceInfoText = this.translate.instant(
       'analyze.placesDialog.categoryRelevanceInfo',
     );
@@ -199,10 +182,6 @@ export class MobileAnalyzeComponent implements OnDestroy {
         this.lastLoadedStep = step;
         this.activitiesData.set(payload.data);
         this.loadActivities();
-      } else if (step === 'personas' && payload?.type === 'analyze-personas') {
-        this.lastLoadedStep = step;
-        this.personasData.set(payload.data);
-        this.loadPersonas(payload.personas);
       } else if (step === 'places' && payload?.type === 'analyze-places') {
         this.lastLoadedStep = step;
         this.loadPlaces(payload.data);
@@ -217,9 +196,6 @@ export class MobileAnalyzeComponent implements OnDestroy {
     this.teardownPlaces();
   }
 
-  setTab(tab: 'activities' | 'personas'): void {
-    this.facade.activePersonaTab.set(tab);
-  }
 
   back(): void {
     this.lastLoadedStep = null;
@@ -234,14 +210,6 @@ export class MobileAnalyzeComponent implements OnDestroy {
     }
   }
 
-  openAllPersonas(): void {
-    const data = this.facade.buildPersonasDialogData();
-    if (data) {
-      this.lastLoadedStep = null;
-      const cached = this.facade.personasData() ?? undefined;
-      this.mobileUi.openAnalyzeDetail('personas', data, cached);
-    }
-  }
 
   openPlaces(cat: CategoryScore): void {
     const data = this.facade.buildPlacesDialogData(cat.category_id, cat.category_name);
@@ -325,17 +293,6 @@ export class MobileAnalyzeComponent implements OnDestroy {
     this.openInfoDialog(LegendInfoComponent);
   }
 
-  openPersonasInfo(event: Event): void {
-    event.stopPropagation();
-    const tpl = this.personasInfoTpl;
-    if (tpl) {
-      this.dialog.open(InfoDialogComponent, {
-        ...this.dialogSize(),
-        panelClass: 'info-dialog-panel',
-        data: { content: tpl },
-      });
-    }
-  }
 
   openPlacesRelevanceInfo(event: Event): void {
     event.stopPropagation();
@@ -356,9 +313,6 @@ export class MobileAnalyzeComponent implements OnDestroy {
     }
     if (step === 'activities') {
       return this.activitiesData()?.isScoreMode ?? false;
-    }
-    if (step === 'personas') {
-      return this.personasData()?.isScoreMode ?? false;
     }
     return this.placesScoreMode();
   }
@@ -493,125 +447,6 @@ export class MobileAnalyzeComponent implements OnDestroy {
     });
   }
 
-  private loadPersonas(cached?: PersonaBreakdown[]): void {
-    const d = this.personasData();
-    if (!d) return;
-
-    if (cached?.length) {
-      const sorted = [...cached].sort((a, b) => b.weight - a.weight);
-      this.buildPersonasChart(sorted, d);
-      this.personasLoading.set(false);
-      return;
-    }
-
-    this.personasLoading.set(true);
-    this.personasError.set(null);
-    this.analyzeService
-      .getPersonas({
-        feature_type: d.featureType,
-        feature_id: d.featureId,
-        profile_ids: d.profileIds,
-        category_ids: d.categoryIds,
-        persona_id: 54,
-      })
-      .pipe(catchError(() => of(null)))
-      .subscribe((res) => {
-        this.personasLoading.set(false);
-        if (!res?.length) {
-          this.personasError.set(
-            this.translate.instant('analyze.analyzeData.errorLoading'),
-          );
-          return;
-        }
-        const sorted = [...res].sort((a, b) => b.weight - a.weight);
-        this.buildPersonasChart(sorted, d);
-      });
-  }
-
-  private buildPersonasChart(
-    personas: PersonaBreakdown[],
-    d: PersonasDialogData,
-  ): void {
-    const barHeight = 28;
-    const weights = personas.map((p) => p.weight * 100);
-    const maxWeight = Math.max(...weights, 0);
-    const xAxisMax = Math.max(5, Math.ceil(maxWeight / 5) * 5);
-    const colors = personas.map((p) =>
-      d.isScoreMode ? scoreColor(p.score, this.scoreColorsService.getConfig()) : gradeColor(p.index),
-    );
-
-    this.personasChartHeight.set(personas.length * barHeight + 56);
-    this.personasChartData.set({
-      labels: personas.map((p) => p.name),
-      datasets: [
-        {
-          label: this.translate.instant('analyze.populationPercent'),
-          data: weights,
-          backgroundColor: colors,
-          borderColor: '#fff',
-          borderWidth: 1,
-          barThickness: barHeight - 6,
-          clip: false,
-        },
-      ],
-    });
-    this.personasChartOptions.set({
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      clip: false,
-      layout: { padding: { top: 4, right: 12, bottom: 4, left: 4 } },
-      plugins: {
-        legend: { display: false },
-        horizontalBarLabels: { labels: personas.map((p) => p.name) },
-        tooltip: {
-          mode: 'index',
-          intersect: false,
-          callbacks: {
-            title: () => '',
-            label: (context: { dataIndex: number }) => {
-              const index = context.dataIndex;
-              const persona = personas[index];
-              const personaLabel = this.translate.instant('analyze.analysis.personas');
-              const populationLabel = this.translate.instant('analyze.populationPercent');
-              const minutesLabel = this.translate.instant('map.popup.minutes');
-              const ratingLabel = d.isScoreMode
-                ? this.translate.instant('map.popup.score')
-                : this.translate.instant('map.popup.index');
-              const ratingValue = d.isScoreMode
-                ? `${Math.round(persona.score / 60)} ${minutesLabel}`
-                : d.getGrade(persona.index);
-              return [
-                `${personaLabel}: ${persona.name}`,
-                `${ratingLabel} ${ratingValue}`,
-                `${populationLabel}: ${weights[index].toFixed(1)}%`,
-              ];
-            },
-          },
-        },
-      },
-      scales: {
-        x: {
-          beginAtZero: true,
-          max: xAxisMax,
-          ticks: {
-            color: '#fff',
-            font: { size: 9 },
-            stepSize: xAxisMax <= 25 ? 5 : Math.ceil(xAxisMax / 10),
-          },
-          grid: { color: 'rgba(255, 255, 255, 0.1)', drawBorder: false },
-          title: {
-            display: true,
-            text: this.translate.instant('analyze.populationPercent'),
-            color: '#fff',
-            font: { size: 10, weight: 'bold' },
-            padding: { top: 6 },
-          },
-        },
-        y: { display: false, reverse: true, grid: { display: false } },
-      },
-    });
-  }
 
   private async loadPlaces(data: PlacesDialogData): Promise<void> {
     this.teardownPlaces();

@@ -31,12 +31,6 @@ export class MobileSheetsComponent {
           this.translate.instant('analyze.analysis.activities')
         );
       }
-      if (step === 'personas' && payload?.type === 'analyze-personas') {
-        return (
-          payload.data.featureName ||
-          this.translate.instant('analyze.analysis.personas')
-        );
-      }
       return this.translate.instant('mobile.analyzeSheet.title');
     }
     return '';

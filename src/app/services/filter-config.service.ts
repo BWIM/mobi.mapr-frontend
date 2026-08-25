@@ -13,7 +13,6 @@ import { AuthService } from '../auth/auth.service';
 import { Profile, Mode } from '../interfaces/profile';
 import { MatDialog } from '@angular/material/dialog';
 import { FilterDialogComponent, FilterDialogData } from '../layout/left/filter-dialog/filter-dialog.component';
-import { PreparingProjectDialogComponent } from '../layout/left/preparing-project-dialog/preparing-project-dialog.component';
 import { ActivityService } from './activity.service';
 import { PersonaService } from './persona.service';
 import { RegioStarService } from './regiostar.service';
@@ -129,7 +128,7 @@ export class FilterConfigService {
   private _isFilterDataLoaded = signal<boolean>(false);
   /** Project id that the loaded filter data belongs to (guards stale async completions). */
   private _filterDataProjectId = signal<number | null>(null);
-  /** Bumped on every project switch to invalidate in-flight map/ready work. */
+  /** Bumped on every project switch to invalidate in-flight map work. */
   private projectLoadGeneration = 0;
   
   // Track if URL params have been applied (to prevent re-applying on every effect run)
@@ -299,11 +298,8 @@ export class FilterConfigService {
       return null;
     }
 
-    const hasCategories = this.hasCategories();
     const featureType: 'index' | 'score' = this._selectedBewertung() === 'zeit' ? 'score' : 'index';
     const selectedStates = this._selectedStates();
-    const selectedActivities = this._selectedActivities();
-    const selectedPersonas = this._selectedPersonas();
     const selectedRegioStars = this._selectedRegioStars();
     const selectedAdminLevel = this.effectiveAdminLevel();
 
@@ -311,8 +307,6 @@ export class FilterConfigService {
       profile_ids: profileIds,
       feature_type: featureType,
       state_ids: selectedStates.length > 0 ? selectedStates : undefined,
-      category_ids: (hasCategories && selectedActivities.length > 0) ? selectedActivities : undefined,
-      persona_id: (hasCategories && selectedPersonas !== null) ? selectedPersonas : undefined,
       regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined,
       admin_level: selectedAdminLevel,
       selected_quality_brackets: [...this._selectedQualityBrackets()],
@@ -444,8 +438,6 @@ export class FilterConfigService {
         this._compareMapsReady.set(false);
         // Reset URL params applied flag when project is cleared
         this._urlParamsApplied.set(false);
-        // Reset ready check state when project is cleared
-        this.mapService.setReadyCheckComplete(false);
         // Clear initialized project IDs when project is cleared
         this._initializedProjectIds.clear();
       }
@@ -709,6 +701,12 @@ export class FilterConfigService {
         }
         if (this.updateMapLayerInProgress) {
           this.mapUpdateRetryNeeded = true;
+          return;
+        }
+
+        // Persona is an analytics overlay only — do not reload baked map tiles.
+        if (!isInitialLoad && previousFilters && !this.filtersDiffer(previousFilters, filters)) {
+          previousFilters = this.cloneContentLayerFilters(filters);
           return;
         }
 
@@ -1032,9 +1030,7 @@ export class FilterConfigService {
           if (responses.categories.results.length > 0) {
             this.preselectAllCategories();
           }
-          if (responses.personas.results.length > 0) {
-            this.preselectAllPersonas();
-          }
+          this.validateSelectedPersona();
           this.preselectAllRegioStars();
           this.preselectAllStates();
           
@@ -1055,9 +1051,7 @@ export class FilterConfigService {
           if (responses.categories.results.length > 0) {
             this.preselectAllCategories();
           }
-          if (responses.personas.results.length > 0) {
-            this.preselectAllPersonas();
-          }
+          this.validateSelectedPersona();
           this.preselectAllRegioStars();
           this.preselectAllStates();
           
@@ -1124,30 +1118,17 @@ export class FilterConfigService {
   }
 
   /**
-   * Preselect default persona (only if no persona is currently selected)
+   * Keep a selected persona only if it exists in the loaded list.
+   * Never invent a default — omitted persona uses the baked project mix.
    */
-  private preselectAllPersonas(): void {
+  private validateSelectedPersona(): void {
     const currentSelection = this._selectedPersonas();
-    const personas = this._allPersonas();
-    
-    // If a persona is already selected, validate it exists in the loaded personas
-    if (currentSelection !== null) {
-      const personaExists = personas.some(p => p.id === currentSelection);
-      if (personaExists) {
-        // Valid selection, keep it
-        return;
-      }
-      // Invalid selection (e.g., from old localStorage), clear it
-      this._selectedPersonas.set(null);
+    if (currentSelection === null) {
+      return;
     }
-    
-    // No valid selection, select the default persona
-    const defaultPersona = personas.find(p => p.default === true);
-    if (defaultPersona) {
-      this._selectedPersonas.set(defaultPersona.id);
-    } else if (personas.length > 0) {
-      // Fallback to first persona if no default is set
-      this._selectedPersonas.set(personas[0].id);
+    const personaExists = this._allPersonas().some(p => p.id === currentSelection);
+    if (!personaExists) {
+      this._selectedPersonas.set(null);
     }
   }
 
@@ -1218,18 +1199,7 @@ export class FilterConfigService {
       }
     }
 
-    // Validate Personas (only if MID)
-    const allPersonaIds = new Set(this._allPersonas().map(p => p.id));
-    const currentPersona = this._selectedPersonas();
-    // If no persona selected and personas are available, preselect default
-    if (currentPersona === null && allPersonaIds.size > 0) {
-      const defaultPersona = this._allPersonas().find(p => p.default === true);
-      this._selectedPersonas.set(defaultPersona ? defaultPersona.id : (this._allPersonas().length > 0 ? this._allPersonas()[0].id : null));
-    } else if (currentPersona !== null && !allPersonaIds.has(currentPersona)) {
-      // Current persona is invalid, try to find default or first available
-      const defaultPersona = this._allPersonas().find(p => p.default === true);
-      this._selectedPersonas.set(defaultPersona ? defaultPersona.id : (this._allPersonas().length > 0 ? this._allPersonas()[0].id : null));
-    }
+    this.validateSelectedPersona();
   }
 
   /**
@@ -1773,11 +1743,8 @@ export class FilterConfigService {
     }
 
     const dialogData: FilterDialogData = {
-      selectedActivities: this._selectedActivities(),
-      selectedPersonas: this._selectedPersonas(),
       selectedRegioStars: this._selectedRegioStars(),
       selectedStates: this._selectedStates(),
-      hasCategories: this.hasCategories()
     };
 
     const dialogRef = this.dialog.open(FilterDialogComponent, {
@@ -1788,8 +1755,6 @@ export class FilterConfigService {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this._selectedActivities.set(result.selectedActivities || []);
-        this._selectedPersonas.set(result.selectedPersonas ?? null);
         this._selectedRegioStars.set(result.selectedRegioStars || []);
         this._selectedStates.set(result.selectedStates || []);
         this.saveSettings();
@@ -1799,34 +1764,15 @@ export class FilterConfigService {
 
   /**
    * Reset advanced filters to default (all selected)
-   * Does not reset modes, only resets: activities, personas, regiostars, states
+   * Does not reset modes, only resets: regiostars, states
    */
   resetAdvancedFilters(): void {
-    // Reset RegioStars to all selected
     const allRegioStarIds = this._allRegioStars().map(r => r.id);
     this._selectedRegioStars.set([...allRegioStarIds]);
 
-    // Reset States to all selected
     const allStateIds = this._allStates().map(s => s.id);
     this._selectedStates.set([...allStateIds]);
 
-    // Reset Activities to all selected (only if project has categories)
-    if (this.hasCategories()) {
-      const allActivityIds = this._allActivities().map(a => a.id);
-      this._selectedActivities.set([...allActivityIds]);
-
-      // Reset Personas to default
-      const defaultPersona = this._allPersonas().find(p => p.default === true);
-      if (defaultPersona) {
-        this._selectedPersonas.set(defaultPersona.id);
-      } else if (this._allPersonas().length > 0) {
-        this._selectedPersonas.set(this._allPersonas()[0].id);
-      } else {
-        this._selectedPersonas.set(null);
-      }
-    }
-
-    // Save settings after reset
     this.saveSettings();
   }
 
@@ -1881,7 +1827,6 @@ export class FilterConfigService {
       previousFilters.feature_type !== filters.feature_type ||
       JSON.stringify(previousFilters.state_ids?.sort()) !== JSON.stringify(filters.state_ids?.sort()) ||
       JSON.stringify(previousFilters.category_ids?.sort()) !== JSON.stringify(filters.category_ids?.sort()) ||
-      previousFilters.persona_id !== filters.persona_id ||
       JSON.stringify(previousFilters.regiostar_ids?.sort()) !== JSON.stringify(filters.regiostar_ids?.sort()) ||
       previousFilters.admin_level !== filters.admin_level ||
       JSON.stringify(previousFilters.selected_quality_brackets) !== JSON.stringify(filters.selected_quality_brackets) ||
@@ -1909,59 +1854,6 @@ export class FilterConfigService {
     return !!targetMap.getSource('content-layer');
   }
 
-  private async ensureProjectReady(
-    filters: ContentLayerFilters,
-    loadGeneration: number
-  ): Promise<boolean> {
-    if (!this.isProjectLoadCurrent(loadGeneration)) {
-      return false;
-    }
-
-    let dialogRef: ReturnType<MatDialog['open']> | null = null;
-
-    try {
-      const readyResponse = await this.mapService.checkReady(filters);
-
-      if (!this.isProjectLoadCurrent(loadGeneration)) {
-        return false;
-      }
-
-      if (!readyResponse.cache_flag) {
-        this.mapService.setPreparingProject(true);
-
-        dialogRef = this.dialog.open(PreparingProjectDialogComponent, {
-          width: '80%',
-          maxWidth: '900px',
-          disableClose: true,
-          hasBackdrop: true,
-          panelClass: 'preparing-project-dialog-panel',
-          data: { sessionId: readyResponse.session_id }
-        });
-
-        if (readyResponse.session_id) {
-          try {
-            await this.mapService.waitForPreload(readyResponse.session_id);
-          } catch (preloadError) {
-            console.error('Error waiting for preload via websocket:', preloadError);
-          }
-        } else {
-          console.warn('No session_id provided, cannot wait for preload');
-        }
-      }
-
-      return this.isProjectLoadCurrent(loadGeneration);
-    } catch (readyError) {
-      console.error('Error calling ready endpoint:', readyError);
-      this.mapService.setPreparingProject(false);
-      return false;
-    } finally {
-      if (dialogRef) {
-        dialogRef.close();
-        this.mapService.setPreparingProject(false);
-      }
-    }
-  }
-
   private async updateDifferenceMapLayers(
     leftFilters: ContentLayerFilters,
     rightFilters: ContentLayerFilters,
@@ -1982,23 +1874,8 @@ export class FilterConfigService {
     try {
       this.mapService.setMapLoading(true);
 
-      if (fullReload) {
-        this.mapService.setReadyCheckComplete(false);
-        const leftReady = await this.ensureProjectReady(leftFilters, loadGeneration);
-        if (!leftReady) {
-          this.mapService.setReadyCheckComplete(false);
-          return false;
-        }
-        const rightReady = await this.ensureProjectReady(rightFilters, loadGeneration);
-        if (!rightReady) {
-          this.mapService.setReadyCheckComplete(false);
-          return false;
-        }
-        if (!this.isProjectLoadCurrent(loadGeneration)) {
-          this.mapService.setReadyCheckComplete(false);
-          return false;
-        }
-        this.mapService.setReadyCheckComplete(true);
+      if (!this.isProjectLoadCurrent(loadGeneration)) {
+        return false;
       }
 
       const leftToApply = this.resolveFiltersForMapApply(leftFilters);
@@ -2021,7 +1898,6 @@ export class FilterConfigService {
       return this.isProjectLoadCurrent(loadGeneration);
     } catch (error) {
       console.error('Error in updateDifferenceMapLayers:', error);
-      this.mapService.setPreparingProject(false);
       this.mapService.setMapLoading(false);
       return false;
     } finally {
@@ -2059,49 +1935,28 @@ export class FilterConfigService {
     try {
       this.mapService.setMapLoading(true);
 
-      const needsReadyCheck =
-        (shouldUpdateLeft && leftFullReload) || (shouldUpdateRight && rightFullReload);
-      if (needsReadyCheck) {
-        this.mapService.setReadyCheckComplete(false);
-        if (shouldUpdateLeft && leftFullReload) {
-          const leftReady = await this.ensureProjectReady(leftFilters, loadGeneration);
-          if (!leftReady) {
-            this.mapService.setReadyCheckComplete(false);
-            return false;
-          }
-        }
-        if (shouldUpdateRight && rightFullReload) {
-          const rightReady = await this.ensureProjectReady(rightFilters, loadGeneration);
-          if (!rightReady) {
-            this.mapService.setReadyCheckComplete(false);
-            return false;
-          }
-        }
-        if (!this.isProjectLoadCurrent(loadGeneration)) {
-          this.mapService.setReadyCheckComplete(false);
-          return false;
-        }
-        this.mapService.setReadyCheckComplete(true);
+      if (!this.isProjectLoadCurrent(loadGeneration)) {
+        return false;
       }
 
       let success = false;
 
       if (sequentialInitialLoad && shouldUpdateLeft && shouldUpdateRight) {
-        const leftOk = await this.updateMapLayer(leftFilters, leftFullReload, false, leftMap, true);
+        const leftOk = await this.updateMapLayer(leftFilters, leftFullReload, false, leftMap);
         const rightOk = leftOk
-          ? await this.updateMapLayer(rightFilters, rightFullReload, false, rightMap, true)
+          ? await this.updateMapLayer(rightFilters, rightFullReload, false, rightMap)
           : false;
         success = leftOk && rightOk;
       } else {
         const loadTasks: Promise<boolean>[] = [];
         if (shouldUpdateLeft) {
           loadTasks.push(
-            this.updateMapLayer(leftFilters, leftFullReload, false, leftMap, true)
+            this.updateMapLayer(leftFilters, leftFullReload, false, leftMap)
           );
         }
         if (shouldUpdateRight) {
           loadTasks.push(
-            this.updateMapLayer(rightFilters, rightFullReload, false, rightMap, true)
+            this.updateMapLayer(rightFilters, rightFullReload, false, rightMap)
           );
         }
 
@@ -2114,8 +1969,7 @@ export class FilterConfigService {
           rightFilters,
           true,
           false,
-          rightMap,
-          true
+          rightMap
         );
         success = rightRetryOk;
       }
@@ -2140,8 +1994,7 @@ export class FilterConfigService {
     filters: ContentLayerFilters,
     fullReload: boolean = true,
     zoomToBounds: boolean = false,
-    targetMap?: MapLibreMap,
-    skipReadyCheck: boolean = false
+    targetMap?: MapLibreMap
   ): Promise<boolean> {
     const loadGeneration = this.projectLoadGeneration;
 
@@ -2154,28 +2007,7 @@ export class FilterConfigService {
     }
 
     try {
-      // Set loading state BEFORE calling ready endpoint (step 0: turn on loading)
-      // This ensures the map is in loading state when ready request is made
       this.mapService.setMapLoading(true);
-
-      // Call the ready endpoint first to check if project is ready (step 2)
-      // Only check ready for full reloads (filter changes), not for tile-only updates
-      if (fullReload && !skipReadyCheck) {
-        // Mark ready check as not complete yet (prevents rankings from loading)
-        this.mapService.setReadyCheckComplete(false);
-
-        const ready = await this.ensureProjectReady(filters, loadGeneration);
-        if (!ready) {
-          this.mapService.setMapLoading(false);
-          this.mapService.setReadyCheckComplete(false);
-          return false;
-        }
-
-        this.mapService.setReadyCheckComplete(true);
-      } else if (!skipReadyCheck) {
-        // For tile-only updates, ready check is not needed, so mark as complete
-        this.mapService.setReadyCheckComplete(true);
-      }
 
       if (!this.isProjectLoadCurrent(loadGeneration)) {
         return false;
@@ -2183,8 +2015,6 @@ export class FilterConfigService {
 
       const filtersToApply = this.resolveFiltersForMapApply(filters);
 
-      // Only load the content layer AFTER we've confirmed data is ready (step 3)
-      // (either via cache_flag: true OR websocket completion)
       const activeMap = targetMap ?? this.mapService.getMap();
       if (activeMap) {
         if (fullReload) {
@@ -2207,7 +2037,6 @@ export class FilterConfigService {
       return this.isProjectLoadCurrent(loadGeneration);
     } catch (error) {
       console.error('Error in updateMapLayer:', error);
-      this.mapService.setPreparingProject(false);
       this.mapService.setMapLoading(false);
       return false;
     } finally {
@@ -2257,19 +2086,9 @@ export class FilterConfigService {
         this._selectedTimeBrackets.set([...availableTimeBrackets]);
       }
 
-      // Load filter settings
+      // Load filter settings (RegioStars and states only — activities/personas are not user-selectable)
       if (settings.filters) {
-        this._selectedActivities.set(settings.filters.activities || []);
-        // Handle both old array format and new single value format
-        // Note: We'll validate the persona ID exists when personas are loaded
-        const personasValue = settings.filters.personas;
-        if (Array.isArray(personasValue)) {
-          // Old array format - ignore it, will be set to default when personas load
-          this._selectedPersonas.set(null);
-        } else {
-          // New single value format - set it, but it will be validated when personas load
-          this._selectedPersonas.set(personasValue ?? null);
-        }
+        this._selectedPersonas.set(null);
         this._selectedRegioStars.set(settings.filters.regiostars || []);
         this._selectedStates.set(settings.filters.states || []);
       }

@@ -5,63 +5,6 @@
 
   <mat-dialog-content class="mat-typography">
     <mat-tab-group>
-      <!-- Categories Tab (labeled as Activities) -->
-      <mat-tab *ngIf="hasCategories" [label]="'filterDialog.tabs.activities' | translate">
-        <div class="tab-content">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-[var(--primary-color)]">{{ 'filterDialog.tabs.activities' | translate }} ({{ selectedActivities.size }} / {{ categoriesLength }})</h3>
-            <button mat-button (click)="selectAllCategories()" class="text-sm">
-              {{ selectedActivities.size === categoriesLength ? ('filterDialog.deselectAll' | translate) : ('filterDialog.selectAll' | translate) }}
-            </button>
-          </div>
-          <div class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
-            <div *ngFor="let group of groupedCategories()" class="border-b border-gray-200 pb-2 mb-2">
-              <div class="flex items-center">
-                <button 
-                  mat-icon-button 
-                  (click)="toggleCategoryGroupExpanded(group.wegezweck)"
-                  class="mr-2">
-                  <mat-icon>{{ isCategoryGroupExpanded(group.wegezweck) ? 'expand_more' : 'chevron_right' }}</mat-icon>
-                </button>
-                <mat-checkbox
-                  [checked]="getCategoryGroupState(group.wegezweck) === 'all'"
-                  [indeterminate]="getCategoryGroupState(group.wegezweck) === 'some'"
-                  (change)="toggleCategoryGroup(group.wegezweck)"
-                  class="flex-1">
-                  {{ group.wegezweck }}
-                </mat-checkbox>
-              </div>
-              <div *ngIf="isCategoryGroupExpanded(group.wegezweck)" class="ml-10 mt-2 space-y-1">
-                <div *ngFor="let category of group.categories" class="flex items-center">
-                  <mat-checkbox
-                    [checked]="isCategorySelected(category.id)"
-                    (change)="toggleCategory(category.id)"
-                    class="w-full">
-                    {{ category.display_name || category.name }}
-                  </mat-checkbox>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </mat-tab>
-
-      <!-- Personas Tab -->
-      <mat-tab *ngIf="hasCategories" [label]="'filterDialog.tabs.personas' | translate">
-        <div class="tab-content">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-[var(--primary-color)]">{{ 'filterDialog.tabs.personas' | translate }}</h3>
-          </div>
-          <mat-radio-group [value]="selectedPersonas" (change)="selectedPersonas = $event.value" class="grid grid-cols-1 gap-2 max-h-[400px] overflow-y-auto">
-            <div *ngFor="let persona of personas()" class="flex items-center">
-              <mat-radio-button [value]="persona.id" class="w-full">
-                {{ persona.display_name || persona.name }}
-              </mat-radio-button>
-            </div>
-          </mat-radio-group>
-        </div>
-      </mat-tab>
-
       <!-- RegioStars Tab -->
       <mat-tab [label]="'filterDialog.tabs.regioStars' | translate">
         <div class="tab-content">

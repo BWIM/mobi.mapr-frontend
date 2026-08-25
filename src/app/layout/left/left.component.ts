@@ -68,11 +68,8 @@ export class LeftComponent implements OnInit, OnDestroy {
   selectedModes = this.filterConfigService.selectedModes;
   selectedBewertung = this.filterConfigService.selectedBewertung;
   selectedAdminLevel = this.filterConfigService.selectedAdminLevel;
-  selectedActivities = this.filterConfigService.selectedActivities;
-  selectedPersonas = this.filterConfigService.selectedPersonas;
   selectedRegioStars = this.filterConfigService.selectedRegioStars;
   selectedStates = this.filterConfigService.selectedStates;
-  allActivities = this.filterConfigService.allActivities;
   allPersonas = this.filterConfigService.allPersonas;
   allRegioStars = this.filterConfigService.allRegioStars;
   allStates = this.filterConfigService.allStates;
@@ -418,15 +415,6 @@ export class LeftComponent implements OnInit, OnDestroy {
       panelClass: 'info-dialog-panel',
       data: { content: LegendInfoComponent }
     });
-  }
-
-  getSelectedPersonaName(): string {
-    const selectedPersonaId = this.selectedPersonas();
-    if (selectedPersonaId === null) {
-      return '';
-    }
-    const persona = this.allPersonas().find(p => p.id === selectedPersonaId);
-    return persona ? (persona.display_name || persona.name) : '';
   }
 
   getFormattedCreatedDate(): string {

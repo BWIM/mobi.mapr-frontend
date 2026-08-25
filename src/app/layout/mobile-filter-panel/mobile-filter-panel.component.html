@@ -43,20 +43,6 @@
   </div>
   }
 
-  @if (isPreparingProject()) {
-    <div class="mobile-preload-hint mx-4 mb-3">
-      <div class="mobile-preload-hint__header">
-        <mat-spinner diameter="16"></mat-spinner>
-        <span class="mobile-preload-hint__title">
-          {{ 'PREPARING_PROJECT.INFO.PREPARING' | translate }}
-        </span>
-      </div>
-      <p class="mobile-preload-hint__text">
-        {{ 'PREPARING_PROJECT.COFFEE_MESSAGE' | translate }}
-      </p>
-    </div>
-  }
-
   <!-- Filter Content - Only visible when expanded -->
   @if (isExpanded()) {
     <div class="px-6 pb-6 space-y-6 overflow-y-auto max-h-[calc(100dvh-12rem)] relative">
@@ -395,28 +381,6 @@
       </app-info-overlay>
     </div>
 
-    @if (isExpanded() && hasCategories()) {
-      <div class="mobile-selection-overview px-4 pb-3">
-        <div class="mobile-selection-overview__row">
-          <span class="mobile-selection-overview__label">{{ 'left.activeFilters.activities' | translate }}</span>
-          <span class="mobile-selection-overview__count">{{ getActivitiesCountLabel() }}</span>
-        </div>
-        <p class="mobile-selection-overview__names">
-          @if (areAllCategoriesSelected()) {
-            {{ 'mobileFilter.allActivitiesSelected' | translate }}
-          } @else {
-            {{ getSelectedCategoryNames().join(', ') }}
-          }
-        </p>
-        @if (selectedPersonas() !== null) {
-          <div class="mobile-selection-overview__row">
-            <span class="mobile-selection-overview__label">{{ 'left.activeFilters.personas' | translate }}</span>
-            <span class="mobile-selection-overview__value">{{ getSelectedPersonaName() }}</span>
-          </div>
-        }
-        <p class="mobile-selection-overview__hint">{{ 'mobileFilter.readOnlyHint' | translate }}</p>
-      </div>
-    }
   }
 
   <!-- Static Footer Information -->

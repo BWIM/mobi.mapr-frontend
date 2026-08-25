@@ -9,7 +9,7 @@ import { CenterComponent } from '../center/center.component';
 import { DashboardSessionService } from '../../services/dashboard-session.service';
 import { AuthService } from '../../auth/auth.service';
 import { ProjectsService } from '../../services/project.service';
-import { MapService, ContentLayerFilters } from '../../services/map.service';
+import { MapService } from '../../services/map.service';
 import { FilterConfigService } from '../../services/filter-config.service';
 import { Project } from '../../interfaces/project';
 import { firstValueFrom } from 'rxjs';
@@ -282,7 +282,7 @@ export class DashboardComponent {
   }
 
   /**
-   * Validates share key by fetching the project and making a preload call with defaults
+   * Validates share key by fetching the project
    */
   private async validateShareKeyAndPreload(shareKey: string): Promise<void> {
     try {
@@ -305,28 +305,8 @@ export class DashboardComponent {
       }
 
       this.projectService.setProject(project);
-
-      if (!project.base_profiles?.length) {
-        return;
-      }
-
-      const defaultFilters: ContentLayerFilters = {
-        profile_ids: [...project.base_profiles].sort((a, b) => a - b),
-        feature_type: 'index'
-      };
-
-      try {
-        await this.mapService.checkReady(defaultFilters);
-        // Preload call succeeded - share key is valid
-      } catch (error) {
-        console.error('Error making preload call:', error);
-        // Preload call failed - share key might be invalid or there's an issue
-        // Redirect to invalid share key page
-        this.router.navigate(['/invalid-share-key']);
-      }
     } catch (error) {
       console.error('Unexpected error validating share key:', error);
-      // Fallback: redirect to invalid share key page for any unexpected errors
       this.router.navigate(['/invalid-share-key']);
     }
   }

@@ -123,10 +123,12 @@
       "overallLabel": "gesamt",
       "regionalClass": "Platz",
       "regionalClassLabel": "Regioklasse",
-      "total": "Gesamt"
+      "total": "Gesamt",
+      "noRankingForDistricts": "Stadtteile haben keine Ranking-Informationen"
     },
     "population": "Einwohnende",
     "grade": "Note:",
+    "time": "Zeit:",
     "analysis": {
       "title": "Analyse Top 5 Aktivitäten",
       "showAllCategories": "Alle Aktivitäten anzeigen",
@@ -255,6 +257,9 @@
       "placeholder": "z.B. Berlin, München...",
       "loading": "Lade Kartendaten...",
       "clickForInfo": "Klicke für weitere Informationen"
+    },
+    "noTiles": {
+      "hint": "Für dieses Projekt sind keine Kartenkacheln verfügbar. Die Scores wurden möglicherweise noch nicht berechnet."
     },
     "layerSwitcher": {
       "title": "Kartenebene",
@@ -525,6 +530,7 @@
       "activities": "Aktivitäten",
       "activitiesDescription": "Die Aktivitäten basieren auf der Studie 'Mobilität in Deutschland'. Sie gruppieren verschiedene reale Aktivitäten (z.B. Supermarkt) in abstrakte Kategorien des täglichen Bedarfs.",
       "personas": "Personengruppen",
+      "projectMix": "Projekt-Mix",
       "personasDescription": "Eine Personengruppe definiert, wie relevant bestimmte Aktivitäten für verschiedene Nutzergruppen sind. Für ein Kind ist beispielsweise der Besuch eines Spielplatzes normalerweise relevanter als für einen Erwachsenen. Die Personengruppen stammen ebenfalls aus der MID-Studie.",
       "regioStars": "Regionalklassen",
       "regioStarsDescription": "Wenn du nur bestimmte Regionen in Deutschland betrachten möchtest, z.B. ländliche Gebiete, kannst du dies hier filtern. Es ändert die Daten selbst nicht, wie Bundesländer, filtert aber auch die Ergebnisse. Dies spiegelt sich auch in den Top-10-Rankings wider.",
@@ -674,6 +680,7 @@
       "regioStars": "RegioStars",
       "states": "States"
     },
+    "projectMix": "Projekt-Mix (Standard)",
     "selectAll": "Alle auswählen",
     "deselectAll": "Alle abwählen"
   },

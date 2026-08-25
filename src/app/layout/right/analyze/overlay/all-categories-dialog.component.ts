@@ -110,7 +110,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
         if (error.status === 404) {
           this.error = this.languageService.instant('analyze.allCategoriesDialog.categoriesNotFound');
         } else if (error.status === 503) {
-          this.error = this.languageService.instant('analyze.allCategoriesDialog.dataNotLoaded');
+          this.error = this.languageService.instant('analyze.allCategoriesDialog.errorLoadingCategories');
         } else {
           this.error = this.languageService.instant('analyze.allCategoriesDialog.errorLoadingCategories');
         }
@@ -157,7 +157,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
         if (error.status === 404) {
           this.error2 = this.languageService.instant('analyze.allCategoriesDialog.categoriesNotFound');
         } else if (error.status === 503) {
-          this.error2 = this.languageService.instant('analyze.allCategoriesDialog.dataNotLoaded');
+          this.error2 = this.languageService.instant('analyze.allCategoriesDialog.errorLoadingCategories');
         } else {
           this.error2 = this.languageService.instant('analyze.allCategoriesDialog.errorLoadingCategories');
         }

@@ -61,7 +61,7 @@ export class StatsComponent implements OnDestroy {
       this.updateLevelOptions();
     });
     // Track previous filter state to detect actual changes (excluding bewertung)
-    let previousFilters: { profileIdsKey: string | null; stateIds: number[] | undefined; categoryIds: number[] | undefined; personaId: number | null | undefined; regiostarIds: number[] | undefined } | null = null;
+    let previousFilters: { profileIdsKey: string | null; stateIds: number[] | undefined; regiostarIds: number[] | undefined } | null = null;
     let previousBewertung: 'qualitaet' | 'zeit' | null = null;
     let previousMapLoading = true;
     
@@ -75,14 +75,10 @@ export class StatsComponent implements OnDestroy {
         ? JSON.stringify([...profileIds].sort((a, b) => a - b))
         : null;
       const isMapLoading = this.mapService.isMapLoading();
-      const isPreparingProject = this.mapService.isPreparingProject();
-      const isReadyCheckComplete = this.mapService.isReadyCheckComplete();
       const filters = this.filterConfigService.contentLayerFilters();
       const currentBewertung = this.filterConfigService.selectedBewertung();
       // Watch individual filter signals to ensure effect triggers on all filter changes
       const selectedStates = this.filterConfigService.selectedStates();
-      const selectedActivities = this.filterConfigService.selectedActivities();
-      const selectedPersonas = this.filterConfigService.selectedPersonas();
       const selectedRegioStars = this.filterConfigService.selectedRegioStars();
       
       // Detect when map transitions from loading to not loading
@@ -96,16 +92,12 @@ export class StatsComponent implements OnDestroy {
       const currentFilterState = {
         profileIdsKey,
         stateIds: selectedStates.length > 0 ? [...selectedStates].sort() : undefined,
-        categoryIds: selectedActivities.length > 0 ? [...selectedActivities].sort() : undefined,
-        personaId: selectedPersonas,
         regiostarIds: selectedRegioStars.length > 0 ? [...selectedRegioStars].sort() : undefined
       };
 
       const rankingsAffectingFiltersChanged = !previousFilters ||
         previousFilters.profileIdsKey !== currentFilterState.profileIdsKey ||
         JSON.stringify(previousFilters.stateIds) !== JSON.stringify(currentFilterState.stateIds) ||
-        JSON.stringify(previousFilters.categoryIds) !== JSON.stringify(currentFilterState.categoryIds) ||
-        previousFilters.personaId !== currentFilterState.personaId ||
         JSON.stringify(previousFilters.regiostarIds) !== JSON.stringify(currentFilterState.regiostarIds);
       
       // Check if only bewertung changed
@@ -114,8 +106,6 @@ export class StatsComponent implements OnDestroy {
         previousFilters !== null &&
         profileIdsKey === previousFilters.profileIdsKey &&
         JSON.stringify(previousFilters.stateIds) === JSON.stringify(currentFilterState.stateIds) &&
-        JSON.stringify(previousFilters.categoryIds) === JSON.stringify(currentFilterState.categoryIds) &&
-        previousFilters.personaId === currentFilterState.personaId &&
         JSON.stringify(previousFilters.regiostarIds) === JSON.stringify(currentFilterState.regiostarIds);
       
       // If only bewertung changed, check if it's a change from zeit to qualitaet
@@ -123,7 +113,7 @@ export class StatsComponent implements OnDestroy {
         // If changing from zeit to qualitaet, send a request to the backend
         if (previousBewertung === 'zeit' && currentBewertung === 'qualitaet') {
           // Only send request if conditions are met (map ready, project ready, etc.)
-          if (profileIdsKey !== null && !isMapLoading && !isPreparingProject && isReadyCheckComplete && filters) {
+          if (profileIdsKey !== null && !isMapLoading && filters) {
             // Clear any existing timeout
             if (this.loadRankingsTimeout) {
               clearTimeout(this.loadRankingsTimeout);
@@ -140,7 +130,7 @@ export class StatsComponent implements OnDestroy {
         return;
       }
       
-      if (profileIdsKey !== null && !isMapLoading && !isPreparingProject && isReadyCheckComplete && filters) {
+      if (profileIdsKey !== null && !isMapLoading && filters) {
         if (mapJustFinishedLoading && !rankingsAffectingFiltersChanged) {
           this.isLoading.set(false);
         }
@@ -152,8 +142,6 @@ export class StatsComponent implements OnDestroy {
         const filtersChanged = !previousFilters || 
           previousFilters.profileIdsKey !== currentFilterState.profileIdsKey ||
           JSON.stringify(previousFilters.stateIds) !== JSON.stringify(currentFilterState.stateIds) ||
-          JSON.stringify(previousFilters.categoryIds) !== JSON.stringify(currentFilterState.categoryIds) ||
-          previousFilters.personaId !== currentFilterState.personaId ||
           JSON.stringify(previousFilters.regiostarIds) !== JSON.stringify(currentFilterState.regiostarIds);
         
         if (filtersChanged) {
@@ -191,10 +179,9 @@ export class StatsComponent implements OnDestroy {
           previousBewertung = null;
           // No data to load, so set loading to false
           this.isLoading.set(false);
-        } else if (isMapLoading || isPreparingProject) {
-          // Set loading state when map starts reloading or project is being prepared
-          // Always show loading when map starts reloading to provide user feedback
-          if (mapJustStartedLoading || isPreparingProject) {
+        } else if (isMapLoading) {
+          // Set loading state when map starts reloading
+          if (mapJustStartedLoading) {
             // Only toggle loading if we actually need to refresh the rankings.
             if (rankingsAffectingFiltersChanged) {
               this.isLoading.set(true);
@@ -218,11 +205,8 @@ export class StatsComponent implements OnDestroy {
     // Trigger new API call when level changes (level is a parameter, not a filter)
     const profileIds = this.filterConfigService.currentProfileIds();
     const isMapLoading = this.mapService.isMapLoading();
-    const isPreparingProject = this.mapService.isPreparingProject();
     const filters = this.filterConfigService.contentLayerFilters();
-    
-    const isReadyCheckComplete = this.mapService.isReadyCheckComplete();
-    if (profileIds?.length && !isMapLoading && !isPreparingProject && isReadyCheckComplete && filters) {
+    if (profileIds?.length && !isMapLoading && filters) {
       this.loadTopRankings();
     }
   }
@@ -271,35 +255,22 @@ export class StatsComponent implements OnDestroy {
       return;
     }
 
-    // Don't load if map is loading, project is being prepared, or ready check hasn't completed
+    // Don't load while map tiles are still loading for a filter change
     const isMapLoading = this.mapService.isMapLoading();
-    const isPreparingProject = this.mapService.isPreparingProject();
-    const isReadyCheckComplete = this.mapService.isReadyCheckComplete();
-    if (isMapLoading || isPreparingProject || !isReadyCheckComplete) {
+    if (isMapLoading) {
       return;
     }
 
     this.isLoading.set(true);
     this.error = null;
 
-    const hasCategories = this.filterConfigService.hasCategories();
-    
-    // Apply the same filtering logic as contentLayerFilters
     const selectedStates = this.filterConfigService.selectedStates();
-    const selectedActivities = this.filterConfigService.selectedActivities();
-    const selectedPersonas = this.filterConfigService.selectedPersonas();
     const selectedRegioStars = this.filterConfigService.selectedRegioStars();
 
     const params = {
       type: this.selectedLevel,
       profile_ids: profileIds,
-      // Only include state_ids if there are selected states (same logic as contentLayerFilters)
       state_ids: selectedStates.length > 0 ? selectedStates : undefined,
-      // Only include category_ids if project has categories and there are selected activities (same logic as contentLayerFilters)
-      category_ids: (hasCategories && selectedActivities.length > 0) ? selectedActivities : undefined,
-      // Only include persona_id if project has categories and there is a selected persona (same logic as contentLayerFilters)
-      persona_id: (hasCategories && selectedPersonas !== null) ? selectedPersonas : undefined,
-      // Only include regiostar_ids if there are selected regiostars (same logic as contentLayerFilters)
       regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined,
       bewertung: this.filterConfigService.selectedBewertung()
     };

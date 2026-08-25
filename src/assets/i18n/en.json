@@ -123,10 +123,12 @@
       "overallLabel": "overall",
       "regionalClass": "Rank",
       "regionalClassLabel": "Regional class",
-      "total": "Total"
+      "total": "Total",
+      "noRankingForDistricts": "City districts do not have ranking information"
     },
     "population": "Population:",
     "grade": "Grade:",
+    "time": "Time:",
     "analysis": {
       "title": "Analysis Top 5 Activities",
       "showAllCategories": "Show all activities",
@@ -255,6 +257,9 @@
       "placeholder": "e.g. Berlin, Munich...",
       "loading": "Loading map data...",
       "clickForInfo": "Click for more information"
+    },
+    "noTiles": {
+      "hint": "No map tiles available for this project. Scores may not have been populated yet."
     },
     "layerSwitcher": {
       "title": "Map layer",
@@ -525,6 +530,7 @@
       "activities": "Activities",
       "activitiesDescription": "Activities are based on the study 'Mobilität in Deutschland' (Mobility in Germany). They group different real-life activities (e.g., supermarket) into abstract daily needs categories, such as 'daily needs'.",
       "personas": "Personas",
+      "projectMix": "Project mix",
       "personasDescription": "A persona defines how relevant certain activities are for different user groups. For example, going to a playground is normally more relevant for a child than for an adult without children. Personas also come from the MID study.",
       "regioStars": "RegioStars",
       "regioStarsDescription": "If you only want to view certain regions in Germany, for example rural areas, you can filter this here. It does not change the data itself, such as states, but it does filter the results. This is then also reflected in the Top rankings.",
@@ -674,6 +680,7 @@
       "regioStars": "RegioStars",
       "states": "States"
     },
+    "projectMix": "Project mix (default)",
     "selectAll": "Select All",
     "deselectAll": "Deselect All"
   },
