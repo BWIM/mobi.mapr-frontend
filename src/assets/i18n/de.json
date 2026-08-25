@@ -922,39 +922,6 @@
       "qualityViewHint": "In der Qualitäts-Ansicht werden die Gebietseinheiten nach ihrem Index gruppiert und bewertet (sh. Info zur Mobilitätsbewertung). So können Gebietseinheiten mit der selben Note (z.B. C+) auf einem unterschiedlichen Platz auf dem Treppchen sein."
     }
   },
-  "PREPARING_PROJECT": {
-    "TITLE": "Projekt wird vorbereitet",
-    "MESSAGE": "Bitte warte, während das Projekt geladen wird...",
-    "COFFEE_MESSAGE": "Gönn dir einen Kaffee! Je nach Komplexität der Filter kann dies mehrere Minuten dauern.",
-    "INFO": {
-      "PREPARING": "Das Projekt wird vorbereitet..."
-    },
-    "FUN_FACTS": {
-      "TITLE": "Wusstest du schon?",
-      "FACT_1": "In Deutschland gibt es über 9.000 Bahnhöfe, die täglich von Millionen von Menschen genutzt werden.",
-      "FACT_2": "Das deutsche Schienennetz erstreckt sich über mehr als 38.000 Kilometer.",
-      "FACT_3": "Öffentliche Verkehrsmittel tragen erheblich zur Reduzierung des CO2-Ausstoßes bei.",
-      "FACT_4": "Die Mobilitätsanalyse hilft dabei, die beste Verkehrsinfrastruktur zu planen.",
-      "FACT_5": "Zu Fuß gehen ist die umweltfreundlichste Art der Fortbewegung."
-    },
-    "STATUS": {
-      "STARTING": "Projekt wird gestartet...",
-      "CALCULATING": "Berechnung läuft...",
-      "PROCESSING": "Daten werden verarbeitet...",
-      "COMPLETED": "Projekt erfolgreich geladen",
-      "ERROR": "Fehler beim Laden des Projekts"
-    },
-    "ACHIEVEMENTS": {
-      "ONE_TIME_TITLE": "Einmalige Vorbereitung",
-      "ONE_TIME_TEXT": "Die Projektvorbereitung muss nur einmal durchgeführt werden.",
-      "FILTER_TITLE": "Filter geändert",
-      "FILTER_TEXT": "Dieser Dialog öffnet sich nur, nachdem du einige Filterparameter geändert hast.",
-      "UNIQUE_TITLE": "Einzigartige Karte",
-      "UNIQUE_TEXT": "Wenn du diesen Bildschirm siehst, hat noch niemand eine solche Karte erstellt (zumindest in den letzten 30 Tagen).",
-      "STATS_TITLE": "Über 15 Milliarden Möglichkeiten",
-      "STATS_TEXT": "Du kannst die 28 Aktivitäten frei kombinieren, für 8 verschiedene Modus-Kombinationen und 7 Personengruppen bedeutet dies mehr als 15 Milliarden verschiedene Karten."
-    }
-  },
   "usersArea": {
     "title": "Meine Projekte",
     "empty": "Keine Projekte gefunden.",

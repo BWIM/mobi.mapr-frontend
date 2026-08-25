@@ -56,8 +56,6 @@ const ADMIN_LEVEL_RANK: Record<AdminLevel, number> = {
   municipality: 2,
   hexagon: 3,
 };
-const MAP_LOAD_GRACE_MS = 1000;
-
 @Injectable({
   providedIn: 'root'
 })
@@ -299,19 +297,43 @@ export class FilterConfigService {
     }
 
     const featureType: 'index' | 'score' = this._selectedBewertung() === 'zeit' ? 'score' : 'index';
-    const selectedStates = this._selectedStates();
-    const selectedRegioStars = this._selectedRegioStars();
     const selectedAdminLevel = this.effectiveAdminLevel();
 
     return {
       profile_ids: profileIds,
       feature_type: featureType,
-      state_ids: selectedStates.length > 0 ? selectedStates : undefined,
-      regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined,
+      state_ids: this.resolveIdsForTileFilter(this._selectedStates(), () =>
+        this._allStates().map(s => s.id)
+      ),
+      regiostar_ids: this.resolveIdsForTileFilter(this._selectedRegioStars(), () =>
+        this._allRegioStars().map(r => r.id)
+      ),
       admin_level: selectedAdminLevel,
       selected_quality_brackets: [...this._selectedQualityBrackets()],
       selected_time_brackets: [...this._selectedTimeBrackets()]
     };
+  }
+
+  /**
+   * Empty or "all selected" both mean unfiltered tiles — omit the param so
+   * preselect-all after catalog load does not force a second tile fetch.
+   * allIds are read lazily so an empty selection does not depend on catalog load.
+   */
+  private resolveIdsForTileFilter(
+    selected: number[],
+    getAllIds: () => number[]
+  ): number[] | undefined {
+    if (selected.length === 0) {
+      return undefined;
+    }
+    const allIds = getAllIds();
+    if (allIds.length > 0 && selected.length === allIds.length) {
+      const allSet = new Set(allIds);
+      if (selected.every(id => allSet.has(id))) {
+        return undefined;
+      }
+    }
+    return selected;
   }
 
   private getProfileIdsForModes(selectedModes: number[]): number[] | null {
@@ -354,7 +376,6 @@ export class FilterConfigService {
   private compareLayerSyncRetries = 0;
   private compareLayerSyncScheduled = false;
   private readonly maxCompareLayerSyncRetries = 5;
-  private initialLoadTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     // Initialize data loading
@@ -396,7 +417,6 @@ export class FilterConfigService {
           this.updateMapLayerInProgress = false;
           this.compareUpdateRetryNeeded = false;
           this.mapUpdateRetryNeeded = false;
-          this.clearInitialLoadTimer();
 
           // Allow URL params to be re-applied when switching projects.
           this._urlParamsApplied.set(false);
@@ -428,7 +448,6 @@ export class FilterConfigService {
       } else {
         // Reset when project is cleared
         previousProjectId = null;
-        this.clearInitialLoadTimer();
         this._isFilterDataLoaded.set(false);
         this._filterDataProjectId.set(null);
         this.projectLoadGeneration++;
@@ -464,18 +483,12 @@ export class FilterConfigService {
     let isInitialLoad = true;
     let compareInitialLoad = true;
     let differenceInitialLoad = true;
+    let wasCompareOrDifference = false;
     effect(() => {
       const compareMode = this._isMapCompareMode();
       const differenceView = this._isDifferenceView();
       const filters = this.contentLayerFilters();
       const rightFilters = this.rightContentLayerFilters();
-      const isFilterDataLoaded = this._isFilterDataLoaded();
-      const filterDataProjectId = this._filterDataProjectId();
-      const currentProjectId = this.projectService.project()?.id ?? null;
-      const filterDataReadyForProject =
-        isFilterDataLoaded &&
-        filterDataProjectId !== null &&
-        filterDataProjectId === currentProjectId;
       const compareMapsReady = this._compareMapsReady();
       this._mapLayerRefreshNonce();
       this.effectiveAdminLevel();
@@ -484,6 +497,7 @@ export class FilterConfigService {
       this._selectedAdminLevel();
 
       if (compareMode && differenceView) {
+        wasCompareOrDifference = true;
         this._selectedModes();
         this._rightSelectedModes();
         this._selectedQualityBrackets();
@@ -506,10 +520,6 @@ export class FilterConfigService {
           return;
         }
         if (!filters || !rightFilters) {
-          scheduleRetryIfNeeded();
-          return;
-        }
-        if (!filterDataReadyForProject && differenceInitialLoad) {
           scheduleRetryIfNeeded();
           return;
         }
@@ -547,37 +557,30 @@ export class FilterConfigService {
             this.needsContentLayerFullReload(previousRightFilters, rightFilters));
         const fullReload = differenceInitialLoad || leftFullReload || rightFullReload;
 
-        const runDifferenceUpdate = () => {
-          void this.updateDifferenceMapLayers(filters, rightFilters, fullReload).then((applied) => {
-            if (applied && this.mapService.hasDifferenceLayers(diffMap)) {
-              previousLeftFilters = this.cloneContentLayerFilters(filters);
-              previousRightFilters = this.cloneContentLayerFilters(rightFilters);
-              differenceInitialLoad = false;
-              this.compareLayerSyncRetries = 0;
-            } else if (differenceInitialLoad) {
-              this.scheduleCompareLayerSync();
-            }
-            if (this.compareUpdateRetryNeeded) {
-              this.compareUpdateRetryNeeded = false;
-              this.scheduleCompareLayerSync();
-            }
-          }).catch((error) => {
-            console.error('Error in updateDifferenceMapLayers:', error);
-            if (differenceInitialLoad) {
-              this.scheduleCompareLayerSync();
-            }
-          });
-        };
-
-        if (differenceInitialLoad) {
-          this.scheduleInitialLoad(runDifferenceUpdate);
-        } else {
-          runDifferenceUpdate();
-        }
+        void this.updateDifferenceMapLayers(filters, rightFilters, fullReload).then((applied) => {
+          if (applied && this.mapService.hasDifferenceLayers(diffMap)) {
+            previousLeftFilters = this.cloneContentLayerFilters(filters);
+            previousRightFilters = this.cloneContentLayerFilters(rightFilters);
+            differenceInitialLoad = false;
+            this.compareLayerSyncRetries = 0;
+          } else if (differenceInitialLoad) {
+            this.scheduleCompareLayerSync();
+          }
+          if (this.compareUpdateRetryNeeded) {
+            this.compareUpdateRetryNeeded = false;
+            this.scheduleCompareLayerSync();
+          }
+        }).catch((error) => {
+          console.error('Error in updateDifferenceMapLayers:', error);
+          if (differenceInitialLoad) {
+            this.scheduleCompareLayerSync();
+          }
+        });
         return;
       }
 
       if (compareMode) {
+        wasCompareOrDifference = true;
         differenceInitialLoad = true;
         if (!this.mapService.hasCompareMaps()) {
           compareInitialLoad = true;
@@ -599,10 +602,6 @@ export class FilterConfigService {
           return;
         }
         if (!filters || !rightFilters) {
-          scheduleRetryIfNeeded();
-          return;
-        }
-        if (!filterDataReadyForProject && compareInitialLoad) {
           scheduleRetryIfNeeded();
           return;
         }
@@ -642,46 +641,37 @@ export class FilterConfigService {
           return;
         }
 
-        const runCompareUpdate = () => {
-          void this.updateCompareMapLayers(
-            filters,
-            rightFilters,
-            leftFullReload,
-            rightFullReload,
-            onlyLeftChanged,
-            onlyRightChanged,
-            leftChanged,
-            rightChanged,
-            compareInitialLoad
-          ).then(applied => {
-            const leftOk = this.mapHasContentLayer(leftMap);
-            const rightOk = this.mapHasContentLayer(rightMap);
+        void this.updateCompareMapLayers(
+          filters,
+          rightFilters,
+          leftFullReload,
+          rightFullReload,
+          onlyLeftChanged,
+          onlyRightChanged,
+          leftChanged,
+          rightChanged
+        ).then(applied => {
+          const leftOk = this.mapHasContentLayer(leftMap);
+          const rightOk = this.mapHasContentLayer(rightMap);
 
-            if (applied && leftOk && rightOk) {
-              previousLeftFilters = this.cloneContentLayerFilters(filters);
-              previousRightFilters = this.cloneContentLayerFilters(rightFilters);
-              compareInitialLoad = false;
-              this.compareLayerSyncRetries = 0;
-            } else if (compareInitialLoad) {
-              this.scheduleCompareLayerSync();
-            }
-            if (this.compareUpdateRetryNeeded) {
-              this.compareUpdateRetryNeeded = false;
-              this.scheduleCompareLayerSync();
-            }
-          }).catch(error => {
-            console.error('Error in updateCompareMapLayers:', error);
-            if (compareInitialLoad) {
-              this.scheduleCompareLayerSync();
-            }
-          });
-        };
-
-        if (compareInitialLoad) {
-          this.scheduleInitialLoad(runCompareUpdate);
-        } else {
-          runCompareUpdate();
-        }
+          if (applied && leftOk && rightOk) {
+            previousLeftFilters = this.cloneContentLayerFilters(filters);
+            previousRightFilters = this.cloneContentLayerFilters(rightFilters);
+            compareInitialLoad = false;
+            this.compareLayerSyncRetries = 0;
+          } else if (compareInitialLoad) {
+            this.scheduleCompareLayerSync();
+          }
+          if (this.compareUpdateRetryNeeded) {
+            this.compareUpdateRetryNeeded = false;
+            this.scheduleCompareLayerSync();
+          }
+        }).catch(error => {
+          console.error('Error in updateCompareMapLayers:', error);
+          if (compareInitialLoad) {
+            this.scheduleCompareLayerSync();
+          }
+        });
         return;
       }
 
@@ -690,22 +680,24 @@ export class FilterConfigService {
       compareInitialLoad = true;
       differenceInitialLoad = true;
       this.compareLayerSyncRetries = 0;
-      isInitialLoad = true;
+      if (wasCompareOrDifference) {
+        isInitialLoad = true;
+        wasCompareOrDifference = false;
+      }
 
       if (filters) {
         if (this._mapModeTransitionInProgress()) {
           return;
         }
-        if (!filterDataReadyForProject && isInitialLoad) {
-          return;
-        }
         if (this.updateMapLayerInProgress) {
-          this.mapUpdateRetryNeeded = true;
+          if (!previousFilters || this.filtersDiffer(previousFilters, filters)) {
+            this.mapUpdateRetryNeeded = true;
+          }
           return;
         }
 
         // Persona is an analytics overlay only — do not reload baked map tiles.
-        if (!isInitialLoad && previousFilters && !this.filtersDiffer(previousFilters, filters)) {
+        if (previousFilters && !this.filtersDiffer(previousFilters, filters)) {
           previousFilters = this.cloneContentLayerFilters(filters);
           return;
         }
@@ -714,33 +706,35 @@ export class FilterConfigService {
           previousFilters !== null && previousFilters.admin_level !== filters.admin_level;
         const isFullReload = isInitialLoad || adminLevelChanged;
         const wasInitialLoad = isInitialLoad;
+        // Snapshot before await so catalog preselect-all (same tile URL) does not queue a retry.
+        previousFilters = this.cloneContentLayerFilters(filters);
 
-        const runSingleUpdate = () => {
-          void this.updateMapLayer(filters, isFullReload, false).then(applied => {
-            if (!applied) {
-              return;
-            }
-            const latestFilters = this.contentLayerFilters();
-            if (latestFilters) {
-              previousFilters = this.cloneContentLayerFilters(latestFilters);
-            }
+        void this.updateMapLayer(filters, isFullReload, false).then(applied => {
+          if (!applied) {
             if (wasInitialLoad) {
-              isInitialLoad = false;
+              previousFilters = null;
+              isInitialLoad = true;
             }
-          }).catch(error => {
-            if (isFullReload) {
-              console.error('Error in updateMapLayer (full reload):', error);
-            } else {
-              console.error('Error in updateMapLayer (tile update):', error);
-            }
-          });
-        };
-
-        if (wasInitialLoad) {
-          this.scheduleInitialLoad(runSingleUpdate);
-        } else {
-          runSingleUpdate();
-        }
+            return;
+          }
+          const latestFilters = this.contentLayerFilters();
+          if (latestFilters) {
+            previousFilters = this.cloneContentLayerFilters(latestFilters);
+          }
+          if (wasInitialLoad) {
+            isInitialLoad = false;
+          }
+        }).catch(error => {
+          if (wasInitialLoad) {
+            previousFilters = null;
+            isInitialLoad = true;
+          }
+          if (isFullReload) {
+            console.error('Error in updateMapLayer (full reload):', error);
+          } else {
+            console.error('Error in updateMapLayer (tile update):', error);
+          }
+        });
       } else {
         this.mapService.removeContentLayer();
         previousFilters = null;
@@ -1445,21 +1439,6 @@ export class FilterConfigService {
     this.mapUpdateRetryNeeded = false;
   }
 
-  private clearInitialLoadTimer(): void {
-    if (this.initialLoadTimer !== null) {
-      clearTimeout(this.initialLoadTimer);
-      this.initialLoadTimer = null;
-    }
-  }
-
-  private scheduleInitialLoad(callback: () => void): void {
-    this.clearInitialLoadTimer();
-    this.initialLoadTimer = setTimeout(() => {
-      this.initialLoadTimer = null;
-      callback();
-    }, MAP_LOAD_GRACE_MS);
-  }
-
   refreshMapLayers(): void {
     this._mapLayerRefreshNonce.update(value => value + 1);
   }
@@ -1913,8 +1892,7 @@ export class FilterConfigService {
     onlyLeftChanged: boolean = false,
     onlyRightChanged: boolean = false,
     leftChanged: boolean = true,
-    rightChanged: boolean = true,
-    sequentialInitialLoad: boolean = false
+    rightChanged: boolean = true
   ): Promise<boolean> {
     const leftMap = this.mapService.getMap();
     const rightMap = this.mapService.getCompareRightMap();
@@ -1941,28 +1919,20 @@ export class FilterConfigService {
 
       let success = false;
 
-      if (sequentialInitialLoad && shouldUpdateLeft && shouldUpdateRight) {
-        const leftOk = await this.updateMapLayer(leftFilters, leftFullReload, false, leftMap);
-        const rightOk = leftOk
-          ? await this.updateMapLayer(rightFilters, rightFullReload, false, rightMap)
-          : false;
-        success = leftOk && rightOk;
-      } else {
-        const loadTasks: Promise<boolean>[] = [];
-        if (shouldUpdateLeft) {
-          loadTasks.push(
-            this.updateMapLayer(leftFilters, leftFullReload, false, leftMap)
-          );
-        }
-        if (shouldUpdateRight) {
-          loadTasks.push(
-            this.updateMapLayer(rightFilters, rightFullReload, false, rightMap)
-          );
-        }
-
-        const results = await Promise.all(loadTasks);
-        success = loadTasks.length > 0 && results.every(Boolean);
+      const loadTasks: Promise<boolean>[] = [];
+      if (shouldUpdateLeft) {
+        loadTasks.push(
+          this.updateMapLayer(leftFilters, leftFullReload, false, leftMap)
+        );
       }
+      if (shouldUpdateRight) {
+        loadTasks.push(
+          this.updateMapLayer(rightFilters, rightFullReload, false, rightMap)
+        );
+      }
+
+      const results = await Promise.all(loadTasks);
+      success = loadTasks.length > 0 && results.every(Boolean);
 
       if (shouldUpdateRight && !this.mapHasContentLayer(rightMap)) {
         const rightRetryOk = await this.updateMapLayer(

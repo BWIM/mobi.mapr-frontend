@@ -922,39 +922,6 @@
       "qualityViewHint": "In the quality view, area units are grouped and evaluated by their index (see info on mobility evaluation). This means area units with the same grade (e.g., C+) can be on different positions in the ranking."
     }
   },
-  "PREPARING_PROJECT": {
-    "TITLE": "Preparing Project",
-    "MESSAGE": "Please wait while the project is being loaded...",
-    "COFFEE_MESSAGE": "Grab a coffee! Depending on the complexity of the filters, this can take a couple of minutes.",
-    "INFO": {
-      "PREPARING": "The project is being prepared..."
-    },
-    "FUN_FACTS": {
-      "TITLE": "Did You Know?",
-      "FACT_1": "Germany has over 9,000 train stations that are used daily by millions of people.",
-      "FACT_2": "The German rail network extends over more than 38,000 kilometers.",
-      "FACT_3": "Public transportation significantly contributes to reducing CO2 emissions.",
-      "FACT_4": "Mobility analysis helps plan the best transportation infrastructure.",
-      "FACT_5": "Walking is the most environmentally friendly way to get around."
-    },
-    "STATUS": {
-      "STARTING": "Starting project...",
-      "CALCULATING": "Calculating...",
-      "PROCESSING": "Processing data...",
-      "COMPLETED": "Project loaded successfully",
-      "ERROR": "Error loading project"
-    },
-    "ACHIEVEMENTS": {
-      "ONE_TIME_TITLE": "One-Time Setup",
-      "ONE_TIME_TEXT": "Preparing a project only needs to be done once.",
-      "FILTER_TITLE": "Filter Changed",
-      "FILTER_TEXT": "This dialogue only opens after changing some filter parameters.",
-      "UNIQUE_TITLE": "Unique Map",
-      "UNIQUE_TEXT": "If you see this screen, nobody has ever produced a map like this (at least in the last 30 days).",
-      "STATS_TITLE": "More than 15 billion possibilities",
-      "STATS_TEXT": "You can combine the 28 activities freely, for 8 different mode combinations and 7 personas, this means more than 15 billion different maps to produce."
-    }
-  },
   "usersArea": {
     "title": "My Projects",
     "empty": "No projects found.",
