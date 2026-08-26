@@ -12,6 +12,7 @@ import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import { ProjectSwitcherComponent } from '../../shared/project-switcher/project-switcher.component';
+import { ProfileOption } from '../../interfaces/profile';
 
 interface NominatimResult {
   display_name: string;
@@ -96,13 +97,10 @@ export class MobileFilterPanelComponent implements OnDestroy {
 
   // Expose filter config service signals for template
   modeOptions = this.filterConfigService.modeOptions;
-  selectedModes = this.filterConfigService.selectedModes;
-  selectedBewertung = this.filterConfigService.selectedBewertung;
   isMapCompareMode = this.filterConfigService.isMapCompareMode;
   isDifferenceView = this.filterConfigService.isDifferenceView;
   isModeSelectionLocked = this.filterConfigService.isModeSelectionLocked;
   canUseMapCompare = this.filterConfigService.canUseMapCompare;
-  rightSelectedModes = this.filterConfigService.rightSelectedModes;
 
   toggleMapCompare(): void {
     this.filterConfigService.toggleMapCompare();
@@ -154,16 +152,16 @@ export class MobileFilterPanelComponent implements OnDestroy {
     return this.filterConfigService.isRightOnlySelectedMode(modeId);
   }
 
-  isCarMode(modeId: number): boolean {
-    const modeOption = this.modeOptions().find(option => option.id === modeId);
-    return modeOption?.name.toLowerCase() === 'car';
+  isCarMode(profileId: number): boolean {
+    const modeOption = this.modeOptions().find(option => option.id === profileId);
+    return modeOption?.modeName.toLowerCase() === 'car';
   }
 
   isModeDisabled(modeId: number): boolean {
     return this.filterConfigService.isModeDisabled(modeId);
   }
 
-  getModeTooltip(option: { id: number; display_name: string }, isRight = false): string {
+  getModeTooltip(option: ProfileOption, isRight = false): string {
     const onlySelected = isRight ? this.isRightOnlySelectedMode(option.id) : this.isOnlySelectedMode(option.id);
     if (onlySelected) {
       const cannotDeselectLast = this.translate.instant('left.transportModes.cannotDeselectLast');

@@ -12,6 +12,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ChartModule } from 'primeng/chart';
 import { Subscription } from 'rxjs';
+import { ProfileOption } from '../../interfaces/profile';
 import { ProjectSwitcherComponent } from '../../shared/project-switcher/project-switcher.component';
 
 @Component({
@@ -30,7 +31,6 @@ export class LeftComponent implements OnInit, OnDestroy {
   private dialog = inject(MatDialog);
   private translate = inject(TranslateService);
   private languageSubscription?: Subscription;
-  private currentLang = signal<string>(this.translate.currentLang || 'de');
 
   // Use the project signal directly - it will reactively update when the project loads
   project = this.projectService.project;
@@ -49,28 +49,11 @@ export class LeftComponent implements OnInit, OnDestroy {
   personasChartData: any;
   personasChartOptions: any;
   
-  // Admin level options - reactive to language changes
-  adminLevelOptions = computed(() => {
-    const lang = this.currentLang(); // Track language changes
-    return [
-      { value: null as 'state' | 'county' | 'municipality' | 'hexagon' | null, label: this.translate.instant('left.adminLevel.automatic') },
-      { value: 'hexagon' as const, label: this.translate.instant('left.adminLevel.hexagon') },
-      { value: 'municipality' as const, label: this.translate.instant('left.adminLevel.municipality') },
-      { value: 'county' as const, label: this.translate.instant('left.adminLevel.county') },
-      { value: 'state' as const, label: this.translate.instant('left.adminLevel.state') }
-    ];
-  });
-  
   // Expose filter config service signals for template
-  // isExpanded = this.filterConfigService.isExpanded;
-  isExpanded = signal<boolean>(true); // Default to true for now
+  isExpanded = signal<boolean>(true);
   modeOptions = this.filterConfigService.modeOptions;
-  selectedModes = this.filterConfigService.selectedModes;
-  selectedBewertung = this.filterConfigService.selectedBewertung;
-  selectedAdminLevel = this.filterConfigService.selectedAdminLevel;
   selectedRegioStars = this.filterConfigService.selectedRegioStars;
   selectedStates = this.filterConfigService.selectedStates;
-  allPersonas = this.filterConfigService.allPersonas;
   allRegioStars = this.filterConfigService.allRegioStars;
   allStates = this.filterConfigService.allStates;
   hasCategories = this.filterConfigService.hasCategories;
@@ -78,7 +61,6 @@ export class LeftComponent implements OnInit, OnDestroy {
   isDifferenceView = this.filterConfigService.isDifferenceView;
   isModeSelectionLocked = this.filterConfigService.isModeSelectionLocked;
   canUseMapCompare = this.filterConfigService.canUseMapCompare;
-  rightSelectedModes = this.filterConfigService.rightSelectedModes;
 
   ngOnInit() {
     this.isLoggedIn.set(this.authService.isLoggedIn());
@@ -91,9 +73,8 @@ export class LeftComponent implements OnInit, OnDestroy {
     this.initializeQualityChart();
     this.initializePersonasChart();
 
-    // Subscribe to language changes to update chart labels and admin level options
-    this.languageSubscription = this.translate.onLangChange.subscribe((event) => {
-      this.currentLang.set(event.lang);
+    // Subscribe to language changes to update chart labels
+    this.languageSubscription = this.translate.onLangChange.subscribe(() => {
       this.initializePersonasChart();
     });
   }
@@ -285,14 +266,6 @@ export class LeftComponent implements OnInit, OnDestroy {
     };
   }
 
-  toggleSidebar() {
-    this.filterConfigService.toggleSidebar();
-  }
-
-  setSidebarExpanded(expanded: boolean) {
-    this.filterConfigService.setSidebarExpanded(expanded);
-  }
-
   toggleMapCompare(): void {
     this.filterConfigService.toggleMapCompare();
   }
@@ -343,16 +316,16 @@ export class LeftComponent implements OnInit, OnDestroy {
     return this.filterConfigService.isRightOnlySelectedMode(modeId);
   }
 
-  isCarMode(modeId: number): boolean {
-    const modeOption = this.modeOptions().find(option => option.id === modeId);
-    return modeOption?.name.toLowerCase() === 'car';
+  isCarMode(profileId: number): boolean {
+    const modeOption = this.modeOptions().find(option => option.id === profileId);
+    return modeOption?.modeName.toLowerCase() === 'car';
   }
 
   isModeDisabled(modeId: number): boolean {
     return this.filterConfigService.isModeDisabled(modeId);
   }
 
-  getModeTooltip(option: { id: number; display_name: string }, isRight = false): string {
+  getModeTooltip(option: ProfileOption, isRight = false): string {
     const onlySelected = isRight ? this.isRightOnlySelectedMode(option.id) : this.isOnlySelectedMode(option.id);
     if (onlySelected) {
       const cannotDeselectLast = this.translate.instant('left.transportModes.cannotDeselectLast');
@@ -371,14 +344,6 @@ export class LeftComponent implements OnInit, OnDestroy {
 
   isMobilitatsbewertungSelected(bewertung: 'qualitaet' | 'zeit'): boolean {
     return this.filterConfigService.isBewertungSelected(bewertung);
-  }
-
-  selectAdminLevel(adminLevel: 'state' | 'county' | 'municipality' | 'hexagon' | null): void {
-    this.filterConfigService.setAdminLevel(adminLevel);
-  }
-
-  isAdminLevelSelected(adminLevel: 'state' | 'county' | 'municipality' | 'hexagon' | null): boolean {
-    return this.selectedAdminLevel() === adminLevel;
   }
 
   openFilterDialog() {

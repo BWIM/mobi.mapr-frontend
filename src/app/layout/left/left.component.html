@@ -31,7 +31,7 @@
       <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-3 xl:p-4 mt-4 mr-2 lg:mr-3 xl:mr-4 relative">
         <h2 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.transportModes.title' | translate }}</h2>
         <div class="flex flex-col gap-2">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             @for (option of modeOptions(); track option.id) {
               <button 
                 class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200"
@@ -145,7 +145,7 @@
     } @else {
       <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-3 xl:p-4 mt-4 mr-2 lg:mr-3 xl:mr-4 relative">
         <h3 class="text-sm font-semibold text-[var(--primary-color)] mb-2">{{ 'left.mapCompare.leftMap' | translate }}</h3>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
           @for (option of modeOptions(); track option.id) {
             <button
               class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200"
@@ -169,7 +169,7 @@
       </div>
       <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-3 xl:p-4 mt-4 mr-2 lg:mr-3 xl:mr-4 relative">
         <h3 class="text-sm font-semibold text-[var(--primary-color)] mb-2">{{ 'left.mapCompare.rightMap' | translate }}</h3>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
           @for (option of modeOptions(); track option.id) {
             <button
               class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200"

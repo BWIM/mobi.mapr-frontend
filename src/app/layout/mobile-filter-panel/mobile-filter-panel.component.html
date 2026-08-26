@@ -50,7 +50,7 @@
       @if (!isMapCompareMode()) {
         <div class="space-y-2">
           <h3 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.transportModes.title' | translate }}</h3>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             @for (option of modeOptions(); track option.id) {
               <button 
                 class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
@@ -76,7 +76,7 @@
       } @else {
         <div class="space-y-2">
           <h3 class="text-sm font-semibold text-[var(--primary-color)] mb-2">{{ 'left.mapCompare.leftMap' | translate }}</h3>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             @for (option of modeOptions(); track option.id) {
               <button
                 class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
@@ -100,7 +100,7 @@
         </div>
         <div class="space-y-2">
           <h3 class="text-sm font-semibold text-[var(--primary-color)] mb-2">{{ 'left.mapCompare.rightMap' | translate }}</h3>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             @for (option of modeOptions(); track option.id) {
               <button
                 class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
