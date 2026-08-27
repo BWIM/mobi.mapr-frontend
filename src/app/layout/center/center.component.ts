@@ -33,6 +33,7 @@ interface NominatimResult {
 interface LayerButtonOption {
   value: AdminLevel;
   labelKey: string;
+  shortLabelKey: string;
 }
 
 @Component({
@@ -105,10 +106,10 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   showLegendClickHint: boolean = true;
   private lastLayerFallbackToastAt = 0;
   readonly layerButtonOptions: LayerButtonOption[] = [
-    { value: 'state', labelKey: 'map.layerSwitcher.state' },
-    { value: 'county', labelKey: 'map.layerSwitcher.county' },
-    { value: 'municipality', labelKey: 'map.layerSwitcher.municipality' },
-    { value: 'hexagon', labelKey: 'map.layerSwitcher.hexagon' }
+    { value: 'state', labelKey: 'map.layerSwitcher.state', shortLabelKey: 'map.layerSwitcher.stateShort' },
+    { value: 'county', labelKey: 'map.layerSwitcher.county', shortLabelKey: 'map.layerSwitcher.countyShort' },
+    { value: 'municipality', labelKey: 'map.layerSwitcher.municipality', shortLabelKey: 'map.layerSwitcher.municipalityShort' },
+    { value: 'hexagon', labelKey: 'map.layerSwitcher.hexagon', shortLabelKey: 'map.layerSwitcher.hexagonShort' }
   ];
 
   constructor(private mapService: MapService) {

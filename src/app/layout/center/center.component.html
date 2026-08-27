@@ -49,7 +49,8 @@
               [disabled]="!isLayerAvailable(option.value)"
               [attr.aria-pressed]="isLayerActive(option.value)"
               (click)="onLayerButtonClick(option.value)">
-              <span>{{ option.labelKey | translate }}</span>
+              <span class="lg:hidden">{{ option.shortLabelKey | translate }}</span>
+              <span class="hidden lg:inline">{{ option.labelKey | translate }}</span>
               @if (isLayerActive(option.value) && layerMode() === 'manual') {
                 <span aria-hidden="true">🔒</span>
               } @else if (isLayerActive(option.value) && layerMode() === 'auto') {
