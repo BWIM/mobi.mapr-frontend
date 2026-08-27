@@ -25,6 +25,7 @@ import { MobileMapControlsComponent } from '../mobile/mobile-map-controls/mobile
 import { MobileSheetsComponent } from '../mobile/mobile-sheets/mobile-sheets.component';
 import { GroupOverviewComponent } from '../../group-overview/group-overview.component';
 import { ProjectNavigationService } from '../../services/project-navigation.service';
+import { LanguageService } from '../../services/language.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -56,6 +57,7 @@ export class DashboardComponent {
   readonly mobileUi = inject(MobileUiService);
   private featureSelectionService = inject(FeatureSelectionService);
   private projectNavigation = inject(ProjectNavigationService);
+  private languageService = inject(LanguageService);
 
   /** Matches right panel `duration-300` transition in dashboard template. */
   private static readonly RIGHT_PANEL_TRANSITION_MS = 300;
@@ -69,7 +71,14 @@ export class DashboardComponent {
 
   readonly isMobile = this.mobileUi.isMobile;
 
+  currentLang = signal<string>(this.languageService.getCurrentLanguage());
+  readonly availableLangs = this.languageService.availableLanguages;
+
   constructor() {
+    this.languageService.onLanguageChange()
+      .pipe(takeUntilDestroyed())
+      .subscribe(event => this.currentLang.set(event.lang));
+
     this.featureSelectionService.selectedMapLibreFeature$
       .pipe(
         takeUntilDestroyed(),
@@ -254,6 +263,11 @@ export class DashboardComponent {
 
   closeGroupOverview(): void {
     this.projectNavigation.closeGroupOverview();
+  }
+
+  switchLanguage(lang: string): void {
+    this.languageService.setLanguage(lang);
+    this.currentLang.set(lang);
   }
 
   /**
