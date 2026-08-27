@@ -943,5 +943,15 @@
     "menuTitle": "Projektgruppe",
     "switchProject": "Projekt wechseln",
     "fieldLabel": "Projekt"
+  },
+  "projectInfo": {
+    "blogLink": "Analyse im Blog lesen",
+    "blogLinkHint": "Öffnet den Blogbeitrag zu diesem Projekt in einem neuen Tab",
+    "dataInfo": {
+      "button": "Informationen über die Daten",
+      "title": "Informationen über die Daten",
+      "openStreetMapFallback": "Die Daten für dieses Projekt stammen aus OpenStreetMap. Sie werden von den OpenStreetMap-Mitwirkenden bereitgestellt und stehen unter der Open Database License (ODbL).",
+      "close": "Schließen"
+    }
   }
 }

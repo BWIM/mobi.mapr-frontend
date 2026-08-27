@@ -943,5 +943,15 @@
     "menuTitle": "Project group",
     "switchProject": "Switch project",
     "fieldLabel": "Project"
+  },
+  "projectInfo": {
+    "blogLink": "Read the analysis on the blog",
+    "blogLinkHint": "Opens the blog article about this project in a new tab",
+    "dataInfo": {
+      "button": "Information about the data",
+      "title": "Information about the data",
+      "openStreetMapFallback": "The data for this project comes from OpenStreetMap. It is provided by the OpenStreetMap contributors under the Open Database License (ODbL).",
+      "close": "Close"
+    }
   }
 }

@@ -1,0 +1,22 @@
+<div class="space-y-2 bg-[var(--background-color)] rounded-lg p-3 xl:p-4">
+  @if (blogUrl(); as url) {
+    <a
+      [href]="url"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--primary-color)] px-4 py-3 text-sm font-bold text-[var(--background-color)] no-underline shadow-sm transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5 active:translate-y-0"
+      [title]="'projectInfo.blogLinkHint' | translate">
+      <mat-icon class="text-xl leading-none shrink-0" aria-hidden="true">auto_stories</mat-icon>
+      <span class="break-words [overflow-wrap:anywhere]">{{ 'projectInfo.blogLink' | translate }}</span>
+      <mat-icon class="text-lg leading-none shrink-0" aria-hidden="true">arrow_forward</mat-icon>
+    </a>
+  }
+
+  <button
+    type="button"
+    class="flex w-full items-center justify-center gap-2 rounded-full border border-[var(--light-primary-color)] bg-[var(--background-color)] px-4 py-3 text-sm font-medium text-[var(--primary-color)] transition-all duration-200 hover:bg-[var(--secondary-color)]"
+    (click)="openDataInfo()">
+    <mat-icon class="text-xl leading-none shrink-0" aria-hidden="true">storage</mat-icon>
+    <span>{{ 'projectInfo.dataInfo.button' | translate }}</span>
+  </button>
+</div>

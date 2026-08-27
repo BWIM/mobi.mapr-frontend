@@ -14,10 +14,11 @@ import { ChartModule } from 'primeng/chart';
 import { Subscription } from 'rxjs';
 import { ProfileOption } from '../../interfaces/profile';
 import { ProjectSwitcherComponent } from '../../shared/project-switcher/project-switcher.component';
+import { ProjectInfoComponent } from '../../shared/project-info/project-info.component';
 
 @Component({
   selector: 'app-left',
-  imports: [SharedModule, InfoOverlayComponent, TranslateModule, ChartModule, ProjectSwitcherComponent],
+  imports: [SharedModule, InfoOverlayComponent, TranslateModule, ChartModule, ProjectSwitcherComponent, ProjectInfoComponent],
   templateUrl: './left.component.html',
   styleUrl: './left.component.css',
 })

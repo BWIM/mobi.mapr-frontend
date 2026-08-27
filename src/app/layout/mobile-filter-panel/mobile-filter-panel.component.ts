@@ -12,6 +12,7 @@ import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import { ProjectSwitcherComponent } from '../../shared/project-switcher/project-switcher.component';
+import { ProjectInfoComponent } from '../../shared/project-info/project-info.component';
 import { ProfileOption } from '../../interfaces/profile';
 
 interface NominatimResult {
@@ -22,7 +23,7 @@ interface NominatimResult {
 
 @Component({
   selector: 'app-mobile-filter-panel',
-  imports: [SharedModule, TranslateModule, InfoOverlayComponent, ProjectSwitcherComponent],
+  imports: [SharedModule, TranslateModule, InfoOverlayComponent, ProjectSwitcherComponent, ProjectInfoComponent],
   templateUrl: './mobile-filter-panel.component.html',
   styleUrl: './mobile-filter-panel.component.css',
 })
