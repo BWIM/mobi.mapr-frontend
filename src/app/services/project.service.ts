@@ -1,10 +1,11 @@
-import { inject, Injectable, signal, computed } from '@angular/core';
+import { inject, Injectable, signal, computed, effect } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of, switchMap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   Project
 } from '../interfaces/project';
+import { ProjectGroup } from '../interfaces/project-group';
 import { PaginatedResponse } from '../interfaces/http';
 import { DashboardSessionService } from './dashboard-session.service';
 
@@ -20,6 +21,8 @@ export class ProjectsService {
   private _project = signal<Project | null>(null);
   private _isLoading = signal<boolean>(false);
   private _isInitialized = signal<boolean>(false);
+  private _listedProjects = signal<Project[]>([]);
+  private _listedProjectsComplete = signal(false);
   /** Bumps on each initialize/set/clear so stale HTTP callbacks cannot overwrite newer state. */
   private projectLoadGeneration = 0;
 
@@ -27,9 +30,20 @@ export class ProjectsService {
   readonly project = this._project.asReadonly();
   readonly isLoading = this._isLoading.asReadonly();
   readonly isInitialized = this._isInitialized.asReadonly();
+  readonly listedProjects = this._listedProjects.asReadonly();
+  readonly listedProjectsComplete = this._listedProjectsComplete.asReadonly();
 
   // Computed signal to check if project is available
   readonly hasProject = computed(() => this._project() !== null);
+
+  constructor() {
+    effect(() => {
+      if (!this.dashboardSessionService.isAuthenticated()) {
+        this._listedProjects.set([]);
+        this._listedProjectsComplete.set(false);
+      }
+    });
+  }
 
   // Project CRUD Operations
   getProjects(page: number = 1, pageSize: number = 10, groupId?: number): Observable<PaginatedResponse<Project>> {
@@ -42,6 +56,30 @@ export class ProjectsService {
     }
 
     return this.http.get<PaginatedResponse<Project>>(`${this.apiUrl}/projects/`, { params });
+  }
+
+  getAllProjects(groupId?: number, pageSize: number = 200): Observable<Project[]> {
+    const loadPage = (page: number, accumulated: Project[]): Observable<Project[]> =>
+      this.getProjects(page, pageSize, groupId).pipe(
+        switchMap(response => {
+          const combined = [...accumulated, ...response.results];
+          if (response.next) {
+            return loadPage(page + 1, combined);
+          }
+          return of(combined);
+        })
+      );
+
+    return loadPage(1, []);
+  }
+
+  getProjectGroup(id: number): Observable<ProjectGroup> {
+    return this.http.get<ProjectGroup>(`${this.apiUrl}/project-groups/${id}/`);
+  }
+
+  setListedProjects(projects: Project[], complete = true): void {
+    this._listedProjects.set(projects);
+    this._listedProjectsComplete.set(complete);
   }
 
   getProjectById(id: number): Observable<Project> {

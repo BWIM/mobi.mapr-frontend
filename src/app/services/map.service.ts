@@ -6,7 +6,6 @@ import { AuthService } from '../auth/auth.service';
 import { DashboardSessionService } from './dashboard-session.service';
 import { appendProjectAccessParams, hasProjectAccess } from './project-access-params';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
-import { WebsocketService } from './websocket.service';
 import { ProjectsService } from './project.service';
 import { ScoreColorsService } from './score-colors.service';
 import {
@@ -43,8 +42,9 @@ export interface FeatureInfoResponse {
   name: string;
   regiostar_name?: string | null;
   population: number;
-  rank: number;
-  total_ranks: number;
+  /** Absent for city districts (Stadtteile) treated as municipalities. */
+  rank?: number | null;
+  total_ranks?: number | null;
   regiostar_rank: number | null;
   regiostar_total_ranks: number | null;
   index: number;
@@ -108,7 +108,6 @@ export class MapService {
   private authService = inject(AuthService);
   private dashboardSessionService = inject(DashboardSessionService);
   private http = inject(HttpClient);
-  private websocketService = inject(WebsocketService);
   private projectService = inject(ProjectsService);
   private scoreColorsService = inject(ScoreColorsService);
   private currentFilters: ContentLayerFilters | null = null;
@@ -139,13 +138,9 @@ export class MapService {
   private _isMapLoading = signal<boolean>(false);
   readonly isMapLoading = this._isMapLoading.asReadonly();
 
-  // Signal to track project preparation state (when preparing dialog is shown)
-  private _isPreparingProject = signal<boolean>(false);
-  readonly isPreparingProject = this._isPreparingProject.asReadonly();
-  
-  // Signal to track if ready check has completed (prevents rankings from loading too early)
-  private _isReadyCheckComplete = signal<boolean>(false);
-  readonly isReadyCheckComplete = this._isReadyCheckComplete.asReadonly();
+  /** True when the project content layer has no tile features (e.g. scores not populated). */
+  private _noProjectTiles = signal<boolean>(false);
+  readonly noProjectTiles = this._noProjectTiles.asReadonly();
 
   constructor() {}
 
@@ -681,131 +676,8 @@ export class MapService {
   }
 
   /**
-   * Calls the ready endpoint to check and ensure preloaded data
-   */
-  async checkReady(filters: ContentLayerFilters): Promise<{ cache_flag: boolean; was_preloaded: boolean; session_id?: string }> {
-    if (!hasProjectAccess(this.dashboardSessionService)) {
-      throw new Error('Project ID or share key is required');
-    }
-
-    if (!filters.profile_ids?.length) {
-      throw new Error('profile_ids is required');
-    }
-
-    let params = new HttpParams()
-      .set('profile_ids', filters.profile_ids.join(','));
-
-    params = appendProjectAccessParams(params, this.dashboardSessionService);
-
-    // Add optional parameters
-    if (filters.category_ids && filters.category_ids.length > 0) {
-      params = params.set('category_ids', filters.category_ids.join(','));
-    }
-
-    if (filters.persona_id !== undefined && filters.persona_id !== null) {
-      params = params.set('persona_id', filters.persona_id.toString());
-    }
-
-    if (filters.state_ids && filters.state_ids.length > 0) {
-      params = params.set('state_ids', filters.state_ids.join(','));
-    }
-
-    if (filters.regiostar_ids && filters.regiostar_ids.length > 0) {
-      params = params.set('regiostar_ids', filters.regiostar_ids.join(','));
-    }
-
-    const url = `${environment.apiUrl}/ready/`;
-    const response = await firstValueFrom(
-      this.http.get<{ cache_flag: boolean; was_preloaded: boolean; session_id?: string }>(url, { params })
-    );
-
-    return response;
-  }
-
-  /**
-   * Waits for preload to complete via websocket
-   */
-  waitForPreload(sessionId: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      let isResolved = false;
-      
-      // Construct the websocket URL with the session_id from the API response
-      // The websocket service will add its own session parameter, but the API expects session=<session_id>
-      const wsUrl = `${environment.wsURL}/preload/?session=${sessionId}`;
-
-      const wsSubject = this.websocketService.connect<any>(wsUrl);
-
-      const subscription = wsSubject.subscribe({
-        next: (message: any) => {
-          
-          // Handle different message formats
-          const status = message.status || message.type || message.message;
-          const messageStr = typeof message === 'string' ? message : JSON.stringify(message);
-          
-          // Check for completion in various formats
-          const isCompleted = 
-            status === 'completed' || 
-            status === 'complete' || 
-            message.completed === true ||
-            messageStr?.toLowerCase().includes('completed') ||
-            messageStr?.toLowerCase().includes('complete') ||
-            message.finished === true ||
-            message.done === true;
-          
-          if (isCompleted) {
-            if (!isResolved) {
-              isResolved = true;
-              subscription.unsubscribe();
-              this.websocketService.closeConnection(wsUrl);
-              resolve();
-            }
-          } else if (status === 'error' || message.error) {
-            console.error('Preload error:', message.error || message);
-            if (!isResolved) {
-              isResolved = true;
-              subscription.unsubscribe();
-              this.websocketService.closeConnection(wsUrl);
-              reject(new Error(message.error || 'Preload failed'));
-            }
-          }
-        },
-        error: (error) => {
-          console.error('Preload websocket error:', error);
-          if (!isResolved) {
-            isResolved = true;
-            subscription.unsubscribe();
-            this.websocketService.closeConnection(wsUrl);
-            reject(error);
-          }
-        },
-        complete: () => {
-          // Don't resolve here - only resolve when we get explicit completion message
-          // Connection might close for other reasons before preload is actually complete
-          subscription.unsubscribe();
-          this.websocketService.closeConnection(wsUrl);
-          // Only reject if we haven't resolved yet and connection closed unexpectedly
-          if (!isResolved) {
-            console.warn('Websocket closed before receiving completion message');
-            // Don't reject here - let timeout handle it, or wait for explicit message
-          }
-        }
-      });
-
-      // Set a timeout to avoid waiting indefinitely (5 minutes)
-      setTimeout(() => {
-        if (!isResolved && subscription && !subscription.closed) {
-          console.warn('Preload websocket timeout, assuming complete');
-          isResolved = true;
-          subscription.unsubscribe();
-          this.websocketService.closeConnection(wsUrl);
-          resolve();
-        }
-      }, 1000000);
-    });
-  }
-
-  /**
-   * Builds the tile URL with query parameters for the content layer
+   * Builds the tile URL with query parameters for the content layer.
+   * Tiles always use the stored project mix — do not send persona_id.
    */
   private buildTileUrl(projectId: string, filters: ContentLayerFilters): string {
     if (!projectId || !filters.profile_ids?.length) {
@@ -824,10 +696,6 @@ export class MapService {
 
     if (filters.category_ids && filters.category_ids.length > 0) {
       params.push(`category_ids=${filters.category_ids.join(',')}`);
-    }
-
-    if (filters.persona_id !== undefined && filters.persona_id !== null) {
-      params.push(`persona_id=${filters.persona_id}`);
     }
 
     if (filters.regiostar_ids && filters.regiostar_ids.length > 0) {
@@ -861,20 +729,13 @@ export class MapService {
    */
   setMapLoading(loading: boolean): void {
     this._isMapLoading.set(loading);
+    if (loading) {
+      this._noProjectTiles.set(false);
+    }
   }
 
-  /**
-   * Sets the project preparation state
-   */
-  setPreparingProject(preparing: boolean): void {
-    this._isPreparingProject.set(preparing);
-  }
-  
-  /**
-   * Sets the ready check completion state
-   */
-  setReadyCheckComplete(complete: boolean): void {
-    this._isReadyCheckComplete.set(complete);
+  setNoProjectTiles(empty: boolean): void {
+    this._noProjectTiles.set(empty);
   }
 
   /**
@@ -1329,8 +1190,7 @@ export class MapService {
     this.currentFilters = null;
     this.currentRightFilters = null;
     this.differenceColorConfig = null;
-    // Reset ready check state when content layer is removed
-    this._isReadyCheckComplete.set(false);
+    this._noProjectTiles.set(false);
     // Reset initial zoom flag so geolocation is attempted again on next load
     this.hasInitialZoom = false;
     this.updateStyle(updatedStyle);

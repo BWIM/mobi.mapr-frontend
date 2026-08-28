@@ -13,4 +13,10 @@ export interface Project {
     group?: ProjectGroup | null;
     pin?: boolean;
     score_colors?: Record<string, string> | null;
+    blog_url?: string | null;
+    license_info?: string | null;
+}
+
+export function projectGroupId(project: Pick<Project, 'group_id' | 'group'>): number | null {
+    return project.group_id ?? project.group?.id ?? null;
 }

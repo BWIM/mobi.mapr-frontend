@@ -40,6 +40,9 @@ function buildSegmentLabel(lowerBound: number, upperBound: number | null): strin
   if (upperBound === null) {
     return `> ${lowerMinutes}`;
   }
+  if (lowerBound === 0) {
+    return `0 - ${upperMinutes}`;
+  }
   return `<= ${upperMinutes}`;
 }
 

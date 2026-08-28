@@ -1,10 +1,32 @@
 <div class="flex flex-col h-dvh w-dvw overflow-hidden bg-[var(--background-color)]">
   <!-- MOBILE HEADER - Only visible on mobile -->
-  <div class="lg:hidden h-16 bg-[var(--secondary-color)] flex items-center justify-center px-4 border-b border-[var(--background-color)]">
+  <div class="lg:hidden h-16 bg-[var(--secondary-color)] flex items-center justify-center px-4 border-b border-[var(--background-color)] relative">
     <a href="https://bw-im.de/mobimapr" target="_blank" [attr.title]="'rail.logoHint' | translate" class="flex items-center gap-2">
       <img src="assets/images/logo.png" alt="Logo" class="h-10 w-auto">
       <img src="assets/images/logo_name.png" alt="Logo Text" class="h-8 w-auto">
     </a>
+
+    <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center text-xs text-[var(--primary-color)]"
+         role="group"
+         [attr.aria-label]="'language.select' | translate">
+      @for (lang of availableLangs; track lang.code) {
+        @if (!$first) {
+          <span class="opacity-25 select-none" aria-hidden="true">/</span>
+        }
+        <button
+          type="button"
+          class="px-1 py-1 transition-opacity duration-200 uppercase tracking-wide"
+          [class.opacity-100]="currentLang() === lang.code"
+          [class.font-semibold]="currentLang() === lang.code"
+          [class.opacity-40]="currentLang() !== lang.code"
+          [attr.aria-pressed]="currentLang() === lang.code"
+          [attr.aria-label]="lang.name"
+          [title]="lang.name"
+          (click)="switchLanguage(lang.code)">
+          {{ lang.code }}
+        </button>
+      }
+    </div>
   </div>
 
   <!-- DESKTOP LAYOUT -->

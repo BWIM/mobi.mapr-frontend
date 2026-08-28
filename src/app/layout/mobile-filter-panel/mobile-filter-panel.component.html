@@ -43,20 +43,6 @@
   </div>
   }
 
-  @if (isPreparingProject()) {
-    <div class="mobile-preload-hint mx-4 mb-3">
-      <div class="mobile-preload-hint__header">
-        <mat-spinner diameter="16"></mat-spinner>
-        <span class="mobile-preload-hint__title">
-          {{ 'PREPARING_PROJECT.INFO.PREPARING' | translate }}
-        </span>
-      </div>
-      <p class="mobile-preload-hint__text">
-        {{ 'PREPARING_PROJECT.COFFEE_MESSAGE' | translate }}
-      </p>
-    </div>
-  }
-
   <!-- Filter Content - Only visible when expanded -->
   @if (isExpanded()) {
     <div class="px-6 pb-6 space-y-6 overflow-y-auto max-h-[calc(100dvh-12rem)] relative">
@@ -64,7 +50,7 @@
       @if (!isMapCompareMode()) {
         <div class="space-y-2">
           <h3 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.transportModes.title' | translate }}</h3>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             @for (option of modeOptions(); track option.id) {
               <button 
                 class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
@@ -90,7 +76,7 @@
       } @else {
         <div class="space-y-2">
           <h3 class="text-sm font-semibold text-[var(--primary-color)] mb-2">{{ 'left.mapCompare.leftMap' | translate }}</h3>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             @for (option of modeOptions(); track option.id) {
               <button
                 class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
@@ -114,7 +100,7 @@
         </div>
         <div class="space-y-2">
           <h3 class="text-sm font-semibold text-[var(--primary-color)] mb-2">{{ 'left.mapCompare.rightMap' | translate }}</h3>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             @for (option of modeOptions(); track option.id) {
               <button
                 class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
@@ -393,30 +379,10 @@
           </div>
         </div>
       </app-info-overlay>
+
+      <app-project-info class="block pt-6" />
     </div>
 
-    @if (isExpanded() && hasCategories()) {
-      <div class="mobile-selection-overview px-4 pb-3">
-        <div class="mobile-selection-overview__row">
-          <span class="mobile-selection-overview__label">{{ 'left.activeFilters.activities' | translate }}</span>
-          <span class="mobile-selection-overview__count">{{ getActivitiesCountLabel() }}</span>
-        </div>
-        <p class="mobile-selection-overview__names">
-          @if (areAllCategoriesSelected()) {
-            {{ 'mobileFilter.allActivitiesSelected' | translate }}
-          } @else {
-            {{ getSelectedCategoryNames().join(', ') }}
-          }
-        </p>
-        @if (selectedPersonas() !== null) {
-          <div class="mobile-selection-overview__row">
-            <span class="mobile-selection-overview__label">{{ 'left.activeFilters.personas' | translate }}</span>
-            <span class="mobile-selection-overview__value">{{ getSelectedPersonaName() }}</span>
-          </div>
-        }
-        <p class="mobile-selection-overview__hint">{{ 'mobileFilter.readOnlyHint' | translate }}</p>
-      </div>
-    }
   }
 
   <!-- Static Footer Information -->

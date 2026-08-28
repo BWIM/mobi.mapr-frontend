@@ -1,49 +1,24 @@
 import { Injectable, inject, signal, computed, effect } from '@angular/core';
 import { Router } from '@angular/router';
-import { BreakpointObserver } from '@angular/cdk/layout';
-import { MOBILE_MEDIA_QUERY } from './mobile-ui.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { ProfileService } from './profile.service';
 import { ProjectsService } from './project.service';
 import { SettingsService } from './settings.service';
 import { Map as MapLibreMap } from 'maplibre-gl';
 import { MapService, ContentLayerFilters } from './map.service';
 import { DashboardSessionService } from './dashboard-session.service';
-import { AuthService } from '../auth/auth.service';
-import { Profile, Mode } from '../interfaces/profile';
+import { Profile, ProfileOption } from '../interfaces/profile';
 import { MatDialog } from '@angular/material/dialog';
 import { FilterDialogComponent, FilterDialogData } from '../layout/left/filter-dialog/filter-dialog.component';
-import { PreparingProjectDialogComponent } from '../layout/left/preparing-project-dialog/preparing-project-dialog.component';
-import { ActivityService } from './activity.service';
 import { PersonaService } from './persona.service';
 import { RegioStarService } from './regiostar.service';
 import { StateService } from './state.service';
 import { CategoryService } from './category.service';
-import { Activity } from '../interfaces/activity';
 import { Persona } from '../interfaces/persona';
 import { RegioStar } from '../interfaces/regiostar';
 import { Category } from '../interfaces/category';
 import { State } from '../interfaces/features';
 import { forkJoin } from 'rxjs';
 import { ScoreColorsService } from './score-colors.service';
-import { map } from 'rxjs/operators';
-
-export interface FilterState {
-  // UI state
-  isExpanded: boolean;
-  
-  // Mode selection (verkehrsmittel)
-  selectedModes: number[];
-  
-  // Mobility evaluation (bewertung)
-  selectedBewertung: 'qualitaet' | 'zeit';
-  
-  // Advanced filters
-  selectedActivities: number[];
-  selectedPersonas: number | null;
-  selectedRegioStars: number[];
-  selectedStates: number[];
-}
 
 export type QualityBracket = 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
 export type TimeBracket = string;
@@ -51,13 +26,15 @@ export type AdminLevel = 'state' | 'county' | 'municipality' | 'hexagon';
 export type LayerMode = 'auto' | 'manual';
 
 const ALL_QUALITY_BRACKETS: QualityBracket[] = ['A', 'B', 'C', 'D', 'E', 'F'];
+const ADMIN_LEVELS: AdminLevel[] = ['state', 'county', 'municipality', 'hexagon'];
 const ADMIN_LEVEL_RANK: Record<AdminLevel, number> = {
   state: 0,
   county: 1,
   municipality: 2,
   hexagon: 3,
 };
-const MAP_LOAD_GRACE_MS = 1000;
+// Give the freshly created map a moment to actually render before adding content layers.
+const MAP_LOAD_GRACE_MS = 500;
 
 @Injectable({
   providedIn: 'root'
@@ -68,29 +45,17 @@ export class FilterConfigService {
   private settingsService = inject(SettingsService);
   private mapService = inject(MapService);
   private dashboardSessionService = inject(DashboardSessionService);
-  private authService = inject(AuthService);
   private dialog = inject(MatDialog);
-  private activityService = inject(ActivityService);
   private personaService = inject(PersonaService);
   private regiostarService = inject(RegioStarService);
   private stateService = inject(StateService);
   private categoryService = inject(CategoryService);
   private scoreColorsService = inject(ScoreColorsService);
   private router = inject(Router);
-  private breakpointObserver = inject(BreakpointObserver);
-
-  private isMobile = toSignal(
-    this.breakpointObserver
-      .observe(MOBILE_MEDIA_QUERY)
-      .pipe(map((result) => result.matches)),
-    { initialValue: false },
-  );
 
   // Internal state signals
-  private _isExpanded = signal<boolean>(true);
   private _selectedModes = signal<number[]>([]);
   private _selectedBewertung = signal<'qualitaet' | 'zeit'>('qualitaet');
-  private _selectedActivities = signal<number[]>([]);
   private _selectedPersonas = signal<number | null>(null);
   private _selectedRegioStars = signal<number[]>([]);
   private _selectedStates = signal<number[]>([]);
@@ -107,19 +72,16 @@ export class FilterConfigService {
   private _mapLayerRefreshNonce = signal<number>(0);
   private _mapModeTransitionInProgress = signal<boolean>(false);
   private _urlCompareIntent = signal<boolean>(false);
-  private _urlCompareModeIds = signal<number[]>([]);
+  private _urlCompareProfileIds = signal<number[]>([]);
   private _compareMapsReady = signal<boolean>(false);
 
-  // Metadata for mode selection
-  private _allModes = signal<Mode[]>([]);
   private _allProfiles = signal<Profile[]>([]);
-  private _modeOptions = signal<Array<{ id: number; name: string; display_name: string; icon: string }>>([]);
+  private _modeOptions = signal<ProfileOption[]>([]);
   private profilesLoading = false;
   private profilesLoadAttempts = 0;
   private readonly maxProfilesLoadAttempts = 3;
 
   // Filter data
-  private _allActivities = signal<Activity[]>([]);
   private _allCategories = signal<Category[]>([]);
   private _allPersonas = signal<Persona[]>([]);
   private _allRegioStars = signal<RegioStar[]>([]);
@@ -129,7 +91,7 @@ export class FilterConfigService {
   private _isFilterDataLoaded = signal<boolean>(false);
   /** Project id that the loaded filter data belongs to (guards stale async completions). */
   private _filterDataProjectId = signal<number | null>(null);
-  /** Bumped on every project switch to invalidate in-flight map/ready work. */
+  /** Bumped on every project switch to invalidate in-flight map work. */
   private projectLoadGeneration = 0;
   
   // Track if URL params have been applied (to prevent re-applying on every effect run)
@@ -142,10 +104,8 @@ export class FilterConfigService {
   private _settingsLoaded = false;
 
   // Public readonly signals
-  readonly isExpanded = this._isExpanded.asReadonly();
   readonly selectedModes = this._selectedModes.asReadonly();
   readonly selectedBewertung = this._selectedBewertung.asReadonly();
-  readonly selectedActivities = this._selectedActivities.asReadonly();
   readonly selectedPersonas = this._selectedPersonas.asReadonly();
   readonly selectedRegioStars = this._selectedRegioStars.asReadonly();
   readonly selectedStates = this._selectedStates.asReadonly();
@@ -156,10 +116,18 @@ export class FilterConfigService {
   readonly selectedQualityBrackets = this._selectedQualityBrackets.asReadonly();
   readonly selectedTimeBrackets = this._selectedTimeBrackets.asReadonly();
   readonly modeOptions = this._modeOptions.asReadonly();
-  readonly allModes = this._allModes.asReadonly();
   readonly allProfiles = this._allProfiles.asReadonly();
-  readonly allActivities = this._allActivities.asReadonly();
   readonly allCategories = this._allCategories.asReadonly();
+  /** Categories are used as activities; selection is always "all". */
+  readonly allActivities = computed(() =>
+    this._allCategories().map(category => ({
+      id: category.id,
+      name: category.name,
+      display_name: category.display_name,
+      description: category.description
+    }))
+  );
+  readonly selectedActivities = computed(() => this._allCategories().map(category => category.id));
   readonly allPersonas = this._allPersonas.asReadonly();
   readonly allRegioStars = this._allRegioStars.asReadonly();
   readonly allStates = this._allStates.asReadonly();
@@ -214,7 +182,7 @@ export class FilterConfigService {
   });
   readonly availableAdminLevels = computed<AdminLevel[]>(() => {
     if (!this.isShareKeyOnly()) {
-      return ['state', 'county', 'municipality', 'hexagon'];
+      return [...ADMIN_LEVELS];
     }
 
     return this.getShareKeySelectableAdminLevels(this.getZoomForAdminLevel());
@@ -224,33 +192,6 @@ export class FilterConfigService {
       return this._selectedAdminLevel()!;
     }
     return this.determineDefaultAdminLevel(this.getZoomForAdminLevel(), this.isRegiostarFilterMode());
-  });
-
-  // Grouped data for nested selects
-  readonly groupedCategories = computed(() => {
-    const categories = this._allCategories();
-    const grouped = new Map<string, Category[]>();
-    
-    categories.forEach(category => {
-      const key = (category.wegezweck && String(category.wegezweck)) || 'Other';
-      if (!grouped.has(key)) {
-        grouped.set(key, []);
-      }
-      grouped.get(key)!.push(category);
-    });
-    
-    return Array.from(grouped.entries()).map(([wegezweck, items]) => ({
-      wegezweck,
-      categories: items.sort((a, b) => {
-        const aName = (a.display_name || a.name || '');
-        const bName = (b.display_name || b.name || '');
-        return aName.localeCompare(bName);
-      })
-    })).sort((a, b) => {
-      const aName = a.wegezweck || '';
-      const bName = b.wegezweck || '';
-      return aName.localeCompare(bName);
-    });
   });
 
   readonly groupedRegioStars = computed(() => {
@@ -275,13 +216,13 @@ export class FilterConfigService {
     });
   });
 
-  /** Sorted profile IDs for selected modes within project base_profiles (API profile_ids). */
+  /** Sorted selected profile IDs within project base_profiles (API profile_ids). */
   readonly currentProfileIds = computed((): number[] | null => {
-    return this.getProfileIdsForModes(this._selectedModes());
+    return this.getSelectedBaseProfileIds(this._selectedModes());
   });
 
   readonly rightCurrentProfileIds = computed((): number[] | null => {
-    return this.getProfileIdsForModes(this._rightSelectedModes());
+    return this.getSelectedBaseProfileIds(this._rightSelectedModes());
   });
 
   readonly contentLayerFilters = computed<ContentLayerFilters | null>(() => {
@@ -299,48 +240,61 @@ export class FilterConfigService {
       return null;
     }
 
-    const hasCategories = this.hasCategories();
     const featureType: 'index' | 'score' = this._selectedBewertung() === 'zeit' ? 'score' : 'index';
-    const selectedStates = this._selectedStates();
-    const selectedActivities = this._selectedActivities();
-    const selectedPersonas = this._selectedPersonas();
-    const selectedRegioStars = this._selectedRegioStars();
     const selectedAdminLevel = this.effectiveAdminLevel();
 
     return {
       profile_ids: profileIds,
       feature_type: featureType,
-      state_ids: selectedStates.length > 0 ? selectedStates : undefined,
-      category_ids: (hasCategories && selectedActivities.length > 0) ? selectedActivities : undefined,
-      persona_id: (hasCategories && selectedPersonas !== null) ? selectedPersonas : undefined,
-      regiostar_ids: selectedRegioStars.length > 0 ? selectedRegioStars : undefined,
+      state_ids: this.resolveIdsForTileFilter(this._selectedStates(), () =>
+        this._allStates().map(s => s.id)
+      ),
+      regiostar_ids: this.resolveIdsForTileFilter(this._selectedRegioStars(), () =>
+        this._allRegioStars().map(r => r.id)
+      ),
       admin_level: selectedAdminLevel,
       selected_quality_brackets: [...this._selectedQualityBrackets()],
       selected_time_brackets: [...this._selectedTimeBrackets()]
     };
   }
 
-  private getProfileIdsForModes(selectedModes: number[]): number[] | null {
-    const project = this.projectService.project();
-    const allProfiles = this._allProfiles();
+  /**
+   * Empty or "all selected" both mean unfiltered tiles — omit the param so
+   * preselect-all after catalog load does not force a second tile fetch.
+   * allIds are read lazily so an empty selection does not depend on catalog load.
+   */
+  private resolveIdsForTileFilter(
+    selected: number[],
+    getAllIds: () => number[]
+  ): number[] | undefined {
+    if (selected.length === 0) {
+      return undefined;
+    }
+    const allIds = getAllIds();
+    if (allIds.length > 0 && selected.length === allIds.length) {
+      const allSet = new Set(allIds);
+      if (selected.every(id => allSet.has(id))) {
+        return undefined;
+      }
+    }
+    return selected;
+  }
 
-    if (!project || !project.base_profiles || selectedModes.length === 0) {
+  private getSelectedBaseProfileIds(selectedIds: number[]): number[] | null {
+    const project = this.projectService.project();
+
+    if (!project || !project.base_profiles || selectedIds.length === 0) {
       return null;
     }
 
-    const selectedProfileIds = allProfiles
-      .filter(profile =>
-        profile.mode &&
-        selectedModes.includes(profile.mode.id) &&
-        project.base_profiles.includes(profile.id)
-      )
-      .map(profile => profile.id)
+    const allowed = new Set(project.base_profiles);
+    const selectedProfileIds = [...new Set(selectedIds.filter(id => allowed.has(id)))]
       .sort((a, b) => a - b);
 
     return selectedProfileIds.length > 0 ? selectedProfileIds : null;
   }
 
-  // Map mode IDs to icon names
+  // Fallback Material icon names when a profile has no icon_name
   private readonly modeIcons: { [key: string]: string } = {
     'pedestrian': 'directions_walk',
     'bicycle': 'directions_bike',
@@ -384,7 +338,6 @@ export class FilterConfigService {
           this._isDifferenceView.set(false);
           this._pendingMapCompareEnable.set(false);
           this._compareMapsReady.set(false);
-          this._selectedActivities.set([]);
           this._selectedPersonas.set(null);
           this._selectedRegioStars.set([]);
           this._selectedStates.set([]);
@@ -444,8 +397,6 @@ export class FilterConfigService {
         this._compareMapsReady.set(false);
         // Reset URL params applied flag when project is cleared
         this._urlParamsApplied.set(false);
-        // Reset ready check state when project is cleared
-        this.mapService.setReadyCheckComplete(false);
         // Clear initialized project IDs when project is cleared
         this._initializedProjectIds.clear();
       }
@@ -472,18 +423,12 @@ export class FilterConfigService {
     let isInitialLoad = true;
     let compareInitialLoad = true;
     let differenceInitialLoad = true;
+    let wasCompareOrDifference = false;
     effect(() => {
       const compareMode = this._isMapCompareMode();
       const differenceView = this._isDifferenceView();
       const filters = this.contentLayerFilters();
       const rightFilters = this.rightContentLayerFilters();
-      const isFilterDataLoaded = this._isFilterDataLoaded();
-      const filterDataProjectId = this._filterDataProjectId();
-      const currentProjectId = this.projectService.project()?.id ?? null;
-      const filterDataReadyForProject =
-        isFilterDataLoaded &&
-        filterDataProjectId !== null &&
-        filterDataProjectId === currentProjectId;
       const compareMapsReady = this._compareMapsReady();
       this._mapLayerRefreshNonce();
       this.effectiveAdminLevel();
@@ -492,6 +437,7 @@ export class FilterConfigService {
       this._selectedAdminLevel();
 
       if (compareMode && differenceView) {
+        wasCompareOrDifference = true;
         this._selectedModes();
         this._rightSelectedModes();
         this._selectedQualityBrackets();
@@ -514,10 +460,6 @@ export class FilterConfigService {
           return;
         }
         if (!filters || !rightFilters) {
-          scheduleRetryIfNeeded();
-          return;
-        }
-        if (!filterDataReadyForProject && differenceInitialLoad) {
           scheduleRetryIfNeeded();
           return;
         }
@@ -586,6 +528,7 @@ export class FilterConfigService {
       }
 
       if (compareMode) {
+        wasCompareOrDifference = true;
         differenceInitialLoad = true;
         if (!this.mapService.hasCompareMaps()) {
           compareInitialLoad = true;
@@ -607,10 +550,6 @@ export class FilterConfigService {
           return;
         }
         if (!filters || !rightFilters) {
-          scheduleRetryIfNeeded();
-          return;
-        }
-        if (!filterDataReadyForProject && compareInitialLoad) {
           scheduleRetryIfNeeded();
           return;
         }
@@ -659,8 +598,7 @@ export class FilterConfigService {
             onlyLeftChanged,
             onlyRightChanged,
             leftChanged,
-            rightChanged,
-            compareInitialLoad
+            rightChanged
           ).then(applied => {
             const leftOk = this.mapHasContentLayer(leftMap);
             const rightOk = this.mapHasContentLayer(rightMap);
@@ -698,17 +636,25 @@ export class FilterConfigService {
       compareInitialLoad = true;
       differenceInitialLoad = true;
       this.compareLayerSyncRetries = 0;
-      isInitialLoad = true;
+      if (wasCompareOrDifference) {
+        isInitialLoad = true;
+        wasCompareOrDifference = false;
+      }
 
       if (filters) {
         if (this._mapModeTransitionInProgress()) {
           return;
         }
-        if (!filterDataReadyForProject && isInitialLoad) {
+        if (this.updateMapLayerInProgress) {
+          if (!previousFilters || this.filtersDiffer(previousFilters, filters)) {
+            this.mapUpdateRetryNeeded = true;
+          }
           return;
         }
-        if (this.updateMapLayerInProgress) {
-          this.mapUpdateRetryNeeded = true;
+
+        // Persona is an analytics overlay only — do not reload baked map tiles.
+        if (previousFilters && !this.filtersDiffer(previousFilters, filters)) {
+          previousFilters = this.cloneContentLayerFilters(filters);
           return;
         }
 
@@ -716,10 +662,16 @@ export class FilterConfigService {
           previousFilters !== null && previousFilters.admin_level !== filters.admin_level;
         const isFullReload = isInitialLoad || adminLevelChanged;
         const wasInitialLoad = isInitialLoad;
+        // Snapshot before await so catalog preselect-all (same tile URL) does not queue a retry.
+        previousFilters = this.cloneContentLayerFilters(filters);
 
         const runSingleUpdate = () => {
           void this.updateMapLayer(filters, isFullReload, false).then(applied => {
             if (!applied) {
+              if (wasInitialLoad) {
+                previousFilters = null;
+                isInitialLoad = true;
+              }
               return;
             }
             const latestFilters = this.contentLayerFilters();
@@ -730,6 +682,10 @@ export class FilterConfigService {
               isInitialLoad = false;
             }
           }).catch(error => {
+            if (wasInitialLoad) {
+              previousFilters = null;
+              isInitialLoad = true;
+            }
             if (isFullReload) {
               console.error('Error in updateMapLayer (full reload):', error);
             } else {
@@ -744,6 +700,7 @@ export class FilterConfigService {
           runSingleUpdate();
         }
       } else {
+        this.clearInitialLoadTimer();
         this.mapService.removeContentLayer();
         previousFilters = null;
         isInitialLoad = true;
@@ -772,16 +729,16 @@ export class FilterConfigService {
         const selectedPersona = allPersonas.find(p => p.id === selectedPersonaId);
 
         if (selectedPersona && selectedPersona.can_use_car === false) {
-          const carMode = this._allModes().find(mode => mode.name.toLowerCase() === 'car');
+          const carProfileIds = this.getCarProfileIds();
 
-          if (carMode && selectedModes.includes(carMode.id)) {
-            this._selectedModes.set(selectedModes.filter(id => id !== carMode.id));
+          if (carProfileIds.some(id => selectedModes.includes(id))) {
+            this._selectedModes.set(selectedModes.filter(id => !carProfileIds.includes(id)));
             this.validateModeSelection();
             this.saveSettings();
           }
 
-          if (carMode && rightSelectedModes.includes(carMode.id)) {
-            this._rightSelectedModes.set(rightSelectedModes.filter(id => id !== carMode.id));
+          if (carProfileIds.some(id => rightSelectedModes.includes(id))) {
+            this._rightSelectedModes.set(rightSelectedModes.filter(id => !carProfileIds.includes(id)));
             this.validateRightModeSelection();
           }
         }
@@ -809,15 +766,8 @@ export class FilterConfigService {
       next: (response) => {
         this.profilesLoading = false;
         this._allProfiles.set(response.results);
-        this.extractModes();
-        // Apply URL params - this will set modes if profile_ids is in URL
         this.applyUrlParams();
-        // Update mode selection from project only if URL params didn't set modes
-        // (check if modes are still empty or if URL params weren't applied)
-        if (this._selectedModes().length === 0 || !this._urlParamsApplied()) {
-          this.updateModeSelectionFromProject();
-        }
-        // Validate and update mode selection after modes are loaded
+        this.updateModeSelectionFromProject();
         this.validateModeSelection();
       },
       error: (error) => {
@@ -835,7 +785,7 @@ export class FilterConfigService {
     });
   }
 
-  private getModeIdsFromProfileIdsParam(param: string): number[] {
+  private parseProfileIdsParam(param: string): number[] {
     const ids = param
       .split(',')
       .map(s => Number(s.trim()))
@@ -843,15 +793,8 @@ export class FilterConfigService {
     if (ids.length === 0) {
       return [];
     }
-    const modeIds = new Set<number>();
-    this._allProfiles()
-      .filter(p => ids.includes(p.id))
-      .forEach(p => {
-        if (p.mode) {
-          modeIds.add(p.mode.id);
-        }
-      });
-    return Array.from(modeIds);
+    const knownIds = new Set(this._allProfiles().map(p => p.id));
+    return [...new Set(ids.filter(id => knownIds.has(id)))];
   }
 
   /**
@@ -884,9 +827,9 @@ export class FilterConfigService {
     // Apply profile_ids parameter (comma-separated integers)
     const profileIdsParam = queryParams['profile_ids'];
     if (profileIdsParam && typeof profileIdsParam === 'string') {
-      const modeIds = this.getModeIdsFromProfileIdsParam(profileIdsParam);
-      if (modeIds.length > 0) {
-        this._selectedModes.set(modeIds);
+      const profileIds = this.parseProfileIdsParam(profileIdsParam);
+      if (profileIds.length > 0) {
+        this._selectedModes.set(profileIds);
         this.saveSettings();
         const currentProject = this.projectService.project();
         if (currentProject && currentProject.base_profiles) {
@@ -937,10 +880,10 @@ export class FilterConfigService {
     const params = queryParams ?? this.router.parseUrl(this.router.url).queryParams;
     const compareProfileIdsParam = params['compare_profile_ids'];
     if (compareProfileIdsParam && typeof compareProfileIdsParam === 'string') {
-      const compareModeIds = this.getModeIdsFromProfileIdsParam(compareProfileIdsParam);
-      if (compareModeIds.length > 0) {
+      const compareProfileIds = this.parseProfileIdsParam(compareProfileIdsParam);
+      if (compareProfileIds.length > 0) {
         this._urlCompareIntent.set(true);
-        this._urlCompareModeIds.set(compareModeIds);
+        this._urlCompareProfileIds.set(compareProfileIds);
       }
     }
   }
@@ -955,8 +898,8 @@ export class FilterConfigService {
       return;
     }
 
-    const modeIds = this._urlCompareModeIds();
-    if (modeIds.length === 0) {
+    const profileIds = this._urlCompareProfileIds();
+    if (profileIds.length === 0) {
       return;
     }
 
@@ -965,12 +908,12 @@ export class FilterConfigService {
     }
 
     if (this._pendingMapCompareEnable()) {
-      this._rightSelectedModes.set(modeIds);
+      this._rightSelectedModes.set(profileIds);
       this.validateRightModeSelection();
       return;
     }
 
-    this.requestEnableMapCompare(modeIds);
+    this.requestEnableMapCompare(profileIds);
   }
 
   private scheduleCompareLayerSync(): void {
@@ -1018,23 +961,9 @@ export class FilterConfigService {
         this._allCategories.set(responses.categories.results);
         this._allPersonas.set(responses.personas.results);
 
-        // Map categories to activities (categories are used as activities)
-        const activities: Activity[] = responses.categories.results.map(category => ({
-          id: category.id,
-          name: category.name,
-          display_name: category.display_name,
-          description: category.description
-        }));
-        this._allActivities.set(activities);
-
         // For share_key users, always preselect all items (they can't modify anyway)
         if (isShareKeyOnly) {
-          if (responses.categories.results.length > 0) {
-            this.preselectAllCategories();
-          }
-          if (responses.personas.results.length > 0) {
-            this.preselectAllPersonas();
-          }
+          this.validateSelectedPersona();
           this.preselectAllRegioStars();
           this.preselectAllStates();
           
@@ -1050,14 +979,8 @@ export class FilterConfigService {
         const hasLoadedSettings = this._settingsLoaded;
         
         if (isFirstLoad && !hasLoadedSettings) {
-          // First load with no saved settings - preselect all items (same logic for all filters)
-          // This ensures consistent behavior: preselect all unless URL params or localStorage say otherwise
-          if (responses.categories.results.length > 0) {
-            this.preselectAllCategories();
-          }
-          if (responses.personas.results.length > 0) {
-            this.preselectAllPersonas();
-          }
+          // First load with no saved settings - preselect all items
+          this.validateSelectedPersona();
           this.preselectAllRegioStars();
           this.preselectAllStates();
           
@@ -1108,46 +1031,17 @@ export class FilterConfigService {
   }
 
   /**
-   * Preselect all categories
+   * Keep a selected persona only if it exists in the loaded list.
+   * Never invent a default — omitted persona uses the baked project mix.
    */
-  private preselectAllCategories(): void {
-    const allCategoryIds = this._allCategories().map(c => c.id);
-    this._selectedActivities.set([...allCategoryIds]);
-  }
-
-  /**
-   * Preselect all activities
-   */
-  private preselectAllActivities(): void {
-    const allActivityIds = this._allActivities().map(a => a.id);
-    this._selectedActivities.set([...allActivityIds]);
-  }
-
-  /**
-   * Preselect default persona (only if no persona is currently selected)
-   */
-  private preselectAllPersonas(): void {
+  private validateSelectedPersona(): void {
     const currentSelection = this._selectedPersonas();
-    const personas = this._allPersonas();
-    
-    // If a persona is already selected, validate it exists in the loaded personas
-    if (currentSelection !== null) {
-      const personaExists = personas.some(p => p.id === currentSelection);
-      if (personaExists) {
-        // Valid selection, keep it
-        return;
-      }
-      // Invalid selection (e.g., from old localStorage), clear it
-      this._selectedPersonas.set(null);
+    if (currentSelection === null) {
+      return;
     }
-    
-    // No valid selection, select the default persona
-    const defaultPersona = personas.find(p => p.default === true);
-    if (defaultPersona) {
-      this._selectedPersonas.set(defaultPersona.id);
-    } else if (personas.length > 0) {
-      // Fallback to first persona if no default is set
-      this._selectedPersonas.set(personas[0].id);
+    const personaExists = this._allPersonas().some(p => p.id === currentSelection);
+    if (!personaExists) {
+      this._selectedPersonas.set(null);
     }
   }
 
@@ -1173,80 +1067,21 @@ export class FilterConfigService {
    * If selections are empty, preselects all available items
    */
   private validateFilterSelections(): void {
-    // Validate RegioStars
-    const allRegioStarIds = new Set(this._allRegioStars().map(r => r.id));
-    const currentRegioStars = this._selectedRegioStars();
-    // If no regiostars selected and regiostars are available, preselect all
-    if (currentRegioStars.length === 0 && allRegioStarIds.size > 0) {
-      this._selectedRegioStars.set(Array.from(allRegioStarIds));
-    } else {
-      const validRegioStars = currentRegioStars.filter(id => allRegioStarIds.has(id));
-      if (validRegioStars.length !== currentRegioStars.length) {
-        // Some selections were invalid, update to only valid ones
-        // If all were invalid, preselect all (fallback)
-        this._selectedRegioStars.set(validRegioStars.length > 0 ? validRegioStars : Array.from(allRegioStarIds));
-      }
-    }
-
-    // Validate States
-    const allStateIds = new Set(this._allStates().map(s => s.id));
-    const currentStates = this._selectedStates();
-    // If no states selected and states are available, preselect all
-    if (currentStates.length === 0 && allStateIds.size > 0) {
-      this._selectedStates.set(Array.from(allStateIds));
-    } else {
-      const validStates = currentStates.filter(id => allStateIds.has(id));
-      if (validStates.length !== currentStates.length) {
-        // Some selections were invalid, update to only valid ones
-        // If all were invalid, preselect all (fallback)
-        this._selectedStates.set(validStates.length > 0 ? validStates : Array.from(allStateIds));
-      }
-    }
-
-    // Validate Activities (only if MID)
-    const allActivityIds = new Set(this._allActivities().map(a => a.id));
-    const currentActivities = this._selectedActivities();
-    // If no activities selected and activities are available, preselect all
-    if (currentActivities.length === 0 && allActivityIds.size > 0) {
-      this._selectedActivities.set(Array.from(allActivityIds));
-    } else {
-      const validActivities = currentActivities.filter(id => allActivityIds.has(id));
-      if (validActivities.length !== currentActivities.length) {
-        // Some selections were invalid, update to only valid ones
-        // If all were invalid, preselect all (fallback)
-        this._selectedActivities.set(validActivities.length > 0 ? validActivities : Array.from(allActivityIds));
-      }
-    }
-
-    // Validate Personas (only if MID)
-    const allPersonaIds = new Set(this._allPersonas().map(p => p.id));
-    const currentPersona = this._selectedPersonas();
-    // If no persona selected and personas are available, preselect default
-    if (currentPersona === null && allPersonaIds.size > 0) {
-      const defaultPersona = this._allPersonas().find(p => p.default === true);
-      this._selectedPersonas.set(defaultPersona ? defaultPersona.id : (this._allPersonas().length > 0 ? this._allPersonas()[0].id : null));
-    } else if (currentPersona !== null && !allPersonaIds.has(currentPersona)) {
-      // Current persona is invalid, try to find default or first available
-      const defaultPersona = this._allPersonas().find(p => p.default === true);
-      this._selectedPersonas.set(defaultPersona ? defaultPersona.id : (this._allPersonas().length > 0 ? this._allPersonas()[0].id : null));
-    }
+    this.syncIdSelection(
+      this._selectedRegioStars(),
+      new Set(this._allRegioStars().map(r => r.id)),
+      ids => this._selectedRegioStars.set(ids)
+    );
+    this.syncIdSelection(
+      this._selectedStates(),
+      new Set(this._allStates().map(s => s.id)),
+      ids => this._selectedStates.set(ids)
+    );
+    this.validateSelectedPersona();
   }
 
   /**
-   * Extract unique modes from profiles
-   */
-  private extractModes(): void {
-    const modeMap = new Map<number, Mode>();
-    this._allProfiles().forEach(profile => {
-      if (profile.mode && !modeMap.has(profile.mode.id)) {
-        modeMap.set(profile.mode.id, profile.mode);
-      }
-    });
-    this._allModes.set(Array.from(modeMap.values()));
-  }
-
-  /**
-   * Update mode selection based on project base_profiles
+   * Update profile options based on project base_profiles
    */
   private updateModeSelectionFromProject(): void {
     const currentProject = this.projectService.project();
@@ -1256,7 +1091,7 @@ export class FilterConfigService {
   }
 
   /**
-   * Update available mode options and validate selection
+   * Update available profile options and validate selection
    */
   private updateModeSelection(baseProfiles: number[]): void {
     if (!baseProfiles || baseProfiles.length === 0 || this._allProfiles().length === 0) {
@@ -1264,108 +1099,90 @@ export class FilterConfigService {
       return;
     }
 
-    // Find which modes are represented in base_profiles
-    const modesInProject = new Set<number>();
-    const modeMap = new Map<number, Mode>();
+    const profilesById = new Map(this._allProfiles().map(profile => [profile.id, profile]));
+    const options: ProfileOption[] = [];
 
     baseProfiles.forEach(profileId => {
-      const profile = this._allProfiles().find(p => p.id === profileId);
-      if (profile && profile.mode) {
-        modesInProject.add(profile.mode.id);
-        if (!modeMap.has(profile.mode.id)) {
-          modeMap.set(profile.mode.id, profile.mode);
-        }
+      const profile = profilesById.get(profileId);
+      if (!profile) {
+        return;
       }
+      const modeName = profile.mode?.name ?? '';
+      options.push({
+        id: profile.id,
+        name: profile.name,
+        display_name: profile.display_name,
+        icon: profile.icon_name
+          || profile.mode?.icon_name
+          || this.modeIcons[modeName.toLowerCase()]
+          || this.modeIcons['default'],
+        modeName
+      });
     });
 
-    // Only show modes that are in base_profiles
-    this._modeOptions.set(Array.from(modeMap.values()).map(mode => ({
-      id: mode.id,
-      name: mode.name,
-      display_name: mode.display_name,
-      icon: this.modeIcons[mode.name.toLowerCase()] || this.modeIcons['default']
-    })));
+    this._modeOptions.set(options);
 
-    // Validate current selection against available modes
     this.validateModeSelection();
     this.validateRightModeSelection();
   }
 
-  private getModesInProject(): Set<number> {
+  private getProfileIdsInProject(): Set<number> {
     const currentProject = this.projectService.project();
-    const modesInProject = new Set<number>();
+    const profileIds = new Set<number>();
     if (!currentProject?.base_profiles) {
-      return modesInProject;
+      return profileIds;
     }
 
+    const knownIds = new Set(this._allProfiles().map(p => p.id));
     currentProject.base_profiles.forEach(profileId => {
-      const profile = this._allProfiles().find(p => p.id === profileId);
-      if (profile?.mode) {
-        modesInProject.add(profile.mode.id);
+      if (knownIds.has(profileId)) {
+        profileIds.add(profileId);
       }
     });
-    return modesInProject;
+    return profileIds;
   }
 
-  private validateModesForSignal(
-    currentModes: number[],
-    setter: (modes: number[]) => void,
-    modesInProject: Set<number>
+  private getCarProfileIds(): number[] {
+    return this._allProfiles()
+      .filter(profile => profile.mode?.name.toLowerCase() === 'car')
+      .map(profile => profile.id);
+  }
+
+  private syncIdSelection(
+    currentIds: number[],
+    allowedIds: Set<number>,
+    setter: (ids: number[]) => void
   ): void {
-    if (modesInProject.size === 0) {
+    if (allowedIds.size === 0) {
       return;
     }
 
-    if (currentModes.length === 0) {
-      setter(Array.from(modesInProject));
+    if (currentIds.length === 0) {
+      setter(Array.from(allowedIds));
       return;
     }
 
-    const validModes = currentModes.filter(modeId => modesInProject.has(modeId));
-    if (validModes.length === 0) {
-      setter(Array.from(modesInProject));
-    } else if (validModes.length !== currentModes.length) {
-      setter(validModes);
+    const validIds = currentIds.filter(id => allowedIds.has(id));
+    if (validIds.length === 0) {
+      setter(Array.from(allowedIds));
+    } else if (validIds.length !== currentIds.length) {
+      setter(validIds);
     }
   }
 
   /**
-   * Validate and update mode selection against available modes
+   * Validate and update profile selection against available project profiles
    */
   private validateModeSelection(): void {
-    const modesInProject = this.getModesInProject();
-    if (modesInProject.size === 0) {
-      return;
-    }
-    this.validateModesForSignal(this._selectedModes(), modes => this._selectedModes.set(modes), modesInProject);
+    this.syncIdSelection(this._selectedModes(), this.getProfileIdsInProject(), ids => this._selectedModes.set(ids));
   }
 
   private validateRightModeSelection(): void {
-    const modesInProject = this.getModesInProject();
-    if (modesInProject.size === 0) {
-      return;
-    }
-    this.validateModesForSignal(this._rightSelectedModes(), modes => this._rightSelectedModes.set(modes), modesInProject);
+    this.syncIdSelection(this._rightSelectedModes(), this.getProfileIdsInProject(), ids => this._rightSelectedModes.set(ids));
   }
 
   /**
-   * Toggle sidebar expansion
-   */
-  toggleSidebar(): void {
-    this._isExpanded.update(expanded => !expanded);
-    this.saveSettings();
-  }
-
-  /**
-   * Set sidebar expansion state
-   */
-  setSidebarExpanded(expanded: boolean): void {
-    this._isExpanded.set(expanded);
-    this.saveSettings();
-  }
-
-  /**
-   * Toggle mode selection. At least one mode must remain selected.
+   * Toggle profile selection. At least one profile must remain selected.
    */
   toggleMode(modeId: number): void {
     const currentModes = this._selectedModes();
@@ -1429,7 +1246,7 @@ export class FilterConfigService {
       this._isDifferenceView.set(false);
       this._isMapCompareMode.set(false);
       this._urlCompareIntent.set(false);
-      this._urlCompareModeIds.set([]);
+      this._urlCompareProfileIds.set([]);
       this.clearCompareProfileIdsFromUrl();
       return;
     }
@@ -1517,9 +1334,9 @@ export class FilterConfigService {
   }
 
   /**
-   * Check if a mode is disabled based on persona selection
+   * Check if a profile is disabled based on persona selection
    */
-  isModeDisabled(modeId: number): boolean {
+  isModeDisabled(profileId: number): boolean {
     const selectedPersonaId = this._selectedPersonas();
     if (selectedPersonaId === null) {
       return false;
@@ -1529,11 +1346,9 @@ export class FilterConfigService {
     if (!selectedPersona) {
       return false;
     }
-    
-    // Check if this is the car mode
-    const mode = this._allModes().find(m => m.id === modeId);
-    if (mode && mode.name.toLowerCase() === 'car') {
-      // Disable car mode if persona cannot use car
+
+    const profile = this._allProfiles().find(p => p.id === profileId);
+    if (profile?.mode?.name.toLowerCase() === 'car') {
       return selectedPersona.can_use_car === false;
     }
     
@@ -1695,18 +1510,16 @@ export class FilterConfigService {
   }
 
   private getAdminLevelsUpTo(level: AdminLevel): AdminLevel[] {
-    const order: AdminLevel[] = ['state', 'county', 'municipality', 'hexagon'];
-    const index = order.indexOf(level);
-    return order.slice(0, index + 1);
+    const index = ADMIN_LEVELS.indexOf(level);
+    return ADMIN_LEVELS.slice(0, index + 1);
   }
 
   private getNextFinerAdminLevel(level: AdminLevel): AdminLevel | null {
-    const order: AdminLevel[] = ['state', 'county', 'municipality', 'hexagon'];
-    const index = order.indexOf(level);
-    if (index < 0 || index >= order.length - 1) {
+    const index = ADMIN_LEVELS.indexOf(level);
+    if (index < 0 || index >= ADMIN_LEVELS.length - 1) {
       return null;
     }
-    return order[index + 1];
+    return ADMIN_LEVELS[index + 1];
   }
 
   getAdminLevelDisabledHintKey(adminLevel: AdminLevel): string | null {
@@ -1773,11 +1586,8 @@ export class FilterConfigService {
     }
 
     const dialogData: FilterDialogData = {
-      selectedActivities: this._selectedActivities(),
-      selectedPersonas: this._selectedPersonas(),
       selectedRegioStars: this._selectedRegioStars(),
       selectedStates: this._selectedStates(),
-      hasCategories: this.hasCategories()
     };
 
     const dialogRef = this.dialog.open(FilterDialogComponent, {
@@ -1788,8 +1598,6 @@ export class FilterConfigService {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this._selectedActivities.set(result.selectedActivities || []);
-        this._selectedPersonas.set(result.selectedPersonas ?? null);
         this._selectedRegioStars.set(result.selectedRegioStars || []);
         this._selectedStates.set(result.selectedStates || []);
         this.saveSettings();
@@ -1799,34 +1607,15 @@ export class FilterConfigService {
 
   /**
    * Reset advanced filters to default (all selected)
-   * Does not reset modes, only resets: activities, personas, regiostars, states
+   * Does not reset modes, only resets: regiostars, states
    */
   resetAdvancedFilters(): void {
-    // Reset RegioStars to all selected
     const allRegioStarIds = this._allRegioStars().map(r => r.id);
     this._selectedRegioStars.set([...allRegioStarIds]);
 
-    // Reset States to all selected
     const allStateIds = this._allStates().map(s => s.id);
     this._selectedStates.set([...allStateIds]);
 
-    // Reset Activities to all selected (only if project has categories)
-    if (this.hasCategories()) {
-      const allActivityIds = this._allActivities().map(a => a.id);
-      this._selectedActivities.set([...allActivityIds]);
-
-      // Reset Personas to default
-      const defaultPersona = this._allPersonas().find(p => p.default === true);
-      if (defaultPersona) {
-        this._selectedPersonas.set(defaultPersona.id);
-      } else if (this._allPersonas().length > 0) {
-        this._selectedPersonas.set(this._allPersonas()[0].id);
-      } else {
-        this._selectedPersonas.set(null);
-      }
-    }
-
-    // Save settings after reset
     this.saveSettings();
   }
 
@@ -1881,7 +1670,6 @@ export class FilterConfigService {
       previousFilters.feature_type !== filters.feature_type ||
       JSON.stringify(previousFilters.state_ids?.sort()) !== JSON.stringify(filters.state_ids?.sort()) ||
       JSON.stringify(previousFilters.category_ids?.sort()) !== JSON.stringify(filters.category_ids?.sort()) ||
-      previousFilters.persona_id !== filters.persona_id ||
       JSON.stringify(previousFilters.regiostar_ids?.sort()) !== JSON.stringify(filters.regiostar_ids?.sort()) ||
       previousFilters.admin_level !== filters.admin_level ||
       JSON.stringify(previousFilters.selected_quality_brackets) !== JSON.stringify(filters.selected_quality_brackets) ||
@@ -1909,59 +1697,6 @@ export class FilterConfigService {
     return !!targetMap.getSource('content-layer');
   }
 
-  private async ensureProjectReady(
-    filters: ContentLayerFilters,
-    loadGeneration: number
-  ): Promise<boolean> {
-    if (!this.isProjectLoadCurrent(loadGeneration)) {
-      return false;
-    }
-
-    let dialogRef: ReturnType<MatDialog['open']> | null = null;
-
-    try {
-      const readyResponse = await this.mapService.checkReady(filters);
-
-      if (!this.isProjectLoadCurrent(loadGeneration)) {
-        return false;
-      }
-
-      if (!readyResponse.cache_flag) {
-        this.mapService.setPreparingProject(true);
-
-        dialogRef = this.dialog.open(PreparingProjectDialogComponent, {
-          width: '80%',
-          maxWidth: '900px',
-          disableClose: true,
-          hasBackdrop: true,
-          panelClass: 'preparing-project-dialog-panel',
-          data: { sessionId: readyResponse.session_id }
-        });
-
-        if (readyResponse.session_id) {
-          try {
-            await this.mapService.waitForPreload(readyResponse.session_id);
-          } catch (preloadError) {
-            console.error('Error waiting for preload via websocket:', preloadError);
-          }
-        } else {
-          console.warn('No session_id provided, cannot wait for preload');
-        }
-      }
-
-      return this.isProjectLoadCurrent(loadGeneration);
-    } catch (readyError) {
-      console.error('Error calling ready endpoint:', readyError);
-      this.mapService.setPreparingProject(false);
-      return false;
-    } finally {
-      if (dialogRef) {
-        dialogRef.close();
-        this.mapService.setPreparingProject(false);
-      }
-    }
-  }
-
   private async updateDifferenceMapLayers(
     leftFilters: ContentLayerFilters,
     rightFilters: ContentLayerFilters,
@@ -1982,23 +1717,8 @@ export class FilterConfigService {
     try {
       this.mapService.setMapLoading(true);
 
-      if (fullReload) {
-        this.mapService.setReadyCheckComplete(false);
-        const leftReady = await this.ensureProjectReady(leftFilters, loadGeneration);
-        if (!leftReady) {
-          this.mapService.setReadyCheckComplete(false);
-          return false;
-        }
-        const rightReady = await this.ensureProjectReady(rightFilters, loadGeneration);
-        if (!rightReady) {
-          this.mapService.setReadyCheckComplete(false);
-          return false;
-        }
-        if (!this.isProjectLoadCurrent(loadGeneration)) {
-          this.mapService.setReadyCheckComplete(false);
-          return false;
-        }
-        this.mapService.setReadyCheckComplete(true);
+      if (!this.isProjectLoadCurrent(loadGeneration)) {
+        return false;
       }
 
       const leftToApply = this.resolveFiltersForMapApply(leftFilters);
@@ -2021,7 +1741,6 @@ export class FilterConfigService {
       return this.isProjectLoadCurrent(loadGeneration);
     } catch (error) {
       console.error('Error in updateDifferenceMapLayers:', error);
-      this.mapService.setPreparingProject(false);
       this.mapService.setMapLoading(false);
       return false;
     } finally {
@@ -2037,8 +1756,7 @@ export class FilterConfigService {
     onlyLeftChanged: boolean = false,
     onlyRightChanged: boolean = false,
     leftChanged: boolean = true,
-    rightChanged: boolean = true,
-    sequentialInitialLoad: boolean = false
+    rightChanged: boolean = true
   ): Promise<boolean> {
     const leftMap = this.mapService.getMap();
     const rightMap = this.mapService.getCompareRightMap();
@@ -2059,63 +1777,33 @@ export class FilterConfigService {
     try {
       this.mapService.setMapLoading(true);
 
-      const needsReadyCheck =
-        (shouldUpdateLeft && leftFullReload) || (shouldUpdateRight && rightFullReload);
-      if (needsReadyCheck) {
-        this.mapService.setReadyCheckComplete(false);
-        if (shouldUpdateLeft && leftFullReload) {
-          const leftReady = await this.ensureProjectReady(leftFilters, loadGeneration);
-          if (!leftReady) {
-            this.mapService.setReadyCheckComplete(false);
-            return false;
-          }
-        }
-        if (shouldUpdateRight && rightFullReload) {
-          const rightReady = await this.ensureProjectReady(rightFilters, loadGeneration);
-          if (!rightReady) {
-            this.mapService.setReadyCheckComplete(false);
-            return false;
-          }
-        }
-        if (!this.isProjectLoadCurrent(loadGeneration)) {
-          this.mapService.setReadyCheckComplete(false);
-          return false;
-        }
-        this.mapService.setReadyCheckComplete(true);
+      if (!this.isProjectLoadCurrent(loadGeneration)) {
+        return false;
       }
 
       let success = false;
 
-      if (sequentialInitialLoad && shouldUpdateLeft && shouldUpdateRight) {
-        const leftOk = await this.updateMapLayer(leftFilters, leftFullReload, false, leftMap, true);
-        const rightOk = leftOk
-          ? await this.updateMapLayer(rightFilters, rightFullReload, false, rightMap, true)
-          : false;
-        success = leftOk && rightOk;
-      } else {
-        const loadTasks: Promise<boolean>[] = [];
-        if (shouldUpdateLeft) {
-          loadTasks.push(
-            this.updateMapLayer(leftFilters, leftFullReload, false, leftMap, true)
-          );
-        }
-        if (shouldUpdateRight) {
-          loadTasks.push(
-            this.updateMapLayer(rightFilters, rightFullReload, false, rightMap, true)
-          );
-        }
-
-        const results = await Promise.all(loadTasks);
-        success = loadTasks.length > 0 && results.every(Boolean);
+      const loadTasks: Promise<boolean>[] = [];
+      if (shouldUpdateLeft) {
+        loadTasks.push(
+          this.updateMapLayer(leftFilters, leftFullReload, false, leftMap)
+        );
       }
+      if (shouldUpdateRight) {
+        loadTasks.push(
+          this.updateMapLayer(rightFilters, rightFullReload, false, rightMap)
+        );
+      }
+
+      const results = await Promise.all(loadTasks);
+      success = loadTasks.length > 0 && results.every(Boolean);
 
       if (shouldUpdateRight && !this.mapHasContentLayer(rightMap)) {
         const rightRetryOk = await this.updateMapLayer(
           rightFilters,
           true,
           false,
-          rightMap,
-          true
+          rightMap
         );
         success = rightRetryOk;
       }
@@ -2140,8 +1828,7 @@ export class FilterConfigService {
     filters: ContentLayerFilters,
     fullReload: boolean = true,
     zoomToBounds: boolean = false,
-    targetMap?: MapLibreMap,
-    skipReadyCheck: boolean = false
+    targetMap?: MapLibreMap
   ): Promise<boolean> {
     const loadGeneration = this.projectLoadGeneration;
 
@@ -2154,28 +1841,7 @@ export class FilterConfigService {
     }
 
     try {
-      // Set loading state BEFORE calling ready endpoint (step 0: turn on loading)
-      // This ensures the map is in loading state when ready request is made
       this.mapService.setMapLoading(true);
-
-      // Call the ready endpoint first to check if project is ready (step 2)
-      // Only check ready for full reloads (filter changes), not for tile-only updates
-      if (fullReload && !skipReadyCheck) {
-        // Mark ready check as not complete yet (prevents rankings from loading)
-        this.mapService.setReadyCheckComplete(false);
-
-        const ready = await this.ensureProjectReady(filters, loadGeneration);
-        if (!ready) {
-          this.mapService.setMapLoading(false);
-          this.mapService.setReadyCheckComplete(false);
-          return false;
-        }
-
-        this.mapService.setReadyCheckComplete(true);
-      } else if (!skipReadyCheck) {
-        // For tile-only updates, ready check is not needed, so mark as complete
-        this.mapService.setReadyCheckComplete(true);
-      }
 
       if (!this.isProjectLoadCurrent(loadGeneration)) {
         return false;
@@ -2183,8 +1849,6 @@ export class FilterConfigService {
 
       const filtersToApply = this.resolveFiltersForMapApply(filters);
 
-      // Only load the content layer AFTER we've confirmed data is ready (step 3)
-      // (either via cache_flag: true OR websocket completion)
       const activeMap = targetMap ?? this.mapService.getMap();
       if (activeMap) {
         if (fullReload) {
@@ -2207,7 +1871,6 @@ export class FilterConfigService {
       return this.isProjectLoadCurrent(loadGeneration);
     } catch (error) {
       console.error('Error in updateMapLayer:', error);
-      this.mapService.setPreparingProject(false);
       this.mapService.setMapLoading(false);
       return false;
     } finally {
@@ -2228,7 +1891,6 @@ export class FilterConfigService {
     const settings = this.settingsService.loadSettings();
     this._settingsLoaded = settings !== null && settings !== undefined;
     if (settings) {
-      this._isExpanded.set(settings.expanded ?? false);
       this._selectedBewertung.set((settings.bewertung === 'zeit' ? 'zeit' : 'qualitaet') as 'qualitaet' | 'zeit');
       
       this._layerMode.set(settings.layerMode === 'manual' ? 'manual' : 'auto');
@@ -2257,24 +1919,14 @@ export class FilterConfigService {
         this._selectedTimeBrackets.set([...availableTimeBrackets]);
       }
 
-      // Load filter settings
+      // Load filter settings (RegioStars and states only — activities/personas are not user-selectable)
       if (settings.filters) {
-        this._selectedActivities.set(settings.filters.activities || []);
-        // Handle both old array format and new single value format
-        // Note: We'll validate the persona ID exists when personas are loaded
-        const personasValue = settings.filters.personas;
-        if (Array.isArray(personasValue)) {
-          // Old array format - ignore it, will be set to default when personas load
-          this._selectedPersonas.set(null);
-        } else {
-          // New single value format - set it, but it will be validated when personas load
-          this._selectedPersonas.set(personasValue ?? null);
-        }
+        this._selectedPersonas.set(null);
         this._selectedRegioStars.set(settings.filters.regiostars || []);
         this._selectedStates.set(settings.filters.states || []);
       }
 
-      // Load mode selection (will be validated later)
+      // Load profile selection (will be validated later)
       if (settings.verkehrsmittel && settings.verkehrsmittel.length > 0) {
         this._selectedModes.set([...settings.verkehrsmittel]);
       }
@@ -2285,9 +1937,7 @@ export class FilterConfigService {
    * Save current settings to localStorage
    */
   private saveSettings(): void {
-    const selectedPersonas = this._selectedPersonas();
     this.settingsService.saveSettings({
-      expanded: this._isExpanded(),
       verkehrsmittel: [...this._selectedModes()],
       bewertung: this._selectedBewertung(),
       adminLevel: this._layerMode() === 'manual' ? this._selectedAdminLevel() : null,
@@ -2297,8 +1947,8 @@ export class FilterConfigService {
         time: [...this._selectedTimeBrackets()]
       },
       filters: {
-        activities: [...this._selectedActivities()],
-        personas: selectedPersonas !== null ? selectedPersonas : null,
+        activities: [],
+        personas: this._selectedPersonas(),
         regiostars: [...this._selectedRegioStars()],
         states: [...this._selectedStates()]
       }

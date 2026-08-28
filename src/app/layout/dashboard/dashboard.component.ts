@@ -9,7 +9,7 @@ import { CenterComponent } from '../center/center.component';
 import { DashboardSessionService } from '../../services/dashboard-session.service';
 import { AuthService } from '../../auth/auth.service';
 import { ProjectsService } from '../../services/project.service';
-import { MapService, ContentLayerFilters } from '../../services/map.service';
+import { MapService } from '../../services/map.service';
 import { FilterConfigService } from '../../services/filter-config.service';
 import { Project } from '../../interfaces/project';
 import { firstValueFrom } from 'rxjs';
@@ -25,6 +25,7 @@ import { MobileMapControlsComponent } from '../mobile/mobile-map-controls/mobile
 import { MobileSheetsComponent } from '../mobile/mobile-sheets/mobile-sheets.component';
 import { GroupOverviewComponent } from '../../group-overview/group-overview.component';
 import { ProjectNavigationService } from '../../services/project-navigation.service';
+import { LanguageService } from '../../services/language.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -56,6 +57,7 @@ export class DashboardComponent {
   readonly mobileUi = inject(MobileUiService);
   private featureSelectionService = inject(FeatureSelectionService);
   private projectNavigation = inject(ProjectNavigationService);
+  private languageService = inject(LanguageService);
 
   /** Matches right panel `duration-300` transition in dashboard template. */
   private static readonly RIGHT_PANEL_TRANSITION_MS = 300;
@@ -69,7 +71,14 @@ export class DashboardComponent {
 
   readonly isMobile = this.mobileUi.isMobile;
 
+  currentLang = signal<string>(this.languageService.getCurrentLanguage());
+  readonly availableLangs = this.languageService.availableLanguages;
+
   constructor() {
+    this.languageService.onLanguageChange()
+      .pipe(takeUntilDestroyed())
+      .subscribe(event => this.currentLang.set(event.lang));
+
     this.featureSelectionService.selectedMapLibreFeature$
       .pipe(
         takeUntilDestroyed(),
@@ -256,6 +265,11 @@ export class DashboardComponent {
     this.projectNavigation.closeGroupOverview();
   }
 
+  switchLanguage(lang: string): void {
+    this.languageService.setLanguage(lang);
+    this.currentLang.set(lang);
+  }
+
   /**
    * Loads a project by ID (for authenticated users)
    */
@@ -282,7 +296,7 @@ export class DashboardComponent {
   }
 
   /**
-   * Validates share key by fetching the project and making a preload call with defaults
+   * Validates share key by fetching the project
    */
   private async validateShareKeyAndPreload(shareKey: string): Promise<void> {
     try {
@@ -305,28 +319,8 @@ export class DashboardComponent {
       }
 
       this.projectService.setProject(project);
-
-      if (!project.base_profiles?.length) {
-        return;
-      }
-
-      const defaultFilters: ContentLayerFilters = {
-        profile_ids: [...project.base_profiles].sort((a, b) => a - b),
-        feature_type: 'index'
-      };
-
-      try {
-        await this.mapService.checkReady(defaultFilters);
-        // Preload call succeeded - share key is valid
-      } catch (error) {
-        console.error('Error making preload call:', error);
-        // Preload call failed - share key might be invalid or there's an issue
-        // Redirect to invalid share key page
-        this.router.navigate(['/invalid-share-key']);
-      }
     } catch (error) {
       console.error('Unexpected error validating share key:', error);
-      // Fallback: redirect to invalid share key page for any unexpected errors
       this.router.navigate(['/invalid-share-key']);
     }
   }

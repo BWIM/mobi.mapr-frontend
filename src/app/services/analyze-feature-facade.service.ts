@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, computed, DestroyRef } from '@angular/core';
+import { Injectable, inject, signal, computed, DestroyRef, effect } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin, of, Subscription } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -9,7 +9,6 @@ import {
   AnalyzeService,
   AnalyzeResponse,
   CategoryScore,
-  PersonaBreakdown,
 } from './analyze.service';
 import { TranslateService } from '@ngx-translate/core';
 import { ScoreColorsService } from './score-colors.service';
@@ -29,28 +28,21 @@ export class AnalyzeFeatureFacadeService {
   private subscription?: Subscription;
   private savedFeatureType: 'municipality' | 'hexagon' | 'county' | 'state' | null = null;
   private selectedCompareSide: 'left' | 'right' = 'left';
+  private previousFilters: ContentLayerFilters | null = null;
+  private isInitialFilterLoad = true;
 
   readonly selectedFeature = signal<MapLibreFeatureData | null>(null);
   readonly featureInfo = signal<FeatureInfoResponse | null>(null);
   readonly analyzeData = signal<AnalyzeResponse | null>(null);
-  readonly personasData = signal<PersonaBreakdown[] | null>(null);
   readonly isLoadingFeatureInfo = signal(false);
   readonly isLoadingAnalyze = signal(false);
-  readonly isLoadingPersonas = signal(false);
   readonly featureInfoError = signal<string | null>(null);
   readonly analyzeError = signal<string | null>(null);
-  readonly personasError = signal<string | null>(null);
   readonly activitiesChartData = signal<unknown>(null);
   readonly activitiesChartOptions = signal<unknown>(null);
-  readonly personasChartData = signal<unknown>(null);
-  readonly personasChartOptions = signal<unknown>(null);
-  readonly activePersonaTab = signal<'activities' | 'personas'>('activities');
 
   readonly isLoading = computed(
-    () =>
-      this.isLoadingFeatureInfo() ||
-      this.isLoadingAnalyze() ||
-      this.isLoadingPersonas(),
+    () => this.isLoadingFeatureInfo() || this.isLoadingAnalyze(),
   );
 
   readonly hexagonId = computed(() => {
@@ -62,13 +54,58 @@ export class AnalyzeFeatureFacadeService {
     return typeof id === 'number' ? id : parseInt(String(id), 10);
   });
 
+  constructor() {
+    effect(() => {
+      const compareMode = this.filterConfig.isMapCompareMode();
+      const filters =
+        compareMode && this.selectedCompareSide === 'right'
+          ? this.filterConfig.rightContentLayerFilters()
+          : this.filterConfig.contentLayerFilters();
+
+      if (this.isInitialFilterLoad) {
+        this.previousFilters = filters ? { ...filters } : null;
+        this.isInitialFilterLoad = false;
+        return;
+      }
+
+      if (filters && this.previousFilters) {
+        const filtersChanged =
+          JSON.stringify([...this.previousFilters.profile_ids].sort((a, b) => a - b)) !==
+            JSON.stringify([...filters.profile_ids].sort((a, b) => a - b)) ||
+          JSON.stringify(this.previousFilters.state_ids?.sort()) !==
+            JSON.stringify(filters.state_ids?.sort()) ||
+          JSON.stringify(this.previousFilters.category_ids?.sort()) !==
+            JSON.stringify(filters.category_ids?.sort()) ||
+          this.previousFilters.persona_id !== filters.persona_id ||
+          JSON.stringify(this.previousFilters.regiostar_ids?.sort()) !==
+            JSON.stringify(filters.regiostar_ids?.sort());
+
+        if (filtersChanged) {
+          const feature = this.selectedFeature();
+          if (feature && this.savedFeatureType) {
+            this.loadFeature(feature);
+          }
+        }
+      }
+
+      this.previousFilters = filters ? { ...filters } : null;
+    });
+
+    // Score vs quality only changes display of existing values — rebuild chart colors.
+    effect(() => {
+      this.filterConfig.selectedBewertung();
+      const analyze = this.analyzeData();
+      if (analyze?.categories?.length && !this.shouldShowMap()) {
+        this.buildActivitiesChart(analyze.categories);
+      }
+    });
+  }
   connect(): void {
     if (!this.subscription) {
       this.subscription = this.featureSelection.selectedMapLibreFeature$
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe((feature) => this.onFeatureSelected(feature));
     }
-    // Replay current selection when the sheet opens (may have been set before subscribe)
     this.onFeatureSelected(this.featureSelection.getCurrentMapLibreFeature());
   }
 
@@ -100,12 +137,9 @@ export class AnalyzeFeatureFacadeService {
     this.selectedFeature.set(null);
     this.featureInfo.set(null);
     this.analyzeData.set(null);
-    this.personasData.set(null);
     this.activitiesChartData.set(null);
-    this.personasChartData.set(null);
     this.featureInfoError.set(null);
     this.analyzeError.set(null);
-    this.personasError.set(null);
     this.savedFeatureType = null;
     this.selectedCompareSide = 'left';
   }
@@ -131,10 +165,6 @@ export class AnalyzeFeatureFacadeService {
     return !hasCategories || !!single;
   }
 
-  isAllPersonas(): boolean {
-    return this.getProfileContext()?.filters.persona_id === 54;
-  }
-
   isScoreMode(): boolean {
     return this.getProfileContext()?.filters.feature_type === 'score';
   }
@@ -145,14 +175,6 @@ export class AnalyzeFeatureFacadeService {
       return [];
     }
     return [...cats].sort((a, b) => b.weight - a.weight).slice(0, 5);
-  }
-
-  getSortedPersonas(): PersonaBreakdown[] {
-    const p = this.personasData();
-    if (!p) {
-      return [];
-    }
-    return [...p].sort((a, b) => b.weight - a.weight).slice(0, 4);
   }
 
   getGrade(index: number): string {
@@ -195,7 +217,7 @@ export class AnalyzeFeatureFacadeService {
     return this.gradeColor(info.index);
   }
 
-  getRankPercentage(rank: number | null, total: number | null): string {
+  getRankPercentage(rank: number | null | undefined, total: number | null | undefined): string {
     if (!rank || !total) return 'N/A';
     return `Top ${Math.ceil((rank / total) * 100)}%`;
   }
@@ -247,21 +269,6 @@ export class AnalyzeFeatureFacadeService {
     };
   }
 
-  buildPersonasDialogData(): import('../layout/right/analyze/overlay/personas-dialog.component').PersonasDialogData | null {
-    const base = this.buildAllCategoriesDialogData();
-    if (!base) return null;
-    return {
-      featureType: base.featureType,
-      featureId: base.featureId,
-      profileIds: base.profileIds,
-      categoryIds: base.categoryIds,
-      personaId: base.personaId,
-      isScoreMode: base.isScoreMode,
-      featureName: base.featureName,
-      getGrade: base.getGrade,
-    };
-  }
-
   private loadFeature(feature: MapLibreFeatureData): void {
     const map = this.mapService.getMap();
     if (!map || !this.savedFeatureType) return;
@@ -280,13 +287,7 @@ export class AnalyzeFeatureFacadeService {
     this.featureInfoError.set(null);
     this.analyzeError.set(null);
 
-    const shouldLoadPersonas = filters.persona_id === 54;
-    if (shouldLoadPersonas) {
-      this.isLoadingPersonas.set(true);
-      this.personasError.set(null);
-    }
-
-    const requests = {
+    forkJoin({
       featureInfo: this.mapService
         .getFeatureInfo({
           feature_type: this.savedFeatureType,
@@ -308,41 +309,16 @@ export class AnalyzeFeatureFacadeService {
           top5: true,
         })
         .pipe(catchError(() => of(null))),
-    };
-
-    const personasRequest = shouldLoadPersonas
-      ? this.analyzeService
-          .getPersonas({
-            feature_type: this.savedFeatureType,
-            feature_id: featureId,
-            profile_ids: profileIds,
-            category_ids: filters.category_ids,
-            persona_id: 54,
-          })
-          .pipe(catchError(() => of(null)))
-      : of(null);
-
-    forkJoin({
-      ...requests,
-      personasData: personasRequest,
     }).subscribe((result) => {
       this.isLoadingFeatureInfo.set(false);
       this.isLoadingAnalyze.set(false);
-      this.isLoadingPersonas.set(false);
 
       this.featureInfo.set(result.featureInfo);
       const analyze = result.analyzeData;
       this.analyzeData.set(analyze);
 
-      if (shouldLoadPersonas) {
-        this.personasData.set(result.personasData);
-      }
-
       if (!this.shouldShowMap() && analyze?.categories) {
         this.buildActivitiesChart(analyze.categories);
-      }
-      if (shouldLoadPersonas && result.personasData) {
-        this.buildPersonasChart(result.personasData);
       }
     });
   }
@@ -367,40 +343,6 @@ export class AnalyzeFeatureFacadeService {
       ],
     });
     this.activitiesChartOptions.set(this.mobileChartOptions(sorted, weights));
-  }
-
-  private buildPersonasChart(personas: PersonaBreakdown[]): void {
-    const sorted = [...personas].sort((a, b) => b.weight - a.weight).slice(0, 4);
-    const isScore = this.isScoreMode();
-    const colors = sorted.map((p) =>
-      isScore ? this.scoreColor(p.score) : this.gradeColorSolid(p.index),
-    );
-    this.personasChartData.set({
-      labels: sorted.map((_, i) => String(i + 1)),
-      datasets: [
-        {
-          label: this.translate.instant('analyze.populationPercent'),
-          data: sorted.map((p) => p.weight * 100),
-          backgroundColor: colors,
-          borderColor: '#ffffff',
-          borderWidth: 1,
-          maxBarThickness: 40,
-        },
-      ],
-    });
-    const personaWeights = sorted.map((p) => p.weight * 100);
-    this.personasChartOptions.set({
-      ...this.mobileChartOptions(sorted, personaWeights),
-      scales: {
-        x: { ticks: { color: '#fff', font: { size: 10 } }, grid: { display: false } },
-        y: {
-          beginAtZero: true,
-          max: 25,
-          ticks: { color: '#fff', font: { size: 10 }, stepSize: 5 },
-          grid: { color: 'rgba(255,255,255,0.1)' },
-        },
-      },
-    });
   }
 
   private mobileChartOptions(

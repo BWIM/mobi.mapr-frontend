@@ -1,10 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { DashboardSessionService } from './dashboard-session.service';
 import { appendProjectAccessParams, hasProjectAccess } from './project-access-params';
-import { AuthService } from '../auth/auth.service';
 import { SessionService } from './session.service';
 
 export interface AnalyzeParams {
@@ -28,38 +27,17 @@ export interface AnalyzeResponse {
   categories: CategoryScore[];
 }
 
-export interface PersonaBreakdownParams {
-  feature_type: 'municipality' | 'hexagon' | 'county' | 'state';
-  feature_id: number;
-  profile_ids: number[];
-  category_ids?: number[];
-  persona_id?: number;
-  lang?: string;
-}
-
-export interface PersonaBreakdown {
-  name: string;
-  weight: number;
-  score: number;
-  index: number;
-}
-
-export interface PersonaBreakdownResponse {
-  profile_ids?: number[];
-  personas?: PersonaBreakdown[];
-}
-
 @Injectable({
   providedIn: 'root'
 })
 export class AnalyzeService {
   private http = inject(HttpClient);
   private dashboardSessionService = inject(DashboardSessionService);
-  private authService = inject(AuthService);
   private sessionService = inject(SessionService);
 
   /**
-   * Gets the top 5 activities (categories) for a feature from the API
+   * Gets category scores / weights for a feature from the API.
+   * Optional persona_id only changes category weights (equal weights if omitted).
    */
   getAnalyze(params: AnalyzeParams): Observable<AnalyzeResponse> {
     if (!hasProjectAccess(this.dashboardSessionService)) {
@@ -76,7 +54,6 @@ export class AnalyzeService {
 
     httpParams = appendProjectAccessParams(httpParams, this.dashboardSessionService);
 
-    // Add optional filter parameters
     if (params.category_ids && params.category_ids.length > 0) {
       httpParams = httpParams.set('category_ids', params.category_ids.join(','));
     }
@@ -86,39 +63,5 @@ export class AnalyzeService {
     }
 
     return this.http.get<AnalyzeResponse>(url, { params: httpParams });
-  }
-
-  /**
-   * Gets persona breakdown for persona 54 (all personas) from the API
-   */
-  getPersonas(params: PersonaBreakdownParams): Observable<PersonaBreakdown[]> {
-    if (!hasProjectAccess(this.dashboardSessionService)) {
-      throw new Error('Project ID or share key is required');
-    }
-
-    const url = `${environment.apiUrl}/analyze/personas`;
-    let httpParams = new HttpParams()
-      .set('feature_type', params.feature_type)
-      .set('feature_id', params.feature_id.toString())
-      .set('profile_ids', params.profile_ids.join(','))
-      .set('persona_id', (params.persona_id ?? 54).toString())
-      .set('lang', params.lang || this.sessionService.getCurrentLanguage());
-
-    httpParams = appendProjectAccessParams(httpParams, this.dashboardSessionService);
-
-    // Add optional filter parameters
-    if (params.category_ids && params.category_ids.length > 0) {
-      httpParams = httpParams.set('category_ids', params.category_ids.join(','));
-    }
-
-    return this.http.get<PersonaBreakdown[] | PersonaBreakdownResponse>(url, { params: httpParams }).pipe(
-      map((response) => {
-        // Support both legacy array responses and current wrapped object responses.
-        if (Array.isArray(response)) {
-          return response;
-        }
-        return response?.personas ?? [];
-      })
-    );
   }
 }

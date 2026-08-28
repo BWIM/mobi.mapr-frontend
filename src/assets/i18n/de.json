@@ -123,10 +123,12 @@
       "overallLabel": "gesamt",
       "regionalClass": "Platz",
       "regionalClassLabel": "Regioklasse",
-      "total": "Gesamt"
+      "total": "Gesamt",
+      "noRankingForDistricts": "Stadtteile haben keine Ranking-Informationen"
     },
     "population": "Einwohnende",
     "grade": "Note:",
+    "time": "Zeit:",
     "analysis": {
       "title": "Analyse Top 5 Aktivitäten",
       "showAllCategories": "Alle Aktivitäten anzeigen",
@@ -256,12 +258,19 @@
       "loading": "Lade Kartendaten...",
       "clickForInfo": "Klicke für weitere Informationen"
     },
+    "noTiles": {
+      "hint": "Für dieses Projekt sind keine Kartenkacheln verfügbar. Die Scores wurden möglicherweise noch nicht berechnet."
+    },
     "layerSwitcher": {
       "title": "Kartenebene",
       "state": "Bundesland",
       "county": "Landkreis",
       "municipality": "Gemeinde",
       "hexagon": "Hexagon",
+      "stateShort": "Land",
+      "countyShort": "Kreis",
+      "municipalityShort": "Gemeinde",
+      "hexagonShort": "Hexagon",
       "resetToAuto": "Zurück auf Auto",
       "layerNoLongerAvailable": "Ebene nicht mehr verfügbar",
       "disabledZoom": "Weiter in die Karte hineinzoomen (Zoomstufe {{zoom}} oder höher), um diese Ebene auszuwählen",
@@ -525,6 +534,7 @@
       "activities": "Aktivitäten",
       "activitiesDescription": "Die Aktivitäten basieren auf der Studie 'Mobilität in Deutschland'. Sie gruppieren verschiedene reale Aktivitäten (z.B. Supermarkt) in abstrakte Kategorien des täglichen Bedarfs.",
       "personas": "Personengruppen",
+      "projectMix": "Projekt-Mix",
       "personasDescription": "Eine Personengruppe definiert, wie relevant bestimmte Aktivitäten für verschiedene Nutzergruppen sind. Für ein Kind ist beispielsweise der Besuch eines Spielplatzes normalerweise relevanter als für einen Erwachsenen. Die Personengruppen stammen ebenfalls aus der MID-Studie.",
       "regioStars": "Regionalklassen",
       "regioStarsDescription": "Wenn du nur bestimmte Regionen in Deutschland betrachten möchtest, z.B. ländliche Gebiete, kannst du dies hier filtern. Es ändert die Daten selbst nicht, wie Bundesländer, filtert aber auch die Ergebnisse. Dies spiegelt sich auch in den Top-10-Rankings wider.",
@@ -674,6 +684,7 @@
       "regioStars": "RegioStars",
       "states": "States"
     },
+    "projectMix": "Projekt-Mix (Standard)",
     "selectAll": "Alle auswählen",
     "deselectAll": "Alle abwählen"
   },
@@ -915,39 +926,6 @@
       "qualityViewHint": "In der Qualitäts-Ansicht werden die Gebietseinheiten nach ihrem Index gruppiert und bewertet (sh. Info zur Mobilitätsbewertung). So können Gebietseinheiten mit der selben Note (z.B. C+) auf einem unterschiedlichen Platz auf dem Treppchen sein."
     }
   },
-  "PREPARING_PROJECT": {
-    "TITLE": "Projekt wird vorbereitet",
-    "MESSAGE": "Bitte warte, während das Projekt geladen wird...",
-    "COFFEE_MESSAGE": "Gönn dir einen Kaffee! Je nach Komplexität der Filter kann dies mehrere Minuten dauern.",
-    "INFO": {
-      "PREPARING": "Das Projekt wird vorbereitet..."
-    },
-    "FUN_FACTS": {
-      "TITLE": "Wusstest du schon?",
-      "FACT_1": "In Deutschland gibt es über 9.000 Bahnhöfe, die täglich von Millionen von Menschen genutzt werden.",
-      "FACT_2": "Das deutsche Schienennetz erstreckt sich über mehr als 38.000 Kilometer.",
-      "FACT_3": "Öffentliche Verkehrsmittel tragen erheblich zur Reduzierung des CO2-Ausstoßes bei.",
-      "FACT_4": "Die Mobilitätsanalyse hilft dabei, die beste Verkehrsinfrastruktur zu planen.",
-      "FACT_5": "Zu Fuß gehen ist die umweltfreundlichste Art der Fortbewegung."
-    },
-    "STATUS": {
-      "STARTING": "Projekt wird gestartet...",
-      "CALCULATING": "Berechnung läuft...",
-      "PROCESSING": "Daten werden verarbeitet...",
-      "COMPLETED": "Projekt erfolgreich geladen",
-      "ERROR": "Fehler beim Laden des Projekts"
-    },
-    "ACHIEVEMENTS": {
-      "ONE_TIME_TITLE": "Einmalige Vorbereitung",
-      "ONE_TIME_TEXT": "Die Projektvorbereitung muss nur einmal durchgeführt werden.",
-      "FILTER_TITLE": "Filter geändert",
-      "FILTER_TEXT": "Dieser Dialog öffnet sich nur, nachdem du einige Filterparameter geändert hast.",
-      "UNIQUE_TITLE": "Einzigartige Karte",
-      "UNIQUE_TEXT": "Wenn du diesen Bildschirm siehst, hat noch niemand eine solche Karte erstellt (zumindest in den letzten 30 Tagen).",
-      "STATS_TITLE": "Über 15 Milliarden Möglichkeiten",
-      "STATS_TEXT": "Du kannst die 28 Aktivitäten frei kombinieren, für 8 verschiedene Modus-Kombinationen und 7 Personengruppen bedeutet dies mehr als 15 Milliarden verschiedene Karten."
-    }
-  },
   "usersArea": {
     "title": "Meine Projekte",
     "empty": "Keine Projekte gefunden.",
@@ -969,5 +947,15 @@
     "menuTitle": "Projektgruppe",
     "switchProject": "Projekt wechseln",
     "fieldLabel": "Projekt"
+  },
+  "projectInfo": {
+    "blogLink": "Analyse im Blog lesen",
+    "blogLinkHint": "Öffnet den Blogbeitrag zu diesem Projekt in einem neuen Tab",
+    "dataInfo": {
+      "button": "Informationen über die Daten",
+      "title": "Informationen über die Daten",
+      "openStreetMapFallback": "Die Daten für dieses Projekt stammen aus OpenStreetMap. Sie werden von den OpenStreetMap-Mitwirkenden bereitgestellt und stehen unter der Open Database License (ODbL).",
+      "close": "Schließen"
+    }
   }
 }

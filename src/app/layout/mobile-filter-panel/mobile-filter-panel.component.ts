@@ -12,6 +12,8 @@ import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import { ProjectSwitcherComponent } from '../../shared/project-switcher/project-switcher.component';
+import { ProjectInfoComponent } from '../../shared/project-info/project-info.component';
+import { ProfileOption } from '../../interfaces/profile';
 
 interface NominatimResult {
   display_name: string;
@@ -21,7 +23,7 @@ interface NominatimResult {
 
 @Component({
   selector: 'app-mobile-filter-panel',
-  imports: [SharedModule, TranslateModule, InfoOverlayComponent, ProjectSwitcherComponent],
+  imports: [SharedModule, TranslateModule, InfoOverlayComponent, ProjectSwitcherComponent, ProjectInfoComponent],
   templateUrl: './mobile-filter-panel.component.html',
   styleUrl: './mobile-filter-panel.component.css',
 })
@@ -36,7 +38,6 @@ export class MobileFilterPanelComponent implements OnDestroy {
   private dialog = inject(MatDialog);
   
   project = this.projectService.project;
-  isPreparingProject = this.mapService.isPreparingProject;
   searchQuery: string = '';
   searchResults: NominatimResult[] = [];
   private searchSubject = new Subject<string>();
@@ -97,18 +98,10 @@ export class MobileFilterPanelComponent implements OnDestroy {
 
   // Expose filter config service signals for template
   modeOptions = this.filterConfigService.modeOptions;
-  selectedModes = this.filterConfigService.selectedModes;
-  selectedBewertung = this.filterConfigService.selectedBewertung;
   isMapCompareMode = this.filterConfigService.isMapCompareMode;
   isDifferenceView = this.filterConfigService.isDifferenceView;
   isModeSelectionLocked = this.filterConfigService.isModeSelectionLocked;
   canUseMapCompare = this.filterConfigService.canUseMapCompare;
-  rightSelectedModes = this.filterConfigService.rightSelectedModes;
-  hasCategories = this.filterConfigService.hasCategories;
-  selectedActivities = this.filterConfigService.selectedActivities;
-  selectedPersonas = this.filterConfigService.selectedPersonas;
-  allCategories = this.filterConfigService.allCategories;
-  allPersonas = this.filterConfigService.allPersonas;
 
   toggleMapCompare(): void {
     this.filterConfigService.toggleMapCompare();
@@ -160,16 +153,16 @@ export class MobileFilterPanelComponent implements OnDestroy {
     return this.filterConfigService.isRightOnlySelectedMode(modeId);
   }
 
-  isCarMode(modeId: number): boolean {
-    const modeOption = this.modeOptions().find(option => option.id === modeId);
-    return modeOption?.name.toLowerCase() === 'car';
+  isCarMode(profileId: number): boolean {
+    const modeOption = this.modeOptions().find(option => option.id === profileId);
+    return modeOption?.modeName.toLowerCase() === 'car';
   }
 
   isModeDisabled(modeId: number): boolean {
     return this.filterConfigService.isModeDisabled(modeId);
   }
 
-  getModeTooltip(option: { id: number; display_name: string }, isRight = false): string {
+  getModeTooltip(option: ProfileOption, isRight = false): string {
     const onlySelected = isRight ? this.isRightOnlySelectedMode(option.id) : this.isOnlySelectedMode(option.id);
     if (onlySelected) {
       const cannotDeselectLast = this.translate.instant('left.transportModes.cannotDeselectLast');
@@ -263,34 +256,6 @@ export class MobileFilterPanelComponent implements OnDestroy {
       maxWidth: '90vw',
       maxHeight: '90vh'
     });
-  }
-
-  getSelectedPersonaName(): string {
-    const selectedPersonaId = this.selectedPersonas();
-    if (selectedPersonaId === null) {
-      return '';
-    }
-    const persona = this.allPersonas().find(p => p.id === selectedPersonaId);
-    return persona ? (persona.display_name || persona.name) : '';
-  }
-
-  getSelectedCategoryNames(): string[] {
-    const selectedIds = new Set(this.selectedActivities());
-    return this.allCategories()
-      .filter(c => selectedIds.has(c.id))
-      .map(c => c.display_name || c.name)
-      .sort((a, b) => a.localeCompare(b));
-  }
-
-  getActivitiesCountLabel(): string {
-    const selected = this.selectedActivities().length;
-    const total = this.allCategories().length;
-    return `(${selected} / ${total})`;
-  }
-
-  areAllCategoriesSelected(): boolean {
-    const total = this.allCategories().length;
-    return total > 0 && this.selectedActivities().length === total;
   }
 
   getFormattedCreatedDate(): string {

@@ -6,7 +6,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { ProjectsService } from '../services/project.service';
 import { DashboardSessionService } from '../services/dashboard-session.service';
 import { AuthService } from '../auth/auth.service';
-import { Project } from '../interfaces/project';
+import { Project, projectGroupId } from '../interfaces/project';
 
 export interface ProjectListSection {
   id: number | null;
@@ -66,10 +66,11 @@ export class UsersAreaComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.projectsService.getProjects(1, 100).subscribe({
-      next: (response) => {
-        this.projects.set(response.results);
-        this.initializeExpandedSections(response.results);
+    this.projectsService.getAllProjects().subscribe({
+      next: (projects) => {
+        this.projectsService.setListedProjects(projects);
+        this.projects.set(projects);
+        this.initializeExpandedSections(projects);
         this.loading.set(false);
       },
       error: (err) => {
@@ -89,10 +90,11 @@ export class UsersAreaComponent implements OnInit {
     const ungrouped: Project[] = [];
 
     for (const project of projects) {
-      if (project.group_id != null) {
-        const groupProjects = byGroup.get(project.group_id) ?? [];
+      const groupId = projectGroupId(project);
+      if (groupId != null) {
+        const groupProjects = byGroup.get(groupId) ?? [];
         groupProjects.push(project);
-        byGroup.set(project.group_id, groupProjects);
+        byGroup.set(groupId, groupProjects);
       } else {
         ungrouped.push(project);
       }
