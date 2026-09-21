@@ -5,6 +5,7 @@ import { LandingComponent } from './landing/landing.component';
 import { MaintenanceComponent } from './maintenance/maintenance.component';
 import { UsersAreaComponent } from './users-area/users-area.component';
 import { InvalidShareKeyComponent } from './invalid-share-key/invalid-share-key.component';
+import { PersonaEditorComponent } from './persona-editor/persona-editor.component';
 
 export const routes: Routes = [
   // {
@@ -24,6 +25,8 @@ export const routes: Routes = [
     ]
   },
   { path: 'users-area', component: UsersAreaComponent },
+  { path: 'persona-editor', component: PersonaEditorComponent },
+  { path: 'persona-editor/:id', component: PersonaEditorComponent },
   {
     path: 'dashboard',
     component: DashboardComponent,

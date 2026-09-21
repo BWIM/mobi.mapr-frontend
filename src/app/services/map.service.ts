@@ -16,6 +16,7 @@ import {
   isDifferenceInSelectedBrackets,
 } from '../utils/difference-colors.util';
 import { buildBasemapStyle, moveBasemapLabelsToTop } from './basemap-style';
+import { buildIndexFillColorExpression } from '../utils/index-colors.util';
 
 export interface ContentLayerFilters {
   profile_ids: number[];
@@ -1263,33 +1264,11 @@ export class MapService {
   }
 
   /**
-   * Returns the fill color expression for Index feature type
-   * Color breaks match the grade boundaries from getIndexName():
-   * - A (A+, A, A-): < 0.35
-   * - B (B+, B, B-): < 0.5
-   * - C (C+, C, C-): < 0.71
-   * - D (D+, D, D-): < 1.0
-   * - E (E+, E, E-): < 1.41
-   * - F (F+, F, F-): >= 1.41
+   * Returns the fill color expression for Index feature type.
+   * Color breaks match the grade boundaries from getIndexName().
    */
   private getIndexFillColorExpression(): any {
-    // Divide "index" by 100 before applying color breaks
-    return [
-      'case',
-      ['<=', ['/', ['get', 'index'], 100], 0],
-      'rgba(128, 128, 128, 0)', // NaN or invalid
-      ['<', ['/', ['get', 'index'], 100], 0.35],
-      'rgba(50, 97, 45, 0.7)',  // Grade A (A+, A, A-)
-      ['<', ['/', ['get', 'index'], 100], 0.5],
-      'rgba(60, 176, 67, 0.7)',  // Grade B (B+, B, B-)
-      ['<', ['/', ['get', 'index'], 100], 0.71],
-      'rgba(238, 210, 2, 0.7)',  // Grade C (C+, C, C-)
-      ['<', ['/', ['get', 'index'], 100], 1.0],
-      'rgba(237, 112, 20, 0.7)',  // Grade D (D+, D, D-)
-      ['<', ['/', ['get', 'index'], 100], 1.41],
-      'rgba(194, 24, 7, 0.7)',  // Grade E (E+, E, E-)
-      'rgba(150, 86, 162, 0.7)',  // Grade F (F+, F, F-)
-    ];
+    return buildIndexFillColorExpression();
   }
 
 

@@ -1,0 +1,47 @@
+.chip {
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 25%, transparent);
+  background: transparent;
+  color: var(--primary-color);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  padding: 0.35rem 0.7rem;
+}
+
+.chip-active {
+  background: var(--primary-color);
+  color: var(--background-color);
+}
+
+.preview-map {
+  width: 100%;
+  height: min(70vh, 640px);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.persona-field {
+  display: block;
+}
+
+.weights-text {
+  width: 100%;
+  min-height: 16rem;
+  resize: vertical;
+  border-radius: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 25%, transparent);
+  background: var(--background-color);
+  color: var(--primary-color);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  padding: 0.75rem;
+}
+
+:host ::ng-deep .persona-field .mat-mdc-text-field-wrapper {
+  background: var(--background-color);
+}
+
+:host ::ng-deep .mat-mdc-slide-toggle {
+  --mdc-switch-selected-track-color: var(--primary-color);
+}

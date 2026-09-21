@@ -1,12 +1,16 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { SharedModule } from '../shared/shared.module';
 import { TranslateModule } from '@ngx-translate/core';
 import { ProjectsService } from '../services/project.service';
 import { DashboardSessionService } from '../services/dashboard-session.service';
 import { AuthService } from '../auth/auth.service';
 import { Project, projectGroupId } from '../interfaces/project';
+import { CustomPersonaService } from '../services/custom-persona.service';
+import { CustomPersona } from '../interfaces/custom-persona';
 
 export interface ProjectListSection {
   id: number | null;
@@ -25,12 +29,17 @@ export class UsersAreaComponent implements OnInit {
   private dashboardSessionService = inject(DashboardSessionService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private customPersonaService = inject(CustomPersonaService);
 
   projects = signal<Project[]>([]);
+  customPersonas = signal<CustomPersona[]>([]);
   loading = signal<boolean>(true);
   error = signal<string | null>(null);
+  personaError = signal<string | null>(null);
   selectedProjectId = signal<number | null>(null);
   expandedSectionKeys = signal<Set<string>>(new Set());
+  pendingDeletePersonaId = signal<number | null>(null);
+  deletingPersonaId = signal<number | null>(null);
 
   pinnedProjects = computed(() =>
     this.sortProjects(this.projects().filter((project) => project.pin))
@@ -48,6 +57,16 @@ export class UsersAreaComponent implements OnInit {
 
   flatProjects = computed(() => this.sortProjects(this.projects()));
 
+  private personaByPublishedProjectId = computed(() => {
+    const byProjectId = new Map<number, CustomPersona>();
+    for (const persona of this.customPersonas()) {
+      if (persona.published_project_id) {
+        byProjectId.set(persona.published_project_id, persona);
+      }
+    }
+    return byProjectId;
+  });
+
   ngOnInit(): void {
     if (!this.authService.isLoggedIn()) {
       this.router.navigate(['/landing']);
@@ -59,21 +78,34 @@ export class UsersAreaComponent implements OnInit {
       this.selectedProjectId.set(Number(currentProjectId));
     }
 
-    this.loadProjects();
+    this.loadData();
   }
 
-  private loadProjects(): void {
-    this.loading.set(true);
+  private loadData(showSpinner = true): void {
+    if (showSpinner) {
+      this.loading.set(true);
+    }
     this.error.set(null);
+    this.personaError.set(null);
 
-    this.projectsService.getAllProjects().subscribe({
-      next: (projects) => {
+    forkJoin({
+      projects: this.projectsService.getAllProjects(),
+      personas: this.customPersonaService.getCustomPersonas().pipe(
+        catchError((err: unknown) => {
+          console.error('Error loading custom personas:', err);
+          this.personaError.set('usersArea.loadPersonasError');
+          return of({ results: [] as CustomPersona[], count: 0, next: null, previous: null });
+        })
+      ),
+    }).subscribe({
+      next: ({ projects, personas }) => {
         this.projectsService.setListedProjects(projects);
         this.projects.set(projects);
         this.initializeExpandedSections(projects);
+        this.customPersonas.set(personas.results);
         this.loading.set(false);
       },
-      error: (err) => {
+      error: (err: unknown) => {
         console.error('Error loading projects:', err);
         this.error.set('usersArea.loadError');
         this.loading.set(false);
@@ -180,5 +212,64 @@ export class UsersAreaComponent implements OnInit {
 
   isProjectSelected(projectId: number): boolean {
     return this.selectedProjectId() === projectId;
+  }
+
+  personaForProject(project: Project): CustomPersona | undefined {
+    return this.personaByPublishedProjectId().get(project.id);
+  }
+
+  createPersona(): void {
+    this.router.navigate(['/persona-editor']);
+  }
+
+  editPersona(persona: CustomPersona): void {
+    this.router.navigate(['/persona-editor', persona.id]);
+  }
+
+  editPersonaFromProject(event: Event, persona: CustomPersona): void {
+    event.stopPropagation();
+    this.editPersona(persona);
+  }
+
+  openPersonaProject(event: Event, persona: CustomPersona): void {
+    event.stopPropagation();
+    if (!persona.published_project_id) {
+      this.editPersona(persona);
+      return;
+    }
+    this.dashboardSessionService.setProjectId(persona.published_project_id.toString());
+    this.router.navigate(['/dashboard'], {
+      queryParams: { project_id: persona.published_project_id },
+    });
+  }
+
+  requestDeletePersona(event: Event, persona: CustomPersona): void {
+    event.stopPropagation();
+    this.pendingDeletePersonaId.set(persona.id);
+  }
+
+  cancelDeletePersona(event: Event): void {
+    event.stopPropagation();
+    this.pendingDeletePersonaId.set(null);
+  }
+
+  confirmDeletePersona(event: Event, persona: CustomPersona): void {
+    event.stopPropagation();
+    this.deletingPersonaId.set(persona.id);
+    this.customPersonaService.deleteCustomPersona(persona.id).subscribe({
+      next: () => {
+        this.pendingDeletePersonaId.set(null);
+        this.deletingPersonaId.set(null);
+        this.customPersonas.set(
+          this.customPersonas().filter((item) => item.id !== persona.id)
+        );
+        this.loadData(false);
+      },
+      error: (err: unknown) => {
+        console.error('Error deleting custom persona:', err);
+        this.deletingPersonaId.set(null);
+        this.personaError.set('usersArea.deletePersonaError');
+      },
+    });
   }
 }

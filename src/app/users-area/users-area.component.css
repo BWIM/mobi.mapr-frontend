@@ -1,7 +1,8 @@
-button.selected {
+.project-card.selected {
   background-color: var(--secondary-color);
 }
 
-button:not(.selected):hover {
+.project-card:not(.selected):hover {
   transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
 }
