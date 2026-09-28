@@ -168,7 +168,7 @@
       
       <!-- Chart Container -->
       <div class="relative">
-        <p-chart #activitiesChart type="bar" [data]="activitiesChartData" [options]="activitiesChartOptions" (onDataSelect)="onChartDataSelect($event)" style="cursor: pointer;"></p-chart>
+        <app-chart #activitiesChart type="bar" [data]="activitiesChartData" [options]="activitiesChartOptions" (dataSelect)="onChartDataSelect($event)" style="cursor: pointer;"></app-chart>
       </div>
       
       <!-- Activity List -->
@@ -403,7 +403,7 @@
       
       <!-- Chart Container -->
       <div class="relative">
-        <p-chart #activitiesChart type="bar" [data]="activitiesChartData" [options]="activitiesChartOptions" (onDataSelect)="onChartDataSelect($event)" style="cursor: pointer;"></p-chart>
+        <app-chart #activitiesChart type="bar" [data]="activitiesChartData" [options]="activitiesChartOptions" (dataSelect)="onChartDataSelect($event)" style="cursor: pointer;"></app-chart>
       </div>
       
       <!-- Activity List -->

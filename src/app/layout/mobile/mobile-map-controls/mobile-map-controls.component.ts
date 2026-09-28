@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
 import { MobileUiService } from '../../../services/mobile-ui.service';
@@ -8,6 +8,7 @@ import { ProjectNavigationService } from '../../../services/project-navigation.s
   selector: 'app-mobile-map-controls',
   imports: [MatIcon, TranslateModule],
   templateUrl: './mobile-map-controls.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './mobile-map-controls.component.css',
 })
 export class MobileMapControlsComponent {

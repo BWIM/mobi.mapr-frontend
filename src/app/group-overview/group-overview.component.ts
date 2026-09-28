@@ -1,4 +1,4 @@
-import { Component, inject, output, computed } from '@angular/core';
+import { Component, inject, output, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SharedModule } from '../shared/shared.module';
 import { TranslateModule } from '@ngx-translate/core';
@@ -10,6 +10,7 @@ import { ProjectGroupSibling } from '../interfaces/project-group';
   selector: 'app-group-overview',
   imports: [CommonModule, SharedModule, TranslateModule],
   templateUrl: './group-overview.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './group-overview.component.css',
 })
 export class GroupOverviewComponent {

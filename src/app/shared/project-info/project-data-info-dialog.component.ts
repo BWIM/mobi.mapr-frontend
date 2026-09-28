@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { SharedModule } from '../shared.module';
 
@@ -9,6 +9,7 @@ export interface ProjectDataInfoDialogData {
 @Component({
   selector: 'app-project-data-info-dialog',
   imports: [SharedModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './project-data-info-dialog.component.html',
 })
 export class ProjectDataInfoDialogComponent {

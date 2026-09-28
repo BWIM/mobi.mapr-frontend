@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, signal, inject, effect, untracked } from '@angular/core';
+import { Component, signal, inject, effect, untracked, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RailComponent } from '../rail/rail.component';
@@ -43,6 +43,7 @@ import { LanguageService } from '../../services/language.service';
     GroupOverviewComponent,
   ],
   templateUrl: './dashboard.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent {

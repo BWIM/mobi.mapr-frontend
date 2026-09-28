@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SharedModule } from '../shared/shared.module';
@@ -18,6 +18,7 @@ export interface ProjectListSection {
   selector: 'app-users-area',
   imports: [CommonModule, SharedModule, TranslateModule],
   templateUrl: './users-area.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './users-area.component.css',
 })
 export class UsersAreaComponent implements OnInit {

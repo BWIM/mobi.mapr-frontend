@@ -36,7 +36,7 @@
       <!-- Chart Container - Takes most of the space (about 70%) -->
       <div class="flex-[4] min-h-0 mb-3 w-full chart-wrapper">
         <div class="relative w-full h-full">
-          <p-chart #allCategoriesChart type="bar" [data]="chartData" [options]="chartOptions" (onDataSelect)="onChartDataSelect($event)" style="cursor: pointer;"></p-chart>
+          <app-chart #allCategoriesChart type="bar" [data]="chartData" [options]="chartOptions" (dataSelect)="onChartDataSelect($event)" style="cursor: pointer;"></app-chart>
         </div>
       </div>
       

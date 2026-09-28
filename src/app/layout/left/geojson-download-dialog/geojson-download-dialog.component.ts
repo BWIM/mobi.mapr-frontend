@@ -1,4 +1,4 @@
-import { Component, Inject, inject } from '@angular/core';
+import { Component, Inject, inject, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl, FormControl, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { FilterConfigService } from '../../../services/filter-config.service';
@@ -31,6 +31,7 @@ function requiredTrimmedEmail(control: AbstractControl): ValidationErrors | null
     ReactiveFormsModule,
   ],
   templateUrl: './geojson-download-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './geojson-download-dialog.component.css'
 })
 export class GeoJsonDownloadDialogComponent {

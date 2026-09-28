@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { SharedModule } from '../../../shared/shared.module';
 import { TranslateService } from '@ngx-translate/core';
@@ -17,6 +17,7 @@ interface InfoComponent {
     SharedModule,
   ],
   templateUrl: './credits-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './credits-dialog.component.css'
 })
 export class CreditsDialogComponent {

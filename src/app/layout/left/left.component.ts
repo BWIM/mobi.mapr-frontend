@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, computed, signal, DestroyRef } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, computed, signal, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProjectsService } from '../../services/project.service';
 import { FilterConfigService } from '../../services/filter-config.service';
@@ -10,7 +10,7 @@ import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.compo
 import { LegendInfoComponent } from '../../shared/legend-info/legend-info.component';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { ChartModule } from 'primeng/chart';
+import { ChartComponent } from '../../shared/chart/chart.component';
 import { Subscription } from 'rxjs';
 import { ProfileOption } from '../../interfaces/profile';
 import { ProjectSwitcherComponent } from '../../shared/project-switcher/project-switcher.component';
@@ -18,8 +18,9 @@ import { ProjectInfoComponent } from '../../shared/project-info/project-info.com
 
 @Component({
   selector: 'app-left',
-  imports: [SharedModule, InfoOverlayComponent, TranslateModule, ChartModule, ProjectSwitcherComponent, ProjectInfoComponent],
+  imports: [SharedModule, InfoOverlayComponent, TranslateModule, ChartComponent, ProjectSwitcherComponent, ProjectInfoComponent],
   templateUrl: './left.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './left.component.css',
 })
 export class LeftComponent implements OnInit, OnDestroy {

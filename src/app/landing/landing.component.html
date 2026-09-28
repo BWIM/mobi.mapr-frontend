@@ -47,7 +47,7 @@
                 <div class="flex items-center gap-4">
                     <div
                         class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-200 shadow-sm transition-colors group-hover:bg-blue-300">
-                        <i class="pi pi-globe text-lg text-blue-700"></i>
+                        <span class="material-icons text-lg! leading-none text-blue-700">public</span>
                     </div>
                     <div>
                         <div class="mb-1 flex items-center gap-2">
@@ -66,8 +66,8 @@
                         </p>
                     </div>
                 </div>
-                <i
-                    class="pi pi-external-link text-gray-400 transition-colors group-hover:text-blue-600"></i>
+                <span
+                    class="material-icons text-base! leading-none text-gray-400 transition-colors group-hover:text-blue-600">open_in_new</span>
             </a>
 
             <!-- Big project try out -->
@@ -76,7 +76,7 @@
                 <div class="flex items-center gap-4">
                     <div
                         class="flex h-10 w-10 items-center justify-center rounded-full bg-teal-100 transition-colors group-hover:bg-teal-200">
-                        <i class="pi pi-compass text-teal-600"></i>
+                        <span class="material-icons text-base! leading-none text-teal-600">explore</span>
                     </div>
                     <div>
                         <h3 class="text-lg font-medium text-[var(--primary-color)] group-hover:text-[var(--secondary-color)]">
@@ -88,8 +88,8 @@
                         </p>
                     </div>
                 </div>
-                <i
-                    class="pi pi-external-link text-gray-400 transition-colors group-hover:text-teal-600"></i>
+                <span
+                    class="material-icons text-base! leading-none text-gray-400 transition-colors group-hover:text-teal-600">open_in_new</span>
             </a>
         </div>
 
@@ -97,7 +97,7 @@
         <div class="text-center">
             <a (click)="goToLogin()"
                 class="inline-flex cursor-pointer items-center text-[0.95rem] text-[var(--primary-color)] opacity-85 transition-colors duration-200 hover:text-[var(--light-primary-color)] hover:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-color)]">
-                <i class="pi pi-sign-in mr-2"></i>
+                <span class="material-icons text-base! leading-none mr-2">login</span>
                 {{ 'LANDING.CARDS.LOGIN.BUTTON' | translate }}
             </a>
         </div>

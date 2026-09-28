@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProjectsService } from '../../services/project.service';
 
@@ -6,6 +6,7 @@ import { ProjectsService } from '../../services/project.service';
   selector: 'app-bottom',
   imports: [CommonModule],
   templateUrl: './bottom.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './bottom.component.css',
 })
 export class BottomComponent {

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { SharedModule } from '../../../shared/shared.module';
@@ -15,6 +15,7 @@ import { finalize } from 'rxjs/operators';
     TranslateModule,
   ],
   templateUrl: './feedback-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './feedback-dialog.component.css'
 })
 export class FeedbackDialogComponent {

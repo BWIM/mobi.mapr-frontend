@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { SharedModule } from '../shared.module';
@@ -35,6 +35,7 @@ export interface CompositionFormattedMetric {
   standalone: true,
   imports: [CommonModule, TranslateModule, SharedModule, CategoryCompositionPanelComponent],
   templateUrl: './category-composition-panel.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './category-composition-panel.component.css',
 })
 export class CategoryCompositionPanelComponent {

@@ -36,14 +36,14 @@
 }
 
 /* Ensure PrimeNG chart container and canvas use full height */
-::ng-deep .all-categories-dialog-panel .chart-wrapper p-chart {
+::ng-deep .all-categories-dialog-panel .chart-wrapper app-chart {
   display: block;
   width: 100%;
   height: 100%;
   min-height: 0;
 }
 
-::ng-deep .all-categories-dialog-panel .chart-wrapper p-chart > div {
+::ng-deep .all-categories-dialog-panel .chart-wrapper app-chart > div {
   width: 100% !important;
   height: 100% !important;
   min-height: 0 !important;

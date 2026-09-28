@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -9,6 +9,7 @@ import { LanguageService } from '../services/language.service';
     selector: 'app-landing',
     standalone: true,
     imports: [CommonModule, TranslateModule],
+    changeDetection: ChangeDetectionStrategy.Eager,
     templateUrl: './landing.component.html'
 })
 export class LandingComponent implements OnInit {

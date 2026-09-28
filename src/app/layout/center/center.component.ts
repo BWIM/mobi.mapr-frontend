@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, effect, ChangeDetectorRef, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, effect, ChangeDetectorRef, computed, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription, firstValueFrom, debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { Map, MapDataEvent, NavigationControl, FullscreenControl, Popup, AttributionControl, LngLatLike } from 'maplibre-gl';
 import Compare from '@maplibre/maplibre-gl-compare';
@@ -40,6 +40,7 @@ interface LayerButtonOption {
   selector: 'app-center',
   imports: [SharedModule, TranslateModule],
   templateUrl: './center.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './center.component.css',
 })
 export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {

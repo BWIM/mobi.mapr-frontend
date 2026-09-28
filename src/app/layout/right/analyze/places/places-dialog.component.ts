@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, NgZone } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, NgZone, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SharedModule } from '../../../../shared/shared.module';
 import { CommonModule } from '@angular/common';
@@ -41,6 +41,7 @@ export interface PlacesDialogData {
     CategoryCompositionPanelComponent,
   ],
   templateUrl: './places-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './places-dialog.component.css'
 })
 export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
