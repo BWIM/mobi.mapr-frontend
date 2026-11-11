@@ -32,7 +32,7 @@
     </div>
     
     <!-- Chart and Categories -->
-    <div *ngIf="(allCategories.length > 0 || (data.isComparisonMode && allCategories2.length > 0)) && !isLoading && !isLoading2 && !error && !error2" class="w-full flex flex-col flex-1 min-h-0">
+    <div data-tour="activity-list" *ngIf="(allCategories.length > 0 || (data.isComparisonMode && allCategories2.length > 0)) && !isLoading && !isLoading2 && !error && !error2" class="w-full flex flex-col flex-1 min-h-0">
       <!-- Chart Container - Takes most of the space (about 70%) -->
       <div class="flex-[4] min-h-0 mb-3 w-full chart-wrapper">
         <div class="relative w-full h-full">

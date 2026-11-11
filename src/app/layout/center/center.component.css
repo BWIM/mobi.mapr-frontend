@@ -581,61 +581,6 @@
   text-align: center;
 }
 
-.legend-hint {
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 70%;
-  transform: translateX(-50%);
-  max-width: min(260px, calc(100% - 16px));
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 10px;
-  background-color: var(--background-color);
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-  color: var(--primary-color);
-  font-size: 11px;
-  font-weight: 500;
-  z-index: 2;
-  pointer-events: auto;
-}
-
-.legend-hint-text {
-  line-height: 1.25;
-}
-
-.legend-hint-close {
-  width: 24px;
-  height: 24px;
-  border: none;
-  border-radius: 9999px;
-  background: rgba(0, 0, 0, 0.08);
-  color: var(--primary-color);
-  cursor: pointer;
-  font-size: 14px;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-}
-
-.legend-hint-close:hover {
-  background: rgba(0, 0, 0, 0.14);
-}
-
-@media (max-width: 1023px) {
-  .legend-hint {
-    bottom: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: min(250px, calc(100% - 12px));
-  }
-}
-
 /* Search form field styling - pill shaped with primary background */
 :host ::ng-deep .search-form-field {
   border-radius: 9999px !important; /* pill shape */

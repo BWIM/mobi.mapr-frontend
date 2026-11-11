@@ -362,10 +362,6 @@
           "45+": "45+ minutes"
         }
       },
-      "hint": {
-        "clickEntries": "Tip: You can click the colors in the legend to filter the map by time/rating.",
-        "dismiss": "Dismiss hint"
-      },
       "difference": {
         "qualityTitle": "Difference in grade steps",
         "timeTitle": "Difference in minutes",
@@ -976,6 +972,66 @@
       "title": "Information about the data",
       "openStreetMapFallback": "The data for this project comes from OpenStreetMap. It is provided by the OpenStreetMap contributors under the Open Database License (ODbL).",
       "close": "Close"
+    }
+  },
+  "tutorial": {
+    "replay": "Show the tour",
+    "progress": "{{current}} / {{total}}",
+    "start": "Start tour",
+    "notNow": "Not now",
+    "next": "Next",
+    "back": "Back",
+    "finish": "Got it",
+    "skipStep": "Skip step",
+    "close": "Close tour",
+    "waitingForClick": "Waiting for your click …",
+    "waitingForTap": "Waiting for your tap …",
+    "steps": {
+      "welcome": {
+        "title": "Welcome to mobi.mapr!",
+        "text": "mobi.mapr shows how well people can reach their everyday destinations – the supermarket, the doctor, school or friends – in every region.\nThis short tour shows you the most important features in about a minute."
+      },
+      "map": {
+        "title": "Map & colors",
+        "text": "Each area is colored by its mobility rating: from A (best quality) to F (poorest), or as weighted mobility time in minutes. Click the colors in the legend to filter the map. The further you zoom in, the more detailed the map becomes."
+      },
+      "modes": {
+        "title": "Transport modes",
+        "text": "Choose which means of transport are taken into account: walking, cycling, public transport or car. The map updates right away – give it a try!"
+      },
+      "analyze": {
+        "title": "Analyze a place",
+        "text": "Zoom into the map until the municipalities or the small hexagons appear. Then click on one of them to see how its rating comes about.",
+        "textMobile": "Zoom into the map until the municipalities or the small hexagons appear. Then tap on one of them to see how its rating comes about.",
+        "zoomHint": "That's a county or state. Please zoom in further and choose a municipality or a hexagon. Counties and states have less information."
+      },
+      "analyzeResult": {
+        "title": "The analysis",
+        "text": "Here you can see the rating of the selected place and which activities are easy or hard to reach. Click on another area at any time to analyze it."
+      },
+      "allActivities": {
+        "title": "All activities",
+        "text": "Click on “Show all activities” to see how well every activity can be reached from this place.",
+        "textMobile": "Tap on “See all activities” to see how well every activity can be reached from this place."
+      },
+      "activity": {
+        "title": "Choose an activity",
+        "text": "Each bar is one activity, e.g. supermarket or doctor. Click on one of them to see the actual places on a map.",
+        "textMobile": "Each bar is one activity, e.g. supermarket or doctor. Tap on one of them to see the actual places on a map."
+      },
+      "places": {
+        "title": "The places map",
+        "text": "This map shows the places of this activity that can be reached from the selected place – and how well. Feel free to look around before you continue."
+      },
+      "stats": {
+        "title": "Statistics",
+        "text": "“The Best” ranks states, counties and municipalities by their mobility. Click on an entry to show it on the map.",
+        "textMobile": "Open “The Best” here: a ranking of states, counties and municipalities by their mobility. Tap an entry to show it on the map."
+      },
+      "done": {
+        "title": "You're ready to go!",
+        "text": "Explore the map on your own. You can restart this tour at any time using this button."
+      }
     }
   }
 }

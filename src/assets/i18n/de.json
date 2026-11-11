@@ -362,10 +362,6 @@
           "45+": "45+ Minuten"
         }
       },
-      "hint": {
-        "clickEntries": "Tipp: Du kannst die Farben in der Legende anklicken, um die Karte nach Zeiten/Bewertung zu filtern.",
-        "dismiss": "Hinweis schließen"
-      },
       "difference": {
         "qualityTitle": "Unterschied in Notenstufen",
         "timeTitle": "Unterschied in Minuten",
@@ -976,6 +972,66 @@
       "title": "Informationen über die Daten",
       "openStreetMapFallback": "Die Daten für dieses Projekt stammen aus OpenStreetMap. Sie werden von den OpenStreetMap-Mitwirkenden bereitgestellt und stehen unter der Open Database License (ODbL).",
       "close": "Schließen"
+    }
+  },
+  "tutorial": {
+    "replay": "Tour anzeigen",
+    "progress": "{{current}} / {{total}}",
+    "start": "Tour starten",
+    "notNow": "Jetzt nicht",
+    "next": "Weiter",
+    "back": "Zurück",
+    "finish": "Alles klar",
+    "skipStep": "Schritt überspringen",
+    "close": "Tour schließen",
+    "waitingForClick": "Warte auf deinen Klick …",
+    "waitingForTap": "Warte auf dein Tippen …",
+    "steps": {
+      "welcome": {
+        "title": "Willkommen bei mobi.mapr!",
+        "text": "mobi.mapr zeigt, wie gut Menschen ihre alltäglichen Ziele erreichen – den Supermarkt, die Arztpraxis, die Schule oder Freunde – und das für jede Region.\nDiese kurze Tour zeigt dir in etwa einer Minute die wichtigsten Funktionen."
+      },
+      "map": {
+        "title": "Karte & Farben",
+        "text": "Jede Fläche ist nach ihrer Mobilitätsbewertung eingefärbt: von A (beste Qualität) bis F (schlechteste) oder als gewichtete Mobilitätszeit in Minuten. Klicke auf die Farben in der Legende, um die Karte zu filtern. Je weiter du hineinzoomst, desto feiner wird die Karte."
+      },
+      "modes": {
+        "title": "Verkehrsmittel",
+        "text": "Wähle, welche Verkehrsmittel berücksichtigt werden: zu Fuß, Fahrrad, ÖPNV oder Auto. Die Karte aktualisiert sich sofort – probier es aus!"
+      },
+      "analyze": {
+        "title": "Einen Ort analysieren",
+        "text": "Zoome in die Karte hinein, bis die Gemeinden oder die kleinen Hexagone erscheinen. Klicke dann auf eine davon, um zu sehen, wie ihre Bewertung zustande kommt.",
+        "textMobile": "Zoome in die Karte hinein, bis die Gemeinden oder die kleinen Hexagone erscheinen. Tippe dann auf eine davon, um zu sehen, wie ihre Bewertung zustande kommt.",
+        "zoomHint": "Das ist ein Landkreis oder Bundesland. Bitte zoome weiter hinein und wähle eine Gemeinde oder ein Hexagon. Landkreise und Bundesländer haben weniger Informationen."
+      },
+      "analyzeResult": {
+        "title": "Die Analyse",
+        "text": "Hier siehst du die Bewertung des gewählten Ortes und welche Aktivitäten gut oder schlecht erreichbar sind. Klicke jederzeit auf eine andere Fläche, um sie zu analysieren."
+      },
+      "allActivities": {
+        "title": "Alle Aktivitäten",
+        "text": "Klicke auf „Alle Aktivitäten anzeigen“, um zu sehen, wie gut jede Aktivität von diesem Ort aus erreichbar ist.",
+        "textMobile": "Tippe auf „Alle Aktivitäten anzeigen“, um zu sehen, wie gut jede Aktivität von diesem Ort aus erreichbar ist."
+      },
+      "activity": {
+        "title": "Eine Aktivität wählen",
+        "text": "Jeder Balken ist eine Aktivität, z. B. Supermarkt oder Arztpraxis. Klicke auf eine davon, um die konkreten Orte auf einer Karte zu sehen.",
+        "textMobile": "Jeder Balken ist eine Aktivität, z. B. Supermarkt oder Arztpraxis. Tippe auf eine davon, um die konkreten Orte auf einer Karte zu sehen."
+      },
+      "places": {
+        "title": "Die Orte-Karte",
+        "text": "Diese Karte zeigt die Orte dieser Aktivität, die vom gewählten Ort aus erreichbar sind – und wie gut. Schau dich ruhig um, bevor du weitermachst."
+      },
+      "stats": {
+        "title": "Statistiken",
+        "text": "„Die Besten“ zeigt eine Rangliste der Bundesländer, Landkreise und Gemeinden nach ihrer Mobilität. Klicke auf einen Eintrag, um ihn auf der Karte anzuzeigen.",
+        "textMobile": "Hier öffnest du „Die Besten“: eine Rangliste der Bundesländer, Landkreise und Gemeinden nach ihrer Mobilität. Tippe auf einen Eintrag, um ihn auf der Karte anzuzeigen."
+      },
+      "done": {
+        "title": "Los geht's!",
+        "text": "Erkunde die Karte jetzt selbst. Über diesen Button kannst du die Tour jederzeit erneut starten."
+      }
     }
   }
 }

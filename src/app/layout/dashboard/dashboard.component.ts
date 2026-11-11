@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, signal, inject, effect, untracked, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, effect, untracked, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RailComponent } from '../rail/rail.component';
@@ -15,6 +15,8 @@ import { Project } from '../../interfaces/project';
 import { firstValueFrom } from 'rxjs';
 import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { TranslateModule } from '@ngx-translate/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
 import { MobileFilterPanelComponent } from '../mobile-filter-panel/mobile-filter-panel.component';
 import { MobileUiService } from '../../services/mobile-ui.service';
 import { FeatureSelectionService } from '../../shared/services/feature-selection.service';
@@ -26,6 +28,8 @@ import { LanguageService } from '../../services/language.service';
 import { ReturnUrlService } from '../../auth/return-url.service';
 import { URL_PARAM } from '../../url-state/url-params';
 import { UrlStateService } from '../../url-state/url-state.service';
+import { TutorialOverlayComponent } from '../../tutorial/tutorial-overlay.component';
+import { TutorialLayout, TutorialService } from '../../tutorial/tutorial.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -36,10 +40,12 @@ import { UrlStateService } from '../../url-state/url-state.service';
     RightComponent,
     CenterComponent,
     TranslateModule,
+    MatIconModule,
     MobileFilterPanelComponent,
     MobileMapControlsComponent,
     MobileSheetsComponent,
     GroupOverviewComponent,
+    TutorialOverlayComponent,
   ],
   templateUrl: './dashboard.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -60,15 +66,21 @@ export class DashboardComponent {
   private returnUrlService = inject(ReturnUrlService);
   /** Created here (not at app start) so it reads the dashboard URL before child maps are built. */
   private urlState = inject(UrlStateService);
+  readonly tutorial = inject(TutorialService);
+  private destroyRef = inject(DestroyRef);
+  private dialog = inject(MatDialog);
 
   /** Matches right panel `duration-300` transition in dashboard template. */
   private static readonly RIGHT_PANEL_TRANSITION_MS = 300;
+  /** Grace period after the dashboard is ready before the tour opens, so the map can render first. */
+  private static readonly TUTORIAL_START_DELAY_MS = 1000;
 
   leftPanelExpanded = signal(true);
   rightPanelExpanded = signal(true);
   mobileFilterExpanded = signal(false);
   showGroupOverview = signal(false);
   private hasInitialized = false;
+  private tutorialAutoStartChecked = false;
   private currentProjectIdentifier: string | null = null;
 
   readonly isMobile = this.mobileUi.isMobile;
@@ -94,6 +106,8 @@ export class DashboardComponent {
           this.resizeMapAfterPanelTransition();
         }
       });
+
+    this.setupTutorial();
 
     effect(() => {
       if (!this.mobileUi.isMobile() && this.mobileUi.isSheetOpen()) {
@@ -360,6 +374,84 @@ export class DashboardComponent {
     } catch (error) {
       console.error('Unexpected error validating share key:', error);
       this.router.navigate(['/invalid-share-key']);
+    }
+  }
+
+  startTutorial(): void {
+    this.tutorial.start();
+  }
+
+  private setupTutorial(): void {
+    // Auto-start once for first-time external (not logged-in) visitors, after the project is shown.
+    effect(() => {
+      const ready =
+        this.projectService.hasProject() &&
+        !this.projectService.isLoading() &&
+        !this.mapService.isMapLoading() &&
+        !this.showGroupOverview();
+      if (!ready || this.tutorialAutoStartChecked) {
+        return;
+      }
+      this.tutorialAutoStartChecked = true;
+      if (this.authService.isLoggedIn() || !this.tutorial.shouldAutoStart()) {
+        return;
+      }
+      const timeoutId = setTimeout(() => {
+        if (!this.tutorial.isActive() && !this.showGroupOverview()) {
+          this.tutorial.start();
+        }
+      }, DashboardComponent.TUTORIAL_START_DELAY_MS);
+      this.destroyRef.onDestroy(() => clearTimeout(timeoutId));
+    });
+
+    // Open the panels / sheets the current step points at.
+    effect(() => {
+      const layout = this.tutorial.currentStep()?.layout;
+      if (layout) {
+        untracked(() => this.applyTutorialLayout(layout));
+      }
+    });
+
+    // Leave the mobile filter panel the way users expect it after the tour.
+    let wasActive = false;
+    effect(() => {
+      const active = this.tutorial.isActive();
+      if (wasActive && !active && this.mobileFilterExpanded()) {
+        untracked(() => this.toggleMobileFilterPanel());
+      }
+      wasActive = active;
+    });
+  }
+
+  private applyTutorialLayout(layout: TutorialLayout): void {
+    if (layout.closeDialogs && this.dialog.openDialogs.length > 0) {
+      this.dialog.closeAll();
+    }
+
+    if (this.mobileUi.isMobile()) {
+      if (layout.closeMobileSheet && this.mobileUi.isSheetOpen()) {
+        this.mobileUi.closeSheet();
+      }
+      if (layout.mobileAnalyzeMain && this.mobileUi.isAnalyzeOpen() && this.mobileUi.analyzeStep() !== 'main') {
+        this.mobileUi.backToAnalyze();
+      }
+      if (layout.mobileFilter !== undefined && layout.mobileFilter !== this.mobileFilterExpanded()) {
+        this.toggleMobileFilterPanel();
+      }
+      return;
+    }
+
+    let resized = false;
+    if (layout.leftPanel && !this.leftPanelExpanded()) {
+      this.leftPanelExpanded.set(true);
+      resized = true;
+    }
+    if (layout.rightPanel && !this.rightPanelExpanded() && !this.filterConfigService.isMapCompareMode()) {
+      this.rightPanelExpanded.set(true);
+      resized = true;
+    }
+    if (resized) {
+      this.resizeMapAfterPanelTransition();
     }
   }
 

@@ -6,6 +6,7 @@
     class="absolute inset-0 bg-black/50 pointer-events-auto"
     (click)="mobileUi.closeSheet()"></div>
   <div
+    [attr.data-tour]="mobileUi.sheet() === 'analyze' ? 'analyze' : null"
     class="relative pointer-events-auto w-full max-h-[85dvh] bg-[var(--background-color)] rounded-t-3xl shadow-2xl flex flex-col overflow-hidden"
     (click)="$event.stopPropagation()">
     <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--primary-color)] border-opacity-20 shrink-0">

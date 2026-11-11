@@ -15,7 +15,6 @@ import { FeatureSelectionService } from '../../shared/services/feature-selection
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SearchService } from '../../services/search.service';
 import { QualityBracket, TimeBracket } from '../../services/filter-config.service';
-import { SettingsService } from '../../services/settings.service';
 import { ScoreColorsService } from '../../services/score-colors.service';
 import {
   buildDifferenceLegendItems,
@@ -88,7 +87,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private featureSelectionService = inject(FeatureSelectionService);
   private translate = inject(TranslateService);
   private searchService = inject(SearchService);
-  private settingsService = inject(SettingsService);
   private scoreColorsService = inject(ScoreColorsService);
   private snackBar = inject(MatSnackBar);
   private popup?: Popup;
@@ -109,7 +107,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   searchResults: NominatimResult[] = [];
   private searchSubject = new Subject<string>();
   isGettingLocation: boolean = false;
-  showLegendClickHint: boolean = true;
   private lastLayerFallbackToastAt = 0;
   readonly layerButtonOptions: LayerButtonOption[] = [
     { value: 'state', labelKey: 'map.layerSwitcher.state', shortLabelKey: 'map.layerSwitcher.stateShort' },
@@ -428,7 +425,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   openLegendDialog(): void {
-    this.markLegendClickHintAsSeen();
     this.dialog.open(InfoDialogComponent, {
       width: '80vw',
       height: '80vh',
@@ -440,9 +436,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async ngOnInit() {
-    const settings = this.settingsService.loadSettings();
-    this.showLegendClickHint = settings?.legendClickHintShown !== true;
-
     // Get initial style value immediately
     this.mapStyle = await firstValueFrom(this.mapService.mapStyle$);
 
@@ -996,20 +989,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.searchQuery.trim().length >= 3) {
       this.searchSubject.next(this.searchQuery.trim());
     }
-  }
-
-  dismissLegendClickHint(event?: Event): void {
-    event?.stopPropagation();
-    this.markLegendClickHintAsSeen();
-  }
-
-  private markLegendClickHintAsSeen(): void {
-    if (!this.showLegendClickHint) {
-      return;
-    }
-
-    this.showLegendClickHint = false;
-    this.settingsService.saveSettings({ legendClickHintShown: true });
   }
 
   private searchNominatim(query: string): Promise<NominatimResult[]> {

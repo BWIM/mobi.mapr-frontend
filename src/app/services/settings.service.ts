@@ -11,7 +11,8 @@ export interface UserSettings {
     quality: Array<'A' | 'B' | 'C' | 'D' | 'E' | 'F'>;
     time: string[];
   };
-  legendClickHintShown?: boolean;
+  /** Highest tutorial version the user finished or skipped. */
+  tutorialVersionSeen?: number;
   filters: {
     activities: number[];
     personas: number | number[] | null; // Support both old array format and new single value format
@@ -68,7 +69,6 @@ export class SettingsService {
         quality: ['A', 'B', 'C', 'D', 'E', 'F'],
         time: []
       },
-      legendClickHintShown: false,
       filters: {
         activities: [],
         personas: null,

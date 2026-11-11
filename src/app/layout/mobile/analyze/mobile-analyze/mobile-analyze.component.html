@@ -98,6 +98,7 @@
             </ul>
             <button
               type="button"
+              data-tour="all-activities"
               class="w-full py-2 text-sm font-medium text-[var(--primary-color)] border border-[var(--primary-color)] rounded-full"
               (click)="openAllActivities()">
               {{ 'mobile.analyze.seeAllActivities' | translate }}
@@ -131,7 +132,7 @@
       } @else if (activitiesError()) {
         <p class="text-sm text-red-600 text-center py-8">{{ activitiesError() }}</p>
       } @else {
-        <div class="chart-scroll-y flex-1 min-h-0 mb-2">
+        <div class="chart-scroll-y flex-1 min-h-0 mb-2" data-tour="activity-list">
           <div class="chart-host" [style.height.px]="activitiesChartHeight()">
             <app-chart
               type="bar"
@@ -154,7 +155,7 @@
   }
 
   @case ('places') {
-    <div class="flex flex-col min-h-[65vh] px-2 pb-4">
+    <div class="flex flex-col min-h-[65vh] px-2 pb-4" data-tour="places-map">
       <button
         type="button"
         class="flex items-center gap-1 text-sm text-[var(--primary-color)] mb-3 pt-1 self-start shrink-0"
