@@ -1517,6 +1517,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       categoryIndex = analyzeForFeature.categories[0].index;
     }
 
+    // Name of whichever place the branches above settled on (first or comparison place).
+    const feature2IdRaw = this.selectedFeature2?.properties.id || this.selectedFeature2?.id;
+    const usesFeature2 = feature2IdRaw != null && Number(feature2IdRaw) === featureId;
+
     const placesData: PlacesDialogData = {
       featureType: featureType,
       featureId: featureId,
@@ -1527,6 +1531,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       isScoreMode: filters.feature_type === 'score',
       categoryScore,
       categoryIndex,
+      featureName: usesFeature2 ? this.featureInfo2?.name : this.featureInfo?.name,
     };
 
     if (this.mobileUi.isMobile()) {

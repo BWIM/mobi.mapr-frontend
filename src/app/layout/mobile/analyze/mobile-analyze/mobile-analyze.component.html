@@ -168,6 +168,25 @@
       @if (placesError()) {
         <p class="text-sm text-[var(--primary-color)] text-center py-12 px-4">{{ placesError() }}</p>
       } @else {
+        <!-- What the map shows: one activity in colour, from the selected place -->
+        @if (!placesLoading() && placesFocusedItem(); as focus) {
+          <div class="places-summary mb-2 shrink-0 text-[var(--primary-color)]">
+            <p class="text-sm leading-snug m-0">
+              <span class="inline-block w-3 h-3 mr-1.5 rounded-full border-2 border-white bg-[var(--secondary-color)] align-[-0.1rem]" aria-hidden="true"></span>
+              {{ (placesFeatureName() ? 'analyze.placesDialog.focusSummary' : 'analyze.placesDialog.focusSummaryNoPlace')
+                  | translate: { activity: focus.name, place: placesFeatureName() } }}
+            </p>
+            <button
+              type="button"
+              class="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-[var(--light-primary-color)] text-xs text-[var(--primary-color)]"
+              (click)="openLegendInfo($event)">
+              {{ (placesScoreMode() ? 'analyze.placesDialog.focusTime' : 'analyze.placesDialog.focusRating') | translate }}:
+              <strong [style.color]="placesMetricTextColor(focus.score, focus.index)">{{ placesMetricLabel(focus.score, focus.index) }}</strong>
+            </button>
+            <p class="text-xs opacity-75 m-0 mt-1.5">{{ 'analyze.placesDialog.focusHintMobile' | translate }}</p>
+          </div>
+        }
+
         <div
           class="relative h-[50vh] min-h-[280px] w-full rounded-xl overflow-hidden border border-[var(--primary-color)] border-opacity-30 places-map-host">
           <div #mapContainer class="w-full h-full"></div>
@@ -182,14 +201,6 @@
             </div>
           }
         </div>
-
-        @if (!placesLoading()) {
-          <div class="mt-3 relative shrink-0">
-            <div class="flex justify-center pt-0.5">
-              <ng-container *ngTemplateOutlet="legendStrip" />
-            </div>
-          </div>
-        }
 
         @if (!placesLoading() && placesComposition()) {
           <div

@@ -630,6 +630,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
       isScoreMode: this.data.isScoreMode,
       categoryScore: match?.score,
       categoryIndex: match?.index,
+      featureName: this.data.featureName,
     };
 
     this.dialog.open(PlacesDialogComponent, {

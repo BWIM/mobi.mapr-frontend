@@ -4,6 +4,7 @@ import {
   NavigationControl,
   Popup,
   GeoJSONSource,
+  Marker,
 } from 'maplibre-gl';
 import { firstValueFrom, catchError, of } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
@@ -15,6 +16,11 @@ import { CompositionNode } from '../../interfaces/composition';
 import { CompositionActivityMeta } from '../../shared/category-composition-panel/category-composition-panel.component';
 import { ScoreColorsService } from '../../services/score-colors.service';
 import { gradeColor, scoreColor } from './analyze-chart.utils';
+import {
+  addSelectedAreaToMap,
+  applyPlacesFocus,
+  placesCirclePaint,
+} from '../../shared/places-map/places-map-focus';
 
 export interface CategoryLegendItem {
   name: string;
@@ -42,6 +48,7 @@ export class MobilePlacesMap {
   private data?: PlacesDialogData;
   private map?: MapLibreMap;
   private popup?: Popup;
+  private areaLabel?: Marker;
   private places: Place[] = [];
   private categoryData: Array<{
     name: string;
@@ -153,6 +160,9 @@ export class MobilePlacesMap {
       }
 
       this.assignCategoryColors();
+      // The map shows one activity at a time; start with the most relevant one.
+      this.pinnedActivityName = this.categoryData[0]?.name ?? null;
+      this.state.highlightedActivityName.set(this.pinnedActivityName);
       this.syncCompositionActivityMeta(placesResponse.categories || []);
       this.pendingFeatureShape = featureShape;
       this.dataLoaded = true;
@@ -178,6 +188,10 @@ export class MobilePlacesMap {
 
   destroy(): void {
     this.resizeObserver?.disconnect();
+    this.areaLabel?.remove();
+    this.areaLabel = undefined;
+    this.pinnedActivityName = null;
+    this.hoveredActivityName = null;
     if (this.map) {
       this.map.remove();
       this.map = undefined;
@@ -190,10 +204,9 @@ export class MobilePlacesMap {
     this.pendingFeatureShape = null;
   }
 
-  /** Click pins (or unpins) highlight — does not hide map layers. */
+  /** Click puts an activity in focus on the map (there is always exactly one). */
   selectActivity(activityName: string): void {
-    this.pinnedActivityName =
-      this.pinnedActivityName === activityName ? null : activityName;
+    this.pinnedActivityName = activityName;
     this.applyEffectiveHighlight();
   }
 
@@ -233,7 +246,7 @@ export class MobilePlacesMap {
         color: fillColor,
         weight: category.weight,
         relevance,
-        enabled: this.state.composition() ? true : index < 3,
+        enabled: true,
         score: category.score,
         index: category.index,
         activity_id: category.activity_id,
@@ -401,7 +414,7 @@ export class MobilePlacesMap {
 
     this.categoryData.forEach((category, index) => {
       const legendItem = this.state.categoryLegendItems().find((item) => item.name === category.name);
-      const isEnabled = legendItem?.enabled ?? index < 3;
+      const isEnabled = legendItem?.enabled ?? true;
       if (!isEnabled) {
         return;
       }
@@ -411,13 +424,6 @@ export class MobilePlacesMap {
         console.error(`Error adding layer for ${category.name}:`, err);
       }
     });
-  }
-
-  private circleRadiusExpression(highlighted: boolean): unknown[] {
-    if (highlighted) {
-      return ['interpolate', ['linear'], ['zoom'], 5, 10, 10, 15, 14, 20];
-    }
-    return ['interpolate', ['linear'], ['zoom'], 5, 6, 10, 9, 14, 12];
   }
 
   private ensureCategoryLayers(
@@ -438,7 +444,6 @@ export class MobilePlacesMap {
     const beforeLayer = findBasemapLabelsBeforeId(this.map);
     const fillColor = this.getMarkerFillColor(category.score, category.index);
     const highlightedName = this.state.highlightedActivityName();
-    const isHighlighted = highlightedName === category.name;
 
     if (this.map.getLayer(labelLayerId)) {
       this.map.removeLayer(labelLayerId);
@@ -475,27 +480,15 @@ export class MobilePlacesMap {
           id: circleLayerId,
           type: 'circle',
           source: sourceId,
-          paint: {
-            'circle-radius': this.circleRadiusExpression(isHighlighted) as any,
-            'circle-color': fillColor,
-            'circle-stroke-width': isHighlighted ? 2.5 : 1.5,
-            'circle-stroke-color': isHighlighted ? 'rgba(0, 0, 0, 0.85)' : 'rgba(0, 0, 0, 0.55)',
-            'circle-opacity': 1.0,
-            'circle-stroke-opacity': 1.0,
-          },
+          paint: placesCirclePaint(fillColor, highlightedName, category.name) as any,
         },
         beforeLayer,
       );
       this.setupMarkerInteractionsForLayer(circleLayerId, category.name);
       this.setupMarkerClickHandlerForLayer(circleLayerId);
     } else {
-      this.map.setPaintProperty(circleLayerId, 'circle-color', fillColor);
       this.map.setLayoutProperty(circleLayerId, 'visibility', 'visible');
-      this.applyHighlightStyleToLayer(
-        category.name,
-        isHighlighted,
-        highlightedName != null && !isHighlighted,
-      );
+      this.applyMarkerHighlightStyles();
     }
   }
 
@@ -503,43 +496,11 @@ export class MobilePlacesMap {
     if (!this.map) {
       return;
     }
-    const highlighted = this.state.highlightedActivityName();
-    for (const cat of this.categoryData) {
-      const legend = this.state.categoryLegendItems().find((item) => item.name === cat.name);
-      if (legend && !legend.enabled) {
-        continue;
-      }
-      const isHighlighted = highlighted != null && highlighted === cat.name;
-      const isDimmed = highlighted != null && highlighted !== cat.name;
-      this.applyHighlightStyleToLayer(cat.name, isHighlighted, isDimmed);
-    }
-  }
-
-  private applyHighlightStyleToLayer(
-    categoryName: string,
-    highlighted: boolean,
-    dimmed = false,
-  ): void {
-    if (!this.map) {
-      return;
-    }
-    const circleLayerId = `places-circles-${categoryName}`;
-    if (!this.map.getLayer(circleLayerId)) {
-      return;
-    }
-    this.map.setPaintProperty(
-      circleLayerId,
-      'circle-radius',
-      this.circleRadiusExpression(highlighted) as any,
+    applyPlacesFocus(
+      this.map,
+      this.state.categoryLegendItems(),
+      this.state.highlightedActivityName(),
     );
-    this.map.setPaintProperty(circleLayerId, 'circle-stroke-width', highlighted ? 2.5 : 1.5);
-    this.map.setPaintProperty(
-      circleLayerId,
-      'circle-stroke-color',
-      highlighted ? 'rgba(0, 0, 0, 0.85)' : 'rgba(0, 0, 0, 0.55)',
-    );
-    this.map.setPaintProperty(circleLayerId, 'circle-opacity', dimmed ? 0.18 : 1.0);
-    this.map.setPaintProperty(circleLayerId, 'circle-stroke-opacity', dimmed ? 0.18 : 1.0);
   }
 
   private setCategoryLayersVisibility(categoryName: string, visible: boolean): void {
@@ -561,55 +522,15 @@ export class MobilePlacesMap {
     if (!this.map || !featureShape) {
       return;
     }
-
-    const shape = featureShape as { type?: string };
-    const geoJsonData =
-      shape.type === 'FeatureCollection'
-        ? featureShape
-        : {
-            type: 'FeatureCollection' as const,
-            features: [featureShape],
-          };
-
-    const sourceId = 'feature-shape';
-    const layerId = 'feature-shape-fill';
-    const beforeLayer = findBasemapLabelsBeforeId(this.map);
-
-    if (this.map.getSource(sourceId)) {
-      (this.map.getSource(sourceId) as GeoJSONSource).setData(geoJsonData as never);
-    } else {
-      this.map.addSource(sourceId, { type: 'geojson', data: geoJsonData as never });
-    }
-
-    if (!this.map.getLayer(layerId)) {
-      try {
-        this.map.addLayer(
-          {
-            id: layerId,
-            type: 'fill',
-            source: sourceId,
-            paint: { 'fill-color': '#808080', 'fill-opacity': 0.3 },
-          },
-          beforeLayer,
-        );
-        this.map.addLayer(
-          {
-            id: 'feature-shape-outline',
-            type: 'line',
-            source: sourceId,
-            paint: {
-              'line-color': '#808080',
-              'line-width': 1,
-              'line-opacity': 0.5,
-            },
-          },
-          beforeLayer,
-        );
-      } catch (err) {
-        console.error('Error adding feature shape layer:', err);
-      }
-    } else {
-      (this.map.getSource(sourceId) as GeoJSONSource).setData(geoJsonData as never);
+    try {
+      this.areaLabel?.remove();
+      this.areaLabel = addSelectedAreaToMap(
+        this.map,
+        featureShape,
+        this.data?.featureName || this.translate.instant('analyze.placesDialog.selectedArea'),
+      );
+    } catch (err) {
+      console.error('Error adding feature shape layer:', err);
     }
   }
 

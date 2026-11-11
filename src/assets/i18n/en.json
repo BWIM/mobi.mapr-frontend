@@ -95,7 +95,14 @@
       "openDetails": "Open detailed places map and composition",
       "openMap": "Open places map",
       "openMapDisabled": "Places map is only available for municipalities and hexagons. Zoom in on the map to select one.",
-      "noActivities": "No activities available for this area."
+      "noActivities": "No activities available for this area.",
+      "focusSummary": "Places for “{{activity}}” that can be reached from {{place}}.",
+      "focusSummaryNoPlace": "Places for “{{activity}}” that can be reached from the selected place.",
+      "focusRating": "Rating",
+      "focusTime": "Mobility time",
+      "focusHint": "Choose an activity on the right to highlight its places in color. Grey dots belong to the other activities.",
+      "focusHintMobile": "Choose an activity below to highlight its places in color. Grey dots belong to the other activities.",
+      "selectedArea": "Selected place"
     },
     "composition": {
       "title": "Composition",

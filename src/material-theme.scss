@@ -10,6 +10,10 @@ html {
     typography: Roboto,
     density: 0
   ));
+  /* Roboto is not loaded; without this, dialog titles fall back to the browser's serif font. */
+  @include mat.dialog-overrides((
+    subhead-font: var(--font-family),
+  ));
 }
 /* Main Theme - using simplified color palette */
 :root, :host {

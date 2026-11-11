@@ -95,7 +95,14 @@
       "openDetails": "Detaillierte Ortskarte und Zusammensetzung öffnen",
       "openMap": "Ortskarte öffnen",
       "openMapDisabled": "Die Ortskarte ist nur für Gemeinden und Hexagone verfügbar. Zoome in die Karte, um eine auszuwählen.",
-      "noActivities": "Keine Aktivitäten für dieses Gebiet verfügbar."
+      "noActivities": "Keine Aktivitäten für dieses Gebiet verfügbar.",
+      "focusSummary": "Orte für „{{activity}}“, die von {{place}} aus erreichbar sind.",
+      "focusSummaryNoPlace": "Orte für „{{activity}}“, die vom gewählten Ort aus erreichbar sind.",
+      "focusRating": "Bewertung",
+      "focusTime": "Mobilitätszeit",
+      "focusHint": "Wähle rechts eine Aktivität, um ihre Orte farbig hervorzuheben. Graue Punkte gehören zu den anderen Aktivitäten.",
+      "focusHintMobile": "Wähle unten eine Aktivität, um ihre Orte farbig hervorzuheben. Graue Punkte gehören zu den anderen Aktivitäten.",
+      "selectedArea": "Gewählter Ort"
     },
     "composition": {
       "title": "Zusammensetzung",
