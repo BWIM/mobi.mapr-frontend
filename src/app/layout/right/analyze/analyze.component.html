@@ -33,8 +33,12 @@
     <!-- Left Column: Feature 1 -->
     <div class="flex-1">
       <!-- Error State -->
-      <div *ngIf="featureInfoError" class="text-sm text-red-600 py-4">
-        {{ featureInfoError }}
+      <div *ngIf="featureInfoError" class="feature-error" [class.feature-error--info]="featureExcludedByFilter" role="status">
+        <mat-icon class="feature-error__icon">{{ featureExcludedByFilter ? 'filter_alt_off' : 'error_outline' }}</mat-icon>
+        <div class="feature-error__body">
+          <p class="m-0">{{ featureInfoError }}</p>
+          <button *ngIf="featureExcludedByFilter" type="button" class="feature-error__action" (click)="clearSelection()">{{ 'analyze.featureInfo.clearSelection' | translate }}</button>
+        </div>
       </div>
       
       <!-- Feature Info -->
@@ -43,17 +47,15 @@
         <div class="px-2 py-2 border-b border-white">
           <h3 class="text-xl font-bold text-white flex items-start flex-wrap">
             <div class="flex-1 min-w-0">
-              <span class="leading-tight">{{ featureInfo.name }}</span>
-              <div *ngIf="featureInfo.regiostar_name" class="text-xs text-[var(--light-primary-color)] font-normal mt-1 leading-none">
+              <span class="leading-tight" [attr.title]="isHexagonSelected && hexagonId !== null ? 'Hexagon ' + hexagonId : null">{{ featureInfo.name }}</span>
+              <div *ngIf="featureInfo.regiostar_name" class="text-xs text-white/80 font-normal mt-1 leading-snug">
                 {{ featureInfo.regiostar_name }}
-              </div>
-              <div *ngIf="isHexagonSelected && hexagonId !== null" class="text-xs text-[var(--light-primary-color)] font-normal mt-1 leading-none">
-                Hexagon {{ hexagonId }}
               </div>
             </div>
             <span 
               class="ml-2 px-2 py-1 rounded text-sm font-semibold whitespace-nowrap"
-              [style.background-color]="getRatingColor(featureInfo)"
+              [style.background-color]="getRatingColor(featureInfo, 1)"
+              [style.color]="getRatingTextColor(featureInfo)"
               [title]="getPopulationTooltip(featureInfo.population)"
               style="cursor: help;">
               {{ getRatingDisplay(featureInfo) }}
@@ -94,8 +96,12 @@
     <!-- Right Column: Feature 2 -->
     <div class="flex-1">
       <!-- Error State -->
-      <div *ngIf="featureInfoError2" class="text-sm text-red-600 py-4">
-        {{ featureInfoError2 }}
+      <div *ngIf="featureInfoError2" class="feature-error" [class.feature-error--info]="featureExcludedByFilter2" role="status">
+        <mat-icon class="feature-error__icon">{{ featureExcludedByFilter2 ? 'filter_alt_off' : 'error_outline' }}</mat-icon>
+        <div class="feature-error__body">
+          <p class="m-0">{{ featureInfoError2 }}</p>
+          <button *ngIf="featureExcludedByFilter2" type="button" class="feature-error__action" (click)="clearComparison()">{{ 'analyze.clearComparison' | translate }}</button>
+        </div>
       </div>
       
       <!-- Feature Info -->
@@ -104,17 +110,15 @@
         <div class="px-2 py-2 border-b border-white">
           <h3 class="text-xl font-bold text-white flex items-start flex-wrap">
             <div class="flex-1 min-w-0">
-              <span class="leading-tight">{{ featureInfo2.name }}</span>
-              <div *ngIf="featureInfo2.regiostar_name" class="text-xs text-[var(--light-primary-color)] font-normal mt-1 leading-none">
+              <span class="leading-tight" [attr.title]="isHexagonSelected2 && hexagonId2 !== null ? 'Hexagon ' + hexagonId2 : null">{{ featureInfo2.name }}</span>
+              <div *ngIf="featureInfo2.regiostar_name" class="text-xs text-white/80 font-normal mt-1 leading-snug">
                 {{ featureInfo2.regiostar_name }}
-              </div>
-              <div *ngIf="isHexagonSelected2 && hexagonId2 !== null" class="text-xs text-[var(--light-primary-color)] font-normal mt-1 leading-none">
-                Hexagon {{ hexagonId2 }}
               </div>
             </div>
             <span 
               class="ml-2 px-2 py-1 rounded text-sm font-semibold whitespace-nowrap"
-              [style.background-color]="getRatingColor(featureInfo2)"
+              [style.background-color]="getRatingColor(featureInfo2, 1)"
+              [style.color]="getRatingTextColor(featureInfo2)"
               [title]="getPopulationTooltip(featureInfo2.population)"
               style="cursor: help;">
               {{ getRatingDisplay(featureInfo2) }}
@@ -160,28 +164,42 @@
       {{ analyzeError || analyzeError2 }}
     </div>
     
-    <div *ngIf="activitiesChartData && !isLoading() && !analyzeError && !analyzeError2">
+    <div *ngIf="activityRows && !isLoading() && !analyzeError && !analyzeError2">
       <!-- Title -->
       <div class="mb-4">
         <h3 class="text-lg font-bold text-white">{{ 'analyze.analysis.title' | translate }}</h3>
       </div>
       
-      <!-- Chart Container -->
-      <div class="relative">
-        <app-chart #activitiesChart type="bar" [data]="activitiesChartData" [options]="activitiesChartOptions" (dataSelect)="onChartDataSelect($event)" style="cursor: pointer;"></app-chart>
-      </div>
+      <!-- Activity bars: length = relevance, colour/chip = rating of the activity -->
+      <ol class="activity-bars">
+        <li *ngFor="let row of activityRows">
+          <!-- One click target per compared place, so the places dialog opens for the clicked place -->
+          <div class="activity-row activity-row--compare">
+            <span class="activity-row-head">
+              <span class="activity-name">{{ row.category.category_name }}</span>
+            </span>
+          <button
+            type="button"
+            *ngFor="let value of row.values; let f = index"
+            class="activity-bar-line activity-bar-button"
+            [disabled]="!value"
+            (click)="onActivityRowClick(row, f === 0 ? 1 : 2)"
+            [matTooltip]="('analyze.analysis.openActivity' | translate) + ': ' + (f === 0 ? featureInfo?.name : featureInfo2?.name)"
+            matTooltipShowDelay="400">
+            <span class="activity-bar-owner">{{ (f === 0 ? featureInfo?.name : featureInfo2?.name) }}</span>
+            <div class="activity-bar-track">
+              <div class="activity-bar-fill" [style.width.%]="getActivityBarWidth(value)" [style.background-color]="value?.color"></div>
+            </div>
+            <span class="activity-relevance" *ngIf="value">{{ value.relevance | localeNumber:'1.0-0' }} %</span>
+            <span class="activity-chip" *ngIf="value; else noValue" [style.background-color]="value.color" [style.color]="getContrastTextColor(value.color)">{{ value.rating }}</span>
+            <ng-template #noValue><span class="activity-chip activity-chip--empty">–</span></ng-template>
+          </button>
+          </div>
+        </li>
+      </ol>
       
-      <!-- Activity List -->
-      <div class="">
-        <div *ngFor="let category of getSortedCategories(); let i = index" 
-             class="text-sm text-white flex items-center">
-          <span class="font-bold mr-2">{{ i + 1 }}.</span>
-          <span class="cursor-pointer hover:underline" (click)="onCategoryNameClick(category)">{{ category.category_name }}</span>
-        </div>
-      </div>
-      
-      <!-- Plus Button -->
-      <div class="mt-4 flex justify-center">
+      <!-- Plus Button: sticky so it stays reachable when content (or font size) grows -->
+      <div class="activity-footer">
         <button 
           matButton
           color="primary"
@@ -208,21 +226,33 @@
   <!-- Feature Info Section at the top -->
   <div class="mb-4" *ngIf="selectedFeature">
     <!-- Error State -->
-    <div *ngIf="featureInfoError" class="text-sm text-red-600 py-4">
-      {{ featureInfoError }}
+    <div *ngIf="featureInfoError" class="feature-error" [class.feature-error--info]="featureExcludedByFilter" role="status">
+      <mat-icon class="feature-error__icon">{{ featureExcludedByFilter ? 'filter_alt_off' : 'error_outline' }}</mat-icon>
+      <div class="feature-error__body">
+        <p class="m-0">{{ featureInfoError }}</p>
+        <button *ngIf="featureExcludedByFilter" type="button" class="feature-error__action" (click)="clearSelection()">{{ 'analyze.featureInfo.clearSelection' | translate }}</button>
+      </div>
     </div>
     
     <!-- Feature Info Table Layout -->
     <div *ngIf="featureInfo && !isLoading() && !featureInfoError" class="rounded-lg overflow-hidden pb-5">
       <!-- Title -->
-      <div class="px-2 py-2 border-b border-white flex items-start justify-between">
-        <div class="flex flex-col">
-          <h3 class="text-xl font-bold text-white">{{ featureInfo.name }}</h3>
-          <div *ngIf="featureInfo.regiostar_name" class="text-xs text-[var(--light-primary-color)] font-normal mt-1 leading-none">
-            {{ featureInfo.regiostar_name }}
+      <div class="px-2 py-2 border-b border-white flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div
+            class="rating-badge"
+            [class.rating-badge--time]="getRatingLabelKey() === 'analyze.time'"
+            [style.background-color]="getRatingColor(featureInfo, 1)"
+            [style.color]="getRatingTextColor(featureInfo)"
+            [attr.aria-label]="(getRatingLabelKey() | translate) + ' ' + getRatingDisplay(featureInfo)">
+            <span class="rating-badge__label">{{ (getRatingLabelKey() === 'analyze.time' ? 'analyze.ratingBadge.time' : 'analyze.ratingBadge.grade') | translate }}</span>
+            <span class="rating-badge__value">{{ getRatingDisplay(featureInfo) }}</span>
           </div>
-          <div *ngIf="isHexagonSelected && hexagonId !== null" class="text-xs text-[var(--light-primary-color)] font-normal mt-1 leading-none">
-            Hexagon {{ hexagonId }}
+          <div class="flex flex-col min-w-0">
+            <h3 class="text-xl font-bold text-white leading-tight" [attr.title]="isHexagonSelected && hexagonId !== null ? 'Hexagon ' + hexagonId : null">{{ featureInfo.name }}</h3>
+            <div *ngIf="featureInfo.regiostar_name" class="text-xs text-white/80 font-normal mt-1 leading-snug">
+              {{ featureInfo.regiostar_name }}
+            </div>
           </div>
         </div>
         <button 
@@ -252,7 +282,7 @@
               <!-- Population -->
               <div>
                 <div class="text-sm text-white font-bold">{{ 'analyze.population' | translate }}</div>
-                <div class="text-base text-white">{{ featureInfo.population | number }}</div>
+                <div class="text-base text-white">{{ featureInfo.population | localeNumber }}</div>
               </div>
             </div>
             
@@ -263,11 +293,6 @@
                 <div><span class="text-m text-white font-bold">{{ 'analyze.rank.regionalClass' | translate }} </span><span class="text-xs text-white">{{ 'analyze.rank.regionalClassLabel' | translate }}</span></div>
                 <div class="text-3xl font-bold text-white">{{ featureInfo.regiostar_rank }} <span class="text-sm text-white">/ {{ featureInfo.regiostar_total_ranks }}</span></div>
                 <div class="text-sm text-white mt-1">{{ getRankPercentage(featureInfo.regiostar_rank, featureInfo.regiostar_total_ranks) }}</div>
-              </div>
-              <!-- Grade / Time (follows left Qualitäts-/Zeit-Filter) -->
-              <div>
-                <div class="text-sm text-white font-bold">{{ getRatingLabelKey() | translate }}</div>
-                <div class="text-base text-white">{{ getRatingDisplay(featureInfo) }}</div>
               </div>
             </div>
           </ng-container>
@@ -284,9 +309,7 @@
             <!-- Column 2: Population and Grade/Time -->
             <div class="flex-1 px-2 py-2">
               <div class="text-sm text-white font-bold">{{ 'analyze.population' | translate }}</div>
-              <div class="text-base text-white mb-2">{{ featureInfo.population | number }}</div>
-              <div class="text-sm text-white font-bold">{{ getRatingLabelKey() | translate }}</div>
-              <div class="text-base text-white">{{ getRatingDisplay(featureInfo) }}</div>
+              <div class="text-base text-white">{{ featureInfo.population | localeNumber }}</div>
             </div>
           </ng-container>
         </ng-container>
@@ -298,9 +321,7 @@
           </div>
           <div class="flex-1 px-2 py-2">
             <div class="text-sm text-white font-bold">{{ 'analyze.population' | translate }}</div>
-            <div class="text-base text-white mb-2">{{ featureInfo.population | number }}</div>
-            <div class="text-sm text-white font-bold">{{ getRatingLabelKey() | translate }}</div>
-            <div class="text-base text-white">{{ getRatingDisplay(featureInfo) }}</div>
+            <div class="text-base text-white">{{ featureInfo.population | localeNumber }}</div>
           </div>
         </ng-container>
       </div>
@@ -349,13 +370,13 @@
                 *ngFor="let item of categoryLegendItems"
                 class="flex items-center gap-2 text-left w-full py-1 text-[var(--primary-color)]">
                 <span class="text-[13px] leading-snug min-w-0 flex-1 truncate">
-                  {{ item.name }} ({{ item.relevance | number:'1.0-0' }}%)
+                  {{ item.name }} ({{ item.relevance | localeNumber:'1.0-0' }}%)
                 </span>
                 <span
                   class="text-[12px] shrink-0 tabular-nums"
                   [style.color]="getPlacesMetricTextColor(item.score, item.index)">
                   <ng-container *ngIf="getPlacesIsScoreMode(); else placesIndexMode">
-                    {{ (item.score / 60) | number:'1.1-1' }} {{ 'map.popup.minutes' | translate }}
+                    {{ (item.score / 60) | localeNumber:'1.1-1' }} {{ 'map.popup.minutes' | translate }}
                   </ng-container>
                   <ng-template #placesIndexMode>
                     {{ getGrade(item.index) }}
@@ -395,28 +416,32 @@
       {{ analyzeError }}
     </div>
     
-    <div *ngIf="activitiesChartData && !isLoading() && !analyzeError">
+    <div *ngIf="activityRows && !isLoading() && !analyzeError">
       <!-- Title -->
       <div class="mb-4">
         <h3 class="text-lg font-bold text-white">{{ 'analyze.analysis.title' | translate }}</h3>
       </div>
       
-      <!-- Chart Container -->
-      <div class="relative">
-        <app-chart #activitiesChart type="bar" [data]="activitiesChartData" [options]="activitiesChartOptions" (dataSelect)="onChartDataSelect($event)" style="cursor: pointer;"></app-chart>
-      </div>
+      <!-- Activity bars: length = relevance, colour/chip = rating of the activity -->
+      <ol class="activity-bars">
+        <li *ngFor="let row of activityRows">
+          <button type="button" class="activity-row" (click)="onActivityRowClick(row)" [matTooltip]="'analyze.analysis.openActivity' | translate" matTooltipShowDelay="400">
+            <span class="activity-row-head">
+              <span class="activity-name">{{ row.category.category_name }}</span>
+            <span class="activity-relevance">{{ row.values[0]?.relevance | localeNumber:'1.0-0' }} %</span>
+            </span>
+          <div class="activity-bar-line" *ngIf="row.values[0] as value">
+            <div class="activity-bar-track">
+              <div class="activity-bar-fill" [style.width.%]="getActivityBarWidth(value)" [style.background-color]="value.color"></div>
+            </div>
+            <span class="activity-chip" [style.background-color]="value.color" [style.color]="getContrastTextColor(value.color)">{{ value.rating }}</span>
+          </div>
+          </button>
+        </li>
+      </ol>
       
-      <!-- Activity List -->
-      <div class="">
-        <div *ngFor="let category of getSortedCategories(); let i = index" 
-             class="text-sm text-white flex items-center">
-          <span class="font-bold mr-2">{{ i + 1 }}.</span>
-          <span class="cursor-pointer hover:underline" (click)="onCategoryNameClick(category)">{{ category.category_name }}</span>
-        </div>
-      </div>
-      
-      <!-- Plus Button -->
-      <div class="mt-4 flex justify-center">
+      <!-- Plus Button: sticky so it stays reachable when content (or font size) grows -->
+      <div class="activity-footer">
         <button 
           matButton
           color="primary"

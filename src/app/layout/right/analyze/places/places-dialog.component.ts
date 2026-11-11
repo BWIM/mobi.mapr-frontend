@@ -16,6 +16,7 @@ import {
   CategoryCompositionPanelComponent,
   CompositionActivityMeta,
 } from '../../../../shared/category-composition-panel/category-composition-panel.component';
+import { LocaleNumberPipe } from '../../../../shared/pipes/locale-number.pipe';
 
 export interface PlacesDialogData {
   featureType: 'municipality' | 'hexagon' | 'county' | 'state';
@@ -34,7 +35,7 @@ export interface PlacesDialogData {
 @Component({
   selector: 'app-places-dialog',
   standalone: true,
-  imports: [
+  imports: [LocaleNumberPipe, 
     SharedModule,
     CommonModule,
     TranslateModule,

@@ -20,7 +20,7 @@
             <div class="min-w-0 flex-1">
               <h3 class="text-base font-bold leading-tight flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
                 <span>{{ info.name }}</span>
-                <span class="text-xs font-normal opacity-60 tabular-nums">{{ info.population | number }} {{ 'analyze.population' | translate }}</span>
+                <span class="text-xs font-normal opacity-60 tabular-nums">{{ info.population | localeNumber }} {{ 'analyze.population' | translate }}</span>
               </h3>
               @if (info.regiostar_name) {
                 <p class="text-xs text-[var(--light-primary-color)] mt-0.5">{{ info.regiostar_name }}</p>
@@ -235,7 +235,7 @@
                     class="text-[11px] shrink-0"
                     [style.color]="placesMetricTextColor(item.score, item.index)">
                     @if (placesScoreMode()) {
-                      {{ item.score / 60 | number: '1.1-1' }}
+                      {{ item.score / 60 | localeNumber: '1.1-1' }}
                       {{ 'map.popup.minutes' | translate }}
                     } @else {
                       {{ gradeFromIndex(item.index) }}

@@ -19,10 +19,15 @@ import { SettingsService } from '../../services/settings.service';
 import { ScoreColorsService } from '../../services/score-colors.service';
 import {
   buildDifferenceLegendItems,
+  DifferenceLegendItem,
   buildQualityDifferenceConfig,
   buildTimeDifferenceConfig,
 } from '../../utils/difference-colors.util';
 import { ScoreLegendItem } from '../../utils/score-colors.util';
+import { formatNumber } from '@angular/common';
+import { currentNumberLocale } from '../../shared/pipes/locale-number.pipe';
+import { ExportMapControl } from './export-map.control';
+import { GeoJsonDownloadDialogComponent, GeoJsonDownloadDialogData } from '../left/geojson-download-dialog/geojson-download-dialog.component';
 interface NominatimResult {
   display_name: string;
   lat: string;
@@ -225,7 +230,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   ];
   readonly timeLegendItems = this.scoreColorsService.legendItems;
   readonly hasScoreColors = this.scoreColorsService.hasConfig;
-  readonly differenceLegendItems = computed((): ScoreLegendItem[] => {
+  readonly differenceLegendItems = computed((): DifferenceLegendItem[] => {
     if (!this.filterConfigService.isDifferenceView()) {
       return [];
     }
@@ -367,9 +372,14 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     const rightText = formatValue(rightRaw);
     let diffText = notAvailable;
     if (hasDiff && diffRaw !== undefined && diffRaw !== null && Number.isFinite(Number(diffRaw))) {
-      diffText = isQualityMode
-        ? Number(diffRaw).toFixed(2)
-        : `${(Number(diffRaw) / 60).toFixed(1)} ${minLabel}`;
+      const signed = Number(diffRaw);
+      const magnitude = isQualityMode
+        ? this.getGradeStepLabel(Math.abs(signed))
+        : `${formatNumber(Math.abs(signed) / 60, currentNumberLocale(this.translate), '1.1-1')} ${minLabel}`;
+      const direction = signed === 0
+        ? ''
+        : ` · ${this.translate.instant(signed > 0 ? 'map.legend.difference.rightBetter' : 'map.legend.difference.leftBetter')}`;
+      diffText = isQualityMode && signed === 0 ? magnitude : `${magnitude}${direction}`;
     }
 
     return `
@@ -377,6 +387,32 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       <div>${rightLabel} ${rightText}</div>
       <div>${diffLabel} ${diffText}</div>
     `;
+  }
+
+  /** "gleiche Note" / "1 Notenstufe" / "3 Notenstufen" */
+  getGradeStepLabel(steps: number): string {
+    if (steps === 0) {
+      return this.translate.instant('map.legend.difference.sameGrade');
+    }
+    return this.translate.instant(
+      steps === 1 ? 'map.legend.difference.gradeStep' : 'map.legend.difference.gradeSteps',
+      { count: steps }
+    );
+  }
+
+  getDifferenceStepTitle(item: DifferenceLegendItem): string {
+    if (item.direction === 0) {
+      return this.translate.instant(
+        this.isQualityMode ? 'map.legend.difference.sameGrade' : 'map.legend.difference.aboutSame'
+      );
+    }
+    const magnitude = this.isQualityMode
+      ? this.getGradeStepLabel(item.stepIndex)
+      : `≥ ${item.segmentLabel} ${this.translate.instant('map.popup.minutes')}`;
+    const side = this.translate.instant(
+      item.direction > 0 ? 'map.legend.difference.rightBetter' : 'map.legend.difference.leftBetter'
+    );
+    return `${magnitude} · ${side}`;
   }
 
   openLegendDialog(): void {
@@ -616,9 +652,35 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     };
   }
 
-  private configureMapControls(targetMap: Map, includeMinimap: boolean): void {
+  openGeoJsonDownloadDialog(): void {
+    const dialogData: GeoJsonDownloadDialogData = {
+      selectedActivities: this.filterConfigService.selectedActivities(),
+      selectedPersonas: this.filterConfigService.selectedPersonas(),
+      profileIds: this.filterConfigService.currentProfileIds(),
+      hasCategories: this.filterConfigService.hasCategories(),
+    };
+
+    this.dialog.open(GeoJsonDownloadDialogComponent, {
+      width: '80vw',
+      maxWidth: '80vw',
+      height: '80vh',
+      maxHeight: '80vh',
+      data: dialogData,
+    });
+  }
+
+  private configureMapControls(targetMap: Map, includeMinimap: boolean, includeExport = true): void {
     targetMap.addControl(new NavigationControl({ showCompass: false }), 'top-right');
     targetMap.addControl(new FullscreenControl(), 'top-right');
+    if (includeExport) {
+      targetMap.addControl(
+        new ExportMapControl(
+          () => this.openGeoJsonDownloadDialog(),
+          () => this.translate.instant('geojsonDownload.button.label'),
+        ),
+        'top-right',
+      );
+    }
     targetMap.dragRotate.disable();
     targetMap.touchZoomRotate.disableRotation();
 
@@ -771,7 +833,8 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     this.mapService.setCompareRightMap(this.afterMap);
     this.popup = this.createPopup();
     this.rightPopup = this.createPopup();
-    this.configureMapControls(this.beforeMap, false);
+    // Only one export button in split view (on the right map, next to the panel controls)
+    this.configureMapControls(this.beforeMap, false, false);
     this.configureMapControls(this.afterMap, false);
     this.bindLayerZoomSync(this.beforeMap);
     this.bindLayerZoomSync(this.afterMap);
@@ -1190,7 +1253,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       let populationHtml = '';
       if (!isHexagon && population !== undefined && population !== null) {
         const populationLabel = this.translate.instant('analyze.population');
-        const formattedPopulation = Number(population).toLocaleString();
+        const formattedPopulation = formatNumber(Number(population), currentNumberLocale(this.translate), '1.0-0');
         populationHtml = `<div>${populationLabel}: ${formattedPopulation}</div>`;
       }
 

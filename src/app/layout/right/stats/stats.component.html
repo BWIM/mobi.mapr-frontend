@@ -40,7 +40,9 @@
                   {{ county.name }}
                 </span>
               </td>
-              <td class="align-top font-medium text-left border-0 whitespace-nowrap w-[75px]">{{ formatDisplayValue(county) }}</td>
+              <td class="align-top border-0 whitespace-nowrap w-[75px]">
+                <span class="rank-chip" [style.background-color]="getDisplayColor(county)" [style.color]="getDisplayTextColor(county)">{{ formatDisplayValue(county) }}</span>
+              </td>
             </tr>
             <tr *ngIf="filteredCounties.length === 0">
               <td colspan="3" class="text-sm text-[var(--primary-color)] opacity-70 py-2 border-0">

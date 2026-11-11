@@ -1,3 +1,10 @@
+/* Give the panel a real height so its own scroll container works
+   (an unstyled host is inline and lets content overflow / get clipped). */
+:host {
+  display: block;
+  height: 100%;
+}
+
 /* Material Dialog Panel Styling */
 ::ng-deep .all-categories-dialog-panel {
   background-color: var(--background-color) !important;
@@ -108,4 +115,217 @@
 
 .places-open-map-btn mat-icon {
   color: inherit;
+}
+/* ---- Prominent rating badge (grade or travel time) ---- */
+.rating-badge {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.75rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.75rem;
+  line-height: 1;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
+}
+.rating-badge__label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+  margin-bottom: 0.2rem;
+}
+.rating-badge__value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.rating-badge--time .rating-badge__value {
+  font-size: 1.05rem;
+}
+
+/* ---- Top activities as labelled horizontal bars ---- */
+.activity-bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.activity-row {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.4rem 0.5rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.activity-row:hover,
+.activity-row:focus-visible {
+  background: rgba(255, 255, 255, 0.08);
+}
+.activity-row:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+.activity-row-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.activity-name {
+  font-size: 0.875rem;
+  line-height: 1.3;
+}
+.activity-relevance {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.8);
+}
+.activity-bar-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.activity-bar-owner {
+  flex: 0 0 5.5rem;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.activity-bar-track {
+  flex: 1;
+  height: 0.6rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+.activity-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  min-width: 2px;
+}
+.activity-chip {
+  flex-shrink: 0;
+  min-width: 2.5rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.activity-chip--empty {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* "All activities" stays visible at the bottom of the scrolling panel.
+   Right padding keeps it clear of the floating download button. */
+.activity-footer {
+  position: sticky;
+  bottom: -1rem; /* cancel the panel's p-4 */
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  margin: 0.75rem -1rem -1rem;
+  padding: 0.75rem 4.5rem 1rem 1rem;
+  background: var(--background-color);
+  box-shadow: 0 -6px 10px -8px rgba(0, 0, 0, 0.5);
+}
+.activity-footer button {
+  max-width: 100%;
+  height: auto;
+  min-height: 2.5rem;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Error / hint shown instead of the feature info */
+.feature-error {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  margin: 0.5rem 0 1rem;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #fff;
+  background: rgba(194, 24, 7, 0.25);
+  border: 1px solid rgba(255, 120, 110, 0.6);
+}
+.feature-error--info {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+.feature-error__icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+}
+.feature-error__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.feature-error__action {
+  padding: 0.3rem 0.8rem;
+  border: 1px solid #fff;
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.feature-error__action:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Comparison: the row itself is not clickable, each place's bar is */
+.activity-row--compare {
+  cursor: default;
+}
+.activity-row--compare:hover {
+  background: transparent;
+}
+.activity-bar-button {
+  width: 100%;
+  padding: 0.2rem 0.3rem;
+  margin: 0 -0.3rem;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.activity-bar-button:hover:not(:disabled),
+.activity-bar-button:focus-visible {
+  background: rgba(255, 255, 255, 0.1);
+}
+.activity-bar-button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+.activity-bar-button:disabled {
+  cursor: default;
 }

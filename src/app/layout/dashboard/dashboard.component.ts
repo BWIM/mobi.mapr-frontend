@@ -15,10 +15,7 @@ import { Project } from '../../interfaces/project';
 import { firstValueFrom } from 'rxjs';
 import { distinctUntilChanged, filter } from 'rxjs/operators';
 import { TranslateModule } from '@ngx-translate/core';
-import { MatIcon } from '@angular/material/icon';
-import { MatDialog } from '@angular/material/dialog';
 import { MobileFilterPanelComponent } from '../mobile-filter-panel/mobile-filter-panel.component';
-import { GeoJsonDownloadDialogComponent, GeoJsonDownloadDialogData } from '../left/geojson-download-dialog/geojson-download-dialog.component';
 import { MobileUiService } from '../../services/mobile-ui.service';
 import { FeatureSelectionService } from '../../shared/services/feature-selection.service';
 import { MobileMapControlsComponent } from '../mobile/mobile-map-controls/mobile-map-controls.component';
@@ -36,7 +33,6 @@ import { LanguageService } from '../../services/language.service';
     RightComponent,
     CenterComponent,
     TranslateModule,
-    MatIcon,
     MobileFilterPanelComponent,
     MobileMapControlsComponent,
     MobileSheetsComponent,
@@ -54,7 +50,6 @@ export class DashboardComponent {
   private projectService = inject(ProjectsService);
   private mapService = inject(MapService);
   readonly filterConfigService = inject(FilterConfigService);
-  private dialog = inject(MatDialog);
   readonly mobileUi = inject(MobileUiService);
   private featureSelectionService = inject(FeatureSelectionService);
   private projectNavigation = inject(ProjectNavigationService);
@@ -348,23 +343,6 @@ export class DashboardComponent {
     requestAnimationFrame(() => {
       this.mapService.getMap()?.resize();
       this.mapService.getCompareRightMap()?.resize();
-    });
-  }
-
-  openGeoJsonDownloadDialog() {
-    const dialogData: GeoJsonDownloadDialogData = {
-      selectedActivities: this.filterConfigService.selectedActivities(),
-      selectedPersonas: this.filterConfigService.selectedPersonas(),
-      profileIds: this.filterConfigService.currentProfileIds(),
-      hasCategories: this.filterConfigService.hasCategories(),
-    };
-
-    this.dialog.open(GeoJsonDownloadDialogComponent, {
-      width: '80vw',
-      maxWidth: '80vw',
-      height: '80vh',
-      maxHeight: '80vh',
-      data: dialogData,
     });
   }
 }

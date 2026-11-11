@@ -12,7 +12,7 @@ import {
   TemplateRef,
   ChangeDetectionStrategy
 } from '@angular/core';
-import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { Chart, Plugin } from 'chart.js';
 import { ChartComponent } from '../../../../shared/chart/chart.component';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -45,6 +45,7 @@ import {
   CategoryCompositionPanelComponent,
   CompositionActivityMeta,
 } from '../../../../shared/category-composition-panel/category-composition-panel.component';
+import { LocaleNumberPipe } from '../../../../shared/pipes/locale-number.pipe';
 
 function gradeFromIndex(index: number): string {
   const indexValue = index / 100;
@@ -104,9 +105,8 @@ Chart.register(horizontalBarLabelsPlugin);
 
 @Component({
   selector: 'app-mobile-analyze',
-  imports: [
+  imports: [LocaleNumberPipe, 
     TranslateModule,
-    DecimalPipe,
     NgTemplateOutlet,
     MatProgressSpinner,
     MatIcon,

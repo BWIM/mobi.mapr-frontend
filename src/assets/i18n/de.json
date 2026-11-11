@@ -71,7 +71,9 @@
       "notFound": "Feature-Informationen nicht gefunden",
       "dataNotPreloaded": "Daten noch nicht vorgeladen",
       "errorLoading": "Fehler beim Laden der Feature-Informationen",
-      "typeMismatch": "Feature-Typen stimmen nicht überein"
+      "typeMismatch": "Feature-Typen stimmen nicht überein",
+      "excludedByFilter": "Der ausgewählte Ort gehört zu einer Regionalklasse bzw. einem Bundesland, das in den Projekteinstellungen gerade herausgefiltert ist.",
+      "clearSelection": "Auswahl aufheben"
     },
     "addToComparison": "Als Vergleich hinzufügen",
     "clearComparison": "Vergleich beenden",
@@ -197,7 +199,12 @@
           "meaning3": "Im ländlichen Raum stehen andere Einrichtungen und Versorgungsstrukturen im Vordergrund.",
           "consideration": "Diese regionalen Unterschiede werden im mobi.mapr berücksichtigt, um realitätsnahe Aussagen zur Alltagsmobilität treffen zu können."
         }
-      }
+      },
+      "openActivity": "Orte dieser Aktivität anzeigen"
+    },
+    "ratingBadge": {
+      "grade": "Note",
+      "time": "Zeit"
     }
   },
   "errors": {
@@ -330,7 +337,9 @@
         "f": {
           "title": "F - Sehr schlechte Qualität",
           "description": "Sehr schlechte Mobilitätsqualität (Index: > 1.41)"
-        }
+        },
+        "scaleBest": "beste Qualität",
+        "scaleWorst": "schlechteste"
       },
       "time": {
         "title": "Mobilitätszeit",
@@ -356,6 +365,16 @@
       "hint": {
         "clickEntries": "Tipp: Du kannst die Farben in der Legende anklicken, um die Karte nach Zeiten/Bewertung zu filtern.",
         "dismiss": "Hinweis schließen"
+      },
+      "difference": {
+        "qualityTitle": "Unterschied in Notenstufen",
+        "timeTitle": "Unterschied in Minuten",
+        "sameGrade": "gleiche Note",
+        "gradeStep": "{{count}} Notenstufe",
+        "gradeSteps": "{{count}} Notenstufen",
+        "leftBetter": "Linke Karte besser",
+        "rightBetter": "Rechte Karte besser",
+        "aboutSame": "etwa gleich"
       }
     }
   },
@@ -674,7 +693,8 @@
           "influence": "Diese Filterung beeinflusst die Rankings und ermöglicht es, Mobilitätsqualitäten gezielt nach Bundesländern zu vergleichen."
         }
       }
-    }
+    },
+    "createdOn": "Erstellt am"
   },
   "filterDialog": {
     "title": "Filter konfigurieren",

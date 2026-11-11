@@ -9,6 +9,7 @@ import {
   sortWeightedChildren,
   weightedChildrenTotal,
 } from '../../interfaces/composition';
+import { LocaleNumberPipe } from '../pipes/locale-number.pipe';
 
 export interface CompositionActivityMeta {
   color?: string;
@@ -33,7 +34,7 @@ export interface CompositionFormattedMetric {
 @Component({
   selector: 'app-category-composition-panel',
   standalone: true,
-  imports: [CommonModule, TranslateModule, SharedModule, CategoryCompositionPanelComponent],
+  imports: [LocaleNumberPipe, CommonModule, TranslateModule, SharedModule, CategoryCompositionPanelComponent],
   templateUrl: './category-composition-panel.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './category-composition-panel.component.css',

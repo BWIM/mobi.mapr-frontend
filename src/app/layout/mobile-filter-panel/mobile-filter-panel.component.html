@@ -53,7 +53,7 @@
           <div class="flex items-center gap-2 flex-wrap">
             @for (option of modeOptions(); track option.id) {
               <button 
-                class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
+                class="relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
                 [style.background-color]="isSelected(option.id) ? 'var(--primary-color)' : 'var(--background-color)'"
                 [style.border]="!isSelected(option.id) ? '1px solid var(--light-primary-color)' : 'none'"
                 [style.cursor]="isOnlySelectedMode(option.id) || isModeDisabled(option.id) || isModeSelectionLocked() ? 'not-allowed' : 'pointer'"
@@ -69,6 +69,9 @@
                   [style.color]="isSelected(option.id) ? 'var(--background-color)' : 'var(--light-primary-color)'">
                   {{ option.icon }}
                 </mat-icon>
+                @if (isSelected(option.id)) {
+                  <span class="mode-selected-check" aria-hidden="true"><mat-icon>check</mat-icon></span>
+                }
               </button>
             }
           </div>
@@ -79,7 +82,7 @@
           <div class="flex items-center gap-2 flex-wrap">
             @for (option of modeOptions(); track option.id) {
               <button
-                class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
+                class="relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
                 [style.background-color]="isSelected(option.id) ? 'var(--primary-color)' : 'var(--background-color)'"
                 [style.border]="!isSelected(option.id) ? '1px solid var(--light-primary-color)' : 'none'"
                 [style.cursor]="isOnlySelectedMode(option.id) || isModeDisabled(option.id) || isModeSelectionLocked() ? 'not-allowed' : 'pointer'"
@@ -94,6 +97,9 @@
                   [style.color]="isSelected(option.id) ? 'var(--background-color)' : 'var(--light-primary-color)'">
                   {{ option.icon }}
                 </mat-icon>
+                @if (isSelected(option.id)) {
+                  <span class="mode-selected-check" aria-hidden="true"><mat-icon>check</mat-icon></span>
+                }
               </button>
             }
           </div>
@@ -103,7 +109,7 @@
           <div class="flex items-center gap-2 flex-wrap">
             @for (option of modeOptions(); track option.id) {
               <button
-                class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
+                class="relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200"
                 [style.background-color]="isRightSelected(option.id) ? 'var(--primary-color)' : 'var(--background-color)'"
                 [style.border]="!isRightSelected(option.id) ? '1px solid var(--light-primary-color)' : 'none'"
                 [style.cursor]="isRightOnlySelectedMode(option.id) || isModeDisabled(option.id) || isModeSelectionLocked() ? 'not-allowed' : 'pointer'"
@@ -118,6 +124,9 @@
                   [style.color]="isRightSelected(option.id) ? 'var(--background-color)' : 'var(--light-primary-color)'">
                   {{ option.icon }}
                 </mat-icon>
+                @if (isRightSelected(option.id)) {
+                  <span class="mode-selected-check" aria-hidden="true"><mat-icon>check</mat-icon></span>
+                }
               </button>
             }
           </div>
