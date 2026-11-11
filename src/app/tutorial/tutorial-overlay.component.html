@@ -24,6 +24,7 @@
       #card
       class="tutorial-card"
       [class.tutorial-card--mobile]="isMobile()"
+      [class.tutorial-card--compact]="isMobile() && step.compactOnMobile"
       [style]="cardPosition()"
       role="dialog"
       aria-modal="false"
@@ -62,14 +63,17 @@
       </div>
 
       <h2 id="tutorial-title" class="tutorial-card__title">{{ titleKey() | translate }}</h2>
-      <p id="tutorial-text" class="tutorial-card__text" aria-live="polite">{{ textKey() | translate }}</p>
+      <!-- Compact card: the hint replaces the step text to keep the card small -->
+      @if (!(isMobile() && step.compactOnMobile && tutorial.hintKey())) {
+        <p id="tutorial-text" class="tutorial-card__text" aria-live="polite">{{ textKey() | translate }}</p>
+      }
 
       @if (tutorial.hintKey(); as hintKey) {
         <p class="tutorial-card__hint" role="alert">
           <mat-icon aria-hidden="true">zoom_in</mat-icon>
           {{ hintKey | translate }}
         </p>
-      } @else if (tutorial.isAwaitingAction()) {
+      } @else if (tutorial.isAwaitingAction() && !(isMobile() && step.compactOnMobile)) {
         <p class="tutorial-card__waiting">
           <mat-icon aria-hidden="true">touch_app</mat-icon>
           {{ (isMobile() ? 'tutorial.waitingForTap' : 'tutorial.waitingForClick') | translate }}

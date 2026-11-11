@@ -58,6 +58,13 @@ export interface TutorialStep {
   result?: { key: string; target?: string };
   /** Step is skipped when this returns false. */
   showIf?: () => boolean;
+  /**
+   * Mobile only: where the card goes. Default is the half of the screen the target is not in.
+   * 'bottom' with `compact` keeps the top of the map (zoom buttons, level switcher) usable.
+   */
+  mobilePlacement?: 'top' | 'bottom';
+  /** Mobile only: smaller card, for steps where the user needs as much of the screen as possible. */
+  compactOnMobile?: boolean;
   /** "Back" jumps to this step id (when the previous steps depend on dialogs that were closed meanwhile). */
   backTo?: string;
 }
@@ -93,12 +100,16 @@ export class TutorialService {
       target: 'map',
       interactive: true,
       awaitsAction: 'pick-place',
+      mobilePlacement: 'bottom',
+      compactOnMobile: true,
       layout: { rightPanel: true, mobileFilter: false, closeMobileSheet: true, closeDialogs: true },
     },
     {
       id: 'analyze-result',
       key: 'tutorial.steps.analyzeResult',
       target: 'analyze',
+      mobilePlacement: 'bottom',
+      compactOnMobile: true,
       layout: { rightPanel: true, mobileFilter: false, closeDialogs: true, mobileAnalyzeMain: true },
       showIf: () => this.featureSelection.getCurrentMapLibreFeature() !== null,
     },
@@ -108,6 +119,7 @@ export class TutorialService {
       target: 'all-activities',
       interactive: true,
       awaitsAction: 'open-activities',
+      compactOnMobile: true,
       layout: { rightPanel: true, mobileFilter: false, closeDialogs: true, mobileAnalyzeMain: true },
       showIf: () => this.hasDetailFeature(),
     },
@@ -117,6 +129,8 @@ export class TutorialService {
       target: 'activity-list',
       interactive: true,
       awaitsAction: 'open-places',
+      mobilePlacement: 'bottom',
+      compactOnMobile: true,
       result: { key: 'tutorial.steps.places', target: 'places-map' },
       showIf: () => this.hasDetailFeature(),
     },

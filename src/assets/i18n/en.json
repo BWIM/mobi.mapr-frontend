@@ -1002,7 +1002,7 @@
       "analyze": {
         "title": "Analyze a place",
         "text": "Zoom into the map until the municipalities or the small hexagons appear. Then click on one of them to see how its rating comes about.",
-        "textMobile": "Zoom into the map until the municipalities or the small hexagons appear. Then tap on one of them to see how its rating comes about.",
+        "textMobile": "Zoom in with two fingers or “+” until “Municipality” or “Hexagon” is highlighted at the top. Then tap an area to see how its rating comes about.",
         "zoomHint": "That's a county or state. Please zoom in further and choose a municipality or a hexagon. Counties and states have less information."
       },
       "analyzeResult": {

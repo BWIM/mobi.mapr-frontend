@@ -1002,7 +1002,7 @@
       "analyze": {
         "title": "Einen Ort analysieren",
         "text": "Zoome in die Karte hinein, bis die Gemeinden oder die kleinen Hexagone erscheinen. Klicke dann auf eine davon, um zu sehen, wie ihre Bewertung zustande kommt.",
-        "textMobile": "Zoome in die Karte hinein, bis die Gemeinden oder die kleinen Hexagone erscheinen. Tippe dann auf eine davon, um zu sehen, wie ihre Bewertung zustande kommt.",
+        "textMobile": "Zoome mit zwei Fingern oder „+“ hinein, bis oben „Gemeinde“ oder „Hexagon“ markiert ist. Tippe dann auf eine Fläche, um zu sehen, wie ihre Bewertung zustande kommt.",
         "zoomHint": "Das ist ein Landkreis oder Bundesland. Bitte zoome weiter hinein und wähle eine Gemeinde oder ein Hexagon. Landkreise und Bundesländer haben weniger Informationen."
       },
       "analyzeResult": {

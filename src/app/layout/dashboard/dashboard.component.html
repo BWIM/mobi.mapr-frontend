@@ -87,7 +87,7 @@
       <!-- CENTER AREA - Map and Credits -->
       <div class="flex-1 flex flex-col min-w-0 bg-[var(--secondary-color)]">
         <div class="flex-1 flex flex-col min-h-0 bg-[var(--background-color)] rounded-tr-3xl rounded-br-3xl">
-          <div class="flex-1 min-h-0 lg:p-3 xl:p-4 rounded-1xl overflow-hidden" data-tour="map">
+          <div class="flex-1 min-h-0 lg:p-3 xl:p-4 rounded-1xl overflow-hidden">
             <app-center></app-center>
           </div>
         </div>
@@ -136,7 +136,6 @@
       </div>
     } @else {
       <div
-        data-tour="map"
         class="mobile-map-container flex-1 min-h-0 overflow-hidden relative"
         [class.mobile-map-container--filter-collapsed]="!mobileFilterExpanded()">
         <app-center></app-center>

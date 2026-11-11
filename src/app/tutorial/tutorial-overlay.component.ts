@@ -109,14 +109,18 @@ export class TutorialOverlayComponent {
     const { width: cw, height: ch } = this.cardSize();
 
     if (this.isMobile()) {
+      const top = { left: '12px', right: '12px', top: 'calc(12px + env(safe-area-inset-top, 0px))' };
+      const bottom = { left: '12px', right: '12px', bottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' };
+      const placement = this.step()?.mobilePlacement;
+      if (placement) {
+        return placement === 'top' ? top : bottom;
+      }
       if (!hole) {
         return { left: '12px', right: '12px', top: '50%', transform: 'translateY(-50%)' };
       }
       // Card goes to the half of the screen the target is not in.
       const targetCenter = hole.top + hole.height / 2;
-      return targetCenter > vh / 2
-        ? { left: '12px', right: '12px', top: 'calc(12px + env(safe-area-inset-top, 0px))' }
-        : { left: '12px', right: '12px', bottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' };
+      return targetCenter > vh / 2 ? top : bottom;
     }
 
     if (!hole) {
