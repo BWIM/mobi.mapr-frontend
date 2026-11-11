@@ -98,6 +98,12 @@ interface MapExportCreateResponse {
   reused_from_job_id?: number;
 }
 
+export interface MapViewport {
+  zoom: number;
+  lat: number;
+  lng: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -139,6 +145,13 @@ export class MapService {
   private _isMapLoading = signal<boolean>(false);
   readonly isMapLoading = this._isMapLoading.asReadonly();
 
+  /**
+   * Last known viewport of the primary map (updated on moveend), or the viewport requested
+   * before a map exists. New maps are created with this viewport.
+   */
+  private _viewport = signal<MapViewport | null>(null);
+  readonly viewport = this._viewport.asReadonly();
+
   /** True when the project content layer has no tile features (e.g. scores not populated). */
   private _noProjectTiles = signal<boolean>(false);
   readonly noProjectTiles = this._noProjectTiles.asReadonly();
@@ -175,6 +188,31 @@ export class MapService {
 
   setMap(map: MapLibreMap | null): void {
     this.map = map;
+  }
+
+  /** Records the viewport of the primary map. Call after the user (or code) moved it. */
+  reportViewport(targetMap: MapLibreMap): void {
+    if (targetMap !== this.map) {
+      return;
+    }
+    const center = targetMap.getCenter();
+    const next: MapViewport = { zoom: targetMap.getZoom(), lat: center.lat, lng: center.lng };
+    const current = this._viewport();
+    if (
+      current &&
+      Math.abs(current.zoom - next.zoom) < 1e-3 &&
+      Math.abs(current.lat - next.lat) < 1e-6 &&
+      Math.abs(current.lng - next.lng) < 1e-6
+    ) {
+      return;
+    }
+    this._viewport.set(next);
+  }
+
+  /** Moves the map to the viewport (or remembers it for the next map that is created). */
+  requestViewport(viewport: MapViewport): void {
+    this._viewport.set({ ...viewport });
+    this.map?.jumpTo({ center: [viewport.lng, viewport.lat], zoom: viewport.zoom });
   }
 
   getMap(): MapLibreMap | null {

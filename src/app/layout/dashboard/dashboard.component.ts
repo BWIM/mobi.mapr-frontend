@@ -23,6 +23,9 @@ import { MobileSheetsComponent } from '../mobile/mobile-sheets/mobile-sheets.com
 import { GroupOverviewComponent } from '../../group-overview/group-overview.component';
 import { ProjectNavigationService } from '../../services/project-navigation.service';
 import { LanguageService } from '../../services/language.service';
+import { ReturnUrlService } from '../../auth/return-url.service';
+import { URL_PARAM } from '../../url-state/url-params';
+import { UrlStateService } from '../../url-state/url-state.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -54,6 +57,9 @@ export class DashboardComponent {
   private featureSelectionService = inject(FeatureSelectionService);
   private projectNavigation = inject(ProjectNavigationService);
   private languageService = inject(LanguageService);
+  private returnUrlService = inject(ReturnUrlService);
+  /** Created here (not at app start) so it reads the dashboard URL before child maps are built. */
+  private urlState = inject(UrlStateService);
 
   /** Matches right panel `duration-300` transition in dashboard template. */
   private static readonly RIGHT_PANEL_TRANSITION_MS = 300;
@@ -152,6 +158,13 @@ export class DashboardComponent {
         // Check authentication tokens
         const isLoggedIn = this.authService.isLoggedIn();
 
+        // Logged-in users always work in project-id mode: translate a share-key link into the
+        // matching project (keeping all other view params) instead of ignoring it.
+        if (isLoggedIn && shareKey && !projectId) {
+          await this.resolveShareKeyForLoggedInUser(shareKey);
+          return;
+        }
+
         // Check if there's already a project or share key in the session service
         const existingProjectId = this.dashboardSessionService.getProjectId();
         const existingShareKey = this.dashboardSessionService.getShareKey();
@@ -210,6 +223,14 @@ export class DashboardComponent {
           }
         } else {
           // Anonymous users always use share-key mode.
+          if (projectId && !shareKey) {
+            // A project link needs a login: remember the full URL and come back after login.
+            const target = this.router.serializeUrl(
+              this.router.createUrlTree(['/dashboard'], { queryParams: params })
+            );
+            void this.returnUrlService.redirectToLogin(target);
+            return;
+          }
           if (!activeShareKey) {
             if (!this.hasInitialized && currentUrl !== '/landing') {
               this.router.navigate(['/landing']);
@@ -287,6 +308,27 @@ export class DashboardComponent {
     } catch (error) {
       console.error('Error loading project by ID:', error);
       // Redirect to users-area on error
+      this.router.navigate(['/users-area']);
+    }
+  }
+
+  /**
+   * Finds the project behind a share key for a logged-in user and switches the URL to
+   * `project_id`, keeping all other params. Falls back to the users area when the user
+   * has no access to that project.
+   */
+  private async resolveShareKeyForLoggedInUser(shareKey: string): Promise<void> {
+    try {
+      const shared = await firstValueFrom(this.projectService.getProjectByShareKey(shareKey));
+      // Make sure the user can open the project by id (share keys may grant wider access).
+      const project = await firstValueFrom(this.projectService.getProjectById(shared.id));
+      await this.router.navigate(['/dashboard'], {
+        queryParams: { [URL_PARAM.projectId]: project.id, [URL_PARAM.shareKey]: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    } catch (error) {
+      console.warn('Could not resolve share key to an accessible project:', error);
       this.router.navigate(['/users-area']);
     }
   }

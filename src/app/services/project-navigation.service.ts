@@ -5,6 +5,7 @@ import { ProjectsService } from './project.service';
 import { DashboardSessionService } from './dashboard-session.service';
 import { Project, projectGroupId } from '../interfaces/project';
 import { ProjectGroupSibling } from '../interfaces/project-group';
+import { PROJECT_SCOPED_PARAMS } from '../url-state/url-params';
 
 @Injectable({
   providedIn: 'root'
@@ -120,7 +121,7 @@ export class ProjectNavigationService {
       tap({
         next: (project) => {
           this.projectsService.setProject(project);
-          this.updateUrl(project.id, options?.closeOverview ?? false, targetShareKey);
+          this.updateUrl(project.id, options?.closeOverview ?? false, targetShareKey, true);
         },
         error: () => {
           if (isShareMode) {
@@ -207,13 +208,26 @@ export class ProjectNavigationService {
     return [...siblings].sort((a, b) => a.display_name.localeCompare(b.display_name));
   }
 
-  private updateUrl(projectId: number, closeOverview: boolean, shareKeyOverride?: string | null): void {
+  private updateUrl(
+    projectId: number,
+    closeOverview: boolean,
+    shareKeyOverride?: string | null,
+    projectChanged = false
+  ): void {
     const shareKey = shareKeyOverride ?? this.dashboardSessionService.getShareKey();
     const isShareKey = !this.dashboardSessionService.getIsAuthenticated() && !!shareKey;
 
     const queryParams: Record<string, string | null> = closeOverview
       ? { overview: null }
       : {};
+
+    if (projectChanged) {
+      // Filters, features etc. belong to the previous project; viewport, language,
+      // rating mode and stats level carry over.
+      for (const param of PROJECT_SCOPED_PARAMS) {
+        queryParams[param] = null;
+      }
+    }
 
     if (isShareKey && shareKey) {
       queryParams['share_key'] = shareKey;

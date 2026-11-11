@@ -128,7 +128,9 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       const compareMode = this.filterConfigService.isMapCompareMode();
       const differenceView = this.filterConfigService.isDifferenceView();
       // Re-run when pending compare resolves so maps init after panel collapse.
-      this.filterConfigService.pendingMapCompareEnable();
+      const pendingCompare = this.filterConfigService.pendingMapCompareEnable();
+      // Re-run when a compare view requested by the URL is dropped (e.g. not permitted).
+      const urlCompareIntent = this.filterConfigService.hasUrlCompareIntent();
       queueMicrotask(() => {
         if (!this.isActiveMapHost()) {
           return;
@@ -158,6 +160,16 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
         if (wantSingle) {
           if (!this.wasCompareMode && !this.wasDifferenceView) {
+            // ngAfterViewInit skips the single map while a URL compare view is expected.
+            if (
+              !pendingCompare &&
+              !urlCompareIntent &&
+              !this.map &&
+              !this.beforeMap &&
+              !this.mapModeTransitionPending
+            ) {
+              this.initSingleMap();
+            }
             return;
           }
           this.wasCompareMode = false;
@@ -624,7 +636,14 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private getMapViewport(): { center: LngLatLike; zoom: number } {
-    return this.savedViewport ?? { center: this.center, zoom: this.zoom };
+    if (this.savedViewport) {
+      return this.savedViewport;
+    }
+    const known = this.mapService.viewport();
+    if (known) {
+      return { center: [known.lng, known.lat], zoom: known.zoom };
+    }
+    return { center: this.center, zoom: this.zoom };
   }
 
   private createPopup(): Popup {
@@ -724,11 +743,16 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     };
 
+    const reportViewport = () => this.mapService.reportViewport(targetMap);
+
     if (targetMap.loaded()) {
       syncZoom();
+      reportViewport();
     }
     targetMap.on('load', syncZoom);
     targetMap.on('zoomend', syncZoom);
+    targetMap.on('load', reportViewport);
+    targetMap.on('moveend', reportViewport);
   }
 
   private getPopupForMap(targetMap: Map): Popup | undefined {
