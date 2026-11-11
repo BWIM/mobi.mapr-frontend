@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, ChangeDetectionStrategy } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MobileUiService } from '../../../services/mobile-ui.service';
@@ -8,6 +8,7 @@ import { MobileAnalyzeComponent } from '../analyze/mobile-analyze/mobile-analyze
 @Component({
   selector: 'app-mobile-sheets',
   imports: [MatIcon, TranslateModule, StatsComponent, MobileAnalyzeComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './mobile-sheets.component.html',
 })
 export class MobileSheetsComponent {

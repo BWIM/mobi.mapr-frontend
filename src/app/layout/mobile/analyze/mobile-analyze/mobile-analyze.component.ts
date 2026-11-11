@@ -10,10 +10,11 @@ import {
   Injector,
   afterNextRender,
   TemplateRef,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import { Chart, Plugin } from 'chart.js';
-import { ChartModule } from 'primeng/chart';
+import { ChartComponent } from '../../../../shared/chart/chart.component';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatIcon } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
@@ -109,10 +110,11 @@ Chart.register(horizontalBarLabelsPlugin);
     NgTemplateOutlet,
     MatProgressSpinner,
     MatIcon,
-    ChartModule,
+    ChartComponent,
     CategoryCompositionPanelComponent,
   ],
   templateUrl: './mobile-analyze.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './mobile-analyze.component.scss',
 })
 export class MobileAnalyzeComponent implements OnDestroy {

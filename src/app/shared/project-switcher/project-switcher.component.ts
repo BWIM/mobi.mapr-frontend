@@ -1,4 +1,4 @@
-import { Component, inject, computed, input } from '@angular/core';
+import { Component, inject, computed, input, ChangeDetectionStrategy } from '@angular/core';
 import { SharedModule } from '../shared.module';
 import { TranslateModule } from '@ngx-translate/core';
 import { ProjectsService } from '../../services/project.service';
@@ -8,6 +8,7 @@ import { ProjectNavigationService } from '../../services/project-navigation.serv
   selector: 'app-project-switcher',
   imports: [SharedModule, TranslateModule],
   templateUrl: './project-switcher.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './project-switcher.component.css',
 })
 export class ProjectSwitcherComponent {

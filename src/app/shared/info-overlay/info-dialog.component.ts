@@ -1,4 +1,4 @@
-import { Component, Inject, TemplateRef, Type } from '@angular/core';
+import { Component, Inject, TemplateRef, Type, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { SharedModule } from '../shared.module';
@@ -12,6 +12,7 @@ export interface InfoDialogData {
   standalone: true,
   imports: [SharedModule, CommonModule],
   templateUrl: './info-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './info-dialog.component.css'
 })
 export class InfoDialogComponent {

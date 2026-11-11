@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ViewChild, TemplateRef, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, ViewChild, TemplateRef, computed, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { SharedModule } from '../../shared/shared.module';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -15,6 +15,7 @@ import { ProjectNavigationService } from '../../services/project-navigation.serv
   selector: 'app-rail',
   imports: [SharedModule, TranslateModule],
   templateUrl: './rail.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './rail.component.css',
 })
 export class RailComponent implements OnInit {

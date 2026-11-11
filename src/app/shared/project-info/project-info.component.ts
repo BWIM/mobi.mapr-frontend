@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { SharedModule } from '../shared.module';
 import { TranslateModule } from '@ngx-translate/core';
@@ -11,6 +11,7 @@ import {
 @Component({
   selector: 'app-project-info',
   imports: [SharedModule, TranslateModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './project-info.component.html',
 })
 export class ProjectInfoComponent {

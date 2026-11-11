@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { SharedModule } from '../shared.module';
@@ -9,6 +9,7 @@ import { ScoreColorsService } from '../../services/score-colors.service';
   standalone: true,
   imports: [CommonModule, TranslateModule, SharedModule],
   templateUrl: './legend-info.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './legend-info.component.css'
 })
 export class LegendInfoComponent {

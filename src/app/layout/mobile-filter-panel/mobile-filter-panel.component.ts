@@ -1,4 +1,4 @@
-import { Component, inject, input, output, OnDestroy } from '@angular/core';
+import { Component, inject, input, output, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { FilterConfigService } from '../../services/filter-config.service';
 import { SharedModule } from '../../shared/shared.module';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -25,6 +25,7 @@ interface NominatimResult {
   selector: 'app-mobile-filter-panel',
   imports: [SharedModule, TranslateModule, InfoOverlayComponent, ProjectSwitcherComponent, ProjectInfoComponent],
   templateUrl: './mobile-filter-panel.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './mobile-filter-panel.component.css',
 })
 export class MobileFilterPanelComponent implements OnDestroy {

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
@@ -15,6 +15,7 @@ import { forkJoin } from 'rxjs';
     standalone: true,
     imports: [CommonModule, TranslateModule, MatIconModule, MatProgressSpinnerModule],
     templateUrl: './maintenance.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './maintenance.component.css'
 })
 export class MaintenanceComponent implements OnInit, OnDestroy {

@@ -1,11 +1,10 @@
-import { Component, Inject, OnInit, AfterViewInit, ViewChild, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, Inject, OnInit, AfterViewInit, ViewChild, ChangeDetectorRef, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialog } from '@angular/material/dialog';
 import { SharedModule } from '../../../../shared/shared.module';
 import { CommonModule } from '@angular/common';
 import { AnalyzeService, CategoryScore } from '../../../../services/analyze.service';
 import { catchError, of } from 'rxjs';
-import { ChartModule } from 'primeng/chart';
-import { UIChart } from 'primeng/chart';
+import { ChartComponent } from '../../../../shared/chart/chart.component';
 import { PlacesDialogComponent, PlacesDialogData } from '../places/places-dialog.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { InfoDialogComponent } from '../../../../shared/info-overlay/info-dialog.component';
@@ -35,10 +34,11 @@ export interface AllCategoriesDialogData {
   imports: [
     SharedModule,
     CommonModule,
-    ChartModule,
+    ChartComponent,
     TranslateModule,
   ],
   templateUrl: './all-categories-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './all-categories-dialog.component.css'
 })
 export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
@@ -51,7 +51,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
   chartData: any = null;
   chartOptions: any = null;
   
-  @ViewChild('allCategoriesChart') allCategoriesChart?: UIChart;
+  @ViewChild('allCategoriesChart') allCategoriesChart?: ChartComponent;
 
   // Quality (index) colors - A through F
   qualityColors = [

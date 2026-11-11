@@ -1,4 +1,4 @@
-import { Component, inject, effect, OnDestroy, computed, signal } from '@angular/core';
+import { Component, inject, effect, OnDestroy, computed, signal, ChangeDetectionStrategy } from '@angular/core';
 import { County } from '../../../interfaces/features';
 import { StatsService } from '../../../services/stats.service';
 import { FilterConfigService } from '../../../services/filter-config.service';
@@ -16,6 +16,7 @@ import { MobileUiService } from '../../../services/mobile-ui.service';
   selector: 'app-stats',
   imports: [SharedModule, InfoOverlayComponent, TranslateModule],
   templateUrl: './stats.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './stats.component.css',
 })
 export class StatsComponent implements OnDestroy {

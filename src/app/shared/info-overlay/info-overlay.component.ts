@@ -1,4 +1,4 @@
-import { Component, TemplateRef, ViewChild, inject } from '@angular/core';
+import { Component, TemplateRef, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { SharedModule } from '../shared.module';
 import { InfoDialogComponent } from './info-dialog.component';
@@ -8,6 +8,7 @@ import { InfoDialogComponent } from './info-dialog.component';
   standalone: true,
   imports: [SharedModule],
   templateUrl: './info-overlay.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './info-overlay.component.css'
 })
 export class InfoOverlayComponent {

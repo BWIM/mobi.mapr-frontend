@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, ViewChild, AfterViewInit, effect } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ViewChild, AfterViewInit, effect, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription, catchError, of, forkJoin, firstValueFrom } from 'rxjs';
 import { FeatureSelectionService, MapCompareSide } from '../../../shared/services/feature-selection.service';
@@ -7,8 +7,7 @@ import { FilterConfigService } from '../../../services/filter-config.service';
 import { AnalyzeService, AnalyzeResponse, CategoryScore } from '../../../services/analyze.service';
 import { ProjectsService } from '../../../services/project.service';
 import { PlacesService, Place } from '../../../services/places.service';
-import { UIChart } from 'primeng/chart';
-import { ChartModule } from 'primeng/chart';
+import { ChartComponent } from '../../../shared/chart/chart.component';
 import { MatDialog } from '@angular/material/dialog';
 import { SharedModule } from '../../../shared/shared.module';
 import { AllCategoriesDialogComponent, AllCategoriesDialogData } from './overlay/all-categories-dialog.component';
@@ -24,8 +23,9 @@ import {
 
 @Component({
   selector: 'app-analyze',
-  imports: [CommonModule, ChartModule, SharedModule, TranslateModule, CategoryCompositionPanelComponent],
+  imports: [CommonModule, ChartComponent, SharedModule, TranslateModule, CategoryCompositionPanelComponent],
   templateUrl: './analyze.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './analyze.component.css',
 })
 export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -105,7 +105,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     { letter: 'F', color: 'rgb(197, 136, 187)' }
   ];
 
-  @ViewChild('activitiesChart') activitiesChart?: UIChart;
+  @ViewChild('activitiesChart') activitiesChart?: ChartComponent;
 
   private featureSelectionService = inject(FeatureSelectionService);
   private mapService = inject(MapService);

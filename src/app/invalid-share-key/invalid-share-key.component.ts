@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
@@ -11,6 +11,7 @@ import { LanguageService } from '../services/language.service';
     standalone: true,
     imports: [CommonModule, TranslateModule, MatIconModule, MatButtonModule],
     templateUrl: './invalid-share-key.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './invalid-share-key.component.css'
 })
 export class InvalidShareKeyComponent {

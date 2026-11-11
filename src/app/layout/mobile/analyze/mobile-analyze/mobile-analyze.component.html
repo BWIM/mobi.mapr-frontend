@@ -84,7 +84,7 @@
         } @else {
           @if (facade.activitiesChartData()) {
             <div class="chart-host h-[180px]">
-              <p-chart type="bar" [data]="facade.activitiesChartData()" [options]="facade.activitiesChartOptions()" />
+              <app-chart type="bar" [data]="facade.activitiesChartData()" [options]="facade.activitiesChartOptions()" />
             </div>
             <ul class="space-y-1 mb-3">
               @for (cat of facade.getSortedCategories(); track cat.category_id; let i = $index) {
@@ -133,12 +133,12 @@
       } @else {
         <div class="chart-scroll-y flex-1 min-h-0 mb-2">
           <div class="chart-host" [style.height.px]="activitiesChartHeight()">
-            <p-chart
+            <app-chart
               type="bar"
               [data]="activitiesChartData()"
               [options]="activitiesChartOptions()"
               style="cursor: pointer"
-              (onDataSelect)="onActivitiesChartSelect($event)" />
+              (dataSelect)="onActivitiesChartSelect($event)" />
           </div>
         </div>
 

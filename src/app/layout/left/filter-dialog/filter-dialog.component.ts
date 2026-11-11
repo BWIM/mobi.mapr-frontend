@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, inject } from '@angular/core';
+import { Component, OnInit, Inject, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FilterConfigService } from '../../../services/filter-config.service';
 import { SharedModule } from '../../../shared/shared.module';
@@ -17,6 +17,7 @@ export interface FilterDialogData {
     TranslateModule,
   ],
   templateUrl: './filter-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './filter-dialog.component.css'
 })
 export class FilterDialogComponent implements OnInit {
