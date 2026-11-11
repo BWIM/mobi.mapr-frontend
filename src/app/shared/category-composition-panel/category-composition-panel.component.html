@@ -38,7 +38,7 @@
         (mouseenter)="onAtomHover(node.activity_id, true)"
         (mouseleave)="onAtomHover(node.activity_id, false)">
         <span class="atom-label min-w-0 truncate" [title]="node.display_name || node.name">
-          {{ node.display_name || node.name }}<ng-container *ngIf="shareLabel != null"> ({{ shareLabel | number:'1.0-0' }}%)</ng-container>
+          {{ node.display_name || node.name }}<ng-container *ngIf="shareLabel != null"> ({{ shareLabel | localeNumber:'1.0-0' }}%)</ng-container>
         </span>
         <span
           *ngIf="metaFor(node.activity_id)?.metricLabel as metric"
@@ -53,7 +53,7 @@
     <ng-container *ngIf="node.op === 'and'">
       <div class="op-row">
         <span class="op-badge">{{ 'analyze.composition.op.and' | translate }}</span>
-        <span *ngIf="shareLabel != null" class="op-share"> ({{ shareLabel | number:'1.0-0' }}%)</span>
+        <span *ngIf="shareLabel != null" class="op-share"> ({{ shareLabel | localeNumber:'1.0-0' }}%)</span>
         <mat-icon
           class="op-info"
           [matTooltip]="'analyze.composition.help.and' | translate"
@@ -89,7 +89,7 @@
     <ng-container *ngIf="node.op === 'or'">
       <div class="op-row">
         <span class="op-badge">{{ 'analyze.composition.op.or' | translate }}</span>
-        <span *ngIf="shareLabel != null" class="op-share"> ({{ shareLabel | number:'1.0-0' }}%)</span>
+        <span *ngIf="shareLabel != null" class="op-share"> ({{ shareLabel | localeNumber:'1.0-0' }}%)</span>
         <mat-icon
           class="op-info"
           [matTooltip]="'analyze.composition.help.or' | translate"
@@ -124,7 +124,7 @@
     <ng-container *ngIf="node.op === 'subst'">
       <div class="op-row">
         <span class="op-badge">{{ 'analyze.composition.op.subst' | translate }}</span>
-        <span *ngIf="shareLabel != null" class="op-share"> ({{ shareLabel | number:'1.0-0' }}%)</span>
+        <span *ngIf="shareLabel != null" class="op-share"> ({{ shareLabel | localeNumber:'1.0-0' }}%)</span>
         <mat-icon
           class="op-info"
           [matTooltip]="'analyze.composition.help.subst' | translate"

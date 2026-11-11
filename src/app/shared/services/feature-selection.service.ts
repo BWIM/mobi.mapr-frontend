@@ -38,8 +38,10 @@ export class FeatureSelectionService {
   }
 
   setSelectedMapLibreFeature(feature: MapLibreFeatureData | null, side: MapCompareSide = 'left') {
-    this.selectedMapLibreFeatureSource.next(feature);
+    // Side must be updated first: feature subscribers run synchronously and read
+    // getSelectedMapLibreFeatureSide() to choose the left/right profile.
     this.selectedMapLibreFeatureSideSource.next(side);
+    this.selectedMapLibreFeatureSource.next(feature);
   }
 
   getCurrentMapLibreFeature(): MapLibreFeatureData | null {

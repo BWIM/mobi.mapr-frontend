@@ -63,3 +63,16 @@
 ::ng-deep .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) {
   background-color: rgba(255, 255, 255, 0.1) !important;
 }
+
+/* Grade / time chip in the ranking, coloured like the map legend */
+.rank-chip {
+  display: inline-block;
+  min-width: 2.25rem;
+  padding: 0 0.4rem;
+  border-radius: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.5;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}

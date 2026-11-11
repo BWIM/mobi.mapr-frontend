@@ -11,6 +11,10 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LanguageService } from '../../../services/language.service';
 import { FeatureSelectionService, MapLibreFeatureData } from '../../../shared/services/feature-selection.service';
 import { MobileUiService } from '../../../services/mobile-ui.service';
+import { ScoreColorsService } from '../../../services/score-colors.service';
+import { getContrastTextColor, getGradeColor } from '../../../utils/grade-colors.util';
+import { currentNumberLocale } from '../../../shared/pipes/locale-number.pipe';
+import { formatNumber } from '@angular/common';
 
 @Component({
   selector: 'app-stats',
@@ -29,6 +33,7 @@ export class StatsComponent implements OnDestroy {
   private languageService = inject(LanguageService);
   private featureSelectionService = inject(FeatureSelectionService);
   private mobileUi = inject(MobileUiService);
+  private scoreColorsService = inject(ScoreColorsService);
 
   counties: County[] = [];
   isLoading = signal(true); // Start with loading state true by default (step 0)
@@ -353,13 +358,24 @@ export class StatsComponent implements OnDestroy {
     if (bewertung === 'zeit') {
       // For score, convert seconds to minutes for display
       // API returns score in seconds, but we display in minutes
-      const minutes = (county.score / 60).toFixed(1);
+      const minutes = formatNumber(county.score / 60, currentNumberLocale(this.translate), '1.1-1');
       const minLabel = this.translate.instant('map.popup.minutes');
       return `${minutes} ${minLabel}`;
     } else {
       // For index, show the rating letter grade
       return this.getRating(county.index / 100) as string;
     }
+  }
+
+  /** Colour chip for the rating column (grade colour or travel-time bracket colour). */
+  getDisplayColor(county: County): string {
+    return this.filterConfigService.selectedBewertung() === 'zeit'
+      ? this.scoreColorsService.getColorForScore(county.score)
+      : getGradeColor(county.index / 100);
+  }
+
+  getDisplayTextColor(county: County): string {
+    return getContrastTextColor(this.getDisplayColor(county));
   }
 
   getRating(index: number): string {

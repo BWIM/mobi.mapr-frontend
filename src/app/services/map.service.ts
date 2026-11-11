@@ -11,6 +11,7 @@ import { ScoreColorsService } from './score-colors.service';
 import {
   buildDifferenceFillColorExpression,
   buildQualityDifferenceConfig,
+  getQualityGradeStep,
   buildTimeDifferenceConfig,
   DifferenceColorConfig,
   isDifferenceInSelectedBrackets,
@@ -283,12 +284,17 @@ export class MapService {
       if (leftValue === null || rightValue === undefined) {
         map.setFeatureState(
           { source: CONTENT_LAYER_SOURCE, sourceLayer: CONTENT_SOURCE_LAYER, id: stateId },
-          { hasDiff: false, diff: -1, diffInSelection: false, leftValue: null, rightValue: null }
+          { hasDiff: false, diff: 0, diffInSelection: false, leftValue: null, rightValue: null }
         );
         continue;
       }
 
-      const diff = Math.abs(leftValue - rightValue);
+      // Signed difference left − right (lower is better for both metrics):
+      // > 0 → right map better, < 0 → left map better.
+      // Quality: in grade steps (A vs C = 2); time: in seconds.
+      const diff = featureType === 'index'
+        ? getQualityGradeStep(leftValue) - getQualityGradeStep(rightValue)
+        : leftValue - rightValue;
       const diffInSelection = isDifferenceInSelectedBrackets(
         diff,
         config,

@@ -71,7 +71,9 @@
       "notFound": "Feature information not found",
       "dataNotPreloaded": "Data not yet preloaded",
       "errorLoading": "Error loading feature information",
-      "typeMismatch": "Feature types do not match"
+      "typeMismatch": "Feature types do not match",
+      "excludedByFilter": "The selected place belongs to a regional class or federal state that is currently filtered out in the project settings.",
+      "clearSelection": "Clear selection"
     },
     "addToComparison": "Add to comparison",
     "clearComparison": "End comparison",
@@ -197,7 +199,12 @@
           "meaning3": "In rural areas, other facilities and provisions are prioritized.",
           "consideration": "These regional differences are taken into account in mobi.mapr to make realistic statements about everyday mobility."
         }
-      }
+      },
+      "openActivity": "Show places for this activity"
+    },
+    "ratingBadge": {
+      "grade": "Grade",
+      "time": "Time"
     }
   },
   "errors": {
@@ -330,7 +337,9 @@
         "f": {
           "title": "F - Very Poor Quality",
           "description": "Very poor mobility quality (Index: > 1.41)"
-        }
+        },
+        "scaleBest": "best quality",
+        "scaleWorst": "poorest"
       },
       "time": {
         "title": "Mobility Time",
@@ -356,6 +365,16 @@
       "hint": {
         "clickEntries": "Tip: You can click the colors in the legend to filter the map by time/rating.",
         "dismiss": "Dismiss hint"
+      },
+      "difference": {
+        "qualityTitle": "Difference in grade steps",
+        "timeTitle": "Difference in minutes",
+        "sameGrade": "same grade",
+        "gradeStep": "{{count}} grade step",
+        "gradeSteps": "{{count}} grade steps",
+        "leftBetter": "Left map better",
+        "rightBetter": "Right map better",
+        "aboutSame": "about the same"
       }
     }
   },
@@ -383,7 +402,7 @@
       "introduction": "Choose from four transport modes to analyze mobility in your region. Each mode uses sophisticated routing algorithms to provide realistic travel time calculations.",
       "modes": {
         "title": "Available Transport Modes",
-          "pedestrian": {
+        "pedestrian": {
           "title": "Pedestrian",
           "description": "Walking routes are calculated using realistic pedestrian paths, taking into account sidewalks, pedestrian zones, and walking-friendly infrastructure."
         },
@@ -674,7 +693,8 @@
           "influence": "This filtering influences the rankings and allows mobility qualities to be compared specifically by federal state."
         }
       }
-    }
+    },
+    "createdOn": "Created on"
   },
   "filterDialog": {
     "title": "Configure Filters",

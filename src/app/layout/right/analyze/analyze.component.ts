@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, inject, ViewChild, AfterViewInit, effect, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy, inject, AfterViewInit, effect, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule, formatNumber } from '@angular/common';
 import { Subscription, catchError, of, forkJoin, firstValueFrom } from 'rxjs';
 import { FeatureSelectionService, MapCompareSide } from '../../../shared/services/feature-selection.service';
 import { MapService, FeatureInfoResponse, ContentLayerFilters } from '../../../services/map.service';
@@ -7,7 +7,6 @@ import { FilterConfigService } from '../../../services/filter-config.service';
 import { AnalyzeService, AnalyzeResponse, CategoryScore } from '../../../services/analyze.service';
 import { ProjectsService } from '../../../services/project.service';
 import { PlacesService, Place } from '../../../services/places.service';
-import { ChartComponent } from '../../../shared/chart/chart.component';
 import { MatDialog } from '@angular/material/dialog';
 import { SharedModule } from '../../../shared/shared.module';
 import { AllCategoriesDialogComponent, AllCategoriesDialogData } from './overlay/all-categories-dialog.component';
@@ -20,10 +19,26 @@ import {
   CategoryCompositionPanelComponent,
   CompositionActivityMeta,
 } from '../../../shared/category-composition-panel/category-composition-panel.component';
+import { getContrastTextColor, getGradeColor } from '../../../utils/grade-colors.util';
+import { LocaleNumberPipe, currentNumberLocale } from '../../../shared/pipes/locale-number.pipe';
+
+interface ActivityValue {
+  /** Relevance in percent (0-100). */
+  relevance: number;
+  color: string;
+  /** Grade (e.g. "B+") or travel time, depending on the selected rating mode. */
+  rating: string;
+}
+
+interface ActivityRow {
+  category: CategoryScore;
+  /** One entry per compared feature; null when the activity is missing for that feature. */
+  values: (ActivityValue | null)[];
+}
 
 @Component({
   selector: 'app-analyze',
-  imports: [CommonModule, ChartComponent, SharedModule, TranslateModule, CategoryCompositionPanelComponent],
+  imports: [LocaleNumberPipe, CommonModule, SharedModule, TranslateModule, CategoryCompositionPanelComponent],
   templateUrl: './analyze.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './analyze.component.css',
@@ -33,6 +48,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   featureInfo: FeatureInfoResponse | null = null;
   isLoadingFeatureInfo: boolean = false;
   featureInfoError: string | null = null;
+  /** Selected feature is outside the active Regionalklassen/Bundesländer filter. */
+  featureExcludedByFilter = false;
 
   // Selected feature id (used for subtle UI hints like "Hexagon {id}")
   private selectedFeatureId: number | null = null;
@@ -42,6 +59,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   featureInfo2: FeatureInfoResponse | null = null;
   isLoadingFeatureInfo2: boolean = false;
   featureInfoError2: string | null = null;
+  featureExcludedByFilter2 = false;
 
   // Selected feature id for feature 2 (comparison mode)
   private selectedFeatureId2: number | null = null;
@@ -50,8 +68,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   analyzeData: AnalyzeResponse | null = null;
   isLoadingAnalyze: boolean = false;
   analyzeError: string | null = null;
-  activitiesChartData: any = null;
-  activitiesChartOptions: any = null;
+  /** Top 5 activities, rendered as labelled horizontal bars. */
+  activityRows: ActivityRow[] | null = null;
   
   // Analyze chart data for feature 2
   analyzeData2: AnalyzeResponse | null = null;
@@ -104,8 +122,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     { letter: 'E', color: 'rgb(194, 24, 7)' },
     { letter: 'F', color: 'rgb(197, 136, 187)' }
   ];
-
-  @ViewChild('activitiesChart') activitiesChart?: ChartComponent;
 
   private featureSelectionService = inject(FeatureSelectionService);
   private mapService = inject(MapService);
@@ -248,7 +264,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
             this.featureInfo = null;
           this.selectedFeatureId = null;
             this.analyzeData = null;
-            this.activitiesChartData = null;
+            this.activityRows = null;
             // Reinitialize charts with feature 2 data only
             if (this.analyzeData2 && this.analyzeData2.categories) {
               this.initializeActivitiesChart(this.analyzeData2.categories);
@@ -294,12 +310,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     );
 
-    // Subscribe to language changes to update chart labels
-    this.languageSubscription = this.translate.onLangChange.subscribe(() => {
-      if (this.activitiesChartData && this.activitiesChartOptions) {
-        this.updateActivitiesChartLabels();
-      }
-    });
+    // Rebuild activity rows on language change so units (e.g. "min") are translated
+    this.languageSubscription = this.translate.onLangChange.subscribe(() => this.refreshActivityRows());
   }
 
   ngAfterViewInit() {
@@ -366,10 +378,11 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.selectedFeatureId = null;
     this.featureInfo = null;
     this.featureInfoError = null;
+    this.featureExcludedByFilter = false;
     this.isLoadingFeatureInfo = false;
     this.currentLoadingFeatureId = null;
     this.analyzeData = null;
-    this.activitiesChartData = null;
+    this.activityRows = null;
     this.isLoadingAnalyze = false;
     this.analyzeError = null;
     this.isLoadingPlaces = false;
@@ -380,6 +393,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.selectedFeatureId2 = null;
     this.featureInfo2 = null;
     this.featureInfoError2 = null;
+    this.featureExcludedByFilter2 = false;
     this.isLoadingFeatureInfo2 = false;
     this.currentLoadingFeatureId2 = null;
     this.analyzeData2 = null;
@@ -468,15 +482,17 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     
     // Clear error states but keep selected features
     this.featureInfoError = null;
+    this.featureExcludedByFilter = false;
     this.analyzeError = null;
     this.placesError = null;
     this.featureInfoError2 = null;
+    this.featureExcludedByFilter2 = false;
     this.analyzeError2 = null;
     
     // Clear data that will be reloaded
     this.featureInfo = null;
     this.analyzeData = null;
-    this.activitiesChartData = null;
+    this.activityRows = null;
     this.featureInfo2 = null;
     this.analyzeData2 = null;
     
@@ -506,6 +522,29 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   /**
    * Clear comparison mode (remove feature 2)
    */
+  /**
+   * With a Regionalklassen/Bundesländer filter the backend ranks only matching
+   * municipalities and answers 404 "... not found in rankings" for anything outside.
+   */
+  private isExcludedByFilterError(error: any): boolean {
+    const message: string = error?.error?.error ?? '';
+    return error?.status === 404 && /not found in rankings/i.test(message);
+  }
+
+  private getFeatureInfoErrorMessage(error: any): string {
+    if (this.isExcludedByFilterError(error)) {
+      return this.translate.instant('analyze.featureInfo.excludedByFilter');
+    }
+    if (error?.status === 404) {
+      return this.translate.instant('analyze.featureInfo.notFound');
+    }
+    return this.translate.instant('analyze.featureInfo.errorLoading');
+  }
+
+  clearSelection(): void {
+    this.featureSelectionService.setSelectedMapLibreFeature(null);
+  }
+
   clearComparison(): void {
     this.featureSelectionService.clearComparison();
   }
@@ -546,23 +585,17 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     return "F-";
   }
 
-  getGradeColor(index: number): string {
-    const indexValue = index / 100;
-    if (indexValue <= 0) {
-      return 'rgba(128, 128, 128, 0.7)'; // NaN or invalid
-    } else if (indexValue < 0.35) {
-      return 'rgba(50, 97, 45, 0.7)'; // Grade A (A+, A, A-)
-    } else if (indexValue < 0.5) {
-      return 'rgba(60, 176, 67, 0.7)'; // Grade B (B+, B, B-)
-    } else if (indexValue < 0.71) {
-      return 'rgba(238, 210, 2, 0.7)'; // Grade C (C+, C, C-)
-    } else if (indexValue < 1.0) {
-      return 'rgba(237, 112, 20, 0.7)'; // Grade D (D+, D, D-)
-    } else if (indexValue < 1.41) {
-      return 'rgba(194, 24, 7, 0.7)'; // Grade E (E+, E, E-)
-    } else {
-      return 'rgba(150, 86, 162, 0.7)'; // Grade F (F+, F, F-)
-    }
+  getGradeColor(index: number, alpha = 0.7): string {
+    return getGradeColor(index / 100, alpha);
+  }
+
+  /** Text colour that stays readable on top of the given rating colour. */
+  getRatingTextColor(featureInfo: FeatureInfoResponse | null): string {
+    return getContrastTextColor(this.getRatingColor(featureInfo, 1));
+  }
+
+  getContrastTextColor(color: string): string {
+    return getContrastTextColor(color);
   }
 
   getScoreColor(score: number): string {
@@ -576,7 +609,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const bewertung = this.filterConfigService.selectedBewertung();
     if (bewertung === 'zeit') {
       // Convert score from seconds to minutes
-      const minutes = (featureInfo.score / 60).toFixed(1);
+      const minutes = formatNumber(featureInfo.score / 60, currentNumberLocale(this.translate), '1.1-1');
       const minLabel = this.translate.instant('map.popup.minutes');
       return `${minutes} ${minLabel}`;
     } else {
@@ -590,15 +623,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       : 'analyze.grade';
   }
 
-  getRatingColor(featureInfo: FeatureInfoResponse | null): string {
+  getRatingColor(featureInfo: FeatureInfoResponse | null, alpha = 0.7): string {
     if (!featureInfo) {
-      return 'rgba(128, 128, 128, 0.7)';
+      return `rgba(128, 128, 128, ${alpha})`;
     }
     const bewertung = this.filterConfigService.selectedBewertung();
     if (bewertung === 'zeit') {
       return this.getScoreColor(featureInfo.score);
     } else {
-      return this.getGradeColor(featureInfo.index);
+      return this.getGradeColor(featureInfo.index, alpha);
     }
   }
 
@@ -615,7 +648,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return '';
     }
     const populationLabel = this.translate.instant('analyze.population');
-    return `${populationLabel}: ${population.toLocaleString()}`;
+    return `${populationLabel}: ${formatNumber(population, currentNumberLocale(this.translate), '1.0-0')}`;
   }
 
   private loadFeatureInfo(feature: any): void {
@@ -690,6 +723,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isLoadingFeatureInfo = true;
     this.isLoadingAnalyze = true;
     this.featureInfoError = null;
+    this.featureExcludedByFilter = false;
     this.analyzeError = null;
 
     // Prepare both API calls
@@ -704,13 +738,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     }).pipe(
       catchError((error) => {
         console.error('Error loading feature info:', error);
-        if (error.status === 404) {
-          this.featureInfoError = this.translate.instant('analyze.featureInfo.notFound');
-        } else if (error.status === 503) {
-          this.featureInfoError = this.translate.instant('analyze.featureInfo.errorLoading');
-        } else {
-          this.featureInfoError = this.translate.instant('analyze.featureInfo.errorLoading');
-        }
+        this.featureExcludedByFilter = this.isExcludedByFilterError(error);
+        this.featureInfoError = this.getFeatureInfoErrorMessage(error);
         return of(null);
       })
     );
@@ -754,7 +783,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       } else if (result.analyzeData && result.analyzeData.categories) {
         this.initializeActivitiesChart(result.analyzeData.categories);
       } else {
-        this.activitiesChartData = null;
+        this.activityRows = null;
       }
 
       this.featureInfoSubscription = undefined;
@@ -827,6 +856,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isLoadingFeatureInfo2 = true;
     this.isLoadingAnalyze2 = true;
     this.featureInfoError2 = null;
+    this.featureExcludedByFilter2 = false;
     this.analyzeError2 = null;
 
     // Prepare both API calls
@@ -841,13 +871,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     }).pipe(
       catchError((error) => {
         console.error('Error loading feature info 2:', error);
-        if (error.status === 404) {
-          this.featureInfoError2 = this.translate.instant('analyze.featureInfo.notFound');
-        } else if (error.status === 503) {
-          this.featureInfoError2 = this.translate.instant('analyze.featureInfo.errorLoading');
-        } else {
-          this.featureInfoError2 = this.translate.instant('analyze.featureInfo.errorLoading');
-        }
+        this.featureExcludedByFilter2 = this.isExcludedByFilterError(error);
+        this.featureInfoError2 = this.getFeatureInfoErrorMessage(error);
         return of(null);
       })
     );
@@ -979,398 +1004,86 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  /** Rebuilds the activity rows (e.g. after a language change, for translated units). */
+  private refreshActivityRows(): void {
+    if (!this.activityRows) {
+      return;
+    }
+    if (this.isComparisonMode) {
+      this.initializeComparisonActivitiesChart();
+    } else if (this.analyzeData?.categories) {
+      this.initializeActivitiesChart(this.analyzeData.categories);
+    }
+  }
+
   private initializeComparisonActivitiesChart(): void {
-    if (!this.analyzeData || !this.analyzeData.categories || !this.analyzeData2 || !this.analyzeData2.categories) {
-      this.activitiesChartData = null;
+    if (!this.analyzeData?.categories || !this.analyzeData2?.categories) {
+      this.activityRows = null;
       return;
     }
 
-    // Get all unique categories from both features, sorted by combined weight
-    const categoryMap = new Map<number, { name: string; weight1: number; weight2: number; index1: number; index2: number; score1: number; score2: number }>();
-    
-    this.analyzeData.categories.forEach(cat => {
-      categoryMap.set(cat.category_id, {
-        name: cat.category_name,
-        weight1: cat.weight,
-        weight2: 0,
-        index1: cat.index,
-        index2: 0,
-        score1: cat.score,
-        score2: 0
+    const rowMap = new Map<number, ActivityRow>();
+    for (const cat of this.analyzeData.categories) {
+      rowMap.set(cat.category_id, {
+        category: cat,
+        values: [this.toActivityValue(cat), null],
       });
-    });
-    
-    this.analyzeData2.categories.forEach(cat => {
-      const existing = categoryMap.get(cat.category_id);
+    }
+    for (const cat of this.analyzeData2.categories) {
+      const existing = rowMap.get(cat.category_id);
       if (existing) {
-        existing.weight2 = cat.weight;
-        existing.index2 = cat.index;
-        existing.score2 = cat.score;
+        existing.values[1] = this.toActivityValue(cat);
       } else {
-        categoryMap.set(cat.category_id, {
-          name: cat.category_name,
-          weight1: 0,
-          weight2: cat.weight,
-          index1: 0,
-          index2: cat.index,
-          score1: 0,
-          score2: cat.score
+        rowMap.set(cat.category_id, {
+          category: cat,
+          values: [null, this.toActivityValue(cat)],
         });
       }
-    });
+    }
 
-    // Sort by combined weight and take top 5
-    const sortedCategories = Array.from(categoryMap.values())
-      .sort((a, b) => Math.max(b.weight1, b.weight2) - Math.max(a.weight1, a.weight2))
+    const maxWeight = (row: ActivityRow) =>
+      Math.max(...row.values.map(v => v?.relevance ?? 0));
+    this.activityRows = Array.from(rowMap.values())
+      .sort((a, b) => maxWeight(b) - maxWeight(a))
       .slice(0, 5);
-
-    const feature1Name = this.featureInfo?.name || this.translate.instant('analyze.feature1');
-    const feature2Name = this.featureInfo2?.name || this.translate.instant('analyze.feature2');
-    
-    // Labels are just numbers
-    const labels = sortedCategories.map((_, index) => (index + 1).toString());
-    const weights1 = sortedCategories.map(cat => cat.weight1 * 100);
-    const weights2 = sortedCategories.map(cat => cat.weight2 * 100);
-
-    // Get current bewertung setting
-    const bewertung = this.filterConfigService.selectedBewertung();
-    const isScoreMode = bewertung === 'zeit';
-
-    // Get colors based on current map visualization type - same colors as before
-    const colors1 = sortedCategories.map((cat) => {
-      if (isScoreMode) {
-        return this.getScoreColor(cat.score1);
-      } else {
-        return this.getGradeColor(cat.index1);
-      }
-    });
-
-    const colors2 = sortedCategories.map((cat) => {
-      if (isScoreMode) {
-        return this.getScoreColor(cat.score2);
-      } else {
-        return this.getGradeColor(cat.index2);
-      }
-    });
-
-    const relevanceLabel = this.translate.instant('analyze.relevancePercent');
-
-    this.activitiesChartData = {
-      labels: labels,
-      datasets: [
-        {
-          label: relevanceLabel,
-          data: weights1,
-          backgroundColor: colors1,
-          borderColor: '#ffffff',
-          borderWidth: 1
-        },
-        {
-          label: relevanceLabel,
-          data: weights2,
-          backgroundColor: colors2,
-          borderColor: '#ffffff',
-          borderWidth: 1
-        }
-      ]
-    };
-
-    this.activitiesChartOptions = {
-      indexAxis: 'x',
-      responsive: true,
-      maintainAspectRatio: false,
-      layout: {
-        padding: {
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0
-        }
-      },
-      plugins: {
-        legend: {
-          display: false
-        },
-        tooltip: {
-          mode: 'index',
-          intersect: false,
-          callbacks: {
-            title: (context: any) => {
-              const index = context[0].dataIndex;
-              return sortedCategories[index].name || '';
-            },
-            label: (context: any) => {
-              const index = context.dataIndex;
-              const datasetIndex = context.datasetIndex;
-              const category = sortedCategories[index];
-              const weight = datasetIndex === 0 ? category.weight1 : category.weight2;
-              const indexValue = datasetIndex === 0 ? category.index1 : category.index2;
-              const grade = this.getGradeFromIndex(indexValue);
-              const featureName = datasetIndex === 0 ? feature1Name : feature2Name;
-              const ratingLabel = this.translate.instant('analyze.rating');
-              const relevanceLabel = this.translate.instant('analyze.relevance');
-              return [
-                `${featureName}`,
-                `${ratingLabel}: ${grade}`,
-                `${relevanceLabel}: ${(weight * 100).toFixed(1)}%`
-              ];
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          ticks: {
-            color: '#ffffff',
-            font: {
-              size: 12
-            }
-          },
-          grid: {
-            display: false
-          }
-        },
-        y: {
-          beginAtZero: true,
-          max: 25,
-          ticks: {
-            stepSize: 5,
-            color: '#ffffff',
-            font: {
-              size: 12
-            },
-            padding: 5
-          },
-          grid: {
-            color: 'rgba(255, 255, 255, 0.1)',
-            drawBorder: false
-          },
-          title: {
-            display: true,
-            text: this.translate.instant('analyze.relevancePercent'),
-            color: '#ffffff',
-            font: {
-              size: 12
-            },
-            padding: {
-              top: 0,
-              bottom: 0
-            }
-          }
-        }
-      }
-    };
-
-    // Refresh chart
-    setTimeout(() => {
-      if (this.activitiesChart) {
-        this.activitiesChart.refresh();
-      }
-    }, 0);
   }
 
   private initializeActivitiesChart(categories: CategoryScore[]): void {
     if (!categories || categories.length === 0) {
-      this.activitiesChartData = null;
+      this.activityRows = null;
       return;
     }
 
-    // Sort by weight descending and take top 5
-    const sortedCategories = [...categories]
+    this.activityRows = [...categories]
       .sort((a, b) => b.weight - a.weight)
-      .slice(0, 5);
+      .slice(0, 5)
+      .map(cat => ({ category: cat, values: [this.toActivityValue(cat)] }));
+  }
 
-    const labels = sortedCategories.map((_, index) => (index + 1).toString());
-    // Convert weights from decimals (0-1) to percentages (0-100)
-    const weights = sortedCategories.map(cat => cat.weight * 100);
-
-    // Get current bewertung setting (qualitaet = index, zeit = score)
-    const bewertung = this.filterConfigService.selectedBewertung();
-    const isScoreMode = bewertung === 'zeit';
-    
-    // Get colors based on current map visualization type
-    // Colors match exactly with map.service.ts getScoreFillColorExpression() and getIndexFillColorExpression()
-    const colors = sortedCategories.map((cat) => {
-      if (isScoreMode) {
-        return this.scoreColorsService.getColorForScore(cat.score);
-      } else {
-        // Use index-based colors (from getIndexFillColorExpression)
-        // Match exact color breaks from map.service.ts
-        const indexValue = cat.index / 100;
-        if (indexValue <= 0) {
-          return 'rgba(128, 128, 128, 1)'; // NaN or invalid
-        } else if (indexValue < 0.35) {
-          return 'rgba(50, 97, 45, 1)'; // Grade A (A+, A, A-)
-        } else if (indexValue < 0.5) {
-          return 'rgba(60, 176, 67, 1)'; // Grade B (B+, B, B-)
-        } else if (indexValue < 0.71) {
-          return 'rgba(238, 210, 2, 1)'; // Grade C (C+, C, C-)
-        } else if (indexValue < 1.0) {
-          return 'rgba(237, 112, 20, 1)'; // Grade D (D+, D, D-)
-        } else if (indexValue < 1.41) {
-          return 'rgba(194, 24, 7, 1)'; // Grade E (E+, E, E-)
-        } else {
-          return 'rgba(150, 86, 162, 1)'; // Grade F (F+, F, F-)
-        }
-      }
-    });
-
-    const relevanceLabel = this.translate.instant('analyze.relevancePercent');
-    this.activitiesChartData = {
-      labels: labels,
-      datasets: [
-        {
-          label: relevanceLabel,
-          data: weights,
-          backgroundColor: colors,
-          borderColor: '#ffffff',
-          borderWidth: 2
-        }
-      ]
+  private toActivityValue(cat: CategoryScore): ActivityValue {
+    const isScoreMode = this.filterConfigService.selectedBewertung() === 'zeit';
+    return {
+      relevance: cat.weight * 100,
+      color: isScoreMode
+        ? this.scoreColorsService.getColorForScore(cat.score)
+        : this.getGradeColor(cat.index, 1),
+      rating: isScoreMode
+        ? `${formatNumber(cat.score / 60, currentNumberLocale(this.translate), '1.1-1')} ${this.translate.instant('map.popup.minutes')}`
+        : this.getGrade(cat.index),
     };
-
-    this.activitiesChartOptions = {
-      indexAxis: 'x',
-      responsive: true,
-      maintainAspectRatio: false,
-      layout: {
-        padding: {
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0
-        }
-      },
-      plugins: {
-        legend: {
-          display: false
-        },
-        tooltip: {
-          mode: 'index',
-          intersect: false,
-          callbacks: {
-            title: (context: any) => {
-              const index = context[0].dataIndex;
-              return sortedCategories[index].category_name || '';
-            },
-            label: (context: any) => {
-              const index = context.dataIndex;
-              const grade = this.getGradeFromIndex(sortedCategories[index].index);
-              const ratingLabel = this.translate.instant('analyze.rating');
-              const relevanceLabel = this.translate.instant('analyze.relevance');
-              return [
-                `${ratingLabel}: ${grade}`,
-                `${relevanceLabel}: ${weights[index].toFixed(1)}%`
-              ];
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          ticks: {
-            color: '#ffffff',
-            font: {
-              size: 12
-            }
-          },
-          grid: {
-            display: false
-          }
-        },
-        y: {
-          beginAtZero: true,
-          max: 25,
-          ticks: {
-            stepSize: 5,
-            color: '#ffffff',
-            font: {
-              size: 12
-            },
-            padding: 5
-          },
-          grid: {
-            color: 'rgba(255, 255, 255, 0.1)',
-            drawBorder: false
-          },
-          title: {
-            display: true,
-            text: this.translate.instant('analyze.relevancePercent'),
-            color: '#ffffff',
-            font: {
-              size: 12
-            },
-            padding: {
-              top: 0,
-              bottom: 0
-            }
-          }
-        }
-      }
-    };
-
-    // Refresh chart to ensure translations are applied
-    setTimeout(() => {
-      if (this.activitiesChart) {
-        this.activitiesChart.refresh();
-      }
-    }, 0);
   }
 
-  private getGradeFromIndex(index: number): string {
-    return this.getGrade(index);
+  /** Bar width on an absolute 0–100 % scale (relevances of all activities sum to 100 %). */
+  getActivityBarWidth(value: ActivityValue | null): number {
+    return value ? Math.min(100, Math.max(0, value.relevance)) : 0;
   }
 
-  private updateActivitiesChartLabels(): void {
-    if (!this.activitiesChartOptions) {
+  onActivityRowClick(row: ActivityRow, featureNumber?: 1 | 2): void {
+    const category = row.category;
+    if (!category?.category_id) {
       return;
     }
-    // Update Y-axis title
-    if (this.activitiesChartOptions.scales?.y?.title) {
-      this.activitiesChartOptions.scales.y.title.text = this.translate.instant('analyze.relevancePercent');
-    }
-    // Update dataset label
-    if (this.activitiesChartData?.datasets?.[0]) {
-      this.activitiesChartData.datasets[0].label = this.translate.instant('analyze.relevancePercent');
-    }
-    // Refresh chart
-    if (this.activitiesChart) {
-      this.activitiesChart.refresh();
-    }
-  }
-
-  onChartDataSelect(event: any): void {
-    if (!event || !event.element || event.element.index === undefined) {
-      return;
-    }
-
-    const clickedIndex = event.element.index;
-    const sortedCategories = this.getSortedCategories();
-    
-    if (clickedIndex < 0 || clickedIndex >= sortedCategories.length) {
-      return;
-    }
-
-    const clickedCategory = sortedCategories[clickedIndex];
-    if (!clickedCategory) {
-      return;
-    }
-
-    // Use category_id directly from the API response
-    if (!clickedCategory.category_id) {
-      console.warn('Category ID not available for category:', clickedCategory.category_name);
-      return;
-    }
-
-    // In comparison mode, determine which feature was clicked based on datasetIndex
-    let featureNumber: 1 | 2 | undefined = undefined;
-    if (this.isComparisonMode && event.element.datasetIndex !== undefined) {
-      // datasetIndex 0 = feature 1, datasetIndex 1 = feature 2
-      featureNumber = (event.element.datasetIndex === 0) ? 1 : 2;
-    }
-
-    // Open places dialog with the specific category_id and feature number
-    this.openPlacesDialog(clickedCategory.category_id, clickedCategory.category_name, featureNumber);
+    this.openPlacesDialog(category.category_id, category.category_name, featureNumber);
   }
 
   onCategoryNameClick(category: CategoryScore): void {

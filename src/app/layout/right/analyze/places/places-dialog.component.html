@@ -66,13 +66,13 @@
               (mouseenter)="onPanelActivityHover(item.name)"
               (mouseleave)="onPanelActivityHover(null)">
               <span class="text-[12px] leading-snug min-w-0 flex-1 truncate">
-                {{ item.name }} ({{ item.relevance | number:'1.0-0' }}%)
+                {{ item.name }} ({{ item.relevance | localeNumber:'1.0-0' }}%)
               </span>
               <span
                 class="text-[11px] shrink-0 tabular-nums"
                 [style.color]="getPlacesMetricTextColor(item.score, item.index)">
                 <ng-container *ngIf="getPlacesIsScoreMode(); else flatIndexMode">
-                  {{ (item.score / 60) | number:'1.1-1' }} {{ 'map.popup.minutes' | translate }}
+                  {{ (item.score / 60) | localeNumber:'1.1-1' }} {{ 'map.popup.minutes' | translate }}
                 </ng-container>
                 <ng-template #flatIndexMode>
                   {{ getGradeFromIndex(item.index) }}

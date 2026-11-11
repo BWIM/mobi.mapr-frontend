@@ -290,3 +290,27 @@ button[matRaisedButton]:hover,
 .cdk-overlay-pane:has(.project-switcher-menu-panel) {
     z-index: 1100 !important;
 }
+
+
+/* Small check badge so selected transport modes are clearly "on" */
+.mode-selected-check {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--secondary-color);
+  border: 1.5px solid var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.mode-selected-check .mat-icon {
+  width: 11px;
+  height: 11px;
+  font-size: 11px;
+  line-height: 11px;
+  color: var(--primary-color);
+}
