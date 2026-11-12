@@ -2,7 +2,7 @@ import { Component, Inject, OnInit, OnDestroy, AfterViewInit, ViewChild, Element
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SharedModule } from '../../../../shared/shared.module';
 import { CommonModule } from '@angular/common';
-import { Map as MapLibreMap, NavigationControl, FullscreenControl, Popup, GeoJSONSource } from 'maplibre-gl';
+import { Map as MapLibreMap, NavigationControl, FullscreenControl, Popup, GeoJSONSource, Marker } from 'maplibre-gl';
 import { PlacesService, Place } from '../../../../services/places.service';
 import { MapService } from '../../../../services/map.service';
 import { findBasemapLabelsBeforeId } from '../../../../services/basemap-style';
@@ -17,6 +17,11 @@ import {
   CompositionActivityMeta,
 } from '../../../../shared/category-composition-panel/category-composition-panel.component';
 import { LocaleNumberPipe } from '../../../../shared/pipes/locale-number.pipe';
+import {
+  addSelectedAreaToMap,
+  applyPlacesFocus,
+  placesCirclePaint,
+} from '../../../../shared/places-map/places-map-focus';
 
 export interface PlacesDialogData {
   featureType: 'municipality' | 'hexagon' | 'county' | 'state';
@@ -30,6 +35,8 @@ export interface PlacesDialogData {
   categoryScore?: number;
   /** Overall category quality index from analyze — for composition panel. */
   categoryIndex?: number;
+  /** Name of the analysed place (municipality / hexagon), shown on the map and in the summary. */
+  featureName?: string;
 }
 
 @Component({
@@ -65,6 +72,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   private dialog = inject(MatDialog);
   private ngZone = inject(NgZone);
   private popup?: Popup;
+  private areaLabel?: Marker;
   private places: Place[] = [];
   private categoryData: Array<{ name: string; weight: number; score: number; index: number; places: Place[]; activity_id?: number }> = [];
   private categoryColors = new Map<string, string>();
@@ -96,22 +104,10 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     '#FFECB3'
   ];
 
-  // Quality (index) colors - A through F (must match map.service.ts getIndexFillColorExpression())
-  qualityColors = [
-    { letter: 'A', color: 'rgb(50, 97, 45)' },
-    { letter: 'B', color: 'rgb(60, 176, 67)' },
-    { letter: 'C', color: 'rgb(238, 210, 2)' },
-    { letter: 'D', color: 'rgb(237, 112, 20)' },
-    { letter: 'E', color: 'rgb(194, 24, 7)' },
-    { letter: 'F', color: 'rgb(197, 136, 187)' }
-  ];
-
   private placesService = inject(PlacesService);
   private mapService = inject(MapService);
   private scoreColorsService = inject(ScoreColorsService);
 
-  readonly timeLegendItems = this.scoreColorsService.legendItems;
-  readonly hasScoreColors = this.scoreColorsService.hasConfig;
 
   constructor(
     public dialogRef: MatDialogRef<PlacesDialogComponent>,
@@ -217,6 +213,9 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       
       // Assign colors to categories
       this.assignCategoryColors();
+      // The map shows one activity at a time; start with the most relevant one.
+      this.pinnedActivityName = this.categoryData[0]?.name ?? null;
+      this.highlightedActivityName = this.pinnedActivityName;
       this.syncCompositionActivityMeta();
       this.setOverallMetricFromBackend();
 
@@ -239,6 +238,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy() {
+    this.areaLabel?.remove();
     if (this.map) {
       this.map.remove();
     }
@@ -329,7 +329,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
           color: fillColor,
           weight: category.weight,
           relevance,
-          enabled: this.composition ? true : index < 3,
+          enabled: true,
           score: category.score,
           index: category.index,
           activity_id: category.activity_id,
@@ -394,27 +394,6 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     };
   }
 
-  private circleRadiusExpression(highlighted: boolean): unknown[] {
-    if (highlighted) {
-      return [
-        'interpolate',
-        ['linear'],
-        ['zoom'],
-        5, 10,
-        10, 15,
-        14, 20,
-      ];
-    }
-    return [
-      'interpolate',
-      ['linear'],
-      ['zoom'],
-      5, 6,
-      10, 9,
-      14, 12,
-    ];
-  }
-
   private ensureCategoryLayers(
     category: { name: string; places: Place[]; activity_id?: number; score: number; index: number }
   ): void {
@@ -426,7 +405,6 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     const beforeLayer = findBasemapLabelsBeforeId(this.map);
     const geoJsonData = this.buildCategoryGeoJson(category);
     const fillColor = this.getMarkerFillColor(category.score, category.index);
-    const isHighlighted = this.highlightedActivityName === category.name;
 
     // Remove legacy number label layers if present
     const labelLayerId = `places-labels-${category.name}`;
@@ -449,23 +427,15 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
           id: circleLayerId,
           type: 'circle',
           source: sourceId,
-          paint: {
-            'circle-radius': this.circleRadiusExpression(isHighlighted) as any,
-            'circle-color': fillColor,
-            'circle-stroke-width': isHighlighted ? 2.5 : 1.5,
-            'circle-stroke-color': isHighlighted ? 'rgba(0, 0, 0, 0.85)' : 'rgba(0, 0, 0, 0.55)',
-            'circle-opacity': 1.0,
-            'circle-stroke-opacity': 1.0,
-          },
+          paint: placesCirclePaint(fillColor, this.highlightedActivityName, category.name) as any,
         },
         beforeLayer
       );
       this.setupMarkerInteractionsForLayer(circleLayerId, category.name);
       this.setupMarkerClickHandlerForLayer(circleLayerId);
     } else {
-      this.map.setPaintProperty(circleLayerId, 'circle-color', fillColor);
       this.map.setLayoutProperty(circleLayerId, 'visibility', 'visible');
-      this.applyHighlightStyleToLayer(category.name, isHighlighted);
+      this.applyMarkerHighlightStyles();
     }
   }
 
@@ -489,11 +459,15 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     this.applyEffectiveHighlight();
   }
 
-  /** Click pins (or unpins) an activity highlight — does not hide map layers. */
+  /** Click puts an activity in focus on the map (there is always exactly one). */
   onPanelActivitySelect(activityName: string): void {
-    this.pinnedActivityName =
-      this.pinnedActivityName === activityName ? null : activityName;
+    this.pinnedActivityName = activityName;
     this.applyEffectiveHighlight();
+  }
+
+  /** Activity currently shown in colour on the map (for the summary line). */
+  get focusedActivity(): (typeof this.categoryLegendItems)[number] | undefined {
+    return this.categoryLegendItems.find((item) => item.name === this.highlightedActivityName);
   }
 
   private applyEffectiveHighlight(): void {
@@ -513,56 +487,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!this.map) {
       return;
     }
-    for (const cat of this.categoryData) {
-      const legend = this.categoryLegendItems.find((item) => item.name === cat.name);
-      if (legend && !legend.enabled) {
-        continue;
-      }
-      const isHighlighted =
-        this.highlightedActivityName != null && this.highlightedActivityName === cat.name;
-      const isDimmed =
-        this.highlightedActivityName != null && this.highlightedActivityName !== cat.name;
-      this.applyHighlightStyleToLayer(cat.name, isHighlighted, isDimmed);
-    }
-  }
-
-  private applyHighlightStyleToLayer(
-    categoryName: string,
-    highlighted: boolean,
-    dimmed = false
-  ): void {
-    if (!this.map) {
-      return;
-    }
-    const circleLayerId = `places-circles-${categoryName}`;
-    if (!this.map.getLayer(circleLayerId)) {
-      return;
-    }
-    this.map.setPaintProperty(
-      circleLayerId,
-      'circle-radius',
-      this.circleRadiusExpression(highlighted) as any
-    );
-    this.map.setPaintProperty(
-      circleLayerId,
-      'circle-stroke-width',
-      highlighted ? 2.5 : 1.5
-    );
-    this.map.setPaintProperty(
-      circleLayerId,
-      'circle-stroke-color',
-      highlighted ? 'rgba(0, 0, 0, 0.85)' : 'rgba(0, 0, 0, 0.55)'
-    );
-    this.map.setPaintProperty(
-      circleLayerId,
-      'circle-opacity',
-      dimmed ? 0.18 : 1.0
-    );
-    this.map.setPaintProperty(
-      circleLayerId,
-      'circle-stroke-opacity',
-      dimmed ? 0.18 : 1.0
-    );
+    applyPlacesFocus(this.map, this.categoryLegendItems, this.highlightedActivityName);
   }
 
   /** Overall from analyze category score passed into the dialog (backend). */
@@ -597,6 +522,11 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       return `${minutes} ${this.translate.instant('map.popup.minutes')}`;
     }
     return this.getGradeFromIndex(index);
+  }
+
+  /** Grade ("B+") or travel time ("12.3 min") of an activity, for the summary line. */
+  metricLabel(score: number, index: number): string {
+    return this.formatPlacesMetric(score, index);
   }
 
   /** Bound for composition panel AND/OR/SUBST headers. */
@@ -692,7 +622,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.categoryData.forEach((category, index) => {
       const legendItem = this.categoryLegendItems.find(item => item.name === category.name);
-      const isEnabled = legendItem?.enabled ?? (index < 3);
+      const isEnabled = legendItem?.enabled ?? true;
       if (!isEnabled) {
         return;
       }
@@ -830,63 +760,15 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!this.map || !featureShape) {
       return;
     }
-
-    // Convert single feature to FeatureCollection if needed
-    const geoJsonData = featureShape.type === 'FeatureCollection' 
-      ? featureShape 
-      : {
-          type: 'FeatureCollection' as const,
-          features: [featureShape]
-        };
-
-    const sourceId = 'feature-shape';
-    const layerId = 'feature-shape-fill';
-
-    // Add or update source
-    if (this.map.getSource(sourceId)) {
-      (this.map.getSource(sourceId) as GeoJSONSource).setData(geoJsonData);
-    } else {
-      this.map.addSource(sourceId, {
-        type: 'geojson',
-        data: geoJsonData
-      });
-    }
-
-    // Add fill layer
-    if (!this.map.getLayer(layerId)) {
-      try {
-        // Find the labels layer to insert before it, or add at the end
-        const beforeLayer = findBasemapLabelsBeforeId(this.map);
-        
-        this.map.addLayer({
-          id: layerId,
-          type: 'fill',
-          source: sourceId,
-          paint: {
-            'fill-color': '#808080', // Slight gray
-            'fill-opacity': 0.3
-          }
-        }, beforeLayer);
-
-        // Add outline layer for better visibility
-        this.map.addLayer({
-          id: 'feature-shape-outline',
-          type: 'line',
-          source: sourceId,
-          paint: {
-            'line-color': '#808080',
-            'line-width': 1,
-            'line-opacity': 0.5
-          }
-        }, beforeLayer);
-
-        console.log('Feature shape added to map');
-      } catch (error) {
-        console.error('Error adding feature shape layer:', error);
-      }
-    } else {
-      // Update existing layer
-      (this.map.getSource(sourceId) as GeoJSONSource).setData(geoJsonData);
+    try {
+      this.areaLabel?.remove();
+      this.areaLabel = addSelectedAreaToMap(
+        this.map,
+        featureShape,
+        this.data.featureName || this.translate.instant('analyze.placesDialog.selectedArea')
+      );
+    } catch (error) {
+      console.error('Error adding feature shape layer:', error);
     }
   }
 

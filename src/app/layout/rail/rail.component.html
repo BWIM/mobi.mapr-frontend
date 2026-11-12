@@ -47,6 +47,14 @@
     <button matIconButton (click)="openFeedbackDialog()" [attr.aria-label]="'rail.feedback.title' | translate">
       <mat-icon>feedback</mat-icon>
     </button>
+    <button
+      matIconButton
+      data-tour="tutorial-replay"
+      (click)="startTutorial()"
+      [attr.title]="'tutorial.replay' | translate"
+      [attr.aria-label]="'tutorial.replay' | translate">
+      <mat-icon>tour</mat-icon>
+    </button>
     <button matIconButton (click)="openMailDialog()" [attr.aria-label]="'rail.mail.title' | translate">
       <mat-icon>question_mark</mat-icon>
     </button>

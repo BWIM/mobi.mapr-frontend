@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { AuthService } from './auth.service';
+import { ReturnUrlService } from './return-url.service';
 
 @Injectable({
   providedIn: 'root'
@@ -8,15 +9,15 @@ import { AuthService } from './auth.service';
 export class AuthGuard {
   constructor(
     private authService: AuthService,
-    private router: Router
+    private returnUrlService: ReturnUrlService
   ) {}
 
-  canActivate(): boolean {
+  canActivate(_route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
     if (this.authService.isLoggedIn()) {
       return true;
     }
 
-    this.router.navigate(['/login']);
-    return false;
+    // Send to login and come back to the requested URL (incl. all view params) afterwards.
+    return this.returnUrlService.loginUrlTree(state.url);
   }
-} 
+}

@@ -40,6 +40,11 @@ export class ChartComponent implements OnDestroy {
   readonly plugins = input<Plugin[]>([]);
   readonly width = input<string>();
   readonly height = input<string>();
+  /**
+   * Select the whole row/column under the pointer instead of requiring a hit on the bar itself.
+   * Useful for bar charts with short bars and labels drawn next to them (e.g. on touch devices).
+   */
+  readonly selectByRow = input(false);
 
   readonly dataSelect = output<ChartDataSelectEvent>();
 
@@ -81,7 +86,14 @@ export class ChartComponent implements OnDestroy {
 
   onCanvasClick(event: MouseEvent): void {
     if (!this.chart) return;
-    const elements = this.chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
+    const elements = this.selectByRow()
+      ? this.chart.getElementsAtEventForMode(
+          event,
+          'index',
+          { intersect: false, axis: this.chart.options.indexAxis === 'y' ? 'y' : 'x' },
+          false,
+        )
+      : this.chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
     if (elements.length > 0) {
       this.dataSelect.emit({ originalEvent: event, element: elements[0], dataset: elements });
     }

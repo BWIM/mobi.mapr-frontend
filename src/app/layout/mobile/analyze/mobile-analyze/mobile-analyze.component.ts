@@ -163,6 +163,12 @@ export class MobileAnalyzeComponent implements OnDestroy {
   placesOverallMetricLabel = signal<string | null>(null);
   placesOverallMetricColor = signal<string | null>(null);
   placesHighlightedActivity = signal<string | null>(null);
+  /** Name of the analysed place, for the summary above the places map. */
+  placesFeatureName = signal<string | null>(null);
+  /** Activity shown in colour on the places map. */
+  readonly placesFocusedItem = computed(() =>
+    this.placesLegendItems().find((item) => item.name === this.placesHighlightedActivity()),
+  );
 
   private placesMap?: MobilePlacesMap;
   private lastLoadedStep: string | null = null;
@@ -248,6 +254,7 @@ export class MobileAnalyzeComponent implements OnDestroy {
       isScoreMode: d.isScoreMode,
       categoryScore: cat.score,
       categoryIndex: cat.index,
+      featureName: d.featureName,
     };
     this.lastLoadedStep = null;
     this.mobileUi.openAnalyzePlaces(places);
@@ -450,8 +457,16 @@ export class MobileAnalyzeComponent implements OnDestroy {
   }
 
 
+  /** Grade ("B+") or travel time ("12.3 min") of an activity, for the places summary. */
+  placesMetricLabel(score: number, index: number): string {
+    return this.placesScoreMode()
+      ? `${(score / 60).toFixed(1)} ${this.translate.instant('map.popup.minutes')}`
+      : gradeFromIndex(index);
+  }
+
   private async loadPlaces(data: PlacesDialogData): Promise<void> {
     this.teardownPlaces();
+    this.placesFeatureName.set(data.featureName ?? null);
     this.placesLegendExpanded.set(true);
     if (data.categoryScore != null || data.categoryIndex != null) {
       const score = Number(data.categoryScore ?? 0);

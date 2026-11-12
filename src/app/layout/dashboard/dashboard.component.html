@@ -1,6 +1,16 @@
 <div class="flex flex-col h-dvh w-dvw overflow-hidden bg-[var(--background-color)]">
   <!-- MOBILE HEADER - Only visible on mobile -->
   <div class="lg:hidden h-16 bg-[var(--secondary-color)] flex items-center justify-center px-4 border-b border-[var(--background-color)] relative">
+    <button
+      type="button"
+      data-tour="tutorial-replay"
+      class="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full text-[var(--primary-color)] opacity-80 hover:opacity-100 transition-opacity"
+      (click)="startTutorial()"
+      [attr.aria-label]="'tutorial.replay' | translate"
+      [title]="'tutorial.replay' | translate">
+      <mat-icon>tour</mat-icon>
+    </button>
+
     <a href="https://bw-im.de/mobimapr" target="_blank" [attr.title]="'rail.logoHint' | translate" class="flex items-center gap-2">
       <img src="assets/images/logo.png" alt="Logo" class="h-10 w-auto">
       <img src="assets/images/logo_name.png" alt="Logo Text" class="h-8 w-auto">
@@ -154,4 +164,6 @@
     }
   </div>
 
+
+  <app-tutorial-overlay />
 </div>

@@ -1,0 +1,115 @@
+@if (step(); as step) {
+  <!-- Rendered as a popover so it lives in the browser's top layer, like CDK overlays (dialogs) do -->
+  <div #root popover="manual" class="tutorial-root" [class.tutorial-root--pending]="pending()">
+    <!-- Dimmed backdrop with a click-through hole over the highlighted element -->
+    <div
+      class="tutorial-backdrop"
+      [style.clip-path]="backdropClipPath()"
+      aria-hidden="true"></div>
+
+    @if (hole(); as hole) {
+      <!-- Ring around the highlight; on non-interactive steps it also swallows clicks on the target -->
+      <div
+        class="tutorial-ring"
+        [class.tutorial-ring--blocking]="!step.interactive"
+        [class.tutorial-ring--pulse]="tutorial.isAwaitingAction()"
+        [style.top.px]="hole.top"
+        [style.left.px]="hole.left"
+        [style.width.px]="hole.width"
+        [style.height.px]="hole.height"
+        aria-hidden="true"></div>
+    }
+
+    <div
+      #card
+      class="tutorial-card"
+      [class.tutorial-card--mobile]="isMobile()"
+      [class.tutorial-card--compact]="isMobile() && step.compactOnMobile"
+      [style]="cardPosition()"
+      role="dialog"
+      aria-modal="false"
+      aria-labelledby="tutorial-title"
+      aria-describedby="tutorial-text"
+      tabindex="-1">
+      <div class="tutorial-card__header">
+        @if (tutorial.progress(); as progress) {
+          <span class="tutorial-card__progress">
+            {{ 'tutorial.progress' | translate: { current: progress.current, total: progress.total } }}
+          </span>
+        }
+        @if (step.id === 'welcome') {
+          <div class="tutorial-card__langs" role="group" [attr.aria-label]="'language.select' | translate">
+            @for (lang of availableLangs; track lang.code) {
+              <button
+                type="button"
+                class="tutorial-card__lang"
+                [class.tutorial-card__lang--active]="currentLang() === lang.code"
+                [attr.aria-pressed]="currentLang() === lang.code"
+                [attr.aria-label]="lang.name"
+                (click)="switchLanguage(lang.code)">
+                {{ lang.code }}
+              </button>
+            }
+          </div>
+        }
+        <button
+          type="button"
+          class="tutorial-card__close"
+          (click)="close()"
+          [attr.aria-label]="'tutorial.close' | translate"
+          [title]="'tutorial.close' | translate">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <h2 id="tutorial-title" class="tutorial-card__title">{{ titleKey() | translate }}</h2>
+      <!-- Compact card: the hint replaces the step text to keep the card small -->
+      @if (!(isMobile() && step.compactOnMobile && tutorial.hintKey())) {
+        <p id="tutorial-text" class="tutorial-card__text" aria-live="polite">{{ textKey() | translate }}</p>
+      }
+
+      @if (tutorial.hintKey(); as hintKey) {
+        <p class="tutorial-card__hint" role="alert">
+          <mat-icon aria-hidden="true">zoom_in</mat-icon>
+          {{ hintKey | translate }}
+        </p>
+      } @else if (tutorial.isAwaitingAction() && !(isMobile() && step.compactOnMobile)) {
+        <p class="tutorial-card__waiting">
+          <mat-icon aria-hidden="true">touch_app</mat-icon>
+          {{ (isMobile() ? 'tutorial.waitingForTap' : 'tutorial.waitingForClick') | translate }}
+        </p>
+      }
+
+      <div class="tutorial-card__actions">
+        @if (step.id === 'welcome') {
+          <button type="button" class="tutorial-btn tutorial-btn--ghost" (click)="close()">
+            {{ 'tutorial.notNow' | translate }}
+          </button>
+          <button type="button" class="tutorial-btn tutorial-btn--primary" (click)="next()">
+            {{ 'tutorial.start' | translate }}
+          </button>
+        } @else {
+          @if (!tutorial.isFirst()) {
+            <button type="button" class="tutorial-btn tutorial-btn--ghost" (click)="back()">
+              {{ 'tutorial.back' | translate }}
+            </button>
+          }
+          <span class="flex-1"></span>
+          @if (tutorial.isLast()) {
+            <button type="button" class="tutorial-btn tutorial-btn--primary" (click)="close()">
+              {{ 'tutorial.finish' | translate }}
+            </button>
+          } @else if (tutorial.isAwaitingAction()) {
+            <button type="button" class="tutorial-btn tutorial-btn--ghost" (click)="next()">
+              {{ 'tutorial.skipStep' | translate }}
+            </button>
+          } @else {
+            <button type="button" class="tutorial-btn tutorial-btn--primary" (click)="next()">
+              {{ 'tutorial.next' | translate }}
+            </button>
+          }
+        }
+      </div>
+    </div>
+  </div>
+}

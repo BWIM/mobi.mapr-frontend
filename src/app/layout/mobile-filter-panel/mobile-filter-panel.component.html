@@ -48,7 +48,7 @@
     <div class="px-6 pb-6 space-y-6 overflow-y-auto max-h-[calc(100dvh-12rem)] relative">
       <!-- Verkehrsmittel Filter -->
       @if (!isMapCompareMode()) {
-        <div class="space-y-2">
+        <div class="space-y-2" data-tour="transport-modes">
           <h3 class="text-lg font-semibold text-[var(--primary-color)] mb-2">{{ 'left.transportModes.title' | translate }}</h3>
           <div class="flex items-center gap-2 flex-wrap">
             @for (option of modeOptions(); track option.id) {

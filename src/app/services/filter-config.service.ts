@@ -1,5 +1,4 @@
 import { Injectable, inject, signal, computed, effect } from '@angular/core';
-import { Router } from '@angular/router';
 import { ProfileService } from './profile.service';
 import { ProjectsService } from './project.service';
 import { SettingsService } from './settings.service';
@@ -24,6 +23,19 @@ export type QualityBracket = 'A' | 'B' | 'C' | 'D' | 'E' | 'F';
 export type TimeBracket = string;
 export type AdminLevel = 'state' | 'county' | 'municipality' | 'hexagon';
 export type LayerMode = 'auto' | 'manual';
+export type StatsLevel = 'state' | 'county' | 'municipality';
+
+/** Filter-related view state that can be restored from a shared URL. */
+export interface ExternalFilterState {
+  bewertung?: 'qualitaet' | 'zeit';
+  profileIds?: number[];
+  qualityBrackets?: QualityBracket[];
+  timeBrackets?: TimeBracket[];
+  regiostarIds?: number[];
+  stateIds?: number[];
+  /** Forced layer; `null` switches back to automatic. */
+  layer?: AdminLevel | null;
+}
 
 const ALL_QUALITY_BRACKETS: QualityBracket[] = ['A', 'B', 'C', 'D', 'E', 'F'];
 const ADMIN_LEVELS: AdminLevel[] = ['state', 'county', 'municipality', 'hexagon'];
@@ -51,7 +63,6 @@ export class FilterConfigService {
   private stateService = inject(StateService);
   private categoryService = inject(CategoryService);
   private scoreColorsService = inject(ScoreColorsService);
-  private router = inject(Router);
 
   // Internal state signals
   private _selectedModes = signal<number[]>([]);
@@ -71,8 +82,9 @@ export class FilterConfigService {
   private _rightSelectedModes = signal<number[]>([]);
   private _mapLayerRefreshNonce = signal<number>(0);
   private _mapModeTransitionInProgress = signal<boolean>(false);
+  /** Set while a compare view requested by the URL is still waiting to be enabled. */
   private _urlCompareIntent = signal<boolean>(false);
-  private _urlCompareProfileIds = signal<number[]>([]);
+  private _statsLevel = signal<StatsLevel>('county');
   private _compareMapsReady = signal<boolean>(false);
 
   private _allProfiles = signal<Profile[]>([]);
@@ -93,9 +105,6 @@ export class FilterConfigService {
   private _filterDataProjectId = signal<number | null>(null);
   /** Bumped on every project switch to invalidate in-flight map work. */
   private projectLoadGeneration = 0;
-  
-  // Track if URL params have been applied (to prevent re-applying on every effect run)
-  private _urlParamsApplied = signal<boolean>(false);
   
   // Track which projects have had filters initialized (to only preselect on first load)
   private _initializedProjectIds = new Set<number>();
@@ -118,6 +127,18 @@ export class FilterConfigService {
   readonly modeOptions = this._modeOptions.asReadonly();
   readonly allProfiles = this._allProfiles.asReadonly();
   readonly allCategories = this._allCategories.asReadonly();
+  readonly statsLevel = this._statsLevel.asReadonly();
+  /** True once profiles and filter catalogs are loaded for the current project. */
+  readonly isProjectFilterStateReady = computed(() => {
+    const project = this.projectService.project();
+    return (
+      !!project &&
+      this._isFilterDataLoaded() &&
+      this._filterDataProjectId() === project.id &&
+      this._modeOptions().length > 0 &&
+      this._selectedModes().length > 0
+    );
+  });
   /** Categories are used as activities; selection is always "all". */
   readonly allActivities = computed(() =>
     this._allCategories().map(category => ({
@@ -357,17 +378,9 @@ export class FilterConfigService {
           this.mapUpdateRetryNeeded = false;
           this.clearInitialLoadTimer();
 
-          // Allow URL params to be re-applied when switching projects.
-          this._urlParamsApplied.set(false);
-
           // Remove old project from initialized set (new project needs initialization)
           if (previousProjectId !== null) {
             this._initializedProjectIds.delete(previousProjectId);
-          }
-
-          // If profiles are already loaded, re-apply URL params now.
-          if (this._allProfiles().length > 0) {
-            this.applyUrlParams();
           }
         }
         previousProjectId = currentProject.id;
@@ -379,7 +392,6 @@ export class FilterConfigService {
         // This will update mode options and validate selection (including URL params)
         if (this._allProfiles().length > 0) {
           this.updateModeSelection(currentProject.base_profiles);
-          this.tryEnableCompareFromUrl();
         } else {
           // Profiles may have failed or not finished on cold start — retry so modes/circles can resolve.
           this.loadProfilesAndModes();
@@ -395,16 +407,9 @@ export class FilterConfigService {
         this.compareUpdateRetryNeeded = false;
         this.mapUpdateRetryNeeded = false;
         this._compareMapsReady.set(false);
-        // Reset URL params applied flag when project is cleared
-        this._urlParamsApplied.set(false);
         // Clear initialized project IDs when project is cleared
         this._initializedProjectIds.clear();
       }
-    });
-
-    effect(() => {
-      this.dashboardSessionService.accessMethod();
-      this.tryEnableCompareFromUrl();
     });
 
     effect(() => {
@@ -766,7 +771,6 @@ export class FilterConfigService {
       next: (response) => {
         this.profilesLoading = false;
         this._allProfiles.set(response.results);
-        this.applyUrlParams();
         this.updateModeSelectionFromProject();
         this.validateModeSelection();
       },
@@ -783,137 +787,6 @@ export class FilterConfigService {
         }
       }
     });
-  }
-
-  private parseProfileIdsParam(param: string): number[] {
-    const ids = param
-      .split(',')
-      .map(s => Number(s.trim()))
-      .filter(n => !isNaN(n));
-    if (ids.length === 0) {
-      return [];
-    }
-    const knownIds = new Set(this._allProfiles().map(p => p.id));
-    return [...new Set(ids.filter(id => knownIds.has(id)))];
-  }
-
-  /**
-   * Apply URL parameters for profile_ids, compare_profile_ids, and bewertung
-   * Called after profiles are loaded
-   */
-  private applyUrlParams(): void {
-    // Only apply URL params once
-    if (this._urlParamsApplied()) {
-      return;
-    }
-
-    if (this._allProfiles().length === 0) {
-      return;
-    }
-
-    // Read URL query parameters
-    const urlTree = this.router.parseUrl(this.router.url);
-    const queryParams = urlTree.queryParams;
-
-    // Apply bewertung parameter
-    if (queryParams['bewertung']) {
-      const bewertung = queryParams['bewertung'];
-      if (bewertung === 'zeit' || bewertung === 'qualitaet') {
-        this._selectedBewertung.set(bewertung);
-        this.saveSettings();
-      }
-    }
-
-    // Apply profile_ids parameter (comma-separated integers)
-    const profileIdsParam = queryParams['profile_ids'];
-    if (profileIdsParam && typeof profileIdsParam === 'string') {
-      const profileIds = this.parseProfileIdsParam(profileIdsParam);
-      if (profileIds.length > 0) {
-        this._selectedModes.set(profileIds);
-        this.saveSettings();
-        const currentProject = this.projectService.project();
-        if (currentProject && currentProject.base_profiles) {
-          this.validateModeSelection();
-        }
-      }
-    }
-
-    this.parseUrlCompareIntent(queryParams);
-
-    // Apply legend_brackets parameter (comma-separated values)
-    // If the parameter is missing, default to "all selected".
-    const legendBracketsParam = queryParams['legend_brackets'];
-    if (legendBracketsParam && typeof legendBracketsParam === 'string') {
-      const values = legendBracketsParam
-        .split(',')
-        .map(v => v.trim())
-        .filter(v => v.length > 0);
-
-      const qualityValues = values.filter((v): v is QualityBracket => ALL_QUALITY_BRACKETS.includes(v as QualityBracket));
-      const availableTimeBrackets = this.scoreColorsService.bracketIds();
-      const timeValues = values.filter((v): v is TimeBracket => availableTimeBrackets.includes(v));
-
-      if (qualityValues.length > 0) {
-        this._selectedQualityBrackets.set([...new Set(qualityValues)]);
-      }
-      if (timeValues.length > 0) {
-        this._selectedTimeBrackets.set([...new Set(timeValues)]);
-      }
-      this.saveSettings();
-    } else {
-      this._selectedQualityBrackets.set([...ALL_QUALITY_BRACKETS]);
-      this._selectedTimeBrackets.set([...this.scoreColorsService.bracketIds()]);
-      this.saveSettings();
-    }
-
-    // Mark URL params as applied
-    this._urlParamsApplied.set(true);
-
-    this.tryEnableCompareFromUrl();
-  }
-
-  private parseUrlCompareIntent(queryParams?: Record<string, unknown>): void {
-    if (this._allProfiles().length === 0) {
-      return;
-    }
-
-    const params = queryParams ?? this.router.parseUrl(this.router.url).queryParams;
-    const compareProfileIdsParam = params['compare_profile_ids'];
-    if (compareProfileIdsParam && typeof compareProfileIdsParam === 'string') {
-      const compareProfileIds = this.parseProfileIdsParam(compareProfileIdsParam);
-      if (compareProfileIds.length > 0) {
-        this._urlCompareIntent.set(true);
-        this._urlCompareProfileIds.set(compareProfileIds);
-      }
-    }
-  }
-
-  private tryEnableCompareFromUrl(): void {
-    if (!this._urlCompareIntent() || !this.canUseMapCompare()) {
-      return;
-    }
-
-    const project = this.projectService.project();
-    if (!project || this._allProfiles().length === 0) {
-      return;
-    }
-
-    const profileIds = this._urlCompareProfileIds();
-    if (profileIds.length === 0) {
-      return;
-    }
-
-    if (this._isMapCompareMode()) {
-      return;
-    }
-
-    if (this._pendingMapCompareEnable()) {
-      this._rightSelectedModes.set(profileIds);
-      this.validateRightModeSelection();
-      return;
-    }
-
-    this.requestEnableMapCompare(profileIds);
   }
 
   private scheduleCompareLayerSync(): void {
@@ -1233,6 +1106,123 @@ export class FilterConfigService {
     }
     this._pendingMapCompareEnable.set(false);
     this._isMapCompareMode.set(true);
+    this._urlCompareIntent.set(false);
+  }
+
+  /**
+   * Applies filter state coming from outside (e.g. a shared URL). Every value is validated against
+   * the current project and the viewer's permissions; values that are not allowed are ignored.
+   * Call only when `isProjectFilterStateReady()` is true.
+   */
+  applyExternalFilterState(state: ExternalFilterState): void {
+    if (state.bewertung) {
+      this._selectedBewertung.set(state.bewertung);
+    }
+
+    if (state.profileIds) {
+      const allowed = this.getProfileIdsInProject();
+      const valid = [...new Set(state.profileIds.filter(id => allowed.has(id)))];
+      if (valid.length > 0 && !this.sameIds(valid, this._selectedModes())) {
+        this._selectedModes.set(valid);
+      }
+    }
+
+    if (state.qualityBrackets) {
+      const valid = ALL_QUALITY_BRACKETS.filter(b => state.qualityBrackets!.includes(b));
+      if (valid.length > 0 || state.qualityBrackets.length === 0) {
+        this._selectedQualityBrackets.set(valid);
+      }
+    }
+
+    if (state.timeBrackets) {
+      const available = this.scoreColorsService.bracketIds();
+      const valid = available.filter(b => state.timeBrackets!.includes(b));
+      if (valid.length > 0 || state.timeBrackets.length === 0) {
+        this._selectedTimeBrackets.set(valid);
+      }
+    }
+
+    // Advanced filters are not available with share-key access.
+    if (!this.isShareKeyOnly()) {
+      if (state.regiostarIds) {
+        const allowed = new Set(this._allRegioStars().map(r => r.id));
+        const valid = state.regiostarIds.filter(id => allowed.has(id));
+        if (valid.length > 0) {
+          this._selectedRegioStars.set(valid);
+        }
+      }
+      if (state.stateIds) {
+        const allowed = new Set(this._allStates().map(s => s.id));
+        const valid = state.stateIds.filter(id => allowed.has(id));
+        if (valid.length > 0) {
+          this._selectedStates.set(valid);
+        }
+      }
+    }
+
+    if (state.layer === null) {
+      if (this._layerMode() === 'manual') {
+        this.setLayerModeAuto();
+      }
+    } else if (state.layer && this.availableAdminLevels().includes(state.layer)) {
+      this._layerMode.set('manual');
+      this._selectedAdminLevel.set(state.layer);
+      this.refreshMapLayers();
+    }
+
+    this.saveSettings();
+  }
+
+  /**
+   * Turns on the compare view with the given right-hand profiles (or updates them when it is
+   * already on). Returns false when the viewer is not allowed to use the compare view.
+   */
+  applyExternalCompareState(rightProfileIds: number[]): boolean {
+    if (!this.canUseMapCompare()) {
+      this._urlCompareIntent.set(false);
+      return false;
+    }
+    const allowed = this.getProfileIdsInProject();
+    const valid = [...new Set(rightProfileIds.filter(id => allowed.has(id)))];
+    if (valid.length === 0) {
+      this._urlCompareIntent.set(false);
+      return false;
+    }
+
+    if (this._isMapCompareMode() || this._pendingMapCompareEnable()) {
+      if (!this.sameIds(valid, this._rightSelectedModes())) {
+        this._rightSelectedModes.set(valid);
+      }
+      return true;
+    }
+
+    this._urlCompareIntent.set(true);
+    this.requestEnableMapCompare(valid);
+    return true;
+  }
+
+  /**
+   * Marks that a compare view is expected from the URL, so the map host does not build a single
+   * map that would be torn down right after.
+   */
+  setUrlCompareIntent(intent: boolean): void {
+    this._urlCompareIntent.set(intent);
+  }
+
+  setStatsLevel(level: StatsLevel): void {
+    if (this._statsLevel() === level) {
+      return;
+    }
+    this._statsLevel.set(level);
+    this.settingsService.saveSettings({ statsLevel: level });
+  }
+
+  private sameIds(a: number[], b: number[]): boolean {
+    if (a.length !== b.length) {
+      return false;
+    }
+    const set = new Set(b);
+    return a.every(id => set.has(id));
   }
 
   toggleMapCompare(): void {
@@ -1246,8 +1236,6 @@ export class FilterConfigService {
       this._isDifferenceView.set(false);
       this._isMapCompareMode.set(false);
       this._urlCompareIntent.set(false);
-      this._urlCompareProfileIds.set([]);
-      this.clearCompareProfileIdsFromUrl();
       return;
     }
 
@@ -1262,18 +1250,6 @@ export class FilterConfigService {
     this._compareMapsReady.set(false);
     this.mapService.unbindDifferenceSync();
     this._isDifferenceView.update((value) => !value);
-  }
-
-  private clearCompareProfileIdsFromUrl(): void {
-    const urlTree = this.router.parseUrl(this.router.url);
-    if (!urlTree.queryParams['compare_profile_ids']) {
-      return;
-    }
-    const { compare_profile_ids: _, ...remaining } = urlTree.queryParams;
-    void this.router.navigate([], {
-      queryParams: remaining,
-      replaceUrl: true,
-    });
   }
 
   setMapModeTransitionInProgress(inProgress: boolean): void {
@@ -1891,6 +1867,9 @@ export class FilterConfigService {
     const settings = this.settingsService.loadSettings();
     this._settingsLoaded = settings !== null && settings !== undefined;
     if (settings) {
+      if (settings.statsLevel === 'state' || settings.statsLevel === 'county' || settings.statsLevel === 'municipality') {
+        this._statsLevel.set(settings.statsLevel);
+      }
       this._selectedBewertung.set((settings.bewertung === 'zeit' ? 'zeit' : 'qualitaet') as 'qualitaet' | 'zeit');
       
       this._layerMode.set(settings.layerMode === 'manual' ? 'manual' : 'auto');

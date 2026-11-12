@@ -1,5 +1,5 @@
 <!-- map.component.html -->
-<div class="rounded-xl overflow-hidden h-full w-full relative">
+<div data-tour="map" class="rounded-xl overflow-hidden h-full w-full relative">
   @if (!isMapCompareMode() || isDifferenceView()) {
     <div #mapContainer class="h-full w-full rounded-xl"></div>
   } @else {
@@ -78,13 +78,7 @@
     <p class="map-no-tiles-hint__text">{{ 'map.noTiles.hint' | translate }}</p>
   </div>
   <!-- Legend -->
-  <div class="map-legend absolute top-0 left-0 lg:bottom-0 lg:left-0 lg:right-auto lg:top-auto" (click)="openLegendDialog()" [title]="'map.search.clickForInfo' | translate">
-    <div class="legend-hint" *ngIf="showLegendClickHint">
-      <span class="legend-hint-text">{{ 'map.legend.hint.clickEntries' | translate }}</span>
-      <button type="button" class="legend-hint-close" (click)="dismissLegendClickHint($event)" [attr.aria-label]="'map.legend.hint.dismiss' | translate">
-        &times;
-      </button>
-    </div>
+  <div data-tour="legend" class="map-legend absolute top-0 left-0 lg:bottom-0 lg:left-0 lg:right-auto lg:top-auto" (click)="openLegendDialog()" [title]="'map.search.clickForInfo' | translate">
     <!-- Difference legend (diverging: left better ← same → right better) -->
     <div class="legend-time legend-difference" *ngIf="isDifferenceView() && differenceLegendItems().length > 0">
       <span class="legend-difference-title">

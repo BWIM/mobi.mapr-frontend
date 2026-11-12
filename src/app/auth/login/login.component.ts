@@ -1,8 +1,9 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../auth.service';
+import { RETURN_URL_PARAM, ReturnUrlService } from '../return-url.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -40,6 +41,8 @@ export class LoginComponent {
   currentLang = 'de';
   languages: { code: string; name: string }[] = [];
   hidePassword = true;
+  private route = inject(ActivatedRoute);
+  private returnUrlService = inject(ReturnUrlService);
 
   constructor(
     private fb: FormBuilder,
@@ -81,7 +84,11 @@ export class LoginComponent {
         finalize(() => this.isLoading = false)
       ).subscribe({
         next: () => {
-          this.router.navigate(['/users-area']);
+          // Bring the user back to the page (incl. all view params) that required the login.
+          const returnUrl = this.returnUrlService.consume(
+            this.route.snapshot.queryParamMap.get(RETURN_URL_PARAM)
+          );
+          this.router.navigateByUrl(returnUrl ?? '/users-area');
         },
         error: (err) => {
           this.translate.get('auth.login.loginFailed').subscribe((text: string) => {

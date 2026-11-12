@@ -15,7 +15,6 @@ import { FeatureSelectionService } from '../../shared/services/feature-selection
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SearchService } from '../../services/search.service';
 import { QualityBracket, TimeBracket } from '../../services/filter-config.service';
-import { SettingsService } from '../../services/settings.service';
 import { ScoreColorsService } from '../../services/score-colors.service';
 import {
   buildDifferenceLegendItems,
@@ -88,7 +87,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private featureSelectionService = inject(FeatureSelectionService);
   private translate = inject(TranslateService);
   private searchService = inject(SearchService);
-  private settingsService = inject(SettingsService);
   private scoreColorsService = inject(ScoreColorsService);
   private snackBar = inject(MatSnackBar);
   private popup?: Popup;
@@ -109,7 +107,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   searchResults: NominatimResult[] = [];
   private searchSubject = new Subject<string>();
   isGettingLocation: boolean = false;
-  showLegendClickHint: boolean = true;
   private lastLayerFallbackToastAt = 0;
   readonly layerButtonOptions: LayerButtonOption[] = [
     { value: 'state', labelKey: 'map.layerSwitcher.state', shortLabelKey: 'map.layerSwitcher.stateShort' },
@@ -128,7 +125,9 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       const compareMode = this.filterConfigService.isMapCompareMode();
       const differenceView = this.filterConfigService.isDifferenceView();
       // Re-run when pending compare resolves so maps init after panel collapse.
-      this.filterConfigService.pendingMapCompareEnable();
+      const pendingCompare = this.filterConfigService.pendingMapCompareEnable();
+      // Re-run when a compare view requested by the URL is dropped (e.g. not permitted).
+      const urlCompareIntent = this.filterConfigService.hasUrlCompareIntent();
       queueMicrotask(() => {
         if (!this.isActiveMapHost()) {
           return;
@@ -158,6 +157,16 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
         if (wantSingle) {
           if (!this.wasCompareMode && !this.wasDifferenceView) {
+            // ngAfterViewInit skips the single map while a URL compare view is expected.
+            if (
+              !pendingCompare &&
+              !urlCompareIntent &&
+              !this.map &&
+              !this.beforeMap &&
+              !this.mapModeTransitionPending
+            ) {
+              this.initSingleMap();
+            }
             return;
           }
           this.wasCompareMode = false;
@@ -416,7 +425,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   openLegendDialog(): void {
-    this.markLegendClickHintAsSeen();
     this.dialog.open(InfoDialogComponent, {
       width: '80vw',
       height: '80vh',
@@ -428,9 +436,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async ngOnInit() {
-    const settings = this.settingsService.loadSettings();
-    this.showLegendClickHint = settings?.legendClickHintShown !== true;
-
     // Get initial style value immediately
     this.mapStyle = await firstValueFrom(this.mapService.mapStyle$);
 
@@ -624,7 +629,14 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private getMapViewport(): { center: LngLatLike; zoom: number } {
-    return this.savedViewport ?? { center: this.center, zoom: this.zoom };
+    if (this.savedViewport) {
+      return this.savedViewport;
+    }
+    const known = this.mapService.viewport();
+    if (known) {
+      return { center: [known.lng, known.lat], zoom: known.zoom };
+    }
+    return { center: this.center, zoom: this.zoom };
   }
 
   private createPopup(): Popup {
@@ -724,11 +736,16 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     };
 
+    const reportViewport = () => this.mapService.reportViewport(targetMap);
+
     if (targetMap.loaded()) {
       syncZoom();
+      reportViewport();
     }
     targetMap.on('load', syncZoom);
     targetMap.on('zoomend', syncZoom);
+    targetMap.on('load', reportViewport);
+    targetMap.on('moveend', reportViewport);
   }
 
   private getPopupForMap(targetMap: Map): Popup | undefined {
@@ -972,20 +989,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.searchQuery.trim().length >= 3) {
       this.searchSubject.next(this.searchQuery.trim());
     }
-  }
-
-  dismissLegendClickHint(event?: Event): void {
-    event?.stopPropagation();
-    this.markLegendClickHintAsSeen();
-  }
-
-  private markLegendClickHintAsSeen(): void {
-    if (!this.showLegendClickHint) {
-      return;
-    }
-
-    this.showLegendClickHint = false;
-    this.settingsService.saveSettings({ legendClickHintShown: true });
   }
 
   private searchNominatim(query: string): Promise<NominatimResult[]> {

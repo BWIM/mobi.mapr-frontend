@@ -1,4 +1,4 @@
-<div class="w-full max-w-full h-[85vh] flex flex-col relative">
+<div class="w-full max-w-full h-[85vh] flex flex-col relative" data-tour="places-map">
   <!-- Overlay Close Button -->
   <button 
     type="button"
@@ -8,11 +8,31 @@
     <span class="text-[var(--secondary-color)] text-[28px] font-bold leading-none m-0 p-0">×</span>
   </button>
   
-  <h2 mat-dialog-title class="text-2xl font-bold text-white mb-4">
+  <h2 mat-dialog-title class="text-2xl font-bold text-white">
     {{ categoryName }}
   </h2>
   
   <mat-dialog-content class="mat-typography flex-1 overflow-hidden py-4 flex flex-col min-h-0">
+    <!-- What the map shows: one activity in colour, from the selected place -->
+    @if (!isLoading && !error && focusedActivity; as focus) {
+      <div class="places-summary mb-3 shrink-0">
+        <p class="places-summary__text">
+          <span class="places-summary__dot" aria-hidden="true"></span>
+          {{ (data.featureName ? 'analyze.placesDialog.focusSummary' : 'analyze.placesDialog.focusSummaryNoPlace')
+              | translate: { activity: focus.name, place: data.featureName } }}
+          <button
+            type="button"
+            class="places-summary__rating"
+            (click)="openLegendInfo()"
+            [title]="'map.search.clickForInfo' | translate">
+            {{ (getPlacesIsScoreMode() ? 'analyze.placesDialog.focusTime' : 'analyze.placesDialog.focusRating') | translate }}:
+            <strong [style.color]="getPlacesMetricTextColor(focus.score, focus.index)">{{ metricLabel(focus.score, focus.index) }}</strong>
+          </button>
+        </p>
+        <p class="places-summary__hint">{{ 'analyze.placesDialog.focusHint' | translate }}</p>
+      </div>
+    }
+
     <div class="flex flex-1 min-h-0 gap-3 flex-col lg:flex-row">
       <!-- Map -->
       <div class="relative flex-1 min-h-[240px] min-w-0 h-full">
@@ -85,29 +105,4 @@
     </div>
   </mat-dialog-content>
 
-  <!-- Bottom: quality / time scale only -->
-  <div class="flex-shrink-0 border-t border-[var(--primary-color)] border-opacity-30 pt-3 px-4 pb-2" *ngIf="!isLoading && !error">
-    <div class="cursor-pointer" (click)="openLegendInfo()">
-      <div class="w-full" *ngIf="!getPlacesIsScoreMode()">
-        <div class="flex items-center gap-2">
-          <div class="w-9 h-9 rounded-full flex items-center justify-center border border-white/40" *ngFor="let item of qualityColors" [style.background-color]="item.color">
-            <span class="text-sm font-bold text-white">{{ item.letter }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="w-full" *ngIf="getPlacesIsScoreMode() && hasScoreColors()">
-        <div class="flex flex-col gap-1.5 w-full max-w-xl">
-          <div class="flex w-full h-3 overflow-hidden rounded">
-            <div class="flex-1" *ngFor="let item of timeLegendItems()" [style.background-color]="item.color"></div>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-xs text-white flex-1 min-w-0 text-center" *ngFor="let item of timeLegendItems()">
-              {{ item.segmentLabel }}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>

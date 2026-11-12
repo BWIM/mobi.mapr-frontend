@@ -5,6 +5,7 @@ import { throwError, Observable, BehaviorSubject } from 'rxjs';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
 import { SessionService } from '../services/session.service';
+import { ReturnUrlService } from './return-url.service';
 
 let isRefreshing = false;
 let refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
@@ -39,6 +40,7 @@ export const AuthInterceptor: HttpInterceptorFn = (
   const authService = inject(AuthService);
   const router = inject(Router);
   const sessionService = inject(SessionService);
+  const returnUrlService = inject(ReturnUrlService);
 
   // Check if it's a token request, feedback request, public route, share route or explicitly allowed public asset
   if (req.url.includes('/token/') || req.url.includes('/feedback') || isPublicRoute(router) || isShareRoute(router) || isPublicAsset(req.url)) {
@@ -58,7 +60,8 @@ export const AuthInterceptor: HttpInterceptorFn = (
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
         authService.logout();
-        router.navigate(['/login']);
+        // Keep the current page so the user returns to the same view after logging in again.
+        void returnUrlService.redirectToLogin(router.url);
         return throwError(() => error);
       }
       if (error.status === 503) {

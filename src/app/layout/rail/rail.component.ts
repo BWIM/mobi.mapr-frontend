@@ -10,6 +10,7 @@ import { CreditsDialogComponent } from './credits-dialog/credits-dialog.componen
 import { FeedbackDialogComponent } from './feedback-dialog/feedback-dialog.component';
 import { ProjectsService } from '../../services/project.service';
 import { ProjectNavigationService } from '../../services/project-navigation.service';
+import { TutorialService } from '../../tutorial/tutorial.service';
 
 @Component({
   selector: 'app-rail',
@@ -29,6 +30,7 @@ export class RailComponent implements OnInit {
   private dialog = inject(MatDialog);
   private projectsService = inject(ProjectsService);
   private projectNavigation = inject(ProjectNavigationService);
+  private tutorial = inject(TutorialService);
 
   currentLang = signal<string>('de');
   isLoggedIn = signal<boolean>(false);
@@ -97,5 +99,9 @@ export class RailComponent implements OnInit {
       maxWidth: '90vw',
       maxHeight: '90vh'
     });
+  }
+
+  startTutorial(): void {
+    this.tutorial.start();
   }
 }

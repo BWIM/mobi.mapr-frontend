@@ -1,9 +1,8 @@
-import { Component, inject, effect, OnDestroy, computed, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, effect, OnDestroy, computed, signal, ChangeDetectionStrategy, untracked } from '@angular/core';
 import { County } from '../../../interfaces/features';
 import { StatsService } from '../../../services/stats.service';
 import { FilterConfigService } from '../../../services/filter-config.service';
 import { MapService } from '../../../services/map.service';
-import { SettingsService } from '../../../services/settings.service';
 import { ProjectsService } from '../../../services/project.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { InfoOverlayComponent } from '../../../shared/info-overlay/info-overlay.component';
@@ -27,7 +26,6 @@ export class StatsComponent implements OnDestroy {
   private statsService = inject(StatsService);
   private filterConfigService = inject(FilterConfigService);
   private mapService = inject(MapService);
-  private settingsService = inject(SettingsService);
   private projectService = inject(ProjectsService);
   private translate = inject(TranslateService);
   private languageService = inject(LanguageService);
@@ -49,14 +47,25 @@ export class StatsComponent implements OnDestroy {
     { value: 'municipality' as const, label: '' }
   ]);
   
-  selectedLevel: 'municipality' | 'county' | 'state' = 'county';
+  /** Ranking level; shared state so it can be restored from and synced to the URL. */
+  get selectedLevel(): 'municipality' | 'county' | 'state' {
+    return this.filterConfigService.statsLevel();
+  }
   private loadRankingsTimeout: ReturnType<typeof setTimeout> | null = null;
   private languageSubscription: any = null;
 
   constructor() {
-    // Load saved level selection from localStorage
-    this.loadSavedLevel();
-    
+    // Reload rankings whenever the level changes (UI selection or restored from the URL).
+    let previousLevel = untracked(() => this.filterConfigService.statsLevel());
+    effect(() => {
+      const level = this.filterConfigService.statsLevel();
+      if (level === previousLevel) {
+        return;
+      }
+      previousLevel = level;
+      untracked(() => this.reloadRankingsForLevel());
+    });
+
     // Initialize level options with translations
     this.updateLevelOptions();
     
@@ -205,9 +214,11 @@ export class StatsComponent implements OnDestroy {
   }
 
   onLevelChange(newLevel: 'municipality' | 'county' | 'state'): void {
-    this.selectedLevel = newLevel;
-    // Save the selection to localStorage
-    this.saveLevel();
+    // Persisted by FilterConfigService; the level effect reloads the rankings.
+    this.filterConfigService.setStatsLevel(newLevel);
+  }
+
+  private reloadRankingsForLevel(): void {
     // Trigger new API call when level changes (level is a parameter, not a filter)
     const profileIds = this.filterConfigService.currentProfileIds();
     const isMapLoading = this.mapService.isMapLoading();
@@ -215,29 +226,6 @@ export class StatsComponent implements OnDestroy {
     if (profileIds?.length && !isMapLoading && filters) {
       this.loadTopRankings();
     }
-  }
-
-  /**
-   * Load saved level selection from localStorage
-   */
-  private loadSavedLevel(): void {
-    const settings = this.settingsService.loadSettings();
-    if (settings?.statsLevel) {
-      // Validate that the saved level is one of the valid options
-      const validLevels: ('municipality' | 'county' | 'state')[] = ['municipality', 'county', 'state'];
-      if (validLevels.includes(settings.statsLevel)) {
-        this.selectedLevel = settings.statsLevel;
-      }
-    }
-  }
-
-  /**
-   * Save current level selection to localStorage
-   */
-  private saveLevel(): void {
-    this.settingsService.saveSettings({
-      statsLevel: this.selectedLevel
-    });
   }
 
   get selectedLevelLabel(): string {

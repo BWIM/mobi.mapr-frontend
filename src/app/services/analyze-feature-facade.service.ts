@@ -266,6 +266,7 @@ export class AnalyzeFeatureFacadeService {
       isScoreMode: base.isScoreMode,
       categoryScore: match?.score,
       categoryIndex: match?.index,
+      featureName: base.featureName,
     };
   }
 
