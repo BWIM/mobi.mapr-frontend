@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { Map as MapLibreMap, StyleSpecification, SourceSpecification, LayerSpecification, LngLatBounds, FilterSpecification, MapSourceDataEvent } from 'maplibre-gl';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
+import { shareForbiddenFeature } from './share-access.service';
 import { DashboardSessionService } from './dashboard-session.service';
 import { appendProjectAccessParams, hasProjectAccess } from './project-access-params';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
@@ -753,19 +754,25 @@ export class MapService {
     // Feature type (required)
     params.push(`feature_type=${filters.feature_type}`);
 
-    // Add authentication token if available
-    const token = this.authService.getAuthorizationHeaders().get('Authorization')?.split(' ')[1];
-    if (token) {
-      params.push(`token=${token}`);
+    // Tiles require a share key or a login token (401/403 otherwise). Share viewers always use
+    // their key, since it decides which projects and profiles they may see.
+    const auth = this.tileAuthParam();
+    if (!auth) {
+      return '';
     }
-
-    // Add share key if available (for unauthenticated access)
-    const shareKey = this.dashboardSessionService.getShareKey();
-    if (shareKey && !token) {
-      params.push(`key=${shareKey}`);
-    }
+    params.push(auth);
 
     return `${baseUrl}?${params.join('&')}`;
+  }
+
+  /** `key=…` for share viewers, else `token=…` for logged-in users; null without either. */
+  private tileAuthParam(): string | null {
+    const shareKey = this.dashboardSessionService.getShareKey();
+    if (shareKey) {
+      return `key=${encodeURIComponent(shareKey)}`;
+    }
+    const token = this.authService.getAuthorizationHeaders().get('Authorization')?.split(' ')[1];
+    return token ? `token=${encodeURIComponent(token)}` : null;
   }
 
   /**
@@ -1021,7 +1028,7 @@ export class MapService {
   }
 
   private buildTileUrlForFilters(filters: ContentLayerFilters): string | null {
-    const effectiveId = this.dashboardSessionService.getEffectiveProjectId()
+    const effectiveId = this.dashboardSessionService.getProjectId()
       ?? this.projectService.getProject()?.id?.toString()
       ?? null;
 
@@ -1029,7 +1036,7 @@ export class MapService {
       return null;
     }
 
-    return this.buildTileUrl(effectiveId, filters);
+    return this.buildTileUrl(effectiveId, filters) || null;
   }
 
   private getCurrentContentLayerTileUrl(targetMap: MapLibreMap): string | null {
@@ -1459,6 +1466,9 @@ export class MapService {
         }
         if (error.status === 404) {
           throw new Error('Project not found or invalid share key');
+        }
+        if (shareForbiddenFeature(error) === 'export') {
+          throw new Error('geojsonDownload.error.notAllowed');
         }
       }
       throw error instanceof Error ? error : new Error('Failed to export map data');

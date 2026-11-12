@@ -102,37 +102,39 @@
       </div>
 
       <!-- RIGHT PANEL - Expandable -->
-      <div class="flex flex-col transition-all duration-300 ease-in-out relative z-0"
-           [ngClass]="rightPanelExpanded() ? 'lg:w-80 xl:w-96 2xl:w-106' : 'w-12'">
-        @if (rightPanelExpanded()) {
-          <div class="flex-1 overflow-auto bg-[var(--secondary-color)]">
-            <app-right></app-right>
-          </div>
-          <div class="absolute top-1/2 left-0 transform -translate-y-1/2 z-10">
-            <button 
-              (click)="toggleRightPanel()"
-              class="p-2 hover:bg-none rounded transition-colors"
-              [attr.aria-label]="'dashboard.collapseRightPanel' | translate">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-              </svg>
-            </button>
-          </div>
-        } @else {
-          <div class="flex-1 relative bg-[var(--secondary-color)]">
-            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+      @if (hasRightPanel()) {
+        <div class="flex flex-col transition-all duration-300 ease-in-out relative z-0"
+             [ngClass]="rightPanelExpanded() ? 'lg:w-80 xl:w-96 2xl:w-106' : 'w-12'">
+          @if (rightPanelExpanded()) {
+            <div class="flex-1 overflow-auto bg-[var(--secondary-color)]">
+              <app-right></app-right>
+            </div>
+            <div class="absolute top-1/2 left-0 transform -translate-y-1/2 z-10">
               <button 
                 (click)="toggleRightPanel()"
                 class="p-2 hover:bg-none rounded transition-colors"
-                [attr.aria-label]="'dashboard.expandRightPanel' | translate">
+                [attr.aria-label]="'dashboard.collapseRightPanel' | translate">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
               </button>
             </div>
-          </div>
-        }
-      </div>
+          } @else {
+            <div class="flex-1 relative bg-[var(--secondary-color)]">
+              <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <button 
+                  (click)="toggleRightPanel()"
+                  class="p-2 hover:bg-none rounded transition-colors"
+                  [attr.aria-label]="'dashboard.expandRightPanel' | translate">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
     }
   </div>
 

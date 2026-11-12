@@ -4,7 +4,7 @@ import { SharedModule } from '../shared/shared.module';
 import { TranslateModule } from '@ngx-translate/core';
 import { ProjectsService } from '../services/project.service';
 import { ProjectNavigationService } from '../services/project-navigation.service';
-import { ProjectGroupSibling } from '../interfaces/project-group';
+import { ProjectGroupMember } from '../interfaces/project-group';
 
 @Component({
   selector: 'app-group-overview',
@@ -21,19 +21,18 @@ export class GroupOverviewComponent {
   backRequested = output<void>();
 
   project = this.projectsService.project;
-  loading = this.projectNavigation.siblingsLoading;
-  error = this.projectNavigation.siblingsError;
-  siblings = this.projectNavigation.siblingProjects;
+  sections = this.projectNavigation.groupSections;
   activeProjectId = this.projectNavigation.activeProjectId;
 
-  groupName = computed(() => this.project()?.group?.display_name ?? '');
+  /** With one group the title names it; with several, each section has its own heading. */
+  singleGroupName = computed(() => {
+    const sections = this.sections();
+    return sections.length === 1 ? sections[0].display_name : null;
+  });
 
-  selectProject(sibling: ProjectGroupSibling): void {
-    this.projectNavigation.switchToProject(sibling.id, {
-      closeOverview: true,
-      siblingShareKey: sibling.share_key ?? null,
-    }).subscribe({
-      next: () => this.projectSelected.emit(sibling.id),
+  selectProject(member: ProjectGroupMember): void {
+    this.projectNavigation.switchToProject(member.id, { closeOverview: true }).subscribe({
+      next: () => this.projectSelected.emit(member.id),
     });
   }
 

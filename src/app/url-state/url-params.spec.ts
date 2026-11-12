@@ -5,11 +5,14 @@ import {
   VIEW_STATE_PARAMS,
   featureRefFromFeature,
   formatViewport,
+  hasViewStateParams,
   parseDashboardUrlState,
   parseFeatureRef,
   parseIdList,
   parseViewport,
   serializeDashboardUrlState,
+  shareDefaultViewQueryParams,
+  shareDefaultViewToParams,
 } from './url-params';
 
 /** Serialised params without the `null` (= remove) entries. */
@@ -152,5 +155,71 @@ describe('url-params', () => {
     expect(PROJECT_SCOPED_PARAMS).not.toContain(URL_PARAM.lang);
     expect(PROJECT_SCOPED_PARAMS).not.toContain(URL_PARAM.bewertung);
     expect(PROJECT_SCOPED_PARAMS).toContain(URL_PARAM.feature);
+  });
+
+  describe('share default view', () => {
+    it('detects view params next to access params', () => {
+      expect(hasViewStateParams({ share_key: 'abc', project_id: '5', overview: 'true' })).toBeFalse();
+      expect(hasViewStateParams({ share_key: 'abc', map: '7/49/9' })).toBeTrue();
+      expect(hasViewStateParams({ share_key: 'abc', legend_brackets: 'A' })).toBeTrue();
+      expect(hasViewStateParams({ share_key: 'abc', diff: '' })).toBeFalse();
+    });
+
+    it('converts typed default view values into URL params', () => {
+      expect(
+        shareDefaultViewToParams({
+          lang: 'en',
+          profile_ids: [3, 1],
+          compare_profile_ids: [2],
+          diff: true,
+          quality_brackets: [],
+          regiostar_ids: [],
+          unknown: 'x',
+          bewertung: 42,
+        })
+      ).toEqual({
+        lang: 'en',
+        profile_ids: '3,1',
+        compare_profile_ids: '2',
+        diff: '1',
+        quality_brackets: 'none',
+      });
+      expect(shareDefaultViewToParams({ diff: false })).toEqual({ diff: '0' });
+      expect(shareDefaultViewToParams(null)).toEqual({});
+    });
+
+    it('builds validated, normalised query params', () => {
+      expect(
+        shareDefaultViewQueryParams({
+          map: '9.5/49.3201/9.2157',
+          bewertung: 'zeit',
+          profile_ids: [3, 1],
+          compare_profile_ids: [2],
+          diff: true,
+          layer: 'county',
+          state_ids: [8],
+          stats_level: 'municipality',
+          feature: 'm:8111000',
+        })
+      ).toEqual({
+        map: '9.5/49.3201/9.2157',
+        bewertung: 'zeit',
+        profile_ids: '1,3',
+        compare_profile_ids: '2',
+        diff: '1',
+        layer: 'county',
+        state_ids: '8',
+        stats_level: 'municipality',
+        feature: 'm:8111000',
+      });
+    });
+
+    it('drops invalid values and a diff without compare view', () => {
+      expect(
+        shareDefaultViewQueryParams({ layer: 'planet', bewertung: 'x', diff: true, map: 'nope' })
+      ).toEqual({});
+      expect(shareDefaultViewQueryParams({})).toEqual({});
+      expect(shareDefaultViewQueryParams(undefined)).toEqual({});
+    });
   });
 });

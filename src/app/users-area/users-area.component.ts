@@ -6,7 +6,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { ProjectsService } from '../services/project.service';
 import { DashboardSessionService } from '../services/dashboard-session.service';
 import { AuthService } from '../auth/auth.service';
-import { Project, projectGroupId } from '../interfaces/project';
+import { Project } from '../interfaces/project';
 
 export interface ProjectListSection {
   id: number | null;
@@ -86,35 +86,29 @@ export class UsersAreaComponent implements OnInit {
     return [...projects].sort((a, b) => a.display_name.localeCompare(b.display_name));
   }
 
+  /** One section per group (a project in several groups shows up in each), then the ungrouped. */
   private buildSections(projects: Project[]): ProjectListSection[] {
-    const byGroup = new Map<number, Project[]>();
+    const byGroup = new Map<number, { displayName: string; projects: Project[] }>();
     const ungrouped: Project[] = [];
 
     for (const project of projects) {
-      const groupId = projectGroupId(project);
-      if (groupId != null) {
-        const groupProjects = byGroup.get(groupId) ?? [];
-        groupProjects.push(project);
-        byGroup.set(groupId, groupProjects);
-      } else {
+      const groups = project.groups ?? [];
+      if (groups.length === 0) {
         ungrouped.push(project);
-      }
-    }
-
-    const sections: ProjectListSection[] = [];
-
-    for (const [groupId, groupProjects] of byGroup) {
-      const sorted = this.sortProjects(groupProjects);
-      if (sorted.length === 0) {
         continue;
       }
-
-      const displayName =
-        sorted.find((project) => project.group?.display_name)?.group?.display_name ??
-        `Group ${groupId}`;
-
-      sections.push({ id: groupId, displayName, projects: sorted });
+      for (const group of groups) {
+        const entry = byGroup.get(group.id) ?? { displayName: group.display_name, projects: [] };
+        entry.projects.push(project);
+        byGroup.set(group.id, entry);
+      }
     }
+
+    const sections: ProjectListSection[] = [...byGroup].map(([groupId, entry]) => ({
+      id: groupId,
+      displayName: entry.displayName || `Group ${groupId}`,
+      projects: this.sortProjects(entry.projects),
+    }));
 
     sections.sort((a, b) => a.displayName.localeCompare(b.displayName));
 

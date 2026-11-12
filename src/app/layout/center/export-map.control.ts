@@ -7,11 +7,23 @@ import type { IControl, Map } from 'maplibre-gl';
 export class ExportMapControl implements IControl {
   private container?: HTMLElement;
 
-  /** `getLabel` is evaluated lazily so the tooltip follows language changes. */
+  /**
+   * `getLabel` is evaluated lazily so the tooltip follows language changes.
+   * `isVisible` hides the control (e.g. when a share disables export); call `refresh()` after
+   * it changes.
+   */
   constructor(
     private readonly onClick: () => void,
     private readonly getLabel: () => string,
+    private readonly isVisible: () => boolean = () => true,
   ) {}
+
+  /** Re-applies `isVisible`. */
+  refresh(): void {
+    if (this.container) {
+      this.container.hidden = !this.isVisible();
+    }
+  }
 
   onAdd(_map: Map): HTMLElement {
     const container = document.createElement('div');
@@ -38,6 +50,7 @@ export class ExportMapControl implements IControl {
 
     container.appendChild(button);
     this.container = container;
+    this.refresh();
     return container;
   }
 

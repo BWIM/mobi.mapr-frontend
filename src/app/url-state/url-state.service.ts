@@ -1,6 +1,6 @@
 import { DestroyRef, Injectable, effect, inject, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { ResolveEnd, Router, UrlTree } from '@angular/router';
+import { Params, ResolveEnd, Router, UrlTree } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { FilterConfigService, AdminLevel } from '../services/filter-config.service';
 import { MapService } from '../services/map.service';
@@ -8,6 +8,8 @@ import { ProjectsService } from '../services/project.service';
 import { DashboardSessionService } from '../services/dashboard-session.service';
 import { LanguageService } from '../services/language.service';
 import { ScoreColorsService } from '../services/score-colors.service';
+import { ShareAccessService } from '../services/share-access.service';
+import { ShareDefaultView } from '../interfaces/share';
 import {
   FeatureSelectionService,
   MapLibreFeatureData,
@@ -21,8 +23,10 @@ import {
   URL_PARAM,
   featureRefFromFeature,
   featureRefsEqual,
+  hasViewStateParams,
   parseDashboardUrlState,
   serializeDashboardUrlState,
+  shareDefaultViewQueryParams,
 } from './url-params';
 
 /** Debounce for writing state changes into the URL. */
@@ -85,6 +89,7 @@ export class UrlStateService {
   private languageService = inject(LanguageService);
   private scoreColors = inject(ScoreColorsService);
   private featureSelection = inject(FeatureSelectionService);
+  private shareAccess = inject(ShareAccessService);
   private destroyRef = inject(DestroyRef);
 
   private readonly pending = signal<DashboardUrlState>({});
@@ -182,6 +187,26 @@ export class UrlStateService {
     );
   }
 
+  /**
+   * Opens a share link in the share's `default_view` when the URL itself carries no view params.
+   * The default view is written into the URL and then read like any other link, so the same
+   * validation applies and explicit URL params always win.
+   */
+  applyShareDefaultView(defaultView: ShareDefaultView | null | undefined, currentParams: Params): void {
+    if (!defaultView || hasViewStateParams(currentParams)) {
+      return;
+    }
+    const queryParams = shareDefaultViewQueryParams(defaultView as Record<string, unknown>);
+    if (Object.keys(queryParams).length === 0) {
+      return;
+    }
+    void this.router.navigate(['/dashboard'], {
+      queryParams,
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
   /** Applies the next pending step whose prerequisites are met. Runs as an effect. */
   private applyPendingStep(): void {
     const pending = this.pending();
@@ -229,10 +254,11 @@ export class UrlStateService {
       return;
     }
 
-    // 3. Difference view (only exists inside the compare view)
+    // 3. Difference view (only exists inside the compare view, and only when the share allows it)
     if (pending.diff !== undefined) {
       untracked(() => {
-        if (compareMode && pending.diff !== this.filterConfig.isDifferenceView()) {
+        const allowed = !pending.diff || this.shareAccess.canUseDifference();
+        if (compareMode && allowed && pending.diff !== this.filterConfig.isDifferenceView()) {
           this.filterConfig.toggleDifferenceView();
         }
         this.clearPending(['diff']);
@@ -240,7 +266,12 @@ export class UrlStateService {
       return;
     }
 
-    // 4. Selected features, once the content layer is on the map
+    // 4. Selected features, once the content layer is on the map (they open the analyze panel,
+    //    so they are ignored when the share disables it)
+    if (pending.feature && !this.shareAccess.canAnalyze()) {
+      untracked(() => this.clearPending(FEATURE_KEYS));
+      return;
+    }
     if (pending.feature) {
       if (this.mapService.isMapLoading() || this.mapService.currentProfileIds() === null) {
         return;
@@ -346,12 +377,17 @@ export class UrlStateService {
       return false;
     }
     const target = this.pendingTarget();
-    if (target?.projectId !== undefined) {
-      return project.id === target.projectId;
-    }
     if (target?.shareKey !== undefined) {
       // Logged-in users get share-key links translated to project_id first (DashboardComponent).
-      return !this.session.isAuthenticated() && this.session.shareKey() === target.shareKey;
+      if (this.session.isAuthenticated() || this.session.shareKey() !== target.shareKey) {
+        return false;
+      }
+      // `project_id` next to the key names a sibling; without it the share's own project is meant.
+      const expectedId = target.projectId ?? project.share?.project_id ?? project.id;
+      return project.id === expectedId;
+    }
+    if (target?.projectId !== undefined) {
+      return project.id === target.projectId;
     }
     return true;
   }
@@ -448,7 +484,7 @@ export class UrlStateService {
       state.timeBrackets = [...time];
     }
 
-    if (!fc.isShareKeyOnly()) {
+    if (this.shareAccess.canEditAdvancedFilters()) {
       const regiostars = fc.selectedRegioStars();
       if (!this.isFullSelection(regiostars, fc.allRegioStars().map((r) => r.id), true)) {
         state.regiostarIds = [...regiostars];

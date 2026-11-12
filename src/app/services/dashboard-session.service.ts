@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, effect } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 import { inject } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
 
@@ -18,20 +18,24 @@ export class DashboardSessionService {
   readonly shareKey = this._shareKey.asReadonly();
   readonly isAuthenticated = this._isAuthenticated.asReadonly();
 
-  // Computed signal to determine the current access method
+  /**
+   * `share_key` whenever a share key is set: share viewers keep their key (it decides their rights)
+   * and use `projectId` for the project they currently look at (the share's own project or a
+   * sibling). Logged-in users never hold a share key (DashboardComponent clears it).
+   */
   readonly accessMethod = computed(() => {
-    if (this._isAuthenticated() && this._projectId()) {
-      return 'project_id' as const;
-    }
     if (this._shareKey()) {
       return 'share_key' as const;
+    }
+    if (this._isAuthenticated() && this._projectId()) {
+      return 'project_id' as const;
     }
     return null;
   });
 
   // Computed signal to get the current identifier (project_id or share_key)
   readonly currentIdentifier = computed(() => {
-    return this._projectId() || this._shareKey() || null;
+    return this._shareKey() || this._projectId() || null;
   });
 
   constructor() {
@@ -41,51 +45,26 @@ export class DashboardSessionService {
     // Subscribe to authentication state changes
     this.authService.currentUser$.subscribe(user => {
       this._isAuthenticated.set(!!user);
-      // Clear project_id if user logs out
-      if (!user) {
-        this._projectId.set(null);
-      }
-    });
-
-    // Effect to ensure only one access method is active at a time
-    effect(() => {
-      const isAuth = this._isAuthenticated();
-      const projectId = this._projectId();
-      const shareKey = this._shareKey();
-
-      // If authenticated and has project_id, clear share_key
-      if (isAuth && projectId) {
-        if (shareKey) {
-          this._shareKey.set(null);
-        }
-      }
-      // If using share_key, ensure we're not authenticated or clear project_id
-      if (shareKey && isAuth && projectId) {
+      // Clear project_id if user logs out (unless it belongs to a share-key session)
+      if (!user && !this._shareKey()) {
         this._projectId.set(null);
       }
     });
   }
 
   /**
-   * Set the project ID (for authenticated users)
+   * Set the current project ID. Logged-in users: the project they opened.
+   * Share viewers: the project shown with their share key (does not touch the key).
    */
   setProjectId(projectId: string | null): void {
     this._projectId.set(projectId);
-    // Clear share_key when setting project_id
-    if (projectId) {
-      this._shareKey.set(null);
-    }
   }
 
   /**
-   * Set the share key (for unauthenticated users)
+   * Set the share key (for unauthenticated users). Does not touch the project ID.
    */
   setShareKey(shareKey: string | null): void {
     this._shareKey.set(shareKey);
-    // Clear auth project_id when setting share_key
-    if (shareKey) {
-      this._projectId.set(null);
-    }
   }
 
   /**
@@ -108,13 +87,6 @@ export class DashboardSessionService {
    */
   getShareKey(): string | null {
     return this._shareKey();
-  }
-
-  /**
-   * Get the effective project ID for API calls (authenticated users only)
-   */
-  getEffectiveProjectId(): string | null {
-    return this._projectId();
   }
 
   /**

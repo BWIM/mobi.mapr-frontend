@@ -453,3 +453,64 @@ export function serializeDashboardUrlState(state: DashboardUrlState): Record<str
 
   return out;
 }
+
+// ---------------------------------------------------------------------------
+// Share default view
+// ---------------------------------------------------------------------------
+
+/** True when the params carry any view state (as opposed to only project access params). */
+export function hasViewStateParams(params: Params): boolean {
+  return VIEW_STATE_PARAMS.some((name) => firstString(params[name]) !== null);
+}
+
+/**
+ * Turns a share's `default_view` (URL param names with typed values: lists, `diff` as boolean)
+ * into query params. Unknown keys and values of the wrong type are dropped; the result is then
+ * validated by `parseDashboardUrlState` like any other URL.
+ */
+export function shareDefaultViewToParams(defaultView: Record<string, unknown> | null | undefined): Params {
+  const params: Params = {};
+  if (!defaultView || typeof defaultView !== 'object') {
+    return params;
+  }
+  const known = new Set<string>(VIEW_STATE_PARAMS);
+  for (const [name, value] of Object.entries(defaultView)) {
+    if (!known.has(name)) {
+      continue;
+    }
+    if (typeof value === 'string') {
+      params[name] = value;
+    } else if (typeof value === 'boolean') {
+      params[name] = value ? '1' : '0';
+    } else if (Array.isArray(value)) {
+      const items = value.filter(
+        (item): item is string | number => typeof item === 'string' || typeof item === 'number'
+      );
+      // An explicit empty bracket list means "none"; empty id lists mean "all" and are skipped.
+      if (items.length > 0) {
+        params[name] = items.join(',');
+      } else if (name === URL_PARAM.qualityBrackets || name === URL_PARAM.timeBrackets) {
+        params[name] = NONE;
+      }
+    }
+  }
+  return params;
+}
+
+/**
+ * The URL query params for a share's default view: only valid values, normalised by the regular
+ * parse/serialise round trip. Empty when there is nothing to apply.
+ */
+export function shareDefaultViewQueryParams(
+  defaultView: Record<string, unknown> | null | undefined
+): Record<string, string> {
+  const state = parseDashboardUrlState(shareDefaultViewToParams(defaultView));
+  const serialized = serializeDashboardUrlState(state);
+  const out: Record<string, string> = {};
+  for (const [name, value] of Object.entries(serialized)) {
+    if (value !== null) {
+      out[name] = value;
+    }
+  }
+  return out;
+}

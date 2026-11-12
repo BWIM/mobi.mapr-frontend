@@ -1,8 +1,16 @@
 <div class="h-full p-2 lg:p-3 xl:p-4 flex flex-col">
-  <div data-tour="stats" class="h-[40%] pb-2 pt-2 pl-2 lg:pb-3 lg:pt-3 lg:pl-3 xl:pb-4 xl:pt-4 xl:pl-4 min-h-0">
-    <app-stats></app-stats>
-  </div>
-  <div data-tour="analyze" class="h-[60%] pt-2 pb-2 pl-2 lg:pt-3 lg:pb-3 lg:pl-3 xl:pt-4 xl:pb-4 xl:pl-4 min-h-0">
-    <app-analyze></app-analyze>
-  </div>
+  @if (showStats()) {
+    <div data-tour="stats" class="pb-2 pt-2 pl-2 lg:pb-3 lg:pt-3 lg:pl-3 xl:pb-4 xl:pt-4 xl:pl-4 min-h-0"
+         [class.h-[40%]]="showAnalyze()"
+         [class.h-full]="!showAnalyze()">
+      <app-stats></app-stats>
+    </div>
+  }
+  @if (showAnalyze()) {
+    <div data-tour="analyze" class="pt-2 pb-2 pl-2 lg:pt-3 lg:pb-3 lg:pl-3 xl:pt-4 xl:pb-4 xl:pl-4 min-h-0"
+         [class.h-[60%]]="showStats()"
+         [class.h-full]="!showStats()">
+      <app-analyze></app-analyze>
+    </div>
+  }
 </div>

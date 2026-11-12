@@ -7,6 +7,7 @@ import { FilterConfigService } from '../../../services/filter-config.service';
 import { AnalyzeService, AnalyzeResponse, CategoryScore } from '../../../services/analyze.service';
 import { ProjectsService } from '../../../services/project.service';
 import { PlacesService, Place } from '../../../services/places.service';
+import { ShareAccessService } from '../../../services/share-access.service';
 import { MatDialog } from '@angular/material/dialog';
 import { SharedModule } from '../../../shared/shared.module';
 import { AllCategoriesDialogComponent, AllCategoriesDialogData } from './overlay/all-categories-dialog.component';
@@ -129,6 +130,9 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private analyzeService = inject(AnalyzeService);
   private projectsService = inject(ProjectsService);
   private placesService = inject(PlacesService);
+  private shareAccess = inject(ShareAccessService);
+  /** Places dialog / map; hidden when a share disables `places`. */
+  readonly canUsePlaces = this.shareAccess.canUsePlaces;
   private dialog = inject(MatDialog);
   private translate = inject(TranslateService);
   private mobileUi = inject(MobileUiService);
@@ -553,8 +557,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
    * Determines if we should show the map instead of the chart
    */
   shouldShowMap(): boolean {
-    // Never show map in comparison mode
-    if (this.isComparisonMode) {
+    // Never show map in comparison mode, nor when the share disables places
+    if (this.isComparisonMode || !this.shareAccess.canUsePlaces()) {
       return false;
     }
     const hasCategories = this.filterConfigService.hasCategories();
@@ -998,9 +1002,17 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
       this.isLoadingPlaces = false;
     } catch (err: any) {
+      this.isLoadingPlaces = false;
+      if (this.shareAccess.handleForbidden(err)) {
+        // The share disables places: fall back to the activity list without an error.
+        this.placesMapAvailable = false;
+        if (this.analyzeData?.categories?.length) {
+          this.initializeActivitiesChart(this.analyzeData.categories);
+        }
+        return;
+      }
       console.error('Error loading places:', err);
       this.placesError = err?.message || this.translate.instant('analyze.placesDialog.errorLoadingPlaces');
-      this.isLoadingPlaces = false;
     }
   }
 
@@ -1378,7 +1390,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   openPlacesDialog(categoryId?: number, categoryName?: string, featureNumber?: 1 | 2): void {
-    if (!this.selectedFeature) {
+    if (!this.selectedFeature || !this.shareAccess.canUsePlaces()) {
       return;
     }
 

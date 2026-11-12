@@ -16,6 +16,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SearchService } from '../../services/search.service';
 import { QualityBracket, TimeBracket } from '../../services/filter-config.service';
 import { ScoreColorsService } from '../../services/score-colors.service';
+import { ShareAccessService } from '../../services/share-access.service';
 import {
   buildDifferenceLegendItems,
   DifferenceLegendItem,
@@ -89,6 +90,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private searchService = inject(SearchService);
   private scoreColorsService = inject(ScoreColorsService);
   private snackBar = inject(MatSnackBar);
+  private shareAccess = inject(ShareAccessService);
   private popup?: Popup;
   private rightPopup?: Popup;
   private contextMenuPopup?: Popup;
@@ -115,7 +117,15 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     { value: 'hexagon', labelKey: 'map.layerSwitcher.hexagon', shortLabelKey: 'map.layerSwitcher.hexagonShort' }
   ];
 
+  /** Export controls on the live maps, so a share's `export` flag can hide them. */
+  private exportControls = new Set<ExportMapControl>();
+
   constructor(private mapService: MapService) {
+    effect(() => {
+      this.shareAccess.canExport();
+      this.exportControls.forEach(control => control.refresh());
+    });
+
     effect(() => {
       const loading = this.mapService.isMapLoading();
       queueMicrotask(() => this.syncMapInteractionsForLoading(loading));
@@ -665,6 +675,9 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   openGeoJsonDownloadDialog(): void {
+    if (!this.shareAccess.canExport()) {
+      return;
+    }
     const dialogData: GeoJsonDownloadDialogData = {
       selectedActivities: this.filterConfigService.selectedActivities(),
       selectedPersonas: this.filterConfigService.selectedPersonas(),
@@ -685,13 +698,14 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     targetMap.addControl(new NavigationControl({ showCompass: false }), 'top-right');
     targetMap.addControl(new FullscreenControl(), 'top-right');
     if (includeExport) {
-      targetMap.addControl(
-        new ExportMapControl(
-          () => this.openGeoJsonDownloadDialog(),
-          () => this.translate.instant('geojsonDownload.button.label'),
-        ),
-        'top-right',
+      const exportControl = new ExportMapControl(
+        () => this.openGeoJsonDownloadDialog(),
+        () => this.translate.instant('geojsonDownload.button.label'),
+        () => this.shareAccess.canExport(),
       );
+      targetMap.addControl(exportControl, 'top-right');
+      this.exportControls.add(exportControl);
+      targetMap.once('remove', () => this.exportControls.delete(exportControl));
     }
     targetMap.dragRotate.disable();
     targetMap.touchZoomRotate.disableRotation();

@@ -11,7 +11,11 @@
     </div>
 
     <h1 class="text-3xl font-bold text-[var(--primary-color)] mb-2">
-      {{ 'groupOverview.title' | translate: { groupName: groupName() } }}
+      @if (singleGroupName(); as groupName) {
+        {{ 'groupOverview.title' | translate: { groupName } }}
+      } @else {
+        {{ 'groupOverview.titleMultiple' | translate }}
+      }
     </h1>
 
     <p class="mb-6 flex items-start gap-2 rounded-lg border border-[var(--light-primary-color)] bg-[var(--secondary-color)] px-4 py-3 text-sm leading-relaxed text-[var(--primary-color)] opacity-90">
@@ -20,38 +24,37 @@
       <span class="lg:hidden">{{ 'groupOverview.switchHintMobile' | translate }}</span>
     </p>
 
-    @if (loading()) {
-      <div class="flex justify-center items-center py-12">
-        <mat-spinner diameter="50"></mat-spinner>
-      </div>
-    } @else if (error(); as errorKey) {
-      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-        {{ errorKey | translate }}
-      </div>
-    } @else if (siblings().length === 0) {
+    @if (sections().length === 0) {
       <div class="text-center py-12">
         <p class="text-lg text-[var(--primary-color)]">{{ 'groupOverview.empty' | translate }}</p>
       </div>
     } @else {
-      <div class="grid grid-cols-1 gap-4 mt-6">
-        @for (sibling of siblings(); track sibling.id) {
-          <button
-            type="button"
-            (click)="selectProject(sibling)"
-            [class.selected]="isActive(sibling.id)"
-            [style.border-color]="isActive(sibling.id) ? 'var(--primary-color)' : 'transparent'"
-            class="w-full text-left p-6 bg-[var(--secondary-color)] rounded-lg border-2 transition-all duration-200 hover:shadow-lg">
-            <div class="flex items-start justify-between">
-              <h3 class="text-xl font-semibold text-[var(--primary-color)]">
-                {{ sibling.display_name }}
-              </h3>
-              @if (isActive(sibling.id)) {
-                <mat-icon class="text-[var(--primary-color)] ml-4">check_circle</mat-icon>
-              }
-            </div>
-          </button>
-        }
-      </div>
+      @for (section of sections(); track section.id) {
+        <section class="mt-6">
+          @if (!singleGroupName()) {
+            <h2 class="text-xl font-semibold text-[var(--primary-color)] mb-3">{{ section.display_name }}</h2>
+          }
+          <div class="grid grid-cols-1 gap-4">
+            @for (member of section.projects; track member.id) {
+              <button
+                type="button"
+                (click)="selectProject(member)"
+                [class.selected]="isActive(member.id)"
+                [style.border-color]="isActive(member.id) ? 'var(--primary-color)' : 'transparent'"
+                class="w-full text-left p-6 bg-[var(--secondary-color)] rounded-lg border-2 transition-all duration-200 hover:shadow-lg">
+                <div class="flex items-start justify-between">
+                  <h3 class="text-xl font-semibold text-[var(--primary-color)]">
+                    {{ member.display_name }}
+                  </h3>
+                  @if (isActive(member.id)) {
+                    <mat-icon class="text-[var(--primary-color)] ml-4">check_circle</mat-icon>
+                  }
+                </div>
+              </button>
+            }
+          </div>
+        </section>
+      }
     }
   </div>
 </div>

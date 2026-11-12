@@ -19,20 +19,17 @@ export class ProjectSwitcherComponent {
   variant = input<'default' | 'mobile'>('default');
 
   project = this.projectsService.project;
-  siblings = this.projectNavigation.siblingProjects;
+  sections = this.projectNavigation.groupSections;
   activeProjectId = this.projectNavigation.activeProjectId;
+  hasGroup = this.projectNavigation.hasGroup;
 
-  groupName = computed(() => this.project()?.group?.display_name ?? '');
-
-  hasGroup = computed(() => !!this.project()?.group);
+  /** Group headings are only shown when the project is in more than one group. */
+  showGroupHeadings = computed(() => this.sections().length > 1);
 
   switchTo(projectId: number): void {
-    const sibling = this.siblings().find((entry) => entry.id === projectId);
-    const siblingShareKey = sibling?.share_key ?? null;
-
-    if (projectId === this.activeProjectId() && !siblingShareKey) {
+    if (projectId === this.activeProjectId()) {
       return;
     }
-    this.projectNavigation.switchToProject(projectId, { siblingShareKey }).subscribe();
+    this.projectNavigation.switchToProject(projectId).subscribe();
   }
 }
