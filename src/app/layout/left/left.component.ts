@@ -44,6 +44,9 @@ export class LeftComponent implements OnInit, OnDestroy {
     return this.dashboardSessionService.accessMethod() === 'share_key';
   });
 
+  /** State / RegioStar filters; share viewers only when their share enables `filters`. */
+  canEditAdvancedFilters = this.filterConfigService.canEditAdvancedFilters;
+
   // Quality graph data
   qualityChartData: any;
   qualityChartOptions: any;
@@ -64,6 +67,7 @@ export class LeftComponent implements OnInit, OnDestroy {
   isDifferenceView = this.filterConfigService.isDifferenceView;
   isModeSelectionLocked = this.filterConfigService.isModeSelectionLocked;
   canUseMapCompare = this.filterConfigService.canUseMapCompare;
+  canUseDifferenceView = this.filterConfigService.canUseDifferenceView;
 
   ngOnInit() {
     this.isLoggedIn.set(this.authService.isLoggedIn());
@@ -350,18 +354,10 @@ export class LeftComponent implements OnInit, OnDestroy {
   }
 
   openFilterDialog() {
-    // Prevent opening filter dialog if user is only authenticated via share key
-    if (this.isShareKeyOnly()) {
-      return;
-    }
     this.filterConfigService.openFilterDialog();
   }
 
   resetFilters() {
-    // Prevent resetting filters if user is only authenticated via share key
-    if (this.isShareKeyOnly()) {
-      return;
-    }
     this.filterConfigService.resetAdvancedFilters();
   }
 

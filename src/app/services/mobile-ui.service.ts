@@ -1,10 +1,11 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, effect, untracked } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { AllCategoriesDialogData } from '../layout/right/analyze/overlay/all-categories-dialog.component';
 import { PlacesDialogData } from '../layout/right/analyze/places/places-dialog.component';
 import { AnalyzeFeatureFacadeService } from './analyze-feature-facade.service';
+import { ShareAccessService } from './share-access.service';
 
 export type MobileSheet = 'none' | 'stats' | 'analyze';
 
@@ -23,6 +24,7 @@ export const MOBILE_MEDIA_QUERY = '(max-width: 1023px)';
 export class MobileUiService {
   private breakpointObserver = inject(BreakpointObserver);
   private analyzeFacade = inject(AnalyzeFeatureFacadeService);
+  private shareAccess = inject(ShareAccessService);
 
   readonly isMobile = toSignal(
     this.breakpointObserver
@@ -42,8 +44,23 @@ export class MobileUiService {
   readonly isAnalyzeOpen = computed(() => this.activeSheet() === 'analyze');
   readonly isSheetOpen = computed(() => this.activeSheet() !== 'none');
 
+  constructor() {
+    // Close sheets whose feature the share disables (e.g. after a 403 from the backend).
+    effect(() => {
+      const sheet = this.activeSheet();
+      const blocked =
+        (sheet === 'stats' && !this.shareAccess.canUseStats()) ||
+        (sheet === 'analyze' && !this.shareAccess.canAnalyze());
+      if (blocked) {
+        untracked(() => this.closeSheet());
+      } else if (this.step() === 'places' && !this.shareAccess.canUsePlaces()) {
+        untracked(() => this.backToAnalyze());
+      }
+    });
+  }
+
   openStats(): void {
-    if (!this.isMobile()) {
+    if (!this.isMobile() || !this.shareAccess.canUseStats()) {
       return;
     }
     this.subSheetPayload.set(null);
@@ -52,7 +69,7 @@ export class MobileUiService {
   }
 
   openAnalyze(): void {
-    if (!this.isMobile()) {
+    if (!this.isMobile() || !this.shareAccess.canAnalyze()) {
       return;
     }
     this.subSheetPayload.set(null);
@@ -65,7 +82,7 @@ export class MobileUiService {
     step: 'activities',
     data: AllCategoriesDialogData,
   ): void {
-    if (!this.isMobile()) {
+    if (!this.isMobile() || !this.shareAccess.canAnalyze()) {
       return;
     }
     if (this.activeSheet() !== 'analyze') {
@@ -80,7 +97,7 @@ export class MobileUiService {
   }
 
   openAnalyzePlaces(data: PlacesDialogData): void {
-    if (!this.isMobile()) {
+    if (!this.isMobile() || !this.shareAccess.canAnalyze() || !this.shareAccess.canUsePlaces()) {
       return;
     }
     if (this.activeSheet() !== 'analyze') {

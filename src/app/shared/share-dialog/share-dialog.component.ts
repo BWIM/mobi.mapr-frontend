@@ -107,11 +107,13 @@ export class ShareDialogComponent {
     }
     // Fall back to the session when the URL does not carry the access params (yet).
     if (!queryParams[URL_PARAM.projectId] && !queryParams[URL_PARAM.shareKey]) {
+      // Share viewers keep their key next to the project they look at (maybe a sibling).
       const shareKey = this.session.shareKey();
       const projectId = this.session.projectId();
       if (shareKey) {
         queryParams[URL_PARAM.shareKey] = shareKey;
-      } else if (projectId) {
+      }
+      if (projectId) {
         queryParams[URL_PARAM.projectId] = projectId;
       }
     }

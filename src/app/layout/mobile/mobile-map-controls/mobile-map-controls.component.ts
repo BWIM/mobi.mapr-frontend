@@ -3,6 +3,7 @@ import { MatIcon } from '@angular/material/icon';
 import { TranslateModule } from '@ngx-translate/core';
 import { MobileUiService } from '../../../services/mobile-ui.service';
 import { ProjectNavigationService } from '../../../services/project-navigation.service';
+import { ShareAccessService } from '../../../services/share-access.service';
 
 @Component({
   selector: 'app-mobile-map-controls',
@@ -16,6 +17,8 @@ export class MobileMapControlsComponent {
   private projectNavigation = inject(ProjectNavigationService);
 
   readonly hasGroup = this.projectNavigation.hasGroup;
+  /** Hidden when a share disables `stats`. */
+  readonly showStats = inject(ShareAccessService).canUseStats;
 
   openStats(): void {
     this.mobileUi.openStats();

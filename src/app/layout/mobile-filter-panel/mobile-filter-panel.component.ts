@@ -103,6 +103,7 @@ export class MobileFilterPanelComponent implements OnDestroy {
   isDifferenceView = this.filterConfigService.isDifferenceView;
   isModeSelectionLocked = this.filterConfigService.isModeSelectionLocked;
   canUseMapCompare = this.filterConfigService.canUseMapCompare;
+  canUseDifferenceView = this.filterConfigService.canUseDifferenceView;
 
   toggleMapCompare(): void {
     this.filterConfigService.toggleMapCompare();

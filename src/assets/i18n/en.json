@@ -862,7 +862,8 @@
       "ccBy": "What does this mean? CC BY 4.0 (Creative Commons Attribution 4.0 International):"
     },
     "error": {
-      "generic": "Error exporting map data"
+      "generic": "Error exporting map data",
+      "notAllowed": "Export is not available for this share link."
     }
   },
   "dashboard": {
@@ -980,9 +981,9 @@
   },
   "groupOverview": {
     "title": "Projects in {{groupName}}",
+    "titleMultiple": "Projects in these groups",
     "empty": "No projects in this group.",
     "back": "Back to map",
-    "loadError": "Error loading group projects.",
     "switchHint": "Tip: Switch between projects anytime by clicking the project name, or open this overview via the group icon in the left rail.",
     "switchHintMobile": "Tip: Tap the project field at the bottom to switch projects, or open the group overview via the hive icon on the map."
   },

@@ -10,6 +10,7 @@ import {
 import { featureRefFromFeature } from '../url-state/url-params';
 import { AllCategoriesDialogComponent } from '../layout/right/analyze/overlay/all-categories-dialog.component';
 import { PlacesDialogComponent } from '../layout/right/analyze/places/places-dialog.component';
+import { ShareAccessService } from '../services/share-access.service';
 
 /**
  * Bump to show the tour again to everyone who has already seen it
@@ -78,6 +79,7 @@ export class TutorialService {
   private featureSelection = inject(FeatureSelectionService);
   private mobileUi = inject(MobileUiService);
   private dialog = inject(MatDialog);
+  private shareAccess = inject(ShareAccessService);
 
   readonly steps: readonly TutorialStep[] = [
     { id: 'welcome', key: 'tutorial.steps.welcome' },
@@ -103,6 +105,7 @@ export class TutorialService {
       mobilePlacement: 'bottom',
       compactOnMobile: true,
       layout: { rightPanel: true, mobileFilter: false, closeMobileSheet: true, closeDialogs: true },
+      showIf: () => this.shareAccess.canAnalyze(),
     },
     {
       id: 'analyze-result',
@@ -111,7 +114,7 @@ export class TutorialService {
       mobilePlacement: 'bottom',
       compactOnMobile: true,
       layout: { rightPanel: true, mobileFilter: false, closeDialogs: true, mobileAnalyzeMain: true },
-      showIf: () => this.featureSelection.getCurrentMapLibreFeature() !== null,
+      showIf: () => this.shareAccess.canAnalyze() && this.featureSelection.getCurrentMapLibreFeature() !== null,
     },
     {
       id: 'all-activities',
@@ -132,7 +135,7 @@ export class TutorialService {
       mobilePlacement: 'bottom',
       compactOnMobile: true,
       result: { key: 'tutorial.steps.places', target: 'places-map' },
-      showIf: () => this.hasDetailFeature(),
+      showIf: () => this.shareAccess.canUsePlaces() && this.hasDetailFeature(),
     },
     {
       id: 'stats',
@@ -140,6 +143,7 @@ export class TutorialService {
       target: 'stats',
       layout: { rightPanel: true, mobileFilter: false, closeMobileSheet: true, closeDialogs: true },
       backTo: 'all-activities',
+      showIf: () => this.shareAccess.canUseStats(),
     },
     {
       id: 'done',
@@ -313,6 +317,9 @@ export class TutorialService {
   }
 
   private hasDetailFeature(): boolean {
+    if (!this.shareAccess.canAnalyze()) {
+      return false;
+    }
     const feature = this.featureSelection.getCurrentMapLibreFeature();
     return feature !== null && isDetailFeature(feature);
   }

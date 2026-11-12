@@ -213,23 +213,25 @@
           }
         </div>
       </div>
-      <div class="flex items-center justify-between gap-2 bg-[var(--secondary-color)] rounded-lg p-3 xl:p-4 mt-4 mr-2 lg:mr-3 xl:mr-4">
-        <span class="text-sm font-semibold text-[var(--primary-color)]">{{ 'left.mapCompare.differenceView' | translate }}</span>
-        <button
-          type="button"
-          class="relative w-10 h-5 border border-[var(--light-primary-color)] rounded-full cursor-pointer transition-all duration-200 overflow-hidden"
-          [style.background-color]="isDifferenceView() ? 'var(--primary-color)' : 'var(--secondary-color)'"
-          (click)="toggleDifferenceView()"
-          [attr.aria-pressed]="isDifferenceView()"
-          [attr.aria-label]="'left.mapCompare.differenceView' | translate"
-          [title]="'left.mapCompare.differenceView' | translate">
-          <div
-            class="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full transition-all duration-200"
-            [style.left]="isDifferenceView() ? 'calc(100% - 1.125rem)' : '0.125rem'"
-            [style.background-color]="isDifferenceView() ? 'var(--secondary-color)' : 'var(--light-primary-color)'">
-          </div>
-        </button>
-      </div>
+      @if (canUseDifferenceView()) {
+        <div class="flex items-center justify-between gap-2 bg-[var(--secondary-color)] rounded-lg p-3 xl:p-4 mt-4 mr-2 lg:mr-3 xl:mr-4">
+          <span class="text-sm font-semibold text-[var(--primary-color)]">{{ 'left.mapCompare.differenceView' | translate }}</span>
+          <button
+            type="button"
+            class="relative w-10 h-5 border border-[var(--light-primary-color)] rounded-full cursor-pointer transition-all duration-200 overflow-hidden"
+            [style.background-color]="isDifferenceView() ? 'var(--primary-color)' : 'var(--secondary-color)'"
+            (click)="toggleDifferenceView()"
+            [attr.aria-pressed]="isDifferenceView()"
+            [attr.aria-label]="'left.mapCompare.differenceView' | translate"
+            [title]="'left.mapCompare.differenceView' | translate">
+            <div
+              class="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full transition-all duration-200"
+              [style.left]="isDifferenceView() ? 'calc(100% - 1.125rem)' : '0.125rem'"
+              [style.background-color]="isDifferenceView() ? 'var(--secondary-color)' : 'var(--light-primary-color)'">
+            </div>
+          </button>
+        </div>
+      }
     }
     <div class="space-y-2 bg-[var(--secondary-color)] rounded-lg p-3 xl:p-4 mt-4 mr-2 lg:mr-3 xl:mr-4 relative">
       <div class="flex items-center justify-between mb-2">
@@ -285,7 +287,7 @@
 
         <div class="flex flex-col gap-2 items-center">
 
-          @if (!isShareKeyOnly()) {
+          @if (canEditAdvancedFilters()) {
             <div class="flex gap-2 items-center">
               <button 
                 class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full border transition-all duration-200 w-fit bg-[var(--primary-color)] text-[var(--background-color)] border-[var(--background-color)] font-bold"
@@ -295,9 +297,6 @@
               </button>
               <button 
                 class="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-full border transition-all duration-200 w-fit bg-[var(--background-color)] text-[var(--primary-color)] border-[var(--primary-color)] font-bold hover:bg-[var(--secondary-color)]"
-                [class.opacity-50]="isShareKeyOnly()"
-                [class.cursor-not-allowed]="isShareKeyOnly()"
-                [disabled]="isShareKeyOnly()"
                 [title]="'left.activeFilters.resetButton' | translate"
                 (click)="resetFilters()">
                 <mat-icon class="text-base leading-none">refresh</mat-icon>

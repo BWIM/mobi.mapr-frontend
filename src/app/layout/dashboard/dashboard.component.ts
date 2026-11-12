@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, signal, inject, effect, untracked, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, signal, inject, effect, untracked, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RailComponent } from '../rail/rail.component';
@@ -31,6 +31,7 @@ import { UrlStateService } from '../../url-state/url-state.service';
 import { TutorialOverlayComponent } from '../../tutorial/tutorial-overlay.component';
 import { TutorialLayout, TutorialService } from '../../tutorial/tutorial.service';
 import { openShareDialog } from '../../shared/share-dialog/open-share-dialog';
+import { ShareAccessService } from '../../services/share-access.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -70,6 +71,7 @@ export class DashboardComponent {
   readonly tutorial = inject(TutorialService);
   private destroyRef = inject(DestroyRef);
   private dialog = inject(MatDialog);
+  private shareAccess = inject(ShareAccessService);
 
   /** Matches right panel `duration-300` transition in dashboard template. */
   private static readonly RIGHT_PANEL_TRANSITION_MS = 300;
@@ -85,6 +87,8 @@ export class DashboardComponent {
   private currentProjectIdentifier: string | null = null;
 
   readonly isMobile = this.mobileUi.isMobile;
+  /** The right panel holds stats and analyze; a share may disable both. */
+  readonly hasRightPanel = computed(() => this.shareAccess.canUseStats() || this.shareAccess.canAnalyze());
 
   currentLang = signal<string>(this.languageService.getCurrentLanguage());
   readonly availableLangs = this.languageService.availableLanguages;
@@ -100,6 +104,9 @@ export class DashboardComponent {
         filter((feature) => feature !== null),
       )
       .subscribe(() => {
+        if (!this.shareAccess.canAnalyze()) {
+          return;
+        }
         if (this.mobileUi.isMobile()) {
           this.mobileUi.openAnalyze();
         } else if (this.filterConfigService.isMapCompareMode()) {
@@ -109,6 +116,16 @@ export class DashboardComponent {
       });
 
     this.setupTutorial();
+
+    // The map gets wider/narrower when a share hides or shows the whole right panel.
+    let hadRightPanel: boolean | null = null;
+    effect(() => {
+      const hasRightPanel = this.hasRightPanel();
+      if (hadRightPanel !== null && hadRightPanel !== hasRightPanel) {
+        untracked(() => this.resizeMapAfterPanelTransition());
+      }
+      hadRightPanel = hasRightPanel;
+    });
 
     effect(() => {
       if (!this.mobileUi.isMobile() && this.mobileUi.isSheetOpen()) {
@@ -175,8 +192,8 @@ export class DashboardComponent {
 
         // Logged-in users always work in project-id mode: translate a share-key link into the
         // matching project (keeping all other view params) instead of ignoring it.
-        if (isLoggedIn && shareKey && !projectId) {
-          await this.resolveShareKeyForLoggedInUser(shareKey);
+        if (isLoggedIn && shareKey) {
+          await this.resolveShareKeyForLoggedInUser(shareKey, projectId);
           return;
         }
 
@@ -193,19 +210,25 @@ export class DashboardComponent {
           existingShareKey,
           existingProjectId
         );
+        const isFirstLoad = this.currentProjectIdentifier === null;
 
         const projectChanged = this.currentProjectIdentifier !== newProjectIdentifier;
         const targetProjectId = isLoggedIn
           ? (projectId || existingProjectId)
           : null;
         const activeShareKey = !isLoggedIn ? (shareKey || existingShareKey) : null;
+        // Share viewers: `project_id` next to `share_key` selects a sibling the share grants;
+        // without it the share's own project is shown.
+        const shareProjectId = !isLoggedIn && activeShareKey ? (projectId ?? null) : null;
+        const loaded = this.projectService.project();
         const alreadyLoaded = isLoggedIn
-          ? !!this.projectService.project() &&
+          ? !!loaded &&
             !!targetProjectId &&
-            this.projectService.project()!.id === Number(targetProjectId)
-          : !!this.projectService.project() &&
+            loaded.id === Number(targetProjectId)
+          : !!loaded &&
             !!activeShareKey &&
-            this.dashboardSessionService.getShareKey() === activeShareKey;
+            this.dashboardSessionService.getShareKey() === activeShareKey &&
+            loaded.id === (shareProjectId ? Number(shareProjectId) : (loaded.share?.project_id ?? loaded.id));
 
         if (projectChanged && this.currentProjectIdentifier !== null && !alreadyLoaded) {
           this.projectService.clearProject();
@@ -253,10 +276,17 @@ export class DashboardComponent {
             return;
           }
 
-          this.dashboardSessionService.setProjectId(null);
-
           if ((projectChanged || !this.projectService.isInitialized()) && !alreadyLoaded) {
-            await this.validateShareKeyAndPreload(activeShareKey);
+            const loadedProject = await this.validateShareKeyAndPreload(activeShareKey, shareProjectId);
+            if (!loadedProject) {
+              return;
+            }
+            // A fresh share link without any view params opens in the share's default view.
+            if (isFirstLoad && shareKey) {
+              this.urlState.applyShareDefaultView(loadedProject.share?.default_view, params);
+            }
+          } else if (alreadyLoaded && loaded) {
+            this.dashboardSessionService.setProjectId(loaded.id.toString());
           }
           this.hasInitialized = true;
         }
@@ -277,18 +307,19 @@ export class DashboardComponent {
     }
 
     const key = shareKey || existingShareKey;
-    return key ? `share:${key}` : null;
+    return key ? `share:${key}:${projectId ?? ''}` : null;
   }
 
   private updateGroupOverviewState(overviewRequested: boolean): void {
     const project = this.projectService.project();
-    if (overviewRequested && project?.group) {
+    const hasGroup = this.projectNavigation.hasGroup();
+    if (overviewRequested && hasGroup) {
       this.showGroupOverview.set(true);
       return;
     }
 
     this.showGroupOverview.set(false);
-    if (overviewRequested && !project?.group) {
+    if (overviewRequested && project && !hasGroup) {
       this.projectNavigation.closeGroupOverview();
     }
   }
@@ -328,13 +359,18 @@ export class DashboardComponent {
   }
 
   /**
-   * Finds the project behind a share key for a logged-in user and switches the URL to
-   * `project_id`, keeping all other params. Falls back to the users area when the user
-   * has no access to that project.
+   * Finds the project behind a share key (or the sibling given by `project_id`) for a logged-in
+   * user and switches the URL to `project_id` only, keeping all other params. Falls back to the
+   * users area when the user has no access to that project.
    */
-  private async resolveShareKeyForLoggedInUser(shareKey: string): Promise<void> {
+  private async resolveShareKeyForLoggedInUser(shareKey: string, projectId?: string): Promise<void> {
     try {
-      const shared = await firstValueFrom(this.projectService.getProjectByShareKey(shareKey));
+      const siblingId = Number(projectId);
+      const shared = await firstValueFrom(
+        Number.isSafeInteger(siblingId) && siblingId > 0
+          ? this.projectService.getProjectById(siblingId, shareKey)
+          : this.projectService.getProjectByShareKey(shareKey)
+      );
       // Make sure the user can open the project by id (share keys may grant wider access).
       const project = await firstValueFrom(this.projectService.getProjectById(shared.id));
       await this.router.navigate(['/dashboard'], {
@@ -349,33 +385,48 @@ export class DashboardComponent {
   }
 
   /**
-   * Validates share key by fetching the project
+   * Loads the project for a share key: the share's own project, or `projectId` when the URL
+   * names a sibling. The key stays the same either way, since it decides the viewer's rights.
+   * A sibling the key does not grant falls back to the share's own project.
    */
-  private async validateShareKeyAndPreload(shareKey: string): Promise<void> {
-    try {
-      this.dashboardSessionService.setShareKey(shareKey);
+  private async validateShareKeyAndPreload(
+    shareKey: string,
+    projectId: string | null
+  ): Promise<Project | null> {
+    this.dashboardSessionService.setShareKey(shareKey);
+    this.dashboardSessionService.setProjectId(projectId);
 
-      let project: Project | null = null;
-      try {
-        project = await firstValueFrom(
-          this.projectService.getProjectByShareKey(shareKey)
-        );
-      } catch (error) {
+    const siblingId = Number(projectId);
+    const hasSibling = !!projectId && Number.isSafeInteger(siblingId) && siblingId > 0;
+
+    let project: Project;
+    try {
+      project = await firstValueFrom(
+        hasSibling
+          ? this.projectService.getProjectById(siblingId, shareKey)
+          : this.projectService.getProjectByShareKey(shareKey)
+      );
+    } catch (error) {
+      if (hasSibling) {
+        console.warn('Share key does not grant this project, opening the shared project:', error);
+        this.router.navigate(['/dashboard'], {
+          queryParams: { [URL_PARAM.projectId]: null },
+          queryParamsHandling: 'merge',
+          replaceUrl: true,
+        });
+      } else {
         console.error('Error fetching project with share key:', error);
         this.router.navigate(['/invalid-share-key']);
-        return;
       }
-
-      if (!project) {
-        this.router.navigate(['/invalid-share-key']);
-        return;
-      }
-
-      this.projectService.setProject(project);
-    } catch (error) {
-      console.error('Unexpected error validating share key:', error);
-      this.router.navigate(['/invalid-share-key']);
+      return null;
     }
+
+    if (this.dashboardSessionService.getShareKey() !== shareKey) {
+      return null;
+    }
+    this.dashboardSessionService.setProjectId(project.id.toString());
+    this.projectService.setProject(project);
+    return project;
   }
 
   startTutorial(): void {

@@ -1,11 +1,18 @@
-import { Injectable, inject, computed, signal, effect, untracked } from '@angular/core';
+import { Injectable, inject, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, catchError, map, tap } from 'rxjs';
+import { Observable, of, tap } from 'rxjs';
 import { ProjectsService } from './project.service';
 import { DashboardSessionService } from './dashboard-session.service';
-import { Project, projectGroupId } from '../interfaces/project';
-import { ProjectGroupSibling } from '../interfaces/project-group';
-import { PROJECT_SCOPED_PARAMS } from '../url-state/url-params';
+import { Project } from '../interfaces/project';
+import { ProjectGroup, ProjectGroupMember } from '../interfaces/project-group';
+import { PROJECT_SCOPED_PARAMS, URL_PARAM } from '../url-state/url-params';
+
+/** One group of the current project with its members, in the group's order. */
+export interface ProjectGroupSection {
+  id: number;
+  display_name: string;
+  projects: ProjectGroupMember[];
+}
 
 @Injectable({
   providedIn: 'root'
@@ -15,116 +22,56 @@ export class ProjectNavigationService {
   private dashboardSessionService = inject(DashboardSessionService);
   private router = inject(Router);
 
-  private _groupSiblings = signal<ProjectGroupSibling[]>([]);
-  private _groupSiblingsGroupId = signal<number | null>(null);
-  private _siblingsError = signal<string | null>(null);
-  private groupLoadGeneration = 0;
-  private inFlightGroupId: number | null = null;
-
-  readonly hasGroup = computed(() => !!this.projectsService.project()?.group);
-  readonly siblingsError = this._siblingsError.asReadonly();
-
-  readonly siblingsLoading = computed(() => {
-    if (this.isShareMode()) {
-      return false;
-    }
-
-    const project = this.projectsService.project();
-    const groupId = project ? projectGroupId(project) : null;
-    if (groupId == null || this.projectsService.listedProjectsComplete()) {
-      return false;
-    }
-
-    return this._groupSiblingsGroupId() !== groupId;
-  });
-
-  readonly siblingProjects = computed((): ProjectGroupSibling[] => {
+  /**
+   * Groups of the current project. A project may be in several groups, so a sibling can show up
+   * in more than one section. Members come ordered from the project detail / share-key response.
+   */
+  readonly groupSections = computed((): ProjectGroupSection[] => {
     const project = this.projectsService.project();
     if (!project) {
       return [];
     }
 
-    if (this.isShareMode()) {
-      return this.sortSiblings(project.group?.projects ?? []);
-    }
-
-    const groupId = projectGroupId(project);
-    if (groupId == null) {
-      return [];
-    }
-
-    if (this.projectsService.listedProjectsComplete()) {
-      return this.siblingsFromListedProjects(groupId, project);
-    }
-
-    if (this._groupSiblingsGroupId() === groupId) {
-      return this._groupSiblings();
-    }
-
-    return [];
+    const reachable = this.reachableProjectIds(project);
+    return (project.groups ?? [])
+      .map(group => ({
+        id: group.id,
+        display_name: group.display_name,
+        projects: this.groupMembers(group, project, reachable),
+      }))
+      .filter(section => section.projects.length > 0);
   });
+
+  readonly hasGroup = computed(() => this.groupSections().length > 0);
 
   readonly activeProjectId = computed(() => this.projectsService.project()?.id ?? null);
 
-  constructor() {
-    effect(() => {
-      const project = this.projectsService.project();
-      if (!project || this.isShareMode()) {
-        return;
-      }
-
-      const groupId = projectGroupId(project);
-      if (groupId == null || this.projectsService.listedProjectsComplete()) {
-        return;
-      }
-
-      if (this._groupSiblingsGroupId() === groupId || this.inFlightGroupId === groupId) {
-        return;
-      }
-
-      untracked(() => this.loadGroupSiblings(groupId));
-    });
-  }
-
-  switchToProject(
-    targetId: number,
-    options?: { closeOverview?: boolean; siblingShareKey?: string | null }
-  ): Observable<Project> {
-    const currentId = this.projectsService.project()?.id;
-    const shareKey = this.dashboardSessionService.getShareKey();
-    const isShareMode = this.isShareMode();
-    const targetShareKey = options?.siblingShareKey ?? shareKey ?? null;
-
-    if (currentId === targetId && (!isShareMode || !targetShareKey || targetShareKey === shareKey)) {
+  /**
+   * Opens another project. Share viewers keep their own share key and only change the project
+   * (`?share_key=<key>&project_id=<id>`), so the share's rights stay in force.
+   */
+  switchToProject(targetId: number, options?: { closeOverview?: boolean }): Observable<Project> {
+    const current = this.projectsService.project();
+    if (current?.id === targetId) {
       if (options?.closeOverview) {
-        this.updateUrl(targetId, true, targetShareKey);
+        this.updateUrl(targetId, true);
       }
-      return new Observable((subscriber) => {
-        subscriber.next(this.projectsService.project()!);
-        subscriber.complete();
-      });
+      return of(current);
     }
+
+    const shareKey = this.isShareMode() ? this.dashboardSessionService.getShareKey() : null;
 
     this.projectsService.clearProject();
+    this.dashboardSessionService.setProjectId(targetId.toString());
 
-    if (isShareMode && targetShareKey) {
-      this.dashboardSessionService.setShareKey(targetShareKey);
-    } else {
-      this.dashboardSessionService.setProjectId(targetId.toString());
-    }
-
-    const fetch$ = isShareMode && targetShareKey
-      ? this.projectsService.getProjectByShareKey(targetShareKey)
-      : this.projectsService.getProjectById(targetId);
-
-    return fetch$.pipe(
+    return this.projectsService.getProjectById(targetId, shareKey).pipe(
       tap({
         next: (project) => {
           this.projectsService.setProject(project);
-          this.updateUrl(project.id, options?.closeOverview ?? false, targetShareKey, true);
+          this.updateUrl(project.id, options?.closeOverview ?? false, true);
         },
         error: () => {
-          if (isShareMode) {
+          if (shareKey) {
             this.router.navigate(['/invalid-share-key']);
           } else {
             this.router.navigate(['/users-area']);
@@ -153,72 +100,39 @@ export class ProjectNavigationService {
       && !!this.dashboardSessionService.getShareKey();
   }
 
-  private siblingsFromListedProjects(groupId: number, current: Project): ProjectGroupSibling[] {
-    const siblings = this.projectsService.listedProjects()
-      .filter(project => projectGroupId(project) === groupId)
-      .map(project => this.toSibling(project));
-
-    if (!siblings.some(sibling => sibling.id === current.id)) {
-      siblings.push(this.toSibling(current));
+  /**
+   * Projects the viewer can open, or null when unknown (then every member is shown).
+   * Share viewers: the share's `project_ids`. Logged-in users: their project list, once loaded.
+   */
+  private reachableProjectIds(project: Project): ReadonlySet<number> | null {
+    if (this.isShareMode()) {
+      const ids = project.share?.project_ids;
+      return ids ? new Set([...ids, project.id]) : null;
     }
-
-    return this.sortSiblings(siblings);
+    if (this.projectsService.listedProjectsComplete()) {
+      return new Set([...this.projectsService.listedProjects().map(p => p.id), project.id]);
+    }
+    return null;
   }
 
-  private loadGroupSiblings(groupId: number): void {
-    const loadGeneration = ++this.groupLoadGeneration;
-    this.inFlightGroupId = groupId;
-    this._siblingsError.set(null);
+  private groupMembers(
+    group: ProjectGroup,
+    current: Project,
+    reachable: ReadonlySet<number> | null
+  ): ProjectGroupMember[] {
+    const members = (group.projects ?? [])
+      .filter(member => !reachable || reachable.has(member.id))
+      .map(({ id, display_name, pin }) => ({ id, display_name, pin }));
 
-    this.projectsService.getProjectGroup(groupId).pipe(
-      map(group => group.projects ?? []),
-      catchError(() => this.projectsService.getAllProjects(groupId).pipe(
-        map(projects => projects.map(project => this.toSibling(project)))
-      ))
-    ).subscribe({
-      next: (siblings) => {
-        if (loadGeneration !== this.groupLoadGeneration) {
-          return;
-        }
-        this.inFlightGroupId = null;
-        this._groupSiblings.set(this.sortSiblings(siblings));
-        this._groupSiblingsGroupId.set(groupId);
-      },
-      error: () => {
-        if (loadGeneration !== this.groupLoadGeneration) {
-          return;
-        }
-        this.inFlightGroupId = null;
-        this._groupSiblings.set([]);
-        this._groupSiblingsGroupId.set(groupId);
-        this._siblingsError.set('groupOverview.loadError');
-      },
-    });
+    if (!members.some(member => member.id === current.id)) {
+      members.push({ id: current.id, display_name: current.display_name, pin: current.pin });
+    }
+    return members;
   }
 
-  private toSibling(project: Pick<Project, 'id' | 'display_name' | 'pin'>): ProjectGroupSibling {
-    return {
-      id: project.id,
-      display_name: project.display_name,
-      pin: project.pin,
-    };
-  }
-
-  private sortSiblings(siblings: ProjectGroupSibling[]): ProjectGroupSibling[] {
-    return [...siblings].sort((a, b) => a.display_name.localeCompare(b.display_name));
-  }
-
-  private updateUrl(
-    projectId: number,
-    closeOverview: boolean,
-    shareKeyOverride?: string | null,
-    projectChanged = false
-  ): void {
-    const shareKey = shareKeyOverride ?? this.dashboardSessionService.getShareKey();
-    const isShareKey = !this.dashboardSessionService.getIsAuthenticated() && !!shareKey;
-
+  private updateUrl(projectId: number, closeOverview: boolean, projectChanged = false): void {
     const queryParams: Record<string, string | null> = closeOverview
-      ? { overview: null }
+      ? { [URL_PARAM.overview]: null }
       : {};
 
     if (projectChanged) {
@@ -229,13 +143,9 @@ export class ProjectNavigationService {
       }
     }
 
-    if (isShareKey && shareKey) {
-      queryParams['share_key'] = shareKey;
-      queryParams['project_id'] = null;
-    } else {
-      queryParams['project_id'] = projectId.toString();
-      queryParams['share_key'] = null;
-    }
+    const shareKey = this.isShareMode() ? this.dashboardSessionService.getShareKey() : null;
+    queryParams[URL_PARAM.projectId] = projectId.toString();
+    queryParams[URL_PARAM.shareKey] = shareKey;
 
     this.router.navigate(['/dashboard'], {
       queryParams,

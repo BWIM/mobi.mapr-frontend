@@ -6,6 +6,7 @@ import { AnalyzeService, CategoryScore } from '../../../../services/analyze.serv
 import { catchError, of } from 'rxjs';
 import { ChartComponent } from '../../../../shared/chart/chart.component';
 import { PlacesDialogComponent, PlacesDialogData } from '../places/places-dialog.component';
+import { ShareAccessService } from '../../../../services/share-access.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { InfoDialogComponent } from '../../../../shared/info-overlay/info-dialog.component';
 import { LegendInfoComponent } from '../../../../shared/legend-info/legend-info.component';
@@ -65,6 +66,9 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
 
   private languageService = inject(LanguageService);
   private scoreColorsService = inject(ScoreColorsService);
+  private shareAccess = inject(ShareAccessService);
+  /** Places dialog; hidden when a share disables `places`. */
+  readonly canUsePlaces = this.shareAccess.canUsePlaces;
 
   readonly timeLegendItems = this.scoreColorsService.legendItems;
   readonly hasScoreColors = this.scoreColorsService.hasConfig;
@@ -615,6 +619,9 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
   }
 
   openPlacesOverlay(categoryId?: number, categoryName?: string): void {
+    if (!this.shareAccess.canUsePlaces()) {
+      return;
+    }
     // Always open the places dialog - it will show a hint for unsupported feature types (state/county)
     const match =
       categoryId != null

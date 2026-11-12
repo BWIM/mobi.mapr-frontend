@@ -2,6 +2,7 @@ import { Injectable, inject, signal, computed, DestroyRef, effect } from '@angul
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin, of, Subscription } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { ShareAccessService } from './share-access.service';
 import { FeatureSelectionService, MapLibreFeatureData } from '../shared/services/feature-selection.service';
 import { MapService, FeatureInfoResponse, ContentLayerFilters } from './map.service';
 import { FilterConfigService } from './filter-config.service';
@@ -24,6 +25,7 @@ export class AnalyzeFeatureFacadeService {
   private translate = inject(TranslateService);
   private scoreColorsService = inject(ScoreColorsService);
   private destroyRef = inject(DestroyRef);
+  private shareAccess = inject(ShareAccessService);
 
   private subscription?: Subscription;
   private savedFeatureType: 'municipality' | 'hexagon' | 'county' | 'state' | null = null;
@@ -160,6 +162,10 @@ export class AnalyzeFeatureFacadeService {
   }
 
   shouldShowMap(): boolean {
+    // The places map needs /places/; without it the activity list is shown instead.
+    if (!this.shareAccess.canUsePlaces()) {
+      return false;
+    }
     const hasCategories = this.filterConfig.hasCategories();
     const single = this.analyzeData()?.categories?.length === 1;
     return !hasCategories || !!single;

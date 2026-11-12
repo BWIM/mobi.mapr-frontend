@@ -5,7 +5,6 @@ import { environment } from '../../environments/environment';
 import {
   Project
 } from '../interfaces/project';
-import { ProjectGroup } from '../interfaces/project-group';
 import { PaginatedResponse } from '../interfaces/http';
 import { DashboardSessionService } from './dashboard-session.service';
 
@@ -73,17 +72,18 @@ export class ProjectsService {
     return loadPage(1, []);
   }
 
-  getProjectGroup(id: number): Observable<ProjectGroup> {
-    return this.http.get<ProjectGroup>(`${this.apiUrl}/project-groups/${id}/`);
-  }
-
   setListedProjects(projects: Project[], complete = true): void {
     this._listedProjects.set(projects);
     this._listedProjectsComplete.set(complete);
   }
 
-  getProjectById(id: number): Observable<Project> {
-    return this.http.get<Project>(`${this.apiUrl}/projects/${id}/`);
+  /**
+   * With `shareKey`, the project is read through the share (the share's own project or a sibling
+   * it grants); the response then carries the `share` block.
+   */
+  getProjectById(id: number, shareKey?: string | null): Observable<Project> {
+    const params = shareKey ? new HttpParams().set('key', shareKey) : undefined;
+    return this.http.get<Project>(`${this.apiUrl}/projects/${id}/`, { params });
   }
 
   getProjectByShareKey(shareKey: string): Observable<Project> {
@@ -92,12 +92,14 @@ export class ProjectsService {
   }
 
   fetchProject(): Observable<Project> {
-    if (this.dashboardSessionService.getShareKey()) {
-      const shareKey = this.dashboardSessionService.getShareKey()!;
-      return this.getProjectByShareKey(shareKey);
-    } else {
-      return this.getProjectById(Number(this.dashboardSessionService.getProjectId()));
+    const shareKey = this.dashboardSessionService.getShareKey();
+    const projectId = this.dashboardSessionService.getProjectId();
+    if (shareKey) {
+      return projectId
+        ? this.getProjectById(Number(projectId), shareKey)
+        : this.getProjectByShareKey(shareKey);
     }
+    return this.getProjectById(Number(projectId));
   }
 
   setProject(project: Project): void {

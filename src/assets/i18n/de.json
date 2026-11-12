@@ -862,7 +862,8 @@
       "ccBy": "Was bedeutet das? CC BY 4.0 (Creative Commons Namensnennung 4.0 International):"
     },
     "error": {
-      "generic": "Fehler beim Export der Kartendaten"
+      "generic": "Fehler beim Export der Kartendaten",
+      "notAllowed": "Export ist für diesen Freigabe-Link nicht verfügbar."
     }
   },
   "dashboard": {
@@ -980,9 +981,9 @@
   },
   "groupOverview": {
     "title": "Projekte in {{groupName}}",
+    "titleMultiple": "Projekte in diesen Gruppen",
     "empty": "Keine Projekte in dieser Gruppe.",
     "back": "Zurück zur Karte",
-    "loadError": "Fehler beim Laden der Gruppenprojekte.",
     "switchHint": "Tipp: Wechsle jederzeit zwischen Projekten über den Projektnamen oder öffne diese Übersicht über das Gruppensymbol in der linken Leiste.",
     "switchHintMobile": "Tipp: Tippe auf das Projekt-Feld unten, um zwischen Projekten zu wechseln, oder öffne die Gruppenübersicht über das Hive-Symbol auf der Karte."
   },

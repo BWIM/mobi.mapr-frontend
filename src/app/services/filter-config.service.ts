@@ -5,6 +5,7 @@ import { SettingsService } from './settings.service';
 import { Map as MapLibreMap } from 'maplibre-gl';
 import { MapService, ContentLayerFilters } from './map.service';
 import { DashboardSessionService } from './dashboard-session.service';
+import { ShareAccessService } from './share-access.service';
 import { Profile, ProfileOption } from '../interfaces/profile';
 import { MatDialog } from '@angular/material/dialog';
 import { FilterDialogComponent, FilterDialogData } from '../layout/left/filter-dialog/filter-dialog.component';
@@ -57,6 +58,7 @@ export class FilterConfigService {
   private settingsService = inject(SettingsService);
   private mapService = inject(MapService);
   private dashboardSessionService = inject(DashboardSessionService);
+  private shareAccess = inject(ShareAccessService);
   private dialog = inject(MatDialog);
   private personaService = inject(PersonaService);
   private regiostarService = inject(RegioStarService);
@@ -155,11 +157,15 @@ export class FilterConfigService {
   readonly isMapCompareMode = this._isMapCompareMode.asReadonly();
   readonly isDifferenceView = this._isDifferenceView.asReadonly();
   readonly pendingMapCompareEnable = this._pendingMapCompareEnable.asReadonly();
-  readonly canUseMapCompare = computed(
-    () =>
-      this.dashboardSessionService.isAuthenticated() ||
-      !!this.projectService.project()?.group
-  );
+  /** Side-by-side compare view; share viewers only when their share enables `compare`. */
+  readonly canUseMapCompare = this.shareAccess.canCompare;
+  /** Difference map; share viewers only when their share enables `compare` and `difference`. */
+  readonly canUseDifferenceView = this.shareAccess.canUseDifference;
+  /**
+   * State / RegioStar filters (dialog, reset, URL params). Share viewers only when their share
+   * enables `filters`; the backend already limits the options to the share's restriction.
+   */
+  readonly canEditAdvancedFilters = this.shareAccess.canEditAdvancedFilters;
   readonly hasUrlCompareIntent = this._urlCompareIntent.asReadonly();
   readonly compareMapsReady = this._compareMapsReady.asReadonly();
   readonly canConfirmMapCompare = computed(() => {
@@ -713,6 +719,15 @@ export class FilterConfigService {
     });
 
     effect(() => {
+      if (!this.canUseDifferenceView() && this._isDifferenceView() && this._isMapCompareMode()) {
+        this._mapModeTransitionInProgress.set(true);
+        this._compareMapsReady.set(false);
+        this.mapService.unbindDifferenceSync();
+        this._isDifferenceView.set(false);
+      }
+    });
+
+    effect(() => {
       if (!this.canUseMapCompare()) {
         this._pendingMapCompareEnable.set(false);
         if (this._isMapCompareMode()) {
@@ -810,8 +825,9 @@ export class FilterConfigService {
   private loadAllFilterData(projectId?: number): void {
     const loadGeneration = this.projectLoadGeneration;
     const expectedProjectId = projectId;
-    const isShareKeyOnly = this.dashboardSessionService.accessMethod() === 'share_key';
-    
+    // Share viewers who may not change state / RegioStar filters always see everything.
+    const lockedFilters = !this.shareAccess.canEditAdvancedFilters();
+
     // Always load RegioStars, States, Categories and Personas (including for share_key users so they can see the data)
     const regiostars$ = this.regiostarService.getRegioStars(1, 100);
     const states$ = this.stateService.getStates(1, 100);
@@ -834,8 +850,8 @@ export class FilterConfigService {
         this._allCategories.set(responses.categories.results);
         this._allPersonas.set(responses.personas.results);
 
-        // For share_key users, always preselect all items (they can't modify anyway)
-        if (isShareKeyOnly) {
+        // Locked filters: always preselect all items (the viewer can't modify them anyway)
+        if (lockedFilters) {
           this.validateSelectedPersona();
           this.preselectAllRegioStars();
           this.preselectAllStates();
@@ -1066,6 +1082,10 @@ export class FilterConfigService {
       }
       this._selectedModes.set(currentModes.filter(id => id !== modeId));
     } else {
+      // Only profiles of the project (with a share key: of the share) can be selected.
+      if (!this.getProfileIdsInProject().has(modeId)) {
+        return;
+      }
       this._selectedModes.set([...currentModes, modeId]);
     }
     this.saveSettings();
@@ -1142,8 +1162,8 @@ export class FilterConfigService {
       }
     }
 
-    // Advanced filters are not available with share-key access.
-    if (!this.isShareKeyOnly()) {
+    // Advanced filters only when the viewer may change them (share `filters` flag).
+    if (this.canEditAdvancedFilters()) {
       if (state.regiostarIds) {
         const allowed = new Set(this._allRegioStars().map(r => r.id));
         const valid = state.regiostarIds.filter(id => allowed.has(id));
@@ -1246,6 +1266,9 @@ export class FilterConfigService {
     if (!this._isMapCompareMode()) {
       return;
     }
+    if (!this._isDifferenceView() && !this.canUseDifferenceView()) {
+      return;
+    }
     this._mapModeTransitionInProgress.set(true);
     this._compareMapsReady.set(false);
     this.mapService.unbindDifferenceSync();
@@ -1296,6 +1319,10 @@ export class FilterConfigService {
       }
       this._rightSelectedModes.set(currentModes.filter(id => id !== modeId));
     } else {
+      // Only profiles of the project (with a share key: of the share) can be selected.
+      if (!this.getProfileIdsInProject().has(modeId)) {
+        return;
+      }
       this._rightSelectedModes.set([...currentModes, modeId]);
     }
   }
@@ -1553,11 +1580,10 @@ export class FilterConfigService {
 
   /**
    * Open filter dialog for advanced filters
-   * Disabled for share_key-only users
+   * Disabled for share viewers whose share does not enable `filters`
    */
   openFilterDialog(): void {
-    // Prevent opening filter dialog for share_key-only users
-    if (this.dashboardSessionService.accessMethod() === 'share_key') {
+    if (!this.canEditAdvancedFilters()) {
       return;
     }
 
@@ -1586,6 +1612,9 @@ export class FilterConfigService {
    * Does not reset modes, only resets: regiostars, states
    */
   resetAdvancedFilters(): void {
+    if (!this.canEditAdvancedFilters()) {
+      return;
+    }
     const allRegioStarIds = this._allRegioStars().map(r => r.id);
     this._selectedRegioStars.set([...allRegioStarIds]);
 

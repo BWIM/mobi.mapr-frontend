@@ -6,6 +6,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 import { AuthInterceptor } from './auth/auth.interceptor';
+import { shareFeatureInterceptor } from './services/share-feature.interceptor';
 import { routes } from './app.routes';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
@@ -28,7 +29,7 @@ export const appConfig: ApplicationConfig = {
         provideRouter(routes),
         provideAnimationsAsync(),
         provideHttpClient(withXhr(), 
-            withInterceptors([AuthInterceptor])
+            withInterceptors([AuthInterceptor, shareFeatureInterceptor])
         ),
         importProvidersFrom(
             HttpClientModule,
