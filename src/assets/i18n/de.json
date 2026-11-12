@@ -875,6 +875,27 @@
     "closeSidebar": "Sidebar schließen",
     "closeFilters": "Filter schließen"
   },
+  "share": {
+    "open": "Teilen",
+    "title": "Teilen",
+    "intro": "Kopiere den Link und schicke ihn weiter – Empfänger:innen landen direkt in mobi.mapr.",
+    "view": {
+      "title": "Aktuelle Ansicht",
+      "description": "Mit allen aktuellen Einstellungen: Kartenausschnitt, Profile, Filter und ausgewählte Gebiete."
+    },
+    "project": {
+      "title": "Projekt",
+      "description": "Nur das Projekt „{{project}}“ – es öffnet sich mit den Standardeinstellungen."
+    },
+    "linkLabel": "Link",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "native": "Teilen über …",
+    "nativeTextView": "Schau dir diese Ansicht in mobi.mapr an: {{project}}",
+    "nativeTextProject": "Schau dir {{project}} in mobi.mapr an",
+    "loginHint": "Dieser Link führt zu einem geschützten Projekt. Empfänger:innen müssen sich anmelden und Zugriff auf das Projekt haben.",
+    "close": "Schließen"
+  },
   "mobile": {
     "statsButton": {
       "label": "Rankings öffnen (Die Besten)"

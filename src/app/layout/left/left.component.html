@@ -5,7 +5,20 @@
     </div>
   } @else {
     <div class="pt-[4rem] lg:pt-[5rem] xl:pt-[6rem]">
-      <app-project-switcher />
+      <div class="flex items-start gap-1 mr-2 lg:mr-3 xl:mr-4">
+        <div class="min-w-0 flex-1">
+          <app-project-switcher />
+        </div>
+        <button
+          matIconButton
+          type="button"
+          class="shrink-0 -mt-1 text-[var(--primary-color)]"
+          (click)="openShareDialog()"
+          [attr.title]="'share.open' | translate"
+          [attr.aria-label]="'share.open' | translate">
+          <mat-icon>share</mat-icon>
+        </button>
+      </div>
       @if (getFormattedCreatedDate()) {
         <div class="text-xs text-[var(--primary-color)] opacity-80 mb-4">
           {{ 'left.createdOn' | translate }} {{ getFormattedCreatedDate() }}

@@ -10,6 +10,14 @@
       [title]="'tutorial.replay' | translate">
       <mat-icon>tour</mat-icon>
     </button>
+    <button
+      type="button"
+      class="absolute left-12 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 rounded-full text-[var(--primary-color)] opacity-80 hover:opacity-100 transition-opacity"
+      (click)="openShareDialog()"
+      [attr.aria-label]="'share.open' | translate"
+      [title]="'share.open' | translate">
+      <mat-icon>share</mat-icon>
+    </button>
 
     <a href="https://bw-im.de/mobimapr" target="_blank" [attr.title]="'rail.logoHint' | translate" class="flex items-center gap-2">
       <img src="assets/images/logo.png" alt="Logo" class="h-10 w-auto">
