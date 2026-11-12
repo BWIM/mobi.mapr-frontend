@@ -1,0 +1,92 @@
+<div class="flex flex-col w-full sm:w-[520px] max-w-full text-[var(--primary-color)]">
+  <div class="flex items-center justify-between gap-2 px-6 pt-5">
+    <h2 class="text-xl sm:text-2xl font-semibold m-0 flex items-center gap-2">
+      <mat-icon>share</mat-icon>
+      {{ 'share.title' | translate }}
+    </h2>
+    <button mat-icon-button type="button" (click)="close()" [attr.aria-label]="'share.close' | translate">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="!px-6 !pt-3 !pb-2">
+    <p class="m-0 mb-4 text-sm leading-relaxed opacity-80">
+      {{ 'share.intro' | translate }}
+    </p>
+
+    <!-- Mode selection -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4" role="radiogroup" [attr.aria-label]="'share.title' | translate">
+      <button
+        type="button"
+        role="radio"
+        class="text-left p-3 rounded-xl border-2 transition-colors cursor-pointer text-[var(--primary-color)]"
+        [ngClass]="mode() === 'view' ? 'border-[var(--primary-color)] bg-black/5' : 'border-black/10 bg-transparent hover:border-black/25'"
+        [attr.aria-checked]="mode() === 'view'"
+        (click)="setMode('view')">
+        <span class="flex items-center gap-2 font-semibold">
+          <mat-icon>tune</mat-icon>
+          {{ 'share.view.title' | translate }}
+        </span>
+        <span class="block mt-1 text-xs leading-snug opacity-80">
+          {{ 'share.view.description' | translate }}
+        </span>
+      </button>
+
+      <button
+        type="button"
+        role="radio"
+        class="text-left p-3 rounded-xl border-2 transition-colors cursor-pointer text-[var(--primary-color)]"
+        [ngClass]="mode() === 'project' ? 'border-[var(--primary-color)] bg-black/5' : 'border-black/10 bg-transparent hover:border-black/25'"
+        [attr.aria-checked]="mode() === 'project'"
+        (click)="setMode('project')">
+        <span class="flex items-center gap-2 font-semibold">
+          <mat-icon>map</mat-icon>
+          {{ 'share.project.title' | translate }}
+        </span>
+        <span class="block mt-1 text-xs leading-snug opacity-80">
+          {{ 'share.project.description' | translate: { project: projectName() || 'mobi.mapr' } }}
+        </span>
+      </button>
+    </div>
+
+    <!-- Link -->
+    <label for="share-link" class="block text-xs font-medium mb-1 opacity-80">{{ 'share.linkLabel' | translate }}</label>
+    <div class="flex items-stretch gap-2">
+      <input
+        id="share-link"
+        type="text"
+        readonly
+        class="flex-1 min-w-0 px-3 py-2 rounded-lg border border-black/15 bg-black/5 text-sm font-mono text-[var(--primary-color)] truncate focus:outline-none focus:border-[var(--primary-color)]"
+        [value]="link()"
+        (focus)="selectInput($event)">
+      <button
+        mat-flat-button
+        type="button"
+        class="shrink-0"
+        (click)="copy()">
+        <mat-icon>{{ copied() ? 'check' : 'content_copy' }}</mat-icon>
+        {{ (copied() ? 'share.copied' : 'share.copy') | translate }}
+      </button>
+    </div>
+    <p class="sr-only" aria-live="polite">{{ copied() ? ('share.copied' | translate) : '' }}</p>
+
+    @if (requiresLogin()) {
+      <p class="flex items-start gap-2 mt-4 mb-0 p-3 rounded-lg bg-black/5 text-xs leading-snug">
+        <mat-icon class="!text-base shrink-0">lock</mat-icon>
+        <span>{{ 'share.loginHint' | translate }}</span>
+      </p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="!px-6 !pb-4">
+    @if (canNativeShare) {
+      <button mat-button type="button" (click)="shareNative()">
+        <mat-icon>ios_share</mat-icon>
+        {{ 'share.native' | translate }}
+      </button>
+    }
+    <button mat-button type="button" (click)="close()">
+      {{ 'share.close' | translate }}
+    </button>
+  </mat-dialog-actions>
+</div>

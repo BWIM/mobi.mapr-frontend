@@ -15,6 +15,7 @@ import { Subscription } from 'rxjs';
 import { ProfileOption } from '../../interfaces/profile';
 import { ProjectSwitcherComponent } from '../../shared/project-switcher/project-switcher.component';
 import { ProjectInfoComponent } from '../../shared/project-info/project-info.component';
+import { openShareDialog } from '../../shared/share-dialog/open-share-dialog';
 
 @Component({
   selector: 'app-left',
@@ -503,4 +504,7 @@ export class LeftComponent implements OnInit, OnDestroy {
     };
   }
 
+  openShareDialog(): void {
+    openShareDialog(this.dialog);
+  }
 }

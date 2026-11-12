@@ -30,6 +30,7 @@ import { URL_PARAM } from '../../url-state/url-params';
 import { UrlStateService } from '../../url-state/url-state.service';
 import { TutorialOverlayComponent } from '../../tutorial/tutorial-overlay.component';
 import { TutorialLayout, TutorialService } from '../../tutorial/tutorial.service';
+import { openShareDialog } from '../../shared/share-dialog/open-share-dialog';
 
 @Component({
   selector: 'app-dashboard',
@@ -379,6 +380,10 @@ export class DashboardComponent {
 
   startTutorial(): void {
     this.tutorial.start();
+  }
+
+  openShareDialog(): void {
+    openShareDialog(this.dialog);
   }
 
   private setupTutorial(): void {
