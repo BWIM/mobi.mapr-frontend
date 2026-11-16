@@ -12,6 +12,7 @@ import { InfoDialogComponent } from '../../../../shared/info-overlay/info-dialog
 import { LegendInfoComponent } from '../../../../shared/legend-info/legend-info.component';
 import { LanguageService } from '../../../../services/language.service';
 import { ScoreColorsService } from '../../../../services/score-colors.service';
+import { getGradeColor, getGradePalette } from '../../../../utils/grade.util';
 
 export interface AllCategoriesDialogData {
   featureType: 'municipality' | 'hexagon' | 'county' | 'state';
@@ -55,14 +56,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
   @ViewChild('allCategoriesChart') allCategoriesChart?: ChartComponent;
 
   // Quality (index) colors - A through F
-  qualityColors = [
-    { letter: 'A', color: 'rgb(50, 97, 45)' },
-    { letter: 'B', color: 'rgb(60, 176, 67)' },
-    { letter: 'C', color: 'rgb(238, 210, 2)' },
-    { letter: 'D', color: 'rgb(237, 112, 20)' },
-    { letter: 'E', color: 'rgb(194, 24, 7)' },
-    { letter: 'F', color: 'rgb(197, 136, 187)' }
-  ];
+  qualityColors = getGradePalette();
 
   private languageService = inject(LanguageService);
   private scoreColorsService = inject(ScoreColorsService);
@@ -201,24 +195,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
       if (this.data.isScoreMode) {
         return this.scoreColorsService.getColorForScore(cat.score);
       } else {
-        // Use index-based colors (from getIndexFillColorExpression)
-        // Match exact color breaks from map.service.ts
-        const indexValue = cat.index / 100;
-        if (indexValue <= 0) {
-          return 'rgba(128, 128, 128, 1)'; // NaN or invalid
-        } else if (indexValue < 0.35) {
-          return 'rgba(50, 97, 45, 1)'; // Grade A (A+, A, A-)
-        } else if (indexValue < 0.5) {
-          return 'rgba(60, 176, 67, 1)'; // Grade B (B+, B, B-)
-        } else if (indexValue < 0.71) {
-          return 'rgba(238, 210, 2, 1)'; // Grade C (C+, C, C-)
-        } else if (indexValue < 1.0) {
-          return 'rgba(237, 112, 20, 1)'; // Grade D (D+, D, D-)
-        } else if (indexValue < 1.41) {
-          return 'rgba(194, 24, 7, 1)'; // Grade E (E+, E, E-)
-        } else {
-          return 'rgba(150, 86, 162, 1)'; // Grade F (F+, F, F-)
-        }
+        return getGradeColor(cat.index);
       }
     });
 
@@ -346,22 +323,7 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
   }
 
   private getGradeColor(index: number): string {
-    const indexValue = index / 100;
-    if (indexValue <= 0) {
-      return 'rgba(128, 128, 128, 1)'; // NaN or invalid
-    } else if (indexValue < 0.35) {
-      return 'rgba(50, 97, 45, 1)'; // Grade A (A+, A, A-)
-    } else if (indexValue < 0.5) {
-      return 'rgba(60, 176, 67, 1)'; // Grade B (B+, B, B-)
-    } else if (indexValue < 0.71) {
-      return 'rgba(238, 210, 2, 1)'; // Grade C (C+, C, C-)
-    } else if (indexValue < 1.0) {
-      return 'rgba(237, 112, 20, 1)'; // Grade D (D+, D, D-)
-    } else if (indexValue < 1.41) {
-      return 'rgba(194, 24, 7, 1)'; // Grade E (E+, E, E-)
-    } else {
-      return 'rgba(150, 86, 162, 1)'; // Grade F (F+, F, F-)
-    }
+    return getGradeColor(index);
   }
 
   private initializeComparisonChart(): void {

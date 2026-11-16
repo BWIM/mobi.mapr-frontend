@@ -13,6 +13,7 @@ import {
 } from './analyze.service';
 import { TranslateService } from '@ngx-translate/core';
 import { ScoreColorsService } from './score-colors.service';
+import { getGrade, getGradeColor, MAP_GRADE_ALPHA } from '../utils/grade.util';
 
 @Injectable({
   providedIn: 'root',
@@ -184,26 +185,7 @@ export class AnalyzeFeatureFacadeService {
   }
 
   getGrade(index: number): string {
-    const indexValue = index / 100;
-    if (indexValue <= 0) return this.translate.instant('map.popup.error');
-    if (indexValue < 0.28) return 'A+';
-    if (indexValue < 0.32) return 'A';
-    if (indexValue < 0.35) return 'A-';
-    if (indexValue < 0.4) return 'B+';
-    if (indexValue < 0.45) return 'B';
-    if (indexValue < 0.5) return 'B-';
-    if (indexValue < 0.56) return 'C+';
-    if (indexValue < 0.63) return 'C';
-    if (indexValue < 0.71) return 'C-';
-    if (indexValue < 0.8) return 'D+';
-    if (indexValue < 0.9) return 'D';
-    if (indexValue < 1.0) return 'D-';
-    if (indexValue < 1.12) return 'E+';
-    if (indexValue < 1.26) return 'E';
-    if (indexValue < 1.41) return 'E-';
-    if (indexValue < 1.59) return 'F+';
-    if (indexValue < 1.78) return 'F';
-    return 'F-';
+    return getGrade(index) ?? this.translate.instant('map.popup.error');
   }
 
   getRatingDisplay(info: FeatureInfoResponse | null): string {
@@ -395,25 +377,11 @@ export class AnalyzeFeatureFacadeService {
   }
 
   private gradeColor(index: number): string {
-    const v = index / 100;
-    if (v <= 0) return 'rgba(128, 128, 128, 0.7)';
-    if (v < 0.35) return 'rgba(50, 97, 45, 0.7)';
-    if (v < 0.5) return 'rgba(60, 176, 67, 0.7)';
-    if (v < 0.71) return 'rgba(238, 210, 2, 0.7)';
-    if (v < 1.0) return 'rgba(237, 112, 20, 0.7)';
-    if (v < 1.41) return 'rgba(194, 24, 7, 0.7)';
-    return 'rgba(150, 86, 162, 0.7)';
+    return getGradeColor(index, MAP_GRADE_ALPHA);
   }
 
   private gradeColorSolid(index: number): string {
-    const v = index / 100;
-    if (v <= 0) return 'rgba(128, 128, 128, 1)';
-    if (v < 0.35) return 'rgba(50, 97, 45, 1)';
-    if (v < 0.5) return 'rgba(60, 176, 67, 1)';
-    if (v < 0.71) return 'rgba(238, 210, 2, 1)';
-    if (v < 1.0) return 'rgba(237, 112, 20, 1)';
-    if (v < 1.41) return 'rgba(194, 24, 7, 1)';
-    return 'rgba(150, 86, 162, 1)';
+    return getGradeColor(index);
   }
 
   private scoreColor(score: number): string {

@@ -11,6 +11,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { InfoDialogComponent } from '../../../../shared/info-overlay/info-dialog.component';
 import { LegendInfoComponent } from '../../../../shared/legend-info/legend-info.component';
 import { ScoreColorsService } from '../../../../services/score-colors.service';
+import { getGrade, getGradeColor } from '../../../../utils/grade.util';
 import { CompositionNode } from '../../../../interfaces/composition';
 import {
   CategoryCompositionPanelComponent,
@@ -547,22 +548,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private getIndexColor(index: number): string {
-    const indexValue = index / 100;
-    if (indexValue <= 0) {
-      return 'rgba(128, 128, 128, 0.7)';
-    } else if (indexValue < 0.35) {
-      return 'rgb(50, 97, 45)';
-    } else if (indexValue < 0.5) {
-      return 'rgb(60, 176, 67)';
-    } else if (indexValue < 0.71) {
-      return 'rgb(238, 210, 2)';
-    } else if (indexValue < 1.0) {
-      return 'rgb(237, 112, 20)';
-    } else if (indexValue < 1.41) {
-      return 'rgb(194, 24, 7)';
-    } else {
-      return 'rgb(197, 136, 187)';
-    }
+    return getGradeColor(index);
   }
 
   private getPlacesScoreTextColor(score: number): string {
@@ -570,14 +556,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private getPlacesIndexTextColor(index: number): string {
-    const indexValue = index / 100;
-    if (indexValue <= 0) return 'rgb(128, 128, 128)';
-    if (indexValue < 0.35) return 'rgb(50, 97, 45)';
-    if (indexValue < 0.5) return 'rgb(60, 176, 67)';
-    if (indexValue < 0.71) return 'rgb(238, 210, 2)';
-    if (indexValue < 1.0) return 'rgb(237, 112, 20)';
-    if (indexValue < 1.41) return 'rgb(194, 24, 7)';
-    return 'rgb(197, 136, 187)';
+    return getGradeColor(index);
   }
 
   getPlacesMetricTextColor(score: number, index: number): string {
@@ -587,26 +566,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getGradeFromIndex(index: number): string {
-    const indexValue = index / 100;
-    if (indexValue <= 0 || !Number.isFinite(indexValue)) return 'N/A';
-    if (indexValue < 0.24) return 'A+';
-    if (indexValue < 0.27) return 'A';
-    if (indexValue < 0.35) return 'A-';
-    if (indexValue < 0.4) return 'B+';
-    if (indexValue < 0.45) return 'B';
-    if (indexValue < 0.5) return 'B-';
-    if (indexValue < 0.56) return 'C+';
-    if (indexValue < 0.63) return 'C';
-    if (indexValue < 0.71) return 'C-';
-    if (indexValue < 0.8) return 'D+';
-    if (indexValue < 0.9) return 'D';
-    if (indexValue < 1.0) return 'D-';
-    if (indexValue < 1.12) return 'E+';
-    if (indexValue < 1.26) return 'E';
-    if (indexValue < 1.41) return 'E-';
-    if (indexValue < 1.59) return 'F+';
-    if (indexValue < 1.78) return 'F';
-    return 'F-';
+    return getGrade(index) ?? 'N/A';
   }
 
   private addPlacesToMap(): void {

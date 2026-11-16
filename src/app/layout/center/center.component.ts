@@ -23,6 +23,7 @@ import {
   buildQualityDifferenceConfig,
   buildTimeDifferenceConfig,
 } from '../../utils/difference-colors.util';
+import { getGrade, getGradePalette, MAP_GRADE_ALPHA } from '../../utils/grade.util';
 import { ScoreLegendItem } from '../../utils/score-colors.util';
 import { formatNumber } from '@angular/common';
 import { currentNumberLocale } from '../../shared/pipes/locale-number.pipe';
@@ -239,14 +240,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
 
   // Quality (index) colors - A through F
-  qualityColors: Array<{ letter: QualityBracket; color: string }> = [
-    { letter: 'A', color: 'rgba(50, 97, 45, 0.7)' },
-    { letter: 'B', color: 'rgba(60, 176, 67, 0.7)' },
-    { letter: 'C', color: 'rgba(238, 210, 2, 0.7)' },
-    { letter: 'D', color: 'rgba(237, 112, 20, 0.7)' },
-    { letter: 'E', color: 'rgba(194, 24, 7, 0.7)' },
-    { letter: 'F', color: 'rgba(197, 136, 187, 0.7)' }
-  ];
+  qualityColors: Array<{ letter: QualityBracket; color: string }> = getGradePalette(MAP_GRADE_ALPHA);
   readonly timeLegendItems = this.scoreColorsService.legendItems;
   readonly hasScoreColors = this.scoreColorsService.hasConfig;
   readonly differenceLegendItems = computed((): DifferenceLegendItem[] => {
@@ -324,27 +318,9 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     this.filterConfigService.setLayerModeAuto();
   }
 
+  /** Sub-grade for an API index (e.g. 42 → "B"). */
   getIndexName(index: number): string {
-    if (index <= 0) return this.translate.instant('map.popup.error');
-    if (index < 0.28) return "A+";
-    if (index < 0.32) return "A";
-    if (index < 0.35) return "A-";
-
-    if (index < 0.4) return "B+";
-    if (index < 0.45) return "B";
-    if (index < 0.5) return "B-";
-    if (index < 0.56) return "C+";
-    if (index < 0.63) return "C";
-    if (index < 0.71) return "C-";
-    if (index < 0.8) return "D+";
-    if (index < 0.9) return "D";
-    if (index < 1.0) return "D-";
-    if (index < 1.12) return "E+";
-    if (index < 1.26) return "E";
-    if (index < 1.41) return "E-";
-    if (index < 1.59) return "F+";
-    if (index < 1.78) return "F";
-    return "F-";
+    return getGrade(index) ?? this.translate.instant('map.popup.error');
   }
 
   private buildDifferencePopupValueHtml(
@@ -373,7 +349,8 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       const value = Number(raw);
       if (isQualityMode) {
-        return this.getIndexName(value);
+        // feature-state stores the quality index as a ratio (index / 100)
+        return this.getIndexName(value * 100);
       }
       return `${(value / 60).toFixed(1)} ${minLabel}`;
     };
@@ -1238,9 +1215,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         const indexLabel = this.translate.instant('map.popup.index');
         const index = properties['index'];
         if (index !== undefined && index !== null) {
-          // Index is stored as integer (multiplied by 100), so divide by 100
-          const indexValue = index / 100;
-          const indexName = this.getIndexName(indexValue);
+          const indexName = this.getIndexName(index);
           valueText = `${indexLabel} ${indexName}`;
         } else {
           valueText = `${indexLabel} ${notAvailable}`;

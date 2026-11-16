@@ -11,7 +11,7 @@ import { LanguageService } from '../../../services/language.service';
 import { FeatureSelectionService, MapLibreFeatureData } from '../../../shared/services/feature-selection.service';
 import { MobileUiService } from '../../../services/mobile-ui.service';
 import { ScoreColorsService } from '../../../services/score-colors.service';
-import { getContrastTextColor, getGradeColor } from '../../../utils/grade-colors.util';
+import { getContrastTextColor, getGrade, getGradeColor } from '../../../utils/grade.util';
 import { currentNumberLocale } from '../../../shared/pipes/locale-number.pipe';
 import { formatNumber } from '@angular/common';
 
@@ -351,7 +351,7 @@ export class StatsComponent implements OnDestroy {
       return `${minutes} ${minLabel}`;
     } else {
       // For index, show the rating letter grade
-      return this.getRating(county.index / 100) as string;
+      return this.getRating(county.index) as string;
     }
   }
 
@@ -359,33 +359,16 @@ export class StatsComponent implements OnDestroy {
   getDisplayColor(county: County): string {
     return this.filterConfigService.selectedBewertung() === 'zeit'
       ? this.scoreColorsService.getColorForScore(county.score)
-      : getGradeColor(county.index / 100);
+      : getGradeColor(county.index);
   }
 
   getDisplayTextColor(county: County): string {
     return getContrastTextColor(this.getDisplayColor(county));
   }
 
+  /** Sub-grade for an API index (e.g. 42 → "B"). */
   getRating(index: number): string {
-    if (index <= 0) return this.translate.instant('map.popup.error');
-    if (index < 0.28) return "A+";
-    if (index < 0.32) return "A";
-    if (index < 0.35) return "A-";
-    if (index < 0.4) return "B+";
-    if (index < 0.45) return "B";
-    if (index < 0.5) return "B-";
-    if (index < 0.56) return "C+";
-    if (index < 0.63) return "C";
-    if (index < 0.71) return "C-";
-    if (index < 0.8) return "D+";
-    if (index < 0.9) return "D";
-    if (index < 1.0) return "D-";
-    if (index < 1.12) return "E+";
-    if (index < 1.26) return "E";
-    if (index < 1.41) return "E-";
-    if (index < 1.59) return "F+";
-    if (index < 1.78) return "F";
-    return "F-";
+    return getGrade(index) ?? this.translate.instant('map.popup.error');
   }
 
   /**

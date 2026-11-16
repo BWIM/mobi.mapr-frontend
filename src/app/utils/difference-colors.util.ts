@@ -3,6 +3,7 @@ import {
   ScoreLegendItem,
   buildLegendItems,
 } from './score-colors.util';
+import { GRADE_LETTERS, getGradeStep } from './grade.util';
 
 /**
  * Diverging difference palette (signed diff = left − right; lower values are better):
@@ -16,9 +17,6 @@ export const DIFFERENCE_NEUTRAL = 'rgba(150, 150, 165, 0.35)';
 const LEFT_BETTER_RAMP = ['#f2b8db', '#e27bbd', '#c8449b', '#9b1d78', '#650c50'];
 const RIGHT_BETTER_RAMP = ['#a8e0d6', '#5fc2b2', '#22998a', '#0f7166', '#064943'];
 
-/** Quality index break points (on index/100), matching map quality legend. */
-export const QUALITY_DIFF_THRESHOLDS = [0.35, 0.5, 0.71, 1.0, 1.41] as const;
-export const QUALITY_DIFF_BRACKET_IDS = ['A', 'B', 'C', 'D', 'E', 'F'] as const;
 
 /** One magnitude bracket; colours differ by which side is better. */
 export interface DifferenceColorStep {
@@ -100,8 +98,7 @@ function withColors(
  * @param indexValue index as a ratio (API `index / 100`)
  */
 export function getQualityGradeStep(indexValue: number): number {
-  const step = QUALITY_DIFF_THRESHOLDS.findIndex((threshold) => indexValue < threshold);
-  return step === -1 ? QUALITY_DIFF_THRESHOLDS.length : step;
+  return Math.max(0, getGradeStep(indexValue * 100));
 }
 
 /** Time difference brackets reuse the time legend brackets (in seconds). */
@@ -123,7 +120,7 @@ export function buildTimeDifferenceConfig(scoreConfig: ScoreColorConfig): Differ
  * existing quality bracket selection keeps working (A ↔ 0 steps, B ↔ 1 step, …).
  */
 export function buildQualityDifferenceConfig(): DifferenceColorConfig {
-  const bracketIds = [...QUALITY_DIFF_BRACKET_IDS];
+  const bracketIds = [...GRADE_LETTERS];
   return withColors(
     bracketIds.map((bracketId, index) => ({
       bracketId,
