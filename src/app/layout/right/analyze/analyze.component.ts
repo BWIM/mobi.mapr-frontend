@@ -20,7 +20,7 @@ import {
   CategoryCompositionPanelComponent,
   CompositionActivityMeta,
 } from '../../../shared/category-composition-panel/category-composition-panel.component';
-import { getContrastTextColor, getGradeColor } from '../../../utils/grade-colors.util';
+import { getContrastTextColor, getGrade, getGradeColor, MAP_GRADE_ALPHA } from '../../../utils/grade.util';
 import { LocaleNumberPipe, currentNumberLocale } from '../../../shared/pipes/locale-number.pipe';
 
 interface ActivityValue {
@@ -115,15 +115,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   ];
 
   // Quality (index) colors - A through F (must match map.service.ts getIndexFillColorExpression())
-  qualityColors = [
-    { letter: 'A', color: 'rgb(50, 97, 45)' },
-    { letter: 'B', color: 'rgb(60, 176, 67)' },
-    { letter: 'C', color: 'rgb(238, 210, 2)' },
-    { letter: 'D', color: 'rgb(237, 112, 20)' },
-    { letter: 'E', color: 'rgb(194, 24, 7)' },
-    { letter: 'F', color: 'rgb(197, 136, 187)' }
-  ];
-
   private featureSelectionService = inject(FeatureSelectionService);
   private mapService = inject(MapService);
   private filterConfigService = inject(FilterConfigService);
@@ -567,30 +558,11 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getGrade(index: number): string {
-    const indexValue = index / 100;
-    if (indexValue <= 0) return this.translate.instant('map.popup.error');
-    if (indexValue < 0.28) return "A+";
-    if (indexValue < 0.32) return "A";
-    if (indexValue < 0.35) return "A-";
-    if (indexValue < 0.4) return "B+";
-    if (indexValue < 0.45) return "B";
-    if (indexValue < 0.5) return "B-";
-    if (indexValue < 0.56) return "C+";
-    if (indexValue < 0.63) return "C";
-    if (indexValue < 0.71) return "C-";
-    if (indexValue < 0.8) return "D+";
-    if (indexValue < 0.9) return "D";
-    if (indexValue < 1.0) return "D-";
-    if (indexValue < 1.12) return "E+";
-    if (indexValue < 1.26) return "E";
-    if (indexValue < 1.41) return "E-";
-    if (indexValue < 1.59) return "F+";
-    if (indexValue < 1.78) return "F";
-    return "F-";
+    return getGrade(index) ?? this.translate.instant('map.popup.error');
   }
 
-  getGradeColor(index: number, alpha = 0.7): string {
-    return getGradeColor(index / 100, alpha);
+  getGradeColor(index: number, alpha = MAP_GRADE_ALPHA): string {
+    return getGradeColor(index, alpha);
   }
 
   /** Text colour that stays readable on top of the given rating colour. */
@@ -1271,14 +1243,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private getPlacesIndexTextColor(index: number): string {
-    const indexValue = index / 100;
-    if (indexValue <= 0) return 'rgb(128, 128, 128)';
-    if (indexValue < 0.35) return 'rgb(50, 97, 45)';
-    if (indexValue < 0.5) return 'rgb(60, 176, 67)';
-    if (indexValue < 0.71) return 'rgb(238, 210, 2)';
-    if (indexValue < 1.0) return 'rgb(237, 112, 20)';
-    if (indexValue < 1.41) return 'rgb(194, 24, 7)';
-    return 'rgb(197, 136, 187)';
+    return getGradeColor(index);
   }
 
   getPlacesMetricTextColor(score: number, index: number): string {

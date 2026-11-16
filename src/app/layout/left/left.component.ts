@@ -16,6 +16,7 @@ import { ProfileOption } from '../../interfaces/profile';
 import { ProjectSwitcherComponent } from '../../shared/project-switcher/project-switcher.component';
 import { ProjectInfoComponent } from '../../shared/project-info/project-info.component';
 import { openShareDialog } from '../../shared/share-dialog/open-share-dialog';
+import { GRADE_LETTERS, GRADE_THRESHOLDS, SUB_GRADES, getGradeLetterColor } from '../../utils/grade.util';
 
 @Component({
   selector: 'app-left',
@@ -104,17 +105,15 @@ export class LeftComponent implements OnInit, OnDestroy {
 
   private initializeQualityChart(): void {
     // Define the 18 grade levels from A+ to F-
-    const gradeLevels = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'E+', 'E', 'E-', 'F+', 'F', 'F-'];
+    const gradeLevels = SUB_GRADES;
 
     // Define grade ranges and their corresponding colors
-    const gradeRanges = [
-      { name: 'A', min: 0, max: 0.35, color: '#32612d' },      // Dark Green
-      { name: 'B', min: 0.35, max: 0.51, color: '#3cb043' },   // Light Green
-      { name: 'C', min: 0.51, max: 0.72, color: '#eed202' },   // Yellow
-      { name: 'D', min: 0.72, max: 1.0, color: '#ed7014' },    // Orange
-      { name: 'E', min: 1.0, max: 1.41, color: '#c21807' },    // Red
-      { name: 'F', min: 1.41, max: 2.0, color: '#9656a2' }     // Purple
-    ];
+    const gradeRanges = GRADE_LETTERS.map((name, step) => ({
+      name,
+      min: step === 0 ? 0 : GRADE_THRESHOLDS[step - 1],
+      max: step < GRADE_THRESHOLDS.length ? GRADE_THRESHOLDS[step] : 2.0,
+      color: getGradeLetterColor(name),
+    }));
 
     // Generate exponential function data: h(x) = 0.2511169 * 1.122178^x for x = 1 to 18
     const exponentialData: number[] = [];

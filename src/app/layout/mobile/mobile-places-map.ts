@@ -16,6 +16,7 @@ import { CompositionNode } from '../../interfaces/composition';
 import { CompositionActivityMeta } from '../../shared/category-composition-panel/category-composition-panel.component';
 import { ScoreColorsService } from '../../services/score-colors.service';
 import { gradeColor, scoreColor } from './analyze-chart.utils';
+import { getGrade } from '../../utils/grade.util';
 import {
   addSelectedAreaToMap,
   applyPlacesFocus,
@@ -313,26 +314,7 @@ export class MobilePlacesMap {
   }
 
   private gradeFromIndex(index: number): string {
-    const indexValue = index / 100;
-    if (indexValue <= 0 || !Number.isFinite(indexValue)) return 'N/A';
-    if (indexValue < 0.24) return 'A+';
-    if (indexValue < 0.27) return 'A';
-    if (indexValue < 0.35) return 'A-';
-    if (indexValue < 0.4) return 'B+';
-    if (indexValue < 0.45) return 'B';
-    if (indexValue < 0.5) return 'B-';
-    if (indexValue < 0.56) return 'C+';
-    if (indexValue < 0.63) return 'C';
-    if (indexValue < 0.71) return 'C-';
-    if (indexValue < 0.8) return 'D+';
-    if (indexValue < 0.9) return 'D';
-    if (indexValue < 1.0) return 'D-';
-    if (indexValue < 1.12) return 'E+';
-    if (indexValue < 1.26) return 'E';
-    if (indexValue < 1.41) return 'E-';
-    if (indexValue < 1.59) return 'F+';
-    if (indexValue < 1.78) return 'F';
-    return 'F-';
+    return getGrade(index) ?? 'N/A';
   }
 
   private scheduleMapInit(): void {

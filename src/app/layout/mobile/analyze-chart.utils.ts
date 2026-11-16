@@ -1,14 +1,8 @@
+import { GRADE_LETTERS, GRADE_THRESHOLDS, getGradeColor, getGradeLetterColor } from '../../utils/grade.util';
 import { getColorForScore, NO_SCORE_COLOR, ScoreColorConfig } from '../../utils/score-colors.util';
 
 export function gradeColor(index: number): string {
-  const v = index / 100;
-  if (v <= 0) return 'rgba(128, 128, 128, 1)';
-  if (v < 0.35) return 'rgba(50, 97, 45, 1)';
-  if (v < 0.5) return 'rgba(60, 176, 67, 1)';
-  if (v < 0.71) return 'rgba(238, 210, 2, 1)';
-  if (v < 1.0) return 'rgba(237, 112, 20, 1)';
-  if (v < 1.41) return 'rgba(194, 24, 7, 1)';
-  return 'rgba(150, 86, 162, 1)';
+  return getGradeColor(index);
 }
 
 export function scoreColor(score: number, config: ScoreColorConfig | null): string {
@@ -17,24 +11,17 @@ export function scoreColor(score: number, config: ScoreColorConfig | null): stri
 
 export function gradeColorSimple(index: number): string {
   const v = index / 100;
-  if (v < 0.5) return 'rgba(60, 176, 67, 0.9)';
-  if (v < 0.71) return 'rgba(238, 210, 2, 0.9)';
-  return 'rgba(237, 112, 20, 0.9)';
+  if (v < GRADE_THRESHOLDS[1]) return getGradeLetterColor('B', 0.9);
+  if (v < GRADE_THRESHOLDS[2]) return getGradeLetterColor('C', 0.9);
+  return getGradeLetterColor('D', 0.9);
 }
 
 export function scoreColorSimple(score: number, config: ScoreColorConfig | null): string {
   return getColorForScore(score, config);
 }
 
-export const QUALITY_COLORS = [
-  'rgb(50, 97, 45)',
-  'rgb(60, 176, 67)',
-  'rgb(238, 210, 2)',
-  'rgb(237, 112, 20)',
-  'rgb(194, 24, 7)',
-  'rgb(197, 136, 187)',
-] as const;
+export const QUALITY_COLORS = GRADE_LETTERS.map(letter => getGradeLetterColor(letter));
 
-export const QUALITY_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'] as const;
+export const QUALITY_LETTERS = GRADE_LETTERS;
 
 export { NO_SCORE_COLOR };
