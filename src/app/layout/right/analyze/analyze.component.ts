@@ -643,20 +643,17 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private loadFeatureInfo(feature: any): void {
     const map = this.mapService.getMap();
     if (!map) {
-      console.warn('Map not available for feature info');
       return;
     }
 
     const featureIdRaw = feature.properties.id || feature.id;
     if (!featureIdRaw) {
-      console.warn('Feature ID not available');
       return;
     }
 
     // Convert to number if needed
     const featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
     if (isNaN(featureId)) {
-      console.warn('Invalid feature ID:', featureIdRaw);
       return;
     }
 
@@ -665,7 +662,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Prevent duplicate requests for the same feature
     if ((this.isLoadingFeatureInfo || this.isLoadingAnalyze) && this.currentLoadingFeatureId === featureId) {
-      console.log('Feature data request already in progress for feature:', featureId);
       return;
     }
 
@@ -702,7 +698,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const profileContext = this.getProfileContext();
     if (!profileContext) {
-      console.warn('Profile combination or filters not available');
       return;
     }
     const { profileIds, filters } = profileContext;
@@ -783,20 +778,17 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private loadFeatureInfo2(feature: any): void {
     const map = this.mapService.getMap();
     if (!map) {
-      console.warn('Map not available for feature info 2');
       return;
     }
 
     const featureIdRaw = feature.properties.id || feature.id;
     if (!featureIdRaw) {
-      console.warn('Feature ID not available for feature 2');
       return;
     }
 
     // Convert to number if needed
     const featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
     if (isNaN(featureId)) {
-      console.warn('Invalid feature ID for feature 2:', featureIdRaw);
       return;
     }
 
@@ -805,7 +797,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Prevent duplicate requests for the same feature
     if ((this.isLoadingFeatureInfo2 || this.isLoadingAnalyze2) && this.currentLoadingFeatureId2 === featureId) {
-      console.log('Feature 2 data request already in progress for feature:', featureId);
       return;
     }
 
@@ -830,14 +821,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Get profile combination ID
     const profileIds = this.filterConfigService.currentProfileIds();
     if (!profileIds?.length) {
-      console.warn('Profile combination ID not available for feature 2');
       return;
     }
 
     // Get current filters
     const filters = this.filterConfigService.contentLayerFilters();
     if (!filters) {
-      console.warn('Content layer filters not available for feature 2');
       return;
     }
 
@@ -917,19 +906,16 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const map = this.mapService.getMap();
     if (!map) {
-      console.warn('Map not available for places');
       return;
     }
 
     const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
     if (!featureIdRaw) {
-      console.warn('Feature ID not available');
       return;
     }
 
     const featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
     if (isNaN(featureId)) {
-      console.warn('Invalid feature ID:', featureIdRaw);
       return;
     }
 
@@ -942,7 +928,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const featureType = this.savedFeatureType;
     const profileContext = this.getProfileContext();
     if (!profileContext) {
-      console.warn('Profile IDs not available');
       return;
     }
     const { profileIds } = profileContext;
@@ -1094,7 +1079,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Use category_id directly from the API response
     if (!category.category_id) {
-      console.warn('Category ID not available for category:', category.category_name);
       return;
     }
 
@@ -1295,19 +1279,16 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const map = this.mapService.getMap();
     if (!map) {
-      console.warn('Map not available for all categories');
       return;
     }
 
     const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
     if (!featureIdRaw) {
-      console.warn('Feature ID not available');
       return;
     }
 
     const featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
     if (isNaN(featureId)) {
-      console.warn('Invalid feature ID:', featureIdRaw);
       return;
     }
 
@@ -1319,7 +1300,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const featureType = this.savedFeatureType;
     const profileContext = this.getProfileContext();
     if (!profileContext) {
-      console.warn('Profile IDs not available');
       return;
     }
     const { profileIds, filters } = profileContext;
@@ -1380,7 +1360,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const map = this.mapService.getMap();
     if (!map) {
-      console.warn('Map not available for places dialog');
       return;
     }
 
@@ -1398,12 +1377,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       featureType = this.savedFeatureType;
       const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
       if (!featureIdRaw) {
-        console.warn('Feature ID not available');
         return;
       }
       featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
       if (isNaN(featureId)) {
-        console.warn('Invalid feature ID:', featureIdRaw);
         return;
       }
     } else if (featureNumber === 2) {
@@ -1414,12 +1391,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       featureType = this.savedFeatureType2;
       const featureIdRaw2 = this.selectedFeature2.properties.id || this.selectedFeature2.id;
       if (!featureIdRaw2) {
-        console.warn('Feature ID 2 not available');
         return;
       }
       featureId = typeof featureIdRaw2 === 'string' ? parseInt(featureIdRaw2, 10) : featureIdRaw2;
       if (isNaN(featureId)) {
-        console.warn('Invalid feature ID 2:', featureIdRaw2);
         return;
       }
     } else {
@@ -1437,12 +1412,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         featureType = this.savedFeatureType;
         const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
         if (!featureIdRaw) {
-          console.warn('Feature ID not available');
           return;
         }
         featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
         if (isNaN(featureId)) {
-          console.warn('Invalid feature ID:', featureIdRaw);
           return;
         }
       } else if (this.isComparisonMode && this.selectedFeature2 && this.savedFeatureType2) {
@@ -1453,12 +1426,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           featureType = this.savedFeatureType2;
           const featureIdRaw2 = this.selectedFeature2.properties.id || this.selectedFeature2.id;
           if (!featureIdRaw2) {
-            console.warn('Feature ID 2 not available');
             return;
           }
           featureId = typeof featureIdRaw2 === 'string' ? parseInt(featureIdRaw2, 10) : featureIdRaw2;
           if (isNaN(featureId)) {
-            console.warn('Invalid feature ID 2:', featureIdRaw2);
             return;
           }
         } else {
@@ -1466,12 +1437,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           featureType = this.savedFeatureType;
           const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
           if (!featureIdRaw) {
-            console.warn('Feature ID not available');
             return;
           }
           featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
           if (isNaN(featureId)) {
-            console.warn('Invalid feature ID:', featureIdRaw);
             return;
           }
         }
@@ -1480,12 +1449,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         featureType = this.savedFeatureType;
         const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
         if (!featureIdRaw) {
-          console.warn('Feature ID not available');
           return;
         }
         featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
         if (isNaN(featureId)) {
-          console.warn('Invalid feature ID:', featureIdRaw);
           return;
         }
       }
@@ -1493,7 +1460,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const profileContext = this.getProfileContext();
     if (!profileContext) {
-      console.warn('Profile IDs not available');
       return;
     }
     const { profileIds, filters } = profileContext;

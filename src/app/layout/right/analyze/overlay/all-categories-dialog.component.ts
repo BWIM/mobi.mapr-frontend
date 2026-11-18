@@ -562,7 +562,6 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
 
     // Use category_id directly from the API response
     if (!clickedCategory.category_id) {
-      console.warn('Category ID not available for category:', clickedCategory.category_name);
       return;
     }
 
@@ -577,7 +576,6 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
 
     // Use category_id directly from the API response
     if (!category.category_id) {
-      console.warn('Category ID not available for category:', category.category_name);
       return;
     }
 

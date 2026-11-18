@@ -303,17 +303,14 @@ export class MapService {
     const diffTileUrl = this.buildDiffTileUrlForFilters(leftFilters, rightFilters);
 
     if (!leftFilters.profile_ids?.length || !rightFilters.profile_ids?.length) {
-      console.warn('Cannot load difference layers: profile_ids required on both sides');
       return false;
     }
     if (!diffTileUrl) {
-      console.warn('Cannot load difference layers: Invalid tile URL');
       return false;
     }
 
     const colorConfig = this.getDifferenceColorConfig(leftFilters.feature_type);
     if (!colorConfig) {
-      console.warn('Cannot load difference layers: missing difference color config');
       return false;
     }
 
@@ -350,7 +347,6 @@ export class MapService {
   ): Promise<void> {
     const diffTileUrl = this.buildDiffTileUrlForFilters(leftFilters, rightFilters);
     if (!diffTileUrl) {
-      console.warn('Cannot update difference layers: Invalid tile URL');
       return;
     }
 
@@ -933,12 +929,10 @@ export class MapService {
     const tileUrl = this.buildTileUrlForFilters(filters);
 
     if (!filters.profile_ids?.length) {
-      console.warn('Cannot load content layer: profile_ids is required');
       return false;
     }
 
     if (!tileUrl) {
-      console.warn('Cannot load content layer: Invalid tile URL');
       return false;
     }
 
@@ -988,13 +982,11 @@ export class MapService {
    */
   async updateContentLayerOnMap(targetMap : MapLibreMap, filters: ContentLayerFilters): Promise<void> {
     if (!filters.profile_ids?.length) {
-      console.warn('Cannot update content layer: profile_ids is required');
       return;
     }
 
     const tileUrl = this.buildTileUrlForFilters(filters);
     if (!tileUrl) {
-      console.warn('Cannot update content layer: Invalid tile URL');
       return;
     }
 
@@ -1042,13 +1034,11 @@ export class MapService {
 
   async loadContentLayer(filters: ContentLayerFilters, zoomToBounds: boolean = false): Promise<void> {
     if (!filters.profile_ids?.length) {
-      console.warn('Cannot load content layer: profile_ids is required');
       this._currentProfileIds.set(null);
       return;
     }
 
     if (!this.buildTileUrlForFilters(filters)) {
-      console.warn('Cannot load content layer: Invalid tile URL');
       return;
     }
 

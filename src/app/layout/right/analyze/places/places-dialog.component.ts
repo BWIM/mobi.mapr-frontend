@@ -130,7 +130,6 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     this.setOverallMetricFromDialogData();
 
     try {
-      console.log('Loading places for category:', this.data);
       
       // Check if places are available for this feature type
       // Places API only supports 'municipality' and 'hexagon'
@@ -174,12 +173,10 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       this.places = placesResponse.places || [];
       this.composition = placesResponse.composition ?? null;
       
-      console.log('Places loaded:', this.places.length, this.places);
       
       // Filter out places with invalid coordinates
       this.places = this.places.filter(p => p.lat !== 0 && p.lon !== 0 && !isNaN(p.lat) && !isNaN(p.lon));
       
-      console.log('Places after filtering:', this.places.length);
       
       // Process category data from response - keep all categories
       if (placesResponse.categories && placesResponse.categories.length > 0) {
@@ -286,7 +283,6 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Wait for map to load before adding places
     this.map.once('load', () => {
-      console.log('Map loaded, places count:', this.places.length);
       // Trigger resize to ensure map renders correctly in dialog
       if (this.map) {
         this.map.resize();
@@ -580,12 +576,10 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private addPlacesToMap(): void {
     if (!this.map) {
-      console.warn('Cannot add places: map not initialized');
       return;
     }
 
     if (this.categoryData.length === 0) {
-      console.warn('Cannot add places: no category data available');
       return;
     }
 
@@ -743,7 +737,6 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private fitMapToPlaces(): void {
     if (!this.map || this.categoryData.length === 0) {
-      console.warn('Cannot fit map: map or category data missing');
       return;
     }
 
@@ -753,7 +746,6 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     const lats = allPlaces.map(p => p.lat).filter(lat => !isNaN(lat) && lat !== 0);
 
     if (lngs.length === 0 || lats.length === 0) {
-      console.warn('No valid coordinates found in places');
       return;
     }
 
@@ -762,7 +754,6 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     const minLat = Math.min(...lats);
     const maxLat = Math.max(...lats);
 
-    console.log('Map bounds:', { minLng, maxLng, minLat, maxLat });
 
     // Add padding
     const padding = 0.1;
@@ -774,7 +765,6 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       [maxLng + lngPadding, maxLat + latPadding]
     ];
 
-    console.log('Fitting map to bounds:', bounds);
 
     this.map.fitBounds(bounds, {
       padding: 50,
