@@ -175,5 +175,8 @@
   </div>
 
 
-  <app-tutorial-overlay />
+  <!-- The tutorial is loaded on first start, not with the dashboard. -->
+  @defer (when tutorial.isActive()) {
+    <app-tutorial-overlay />
+  }
 </div>

@@ -138,6 +138,7 @@
               type="bar"
               [data]="activitiesChartData()"
               [options]="activitiesChartOptions()"
+              [plugins]="activitiesChartPlugins"
               style="cursor: pointer"
               [selectByRow]="true"
               (dataSelect)="onActivitiesChartSelect($event)" />

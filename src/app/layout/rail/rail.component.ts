@@ -5,9 +5,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../auth/auth.service';
 import { LanguageService } from '../../services/language.service';
 import { MatDialog } from '@angular/material/dialog';
-import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.component';
-import { CreditsDialogComponent } from './credits-dialog/credits-dialog.component';
-import { FeedbackDialogComponent } from './feedback-dialog/feedback-dialog.component';
+import { openInfoDialog } from '../../shared/info-overlay/open-info-dialog';
+import { openCreditsDialog } from './credits-dialog/open-credits-dialog';
 import { ProjectNavigationService } from '../../services/project-navigation.service';
 import { TutorialService } from '../../tutorial/tutorial.service';
 
@@ -73,25 +72,15 @@ export class RailComponent implements OnInit {
   }
 
   openMailDialog(): void {
-    this.dialog.open(InfoDialogComponent, {
-      width: '80vw',
-      height: '80vh',
-      maxWidth: '80vw',
-      maxHeight: '80vh',
-      panelClass: 'info-dialog-panel',
-      data: { content: this.mailContentTemplate }
-    });
+    void openInfoDialog(this.dialog, this.mailContentTemplate);
   }
 
   openCredits() {
-    this.dialog.open(CreditsDialogComponent, {
-      width: '800px',
-      maxWidth: '90vw',
-      maxHeight: '90vh'
-    });
+    void openCreditsDialog(this.dialog);
   }
 
-  openFeedbackDialog() {
+  async openFeedbackDialog() {
+    const { FeedbackDialogComponent } = await import('./feedback-dialog/feedback-dialog.component');
     this.dialog.open(FeedbackDialogComponent, {
       width: '600px',
       maxWidth: '90vw',

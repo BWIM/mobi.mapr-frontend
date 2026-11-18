@@ -13,7 +13,7 @@ import {
   ChangeDetectionStrategy
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { Chart, Plugin } from 'chart.js';
+import type { Plugin } from 'chart.js';
 import { ChartComponent } from '../../../../shared/chart/chart.component';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatIcon } from '@angular/material/icon';
@@ -26,12 +26,11 @@ import {
   AnalyzeService,
   CategoryScore,
 } from '../../../../services/analyze.service';
-import { AllCategoriesDialogData } from '../../../right/analyze/overlay/all-categories-dialog.component';
-import { PlacesDialogData } from '../../../right/analyze/places/places-dialog.component';
+import type { AllCategoriesDialogData } from '../../../right/analyze/overlay/all-categories-dialog.component';
+import type { PlacesDialogData } from '../../../right/analyze/places/places-dialog.component';
 import { PlacesService } from '../../../../services/places.service';
 import { MapService } from '../../../../services/map.service';
-import { InfoDialogComponent } from '../../../../shared/info-overlay/info-dialog.component';
-import { LegendInfoComponent } from '../../../../shared/legend-info/legend-info.component';
+import { openInfoDialog, openLegendInfoDialog } from '../../../../shared/info-overlay/open-info-dialog';
 import {
   gradeColor,
   scoreColor,
@@ -55,6 +54,7 @@ function gradeFromIndex(index: number): string {
 const LABEL_FONT = 'bold 11px sans-serif';
 const LABEL_PADDING = 8;
 
+/** Passed per chart (not registered globally) so Chart.js stays out of the dashboard chunk. */
 const horizontalBarLabelsPlugin: Plugin<'bar'> = {
   id: 'horizontalBarLabels',
   afterDatasetsDraw(chart, _args, opts) {
@@ -83,7 +83,6 @@ const horizontalBarLabelsPlugin: Plugin<'bar'> = {
   },
 };
 
-Chart.register(horizontalBarLabelsPlugin);
 
 @Component({
   selector: 'app-mobile-analyze',
@@ -259,6 +258,7 @@ export class MobileAnalyzeComponent implements OnDestroy {
   }
 
   readonly gradeFromIndex = gradeFromIndex;
+  readonly activitiesChartPlugins = [horizontalBarLabelsPlugin] as Plugin[];
 
   placesMetricTextColor(score: number, index: number): string {
     return this.placesScoreMode()
@@ -281,7 +281,7 @@ export class MobileAnalyzeComponent implements OnDestroy {
 
   openLegendInfo(event: Event): void {
     event.stopPropagation();
-    this.openInfoDialog(LegendInfoComponent);
+    void openLegendInfoDialog(this.dialog, this.dialogSize());
   }
 
 
@@ -289,11 +289,7 @@ export class MobileAnalyzeComponent implements OnDestroy {
     event.stopPropagation();
     const tpl = this.placesRelevanceInfoTpl;
     if (tpl) {
-      this.dialog.open(InfoDialogComponent, {
-        ...this.dialogSize(),
-        panelClass: 'info-dialog-panel',
-        data: { content: tpl },
-      });
+      void openInfoDialog(this.dialog, tpl, this.dialogSize());
     }
   }
 
@@ -309,17 +305,10 @@ export class MobileAnalyzeComponent implements OnDestroy {
   }
 
   private dialogSize() {
+    // height '' keeps the dialog content-sized (the shared info dialog defaults to 80vh).
     return this.mobileUi.isMobile()
-      ? { width: '100vw', maxWidth: '100vw', maxHeight: '90vh' }
-      : { width: '80vw', maxWidth: '80vw', maxHeight: '80vh' };
-  }
-
-  private openInfoDialog(content: typeof LegendInfoComponent): void {
-    this.dialog.open(InfoDialogComponent, {
-      ...this.dialogSize(),
-      panelClass: 'info-dialog-panel',
-      data: { content },
-    });
+      ? { width: '100vw', maxWidth: '100vw', maxHeight: '90vh', height: '' }
+      : { width: '80vw', maxWidth: '80vw', maxHeight: '80vh', height: '' };
   }
 
   private loadActivities(): void {

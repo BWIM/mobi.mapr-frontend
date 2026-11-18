@@ -3,10 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { SharedModule } from '../shared.module';
 import { TranslateModule } from '@ngx-translate/core';
 import { ProjectsService } from '../../services/project.service';
-import {
-  ProjectDataInfoDialogComponent,
-  ProjectDataInfoDialogData,
-} from './project-data-info-dialog.component';
+import type { ProjectDataInfoDialogData } from './project-data-info-dialog.component';
 
 @Component({
   selector: 'app-project-info',
@@ -22,8 +19,9 @@ export class ProjectInfoComponent {
   readonly blogUrl = computed(() => this.project()?.blog_url?.trim() || null);
   readonly licenseInfo = computed(() => this.project()?.license_info?.trim() || null);
 
-  openDataInfo(): void {
-    this.dialog.open<ProjectDataInfoDialogComponent, ProjectDataInfoDialogData>(
+  async openDataInfo(): Promise<void> {
+    const { ProjectDataInfoDialogComponent } = await import('./project-data-info-dialog.component');
+    this.dialog.open<InstanceType<typeof ProjectDataInfoDialogComponent>, ProjectDataInfoDialogData>(
       ProjectDataInfoDialogComponent,
       { data: { licenseInfo: this.licenseInfo() } }
     );

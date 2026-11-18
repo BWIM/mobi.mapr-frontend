@@ -5,7 +5,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ProjectsService } from '../../services/project.service';
 import { MapService } from '../../services/map.service';
 import { MatDialog } from '@angular/material/dialog';
-import { CreditsDialogComponent } from '../rail/credits-dialog/credits-dialog.component';
+import { openCreditsDialog } from '../rail/credits-dialog/open-credits-dialog';
 import { InfoOverlayComponent } from '../../shared/info-overlay/info-overlay.component';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
@@ -253,11 +253,7 @@ export class MobileFilterPanelComponent implements OnDestroy {
   }
 
   openCreditsDialog(): void {
-    this.dialog.open(CreditsDialogComponent, {
-      width: '800px',
-      maxWidth: '90vw',
-      maxHeight: '90vh'
-    });
+    void openCreditsDialog(this.dialog);
   }
 
   getFormattedCreatedDate(): string {

@@ -1,15 +1,14 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, effect, ChangeDetectorRef, computed, ChangeDetectionStrategy, NgZone, signal } from '@angular/core';
 import { Subscription, firstValueFrom, debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { Map, MapDataEvent, NavigationControl, FullscreenControl, Popup, AttributionControl, LngLatLike } from 'maplibre-gl';
-import Compare from '@maplibre/maplibre-gl-compare';
+import type Compare from '@maplibre/maplibre-gl-compare';
 import { MapService, NO_DATA_SCORE, CAPPED_SCORE_MINUTES, CONTENT_LAYER_RIGHT_SOURCE, CONTENT_SOURCE_LAYER } from '../../services/map.service';
 import MinimapControl from "maplibregl-minimap";
 import { SharedModule } from '../../shared/shared.module';
 import { AdminLevel, FilterConfigService } from '../../services/filter-config.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.component';
-import { LegendInfoComponent } from '../../shared/legend-info/legend-info.component';
+import { openLegendInfoDialog } from '../../shared/info-overlay/open-info-dialog';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { FeatureSelectionService } from '../../shared/services/feature-selection.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -28,7 +27,7 @@ import { ScoreLegendItem } from '../../utils/score-colors.util';
 import { formatNumber } from '@angular/common';
 import { currentNumberLocale } from '../../shared/pipes/locale-number.pipe';
 import { ExportMapControl } from './export-map.control';
-import { GeoJsonDownloadDialogComponent, GeoJsonDownloadDialogData } from '../left/geojson-download-dialog/geojson-download-dialog.component';
+import type { GeoJsonDownloadDialogData } from '../left/geojson-download-dialog/geojson-download-dialog.component';
 interface NominatimResult {
   display_name: string;
   lat: string;
@@ -420,14 +419,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   openLegendDialog(): void {
-    this.dialog.open(InfoDialogComponent, {
-      width: '80vw',
-      height: '80vh',
-      maxWidth: '80vw',
-      maxHeight: '80vh',
-      panelClass: 'info-dialog-panel',
-      data: { content: LegendInfoComponent }
-    });
+    void openLegendInfoDialog(this.dialog);
   }
 
   async ngOnInit() {
@@ -666,7 +658,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     };
   }
 
-  openGeoJsonDownloadDialog(): void {
+  async openGeoJsonDownloadDialog(): Promise<void> {
     if (!this.shareAccess.canExport()) {
       return;
     }
@@ -677,6 +669,9 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       hasCategories: this.filterConfigService.hasCategories(),
     };
 
+    const { GeoJsonDownloadDialogComponent } = await import(
+      '../left/geojson-download-dialog/geojson-download-dialog.component'
+    );
     this.dialog.open(GeoJsonDownloadDialogComponent, {
       width: '80vw',
       maxWidth: '80vw',
@@ -691,7 +686,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     targetMap.addControl(new FullscreenControl(), 'top-right');
     if (includeExport) {
       const exportControl = new ExportMapControl(
-        () => this.ngZone.run(() => this.openGeoJsonDownloadDialog()),
+        () => this.ngZone.run(() => void this.openGeoJsonDownloadDialog()),
         () => this.translate.instant('geojsonDownload.button.label'),
         () => this.shareAccess.canExport(),
       );
@@ -863,13 +858,23 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     const afterContainer = this.afterMapContainer.nativeElement;
     // Register map instances synchronously so concurrent init cannot race past the guard.
     const { beforeMap, afterMap } = this.ngZone.runOutsideAngular(() =>
-      this.createCompareMaps(compareContainer, beforeContainer, afterContainer)
+      this.createCompareMaps(beforeContainer, afterContainer)
     );
 
-    await Promise.all([
+    // The swipe slider plugin is only needed in compare mode, so it is loaded on demand.
+    const [{ default: CompareCtor }] = await Promise.all([
+      import('@maplibre/maplibre-gl-compare'),
       this.waitForMapLoad(beforeMap),
       this.waitForMapLoad(afterMap),
     ]);
+
+    // Compare mode may have been left (maps destroyed/replaced) while loading.
+    if (!this.isCurrentComparePair(beforeMap, afterMap)) {
+      return;
+    }
+    this.mapCompare = this.ngZone.runOutsideAngular(() =>
+      new CompareCtor(beforeMap, afterMap, compareContainer, { mousemove: false })
+    );
 
     beforeMap.resize();
     afterMap.resize();
@@ -877,8 +882,11 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     this.filterConfigService.setCompareMapsReady(true);
   }
 
+  private isCurrentComparePair(beforeMap: Map, afterMap: Map): boolean {
+    return this.beforeMap === beforeMap && this.afterMap === afterMap;
+  }
+
   private createCompareMaps(
-    compareContainer: HTMLElement,
     beforeContainer: HTMLElement,
     afterContainer: HTMLElement,
   ): { beforeMap: Map; afterMap: Map } {
@@ -895,13 +903,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     this.bindLayerZoomSync(this.afterMap);
 
     this.syncMapInteractionsForLoading(this.mapService.isMapLoading());
-
-    this.mapCompare = new Compare(
-      this.beforeMap,
-      this.afterMap,
-      compareContainer,
-      { mousemove: false }
-    );
 
     this.beforeMap.on('style.load', () => {
       if (this.beforeMap) {

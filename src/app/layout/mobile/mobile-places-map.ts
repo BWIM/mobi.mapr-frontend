@@ -11,7 +11,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { PlacesService, Place } from '../../services/places.service';
 import { MapService } from '../../services/map.service';
 import { findBasemapLabelsBeforeId } from '../../services/basemap-style';
-import { PlacesDialogData } from '../right/analyze/places/places-dialog.component';
+import type { PlacesDialogData } from '../right/analyze/places/places-dialog.component';
 import { CompositionNode } from '../../interfaces/composition';
 import { CompositionActivityMeta } from '../../shared/category-composition-panel/category-composition-panel.component';
 import { ScoreColorsService } from '../../services/score-colors.service';

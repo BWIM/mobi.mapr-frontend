@@ -434,7 +434,7 @@ export class DashboardComponent {
   }
 
   openShareDialog(): void {
-    openShareDialog(this.dialog);
+    void openShareDialog(this.dialog);
   }
 
   private setupTutorial(): void {

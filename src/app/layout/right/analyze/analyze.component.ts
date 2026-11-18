@@ -10,8 +10,8 @@ import { PlacesService, Place } from '../../../services/places.service';
 import { ShareAccessService } from '../../../services/share-access.service';
 import { MatDialog } from '@angular/material/dialog';
 import { SharedModule } from '../../../shared/shared.module';
-import { AllCategoriesDialogComponent, AllCategoriesDialogData } from './overlay/all-categories-dialog.component';
-import { PlacesDialogComponent, PlacesDialogData } from './places/places-dialog.component';
+import type { AllCategoriesDialogData } from './overlay/all-categories-dialog.component';
+import type { PlacesDialogData } from './places/places-dialog.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MobileUiService } from '../../../services/mobile-ui.service';
 import { ScoreColorsService } from '../../../services/score-colors.service';
@@ -1364,11 +1364,13 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    this.dialog.open(AllCategoriesDialogComponent, {
-      ...this.getOverlayDialogSize(),
-      panelClass: 'all-categories-dialog-panel',
-      data: dialogData,
-    });
+    void import('./overlay/all-categories-dialog.component').then(({ AllCategoriesDialogComponent }) =>
+      this.dialog.open(AllCategoriesDialogComponent, {
+        ...this.getOverlayDialogSize(),
+        panelClass: 'all-categories-dialog-panel',
+        data: dialogData,
+      })
+    );
   }
 
   openPlacesDialog(categoryId?: number, categoryName?: string, featureNumber?: 1 | 2): void {
@@ -1533,13 +1535,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    this.dialog.open(PlacesDialogComponent, {
-      width: '85vw',
-      maxWidth: '1200px',
-      maxHeight: '85vh',
-      panelClass: 'places-dialog-panel',
-      data: placesData,
-    });
+    void import('./places/places-dialog.component').then(({ PlacesDialogComponent }) =>
+      this.dialog.open(PlacesDialogComponent, {
+        width: '85vw',
+        maxWidth: '1200px',
+        maxHeight: '85vh',
+        panelClass: 'places-dialog-panel',
+        data: placesData,
+      })
+    );
   }
 
 }

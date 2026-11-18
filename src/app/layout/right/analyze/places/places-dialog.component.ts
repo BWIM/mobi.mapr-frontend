@@ -8,8 +8,7 @@ import { MapService } from '../../../../services/map.service';
 import { findBasemapLabelsBeforeId } from '../../../../services/basemap-style';
 import { firstValueFrom, catchError, of } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { InfoDialogComponent } from '../../../../shared/info-overlay/info-dialog.component';
-import { LegendInfoComponent } from '../../../../shared/legend-info/legend-info.component';
+import { openLegendInfoDialog } from '../../../../shared/info-overlay/open-info-dialog';
 import { ScoreColorsService } from '../../../../services/score-colors.service';
 import { getGrade, getGradeColor } from '../../../../utils/grade.util';
 import { CompositionNode } from '../../../../interfaces/composition';
@@ -56,6 +55,8 @@ export interface PlacesDialogData {
 export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('mapContainerPlaces') mapContainerPlaces?: ElementRef;
   
+  /** Opening this dialog completes the tutorial's "open places" step. */
+  readonly tutorialOpenAction = 'open-places' as const;
   isLoading: boolean = false;
   error: string | null = null;
   categoryName: string = '';
@@ -118,14 +119,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {}
 
   openLegendInfo(): void {
-    this.dialog.open(InfoDialogComponent, {
-      width: '80vw',
-      height: '80vh',
-      maxWidth: '80vw',
-      maxHeight: '80vh',
-      panelClass: 'info-dialog-panel',
-      data: { content: LegendInfoComponent }
-    });
+    void openLegendInfoDialog(this.dialog);
   }
 
   async ngOnInit() {

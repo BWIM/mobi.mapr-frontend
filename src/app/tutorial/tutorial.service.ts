@@ -8,8 +8,6 @@ import {
   MapLibreFeatureData,
 } from '../shared/services/feature-selection.service';
 import { featureRefFromFeature } from '../url-state/url-params';
-import { AllCategoriesDialogComponent } from '../layout/right/analyze/overlay/all-categories-dialog.component';
-import { PlacesDialogComponent } from '../layout/right/analyze/places/places-dialog.component';
 import { ShareAccessService } from '../services/share-access.service';
 
 /**
@@ -20,6 +18,14 @@ export const TUTORIAL_VERSION = 1;
 
 /** User actions a step can wait for. */
 export type TutorialAction = 'pick-place' | 'open-activities' | 'open-places';
+
+/**
+ * Implemented by dialogs whose opening completes a tutorial step. A marker property (rather than
+ * `instanceof`) keeps this service from importing the lazily loaded dialog components.
+ */
+export interface TutorialActionDialog {
+  readonly tutorialOpenAction: TutorialAction;
+}
 
 /** Panels/sheets/dialogs a step needs. Applied by DashboardComponent when the step is shown. */
 export interface TutorialLayout {
@@ -207,10 +213,9 @@ export class TutorialService {
 
     // Desktop: activities and places open as dialogs.
     this.dialog.afterOpened.subscribe((ref) => {
-      if (ref.componentInstance instanceof AllCategoriesDialogComponent) {
-        this.notifyAction('open-activities');
-      } else if (ref.componentInstance instanceof PlacesDialogComponent) {
-        this.notifyAction('open-places');
+      const action = (ref.componentInstance as Partial<TutorialActionDialog> | null)?.tutorialOpenAction;
+      if (action) {
+        this.notifyAction(action);
       }
     });
 

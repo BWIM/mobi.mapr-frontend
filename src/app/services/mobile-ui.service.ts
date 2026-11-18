@@ -2,8 +2,8 @@ import { Injectable, inject, signal, computed, effect, untracked } from '@angula
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
-import { AllCategoriesDialogData } from '../layout/right/analyze/overlay/all-categories-dialog.component';
-import { PlacesDialogData } from '../layout/right/analyze/places/places-dialog.component';
+import type { AllCategoriesDialogData } from '../layout/right/analyze/overlay/all-categories-dialog.component';
+import type { PlacesDialogData } from '../layout/right/analyze/places/places-dialog.component';
 import { AnalyzeFeatureFacadeService } from './analyze-feature-facade.service';
 import { ShareAccessService } from './share-access.service';
 

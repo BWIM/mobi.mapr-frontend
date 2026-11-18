@@ -5,11 +5,10 @@ import { CommonModule } from '@angular/common';
 import { AnalyzeService, CategoryScore } from '../../../../services/analyze.service';
 import { catchError, of } from 'rxjs';
 import { ChartComponent } from '../../../../shared/chart/chart.component';
-import { PlacesDialogComponent, PlacesDialogData } from '../places/places-dialog.component';
+import type { PlacesDialogData } from '../places/places-dialog.component';
 import { ShareAccessService } from '../../../../services/share-access.service';
 import { TranslateModule } from '@ngx-translate/core';
-import { InfoDialogComponent } from '../../../../shared/info-overlay/info-dialog.component';
-import { LegendInfoComponent } from '../../../../shared/legend-info/legend-info.component';
+import { openLegendInfoDialog } from '../../../../shared/info-overlay/open-info-dialog';
 import { LanguageService } from '../../../../services/language.service';
 import { ScoreColorsService } from '../../../../services/score-colors.service';
 import { getGradeColor, getGradePalette } from '../../../../utils/grade.util';
@@ -44,6 +43,8 @@ export interface AllCategoriesDialogData {
   styleUrl: './all-categories-dialog.component.css'
 })
 export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
+  /** Opening this dialog completes the tutorial's "open activities" step. */
+  readonly tutorialOpenAction = 'open-activities' as const;
   allCategories: CategoryScore[] = [];
   allCategories2: CategoryScore[] = [];
   isLoading: boolean = false;
@@ -606,24 +607,19 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
       featureName: this.data.featureName,
     };
 
-    this.dialog.open(PlacesDialogComponent, {
-      width: '85vw',
-      maxWidth: '1200px',
-      maxHeight: '85vh',
-      panelClass: 'places-dialog-panel',
-      data: placesData
-    });
+    void import('../places/places-dialog.component').then(({ PlacesDialogComponent }) =>
+      this.dialog.open(PlacesDialogComponent, {
+        width: '85vw',
+        maxWidth: '1200px',
+        maxHeight: '85vh',
+        panelClass: 'places-dialog-panel',
+        data: placesData
+      })
+    );
   }
 
   openLegendInfo(): void {
-    this.dialog.open(InfoDialogComponent, {
-      width: '80vw',
-      height: '80vh',
-      maxWidth: '80vw',
-      maxHeight: '80vh',
-      panelClass: 'info-dialog-panel',
-      data: { content: LegendInfoComponent }
-    });
+    void openLegendInfoDialog(this.dialog);
   }
 
   onClose(): void {

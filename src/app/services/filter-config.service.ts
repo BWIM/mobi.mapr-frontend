@@ -8,7 +8,7 @@ import { DashboardSessionService } from './dashboard-session.service';
 import { ShareAccessService } from './share-access.service';
 import { Profile, ProfileOption } from '../interfaces/profile';
 import { MatDialog } from '@angular/material/dialog';
-import { FilterDialogComponent, FilterDialogData } from '../layout/left/filter-dialog/filter-dialog.component';
+import type { FilterDialogData } from '../layout/left/filter-dialog/filter-dialog.component';
 import { PersonaService } from './persona.service';
 import { RegioStarService } from './regiostar.service';
 import { StateService } from './state.service';
@@ -1582,7 +1582,7 @@ export class FilterConfigService {
    * Open filter dialog for advanced filters
    * Disabled for share viewers whose share does not enable `filters`
    */
-  openFilterDialog(): void {
+  async openFilterDialog(): Promise<void> {
     if (!this.canEditAdvancedFilters()) {
       return;
     }
@@ -1592,6 +1592,7 @@ export class FilterConfigService {
       selectedStates: this._selectedStates(),
     };
 
+    const { FilterDialogComponent } = await import('../layout/left/filter-dialog/filter-dialog.component');
     const dialogRef = this.dialog.open(FilterDialogComponent, {
       width: '800px',
       maxWidth: '90vw',
