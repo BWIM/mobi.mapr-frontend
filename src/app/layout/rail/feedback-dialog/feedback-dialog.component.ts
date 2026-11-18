@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { SharedModule } from '../../../shared/shared.module';
@@ -15,14 +15,14 @@ import { finalize } from 'rxjs/operators';
     TranslateModule,
   ],
   templateUrl: './feedback-dialog.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './feedback-dialog.component.css'
 })
 export class FeedbackDialogComponent {
   feedbackForm!: FormGroup;
-  isLoading = false;
-  errorMessage = '';
-  successMessage = '';
+  readonly isLoading = signal(false);
+  readonly errorMessage = signal('');
+  readonly successMessage = signal('');
 
   private fb = inject(FormBuilder);
   private feedbackService = inject(FeedbackService);
@@ -47,9 +47,9 @@ export class FeedbackDialogComponent {
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
 
     const formValue = this.feedbackForm.value;
     const payload = {
@@ -60,19 +60,19 @@ export class FeedbackDialogComponent {
     this.feedbackService.submitFeedback(payload)
       .pipe(
         finalize(() => {
-          this.isLoading = false;
+          this.isLoading.set(false);
         })
       )
       .subscribe({
         next: () => {
-          this.successMessage = this.translate.instant('rail.feedback.success');
+          this.successMessage.set(this.translate.instant('rail.feedback.success'));
           setTimeout(() => {
             this.dialogRef.close();
           }, 2000);
         },
         error: (error) => {
           console.error('Feedback submission error:', error);
-          this.errorMessage = this.translate.instant('rail.feedback.error');
+          this.errorMessage.set(this.translate.instant('rail.feedback.error'));
         }
       });
   }

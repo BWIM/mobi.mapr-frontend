@@ -15,7 +15,7 @@ import { forkJoin } from 'rxjs';
     standalone: true,
     imports: [CommonModule, TranslateModule, MatIconModule, MatProgressSpinnerModule],
     templateUrl: './maintenance.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './maintenance.component.css'
 })
 export class MaintenanceComponent implements OnInit, OnDestroy {

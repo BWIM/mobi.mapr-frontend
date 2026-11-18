@@ -96,7 +96,7 @@ Chart.register(horizontalBarLabelsPlugin);
     CategoryCompositionPanelComponent,
   ],
   templateUrl: './mobile-analyze.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './mobile-analyze.component.scss',
 })
 export class MobileAnalyzeComponent implements OnDestroy {

@@ -8,7 +8,7 @@ import { InfoDialogComponent } from './info-dialog.component';
   standalone: true,
   imports: [SharedModule],
   templateUrl: './info-overlay.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './info-overlay.component.css'
 })
 export class InfoOverlayComponent {

@@ -32,16 +32,16 @@
           <mat-error *ngIf="getFieldError('password')">{{ getFieldError('password') }}</mat-error>
         </mat-form-field>
 
-        <p class="login-error" *ngIf="error">{{ error }}</p>
+        <p class="login-error" *ngIf="error()">{{ error() }}</p>
 
         <button
           mat-flat-button
           color="primary"
           type="submit"
           class="login-button"
-          [disabled]="loginForm.invalid || isLoading">
-          <mat-spinner *ngIf="isLoading" diameter="20" class="login-spinner"></mat-spinner>
-          <span *ngIf="!isLoading">{{ 'auth.login.loginButton' | translate }}</span>
+          [disabled]="loginForm.invalid || isLoading()">
+          <mat-spinner *ngIf="isLoading()" diameter="20" class="login-spinner"></mat-spinner>
+          <span *ngIf="!isLoading()">{{ 'auth.login.loginButton' | translate }}</span>
         </button>
       </form>
 

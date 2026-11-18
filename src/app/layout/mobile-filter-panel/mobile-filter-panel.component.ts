@@ -1,4 +1,4 @@
-import { Component, inject, input, output, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, output, OnDestroy, ChangeDetectionStrategy, signal } from '@angular/core';
 import { FilterConfigService } from '../../services/filter-config.service';
 import { SharedModule } from '../../shared/shared.module';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -25,7 +25,7 @@ interface NominatimResult {
   selector: 'app-mobile-filter-panel',
   imports: [SharedModule, TranslateModule, InfoOverlayComponent, ProjectSwitcherComponent, ProjectInfoComponent],
   templateUrl: './mobile-filter-panel.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './mobile-filter-panel.component.css',
 })
 export class MobileFilterPanelComponent implements OnDestroy {
@@ -40,7 +40,7 @@ export class MobileFilterPanelComponent implements OnDestroy {
   
   project = this.projectService.project;
   searchQuery: string = '';
-  searchResults: NominatimResult[] = [];
+  readonly searchResults = signal<NominatimResult[]>([]);
   private searchSubject = new Subject<string>();
   
   private touchStartY: number = 0;
@@ -54,7 +54,7 @@ export class MobileFilterPanelComponent implements OnDestroy {
       distinctUntilChanged(),
       switchMap(query => this.searchNominatim(query))
     ).subscribe(results => {
-      this.searchResults = results;
+      this.searchResults.set(results);
     });
   }
 
@@ -65,7 +65,7 @@ export class MobileFilterPanelComponent implements OnDestroy {
     if (query.length >= 3) {
       this.searchSubject.next(query);
     } else {
-      this.searchResults = [];
+      this.searchResults.set([]);
     }
   }
 
@@ -94,7 +94,7 @@ export class MobileFilterPanelComponent implements OnDestroy {
     }
 
     this.searchQuery = result.display_name;
-    this.searchResults = [];
+    this.searchResults.set([]);
   }
 
   // Expose filter config service signals for template

@@ -50,7 +50,7 @@ import { ShareAccessService } from '../../services/share-access.service';
     TutorialOverlayComponent,
   ],
   templateUrl: './dashboard.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent {

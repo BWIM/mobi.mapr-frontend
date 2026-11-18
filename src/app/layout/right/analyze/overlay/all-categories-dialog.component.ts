@@ -40,7 +40,7 @@ export interface AllCategoriesDialogData {
     TranslateModule,
   ],
   templateUrl: './all-categories-dialog.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './all-categories-dialog.component.css'
 })
 export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
@@ -116,6 +116,8 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
       })
     ).subscribe((response) => {
       this.isLoading = false;
+      // OnPush: loading/error/chart state below is plain fields set from this async callback.
+      this.cdr.markForCheck();
       if (response && response.categories) {
         this.allCategories = [...response.categories]
           .sort((a, b) => b.weight - a.weight);
@@ -163,6 +165,8 @@ export class AllCategoriesDialogComponent implements OnInit, AfterViewInit {
       })
     ).subscribe((response) => {
       this.isLoading2 = false;
+      // OnPush: loading/error/chart state below is plain fields set from this async callback.
+      this.cdr.markForCheck();
       if (response && response.categories) {
         this.allCategories2 = [...response.categories]
           .sort((a, b) => b.weight - a.weight);

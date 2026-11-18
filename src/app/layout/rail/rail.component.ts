@@ -15,7 +15,7 @@ import { TutorialService } from '../../tutorial/tutorial.service';
   selector: 'app-rail',
   imports: [SharedModule, TranslateModule],
   templateUrl: './rail.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './rail.component.css',
 })
 export class RailComponent implements OnInit {

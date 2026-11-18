@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, effect, ChangeDetectorRef, computed, ChangeDetectionStrategy, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, effect, ChangeDetectorRef, computed, ChangeDetectionStrategy, NgZone, signal } from '@angular/core';
 import { Subscription, firstValueFrom, debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { Map, MapDataEvent, NavigationControl, FullscreenControl, Popup, AttributionControl, LngLatLike } from 'maplibre-gl';
 import Compare from '@maplibre/maplibre-gl-compare';
@@ -46,7 +46,7 @@ interface LayerButtonOption {
   selector: 'app-center',
   imports: [SharedModule, TranslateModule],
   templateUrl: './center.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './center.component.css',
 })
 export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -113,7 +113,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // Nominatim search properties
   searchQuery: string = '';
-  searchResults: NominatimResult[] = [];
+  readonly searchResults = signal<NominatimResult[]>([]);
   private searchSubject = new Subject<string>();
   isGettingLocation: boolean = false;
   private lastLayerFallbackToastAt = 0;
@@ -199,13 +199,15 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       distinctUntilChanged(),
       switchMap(query => this.searchNominatim(query))
     ).subscribe(results => {
-      this.searchResults = results;
+      this.searchResults.set(results);
     });
 
     // Subscribe to search queries from other components (e.g., stats component)
     this.searchQuerySubscription = this.searchService.searchQuery$.subscribe(query => {
       if (query) {
         this.searchQuery = query;
+        // OnPush: searchQuery is a plain ngModel field set from another component's stream.
+        this.changeDetectorRef.markForCheck();
         // Trigger search if query is long enough
         if (query.trim().length >= 3) {
           this.searchSubject.next(query.trim());
@@ -1009,7 +1011,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     if (query.length >= 3) {
       this.searchSubject.next(query);
     } else {
-      this.searchResults = [];
+      this.searchResults.set([]);
     }
   }
 
@@ -1048,7 +1050,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     const result: NominatimResult = event.option.value;
     this.zoomToLocation(parseFloat(result.lat), parseFloat(result.lon));
     this.searchQuery = result.display_name;
-    this.searchResults = [];
+    this.searchResults.set([]);
   }
 
   private zoomToLocation(lat: number, lon: number): void {

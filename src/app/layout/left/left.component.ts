@@ -22,7 +22,7 @@ import { GRADE_LETTERS, GRADE_THRESHOLDS, SUB_GRADES, getGradeLetterColor } from
   selector: 'app-left',
   imports: [SharedModule, InfoOverlayComponent, TranslateModule, ChartComponent, ProjectSwitcherComponent, ProjectInfoComponent],
   templateUrl: './left.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './left.component.css',
 })
 export class LeftComponent implements OnInit, OnDestroy {
@@ -53,8 +53,8 @@ export class LeftComponent implements OnInit, OnDestroy {
   qualityChartOptions: any;
   
   // Personas pie chart data
-  personasChartData: any;
-  personasChartOptions: any;
+  readonly personasChartData = signal<any>(null);
+  readonly personasChartOptions = signal<any>(null);
   
   // Expose filter config service signals for template
   isExpanded = signal<boolean>(true);
@@ -457,7 +457,7 @@ export class LeftComponent implements OnInit, OnDestroy {
     const sortedColors = chartItems.map(item => item.color);
 
     // Create new object reference to ensure change detection works
-    this.personasChartData = {
+    this.personasChartData.set({
       labels: [...sortedLabels], // Create new array with sorted labels
       datasets: [
         {
@@ -467,9 +467,9 @@ export class LeftComponent implements OnInit, OnDestroy {
           borderWidth: 2
         }
       ]
-    };
+    });
 
-    this.personasChartOptions = {
+    this.personasChartOptions.set({
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
@@ -496,7 +496,7 @@ export class LeftComponent implements OnInit, OnDestroy {
           }
         }
       }
-    };
+    });
   }
 
   openShareDialog(): void {

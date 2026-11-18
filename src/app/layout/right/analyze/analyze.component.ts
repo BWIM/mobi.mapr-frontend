@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, AfterViewInit, effect, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, AfterViewInit, effect, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, formatNumber } from '@angular/common';
 import { Subscription, catchError, of, forkJoin, firstValueFrom } from 'rxjs';
 import { FeatureSelectionService, MapCompareSide } from '../../../shared/services/feature-selection.service';
@@ -41,7 +41,7 @@ interface ActivityRow {
   selector: 'app-analyze',
   imports: [LocaleNumberPipe, CommonModule, SharedModule, TranslateModule, CategoryCompositionPanelComponent],
   templateUrl: './analyze.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './analyze.component.css',
 })
 export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -128,6 +128,11 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private translate = inject(TranslateService);
   private mobileUi = inject(MobileUiService);
   private scoreColorsService = inject(ScoreColorsService);
+  /**
+   * OnPush: most template state here is plain fields updated from effects, RxJS subscriptions
+   * and awaits, so every async entry point ends with markForCheck().
+   */
+  private cdr = inject(ChangeDetectorRef);
   private featureSubscription?: Subscription;
   private featureSubscription2?: Subscription;
   private featureInfoSubscription?: Subscription;
@@ -211,6 +216,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.previousLeftFilters = leftFilters ? { ...leftFilters } : null;
       this.previousRightFilters = rightFilters ? { ...rightFilters } : null;
       this.previousFilters = filters ? { ...filters } : null;
+      this.cdr.markForCheck();
     });
 
     effect(() => {
@@ -218,6 +224,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       if (!isMapLoading && this.pendingReload) {
         this.pendingReload = false;
         this.executeReload();
+        this.cdr.markForCheck();
       }
     });
 
@@ -228,6 +235,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
       this.refreshPlacesMetricDisplay();
+      this.cdr.markForCheck();
     });
   }
 
@@ -266,6 +274,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
             }
           }
         }
+        this.cdr.markForCheck();
       }
     );
 
@@ -302,11 +311,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
             }
           }
         }
+        this.cdr.markForCheck();
       }
     );
 
     // Rebuild activity rows on language change so units (e.g. "min") are translated
-    this.languageSubscription = this.translate.onLangChange.subscribe(() => this.refreshActivityRows());
+    this.languageSubscription = this.translate.onLangChange.subscribe(() => {
+      this.refreshActivityRows();
+      this.cdr.markForCheck();
+    });
   }
 
   ngAfterViewInit() {
@@ -745,6 +758,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       featureInfo: featureInfoRequest,
       analyzeData: analyzeRequest
     }).subscribe((result: any) => {
+      this.cdr.markForCheck();
       this.isLoadingFeatureInfo = false;
       this.isLoadingAnalyze = false;
       this.currentLoadingFeatureId = null;
@@ -878,6 +892,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       featureInfo: featureInfoRequest,
       analyzeData: analyzeRequest
     }).subscribe((result: any) => {
+      this.cdr.markForCheck();
       this.isLoadingFeatureInfo2 = false;
       this.isLoadingAnalyze2 = false;
       this.currentLoadingFeatureId2 = null;
@@ -985,6 +1000,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       console.error('Error loading places:', err);
       this.placesError = err?.message || this.translate.instant('analyze.placesDialog.errorLoadingPlaces');
+    } finally {
+      this.cdr.markForCheck();
     }
   }
 

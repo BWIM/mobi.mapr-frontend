@@ -1,4 +1,4 @@
-import { Component, Inject, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Inject, inject, ChangeDetectionStrategy, signal } from '@angular/core';
 import { AbstractControl, FormControl, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { FilterConfigService } from '../../../services/filter-config.service';
@@ -31,7 +31,7 @@ function requiredTrimmedEmail(control: AbstractControl): ValidationErrors | null
     ReactiveFormsModule,
   ],
   templateUrl: './geojson-download-dialog.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './geojson-download-dialog.component.css'
 })
 export class GeoJsonDownloadDialogComponent {
@@ -60,12 +60,12 @@ export class GeoJsonDownloadDialogComponent {
   hasCategories = false;
 
   /** Short request in flight */
-  isSubmitting = false;
+  readonly isSubmitting = signal(false);
   /** User acknowledged the “check your email” step */
-  exportConfirmed = false;
-  submittedEmail = '';
+  readonly exportConfirmed = signal(false);
+  readonly submittedEmail = signal('');
 
-  errorMessage: string | null = null;
+  readonly errorMessage = signal<string | null>(null);
 
   formatOptions = [
     { value: 'geojson' as const, label: 'geojsonDownload.format.geojson' },
@@ -150,7 +150,7 @@ export class GeoJsonDownloadDialogComponent {
   }
 
   shouldShowLicenseWarning(): boolean {
-    return this.selectedResolution !== null && !this.exportConfirmed;
+    return this.selectedResolution !== null && !this.exportConfirmed();
   }
 
   getCcByUrl(): string {
@@ -178,8 +178,8 @@ export class GeoJsonDownloadDialogComponent {
       return;
     }
 
-    this.isSubmitting = true;
-    this.errorMessage = null;
+    this.isSubmitting.set(true);
+    this.errorMessage.set(null);
 
     try {
       const state = this.states().find(s => s.id === this.selectedStateId);
@@ -200,14 +200,14 @@ export class GeoJsonDownloadDialogComponent {
         include_population: this.includePopulation || undefined,
       });
 
-      this.submittedEmail = emailTrimmed;
-      this.exportConfirmed = true;
+      this.submittedEmail.set(emailTrimmed);
+      this.exportConfirmed.set(true);
     } catch (error: unknown) {
       console.error('Error exporting map data:', error);
       const message = error instanceof Error ? error.message : '';
-      this.errorMessage = message || 'geojsonDownload.error.generic';
+      this.errorMessage.set(message || 'geojsonDownload.error.generic');
     } finally {
-      this.isSubmitting = false;
+      this.isSubmitting.set(false);
     }
   }
 }

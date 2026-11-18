@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, NgZone, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, NgZone, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SharedModule } from '../../../../shared/shared.module';
 import { CommonModule } from '@angular/common';
@@ -50,7 +50,7 @@ export interface PlacesDialogData {
     CategoryCompositionPanelComponent,
   ],
   templateUrl: './places-dialog.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './places-dialog.component.css'
 })
 export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -72,6 +72,8 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   private translate = inject(TranslateService);
   private dialog = inject(MatDialog);
   private ngZone = inject(NgZone);
+  /** OnPush: template state is plain fields set after awaits and from map events, so mark explicitly. */
+  private cdr = inject(ChangeDetectorRef);
   private popup?: Popup;
   private areaLabel?: Marker;
   private places: Place[] = [];
@@ -225,10 +227,12 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       this.pendingFeatureShape = featureShape;
       this.dataLoaded = true;
       this.tryInitializeMap();
+      this.cdr.markForCheck();
     } catch (err: any) {
       console.error('Error loading places:', err);
       this.error = err?.message || this.translate.instant('analyze.placesDialog.errorLoadingPlaces');
       this.isLoading = false;
+      this.cdr.markForCheck();
     }
   }
 
@@ -306,6 +310,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
       this.ngZone.run(() => {
         this.isLoading = false;
+        this.cdr.markForCheck();
       });
     });
   }
@@ -490,6 +495,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     this.highlightedActivityName = activityName;
+    this.cdr.markForCheck();
     this.applyMarkerHighlightStyles();
   }
 

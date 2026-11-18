@@ -9,7 +9,7 @@ import { LanguageService } from '../services/language.service';
     selector: 'app-landing',
     standalone: true,
     imports: [CommonModule, TranslateModule],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './landing.component.html'
 })
 export class LandingComponent implements OnInit {

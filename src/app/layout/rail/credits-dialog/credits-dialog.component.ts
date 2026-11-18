@@ -17,7 +17,7 @@ interface InfoComponent {
     SharedModule,
   ],
   templateUrl: './credits-dialog.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './credits-dialog.component.css'
 })
 export class CreditsDialogComponent {

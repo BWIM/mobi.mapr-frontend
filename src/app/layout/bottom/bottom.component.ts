@@ -6,7 +6,7 @@ import { ProjectsService } from '../../services/project.service';
   selector: 'app-bottom',
   imports: [CommonModule],
   templateUrl: './bottom.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './bottom.component.css',
 })
 export class BottomComponent {

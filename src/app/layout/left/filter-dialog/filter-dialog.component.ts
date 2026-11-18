@@ -17,7 +17,7 @@ export interface FilterDialogData {
     TranslateModule,
   ],
   templateUrl: './filter-dialog.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './filter-dialog.component.css'
 })
 export class FilterDialogComponent implements OnInit {

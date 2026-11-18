@@ -23,7 +23,7 @@
         [matAutocomplete]="auto">
       <mat-icon matPrefix>search</mat-icon>
       <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onLocationSelected($event)">
-        <mat-option *ngFor="let result of searchResults" [value]="result">
+        <mat-option *ngFor="let result of searchResults()" [value]="result">
           <span>{{ result.display_name }}</span>
         </mat-option>
       </mat-autocomplete>

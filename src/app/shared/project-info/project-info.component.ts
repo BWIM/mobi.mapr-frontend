@@ -11,7 +11,7 @@ import {
 @Component({
   selector: 'app-project-info',
   imports: [SharedModule, TranslateModule],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './project-info.component.html',
 })
 export class ProjectInfoComponent {

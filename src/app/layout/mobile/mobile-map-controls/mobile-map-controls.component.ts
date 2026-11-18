@@ -9,7 +9,7 @@ import { ShareAccessService } from '../../../services/share-access.service';
   selector: 'app-mobile-map-controls',
   imports: [MatIcon, TranslateModule],
   templateUrl: './mobile-map-controls.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './mobile-map-controls.component.css',
 })
 export class MobileMapControlsComponent {
