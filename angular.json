@@ -30,17 +30,12 @@
                 "glob": "**/*",
                 "input": "src/assets",
                 "output": "assets"
-              },
-              {
-                "glob": "inkmap-worker.js",
-                "input": "src/assets",
-                "output": "/"
               }
             ],
             "styles": [
               "src/material-theme.scss",
               "src/styles.css",
-              "node_modules/ol/ol.css",
+              "node_modules/material-icons/iconfont/filled.css",
               "node_modules/maplibre-gl/dist/maplibre-gl.css",
               "node_modules/@maplibre/maplibre-gl-compare/dist/maplibre-gl-compare.css"
             ],
@@ -132,7 +127,7 @@
             ],
             "styles": [
               "src/styles.css",
-              "node_modules/ol/ol.css"
+              "node_modules/material-icons/iconfont/filled.css"
             ],
             "scripts": []
           }
