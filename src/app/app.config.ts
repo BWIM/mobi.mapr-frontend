@@ -1,18 +1,14 @@
-import { ApplicationConfig, importProvidersFrom, provideAppInitializer, inject } from '@angular/core';
+import { ApplicationConfig, provideAppInitializer, inject, provideZoneChangeDetection } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { RuntimeConfigService } from './services/runtime-config.service';
-import { provideZoneChangeDetection } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { RuntimeConfigService } from './services/runtime-config.service';
 import { AuthInterceptor } from './auth/auth.interceptor';
 import { shareFeatureInterceptor } from './services/share-feature.interceptor';
 import { routes } from './app.routes';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
-import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-import { RouterModule } from '@angular/router';
-import { MatDialogModule } from '@angular/material/dialog';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -28,21 +24,17 @@ export const appConfig: ApplicationConfig = {
         provideZoneChangeDetection({ eventCoalescing: true }),
         provideRouter(routes),
         provideAnimationsAsync(),
-        provideHttpClient(withXhr(), 
+        provideHttpClient(withXhr(),
             withInterceptors([AuthInterceptor, shareFeatureInterceptor])
         ),
-        importProvidersFrom(
-            HttpClientModule,
-            RouterModule.forRoot(routes),
-            TranslateModule.forRoot({
-                defaultLanguage: 'de',
-                loader: {
-                    provide: TranslateLoader,
-                    useFactory: HttpLoaderFactory,
-                    deps: [HttpClient]
-                }
-            }),
-            MatDialogModule
-        )
+        // MatDialog is providedIn: 'root' and needs no module import.
+        provideTranslateService({
+            defaultLanguage: 'de',
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient]
+            }
+        }),
     ]
 };
