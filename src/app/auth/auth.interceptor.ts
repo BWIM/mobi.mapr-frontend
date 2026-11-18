@@ -35,6 +35,18 @@ function isAuthTokenEndpoint(url: string): boolean {
   return path === `${environment.apiUrl}/token/` || path === `${environment.apiUrl}/token/refresh/`;
 }
 
+/**
+ * Absolute URLs on another origin than our backend (e.g. the geocoder). They must not get
+ * the access token or session parameters: that would leak the JWT to a third party and
+ * force a CORS preflight the other server may reject.
+ */
+function isThirdPartyUrl(url: string): boolean {
+  if (!/^https?:\/\//i.test(url)) {
+    return false;
+  }
+  return !url.startsWith(environment.apiUrl) && !url.startsWith(environment.baseUrl);
+}
+
 function addSessionParameters(url: string, sessionService: SessionService): string {
   const separator = url.includes('?') ? '&' : '?';
   return `${url}${separator}${sessionService.getRequestParameters()}`;
@@ -48,6 +60,10 @@ export const AuthInterceptor: HttpInterceptorFn = (
   const router = inject(Router);
   const sessionService = inject(SessionService);
   const returnUrlService = inject(ReturnUrlService);
+
+  if (isThirdPartyUrl(req.url)) {
+    return next(req);
+  }
 
   // Check if it's a token request, feedback request, public route, share route or explicitly allowed public asset
   if (isAuthTokenEndpoint(req.url) || req.url.includes('/feedback') || isPublicRoute(router) || isShareRoute(router) || isPublicAsset(req.url)) {

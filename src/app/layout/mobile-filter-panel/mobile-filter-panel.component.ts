@@ -7,19 +7,13 @@ import { MapService } from '../../services/map.service';
 import { MatDialog } from '@angular/material/dialog';
 import { openCreditsDialog } from '../rail/credits-dialog/open-credits-dialog';
 import { InfoOverlayComponent } from '../../shared/info-overlay/info-overlay.component';
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
+import { Subject } from 'rxjs';
 import { ProjectSwitcherComponent } from '../../shared/project-switcher/project-switcher.component';
 import { ProjectInfoComponent } from '../../shared/project-info/project-info.component';
 import { ProfileOption } from '../../interfaces/profile';
 
-interface NominatimResult {
-  display_name: string;
-  lat: string;
-  lon: string;
-}
+import { GEOCODING_MIN_QUERY_LENGTH, GeocodingResult, GeocodingService } from '../../services/geocoding.service';
 
 @Component({
   selector: 'app-mobile-filter-panel',
@@ -35,12 +29,12 @@ export class MobileFilterPanelComponent implements OnDestroy {
   private translate = inject(TranslateService);
   private projectService = inject(ProjectsService);
   private mapService = inject(MapService);
-  private http = inject(HttpClient);
+  private geocoding = inject(GeocodingService);
   private dialog = inject(MatDialog);
   
   project = this.projectService.project;
   searchQuery: string = '';
-  readonly searchResults = signal<NominatimResult[]>([]);
+  readonly searchResults = signal<GeocodingResult[]>([]);
   private searchSubject = new Subject<string>();
   
   private touchStartY: number = 0;
@@ -49,40 +43,27 @@ export class MobileFilterPanelComponent implements OnDestroy {
   private readonly SWIPE_THRESHOLD = 30;
 
   constructor() {
-    this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(query => this.searchNominatim(query))
-    ).subscribe(results => {
+    this.geocoding.searchAsYouType(this.searchSubject).subscribe(results => {
       this.searchResults.set(results);
     });
   }
 
   onSearchInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const query = input.value.trim();
     this.searchQuery = input.value;
-    if (query.length >= 3) {
-      this.searchSubject.next(query);
-    } else {
+    // Short queries go through too (answered with no results) so retyping a query searches again.
+    this.searchSubject.next(input.value);
+    if (input.value.trim().length < GEOCODING_MIN_QUERY_LENGTH) {
       this.searchResults.set([]);
     }
   }
 
   onSearchSubmit(): void {
-    const query = this.searchQuery.trim();
-    if (query.length >= 3) {
-      this.searchSubject.next(query);
-    }
+    this.searchSubject.next(this.searchQuery);
   }
 
   onLocationSelected(event: MatAutocompleteSelectedEvent): void {
-    const result = event.option.value as NominatimResult;
-    const lat = Number.parseFloat(result.lat);
-    const lon = Number.parseFloat(result.lon);
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-      return;
-    }
+    const { lat, lon, label } = event.option.value as GeocodingResult;
 
     const map = this.mapService.getMap();
     if (map) {
@@ -93,7 +74,7 @@ export class MobileFilterPanelComponent implements OnDestroy {
       });
     }
 
-    this.searchQuery = result.display_name;
+    this.searchQuery = label;
     this.searchResults.set([]);
   }
 
@@ -229,27 +210,6 @@ export class MobileFilterPanelComponent implements OnDestroy {
 
     this.touchStartY = 0;
     this.touchDragging = false;
-  }
-
-  private searchNominatim(query: string): Promise<NominatimResult[]> {
-    if (!query || query.length < 3) {
-      return Promise.resolve([]);
-    }
-
-    const params = new HttpParams()
-      .set('q', query)
-      .set('format', 'json')
-      .set('limit', '10')
-      .set('addressdetails', '1')
-      .set('countrycodes', 'de');
-
-    const headers = {
-      'User-Agent': 'MapR-Frontend/1.0'
-    };
-
-    return firstValueFrom(
-      this.http.get<NominatimResult[]>('https://nominatim.openstreetmap.org/search', { params, headers })
-    ).catch(() => []);
   }
 
   openCreditsDialog(): void {

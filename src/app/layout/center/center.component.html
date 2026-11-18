@@ -8,7 +8,7 @@
       <div #afterMapContainer class="compare-map h-full w-full"></div>
     </div>
   }
-  <!-- Nominatim Search - Hidden on mobile, shown on desktop -->
+  <!-- Place search (Photon) - Hidden on mobile, shown on desktop -->
   <div class="hidden lg:flex absolute top-0 left-0 right-auto bottom-auto z-[1000] p-3 min-w-[240px] max-w-[300px] xl:min-w-[300px] xl:max-w-[400px] items-center gap-2">
     <mat-form-field appearance="fill" class="search-form-field w-full rounded-full" >
       <mat-label>{{ 'map.search.label' | translate }}</mat-label>
@@ -24,7 +24,7 @@
       <mat-icon matPrefix>search</mat-icon>
       <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onLocationSelected($event)">
         <mat-option *ngFor="let result of searchResults()" [value]="result">
-          <span>{{ result.display_name }}</span>
+          <span>{{ result.label }}</span>
         </mat-option>
       </mat-autocomplete>
     </mat-form-field>

@@ -36,7 +36,7 @@
       <mat-icon matPrefix>search</mat-icon>
       <mat-autocomplete #mobileSearchAuto="matAutocomplete" (optionSelected)="onLocationSelected($event)">
         <mat-option *ngFor="let result of searchResults()" [value]="result">
-          <span>{{ result.display_name }}</span>
+          <span>{{ result.label }}</span>
         </mat-option>
       </mat-autocomplete>
     </mat-form-field>

@@ -27,7 +27,7 @@ export class CreditsDialogComponent {
     { name: 'Material Design', icon: 'desktop_windows', url: 'https://material.angular.io' },
     { name: 'VersaTiles', icon: 'place', url: 'https://versatiles.org' },
     { name: 'MapLibre', icon: 'place', url: 'https://maplibre.org' },
-    { name: 'Nominatim', icon: 'place', url: 'https://nominatim.org' },
+    { name: 'Photon', icon: 'place', url: 'https://photon.komoot.io' },
     { name: 'Flaticon', icon: 'place', url: 'https://www.flaticon.com' }
   ];
 

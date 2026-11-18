@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, effect, ChangeDetectorRef, ChangeDetectionStrategy, NgZone, signal } from '@angular/core';
-import { Subscription, firstValueFrom, debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
+import { Subscription, firstValueFrom, Subject } from 'rxjs';
 import { Map, MapDataEvent, NavigationControl, FullscreenControl, Popup, AttributionControl, LngLatLike, ResourceType } from 'maplibre-gl';
 import type Compare from '@maplibre/maplibre-gl-compare';
 import { MapService, NO_DATA_SCORE, CAPPED_SCORE_MINUTES, CONTENT_SOURCE_LAYER } from '../../services/map.service';
@@ -9,7 +9,6 @@ import { SharedModule } from '../../shared/shared.module';
 import { AdminLevel, FilterConfigService } from '../../services/filter-config.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { FeatureSelectionService } from '../../shared/services/feature-selection.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SearchService } from '../../services/search.service';
@@ -21,12 +20,8 @@ import { formatNumber } from '@angular/common';
 import { currentNumberLocale } from '../../shared/pipes/locale-number.pipe';
 import { ExportMapControl } from './export-map.control';
 import type { GeoJsonDownloadDialogData } from '../left/geojson-download-dialog/geojson-download-dialog.component';
-interface NominatimResult {
-  display_name: string;
-  lat: string;
-  lon: string;
-  boundingbox?: string[];
-}
+import { GEOCODING_MIN_QUERY_LENGTH, GeocodingResult, GeocodingService } from '../../services/geocoding.service';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 
 interface LayerButtonOption {
   value: AdminLevel;
@@ -83,7 +78,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly isMapCompareMode = this.filterConfigService.isMapCompareMode;
   readonly isDifferenceView = this.filterConfigService.isDifferenceView;
   private dialog = inject(MatDialog);
-  private http = inject(HttpClient);
   private featureSelectionService = inject(FeatureSelectionService);
   private translate = inject(TranslateService);
   private searchService = inject(SearchService);
@@ -102,9 +96,10 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     { layerId: 'content-layer-selection', paintProperty: 'line-opacity' }
   ];
 
-  // Nominatim search properties
+  // Place search (Photon via GeocodingService)
+  private geocoding = inject(GeocodingService);
   searchQuery: string = '';
-  readonly searchResults = signal<NominatimResult[]>([]);
+  readonly searchResults = signal<GeocodingResult[]>([]);
   private searchSubject = new Subject<string>();
   isGettingLocation: boolean = false;
   private lastLayerFallbackToastAt = 0;
@@ -185,11 +180,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     // Setup debounced search
-    this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(query => this.searchNominatim(query))
-    ).subscribe(results => {
+    this.geocoding.searchAsYouType(this.searchSubject).subscribe(results => {
       this.searchResults.set(results);
     });
 
@@ -199,10 +190,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         this.searchQuery = query;
         // OnPush: searchQuery is a plain ngModel field set from another component's stream.
         this.changeDetectorRef.markForCheck();
-        // Trigger search if query is long enough
-        if (query.trim().length >= 3) {
-          this.searchSubject.next(query.trim());
-        }
+        this.searchSubject.next(query);
         // Focus the search input after a short delay to ensure it's rendered
         setTimeout(() => {
           if (this.searchInput?.nativeElement) {
@@ -899,50 +887,22 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onSearchInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const query = input.value.trim();
-    
-    if (query.length >= 3) {
-      this.searchSubject.next(query);
-    } else {
+    // Short queries go through too (the service answers them with no results), so the
+    // debounced stream sees every change and typing a query again searches again.
+    this.searchSubject.next(input.value);
+    if (input.value.trim().length < GEOCODING_MIN_QUERY_LENGTH) {
       this.searchResults.set([]);
     }
   }
 
   onSearchSubmit(): void {
-    if (this.searchQuery.trim().length >= 3) {
-      this.searchSubject.next(this.searchQuery.trim());
-    }
+    this.searchSubject.next(this.searchQuery);
   }
 
-  private searchNominatim(query: string): Promise<NominatimResult[]> {
-    if (!query || query.length < 3) {
-      return Promise.resolve([]);
-    }
-
-    const params = new HttpParams()
-      .set('q', query)
-      .set('format', 'json')
-      .set('limit', '10')
-      .set('addressdetails', '1')
-      .set('countrycodes', 'de'); // Restrict results to Germany
-
-    // Nominatim requires a User-Agent header per their usage policy
-    const headers = {
-      'User-Agent': 'MapR-Frontend/1.0'
-    };
-
-    return firstValueFrom(
-      this.http.get<NominatimResult[]>(`https://nominatim.openstreetmap.org/search`, { params, headers })
-    ).catch(error => {
-      console.error('Nominatim search error:', error);
-      return [];
-    });
-  }
-
-  onLocationSelected(event: any): void {
-    const result: NominatimResult = event.option.value;
-    this.zoomToLocation(parseFloat(result.lat), parseFloat(result.lon));
-    this.searchQuery = result.display_name;
+  onLocationSelected(event: MatAutocompleteSelectedEvent): void {
+    const result = event.option.value as GeocodingResult;
+    this.zoomToLocation(result.lat, result.lon);
+    this.searchQuery = result.label;
     this.searchResults.set([]);
   }
 
