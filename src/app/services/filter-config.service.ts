@@ -722,7 +722,6 @@ export class FilterConfigService {
       if (!this.canUseDifferenceView() && this._isDifferenceView() && this._isMapCompareMode()) {
         this._mapModeTransitionInProgress.set(true);
         this._compareMapsReady.set(false);
-        this.mapService.unbindDifferenceSync();
         this._isDifferenceView.set(false);
       }
     });
@@ -1271,7 +1270,6 @@ export class FilterConfigService {
     }
     this._mapModeTransitionInProgress.set(true);
     this._compareMapsReady.set(false);
-    this.mapService.unbindDifferenceSync();
     this._isDifferenceView.update((value) => !value);
   }
 

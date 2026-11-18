@@ -2,7 +2,8 @@ import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inj
 import { Subscription, firstValueFrom, debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { Map, MapDataEvent, NavigationControl, FullscreenControl, Popup, AttributionControl, LngLatLike } from 'maplibre-gl';
 import type Compare from '@maplibre/maplibre-gl-compare';
-import { MapService, NO_DATA_SCORE, CAPPED_SCORE_MINUTES, CONTENT_LAYER_RIGHT_SOURCE, CONTENT_SOURCE_LAYER } from '../../services/map.service';
+import { MapService, NO_DATA_SCORE, CAPPED_SCORE_MINUTES, CONTENT_SOURCE_LAYER } from '../../services/map.service';
+import { getFeatureDifference } from '../../utils/difference-colors.util';
 import MinimapControl from "maplibregl-minimap";
 import { SharedModule } from '../../shared/shared.module';
 import { AdminLevel, FilterConfigService } from '../../services/filter-config.service';
@@ -277,47 +278,27 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     isQualityMode: boolean,
     notAvailable: string
   ): string {
-    const featureId = properties['id'];
-    const state =
-      this.map && featureId !== undefined && featureId !== null
-        ? this.map.getFeatureState({
-            source: 'content-layer',
-            sourceLayer: 'geodata',
-            id: featureId as string | number,
-          })
-        : null;
+    // Difference tiles carry both sides per feature (left_/right_ score and index).
+    const { left, right, diff } = getFeatureDifference(properties, isQualityMode ? 'index' : 'score');
 
     const leftLabel = this.translate.instant('map.popup.left');
     const rightLabel = this.translate.instant('map.popup.right');
     const diffLabel = this.translate.instant('map.popup.difference');
     const minLabel = this.translate.instant('map.popup.minutes');
 
-    const formatValue = (raw: unknown): string => {
-      if (raw === undefined || raw === null || !Number.isFinite(Number(raw))) {
+    // Index values are × 100 (as in the tiles), scores are seconds.
+    const formatValue = (value: number | null): string => {
+      if (value === null) {
         return notAvailable;
       }
-      const value = Number(raw);
-      if (isQualityMode) {
-        // feature-state stores the quality index as a ratio (index / 100)
-        return this.getIndexName(value * 100);
-      }
-      return `${(value / 60).toFixed(1)} ${minLabel}`;
+      return isQualityMode ? this.getIndexName(value) : `${(value / 60).toFixed(1)} ${minLabel}`;
     };
 
-    const leftRaw = state?.['leftValue'] ?? (isQualityMode
-      ? (properties['index'] !== undefined && properties['index'] !== null
-          ? Number(properties['index']) / 100
-          : null)
-      : properties['score']);
-    const rightRaw = state?.['rightValue'];
-    const hasDiff = !!state?.['hasDiff'];
-    const diffRaw = hasDiff ? state?.['diff'] : null;
-
-    const leftText = formatValue(leftRaw);
-    const rightText = formatValue(rightRaw);
+    const leftText = formatValue(left);
+    const rightText = formatValue(right);
     let diffText = notAvailable;
-    if (hasDiff && diffRaw !== undefined && diffRaw !== null && Number.isFinite(Number(diffRaw))) {
-      const signed = Number(diffRaw);
+    if (diff !== null) {
+      const signed = diff;
       const magnitude = isQualityMode
         ? gradeStepLabel(this.translate, Math.abs(signed))
         : `${formatNumber(Math.abs(signed) / 60, currentNumberLocale(this.translate), '1.1-1')} ${minLabel}`;
@@ -397,7 +378,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
           return;
         }
         this.captureViewportFromActiveMap();
-        this.mapService.unbindDifferenceSync();
         this.destroyCompareMaps();
         this.destroySingleMap();
         await new Promise<void>(resolve => setTimeout(resolve, 0));
@@ -434,7 +414,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       this.captureViewportFromActiveMap();
       this.filterConfigService.resetMapLayerUpdateState();
       this.filterConfigService.setCompareMapsReady(false);
-      this.mapService.unbindDifferenceSync();
       this.destroyCompareMaps();
       this.destroySingleMap();
       await this.waitForCompareContainers();
@@ -464,7 +443,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       this.captureViewportFromActiveMap();
       this.filterConfigService.resetMapLayerUpdateState();
       this.filterConfigService.setCompareMapsReady(false);
-      this.mapService.unbindDifferenceSync();
       this.destroyCompareMaps();
       this.destroySingleMap();
       await new Promise<void>((resolve) => setTimeout(resolve, 0));
@@ -848,7 +826,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    this.mapService.unbindDifferenceSync();
     this.removeCanvasPointerMoveListener(this.map);
     this.removeTileLoadingHandlers(this.map);
 
@@ -1410,10 +1387,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     const error = (e: { sourceId?: string; error?: { sourceId?: string; status?: number } }) => {
       this.mapService.setMapLoading(false);
       const sourceId = e?.sourceId ?? e?.error?.sourceId;
-      if (
-        sourceId === 'content-layer' ||
-        sourceId === CONTENT_LAYER_RIGHT_SOURCE
-      ) {
+      if (sourceId === 'content-layer') {
         this.mapService.setNoProjectTiles(true);
       }
     };
@@ -1438,13 +1412,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       contentLayerPresent = true;
       if (!targetMap.isSourceLoaded('content-layer')) {
-        return false;
-      }
-      if (
-        this.filterConfigService.isDifferenceView() &&
-        CONTENT_LAYER_RIGHT_SOURCE in style.sources &&
-        !targetMap.isSourceLoaded(CONTENT_LAYER_RIGHT_SOURCE)
-      ) {
         return false;
       }
     }
@@ -1490,20 +1457,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       if (features.length > 0) {
         hasFeatures = true;
         break;
-      }
-
-      if (
-        this.filterConfigService.isDifferenceView() &&
-        CONTENT_LAYER_RIGHT_SOURCE in style.sources &&
-        targetMap.isSourceLoaded(CONTENT_LAYER_RIGHT_SOURCE)
-      ) {
-        const rightFeatures = targetMap.querySourceFeatures(CONTENT_LAYER_RIGHT_SOURCE, {
-          sourceLayer: CONTENT_SOURCE_LAYER,
-        });
-        if (rightFeatures.length > 0) {
-          hasFeatures = true;
-          break;
-        }
       }
     }
 
