@@ -648,7 +648,11 @@ export class FilterConfigService {
       differenceInitialLoad = true;
       this.compareLayerSyncRetries = 0;
       if (wasCompareOrDifference) {
+        // Leaving compare/difference: the single map may still carry that view's style
+        // (difference view keeps its map), so force a full reload even if the filters
+        // are unchanged since the last single-map load.
         isInitialLoad = true;
+        previousFilters = null;
         wasCompareOrDifference = false;
       }
 

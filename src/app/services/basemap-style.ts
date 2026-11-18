@@ -4,7 +4,7 @@ import type { LayerSpecification, Map as MapLibreMap, StyleSpecification } from 
 /** Self-hosted Shortbread vector tiles (VersaTiles). */
 export const BASEMAP_TILE_URL = 'https://tiles.mapr.mobi/tiles/eu/{z}/{x}/{y}';
 
-/** Glyphs/sprites are served by the public VersaTiles CDN. */
+/** Glyphs are served by the public VersaTiles CDN. */
 const BASEMAP_ASSETS_BASE_URL = 'https://tiles.versatiles.org';
 
 /** Neutral ground color — avoids green landcover competing with choropleth fills. */
@@ -59,7 +59,7 @@ function cloneStyle(style: StyleSpecification): StyleSpecification {
 }
 
 function buildNeutrinoStyle(hideLabels: boolean): StyleSpecification {
-  const style = neutrino({ ...STYLE_OPTIONS, hideLabels }) as StyleSpecification;
+  const { sprite: _unusedSprite, ...style } = neutrino({ ...STYLE_OPTIONS, hideLabels }) as StyleSpecification;
   return {
     ...style,
     layers: simplifyBasemapLayers(style.layers),

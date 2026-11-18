@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
 import { SessionService } from '../services/session.service';
 import { ReturnUrlService } from './return-url.service';
+import { environment } from '../../environments/environment';
 
 let isRefreshing = false;
 let refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
@@ -28,6 +29,15 @@ function isPublicAsset(url: string): boolean {
   return publicAssetPatterns.some(pattern => url.includes(pattern));
 }
 
+/**
+ * Login and token refresh must go out without the (possibly expired) access token.
+ * Matched exactly: other endpoints ending in /token/ (e.g. tiles/token/) do need it.
+ */
+function isAuthTokenEndpoint(url: string): boolean {
+  const path = url.split('?')[0];
+  return path === `${environment.apiUrl}/token/` || path === `${environment.apiUrl}/token/refresh/`;
+}
+
 function addSessionParameters(url: string, sessionService: SessionService): string {
   const separator = url.includes('?') ? '&' : '?';
   return `${url}${separator}${sessionService.getRequestParameters()}`;
@@ -43,7 +53,7 @@ export const AuthInterceptor: HttpInterceptorFn = (
   const returnUrlService = inject(ReturnUrlService);
 
   // Check if it's a token request, feedback request, public route, share route or explicitly allowed public asset
-  if (req.url.includes('/token/') || req.url.includes('/feedback') || isPublicRoute(router) || isShareRoute(router) || isPublicAsset(req.url)) {
+  if (isAuthTokenEndpoint(req.url) || req.url.includes('/feedback') || isPublicRoute(router) || isShareRoute(router) || isPublicAsset(req.url)) {
     const url = addSessionParameters(req.url, sessionService);
     return next(req.clone({ url }));
   }

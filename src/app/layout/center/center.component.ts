@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, effect, ChangeDetectorRef, ChangeDetectionStrategy, NgZone, signal } from '@angular/core';
 import { Subscription, firstValueFrom, debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
-import { Map, MapDataEvent, NavigationControl, FullscreenControl, Popup, AttributionControl, LngLatLike } from 'maplibre-gl';
+import { Map, MapDataEvent, NavigationControl, FullscreenControl, Popup, AttributionControl, LngLatLike, ResourceType } from 'maplibre-gl';
 import type Compare from '@maplibre/maplibre-gl-compare';
 import { MapService, NO_DATA_SCORE, CAPPED_SCORE_MINUTES, CONTENT_SOURCE_LAYER } from '../../services/map.service';
 import { getFeatureDifference } from '../../utils/difference-colors.util';
@@ -545,6 +545,9 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       dragRotate: false,
       renderWorldCopies: false,
       attributionControl: false,
+      // Adds the short-lived tile token to content tile requests of logged-in users.
+      transformRequest: (url: string, resourceType?: ResourceType) =>
+        this.mapService.transformTileRequest(url, resourceType),
     };
   }
 

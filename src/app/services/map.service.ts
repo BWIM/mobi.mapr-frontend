@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { Map as MapLibreMap, StyleSpecification, SourceSpecification, LayerSpecification, LngLatBounds, FilterSpecification } from 'maplibre-gl';
+import { Map as MapLibreMap, RequestParameters, ResourceType, StyleSpecification, SourceSpecification, LayerSpecification, LngLatBounds, FilterSpecification } from 'maplibre-gl';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { shareForbiddenFeature } from './share-access.service';
@@ -9,6 +9,7 @@ import { appendProjectAccessParams, hasProjectAccess } from './project-access-pa
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { ProjectsService } from './project.service';
 import { ScoreColorsService } from './score-colors.service';
+import { TileTokenService } from './tile-token.service';
 import {
   buildDifferenceFillColorExpression,
   buildDiffInSelectionExpression,
@@ -125,6 +126,7 @@ export class MapService {
   private http = inject(HttpClient);
   private projectService = inject(ProjectsService);
   private scoreColorsService = inject(ScoreColorsService);
+  private tileTokenService = inject(TileTokenService);
   private currentFilters: ContentLayerFilters | null = null;
   private hasInitialZoom = false; // Track if initial zoom to geolocation has occurred
   
@@ -147,7 +149,54 @@ export class MapService {
   private _noProjectTiles = signal<boolean>(false);
   readonly noProjectTiles = this._noProjectTiles.asReadonly();
 
-  constructor() {}
+  constructor() {
+    // Tiles requested while the tile token had lapsed got a 401; refetch them with the new token.
+    this.tileTokenService.renewedAfterExpiry.subscribe(() => {
+      for (const targetMap of [this.map, this.compareRightMap]) {
+        const source = targetMap?.getSource(CONTENT_LAYER_SOURCE) as
+          | { setTiles?: (tiles: string[]) => void; tiles?: string[] }
+          | undefined;
+        if (source?.setTiles && source.tiles) {
+          source.setTiles([...source.tiles]);
+        }
+      }
+    });
+  }
+
+  /**
+   * MapLibre `transformRequest`: adds the short-lived tile token (`tt`) to content tile requests
+   * of logged-in users. The token is not part of the source URL, so renewing it does not
+   * change the style or reload the map. Share-key URLs are left as they are.
+   */
+  transformTileRequest(url: string, resourceType?: ResourceType): RequestParameters {
+    if (resourceType !== 'Tile' || /[?&]key=/.test(url)) {
+      return { url };
+    }
+    const match = /\/projects\/(\d+)\/(?:diff-)?tiles\/\d+\/\d+\/\d+\.pbf/.exec(url);
+    if (!match) {
+      return { url };
+    }
+    const tt = this.tileTokenService.current(Number(match[1]));
+    if (!tt) {
+      return { url };
+    }
+    const separator = url.includes('?') ? '&' : '?';
+    return { url: `${url}${separator}tt=${encodeURIComponent(tt)}` };
+  }
+
+  /**
+   * Logged-in users need a tile token for the current project before its tiles are requested.
+   * Share viewers authenticate with their share key instead.
+   */
+  private async ensureTileAuth(): Promise<void> {
+    if (this.dashboardSessionService.getShareKey() || !this.authService.isLoggedIn()) {
+      return;
+    }
+    const projectId = Number(this.getEffectiveProjectId());
+    if (Number.isInteger(projectId) && projectId > 0) {
+      await this.tileTokenService.ensure(projectId);
+    }
+  }
 
   private getLegendBracketFilterExpression(filters: ContentLayerFilters): any[] | null {
     if (filters.feature_type === 'index') {
@@ -267,6 +316,8 @@ export class MapService {
       console.warn('Cannot load difference layers: missing difference color config');
       return false;
     }
+
+    await this.ensureTileAuth();
 
     if (zoomToBounds) {
       await this.zoomToContentLayerBoundsForMap(targetMap, leftFilters, false);
@@ -563,25 +614,17 @@ export class MapService {
       params.push(`feature_type=${filters.feature_type}`);
     }
 
-    // Tiles require a share key or a login token (401/403 otherwise). Share viewers always use
-    // their key, since it decides which projects and profiles they may see.
-    const auth = this.tileAuthParam();
-    if (!auth) {
-      return '';
-    }
-    params.push(auth);
-
-    return `${baseUrl}?${params.join('&')}`;
-  }
-
-  /** `key=…` for share viewers, else `token=…` for logged-in users; null without either. */
-  private tileAuthParam(): string | null {
+    // Tiles require a share key or a login (401/403 otherwise). Share viewers always use their
+    // key, since it decides which projects and profiles they may see. Logged-in users get the
+    // short-lived tile token added per request (transformTileRequest), never the access JWT.
     const shareKey = this.dashboardSessionService.getShareKey();
     if (shareKey) {
-      return `key=${encodeURIComponent(shareKey)}`;
+      params.push(`key=${encodeURIComponent(shareKey)}`);
+    } else if (!this.authService.isLoggedIn()) {
+      return '';
     }
-    const token = this.authService.getAuthorizationHeaders().get('Authorization')?.split(' ')[1];
-    return token ? `token=${encodeURIComponent(token)}` : null;
+
+    return `${baseUrl}?${params.join('&')}`;
   }
 
   /**
@@ -638,16 +681,18 @@ export class MapService {
     try {
       let params = new HttpParams();
 
-      // Add authentication token if available
-      const token = this.authService.getAuthorizationHeaders().get('Authorization')?.split(' ')[1];
-      if (token) {
-        params = params.set('token', token);
-      }
-
-      // Add share key if available (for unauthenticated access)
+      // Same auth as the tiles: share key, else the short-lived tile token (never the JWT).
       const shareKey = this.dashboardSessionService.getShareKey();
-      if (shareKey && !token) {
+      if (shareKey) {
         params = params.set('key', shareKey);
+      } else {
+        const projectId = Number(this.getEffectiveProjectId());
+        const tt = Number.isInteger(projectId) && projectId > 0
+          ? await this.tileTokenService.ensure(projectId)
+          : null;
+        if (tt) {
+          params = params.set('tt', tt);
+        }
       }
 
       // Only send state_ids if they are selected
@@ -834,10 +879,14 @@ export class MapService {
     return moveBasemapLabelsToTop(updatedStyle);
   }
 
-  private buildTileUrlForFilters(filters: ContentLayerFilters, compareProfileIds?: number[]): string | null {
-    const effectiveId = this.dashboardSessionService.getProjectId()
+  private getEffectiveProjectId(): string | null {
+    return this.dashboardSessionService.getProjectId()
       ?? this.projectService.getProject()?.id?.toString()
       ?? null;
+  }
+
+  private buildTileUrlForFilters(filters: ContentLayerFilters, compareProfileIds?: number[]): string | null {
+    const effectiveId = this.getEffectiveProjectId();
 
     if (!effectiveId || !filters.profile_ids?.length) {
       return null;
@@ -892,6 +941,8 @@ export class MapService {
       console.warn('Cannot load content layer: Invalid tile URL');
       return false;
     }
+
+    await this.ensureTileAuth();
 
     if (zoomToBounds) {
       await this.zoomToContentLayerBoundsForMap(targetMap, filters, allowGeolocation);
@@ -1006,6 +1057,7 @@ export class MapService {
       return;
     }
 
+    await this.ensureTileAuth();
     this.syncContentLayerState(filters);
 
     if (zoomToBounds && this.map) {
