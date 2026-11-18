@@ -18,7 +18,7 @@ export interface ProjectListSection {
   selector: 'app-users-area',
   imports: [CommonModule, SharedModule, TranslateModule],
   templateUrl: './users-area.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './users-area.component.css',
 })
 export class UsersAreaComponent implements OnInit {

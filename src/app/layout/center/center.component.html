@@ -8,7 +8,7 @@
       <div #afterMapContainer class="compare-map h-full w-full"></div>
     </div>
   }
-  <!-- Nominatim Search - Hidden on mobile, shown on desktop -->
+  <!-- Place search (Photon) - Hidden on mobile, shown on desktop -->
   <div class="hidden lg:flex absolute top-0 left-0 right-auto bottom-auto z-[1000] p-3 min-w-[240px] max-w-[300px] xl:min-w-[300px] xl:max-w-[400px] items-center gap-2">
     <mat-form-field appearance="fill" class="search-form-field w-full rounded-full" >
       <mat-label>{{ 'map.search.label' | translate }}</mat-label>
@@ -23,8 +23,8 @@
         [matAutocomplete]="auto">
       <mat-icon matPrefix>search</mat-icon>
       <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onLocationSelected($event)">
-        <mat-option *ngFor="let result of searchResults" [value]="result">
-          <span>{{ result.display_name }}</span>
+        <mat-option *ngFor="let result of searchResults()" [value]="result">
+          <span>{{ result.label }}</span>
         </mat-option>
       </mat-autocomplete>
     </mat-form-field>
@@ -78,70 +78,7 @@
     <p class="map-no-tiles-hint__text">{{ 'map.noTiles.hint' | translate }}</p>
   </div>
   <!-- Legend -->
-  <div data-tour="legend" class="map-legend absolute top-0 left-0 lg:bottom-0 lg:left-0 lg:right-auto lg:top-auto" (click)="openLegendDialog()" [title]="'map.search.clickForInfo' | translate">
-    <!-- Difference legend (diverging: left better ← same → right better) -->
-    <div class="legend-time legend-difference" *ngIf="isDifferenceView() && differenceLegendItems().length > 0">
-      <span class="legend-difference-title">
-        {{ (isQualityMode ? 'map.legend.difference.qualityTitle' : 'map.legend.difference.timeTitle') | translate }}
-      </span>
-      <div class="legend-steps">
-        <div
-          class="legend-step"
-          *ngFor="let item of differenceLegendItems()"
-          [class.legend-step--neutral]="item.direction === 0"
-          [style.background-color]="item.color"
-          (click)="toggleDifferenceBracket($event, item.bracketId)"
-          [class.legend-item-inactive]="!isDifferenceBracketSelected(item.bracketId)"
-          [attr.title]="getDifferenceStepTitle(item)"
-        ></div>
-      </div>
-      <div class="legend-labels">
-        <span class="legend-label" *ngFor="let item of differenceLegendItems()">
-          {{ item.segmentLabel }}
-        </span>
-      </div>
-      <div class="legend-difference-ends">
-        <span class="legend-difference-end legend-difference-end--left">{{ 'map.legend.difference.leftBetter' | translate }}</span>
-        <span class="legend-difference-end legend-difference-end--right">{{ 'map.legend.difference.rightBetter' | translate }}</span>
-      </div>
-    </div>
-    <!-- Quality legend (A-F letters) -->
-    <div class="legend-quality" *ngIf="!isDifferenceView() && isQualityMode">
-      <span class="legend-quality-end legend-quality-end--best">{{ 'map.legend.quality.scaleBest' | translate }}</span>
-      <div class="legend-items">
-        <div
-          class="legend-item-quality"
-          *ngFor="let item of qualityColors"
-          (click)="toggleQualityBracket($event, item.letter)"
-          [class.legend-item-inactive]="!isQualityBracketSelected(item.letter)"
-          [attr.title]="('map.legend.quality.' + (item.letter | lowercase) + '.title') | translate"
-        >
-          <div class="legend-circle" [style.background-color]="item.color">
-            <span class="legend-letter" [class.legend-letter--dark]="item.letter === 'C'">{{ item.letter }}</span>
-          </div>
-        </div>
-      </div>
-      <span class="legend-quality-end legend-quality-end--worst">{{ 'map.legend.quality.scaleWorst' | translate }}</span>
-    </div>
-    <!-- Time legend (discrete color steps) -->
-    <div class="legend-time" *ngIf="!isDifferenceView() && !isQualityMode && hasScoreColors()">
-      <div class="legend-steps">
-        <div
-          class="legend-step"
-          *ngFor="let item of timeLegendItems()"
-          [style.background-color]="item.color"
-          (click)="toggleTimeBracket($event, item.bracketId)"
-          [class.legend-item-inactive]="!isTimeBracketSelected(item.bracketId)"
-          [attr.title]="item.segmentLabel"
-        ></div>
-      </div>
-      <div class="legend-labels">
-        <span class="legend-label" *ngFor="let item of timeLegendItems()">
-          {{ item.segmentLabel }}
-        </span>
-      </div>
-    </div>
-  </div>
+  <app-map-legend />
 
 </div>
 

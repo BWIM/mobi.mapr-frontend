@@ -1,6 +1,6 @@
 <div>
   <h2 mat-dialog-title class="text-2xl font-semibold text-[var(--primary-color)] mb-4">
-    @if (exportConfirmed) {
+    @if (exportConfirmed()) {
       {{ 'geojsonDownload.success.title' | translate }}
     } @else {
       {{ 'geojsonDownload.title' | translate }}
@@ -8,7 +8,7 @@
   </h2>
 
   <mat-dialog-content class="mat-typography">
-    @if (exportConfirmed) {
+    @if (exportConfirmed()) {
       <div class="bg-emerald-50 border border-emerald-200 text-emerald-900 px-4 py-4 rounded-lg">
         <div class="flex items-start gap-3">
           <mat-icon class="text-emerald-700 mt-0.5">mark_email_read</mat-icon>
@@ -16,13 +16,13 @@
             <p class="font-semibold">{{ 'geojsonDownload.success.lead' | translate }}</p>
             <p>{{ 'geojsonDownload.success.durationHint' | translate }}</p>
             <p>{{ 'geojsonDownload.success.cacheHint' | translate }}</p>
-            <p>{{ 'geojsonDownload.success.message' | translate: { email: submittedEmail } }}</p>
+            <p>{{ 'geojsonDownload.success.message' | translate: { email: submittedEmail() } }}</p>
             <p class="mt-2 pt-2 border-t border-emerald-200/80 text-emerald-800/90">{{ 'geojsonDownload.success.footer' | translate }}</p>
           </div>
         </div>
       </div>
     } @else {
-      <div class="space-y-6" [class.opacity-50]="isSubmitting" [class.pointer-events-none]="isSubmitting">
+      <div class="space-y-6" [class.opacity-50]="isSubmitting()" [class.pointer-events-none]="isSubmitting()">
         <div>
           <label class="block text-sm font-semibold text-[var(--primary-color)] mb-2">
             {{ 'geojsonDownload.format.label' | translate }}
@@ -31,7 +31,7 @@
             <mat-select
               [value]="selectedExportFormat"
               (selectionChange)="selectedExportFormat = $event.value"
-              [disabled]="isSubmitting"
+              [disabled]="isSubmitting()"
               class="text-[var(--primary-color)]">
               @for (option of formatOptions; track option.value) {
                 <mat-option [value]="option.value">
@@ -50,7 +50,7 @@
             <mat-select
               [value]="selectedResolution"
               (selectionChange)="selectedResolution = $event.value"
-              [disabled]="isSubmitting"
+              [disabled]="isSubmitting()"
               class="text-[var(--primary-color)]">
               @for (option of resolutionOptions; track option.value) {
                 <mat-option [value]="option.value">
@@ -69,7 +69,7 @@
             <mat-select
               [value]="selectedStateId"
               (selectionChange)="selectedStateId = $event.value"
-              [disabled]="isSubmitting"
+              [disabled]="isSubmitting()"
               class="text-[var(--primary-color)]">
               @for (state of states(); track state.id) {
                 <mat-option [value]="state.id">
@@ -86,7 +86,7 @@
           </label>
           <mat-form-field appearance="outline" class="w-full text-[var(--light-primary-color)]">
             <mat-label class="text-[var(--light-primary-color)]">{{ 'geojsonDownload.email.label' | translate }}</mat-label>
-            <input matInput type="email" [formControl]="emailControl" [disabled]="isSubmitting" autocomplete="email" class="text-[var(--primary-color)]" />
+            <input matInput type="email" [formControl]="emailControl" [disabled]="isSubmitting()" autocomplete="email" class="text-[var(--primary-color)]" />
             <mat-hint>{{ 'geojsonDownload.email.hint' | translate }}</mat-hint>
             @if (emailControl.invalid && emailControl.touched) {
               <mat-error>
@@ -101,7 +101,7 @@
         </div>
 
         <div class="flex items-start gap-2">
-          <mat-checkbox [(ngModel)]="includePopulation" [disabled]="isSubmitting">
+          <mat-checkbox [(ngModel)]="includePopulation" [disabled]="isSubmitting()">
             {{ 'geojsonDownload.includePopulation.label' | translate }}
           </mat-checkbox>
         </div>
@@ -163,9 +163,9 @@
           </div>
         </div>
 
-        @if (errorMessage) {
+        @if (errorMessage(); as message) {
           <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {{ errorMessage | translate }}
+            {{ message | translate }}
           </div>
         }
       </div>
@@ -173,12 +173,12 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end" class="mt-4">
-    @if (exportConfirmed) {
+    @if (exportConfirmed()) {
       <button mat-raised-button color="primary" (click)="onAcknowledgeSuccess()" class="cursor-pointer">
         {{ 'geojsonDownload.success.ok' | translate }}
       </button>
     } @else {
-      <button mat-button (click)="onCancel()" [disabled]="isSubmitting">
+      <button mat-button (click)="onCancel()" [disabled]="isSubmitting()">
         {{ 'common.cancel' | translate }}
       </button>
       <button
@@ -186,8 +186,8 @@
         color="primary"
         (click)="onDownload()"
         class="cursor-pointer"
-        [disabled]="!isFormValid() || isSubmitting">
-        @if (isSubmitting) {
+        [disabled]="!isFormValid() || isSubmitting()">
+        @if (isSubmitting()) {
           <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
         }
         {{ 'geojsonDownload.download' | translate }}

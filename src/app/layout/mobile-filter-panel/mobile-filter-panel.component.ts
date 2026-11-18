@@ -1,31 +1,25 @@
-import { Component, inject, input, output, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, output, OnDestroy, ChangeDetectionStrategy, signal } from '@angular/core';
 import { FilterConfigService } from '../../services/filter-config.service';
 import { SharedModule } from '../../shared/shared.module';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ProjectsService } from '../../services/project.service';
 import { MapService } from '../../services/map.service';
 import { MatDialog } from '@angular/material/dialog';
-import { CreditsDialogComponent } from '../rail/credits-dialog/credits-dialog.component';
+import { openCreditsDialog } from '../rail/credits-dialog/open-credits-dialog';
 import { InfoOverlayComponent } from '../../shared/info-overlay/info-overlay.component';
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
+import { Subject } from 'rxjs';
 import { ProjectSwitcherComponent } from '../../shared/project-switcher/project-switcher.component';
 import { ProjectInfoComponent } from '../../shared/project-info/project-info.component';
 import { ProfileOption } from '../../interfaces/profile';
 
-interface NominatimResult {
-  display_name: string;
-  lat: string;
-  lon: string;
-}
+import { GEOCODING_MIN_QUERY_LENGTH, GeocodingResult, GeocodingService } from '../../services/geocoding.service';
 
 @Component({
   selector: 'app-mobile-filter-panel',
   imports: [SharedModule, TranslateModule, InfoOverlayComponent, ProjectSwitcherComponent, ProjectInfoComponent],
   templateUrl: './mobile-filter-panel.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './mobile-filter-panel.component.css',
 })
 export class MobileFilterPanelComponent implements OnDestroy {
@@ -35,12 +29,12 @@ export class MobileFilterPanelComponent implements OnDestroy {
   private translate = inject(TranslateService);
   private projectService = inject(ProjectsService);
   private mapService = inject(MapService);
-  private http = inject(HttpClient);
+  private geocoding = inject(GeocodingService);
   private dialog = inject(MatDialog);
   
   project = this.projectService.project;
   searchQuery: string = '';
-  searchResults: NominatimResult[] = [];
+  readonly searchResults = signal<GeocodingResult[]>([]);
   private searchSubject = new Subject<string>();
   
   private touchStartY: number = 0;
@@ -49,40 +43,27 @@ export class MobileFilterPanelComponent implements OnDestroy {
   private readonly SWIPE_THRESHOLD = 30;
 
   constructor() {
-    this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(query => this.searchNominatim(query))
-    ).subscribe(results => {
-      this.searchResults = results;
+    this.geocoding.searchAsYouType(this.searchSubject).subscribe(results => {
+      this.searchResults.set(results);
     });
   }
 
   onSearchInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const query = input.value.trim();
     this.searchQuery = input.value;
-    if (query.length >= 3) {
-      this.searchSubject.next(query);
-    } else {
-      this.searchResults = [];
+    // Short queries go through too (answered with no results) so retyping a query searches again.
+    this.searchSubject.next(input.value);
+    if (input.value.trim().length < GEOCODING_MIN_QUERY_LENGTH) {
+      this.searchResults.set([]);
     }
   }
 
   onSearchSubmit(): void {
-    const query = this.searchQuery.trim();
-    if (query.length >= 3) {
-      this.searchSubject.next(query);
-    }
+    this.searchSubject.next(this.searchQuery);
   }
 
   onLocationSelected(event: MatAutocompleteSelectedEvent): void {
-    const result = event.option.value as NominatimResult;
-    const lat = Number.parseFloat(result.lat);
-    const lon = Number.parseFloat(result.lon);
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-      return;
-    }
+    const { lat, lon, label } = event.option.value as GeocodingResult;
 
     const map = this.mapService.getMap();
     if (map) {
@@ -93,8 +74,8 @@ export class MobileFilterPanelComponent implements OnDestroy {
       });
     }
 
-    this.searchQuery = result.display_name;
-    this.searchResults = [];
+    this.searchQuery = label;
+    this.searchResults.set([]);
   }
 
   // Expose filter config service signals for template
@@ -231,33 +212,8 @@ export class MobileFilterPanelComponent implements OnDestroy {
     this.touchDragging = false;
   }
 
-  private searchNominatim(query: string): Promise<NominatimResult[]> {
-    if (!query || query.length < 3) {
-      return Promise.resolve([]);
-    }
-
-    const params = new HttpParams()
-      .set('q', query)
-      .set('format', 'json')
-      .set('limit', '10')
-      .set('addressdetails', '1')
-      .set('countrycodes', 'de');
-
-    const headers = {
-      'User-Agent': 'MapR-Frontend/1.0'
-    };
-
-    return firstValueFrom(
-      this.http.get<NominatimResult[]>('https://nominatim.openstreetmap.org/search', { params, headers })
-    ).catch(() => []);
-  }
-
   openCreditsDialog(): void {
-    this.dialog.open(CreditsDialogComponent, {
-      width: '800px',
-      maxWidth: '90vw',
-      maxHeight: '90vh'
-    });
+    void openCreditsDialog(this.dialog);
   }
 
   getFormattedCreatedDate(): string {

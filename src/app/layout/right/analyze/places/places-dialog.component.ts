@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, NgZone, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, NgZone, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SharedModule } from '../../../../shared/shared.module';
 import { CommonModule } from '@angular/common';
@@ -8,8 +8,7 @@ import { MapService } from '../../../../services/map.service';
 import { findBasemapLabelsBeforeId } from '../../../../services/basemap-style';
 import { firstValueFrom, catchError, of } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { InfoDialogComponent } from '../../../../shared/info-overlay/info-dialog.component';
-import { LegendInfoComponent } from '../../../../shared/legend-info/legend-info.component';
+import { openLegendInfoDialog } from '../../../../shared/info-overlay/open-info-dialog';
 import { ScoreColorsService } from '../../../../services/score-colors.service';
 import { getGrade, getGradeColor } from '../../../../utils/grade.util';
 import { CompositionNode } from '../../../../interfaces/composition';
@@ -50,12 +49,14 @@ export interface PlacesDialogData {
     CategoryCompositionPanelComponent,
   ],
   templateUrl: './places-dialog.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './places-dialog.component.css'
 })
 export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('mapContainerPlaces') mapContainerPlaces?: ElementRef;
   
+  /** Opening this dialog completes the tutorial's "open places" step. */
+  readonly tutorialOpenAction = 'open-places' as const;
   isLoading: boolean = false;
   error: string | null = null;
   categoryName: string = '';
@@ -72,6 +73,8 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   private translate = inject(TranslateService);
   private dialog = inject(MatDialog);
   private ngZone = inject(NgZone);
+  /** OnPush: template state is plain fields set after awaits and from map events, so mark explicitly. */
+  private cdr = inject(ChangeDetectorRef);
   private popup?: Popup;
   private areaLabel?: Marker;
   private places: Place[] = [];
@@ -116,14 +119,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {}
 
   openLegendInfo(): void {
-    this.dialog.open(InfoDialogComponent, {
-      width: '80vw',
-      height: '80vh',
-      maxWidth: '80vw',
-      maxHeight: '80vh',
-      panelClass: 'info-dialog-panel',
-      data: { content: LegendInfoComponent }
-    });
+    void openLegendInfoDialog(this.dialog);
   }
 
   async ngOnInit() {
@@ -134,7 +130,6 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     this.setOverallMetricFromDialogData();
 
     try {
-      console.log('Loading places for category:', this.data);
       
       // Check if places are available for this feature type
       // Places API only supports 'municipality' and 'hexagon'
@@ -178,12 +173,10 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       this.places = placesResponse.places || [];
       this.composition = placesResponse.composition ?? null;
       
-      console.log('Places loaded:', this.places.length, this.places);
       
       // Filter out places with invalid coordinates
       this.places = this.places.filter(p => p.lat !== 0 && p.lon !== 0 && !isNaN(p.lat) && !isNaN(p.lon));
       
-      console.log('Places after filtering:', this.places.length);
       
       // Process category data from response - keep all categories
       if (placesResponse.categories && placesResponse.categories.length > 0) {
@@ -225,10 +218,12 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       this.pendingFeatureShape = featureShape;
       this.dataLoaded = true;
       this.tryInitializeMap();
+      this.cdr.markForCheck();
     } catch (err: any) {
       console.error('Error loading places:', err);
       this.error = err?.message || this.translate.instant('analyze.placesDialog.errorLoadingPlaces');
       this.isLoading = false;
+      this.cdr.markForCheck();
     }
   }
 
@@ -246,6 +241,13 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private initializeMap(): void {
+    if (!this.mapContainerPlaces) {
+      return;
+    }
+    this.ngZone.runOutsideAngular(() => this.createMap());
+  }
+
+  private createMap(): void {
     if (!this.mapContainerPlaces) {
       return;
     }
@@ -281,7 +283,6 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Wait for map to load before adding places
     this.map.once('load', () => {
-      console.log('Map loaded, places count:', this.places.length);
       // Trigger resize to ensure map renders correctly in dialog
       if (this.map) {
         this.map.resize();
@@ -297,7 +298,10 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         this.pendingFeatureShape = null;
       }
 
-      this.isLoading = false;
+      this.ngZone.run(() => {
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      });
     });
   }
 
@@ -481,6 +485,7 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     this.highlightedActivityName = activityName;
+    this.cdr.markForCheck();
     this.applyMarkerHighlightStyles();
   }
 
@@ -571,12 +576,10 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private addPlacesToMap(): void {
     if (!this.map) {
-      console.warn('Cannot add places: map not initialized');
       return;
     }
 
     if (this.categoryData.length === 0) {
-      console.warn('Cannot add places: no category data available');
       return;
     }
 
@@ -734,7 +737,6 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private fitMapToPlaces(): void {
     if (!this.map || this.categoryData.length === 0) {
-      console.warn('Cannot fit map: map or category data missing');
       return;
     }
 
@@ -744,7 +746,6 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     const lats = allPlaces.map(p => p.lat).filter(lat => !isNaN(lat) && lat !== 0);
 
     if (lngs.length === 0 || lats.length === 0) {
-      console.warn('No valid coordinates found in places');
       return;
     }
 
@@ -753,7 +754,6 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     const minLat = Math.min(...lats);
     const maxLat = Math.max(...lats);
 
-    console.log('Map bounds:', { minLng, maxLng, minLat, maxLat });
 
     // Add padding
     const padding = 0.1;
@@ -765,7 +765,6 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
       [maxLng + lngPadding, maxLat + latPadding]
     ];
 
-    console.log('Fitting map to bounds:', bounds);
 
     this.map.fitBounds(bounds, {
       padding: 50,

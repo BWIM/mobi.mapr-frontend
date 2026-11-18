@@ -8,7 +8,7 @@ import { ProjectNavigationService } from '../../services/project-navigation.serv
   selector: 'app-project-switcher',
   imports: [SharedModule, TranslateModule],
   templateUrl: './project-switcher.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './project-switcher.component.css',
 })
 export class ProjectSwitcherComponent {

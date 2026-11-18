@@ -10,7 +10,7 @@ import { ProjectGroupMember } from '../interfaces/project-group';
   selector: 'app-group-overview',
   imports: [CommonModule, SharedModule, TranslateModule],
   templateUrl: './group-overview.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './group-overview.component.css',
 })
 export class GroupOverviewComponent {

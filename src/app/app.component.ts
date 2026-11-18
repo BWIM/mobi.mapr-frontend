@@ -22,7 +22,7 @@ import { environment } from '../environments/environment';
     // Archived components removed
   ],
   templateUrl: './app.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './app.component.css'
 })
 export class AppComponent {

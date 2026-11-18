@@ -1,12 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
 @import 'tailwindcss';
 
-@import 'ol/ol.css';
 
 /* Font Face Declarations - CORBEL fonts */
 @font-face {
     font-family: 'Corbel';
-    src: url('/assets/fonts/CORBEL.TTF') format('truetype');
+    src: url('/assets/fonts/CORBEL.woff2') format('woff2');
     font-weight: normal;
     font-style: normal;
     font-display: swap; /* Ensures text is visible while font loads */
@@ -14,7 +13,7 @@
 
 @font-face {
     font-family: 'Corbel';
-    src: url('/assets/fonts/CORBEL_BOLD.TTF') format('truetype');
+    src: url('/assets/fonts/CORBEL_BOLD.woff2') format('woff2');
     font-weight: bold;
     font-style: normal;
     font-display: swap; /* Ensures text is visible while font loads */

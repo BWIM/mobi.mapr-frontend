@@ -36,7 +36,7 @@ export interface CompositionFormattedMetric {
   standalone: true,
   imports: [LocaleNumberPipe, CommonModule, TranslateModule, SharedModule, CategoryCompositionPanelComponent],
   templateUrl: './category-composition-panel.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './category-composition-panel.component.css',
 })
 export class CategoryCompositionPanelComponent {

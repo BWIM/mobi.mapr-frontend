@@ -8,7 +8,7 @@ import { ShareAccessService } from '../../services/share-access.service';
   selector: 'app-right',
   imports: [SharedModule, StatsComponent, AnalyzeComponent],
   templateUrl: './right.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './right.component.css',
 })
 export class RightComponent {

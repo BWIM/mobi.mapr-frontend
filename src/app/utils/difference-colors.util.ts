@@ -3,7 +3,7 @@ import {
   ScoreLegendItem,
   buildLegendItems,
 } from './score-colors.util';
-import { GRADE_LETTERS, getGradeStep } from './grade.util';
+import { GRADE_LETTERS, GRADE_THRESHOLDS, getGradeStep } from './grade.util';
 
 /**
  * Diverging difference palette (signed diff = left − right; lower values are better):
@@ -153,15 +153,108 @@ export function buildDifferenceLegendItems(config: DifferenceColorConfig): Diffe
 const BOUNDARY_EPSILON = 1e-6;
 
 /**
- * MapLibre colour expression on the signed feature-state `diff` (left − right).
- * Features without a comparable value (`hasDiff` false) are transparent.
+ * Score that marks "no data" in tiles (capped travel time, in seconds). Mirrors
+ * `NO_DATA_SCORE` in map.service (kept here to avoid an import cycle).
  */
-export function buildDifferenceFillColorExpression(config: DifferenceColorConfig): unknown[] {
+const NO_DATA_SCORE = 15000;
+
+/**
+ * Difference tiles (`/diff-tiles/`) carry both sides per feature:
+ * `left_score` / `right_score` (seconds) and `left_index` / `right_index` (index × 100).
+ * A side is missing (property absent) when only the other profile set has a score.
+ */
+type DiffSide = 'left' | 'right';
+type DiffMetric = 'index' | 'score';
+
+function sideProperty(side: DiffSide, metric: DiffMetric): string {
+  return `${side}_${metric}`;
+}
+
+/** Grade-step expression (0 = A … 5 = F) on an index × 100; mirrors getQualityGradeStep. */
+function gradeStepExpression(indexExpression: unknown[]): unknown[] {
+  const expression: unknown[] = ['step', indexExpression, 0];
+  GRADE_THRESHOLDS.forEach((threshold, step) => {
+    expression.push(Math.round(threshold * 100), step + 1);
+  });
+  return expression;
+}
+
+/** True when the side has a comparable value (score not capped, index > 0). */
+function sideValidExpression(side: DiffSide, metric: DiffMetric): unknown[] {
+  const key = sideProperty(side, metric);
+  const value = ['to-number', ['get', key], metric === 'score' ? NO_DATA_SCORE : 0];
+  return metric === 'score'
+    ? ['all', ['has', key], ['!=', value, NO_DATA_SCORE]]
+    : ['all', ['has', key], ['>', value, 0]];
+}
+
+/** True when both sides have a comparable value (otherwise the feature is not drawn). */
+export function buildHasDiffExpression(metric: DiffMetric): unknown[] {
+  return ['all', sideValidExpression('left', metric), sideValidExpression('right', metric)];
+}
+
+/**
+ * Signed difference left − right (lower is better for both metrics):
+ * > 0 → right better, < 0 → left better. Quality in grade steps, time in seconds.
+ * Only meaningful where buildHasDiffExpression is true.
+ */
+export function buildSignedDiffExpression(metric: DiffMetric): unknown[] {
+  const left = ['to-number', ['get', sideProperty('left', metric)], 0];
+  const right = ['to-number', ['get', sideProperty('right', metric)], 0];
+  return metric === 'index'
+    ? ['-', gradeStepExpression(left), gradeStepExpression(right)]
+    : ['-', left, right];
+}
+
+/** Both sides and the signed diff of a difference-tile feature, as the map colours it. */
+export interface FeatureDifference {
+  /** Left value: seconds (score) or index × 100; null when missing. */
+  left: number | null;
+  right: number | null;
+  /** Signed left − right (grade steps or seconds); null unless both sides are present. */
+  diff: number | null;
+}
+
+/** TypeScript twin of the expressions above, e.g. for the hover popup. */
+export function getFeatureDifference(
+  properties: Record<string, unknown> | null | undefined,
+  metric: DiffMetric
+): FeatureDifference {
+  const read = (side: DiffSide): number | null => {
+    const raw = properties?.[sideProperty(side, metric)];
+    if (raw === undefined || raw === null || raw === '') {
+      return null;
+    }
+    const value = Number(raw);
+    if (!Number.isFinite(value)) {
+      return null;
+    }
+    if (metric === 'score' ? value === NO_DATA_SCORE : value <= 0) {
+      return null;
+    }
+    return value;
+  };
+  const left = read('left');
+  const right = read('right');
+  if (left === null || right === null) {
+    return { left, right, diff: null };
+  }
+  const diff = metric === 'index'
+    ? getQualityGradeStep(left / 100) - getQualityGradeStep(right / 100)
+    : left - right;
+  return { left, right, diff };
+}
+
+/**
+ * MapLibre colour expression on the signed difference (left − right) computed from the
+ * diff-tile properties. Features without a value on both sides are transparent.
+ */
+export function buildDifferenceFillColorExpression(config: DifferenceColorConfig, metric: DiffMetric): unknown[] {
   const steps = config.steps;
   const last = steps[steps.length - 1];
   const stepExpression: unknown[] = [
     'step',
-    ['to-number', ['feature-state', 'diff'], 0],
+    buildSignedDiffExpression(metric),
     last ? last.leftBetterColor : config.neutralColor,
   ];
 
@@ -177,10 +270,33 @@ export function buildDifferenceFillColorExpression(config: DifferenceColorConfig
 
   return [
     'case',
-    ['!', ['to-boolean', ['feature-state', 'hasDiff']]],
+    ['!', buildHasDiffExpression(metric)],
     'rgba(128, 128, 128, 0)',
     stepExpression,
   ];
+}
+
+/**
+ * True when the magnitude of the difference falls into a selected bracket
+ * (expression twin of isDifferenceInSelectedBrackets).
+ */
+export function buildDiffInSelectionExpression(
+  config: DifferenceColorConfig,
+  metric: DiffMetric,
+  selectedBracketIds: string[]
+): unknown {
+  if (selectedBracketIds.length === 0) {
+    return false;
+  }
+  if (selectedBracketIds.length >= config.steps.length) {
+    return true;
+  }
+  const [first, ...rest] = config.steps;
+  const bracketId: unknown[] = ['step', ['abs', buildSignedDiffExpression(metric)], first.bracketId];
+  for (const step of rest) {
+    bracketId.push(step.lowerBound, step.bracketId);
+  }
+  return ['in', bracketId, ['literal', selectedBracketIds]];
 }
 
 /** Selection is by magnitude, so a bracket covers both "left better" and "right better". */

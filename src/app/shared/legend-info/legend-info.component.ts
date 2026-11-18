@@ -10,7 +10,7 @@ import { getGradePalette, MAP_GRADE_ALPHA } from '../../utils/grade.util';
   standalone: true,
   imports: [CommonModule, TranslateModule, SharedModule],
   templateUrl: './legend-info.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './legend-info.component.css'
 })
 export class LegendInfoComponent {

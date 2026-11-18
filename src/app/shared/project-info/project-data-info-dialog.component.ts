@@ -9,7 +9,7 @@ export interface ProjectDataInfoDialogData {
 @Component({
   selector: 'app-project-data-info-dialog',
   imports: [SharedModule],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './project-data-info-dialog.component.html',
 })
 export class ProjectDataInfoDialogComponent {

@@ -17,8 +17,7 @@
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
-              "zone.js",
-              "@angular/localize/init"
+              "zone.js"
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
@@ -30,17 +29,12 @@
                 "glob": "**/*",
                 "input": "src/assets",
                 "output": "assets"
-              },
-              {
-                "glob": "inkmap-worker.js",
-                "input": "src/assets",
-                "output": "/"
               }
             ],
             "styles": [
               "src/material-theme.scss",
               "src/styles.css",
-              "node_modules/ol/ol.css",
+              "node_modules/material-icons/iconfont/filled.css",
               "node_modules/maplibre-gl/dist/maplibre-gl.css",
               "node_modules/@maplibre/maplibre-gl-compare/dist/maplibre-gl-compare.css"
             ],
@@ -51,12 +45,12 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "5MB",
-                  "maximumError": "6MB"
+                  "maximumWarning": "730kB",
+                  "maximumError": "830kB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "6kB",
+                  "maximumWarning": "11kB",
                   "maximumError": "25kB"
                 }
               ],
@@ -72,12 +66,12 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "5MB",
-                  "maximumError": "6MB"
+                  "maximumWarning": "730kB",
+                  "maximumError": "830kB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
+                  "maximumWarning": "11kB",
                   "maximumError": "20kB"
                 }
               ],
@@ -112,16 +106,12 @@
           },
           "defaultConfiguration": "development"
         },
-        "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n"
-        },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "polyfills": [
               "zone.js",
-              "zone.js/testing",
-              "@angular/localize/init"
+              "zone.js/testing"
             ],
             "tsConfig": "tsconfig.spec.json",
             "assets": [
@@ -132,7 +122,7 @@
             ],
             "styles": [
               "src/styles.css",
-              "node_modules/ol/ol.css"
+              "node_modules/material-icons/iconfont/filled.css"
             ],
             "scripts": []
           }

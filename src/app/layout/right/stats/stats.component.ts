@@ -15,11 +15,19 @@ import { getContrastTextColor, getGrade, getGradeColor } from '../../../utils/gr
 import { currentNumberLocale } from '../../../shared/pipes/locale-number.pipe';
 import { formatNumber } from '@angular/common';
 
+interface RankedRow {
+  county: County;
+  rank: number;
+  label: string;
+  color: string;
+  textColor: string;
+}
+
 @Component({
   selector: 'app-stats',
   imports: [SharedModule, InfoOverlayComponent, TranslateModule],
   templateUrl: './stats.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './stats.component.css',
 })
 export class StatsComponent implements OnDestroy {
@@ -33,9 +41,9 @@ export class StatsComponent implements OnDestroy {
   private mobileUi = inject(MobileUiService);
   private scoreColorsService = inject(ScoreColorsService);
 
-  counties: County[] = [];
+  private readonly counties = signal<County[]>([]);
   isLoading = signal(true); // Start with loading state true by default (step 0)
-  error: string | null = null;
+  readonly error = signal<string | null>(null);
   
   // Track current language to trigger translation updates
   private currentLang = signal<string>(this.languageService.getCurrentLanguage());
@@ -189,7 +197,7 @@ export class StatsComponent implements OnDestroy {
         
         // Clear data if no profiles are available
         if (profileIdsKey === null) {
-          this.counties = [];
+          this.counties.set([]);
           previousFilters = null;
           previousBewertung = null;
           // No data to load, so set loading to false
@@ -203,7 +211,7 @@ export class StatsComponent implements OnDestroy {
             } else {
               this.isLoading.set(false);
             }
-          } else if (this.counties.length === 0) {
+          } else if (untracked(() => this.counties()).length === 0) {
             // If map is loading but we don't have data yet, show loading
             this.isLoading.set(true);
           }
@@ -256,7 +264,7 @@ export class StatsComponent implements OnDestroy {
     }
 
     this.isLoading.set(true);
-    this.error = null;
+    this.error.set(null);
 
     const selectedStates = this.filterConfigService.selectedStates();
     const selectedRegioStars = this.filterConfigService.selectedRegioStars();
@@ -272,77 +280,58 @@ export class StatsComponent implements OnDestroy {
     this.statsService.getTopRankings(params).subscribe({
       next: (data) => {
         // Store raw data - ranks will be recalculated in filteredCounties getter to handle ties
-        this.counties = data as County[];
+        this.counties.set(data as County[]);
         this.isLoading.set(false);
       },
       error: (error) => {
         console.error('Error loading top rankings:', error);
-        this.error = this.translate.instant('stats.errorLoading');
+        this.error.set(this.translate.instant('stats.errorLoading'));
         this.isLoading.set(false);
-        this.counties = [];
+        this.counties.set([]);
       }
     });
   }
 
   /**
-   * Process rankings to handle tied scores - areas with the same score/index share the same rank
+   * Rankings sorted by the active bewertung, with tied scores sharing a rank
+   * (e.g. two items on rank 3 make the next one rank 5), plus the precomputed chip label and colours.
    */
-  get filteredCounties(): County[] {
-    if (this.counties.length === 0) {
+  readonly rankedRows = computed<RankedRow[]>(() => {
+    const counties = this.counties();
+    const bewertung = this.filterConfigService.selectedBewertung();
+    // Labels come from translate.instant; re-run on language change.
+    this.currentLang();
+    if (counties.length === 0) {
       return [];
     }
 
-    // Sort by the display value (score or index) in ascending order
-    // Lower values are better for both score (zeit) and index (qualitaet)
-    const sorted = [...this.counties].sort((a, b) => {
-      const valueA = this.getDisplayValue(a);
-      const valueB = this.getDisplayValue(b);
-      // For both 'zeit' (score) and 'qualitaet' (index), lower is better
-      return valueA - valueB; // Ascending order (lower values first)
-    });
+    const valueOf = (county: County) => (bewertung === 'zeit' ? county.score : county.index);
+    // Lower values are better for both score (zeit) and index (qualitaet).
+    const sorted = [...counties].sort((a, b) => valueOf(a) - valueOf(b));
 
-    // Assign ranks, handling ties
-    // When areas have the same numeric value (score or index), they share the same rank
-    // The next rank skips positions (e.g., if rank 3 is shared by 2 items, next is rank 5)
+    const rows: RankedRow[] = [];
     for (let i = 0; i < sorted.length; i++) {
-      if (i === 0) {
-        // First item always gets rank 1
-        sorted[i].rank = 1;
-      } else {
-        const prevValue = this.getDisplayValue(sorted[i - 1]);
-        const currentValue = this.getDisplayValue(sorted[i]);
-        
-        // Check if values are equal (with small tolerance for floating point)
-        const isEqual = Math.abs(prevValue - currentValue) < 0.001;
-        
-        if (isEqual) {
-          // Same rank as previous (tied)
-          sorted[i].rank = sorted[i - 1].rank;
-        } else {
-          // New rank - use position (i + 1) which automatically accounts for skipped positions
-          sorted[i].rank = i + 1;
-        }
-      }
+      const county = sorted[i];
+      // Compare with a small tolerance for floating point.
+      const tied = i > 0 && Math.abs(valueOf(sorted[i - 1]) - valueOf(county)) < 0.001;
+      const rank = tied ? rows[i - 1].rank : i + 1;
+      county.rank = rank;
+      const color = this.getDisplayColor(county, bewertung);
+      rows.push({
+        county,
+        rank,
+        label: this.formatDisplayValue(county, bewertung),
+        color,
+        textColor: getContrastTextColor(color),
+      });
     }
-
-    return sorted;
-  }
-
-  /**
-   * Get the display value (index or score) based on settings
-   */
-  getDisplayValue(county: County): number {
-    const bewertung = this.filterConfigService.selectedBewertung();
-    // 'zeit' -> score, 'qualitaet' -> index
-    return bewertung === 'zeit' ? county.score : county.index;
-  }
+    return rows;
+  });
 
   /**
    * Format the display value based on settings
    */
-  formatDisplayValue(county: County): string {
-    const bewertung = this.filterConfigService.selectedBewertung();
-    
+  private formatDisplayValue(county: County, bewertung: 'qualitaet' | 'zeit'): string {
     if (bewertung === 'zeit') {
       // For score, convert seconds to minutes for display
       // API returns score in seconds, but we display in minutes
@@ -356,18 +345,14 @@ export class StatsComponent implements OnDestroy {
   }
 
   /** Colour chip for the rating column (grade colour or travel-time bracket colour). */
-  getDisplayColor(county: County): string {
-    return this.filterConfigService.selectedBewertung() === 'zeit'
+  private getDisplayColor(county: County, bewertung: 'qualitaet' | 'zeit'): string {
+    return bewertung === 'zeit'
       ? this.scoreColorsService.getColorForScore(county.score)
       : getGradeColor(county.index);
   }
 
-  getDisplayTextColor(county: County): string {
-    return getContrastTextColor(this.getDisplayColor(county));
-  }
-
   /** Sub-grade for an API index (e.g. 42 → "B"). */
-  getRating(index: number): string {
+  private getRating(index: number): string {
     return getGrade(index) ?? this.translate.instant('map.popup.error');
   }
 

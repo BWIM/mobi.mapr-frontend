@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, AfterViewInit, effect, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, AfterViewInit, effect, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, formatNumber } from '@angular/common';
 import { Subscription, catchError, of, forkJoin, firstValueFrom } from 'rxjs';
 import { FeatureSelectionService, MapCompareSide } from '../../../shared/services/feature-selection.service';
@@ -10,8 +10,8 @@ import { PlacesService, Place } from '../../../services/places.service';
 import { ShareAccessService } from '../../../services/share-access.service';
 import { MatDialog } from '@angular/material/dialog';
 import { SharedModule } from '../../../shared/shared.module';
-import { AllCategoriesDialogComponent, AllCategoriesDialogData } from './overlay/all-categories-dialog.component';
-import { PlacesDialogComponent, PlacesDialogData } from './places/places-dialog.component';
+import type { AllCategoriesDialogData } from './overlay/all-categories-dialog.component';
+import type { PlacesDialogData } from './places/places-dialog.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MobileUiService } from '../../../services/mobile-ui.service';
 import { ScoreColorsService } from '../../../services/score-colors.service';
@@ -41,7 +41,7 @@ interface ActivityRow {
   selector: 'app-analyze',
   imports: [LocaleNumberPipe, CommonModule, SharedModule, TranslateModule, CategoryCompositionPanelComponent],
   templateUrl: './analyze.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './analyze.component.css',
 })
 export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -128,6 +128,11 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private translate = inject(TranslateService);
   private mobileUi = inject(MobileUiService);
   private scoreColorsService = inject(ScoreColorsService);
+  /**
+   * OnPush: most template state here is plain fields updated from effects, RxJS subscriptions
+   * and awaits, so every async entry point ends with markForCheck().
+   */
+  private cdr = inject(ChangeDetectorRef);
   private featureSubscription?: Subscription;
   private featureSubscription2?: Subscription;
   private featureInfoSubscription?: Subscription;
@@ -211,6 +216,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.previousLeftFilters = leftFilters ? { ...leftFilters } : null;
       this.previousRightFilters = rightFilters ? { ...rightFilters } : null;
       this.previousFilters = filters ? { ...filters } : null;
+      this.cdr.markForCheck();
     });
 
     effect(() => {
@@ -218,6 +224,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       if (!isMapLoading && this.pendingReload) {
         this.pendingReload = false;
         this.executeReload();
+        this.cdr.markForCheck();
       }
     });
 
@@ -228,6 +235,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
       this.refreshPlacesMetricDisplay();
+      this.cdr.markForCheck();
     });
   }
 
@@ -266,6 +274,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
             }
           }
         }
+        this.cdr.markForCheck();
       }
     );
 
@@ -302,11 +311,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
             }
           }
         }
+        this.cdr.markForCheck();
       }
     );
 
     // Rebuild activity rows on language change so units (e.g. "min") are translated
-    this.languageSubscription = this.translate.onLangChange.subscribe(() => this.refreshActivityRows());
+    this.languageSubscription = this.translate.onLangChange.subscribe(() => {
+      this.refreshActivityRows();
+      this.cdr.markForCheck();
+    });
   }
 
   ngAfterViewInit() {
@@ -630,20 +643,17 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private loadFeatureInfo(feature: any): void {
     const map = this.mapService.getMap();
     if (!map) {
-      console.warn('Map not available for feature info');
       return;
     }
 
     const featureIdRaw = feature.properties.id || feature.id;
     if (!featureIdRaw) {
-      console.warn('Feature ID not available');
       return;
     }
 
     // Convert to number if needed
     const featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
     if (isNaN(featureId)) {
-      console.warn('Invalid feature ID:', featureIdRaw);
       return;
     }
 
@@ -652,7 +662,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Prevent duplicate requests for the same feature
     if ((this.isLoadingFeatureInfo || this.isLoadingAnalyze) && this.currentLoadingFeatureId === featureId) {
-      console.log('Feature data request already in progress for feature:', featureId);
       return;
     }
 
@@ -689,7 +698,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const profileContext = this.getProfileContext();
     if (!profileContext) {
-      console.warn('Profile combination or filters not available');
       return;
     }
     const { profileIds, filters } = profileContext;
@@ -745,6 +753,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       featureInfo: featureInfoRequest,
       analyzeData: analyzeRequest
     }).subscribe((result: any) => {
+      this.cdr.markForCheck();
       this.isLoadingFeatureInfo = false;
       this.isLoadingAnalyze = false;
       this.currentLoadingFeatureId = null;
@@ -769,20 +778,17 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
   private loadFeatureInfo2(feature: any): void {
     const map = this.mapService.getMap();
     if (!map) {
-      console.warn('Map not available for feature info 2');
       return;
     }
 
     const featureIdRaw = feature.properties.id || feature.id;
     if (!featureIdRaw) {
-      console.warn('Feature ID not available for feature 2');
       return;
     }
 
     // Convert to number if needed
     const featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
     if (isNaN(featureId)) {
-      console.warn('Invalid feature ID for feature 2:', featureIdRaw);
       return;
     }
 
@@ -791,7 +797,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Prevent duplicate requests for the same feature
     if ((this.isLoadingFeatureInfo2 || this.isLoadingAnalyze2) && this.currentLoadingFeatureId2 === featureId) {
-      console.log('Feature 2 data request already in progress for feature:', featureId);
       return;
     }
 
@@ -816,14 +821,12 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Get profile combination ID
     const profileIds = this.filterConfigService.currentProfileIds();
     if (!profileIds?.length) {
-      console.warn('Profile combination ID not available for feature 2');
       return;
     }
 
     // Get current filters
     const filters = this.filterConfigService.contentLayerFilters();
     if (!filters) {
-      console.warn('Content layer filters not available for feature 2');
       return;
     }
 
@@ -878,6 +881,7 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       featureInfo: featureInfoRequest,
       analyzeData: analyzeRequest
     }).subscribe((result: any) => {
+      this.cdr.markForCheck();
       this.isLoadingFeatureInfo2 = false;
       this.isLoadingAnalyze2 = false;
       this.currentLoadingFeatureId2 = null;
@@ -902,19 +906,16 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const map = this.mapService.getMap();
     if (!map) {
-      console.warn('Map not available for places');
       return;
     }
 
     const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
     if (!featureIdRaw) {
-      console.warn('Feature ID not available');
       return;
     }
 
     const featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
     if (isNaN(featureId)) {
-      console.warn('Invalid feature ID:', featureIdRaw);
       return;
     }
 
@@ -927,7 +928,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const featureType = this.savedFeatureType;
     const profileContext = this.getProfileContext();
     if (!profileContext) {
-      console.warn('Profile IDs not available');
       return;
     }
     const { profileIds } = profileContext;
@@ -985,6 +985,8 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       console.error('Error loading places:', err);
       this.placesError = err?.message || this.translate.instant('analyze.placesDialog.errorLoadingPlaces');
+    } finally {
+      this.cdr.markForCheck();
     }
   }
 
@@ -1077,7 +1079,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Use category_id directly from the API response
     if (!category.category_id) {
-      console.warn('Category ID not available for category:', category.category_name);
       return;
     }
 
@@ -1278,19 +1279,16 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const map = this.mapService.getMap();
     if (!map) {
-      console.warn('Map not available for all categories');
       return;
     }
 
     const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
     if (!featureIdRaw) {
-      console.warn('Feature ID not available');
       return;
     }
 
     const featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
     if (isNaN(featureId)) {
-      console.warn('Invalid feature ID:', featureIdRaw);
       return;
     }
 
@@ -1302,7 +1300,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
     const featureType = this.savedFeatureType;
     const profileContext = this.getProfileContext();
     if (!profileContext) {
-      console.warn('Profile IDs not available');
       return;
     }
     const { profileIds, filters } = profileContext;
@@ -1347,11 +1344,13 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    this.dialog.open(AllCategoriesDialogComponent, {
-      ...this.getOverlayDialogSize(),
-      panelClass: 'all-categories-dialog-panel',
-      data: dialogData,
-    });
+    void import('./overlay/all-categories-dialog.component').then(({ AllCategoriesDialogComponent }) =>
+      this.dialog.open(AllCategoriesDialogComponent, {
+        ...this.getOverlayDialogSize(),
+        panelClass: 'all-categories-dialog-panel',
+        data: dialogData,
+      })
+    );
   }
 
   openPlacesDialog(categoryId?: number, categoryName?: string, featureNumber?: 1 | 2): void {
@@ -1361,7 +1360,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const map = this.mapService.getMap();
     if (!map) {
-      console.warn('Map not available for places dialog');
       return;
     }
 
@@ -1379,12 +1377,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       featureType = this.savedFeatureType;
       const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
       if (!featureIdRaw) {
-        console.warn('Feature ID not available');
         return;
       }
       featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
       if (isNaN(featureId)) {
-        console.warn('Invalid feature ID:', featureIdRaw);
         return;
       }
     } else if (featureNumber === 2) {
@@ -1395,12 +1391,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       featureType = this.savedFeatureType2;
       const featureIdRaw2 = this.selectedFeature2.properties.id || this.selectedFeature2.id;
       if (!featureIdRaw2) {
-        console.warn('Feature ID 2 not available');
         return;
       }
       featureId = typeof featureIdRaw2 === 'string' ? parseInt(featureIdRaw2, 10) : featureIdRaw2;
       if (isNaN(featureId)) {
-        console.warn('Invalid feature ID 2:', featureIdRaw2);
         return;
       }
     } else {
@@ -1418,12 +1412,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         featureType = this.savedFeatureType;
         const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
         if (!featureIdRaw) {
-          console.warn('Feature ID not available');
           return;
         }
         featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
         if (isNaN(featureId)) {
-          console.warn('Invalid feature ID:', featureIdRaw);
           return;
         }
       } else if (this.isComparisonMode && this.selectedFeature2 && this.savedFeatureType2) {
@@ -1434,12 +1426,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           featureType = this.savedFeatureType2;
           const featureIdRaw2 = this.selectedFeature2.properties.id || this.selectedFeature2.id;
           if (!featureIdRaw2) {
-            console.warn('Feature ID 2 not available');
             return;
           }
           featureId = typeof featureIdRaw2 === 'string' ? parseInt(featureIdRaw2, 10) : featureIdRaw2;
           if (isNaN(featureId)) {
-            console.warn('Invalid feature ID 2:', featureIdRaw2);
             return;
           }
         } else {
@@ -1447,12 +1437,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
           featureType = this.savedFeatureType;
           const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
           if (!featureIdRaw) {
-            console.warn('Feature ID not available');
             return;
           }
           featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
           if (isNaN(featureId)) {
-            console.warn('Invalid feature ID:', featureIdRaw);
             return;
           }
         }
@@ -1461,12 +1449,10 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
         featureType = this.savedFeatureType;
         const featureIdRaw = this.selectedFeature.properties.id || this.selectedFeature.id;
         if (!featureIdRaw) {
-          console.warn('Feature ID not available');
           return;
         }
         featureId = typeof featureIdRaw === 'string' ? parseInt(featureIdRaw, 10) : featureIdRaw;
         if (isNaN(featureId)) {
-          console.warn('Invalid feature ID:', featureIdRaw);
           return;
         }
       }
@@ -1474,7 +1460,6 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const profileContext = this.getProfileContext();
     if (!profileContext) {
-      console.warn('Profile IDs not available');
       return;
     }
     const { profileIds, filters } = profileContext;
@@ -1516,13 +1501,15 @@ export class AnalyzeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    this.dialog.open(PlacesDialogComponent, {
-      width: '85vw',
-      maxWidth: '1200px',
-      maxHeight: '85vh',
-      panelClass: 'places-dialog-panel',
-      data: placesData,
-    });
+    void import('./places/places-dialog.component').then(({ PlacesDialogComponent }) =>
+      this.dialog.open(PlacesDialogComponent, {
+        width: '85vw',
+        maxWidth: '1200px',
+        maxHeight: '85vh',
+        panelClass: 'places-dialog-panel',
+        data: placesData,
+      })
+    );
   }
 
 }

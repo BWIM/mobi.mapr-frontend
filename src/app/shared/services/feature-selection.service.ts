@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { Feature } from 'ol';
 
 export type MapCompareSide = 'left' | 'right';
 
@@ -19,9 +18,6 @@ export interface MapLibreFeatureData {
   providedIn: 'root'
 })
 export class FeatureSelectionService {
-  private selectedFeatureSource = new BehaviorSubject<Feature | null>(null);
-  selectedFeature$ = this.selectedFeatureSource.asObservable();
-
   // MapLibre feature selection
   private selectedMapLibreFeatureSource = new BehaviorSubject<MapLibreFeatureData | null>(null);
   selectedMapLibreFeature$ = this.selectedMapLibreFeatureSource.asObservable();
@@ -32,10 +28,6 @@ export class FeatureSelectionService {
   // Second feature for comparison
   private selectedMapLibreFeature2Source = new BehaviorSubject<MapLibreFeatureData | null>(null);
   selectedMapLibreFeature2$ = this.selectedMapLibreFeature2Source.asObservable();
-
-  setSelectedFeature(feature: Feature | null) {
-    this.selectedFeatureSource.next(feature);
-  }
 
   setSelectedMapLibreFeature(feature: MapLibreFeatureData | null, side: MapCompareSide = 'left') {
     // Side must be updated first: feature subscribers run synchronously and read

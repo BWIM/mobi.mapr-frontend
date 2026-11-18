@@ -9,8 +9,14 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import Chart from 'chart.js/auto';
-import type { ActiveElement, ChartType, Plugin } from 'chart.js';
+import type { ActiveElement, Chart, ChartType, Plugin } from 'chart.js';
+
+/** Chart.js (with all controllers registered) is loaded on first use, outside the initial bundle. */
+let chartModule: Promise<typeof import('chart.js/auto').default> | null = null;
+function loadChart(): Promise<typeof import('chart.js/auto').default> {
+  chartModule ??= import('chart.js/auto').then(m => m.default);
+  return chartModule;
+}
 
 export interface ChartDataSelectEvent {
   originalEvent: MouseEvent;
@@ -51,6 +57,8 @@ export class ChartComponent implements OnDestroy {
   private readonly canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
 
   chart?: Chart;
+  /** Bumped on every (re)init and on destroy so a stale async init does not create a chart. */
+  private initToken = 0;
 
   constructor() {
     afterRenderEffect(() => {
@@ -69,6 +77,16 @@ export class ChartComponent implements OnDestroy {
 
   /** Destroys and recreates the chart, e.g. after its container was resized. */
   reinit(): void {
+    const token = ++this.initToken;
+    void loadChart().then(ChartCtor => {
+      if (token !== this.initToken) {
+        return;
+      }
+      this.createChart(ChartCtor);
+    });
+  }
+
+  private createChart(ChartCtor: typeof import('chart.js/auto').default): void {
     this.chart?.destroy();
 
     const options = { ...(this.options() ?? {}), responsive: true };
@@ -76,7 +94,7 @@ export class ChartComponent implements OnDestroy {
       options.maintainAspectRatio = false;
     }
 
-    this.chart = new Chart(this.canvas().nativeElement, {
+    this.chart = new ChartCtor(this.canvas().nativeElement, {
       type: this.type(),
       data: this.data() ?? { datasets: [] },
       options,
@@ -100,6 +118,7 @@ export class ChartComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.initToken++;
     this.chart?.destroy();
     this.chart = undefined;
   }

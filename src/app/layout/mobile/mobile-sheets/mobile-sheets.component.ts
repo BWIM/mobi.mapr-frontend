@@ -8,7 +8,7 @@ import { MobileAnalyzeComponent } from '../analyze/mobile-analyze/mobile-analyze
 @Component({
   selector: 'app-mobile-sheets',
   imports: [MatIcon, TranslateModule, StatsComponent, MobileAnalyzeComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './mobile-sheets.component.html',
 })
 export class MobileSheetsComponent {

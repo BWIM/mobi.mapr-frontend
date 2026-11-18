@@ -12,7 +12,7 @@ export interface InfoDialogData {
   standalone: true,
   imports: [SharedModule, CommonModule],
   templateUrl: './info-dialog.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './info-dialog.component.css'
 })
 export class InfoDialogComponent {

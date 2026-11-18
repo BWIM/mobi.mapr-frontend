@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -20,7 +20,7 @@ import { LanguageService } from '../../services/language.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -36,8 +36,8 @@ import { LanguageService } from '../../services/language.service';
 })
 export class LoginComponent {
   loginForm!: FormGroup;
-  error: string = '';
-  isLoading: boolean = false;
+  readonly error = signal('');
+  readonly isLoading = signal(false);
   currentLang = 'de';
   languages: { code: string; name: string }[] = [];
   hidePassword = true;
@@ -75,13 +75,13 @@ export class LoginComponent {
   }
 
   onSubmit(): void {
-    if (this.loginForm.valid && !this.isLoading) {
-      this.isLoading = true;
-      this.error = '';
+    if (this.loginForm.valid && !this.isLoading()) {
+      this.isLoading.set(true);
+      this.error.set('');
 
       const { username, password } = this.loginForm.value;
       this.authService.login(username, password).pipe(
-        finalize(() => this.isLoading = false)
+        finalize(() => this.isLoading.set(false))
       ).subscribe({
         next: () => {
           // Bring the user back to the page (incl. all view params) that required the login.
@@ -92,7 +92,7 @@ export class LoginComponent {
         },
         error: (err) => {
           this.translate.get('auth.login.loginFailed').subscribe((text: string) => {
-            this.error = text;
+            this.error.set(text);
           });
           console.error('Login error:', err);
         }

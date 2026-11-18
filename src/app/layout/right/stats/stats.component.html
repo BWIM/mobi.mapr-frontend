@@ -23,28 +23,28 @@
         </mat-form-field>
       </div>
       
-      <div *ngIf="error && !isLoading()" class="flex-1 flex items-center justify-center text-red-500">
-        <p>{{ error }}</p>
+      <div *ngIf="error() && !isLoading()" class="flex-1 flex items-center justify-center text-red-500">
+        <p>{{ error() }}</p>
       </div>
       
-      <div *ngIf="!isLoading() && !error" class="flex-1 overflow-auto pr-4">
+      <div *ngIf="!isLoading() && !error()" class="flex-1 overflow-auto pr-4">
         <table class="w-full border-collapse border-0 text-[var(--primary-color)]" style="table-layout: fixed;">
           <tbody>
-            <tr *ngFor="let county of filteredCounties" class="leading-[1.8]">
-              <td class="pr-3 align-top border-0 w-[35px]">{{ county.rank }}</td>
+            <tr *ngFor="let row of rankedRows()" class="leading-[1.8]">
+              <td class="pr-3 align-top border-0 w-[35px]">{{ row.rank }}</td>
               <td class="pr-3 align-top border-0">
                 <span 
-                  (click)="onFeatureNameClick(county)" 
+                  (click)="onFeatureNameClick(row.county)" 
                   class="cursor-pointer hover:underline"
                   [title]="'stats.clickToZoom' | translate">
-                  {{ county.name }}
+                  {{ row.county.name }}
                 </span>
               </td>
               <td class="align-top border-0 whitespace-nowrap w-[75px]">
-                <span class="rank-chip" [style.background-color]="getDisplayColor(county)" [style.color]="getDisplayTextColor(county)">{{ formatDisplayValue(county) }}</span>
+                <span class="rank-chip" [style.background-color]="row.color" [style.color]="row.textColor">{{ row.label }}</span>
               </td>
             </tr>
-            <tr *ngIf="filteredCounties.length === 0">
+            <tr *ngIf="rankedRows().length === 0">
               <td colspan="3" class="text-sm text-[var(--primary-color)] opacity-70 py-2 border-0">
                 {{ 'stats.noDataAvailable' | translate }}
               </td>

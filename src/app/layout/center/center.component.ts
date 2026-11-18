@@ -1,40 +1,27 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, effect, ChangeDetectorRef, computed, ChangeDetectionStrategy } from '@angular/core';
-import { Subscription, firstValueFrom, debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
-import { Map, MapDataEvent, NavigationControl, FullscreenControl, Popup, AttributionControl, LngLatLike } from 'maplibre-gl';
-import Compare from '@maplibre/maplibre-gl-compare';
-import { MapService, NO_DATA_SCORE, CAPPED_SCORE_MINUTES, CONTENT_LAYER_RIGHT_SOURCE, CONTENT_SOURCE_LAYER } from '../../services/map.service';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, effect, ChangeDetectorRef, ChangeDetectionStrategy, NgZone, signal } from '@angular/core';
+import { Subscription, firstValueFrom, Subject } from 'rxjs';
+import { Map, MapDataEvent, NavigationControl, FullscreenControl, Popup, AttributionControl, LngLatLike, ResourceType } from 'maplibre-gl';
+import type Compare from '@maplibre/maplibre-gl-compare';
+import { MapService, NO_DATA_SCORE, CAPPED_SCORE_MINUTES, CONTENT_SOURCE_LAYER } from '../../services/map.service';
+import { getFeatureDifference } from '../../utils/difference-colors.util';
 import MinimapControl from "maplibregl-minimap";
 import { SharedModule } from '../../shared/shared.module';
 import { AdminLevel, FilterConfigService } from '../../services/filter-config.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { InfoDialogComponent } from '../../shared/info-overlay/info-dialog.component';
-import { LegendInfoComponent } from '../../shared/legend-info/legend-info.component';
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { FeatureSelectionService } from '../../shared/services/feature-selection.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SearchService } from '../../services/search.service';
-import { QualityBracket, TimeBracket } from '../../services/filter-config.service';
-import { ScoreColorsService } from '../../services/score-colors.service';
 import { ShareAccessService } from '../../services/share-access.service';
-import {
-  buildDifferenceLegendItems,
-  DifferenceLegendItem,
-  buildQualityDifferenceConfig,
-  buildTimeDifferenceConfig,
-} from '../../utils/difference-colors.util';
-import { getGrade, getGradePalette, MAP_GRADE_ALPHA } from '../../utils/grade.util';
-import { ScoreLegendItem } from '../../utils/score-colors.util';
+import { getGrade } from '../../utils/grade.util';
+import { gradeStepLabel } from '../../utils/grade-step-label.util';
+import { MapLegendComponent } from './map-legend/map-legend.component';
 import { formatNumber } from '@angular/common';
 import { currentNumberLocale } from '../../shared/pipes/locale-number.pipe';
 import { ExportMapControl } from './export-map.control';
-import { GeoJsonDownloadDialogComponent, GeoJsonDownloadDialogData } from '../left/geojson-download-dialog/geojson-download-dialog.component';
-interface NominatimResult {
-  display_name: string;
-  lat: string;
-  lon: string;
-  boundingbox?: string[];
-}
+import type { GeoJsonDownloadDialogData } from '../left/geojson-download-dialog/geojson-download-dialog.component';
+import { GEOCODING_MIN_QUERY_LENGTH, GeocodingResult, GeocodingService } from '../../services/geocoding.service';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 
 interface LayerButtonOption {
   value: AdminLevel;
@@ -44,9 +31,9 @@ interface LayerButtonOption {
 
 @Component({
   selector: 'app-center',
-  imports: [SharedModule, TranslateModule],
+  imports: [SharedModule, TranslateModule, MapLegendComponent],
   templateUrl: './center.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './center.component.css',
 })
 export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -81,15 +68,19 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   center: [number, number] = [9.2156505, 49.320099];
   private filterConfigService = inject(FilterConfigService);
   private changeDetectorRef = inject(ChangeDetectorRef);
+  /**
+   * Maps are constructed outside Angular's zone so MapLibre's DOM listeners (mousemove, drag),
+   * render loop and tile events do not trigger app-wide change detection. Handlers that mutate
+   * non-signal UI state re-enter the zone via ngZone.run; signal writes need no zone.
+   */
+  private readonly ngZone = inject(NgZone);
   private readonly hostElementRef = inject(ElementRef<HTMLElement>);
   readonly isMapCompareMode = this.filterConfigService.isMapCompareMode;
   readonly isDifferenceView = this.filterConfigService.isDifferenceView;
   private dialog = inject(MatDialog);
-  private http = inject(HttpClient);
   private featureSelectionService = inject(FeatureSelectionService);
   private translate = inject(TranslateService);
   private searchService = inject(SearchService);
-  private scoreColorsService = inject(ScoreColorsService);
   private snackBar = inject(MatSnackBar);
   private shareAccess = inject(ShareAccessService);
   private popup?: Popup;
@@ -105,9 +96,10 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     { layerId: 'content-layer-selection', paintProperty: 'line-opacity' }
   ];
 
-  // Nominatim search properties
+  // Place search (Photon via GeocodingService)
+  private geocoding = inject(GeocodingService);
   searchQuery: string = '';
-  searchResults: NominatimResult[] = [];
+  readonly searchResults = signal<GeocodingResult[]>([]);
   private searchSubject = new Subject<string>();
   isGettingLocation: boolean = false;
   private lastLayerFallbackToastAt = 0;
@@ -188,22 +180,17 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     // Setup debounced search
-    this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(query => this.searchNominatim(query))
-    ).subscribe(results => {
-      this.searchResults = results;
+    this.geocoding.searchAsYouType(this.searchSubject).subscribe(results => {
+      this.searchResults.set(results);
     });
 
     // Subscribe to search queries from other components (e.g., stats component)
     this.searchQuerySubscription = this.searchService.searchQuery$.subscribe(query => {
       if (query) {
         this.searchQuery = query;
-        // Trigger search if query is long enough
-        if (query.trim().length >= 3) {
-          this.searchSubject.next(query.trim());
-        }
+        // OnPush: searchQuery is a plain ngModel field set from another component's stream.
+        this.changeDetectorRef.markForCheck();
+        this.searchSubject.next(query);
         // Focus the search input after a short delay to ensure it's rendered
         setTimeout(() => {
           if (this.searchInput?.nativeElement) {
@@ -238,55 +225,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     return this.filterConfigService.effectiveAdminLevel;
   }
 
-
-  // Quality (index) colors - A through F
-  qualityColors: Array<{ letter: QualityBracket; color: string }> = getGradePalette(MAP_GRADE_ALPHA);
-  readonly timeLegendItems = this.scoreColorsService.legendItems;
-  readonly hasScoreColors = this.scoreColorsService.hasConfig;
-  readonly differenceLegendItems = computed((): DifferenceLegendItem[] => {
-    if (!this.filterConfigService.isDifferenceView()) {
-      return [];
-    }
-    if (this.filterConfigService.selectedBewertung() === 'zeit') {
-      const scoreConfig = this.scoreColorsService.config();
-      return scoreConfig ? buildDifferenceLegendItems(buildTimeDifferenceConfig(scoreConfig)) : [];
-    }
-    return buildDifferenceLegendItems(buildQualityDifferenceConfig());
-  });
-
-  isQualityBracketSelected(bracket: QualityBracket): boolean {
-    return this.filterConfigService.isQualityBracketSelected(bracket);
-  }
-
-  isTimeBracketSelected(bracket: TimeBracket): boolean {
-    return this.filterConfigService.isTimeBracketSelected(bracket);
-  }
-
-  isDifferenceBracketSelected(bracketId: string): boolean {
-    if (this.isQualityMode) {
-      return this.filterConfigService.isQualityBracketSelected(bracketId as QualityBracket);
-    }
-    return this.filterConfigService.isTimeBracketSelected(bracketId);
-  }
-
-  toggleQualityBracket(event: MouseEvent, bracket: QualityBracket): void {
-    event.stopPropagation();
-    this.filterConfigService.toggleQualityBracket(bracket);
-  }
-
-  toggleTimeBracket(event: MouseEvent, bracket: TimeBracket): void {
-    event.stopPropagation();
-    this.filterConfigService.toggleTimeBracket(bracket);
-  }
-
-  toggleDifferenceBracket(event: MouseEvent, bracketId: string): void {
-    event.stopPropagation();
-    if (this.isQualityMode) {
-      this.filterConfigService.toggleQualityBracket(bracketId as QualityBracket);
-      return;
-    }
-    this.filterConfigService.toggleTimeBracket(bracketId);
-  }
 
   isLayerAvailable(level: AdminLevel): boolean {
     return this.filterConfigService.availableAdminLevels().includes(level);
@@ -328,49 +266,29 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     isQualityMode: boolean,
     notAvailable: string
   ): string {
-    const featureId = properties['id'];
-    const state =
-      this.map && featureId !== undefined && featureId !== null
-        ? this.map.getFeatureState({
-            source: 'content-layer',
-            sourceLayer: 'geodata',
-            id: featureId as string | number,
-          })
-        : null;
+    // Difference tiles carry both sides per feature (left_/right_ score and index).
+    const { left, right, diff } = getFeatureDifference(properties, isQualityMode ? 'index' : 'score');
 
     const leftLabel = this.translate.instant('map.popup.left');
     const rightLabel = this.translate.instant('map.popup.right');
     const diffLabel = this.translate.instant('map.popup.difference');
     const minLabel = this.translate.instant('map.popup.minutes');
 
-    const formatValue = (raw: unknown): string => {
-      if (raw === undefined || raw === null || !Number.isFinite(Number(raw))) {
+    // Index values are × 100 (as in the tiles), scores are seconds.
+    const formatValue = (value: number | null): string => {
+      if (value === null) {
         return notAvailable;
       }
-      const value = Number(raw);
-      if (isQualityMode) {
-        // feature-state stores the quality index as a ratio (index / 100)
-        return this.getIndexName(value * 100);
-      }
-      return `${(value / 60).toFixed(1)} ${minLabel}`;
+      return isQualityMode ? this.getIndexName(value) : `${(value / 60).toFixed(1)} ${minLabel}`;
     };
 
-    const leftRaw = state?.['leftValue'] ?? (isQualityMode
-      ? (properties['index'] !== undefined && properties['index'] !== null
-          ? Number(properties['index']) / 100
-          : null)
-      : properties['score']);
-    const rightRaw = state?.['rightValue'];
-    const hasDiff = !!state?.['hasDiff'];
-    const diffRaw = hasDiff ? state?.['diff'] : null;
-
-    const leftText = formatValue(leftRaw);
-    const rightText = formatValue(rightRaw);
+    const leftText = formatValue(left);
+    const rightText = formatValue(right);
     let diffText = notAvailable;
-    if (hasDiff && diffRaw !== undefined && diffRaw !== null && Number.isFinite(Number(diffRaw))) {
-      const signed = Number(diffRaw);
+    if (diff !== null) {
+      const signed = diff;
       const magnitude = isQualityMode
-        ? this.getGradeStepLabel(Math.abs(signed))
+        ? gradeStepLabel(this.translate, Math.abs(signed))
         : `${formatNumber(Math.abs(signed) / 60, currentNumberLocale(this.translate), '1.1-1')} ${minLabel}`;
       const direction = signed === 0
         ? ''
@@ -383,43 +301,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       <div>${rightLabel} ${rightText}</div>
       <div>${diffLabel} ${diffText}</div>
     `;
-  }
-
-  /** "gleiche Note" / "1 Notenstufe" / "3 Notenstufen" */
-  getGradeStepLabel(steps: number): string {
-    if (steps === 0) {
-      return this.translate.instant('map.legend.difference.sameGrade');
-    }
-    return this.translate.instant(
-      steps === 1 ? 'map.legend.difference.gradeStep' : 'map.legend.difference.gradeSteps',
-      { count: steps }
-    );
-  }
-
-  getDifferenceStepTitle(item: DifferenceLegendItem): string {
-    if (item.direction === 0) {
-      return this.translate.instant(
-        this.isQualityMode ? 'map.legend.difference.sameGrade' : 'map.legend.difference.aboutSame'
-      );
-    }
-    const magnitude = this.isQualityMode
-      ? this.getGradeStepLabel(item.stepIndex)
-      : `≥ ${item.segmentLabel} ${this.translate.instant('map.popup.minutes')}`;
-    const side = this.translate.instant(
-      item.direction > 0 ? 'map.legend.difference.rightBetter' : 'map.legend.difference.leftBetter'
-    );
-    return `${magnitude} · ${side}`;
-  }
-
-  openLegendDialog(): void {
-    this.dialog.open(InfoDialogComponent, {
-      width: '80vw',
-      height: '80vh',
-      maxWidth: '80vw',
-      maxHeight: '80vh',
-      panelClass: 'info-dialog-panel',
-      data: { content: LegendInfoComponent }
-    });
   }
 
   async ngOnInit() {
@@ -485,7 +366,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
           return;
         }
         this.captureViewportFromActiveMap();
-        this.mapService.unbindDifferenceSync();
         this.destroyCompareMaps();
         this.destroySingleMap();
         await new Promise<void>(resolve => setTimeout(resolve, 0));
@@ -522,7 +402,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       this.captureViewportFromActiveMap();
       this.filterConfigService.resetMapLayerUpdateState();
       this.filterConfigService.setCompareMapsReady(false);
-      this.mapService.unbindDifferenceSync();
       this.destroyCompareMaps();
       this.destroySingleMap();
       await this.waitForCompareContainers();
@@ -552,7 +431,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       this.captureViewportFromActiveMap();
       this.filterConfigService.resetMapLayerUpdateState();
       this.filterConfigService.setCompareMapsReady(false);
-      this.mapService.unbindDifferenceSync();
       this.destroyCompareMaps();
       this.destroySingleMap();
       await new Promise<void>((resolve) => setTimeout(resolve, 0));
@@ -577,6 +455,13 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private initSingleMapForDifference(): void {
+    if (this.map || !this.mapContainer?.nativeElement) {
+      return;
+    }
+    this.ngZone.runOutsideAngular(() => this.createSingleMapForDifference());
+  }
+
+  private createSingleMapForDifference(): void {
     if (this.map || !this.mapContainer?.nativeElement) {
       return;
     }
@@ -648,10 +533,13 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       dragRotate: false,
       renderWorldCopies: false,
       attributionControl: false,
+      // Adds the short-lived tile token to content tile requests of logged-in users.
+      transformRequest: (url: string, resourceType?: ResourceType) =>
+        this.mapService.transformTileRequest(url, resourceType),
     };
   }
 
-  openGeoJsonDownloadDialog(): void {
+  async openGeoJsonDownloadDialog(): Promise<void> {
     if (!this.shareAccess.canExport()) {
       return;
     }
@@ -662,6 +550,9 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       hasCategories: this.filterConfigService.hasCategories(),
     };
 
+    const { GeoJsonDownloadDialogComponent } = await import(
+      '../left/geojson-download-dialog/geojson-download-dialog.component'
+    );
     this.dialog.open(GeoJsonDownloadDialogComponent, {
       width: '80vw',
       maxWidth: '80vw',
@@ -676,7 +567,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     targetMap.addControl(new FullscreenControl(), 'top-right');
     if (includeExport) {
       const exportControl = new ExportMapControl(
-        () => this.openGeoJsonDownloadDialog(),
+        () => this.ngZone.run(() => void this.openGeoJsonDownloadDialog()),
         () => this.translate.instant('geojsonDownload.button.label'),
         () => this.shareAccess.canExport(),
       );
@@ -720,10 +611,12 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
       this.lastLayerFallbackToastAt = now;
-      this.snackBar.open(this.translate.instant('map.layerSwitcher.layerNoLongerAvailable'), undefined, {
-        duration: 2000,
-        horizontalPosition: 'center',
-        verticalPosition: 'top'
+      this.ngZone.run(() => {
+        this.snackBar.open(this.translate.instant('map.layerSwitcher.layerNoLongerAvailable'), undefined, {
+          duration: 2000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top'
+        });
       });
     };
 
@@ -781,6 +674,13 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.map || !this.mapContainer?.nativeElement) {
       return;
     }
+    this.ngZone.runOutsideAngular(() => this.createSingleMap());
+  }
+
+  private createSingleMap(): void {
+    if (this.map || !this.mapContainer?.nativeElement) {
+      return;
+    }
 
     this.map = new Map(this.createBaseMapOptions(this.mapContainer.nativeElement) as any);
     this.mapService.setMap(this.map);
@@ -834,9 +734,45 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    const compareContainer = this.compareContainer.nativeElement;
+    const beforeContainer = this.beforeMapContainer.nativeElement;
+    const afterContainer = this.afterMapContainer.nativeElement;
     // Register map instances synchronously so concurrent init cannot race past the guard.
-    this.beforeMap = new Map(this.createBaseMapOptions(this.beforeMapContainer.nativeElement, true) as any);
-    this.afterMap = new Map(this.createBaseMapOptions(this.afterMapContainer.nativeElement, true) as any);
+    const { beforeMap, afterMap } = this.ngZone.runOutsideAngular(() =>
+      this.createCompareMaps(beforeContainer, afterContainer)
+    );
+
+    // The swipe slider plugin is only needed in compare mode, so it is loaded on demand.
+    const [{ default: CompareCtor }] = await Promise.all([
+      import('@maplibre/maplibre-gl-compare'),
+      this.waitForMapLoad(beforeMap),
+      this.waitForMapLoad(afterMap),
+    ]);
+
+    // Compare mode may have been left (maps destroyed/replaced) while loading.
+    if (!this.isCurrentComparePair(beforeMap, afterMap)) {
+      return;
+    }
+    this.mapCompare = this.ngZone.runOutsideAngular(() =>
+      new CompareCtor(beforeMap, afterMap, compareContainer, { mousemove: false })
+    );
+
+    beforeMap.resize();
+    afterMap.resize();
+
+    this.filterConfigService.setCompareMapsReady(true);
+  }
+
+  private isCurrentComparePair(beforeMap: Map, afterMap: Map): boolean {
+    return this.beforeMap === beforeMap && this.afterMap === afterMap;
+  }
+
+  private createCompareMaps(
+    beforeContainer: HTMLElement,
+    afterContainer: HTMLElement,
+  ): { beforeMap: Map; afterMap: Map } {
+    this.beforeMap = new Map(this.createBaseMapOptions(beforeContainer, true) as any);
+    this.afterMap = new Map(this.createBaseMapOptions(afterContainer, true) as any);
     this.mapService.setMap(this.beforeMap);
     this.mapService.setCompareRightMap(this.afterMap);
     this.popup = this.createPopup();
@@ -848,13 +784,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     this.bindLayerZoomSync(this.afterMap);
 
     this.syncMapInteractionsForLoading(this.mapService.isMapLoading());
-
-    this.mapCompare = new Compare(
-      this.beforeMap,
-      this.afterMap,
-      this.compareContainer.nativeElement,
-      { mousemove: false }
-    );
 
     this.beforeMap.on('style.load', () => {
       if (this.beforeMap) {
@@ -870,15 +799,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
 
-    await Promise.all([
-      this.waitForMapLoad(this.beforeMap),
-      this.waitForMapLoad(this.afterMap),
-    ]);
-
-    this.beforeMap.resize();
-    this.afterMap.resize();
-
-    this.filterConfigService.setCompareMapsReady(true);
+    return { beforeMap: this.beforeMap, afterMap: this.afterMap };
   }
 
   private waitForMapLoad(map: Map): Promise<void> {
@@ -896,7 +817,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    this.mapService.unbindDifferenceSync();
     this.removeCanvasPointerMoveListener(this.map);
     this.removeTileLoadingHandlers(this.map);
 
@@ -967,51 +887,23 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onSearchInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const query = input.value.trim();
-    
-    if (query.length >= 3) {
-      this.searchSubject.next(query);
-    } else {
-      this.searchResults = [];
+    // Short queries go through too (the service answers them with no results), so the
+    // debounced stream sees every change and typing a query again searches again.
+    this.searchSubject.next(input.value);
+    if (input.value.trim().length < GEOCODING_MIN_QUERY_LENGTH) {
+      this.searchResults.set([]);
     }
   }
 
   onSearchSubmit(): void {
-    if (this.searchQuery.trim().length >= 3) {
-      this.searchSubject.next(this.searchQuery.trim());
-    }
+    this.searchSubject.next(this.searchQuery);
   }
 
-  private searchNominatim(query: string): Promise<NominatimResult[]> {
-    if (!query || query.length < 3) {
-      return Promise.resolve([]);
-    }
-
-    const params = new HttpParams()
-      .set('q', query)
-      .set('format', 'json')
-      .set('limit', '10')
-      .set('addressdetails', '1')
-      .set('countrycodes', 'de'); // Restrict results to Germany
-
-    // Nominatim requires a User-Agent header per their usage policy
-    const headers = {
-      'User-Agent': 'MapR-Frontend/1.0'
-    };
-
-    return firstValueFrom(
-      this.http.get<NominatimResult[]>(`https://nominatim.openstreetmap.org/search`, { params, headers })
-    ).catch(error => {
-      console.error('Nominatim search error:', error);
-      return [];
-    });
-  }
-
-  onLocationSelected(event: any): void {
-    const result: NominatimResult = event.option.value;
-    this.zoomToLocation(parseFloat(result.lat), parseFloat(result.lon));
-    this.searchQuery = result.display_name;
-    this.searchResults = [];
+  onLocationSelected(event: MatAutocompleteSelectedEvent): void {
+    const result = event.option.value as GeocodingResult;
+    this.zoomToLocation(result.lat, result.lon);
+    this.searchQuery = result.label;
+    this.searchResults.set([]);
   }
 
   private zoomToLocation(lat: number, lon: number): void {
@@ -1019,11 +911,13 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    this.map.flyTo({
+    const map = this.map;
+    // Keep the fly animation's requestAnimationFrame loop outside the zone.
+    this.ngZone.runOutsideAngular(() => map.flyTo({
       center: [lon, lat],
       zoom: 12,
       duration: 1500
-    });
+    }));
   }
 
   /**
@@ -1319,20 +1213,23 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
       // Check if Ctrl key is pressed (for comparison mode)
       const isCtrlPressed = e.originalEvent && (e.originalEvent.ctrlKey || e.originalEvent.metaKey);
-      
-      if (isCtrlPressed) {
-        // Only allow adding to comparison if a feature is already selected
-        if (this.hasSelectedFeature) {
-          // Set as second feature for comparison
-          this.featureSelectionService.setSelectedMapLibreFeature2(featureData);
+
+      // Selection is RxJS-based and drives the analyze panel, so it must run inside the zone.
+      this.ngZone.run(() => {
+        if (isCtrlPressed) {
+          // Only allow adding to comparison if a feature is already selected
+          if (this.hasSelectedFeature) {
+            // Set as second feature for comparison
+            this.featureSelectionService.setSelectedMapLibreFeature2(featureData);
+          } else {
+            // If no feature is selected, treat as normal click
+            this.featureSelectionService.setSelectedMapLibreFeature(featureData, compareSide);
+          }
         } else {
-          // If no feature is selected, treat as normal click
+          // Set as primary feature
           this.featureSelectionService.setSelectedMapLibreFeature(featureData, compareSide);
         }
-      } else {
-        // Set as primary feature
-        this.featureSelectionService.setSelectedMapLibreFeature(featureData, compareSide);
-      }
+      });
     });
 
     // Handle right-click (context menu)
@@ -1405,7 +1302,8 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         if (btn) {
           btn.addEventListener('click', () => {
             if (this.contextMenuFeature) {
-              this.featureSelectionService.setSelectedMapLibreFeature2(this.contextMenuFeature);
+              const feature = this.contextMenuFeature;
+              this.ngZone.run(() => this.featureSelectionService.setSelectedMapLibreFeature2(feature));
             }
             if (this.contextMenuPopup) {
               this.contextMenuPopup.remove();
@@ -1452,10 +1350,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     const error = (e: { sourceId?: string; error?: { sourceId?: string; status?: number } }) => {
       this.mapService.setMapLoading(false);
       const sourceId = e?.sourceId ?? e?.error?.sourceId;
-      if (
-        sourceId === 'content-layer' ||
-        sourceId === CONTENT_LAYER_RIGHT_SOURCE
-      ) {
+      if (sourceId === 'content-layer') {
         this.mapService.setNoProjectTiles(true);
       }
     };
@@ -1480,13 +1375,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       contentLayerPresent = true;
       if (!targetMap.isSourceLoaded('content-layer')) {
-        return false;
-      }
-      if (
-        this.filterConfigService.isDifferenceView() &&
-        CONTENT_LAYER_RIGHT_SOURCE in style.sources &&
-        !targetMap.isSourceLoaded(CONTENT_LAYER_RIGHT_SOURCE)
-      ) {
         return false;
       }
     }
@@ -1532,20 +1420,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       if (features.length > 0) {
         hasFeatures = true;
         break;
-      }
-
-      if (
-        this.filterConfigService.isDifferenceView() &&
-        CONTENT_LAYER_RIGHT_SOURCE in style.sources &&
-        targetMap.isSourceLoaded(CONTENT_LAYER_RIGHT_SOURCE)
-      ) {
-        const rightFeatures = targetMap.querySourceFeatures(CONTENT_LAYER_RIGHT_SOURCE, {
-          sourceLayer: CONTENT_SOURCE_LAYER,
-        });
-        if (rightFeatures.length > 0) {
-          hasFeatures = true;
-          break;
-        }
       }
     }
 

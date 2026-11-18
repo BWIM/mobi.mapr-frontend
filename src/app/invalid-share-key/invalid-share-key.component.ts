@@ -11,7 +11,7 @@ import { LanguageService } from '../services/language.service';
     standalone: true,
     imports: [CommonModule, TranslateModule, MatIconModule, MatButtonModule],
     templateUrl: './invalid-share-key.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrl: './invalid-share-key.component.css'
 })
 export class InvalidShareKeyComponent {

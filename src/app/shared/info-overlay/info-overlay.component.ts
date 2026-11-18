@@ -1,14 +1,14 @@
 import { Component, TemplateRef, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { SharedModule } from '../shared.module';
-import { InfoDialogComponent } from './info-dialog.component';
+import { openInfoDialog } from './open-info-dialog';
 
 @Component({
   selector: 'app-info-overlay',
   standalone: true,
   imports: [SharedModule],
   templateUrl: './info-overlay.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './info-overlay.component.css'
 })
 export class InfoOverlayComponent {
@@ -17,13 +17,6 @@ export class InfoOverlayComponent {
   @ViewChild('contentTemplate') contentTemplate!: TemplateRef<any>;
 
   openDialog(): void {
-    this.dialog.open(InfoDialogComponent, {
-      width: '80vw',
-      height: '80vh',
-      maxWidth: '80vw',
-      maxHeight: '80vh',
-      panelClass: 'info-dialog-panel',
-      data: { content: this.contentTemplate }
-    });
+    void openInfoDialog(this.dialog, this.contentTemplate);
   }
 }
