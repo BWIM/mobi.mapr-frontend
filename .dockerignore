@@ -1,0 +1,17 @@
+# Installed and built inside the image
+node_modules
+dist
+.angular
+
+# Not needed for the build
+.git
+.github
+.vscode
+.idea
+docs
+coverage
+*.log
+.env*
+Dockerfile
+.dockerignore
+compose.yml

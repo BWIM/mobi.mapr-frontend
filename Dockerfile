@@ -1,43 +1,38 @@
 # Stage 1: Build the Angular application
-FROM node AS build
+# Node 26 is the active LTS; Angular 22 supports ^22.22.3 || ^24.15.0 || >=26.
+FROM node:26-alpine AS build
 
-# Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
+# Install exactly what package-lock.json pins (fails if it is out of sync with package.json).
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# Install dependencies
-RUN npm install --legacy-peer-deps
-
-# Copy the rest of the application code
 COPY . .
 
-# Build-Argument für die Konfiguration
+# Build configuration: production (main branch) or stage (all other branches).
 ARG CONFIGURATION=stage
+RUN npm run build -- --configuration="$CONFIGURATION"
 
-# Build the Angular application with the specified configuration
-RUN if [ "$CONFIGURATION" = "production" ]; then \
-        npm run build --prod; \
-    else \
-        npm run build -- --configuration=stage; \
-    fi
+# Precompress text files once at maximum level so nginx can serve them with gzip_static
+# instead of compressing per request. assets/config.json is excluded: the entrypoint rewrites
+# it at container start, and a build-time .gz copy would be served instead.
+RUN find dist/mobi.mapr/browser -type f \
+        \( -name '*.js' -o -name '*.css' -o -name '*.html' -o -name '*.json' -o -name '*.svg' -o -name '*.txt' \) \
+        ! -path '*/assets/config.json' \
+        -size +1k \
+        -exec gzip -9 -k {} +
 
-# Stage 2: Serve the application with Nginx
-FROM nginx:alpine
+# Stage 2: Serve the application with nginx (stable branch)
+FROM nginx:1.30-alpine
 
-# Korrigierter Pfad entsprechend der Angular-Konfiguration
 COPY --from=build /app/dist/mobi.mapr/browser /usr/share/nginx/html
-
-# Copy the custom Nginx configuration file
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Copy entrypoint script for runtime config
+# Writes assets/config.json (runtime config, e.g. maintenance mode), then starts nginx
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
-# Expose port 80
 EXPOSE 80
 
-# Start Nginx with runtime config injection
 CMD ["/docker-entrypoint.sh"]
