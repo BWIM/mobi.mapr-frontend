@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, effect, ChangeDetectorRef, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, effect, ChangeDetectorRef, computed, ChangeDetectionStrategy, NgZone } from '@angular/core';
 import { Subscription, firstValueFrom, debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { Map, MapDataEvent, NavigationControl, FullscreenControl, Popup, AttributionControl, LngLatLike } from 'maplibre-gl';
 import Compare from '@maplibre/maplibre-gl-compare';
@@ -81,6 +81,12 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   center: [number, number] = [9.2156505, 49.320099];
   private filterConfigService = inject(FilterConfigService);
   private changeDetectorRef = inject(ChangeDetectorRef);
+  /**
+   * Maps are constructed outside Angular's zone so MapLibre's DOM listeners (mousemove, drag),
+   * render loop and tile events do not trigger app-wide change detection. Handlers that mutate
+   * non-signal UI state re-enter the zone via ngZone.run; signal writes need no zone.
+   */
+  private readonly ngZone = inject(NgZone);
   private readonly hostElementRef = inject(ElementRef<HTMLElement>);
   readonly isMapCompareMode = this.filterConfigService.isMapCompareMode;
   readonly isDifferenceView = this.filterConfigService.isDifferenceView;
@@ -580,6 +586,13 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.map || !this.mapContainer?.nativeElement) {
       return;
     }
+    this.ngZone.runOutsideAngular(() => this.createSingleMapForDifference());
+  }
+
+  private createSingleMapForDifference(): void {
+    if (this.map || !this.mapContainer?.nativeElement) {
+      return;
+    }
 
     this.map = new Map(this.createBaseMapOptions(this.mapContainer.nativeElement, true) as any);
     this.mapService.setMap(this.map);
@@ -676,7 +689,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     targetMap.addControl(new FullscreenControl(), 'top-right');
     if (includeExport) {
       const exportControl = new ExportMapControl(
-        () => this.openGeoJsonDownloadDialog(),
+        () => this.ngZone.run(() => this.openGeoJsonDownloadDialog()),
         () => this.translate.instant('geojsonDownload.button.label'),
         () => this.shareAccess.canExport(),
       );
@@ -720,10 +733,12 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         return;
       }
       this.lastLayerFallbackToastAt = now;
-      this.snackBar.open(this.translate.instant('map.layerSwitcher.layerNoLongerAvailable'), undefined, {
-        duration: 2000,
-        horizontalPosition: 'center',
-        verticalPosition: 'top'
+      this.ngZone.run(() => {
+        this.snackBar.open(this.translate.instant('map.layerSwitcher.layerNoLongerAvailable'), undefined, {
+          duration: 2000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top'
+        });
       });
     };
 
@@ -781,6 +796,13 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.map || !this.mapContainer?.nativeElement) {
       return;
     }
+    this.ngZone.runOutsideAngular(() => this.createSingleMap());
+  }
+
+  private createSingleMap(): void {
+    if (this.map || !this.mapContainer?.nativeElement) {
+      return;
+    }
 
     this.map = new Map(this.createBaseMapOptions(this.mapContainer.nativeElement) as any);
     this.mapService.setMap(this.map);
@@ -834,9 +856,32 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    const compareContainer = this.compareContainer.nativeElement;
+    const beforeContainer = this.beforeMapContainer.nativeElement;
+    const afterContainer = this.afterMapContainer.nativeElement;
     // Register map instances synchronously so concurrent init cannot race past the guard.
-    this.beforeMap = new Map(this.createBaseMapOptions(this.beforeMapContainer.nativeElement, true) as any);
-    this.afterMap = new Map(this.createBaseMapOptions(this.afterMapContainer.nativeElement, true) as any);
+    const { beforeMap, afterMap } = this.ngZone.runOutsideAngular(() =>
+      this.createCompareMaps(compareContainer, beforeContainer, afterContainer)
+    );
+
+    await Promise.all([
+      this.waitForMapLoad(beforeMap),
+      this.waitForMapLoad(afterMap),
+    ]);
+
+    beforeMap.resize();
+    afterMap.resize();
+
+    this.filterConfigService.setCompareMapsReady(true);
+  }
+
+  private createCompareMaps(
+    compareContainer: HTMLElement,
+    beforeContainer: HTMLElement,
+    afterContainer: HTMLElement,
+  ): { beforeMap: Map; afterMap: Map } {
+    this.beforeMap = new Map(this.createBaseMapOptions(beforeContainer, true) as any);
+    this.afterMap = new Map(this.createBaseMapOptions(afterContainer, true) as any);
     this.mapService.setMap(this.beforeMap);
     this.mapService.setCompareRightMap(this.afterMap);
     this.popup = this.createPopup();
@@ -852,7 +897,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     this.mapCompare = new Compare(
       this.beforeMap,
       this.afterMap,
-      this.compareContainer.nativeElement,
+      compareContainer,
       { mousemove: false }
     );
 
@@ -870,15 +915,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
 
-    await Promise.all([
-      this.waitForMapLoad(this.beforeMap),
-      this.waitForMapLoad(this.afterMap),
-    ]);
-
-    this.beforeMap.resize();
-    this.afterMap.resize();
-
-    this.filterConfigService.setCompareMapsReady(true);
+    return { beforeMap: this.beforeMap, afterMap: this.afterMap };
   }
 
   private waitForMapLoad(map: Map): Promise<void> {
@@ -1019,11 +1056,13 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    this.map.flyTo({
+    const map = this.map;
+    // Keep the fly animation's requestAnimationFrame loop outside the zone.
+    this.ngZone.runOutsideAngular(() => map.flyTo({
       center: [lon, lat],
       zoom: 12,
       duration: 1500
-    });
+    }));
   }
 
   /**
@@ -1319,20 +1358,23 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
 
       // Check if Ctrl key is pressed (for comparison mode)
       const isCtrlPressed = e.originalEvent && (e.originalEvent.ctrlKey || e.originalEvent.metaKey);
-      
-      if (isCtrlPressed) {
-        // Only allow adding to comparison if a feature is already selected
-        if (this.hasSelectedFeature) {
-          // Set as second feature for comparison
-          this.featureSelectionService.setSelectedMapLibreFeature2(featureData);
+
+      // Selection is RxJS-based and drives the analyze panel, so it must run inside the zone.
+      this.ngZone.run(() => {
+        if (isCtrlPressed) {
+          // Only allow adding to comparison if a feature is already selected
+          if (this.hasSelectedFeature) {
+            // Set as second feature for comparison
+            this.featureSelectionService.setSelectedMapLibreFeature2(featureData);
+          } else {
+            // If no feature is selected, treat as normal click
+            this.featureSelectionService.setSelectedMapLibreFeature(featureData, compareSide);
+          }
         } else {
-          // If no feature is selected, treat as normal click
+          // Set as primary feature
           this.featureSelectionService.setSelectedMapLibreFeature(featureData, compareSide);
         }
-      } else {
-        // Set as primary feature
-        this.featureSelectionService.setSelectedMapLibreFeature(featureData, compareSide);
-      }
+      });
     });
 
     // Handle right-click (context menu)
@@ -1405,7 +1447,8 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
         if (btn) {
           btn.addEventListener('click', () => {
             if (this.contextMenuFeature) {
-              this.featureSelectionService.setSelectedMapLibreFeature2(this.contextMenuFeature);
+              const feature = this.contextMenuFeature;
+              this.ngZone.run(() => this.featureSelectionService.setSelectedMapLibreFeature2(feature));
             }
             if (this.contextMenuPopup) {
               this.contextMenuPopup.remove();

@@ -352,6 +352,10 @@ export class MobilePlacesMap {
   }
 
   private initializeMap(): void {
+    this.ngZone.runOutsideAngular(() => this.createMap());
+  }
+
+  private createMap(): void {
     if (!this.mapContainer) {
       return;
     }

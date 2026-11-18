@@ -249,6 +249,13 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!this.mapContainerPlaces) {
       return;
     }
+    this.ngZone.runOutsideAngular(() => this.createMap());
+  }
+
+  private createMap(): void {
+    if (!this.mapContainerPlaces) {
+      return;
+    }
 
     // Get base map style from MapService
     const baseStyle = this.mapService.getBaseMapStyle();
@@ -297,7 +304,9 @@ export class PlacesDialogComponent implements OnInit, OnDestroy, AfterViewInit {
         this.pendingFeatureShape = null;
       }
 
-      this.isLoading = false;
+      this.ngZone.run(() => {
+        this.isLoading = false;
+      });
     });
   }
 
