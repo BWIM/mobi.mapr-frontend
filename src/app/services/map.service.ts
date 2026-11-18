@@ -41,6 +41,14 @@ export const CONTENT_LAYER_RIGHT_SOURCE = 'content-layer-right';
 export const CONTENT_LAYER_RIGHT_KEEPALIVE = 'content-layer-right-keepalive';
 export const CONTENT_SOURCE_LAYER = 'geodata';
 
+/**
+ * Highest zoom the content tiles are requested at. Above it MapLibre overzooms the z12 tiles
+ * (vector, so still sharp) instead of fetching 4x more tiles per zoom step from the backend.
+ */
+export const CONTENT_TILES_MAX_ZOOM = 12;
+/** Germany (west, south, east, north): no content tiles are requested outside it. */
+export const CONTENT_TILES_BOUNDS: [number, number, number, number] = [5.8, 47.2, 15.1, 55.1];
+
 export interface FeatureInfoResponse {
   name: string;
   regiostar_name?: string | null;
@@ -597,6 +605,8 @@ export class MapService {
       type: 'vector',
       tiles: [leftTileUrl],
       minzoom: 0,
+      maxzoom: CONTENT_TILES_MAX_ZOOM,
+      bounds: CONTENT_TILES_BOUNDS,
       tileSize: 512,
       promoteId,
     } as SourceSpecification;
@@ -605,6 +615,8 @@ export class MapService {
       type: 'vector',
       tiles: [rightTileUrl],
       minzoom: 0,
+      maxzoom: CONTENT_TILES_MAX_ZOOM,
+      bounds: CONTENT_TILES_BOUNDS,
       tileSize: 512,
       promoteId,
     } as SourceSpecification;
@@ -924,6 +936,8 @@ export class MapService {
       type: 'vector',
       tiles: [tileUrl],
       minzoom: 0,
+      maxzoom: CONTENT_TILES_MAX_ZOOM,
+      bounds: CONTENT_TILES_BOUNDS,
       tileSize: 512
     } as SourceSpecification;
 
