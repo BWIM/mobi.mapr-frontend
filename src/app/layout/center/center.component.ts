@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, effect, ChangeDetectorRef, computed, ChangeDetectionStrategy, NgZone, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, inject, effect, ChangeDetectorRef, ChangeDetectionStrategy, NgZone, signal } from '@angular/core';
 import { Subscription, firstValueFrom, debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { Map, MapDataEvent, NavigationControl, FullscreenControl, Popup, AttributionControl, LngLatLike } from 'maplibre-gl';
 import type Compare from '@maplibre/maplibre-gl-compare';
@@ -8,22 +8,14 @@ import { SharedModule } from '../../shared/shared.module';
 import { AdminLevel, FilterConfigService } from '../../services/filter-config.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { openLegendInfoDialog } from '../../shared/info-overlay/open-info-dialog';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { FeatureSelectionService } from '../../shared/services/feature-selection.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SearchService } from '../../services/search.service';
-import { QualityBracket, TimeBracket } from '../../services/filter-config.service';
-import { ScoreColorsService } from '../../services/score-colors.service';
 import { ShareAccessService } from '../../services/share-access.service';
-import {
-  buildDifferenceLegendItems,
-  DifferenceLegendItem,
-  buildQualityDifferenceConfig,
-  buildTimeDifferenceConfig,
-} from '../../utils/difference-colors.util';
-import { getGrade, getGradePalette, MAP_GRADE_ALPHA } from '../../utils/grade.util';
-import { ScoreLegendItem } from '../../utils/score-colors.util';
+import { getGrade } from '../../utils/grade.util';
+import { gradeStepLabel } from '../../utils/grade-step-label.util';
+import { MapLegendComponent } from './map-legend/map-legend.component';
 import { formatNumber } from '@angular/common';
 import { currentNumberLocale } from '../../shared/pipes/locale-number.pipe';
 import { ExportMapControl } from './export-map.control';
@@ -43,7 +35,7 @@ interface LayerButtonOption {
 
 @Component({
   selector: 'app-center',
-  imports: [SharedModule, TranslateModule],
+  imports: [SharedModule, TranslateModule, MapLegendComponent],
   templateUrl: './center.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './center.component.css',
@@ -94,7 +86,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   private featureSelectionService = inject(FeatureSelectionService);
   private translate = inject(TranslateService);
   private searchService = inject(SearchService);
-  private scoreColorsService = inject(ScoreColorsService);
   private snackBar = inject(MatSnackBar);
   private shareAccess = inject(ShareAccessService);
   private popup?: Popup;
@@ -246,55 +237,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
 
-  // Quality (index) colors - A through F
-  qualityColors: Array<{ letter: QualityBracket; color: string }> = getGradePalette(MAP_GRADE_ALPHA);
-  readonly timeLegendItems = this.scoreColorsService.legendItems;
-  readonly hasScoreColors = this.scoreColorsService.hasConfig;
-  readonly differenceLegendItems = computed((): DifferenceLegendItem[] => {
-    if (!this.filterConfigService.isDifferenceView()) {
-      return [];
-    }
-    if (this.filterConfigService.selectedBewertung() === 'zeit') {
-      const scoreConfig = this.scoreColorsService.config();
-      return scoreConfig ? buildDifferenceLegendItems(buildTimeDifferenceConfig(scoreConfig)) : [];
-    }
-    return buildDifferenceLegendItems(buildQualityDifferenceConfig());
-  });
-
-  isQualityBracketSelected(bracket: QualityBracket): boolean {
-    return this.filterConfigService.isQualityBracketSelected(bracket);
-  }
-
-  isTimeBracketSelected(bracket: TimeBracket): boolean {
-    return this.filterConfigService.isTimeBracketSelected(bracket);
-  }
-
-  isDifferenceBracketSelected(bracketId: string): boolean {
-    if (this.isQualityMode) {
-      return this.filterConfigService.isQualityBracketSelected(bracketId as QualityBracket);
-    }
-    return this.filterConfigService.isTimeBracketSelected(bracketId);
-  }
-
-  toggleQualityBracket(event: MouseEvent, bracket: QualityBracket): void {
-    event.stopPropagation();
-    this.filterConfigService.toggleQualityBracket(bracket);
-  }
-
-  toggleTimeBracket(event: MouseEvent, bracket: TimeBracket): void {
-    event.stopPropagation();
-    this.filterConfigService.toggleTimeBracket(bracket);
-  }
-
-  toggleDifferenceBracket(event: MouseEvent, bracketId: string): void {
-    event.stopPropagation();
-    if (this.isQualityMode) {
-      this.filterConfigService.toggleQualityBracket(bracketId as QualityBracket);
-      return;
-    }
-    this.filterConfigService.toggleTimeBracket(bracketId);
-  }
-
   isLayerAvailable(level: AdminLevel): boolean {
     return this.filterConfigService.availableAdminLevels().includes(level);
   }
@@ -377,7 +319,7 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
     if (hasDiff && diffRaw !== undefined && diffRaw !== null && Number.isFinite(Number(diffRaw))) {
       const signed = Number(diffRaw);
       const magnitude = isQualityMode
-        ? this.getGradeStepLabel(Math.abs(signed))
+        ? gradeStepLabel(this.translate, Math.abs(signed))
         : `${formatNumber(Math.abs(signed) / 60, currentNumberLocale(this.translate), '1.1-1')} ${minLabel}`;
       const direction = signed === 0
         ? ''
@@ -390,36 +332,6 @@ export class CenterComponent implements OnInit, OnDestroy, AfterViewInit {
       <div>${rightLabel} ${rightText}</div>
       <div>${diffLabel} ${diffText}</div>
     `;
-  }
-
-  /** "gleiche Note" / "1 Notenstufe" / "3 Notenstufen" */
-  getGradeStepLabel(steps: number): string {
-    if (steps === 0) {
-      return this.translate.instant('map.legend.difference.sameGrade');
-    }
-    return this.translate.instant(
-      steps === 1 ? 'map.legend.difference.gradeStep' : 'map.legend.difference.gradeSteps',
-      { count: steps }
-    );
-  }
-
-  getDifferenceStepTitle(item: DifferenceLegendItem): string {
-    if (item.direction === 0) {
-      return this.translate.instant(
-        this.isQualityMode ? 'map.legend.difference.sameGrade' : 'map.legend.difference.aboutSame'
-      );
-    }
-    const magnitude = this.isQualityMode
-      ? this.getGradeStepLabel(item.stepIndex)
-      : `≥ ${item.segmentLabel} ${this.translate.instant('map.popup.minutes')}`;
-    const side = this.translate.instant(
-      item.direction > 0 ? 'map.legend.difference.rightBetter' : 'map.legend.difference.leftBetter'
-    );
-    return `${magnitude} · ${side}`;
-  }
-
-  openLegendDialog(): void {
-    void openLegendInfoDialog(this.dialog);
   }
 
   async ngOnInit() {
