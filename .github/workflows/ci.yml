@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          # Same major as the Docker build image (Dockerfile)
+          node-version: 26
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (production)
+        run: npx ng build --configuration production
+
+      - name: Unit tests
+        # Chrome is preinstalled on ubuntu-latest (CHROME_BIN is set by the runner image).
+        run: npx ng test --watch=false --browsers=ChromeHeadless
