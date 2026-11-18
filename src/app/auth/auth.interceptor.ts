@@ -1,15 +1,12 @@
 import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { catchError, switchMap, take, filter, retry } from 'rxjs/operators';
-import { throwError, Observable, BehaviorSubject } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
 import { SessionService } from '../services/session.service';
 import { ReturnUrlService } from './return-url.service';
 import { environment } from '../../environments/environment';
-
-let isRefreshing = false;
-let refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
 
 function isPublicRoute(router: Router): boolean {
   return router.routerState.snapshot.root.firstChild?.data?.['public'] === true;
